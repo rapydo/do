@@ -12,7 +12,8 @@ yaml.dump({})
 
 
 # @lru_cache()
-def load_yaml_file(file, path=None, get_all=False, skip_error=False):
+def load_yaml_file(file, path=None,
+                   get_all=False, skip_error=False, extension=YAML_EXT):
     """
     Import data from a YAML file.
     Reading is cached.
@@ -22,8 +23,8 @@ def load_yaml_file(file, path=None, get_all=False, skip_error=False):
     if path is None:
         filepath = file
     else:
-        filepath = os.path.join(path, file + "." + YAML_EXT)
-    log.very_verbose("Reading file %s" % filepath)
+        filepath = os.path.join(path, file + "." + extension)
+    log.verbose("Reading file %s" % filepath)
 
     # load from this file
     if os.path.exists(filepath):
@@ -46,9 +47,9 @@ def load_yaml_file(file, path=None, get_all=False, skip_error=False):
     else:
         error = 'File does not exist'
 
-    message = "Failed to read YAML from '%s': %s" % (filepath, error)
+    message = "Failed to read YAML file in'%s': %s" % (filepath, error)
     if skip_error:
         log.warning(message)
     else:
-        raise Exception(message)
+        raise KeyError(message)
     return None
