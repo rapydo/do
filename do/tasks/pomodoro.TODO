@@ -1,0 +1,32 @@
+
+YAML files:
+  - check if is
+    - mandatory: backend/docker-compose.yml
+    - optional: frontend/docker-compose.yml
+  - read
+
+ --- ✄ -----------------------
+
+ BUILDS:
+   - something to build
+     - find the referenced server?
+     - docker.py launch build
+
+ --- ✄ -----------------------
+
+ ENV FILES:
+   - mix
+   $ cat backend/env frontend/env ./env > .env
+
+ --- ✄ -----------------------
+
+docker versions:
+   - packaging
+     - check package docker-compose
+     - check package docker-py -> docker?
+   - write a base requirements.txt for rapydo-vanilla
+
+ --- ✄ -----------------------
+
+ init!
+
