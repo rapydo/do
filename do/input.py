@@ -11,11 +11,7 @@ log = get_logger(__name__)
 def read_yamls(blueprint, path):
 
     try:
-        compose = load_yaml_file(
-            file=blueprint,
-            extension='yml',
-            path=path
-        )
+        compose = load_yaml_file(file=blueprint, extension='yml', path=path)
     except KeyError as e:
         log.critical_exit(e)
 

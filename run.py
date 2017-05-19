@@ -5,10 +5,6 @@
 
 # import sys
 # sys.path.append("/Users/projects/tmp/do")
-import os
-
-from dockerfile_parse import DockerfileParser
-# https://github.com/DBuildService/dockerfile-parse
 
 import docker
 # https://docker-py.readthedocs.io/en/stable/
@@ -16,6 +12,7 @@ import docker
 from do import containers_yaml_path
 from do.params import args
 from do.input import read_yamls
+from do.builds import find_and_build
 from do.utils.logs import get_logger
 
 ##########################
@@ -34,23 +31,7 @@ if __name__ == '__main__':
 
     # Read necessary files
     services_data = read_yamls(args.get('blueprint'), containers_yaml_path)
-
-    # Parse docker files for services
-    for service_name, service in services_data.items():
-
-        builder = service.get('build')
-        if builder is not None:
-
-            dockerfile = os.path.join(containers_yaml_path, builder)
-            dfp = DockerfileParser(dockerfile)
-
-            try:
-                dfp.content
-                log.debug("Parsed dockerfile %s" % builder)
-            except FileNotFoundError as e:
-                log.critical_exit(e)
-
-            if dfp.baseimage.endswith(':template'):
-                log.warning("To build: %s" % dfp.baseimage)
-
+    # Find builds
+    find_and_build(services_data)
+    # logger
     log.info("Completed")
