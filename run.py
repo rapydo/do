@@ -13,8 +13,9 @@ from dockerfile_parse import DockerfileParser
 import docker
 # https://docker-py.readthedocs.io/en/stable/
 
-from do.utils.myyaml import load_yaml_file
+from do import containers_yaml_path
 from do.params import args
+from do.input import read_yamls
 from do.utils.logs import get_logger
 
 ##########################
@@ -28,25 +29,14 @@ docker
 # log.debug("Docker:%s" % containers)
 
 ##########################
-# Read YAML files
-containers_yaml_path = os.path.join(os.curdir, 'containers')
-try:
-    compose = load_yaml_file(
-        file=args.get('blueprint'),
-        extension='yml',
-        path=containers_yaml_path
-    )
-except KeyError as e:
-    log.critical_exit(e)
-
-# services_data = compose.get('services', {})
-# services_list = list(services_data.keys())
-# log.debug("Services:\n%s" % services_list)
 
 if __name__ == '__main__':
 
+    # Read necessary files
+    services_data = read_yamls(args.get('blueprint'), containers_yaml_path)
+
     # Parse docker files for services
-    for service_name, service in compose.get('services', {}).items():
+    for service_name, service in services_data.items():
 
         builder = service.get('build')
         if builder is not None:
