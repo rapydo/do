@@ -13,7 +13,8 @@ yaml.dump({})
 
 # @lru_cache()
 def load_yaml_file(file, path=None,
-                   get_all=False, skip_error=False, extension=YAML_EXT):
+                   get_all=False, skip_error=False,
+                   extension=YAML_EXT, return_path=False):
     """
     Import data from a YAML file.
     Reading is cached.
@@ -24,10 +25,15 @@ def load_yaml_file(file, path=None,
         filepath = file
     else:
         filepath = os.path.join(path, file + "." + extension)
-    log.verbose("Reading file %s" % filepath)
+
+    if not return_path:
+        log.verbose("Reading file %s" % filepath)
 
     # load from this file
     if os.path.exists(filepath):
+        if return_path:
+            return filepath
+
         with open(filepath) as fh:
             try:
                 # LOAD fails if more than one document is there
