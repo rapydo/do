@@ -46,7 +46,8 @@ def read_yamls(blueprint, path=containers_yaml_path):
         }
     }
 
-    files = []
+    base_files = []
+    all_files = []
     composers = {**COMPOSER_DEFAULT_YAMLS, **COMPOSER_VANILLA_YAMLS}
 
     # YAML CHECK UP
@@ -61,7 +62,10 @@ def read_yamls(blueprint, path=containers_yaml_path):
             if len(compose.get('services', {})) < 1 and mandatory:
                 raise AttributeError("Missing services in file %s" % file)
             else:
-                files.append(load_yaml_file(return_path=True, **composer))
+                filepath = load_yaml_file(return_path=True, **composer)
+                all_files.append(filepath)
+                if path != composer.get('path'):
+                    base_files.append(filepath)
 
             # services_data = compose.get('services', {})
             # services_list = list(services_data.keys())
@@ -73,7 +77,9 @@ def read_yamls(blueprint, path=containers_yaml_path):
                 log.critical_exit(
                     "Composer %s[%s] is mandatory.\n%s" % (name, file, e))
             else:
-                log.debug("Missing %s" % name)
+                log.debug("Missing '%s' composer" % name)
 
     from do.compose import docker_compose
-    return docker_compose(files=files)
+    base_services = docker_compose(files=base_files)
+    vanilla_services = docker_compose(files=all_files)
+    return vanilla_services, base_services
