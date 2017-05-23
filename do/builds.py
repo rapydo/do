@@ -116,6 +116,12 @@ def find_and_build(bp, build=False, frontend=False):
             dimages = docker_images()
             cache = False
             for image_tag, build in builds.items():
+
+                # TODO: BETTER CHECK: compare dates between git and docker;
+                # check if build template commit (git.blame) is older
+                # than image build datetime.
+                # SEE gitter.py
+
                 if image_tag in dimages:
                     log.warning(
                         "Notice: using cache for image [%s]" % image_tag)
@@ -125,3 +131,5 @@ def find_and_build(bp, build=False, frontend=False):
                     "If you want to build these template(s) " +
                     "add option \"%s %s\"" % ('--execute_build', str(True))
                 )
+
+    return

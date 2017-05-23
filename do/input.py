@@ -53,7 +53,7 @@ def read_yamls(blueprint, frontend=False, path=containers_yaml_path):
     # YAML CHECK UP
     for composer in composers:
 
-        name = composer.get('name')
+        name = composer.pop('name')
         file = composer.get('file', 'unknown')
         mandatory = composer.pop('mandatory', False)
 

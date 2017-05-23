@@ -5,6 +5,7 @@
 
 from do.project import read_configuration
 from do.params import args
+from do.gitter import clone_submodules
 from do.builds import find_and_build
 from do.utils.logs import get_logger
 
@@ -15,6 +16,7 @@ if __name__ == '__main__':
 
     # Read project configuration
     specs = read_configuration()
+
     frontend = specs \
         .get('variables', {}) \
         .get('python', {}) \
@@ -22,15 +24,17 @@ if __name__ == '__main__':
         .get('enable', False)
     log.info("Frontend is %s" % frontend)
 
+    # TODO: recover commits for each repo
+
     # Clone git projects
-    raise NotImplementedError("Clone git repos")
-    exit(1)
+    clone_submodules(frontend)
 
     # Find builds
     find_and_build(
         bp=args.get('blueprint'),
+        build=args.get('execute_build'),
         frontend=frontend,
-        build=args.get('execute_build')
     )
+
     # logger
-    log.info("done")
+    log.info("Done")

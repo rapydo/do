@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
+from do import PROJECT_DIR
 from do.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -17,7 +17,7 @@ class Compose(object):
         self.files = files
         self.options = {'--file': self.files, **options}
 
-        self.project_dir = os.curdir
+        self.project_dir = PROJECT_DIR
         self.project_name = get_project_name(self.project_dir)
         log.very_verbose("Project name %s" % self.project_name)
 
@@ -49,3 +49,5 @@ class Compose(object):
             myoptions = {'SERVICE': [service], **force_options, **options}
             compose_handler.build(options=myoptions)
             log.info("Built template: %s" % service)
+
+        return
