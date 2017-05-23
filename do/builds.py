@@ -10,6 +10,7 @@ Parse dockerfiles and check for builds
 import os
 import docker
 from dockerfile_parse import DockerfileParser
+from do.compose import Compose
 from do import containers_yaml_path
 from do.input import read_yamls
 from do.utils.logs import get_logger
@@ -17,10 +18,19 @@ from do.utils.logs import get_logger
 log = get_logger(__name__)
 
 
-def some_docker():
+def docker_images():
     client = docker.from_env()
-    containers = client.containers.list()
-    log.debug("Docker:%s" % containers)
+    images = []
+    for obj in client.images.list():
+        for tag in obj.attrs.get('RepoTags', []):
+            images.append(tag)
+    # log.debug("Docker:%s" % images)
+    return images
+
+# def some_docker():
+#     client = docker.from_env()
+#     containers = client.containers.list()
+#     log.debug("Docker:%s" % containers)
 
 
 def find_templates_build(base_services):
@@ -53,19 +63,20 @@ def find_templates_build(base_services):
 
 def find_overriden_templates(services, templates={}):
 
+    builds = {}
+
     for service in services:
 
         builder = service.get('build')
         if builder is not None:
 
-            dockerfile = os.path.join(
-                containers_yaml_path,
-                builder.get('context'))
+            dpath = builder.get('context')
+            dockerfile = os.path.join(containers_yaml_path, dpath)
             dfp = DockerfileParser(dockerfile)
 
             try:
                 dfp.content
-                log.debug("Parsed dockerfile %s" % builder)
+                log.debug("Parsed dockerfile %s" % dpath)
             except FileNotFoundError as e:
                 log.critical_exit(e)
 
@@ -75,31 +86,42 @@ def find_overriden_templates(services, templates={}):
                         "Template build misconfiguration with: %s"
                         % service.get('name')
                     )
+                else:
+                    builds[dfp.baseimage] = templates.get(dfp.baseimage)
 
-                print(
-                    "TO BUILD:\n",
-                    dfp.baseimage, templates.get(dfp.baseimage))
-
-    print("DEBUG")
-    exit(1)
+    return builds
 
 
-def find_and_build(bp):
+def find_and_build(bp, build=False):
 
     # Read necessary files
-    services, base_services = read_yamls(bp)
+    services, files, base_services, base_files = read_yamls(bp)
+    log.info("Files are %s" % files)
 
     # 1. find templates and store them
     templates = find_templates_build(base_services)
 
     # 2. find templates that were overridden
-    find_overriden_templates(services, templates)
+    builds = find_overriden_templates(services, templates)
 
-    # 3. (outside loop) find templates to be built
-    print("DEBUG STEP 3")
-    exit(1)
+    # 3. templates to be built (if requested)
+    if len(builds) > 0:
 
-    # 4. build if requested
-    pass
-
-    return
+        if build:
+            dc = Compose(
+                files=base_files,
+            )
+            dc.force_template_build(builds)
+        else:
+            dimages = docker_images()
+            cache = False
+            for image_tag, build in builds.items():
+                if image_tag in dimages:
+                    log.warning(
+                        "Notice: using cache for image [%s]" % image_tag)
+                    cache = True
+            if cache:
+                log.info(
+                    "If you want to build these template(s) " +
+                    "add option \"%s %s\"" % ('--execute_build', str(True))
+                )

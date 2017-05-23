@@ -15,6 +15,9 @@ log = get_logger(__name__)
 if __name__ == '__main__':
 
     # Find builds
-    find_and_build(bp=args.get('blueprint'))
+    find_and_build(
+        bp=args.get('blueprint'),
+        build=args.get('execute_build')
+    )
     # logger
     log.info("done")

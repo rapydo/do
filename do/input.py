@@ -3,6 +3,7 @@
 """ Reading yaml files for this project """
 
 from do import containers_yaml_path
+from do.compose import Compose
 from do.utils.myyaml import load_yaml_file
 from do.utils.logs import get_logger
 
@@ -79,7 +80,13 @@ def read_yamls(blueprint, path=containers_yaml_path):
             else:
                 log.debug("Missing '%s' composer" % name)
 
-    from do.compose import docker_compose
-    base_services = docker_compose(files=base_files)
-    vanilla_services = docker_compose(files=all_files)
-    return vanilla_services, base_services
+    # docker compose python library
+
+    # to build the config with files and variables
+    dc = Compose(files=base_files)
+    base_services = dc.config()
+
+    dc = Compose(files=all_files)
+    vanilla_services = dc.config()
+
+    return vanilla_services, all_files, base_services, base_files
