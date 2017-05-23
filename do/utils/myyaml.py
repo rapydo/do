@@ -53,7 +53,7 @@ def load_yaml_file(file, path=None,
     else:
         error = 'File does not exist'
 
-    message = "Failed to read YAML file in'%s': %s" % (filepath, error)
+    message = "Failed to read YAML file in '%s': %s" % (filepath, error)
     if skip_error:
         log.warning(message)
     else:

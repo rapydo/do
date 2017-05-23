@@ -14,46 +14,46 @@ FRONTEND_PATH = 'frontend'
 COMPOSE_FILE = 'docker-compose'
 SHORT_YAML_EXT = 'yml'
 
-COMPOSER_DEFAULT_YAMLS = {
-    "backend": {
-        'file': COMPOSE_FILE,
-        'extension': SHORT_YAML_EXT,
-        'path': BACKEND_PATH,
-        'mandatory': True
-    },
-    "frontend": {
-        'file': COMPOSE_FILE,
-        'extension': SHORT_YAML_EXT,
-        'path': FRONTEND_PATH,
-        'mandatory': False
-    }
+COMPOSER_BACKEND_YAML = {
+    'name': 'backend',
+    'file': COMPOSE_FILE,
+    'extension': SHORT_YAML_EXT,
+    'path': BACKEND_PATH,
+    'mandatory': True
+}
+COMPOSER_FRONTEND_YAML = {
+    'name': 'frontend',
+    'file': COMPOSE_FILE,
+    'extension': SHORT_YAML_EXT,
+    'path': FRONTEND_PATH,
+    'mandatory': False
 }
 
 
-def read_yamls(blueprint, path=containers_yaml_path):
+def read_yamls(blueprint, frontend=False, path=containers_yaml_path):
 
-    COMPOSER_VANILLA_YAMLS = {
-        "common": {
-            'file': 'commons',
-            'extension': SHORT_YAML_EXT,
-            'path': path,
-            'mandatory': False
-        },
-        "blueprint": {
-            'file': blueprint,
-            'extension': SHORT_YAML_EXT,
-            'path': path,
-            'mandatory': True
-        }
-    }
-
+    composers = []
     base_files = []
     all_files = []
-    composers = {**COMPOSER_DEFAULT_YAMLS, **COMPOSER_VANILLA_YAMLS}
+
+    composers.append(COMPOSER_BACKEND_YAML)
+    if frontend:
+        composers.append(COMPOSER_FRONTEND_YAML)
+
+    composers.append({
+        'name': 'common', 'file': 'commons',
+        'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': False
+    })
+
+    composers.append({
+        'name': 'blueprint', 'file': blueprint,
+        'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': True
+    })
 
     # YAML CHECK UP
-    for name, composer in composers.items():
+    for composer in composers:
 
+        name = composer.get('name')
         file = composer.get('file', 'unknown')
         mandatory = composer.pop('mandatory', False)
 
@@ -68,10 +68,6 @@ def read_yamls(blueprint, path=containers_yaml_path):
                 if path != composer.get('path'):
                     base_files.append(filepath)
 
-            # services_data = compose.get('services', {})
-            # services_list = list(services_data.keys())
-            # log.debug("Services:\n%s" % services_list)
-
         except KeyError as e:
 
             if mandatory:
@@ -79,8 +75,6 @@ def read_yamls(blueprint, path=containers_yaml_path):
                     "Composer %s[%s] is mandatory.\n%s" % (name, file, e))
             else:
                 log.debug("Missing '%s' composer" % name)
-
-    # docker compose python library
 
     # to build the config with files and variables
     dc = Compose(files=base_files)

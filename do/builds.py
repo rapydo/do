@@ -92,10 +92,10 @@ def find_overriden_templates(services, templates={}):
     return builds
 
 
-def find_and_build(bp, build=False):
+def find_and_build(bp, build=False, frontend=False):
 
     # Read necessary files
-    services, files, base_services, base_files = read_yamls(bp)
+    services, files, base_services, base_files = read_yamls(bp, frontend)
     log.info("Files are %s" % files)
 
     # 1. find templates and store them
