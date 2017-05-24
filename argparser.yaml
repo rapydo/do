@@ -1,0 +1,59 @@
+
+description: Do actions with your RAPyDo project
+command:
+  name: command
+  help: all possible commands
+
+options:
+  log-level:
+    type: str
+    metavalue: LEVEL_OF_DEBUGGER
+    default: DEBUG
+    help: Level of verbosity
+
+  blueprint:
+    type: str
+    metavalue: CONTAINERS_YAML_BLUEPRINT
+    default: debug
+    help: Blueprint marker of the configuration to launch
+
+  execute_build:
+    type: bool
+    metavalue: TRUE_OR_FALSE
+    default: False
+    help: Force build of templates docker images
+
+subcommands:
+  check:
+    description: verify if currently compliant to RAPyDo specs
+  init:
+    description: "
+      make current project compliant to RAPyDo requirements
+      (if not yet being)"
+  log:
+    description: watch log tails of all or specified containers
+  shell:
+    description: open a shell inside the specified container
+  remote:
+    description: manage start/stop of the framework based on  current specified blueprint
+    innerrequired: True
+    innercommands:
+      start:
+        - some
+      stop:
+        - some
+      restart:
+        - some
+      remove:
+        - some
+      freeze:
+        - some
+  clean:
+    description: "remove all:
+      containers, networks and OPTIONALLY data volumes"
+    # suboptions:
+    #   whatever:
+    #     type: str
+    #     metavalue: SOME
+    #     default: DEBUG
+    #     help: bla bla

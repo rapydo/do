@@ -15,6 +15,11 @@ log = get_logger(__name__)
 if __name__ == '__main__':
 
     action = args.get('command')
+    if action is None:
+        raise AttributeError("Misconfiguration")
+    else:
+        raise NotImplementedError(f"Do something with {action}")
+
     print(f"\n********************\tDO: {action}")
     # TODO: do something with the command
 

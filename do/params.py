@@ -3,45 +3,51 @@
 import os
 import sys
 import argparse
-from do import COMMANDS, FRAMEWORK_NAME
+from do.utils.myyaml import load_yaml_file
 
-##########################
+# FIXME: @packaging - how to specify a configuration file where the lib is?
+ABSOLUTE_PATH = '/Users/projects/tmp/do'
+
+parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)
+
 # Arguments definition
 parser = argparse.ArgumentParser(
     prog=sys.argv[0],
-    description='Do actions with your {FRAMEWORK_NAME} project'
+    description=parse_conf.get('description')
 )
 
-# parser.add_argument(
-#     '--project', type=str, metavar='PROJECT_NAME', default='vanilla',
-#     help='Project which forked RAPyDo')
-
 # PARAMETERS
-
-parser.add_argument(
-    '--log-level', type=str,
-    metavar='LEVEL_OF_DEBUGGER', default='DEBUG',
-    help='Level of verbosity [default: DEBUG]')
-
-parser.add_argument(
-    '--blueprint', type=str,
-    metavar='CONTAINERS_YAML_BLUEPRINT', default='debug',
-    help='Blueprint marker of the configuration to launch [default: debug]')
-
-parser.add_argument(
-    '--execute_build', type=bool, metavar='TRUE_OR_FALSE', default=False,
-    help='Force build of templates docker images [default: False]')
+for option_name, option in parse_conf.get('options', {}).items():
+    option_type = str
+    if option.get('type') == 'bool':
+        option_type = bool
+    default = option.get('default')
+    myhelp = f"{option.get('help')} [default: {default}]"
+    parser.add_argument(
+        f'--{option_name}', type=option_type,
+        metavar=option.get('metavalue'), default=default, help=myhelp
+    )
 
 # COMMANDS
+main_command = parse_conf.get('command')
 subparsers = parser.add_subparsers(
-    dest='command',
-    help=f'All possible {FRAMEWORK_NAME} commands:')
+    dest=main_command.get('name'),
+    help=main_command.get('help')
+)
 subparsers.required = True
-# subparsers.dest = 'command'
 
-for command_name, command_help in COMMANDS.items():
-    subparse1 = subparsers.add_parser(command_name, help=command_help)
-    # subparse1.add_argument('bar', type=int, help='bar help')
+for command_name, options in parse_conf.get('subcommands', {}).items():
+    subparse = subparsers.add_parser(
+        command_name, help=options.get('description'))
+
+    innercommands = options.get('innercommands', {})
+    if len(innercommands) > 0:
+        innerparser = subparse.add_subparsers(
+            dest='innercommand'
+        )
+        innerparser.required = options.get('innerrequired', False)
+        for subcommand, suboptions in innercommands.items():
+            innerparser.add_parser(subcommand, help='some help')
 
 # Reading input parameters
 args = parser.parse_args()
