@@ -16,6 +16,7 @@ GITHUB_DOMAIN = 'github.com'
 GITHUB_SITE = f"{GITHUB_PROTOCOL}://{GITHUB_DOMAIN}"
 GITHUB_RAPYDO_COMPANY = 'rapydo'
 
+# FIXME: switch from JSON in code to a YAML file
 COMMANDS = {
     'check':
         f"verify if currently compliant to {FRAMEWORK_NAME} specs",

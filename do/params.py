@@ -33,10 +33,15 @@ parser.add_argument(
     help='Force build of templates docker images [default: False]')
 
 # COMMANDS
-myhelp = ""
-for name, description in COMMANDS.items():
-    myhelp += f"{name}:\t\"{description}\"\n"
-parser.add_argument('command', help=myhelp)
+subparsers = parser.add_subparsers(
+    dest='command',
+    help=f'All possible {FRAMEWORK_NAME} commands:')
+subparsers.required = True
+# subparsers.dest = 'command'
+
+for command_name, command_help in COMMANDS.items():
+    subparse1 = subparsers.add_parser(command_name, help=command_help)
+    # subparse1.add_argument('bar', type=int, help='bar help')
 
 # Reading input parameters
 args = parser.parse_args()
