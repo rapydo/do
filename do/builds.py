@@ -76,7 +76,7 @@ def find_overriden_templates(services, templates={}):
 
             try:
                 dfp.content
-                log.debug("Parsed dockerfile %s" % dpath)
+                log.very_verbose("Parsed dockerfile %s" % dpath)
             except FileNotFoundError as e:
                 log.critical_exit(e)
 
@@ -96,7 +96,7 @@ def find_and_build(bp, build=False, frontend=False):
 
     # Read necessary files
     services, files, base_services, base_files = read_yamls(bp, frontend)
-    log.info("Files are %s" % files)
+    log.debug(f"Confs used in order: {files}")
 
     # 1. find templates and store them
     templates = find_templates_build(base_services)

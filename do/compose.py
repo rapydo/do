@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+Integration with Docker compose
+
+# NOTE: A way to silence compose output:
+https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
+"""
+
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
@@ -19,7 +26,7 @@ class Compose(object):
 
         self.project_dir = PROJECT_DIR
         self.project_name = get_project_name(self.project_dir)
-        log.very_verbose("Project name %s" % self.project_name)
+        log.very_verbose(f"Client compose '{self.project_name}': {files}")
 
     def config(self):
         _, services_list, _, _, _ = \

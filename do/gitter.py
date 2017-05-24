@@ -14,7 +14,7 @@ def clone(repo, path):
 
     # check if directory exist
     if os.path.exists(dest):
-        log.very_verbose(f"Path {dest} already exists")
+        log.debug(f"Path {dest} already exists")
     else:
         gitobj = git.Repo.clone_from(
             url=f"{GITHUB_SITE}/{GITHUB_RAPYDO_COMPANY}/{repo}.{GIT_EXT}",
