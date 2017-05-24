@@ -17,11 +17,11 @@ options:
     default: debug
     help: Blueprint marker of the configuration to launch
 
-  execute_build:
+  force_build:
     type: bool
     metavalue: TRUE_OR_FALSE
     default: False
-    help: Force build of templates docker images
+    help: Force building of templates docker images available
 
 subcommands:
   check:
@@ -38,6 +38,7 @@ subcommands:
     description: manage start/stop of the framework based on  current specified blueprint
     innerrequired: True
     innercommands:
+      # FIXME: complete this part
       start:
         - some
       stop:

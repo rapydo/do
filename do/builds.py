@@ -12,7 +12,7 @@ import docker
 from dockerfile_parse import DockerfileParser
 from do.compose import Compose
 from do import containers_yaml_path
-from do.input import read_yamls
+from do.configuration import read_yamls
 from do.utils.logs import get_logger
 
 log = get_logger(__name__)

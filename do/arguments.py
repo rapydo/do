@@ -50,13 +50,13 @@ for command_name, options in parse_conf.get('subcommands', {}).items():
             innerparser.add_parser(subcommand, help='some help')
 
 # Reading input parameters
-args = parser.parse_args()
-args = vars(args)
+current_args = parser.parse_args()
+current_args = vars(current_args)
 
 # Log level
-os.environ['DEBUG_LEVEL'] = args.get('log_level')
+os.environ['DEBUG_LEVEL'] = current_args.get('log_level')
 
 if True:
     from do.utils.logs import get_logger
     log = get_logger(__name__)
-    log.verbose("Parsed args: %s" % args)
+    log.verbose("Parsed arguments: %s" % current_args)
