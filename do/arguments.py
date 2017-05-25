@@ -7,6 +7,7 @@ from do.utils.myyaml import load_yaml_file
 
 # FIXME: @packaging - how to specify a configuration file where the lib is?
 ABSOLUTE_PATH = '/Users/projects/tmp/do'
+ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__)) + "/.."
 
 parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)
 
