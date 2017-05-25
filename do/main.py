@@ -7,7 +7,7 @@ I can do things thanks to Python, YAML configurations and Docker
 NOTE: the command check does nothing
 """
 
-from do.project import project_configuration
+from do.project import project_configuration, apply_variables
 from do.gitter import clone
 from do.builds import find_and_build
 from do.utils.logs import get_logger
@@ -48,36 +48,19 @@ class Application(object):
     def git_submodules(self):
         """ Check and/or clone git projects """
 
-        print(self.vars.get('repos'))
-        exit(1)
+        # TODO: add fetch upstream to rapydo/core
 
-        rapydo_repos = [
-            # Builds templates
-            {
-                "repo": "build-templates",
-                "path": "builds_base",
-                "if": True,
-            },
-            # Rapydo core as backend
-            {
-                "repo": "http-api",
-                "path": "backend",
-                "if": True
-            },
-            # Frontend only if requested
-            {
-                "repo": "node-ui",
-                "path": "frontend",
-                "if": self.frontend
-            }
-        ]
+        myvars = {'frontend': self.frontend}
 
-        for repo in rapydo_repos:
+        for _, repo in self.vars.get('repos').items():
+
+            # substitute $$ values
+            repo = apply_variables(repo, myvars)
+
             if repo.pop('if', False):
                 clone(**repo, do=self.action == 'init')
-                # if not clone(**repo, do=self.action == 'init'):
-                #     raise NotImplementedError("TO DO")
-        raise NotImplementedError("TO DO")
+
+        raise NotImplementedError("TO FINISH")
 
     def builds(self):
         """ Look up for builds depending on templates """
@@ -107,4 +90,7 @@ class Application(object):
         func()
 
     def check(self):
-        log.info("Hello")
+        raise AttributeError("Not completed yet")
+
+    def init(self):
+        raise AttributeError("Not completed yet")

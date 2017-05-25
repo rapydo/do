@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-# import git
 from git import Repo
-from do import GITHUB_SITE, GIT_EXT, GITHUB_RAPYDO_COMPANY, PROJECT_DIR
+from do import PROJECT_DIR
 from do.utils.logs import get_logger
 
 log = get_logger(__name__)
 
 
-def clone(repo, path, do=False):
+def clone(online_url, path, branch='master', do=False):
 
     local_path = os.path.join(PROJECT_DIR, path)
-    # online_url = f"{GITHUB_SITE}/{GITHUB_RAPYDO_COMPANY}/{repo}.{GIT_EXT}"
-    online_url = "{%s}/{%s}/{%s}.{%s}" % \
-        (GITHUB_SITE, GITHUB_RAPYDO_COMPANY, repo, GIT_EXT)
+
     # check if directory exist
     if os.path.exists(local_path):
         gitobj = Repo(local_path)
@@ -22,26 +19,36 @@ def clone(repo, path, do=False):
         log.debug("(CHECKED)\tPath %s already exists" % local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        # log.info(f"Cloned repo {repo} as {path}")
-        log.info("Cloned repo %s as %s" % (repo, path))
+        log.info("Cloned repo %s as %s" % (online_url, path))
     else:
-        log.critical_exit(
-            "Repo {GITHUB_RAPYDO_COMPANY}/{repo} is missing in {path}")
+        log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
 
-    return comparing(gitobj, online_url=online_url)
+    # switch
+
+    return comparing(gitobj, branch, online_url=online_url)
 
 
-def comparing(gitobj, online_url, do=False):
+def comparing(gitobj, branch, online_url):
 
     origin = gitobj.remote()
     url = list(origin.urls).pop(0)
     if online_url != url:
         log.critical_exit(
-            # f"Unmatched subrepo.\nLocal:\t{url}\nExpected:\t{online_url}")
-            "Unmatched local subrepo %s, expected:%s" % (url, online_url))
+            """
+Unmatched local remote: %s\nExpected: %s
+Suggestion: remove the directory %s
+            """ % (url, online_url, gitobj.working_dir))
+    else:
+        pass
 
-    # gitobj.working_dir
-    # gitobj.active_branch
+    if branch != str(gitobj.active_branch):
+        log.critical_exit(
+            "Wrong branch %s, expected %s.\nSuggested: cd %s; git checkout %s;"
+            % (gitobj.active_branch, branch, gitobj.working_dir, branch)
+        )
+    else:
+        pass
+
     # gitobj.commit()
 
     # gitobj.blame(rev='HEAD', file='docker-compose.yml')

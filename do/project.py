@@ -57,3 +57,14 @@ def mix_dictionary(base, custom):
             base[key] = elements
 
     return base
+
+
+def apply_variables(dictionary={}, variables={}):
+
+    new_dict = {}
+    for key, value in dictionary.items():
+        if isinstance(value, str) and value.startswith('$$'):
+            value = variables.get(value.lstrip('$'), None)
+        new_dict[key] = value
+
+    return new_dict
