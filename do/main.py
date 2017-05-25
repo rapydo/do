@@ -8,7 +8,7 @@ NOTE: the command check does nothing
 """
 
 from do.project import project_configuration, apply_variables
-from do.gitter import clone
+from do.gitter import clone, upstream
 from do.builds import find_and_build
 from do.utils.logs import get_logger
 
@@ -48,17 +48,25 @@ class Application(object):
     def git_submodules(self):
         """ Check and/or clone git projects """
 
-        # TODO: add fetch upstream to rapydo/core
+        initialize = self.action == 'init'
+        repos = self.vars.get('repos')
+        core = repos.pop('rapydo')
+
+        upstream(
+            url=core.get('online_url'),
+            path=core.get('path'),
+            do=initialize
+        )
 
         myvars = {'frontend': self.frontend}
 
-        for _, repo in self.vars.get('repos').items():
+        for _, repo in repos.items():
 
             # substitute $$ values
             repo = apply_variables(repo, myvars)
 
             if repo.pop('if', False):
-                clone(**repo, do=self.action == 'init')
+                clone(**repo, do=initialize)
 
         raise NotImplementedError("TO FINISH")
 

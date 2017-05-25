@@ -8,6 +8,35 @@ from do.utils.logs import get_logger
 log = get_logger(__name__)
 
 
+def upstream(url, path=None, key='upstream', do=False):
+
+    if path is None:
+        path = PROJECT_DIR
+
+    gitobj = Repo(path)
+    try:
+        upstream = gitobj.remote(key)
+    except ValueError:
+        if do:
+            upstream = gitobj.create_remote(key, url)
+            log.info("Added remote %s: %s" % (key, url))
+        else:
+            log.critical_exit("Missing upstream to rapydo/core")
+
+    current_url = next(upstream.urls)
+    if current_url != url:
+        if do:
+            upstream.set_url(new_url=url, old_url=current_url)
+            log.info("Replaced %s to %s" % (key, url))
+        else:
+            log.critical_exit(
+                "Upstream misconfiguration. Found %s, Expected %s"
+                % (current_url, url)
+            )
+    else:
+        log.debug("(CHECKED)\tUpstream is set correctly")
+
+
 def clone(online_url, path, branch='master', do=False):
 
     local_path = os.path.join(PROJECT_DIR, path)
@@ -30,8 +59,10 @@ def clone(online_url, path, branch='master', do=False):
 
 def comparing(gitobj, branch, online_url):
 
-    origin = gitobj.remote()
-    url = list(origin.urls).pop(0)
+    # origin = gitobj.remote()
+    # url = list(origin.urls).pop(0)
+    url = gitobj.remotes.origin.url
+
     if online_url != url:
         log.critical_exit(
             """
