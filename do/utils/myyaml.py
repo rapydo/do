@@ -29,6 +29,7 @@ def load_yaml_file(file, path=None,
         filepath = os.path.join(path, file + "." + extension)
 
     if not return_path and logger:
+        # TODO: add CHECKED
         log.verbose("Reading file %s" % filepath)
 
     # load from this file
