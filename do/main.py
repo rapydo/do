@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 
-""" DO! """
+""" DO!
 
-from do.project import read_configuration
-from do.gitter import clone_submodules
+I can do things thanks to Python, YAML configurations and Docker
+
+NOTE: the command check does nothing
+"""
+
+from do.project import project_configuration
+from do.gitter import clone
 from do.builds import find_and_build
 from do.utils.logs import get_logger
 
@@ -21,38 +26,79 @@ class Application(object):
             print(f"\n********************\tDO: {self.action}")
 
         self.blueprint = args.get('blueprint')
-        self.force_build = args.get('force_build')
-
+        self.current_args = args
         self.run()
 
-    def run(self):
+    def read_specs(self):
+        """ Read project configuration """
 
-        # Read project configuration
-        specs = read_configuration()
+        self.specs = project_configuration()
 
-        frontend = specs \
+        self.frontend = self.specs \
             .get('variables', {}) \
             .get('python', {}) \
             .get('frontend', {}) \
             .get('enable', False)
-        log.very_verbose("Frontend is %s" % frontend)
 
-        # TODO: recover commits for each subrepo
-        # and check against online version
+        log.very_verbose("Frontend is %s" % self.frontend)
 
-        # Clone git projects
-        clone_submodules(frontend)
+    def git_submodules(self):
+        """ Check and/or clone git projects """
 
-        # Find builds
+        rapydo_repos = [
+            # Builds templates
+            {
+                "repo": "build-templates",
+                "path": "builds_base",
+                "if": True,
+            },
+            # Rapydo core as backend
+            {
+                "repo": "http-api",
+                "path": "backend",
+                "if": True
+            },
+            # Frontend only if requested
+            {
+                "repo": "node-ui",
+                "path": "frontend",
+                "if": self.frontend
+            }
+        ]
+
+        if self.action in ['init']:
+            pass
+
+        for repo in rapydo_repos:
+            if repo.pop('if', False):
+                if not clone(**repo, do=self.action == 'init'):
+                    raise NotImplementedError("TO DO")
+
+    def builds(self):
+        """ Look up for builds depending on templates """
+
+        # FIXME: move here the logic
+        # TODO: pass the check/init option
         find_and_build(
             bp=self.blueprint,
-            build=self.force_build,
-            frontend=frontend,
+            frontend=self.frontend,
+            build=self.current_args.get('force_build'),
         )
 
-        # TODO: do something with the command
+    def run(self):
+
         func = getattr(self, self.action, None)
         if func is None:
             log.critical_exit(f"Command not yet implemented: {self.action}")
-        else:
-            func()
+
+        self.read_specs()
+
+        self.git_submodules()
+
+        self.builds()
+
+        # Do what you're supposed to
+        func()
+
+    def check(self):
+        log.info("Hello")

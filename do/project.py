@@ -7,7 +7,7 @@ from do.utils.logs import get_logger
 log = get_logger(__name__)
 
 
-def read_configuration():
+def project_configuration():
 
     # TODO: generalize this in rapydo.utils?
 

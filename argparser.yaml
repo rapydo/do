@@ -25,7 +25,8 @@ options:
 
 subcommands:
   check:
-    description: verify if currently compliant to RAPyDo specs
+    description: "only verify if currently compliant to RAPyDo specs
+        (NOTE: this is done at every call)"
   init:
     description: "
       make current project compliant to RAPyDo requirements
