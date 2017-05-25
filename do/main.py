@@ -34,9 +34,11 @@ class Application(object):
 
         self.specs = project_configuration()
 
-        self.frontend = self.specs \
+        self.vars = self.specs \
             .get('variables', {}) \
-            .get('python', {}) \
+            .get('python', {})
+
+        self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
 
@@ -44,6 +46,9 @@ class Application(object):
 
     def git_submodules(self):
         """ Check and/or clone git projects """
+
+        print(self.vars.get('repos'))
+        exit(1)
 
         rapydo_repos = [
             # Builds templates
@@ -66,13 +71,12 @@ class Application(object):
             }
         ]
 
-        if self.action in ['init']:
-            pass
-
         for repo in rapydo_repos:
             if repo.pop('if', False):
-                if not clone(**repo, do=self.action == 'init'):
-                    raise NotImplementedError("TO DO")
+                clone(**repo, do=self.action == 'init')
+                # if not clone(**repo, do=self.action == 'init'):
+                #     raise NotImplementedError("TO DO")
+        raise NotImplementedError("TO DO")
 
     def builds(self):
         """ Look up for builds depending on templates """

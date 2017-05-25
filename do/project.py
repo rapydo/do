@@ -39,6 +39,7 @@ def project_configuration():
     if len(defaults) < 0:
         raise ValueError("Missing defaults for server configuration!")
 
+    raise NotImplementedError("Help @mattia")
     # Mix default and custom configuration
     # We go deep into two levels down of dictionaries
     for key, elements in defaults.items():
