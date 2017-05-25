@@ -3,3 +3,4 @@ docker
 docker-compose
 gitpython
 dockerfile-parse
+beeprint
