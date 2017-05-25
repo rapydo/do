@@ -96,7 +96,8 @@ def find_and_build(bp, build=False, frontend=False):
 
     # Read necessary files
     services, files, base_services, base_files = read_yamls(bp, frontend)
-    log.debug(f"Confs used in order: {files}")
+    # log.debug(f"Confs used in order: {files}")
+    log.debug("Confs used in order: %s" % files)
 
     # 1. find templates and store them
     templates = find_templates_build(base_services)

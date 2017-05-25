@@ -11,17 +11,20 @@ def project_configuration():
 
     # TODO: generalize this in rapydo.utils?
 
+    # Read default configuration
+    specs = load_yaml_file('defaults', path=defaults_path)
+    if len(specs) < 0:
+        raise ValueError("Missing defaults for server configuration!")
+
+    # Read custom project configuration
     args = {
         'file': PROJECT_CONF_FILENAME,
         'path': project_specs_yaml_path
     }
+    custom = load_yaml_file(**args)
 
-    try:
-        specs = load_yaml_file(**args)
-    except Exception as e:
-        log.critical_exit(e)
-
-    prj = specs.get('project')
+    # Verify custom project configuration
+    prj = custom.get('project')
     if prj is None:
         raise AttributeError("Missing project configuration")
     else:
@@ -34,19 +37,23 @@ def project_configuration():
                 "Please edit file %s" % filepath
             )
 
-    # Read default configuration
-    defaults = load_yaml_file('defaults', path=defaults_path)
-    if len(defaults) < 0:
-        raise ValueError("Missing defaults for server configuration!")
-
-    raise NotImplementedError("Help @mattia")
     # Mix default and custom configuration
-    # We go deep into two levels down of dictionaries
-    for key, elements in defaults.items():
-        if key not in specs:
-            specs[key] = {}
-        for label, element in elements.items():
-            if label not in specs[key]:
-                specs[key][label] = element
+    return mix_dictionary(specs, custom)
 
-    return specs
+
+def mix_dictionary(base, custom):
+
+    for key, elements in custom.items():
+
+        if key not in base:
+            # log.info("Adding %s to configuration" % key)
+            base[key] = custom[key]
+            continue
+
+        if isinstance(elements, dict):
+            mix_dictionary(base[key], custom[key])
+        else:
+            # log.info("Replacing default %s in configuration" % key)
+            base[key] = elements
+
+    return base

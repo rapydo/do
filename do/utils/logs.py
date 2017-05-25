@@ -7,6 +7,7 @@ import logging
 import traceback
 from logging.config import fileConfig
 from json.decoder import JSONDecodeError
+from do import ABSOLUTE_PATH
 
 AVOID_COLORS_ENV_LABEL = "WHATEVER"
 
@@ -22,7 +23,7 @@ MAX_CHAR_LEN = 200
 OBSCURE_VALUE = '****'
 OBSCURED_FIELDS = ['password', 'pwd', 'token', 'file', 'filename']
 
-LOG_CONFIG = '/Users/projects/tmp/do/logging.ini'
+LOG_CONFIG = os.path.join(ABSOLUTE_PATH, 'logging.ini')
 
 
 def critical_exit(self, message, *args, **kws):
