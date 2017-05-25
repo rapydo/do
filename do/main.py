@@ -23,7 +23,8 @@ class Application(object):
         if self.action is None:
             raise AttributeError("Misconfiguration")
         else:
-            print(f"\n********************\tDO: {self.action}")
+            # print(f"\n********************\tDO: {self.action}")
+            print("\n********************\tDO: %s" % self.action)
 
         self.blueprint = args.get('blueprint')
         self.current_args = args
@@ -93,7 +94,8 @@ class Application(object):
 
         func = getattr(self, self.action, None)
         if func is None:
-            log.critical_exit(f"Command not yet implemented: {self.action}")
+            # log.critical_exit(f"Command not yet implemented: {self.action}")
+            log.critical_exit("Command not yet implemented: %s" % self.action)
 
         self.read_specs()
 

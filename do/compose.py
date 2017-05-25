@@ -26,7 +26,8 @@ class Compose(object):
 
         self.project_dir = PROJECT_DIR
         self.project_name = get_project_name(self.project_dir)
-        log.very_verbose(f"Client compose '{self.project_name}': {files}")
+        # log.very_verbose(f"Client compose '{self.project_name}': {files}")
+        log.very_verbose("Client compose %s: %s" % (self.project_name, files))
 
     def config(self):
         _, services_list, _, _, _ = \

@@ -60,7 +60,8 @@ def load_yaml_file(file, path=None,
         if logger:
             log.warning(message)
         else:
-            raise NotImplementedError(f"Cannot log warning {message}")
+            # raise NotImplementedError(f"Cannot log warning {message}")
+            raise NotImplementedError("Cannot log warning %s" % message)
     else:
         raise KeyError(message)
     return None

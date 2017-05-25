@@ -22,9 +22,10 @@ for option_name, option in parse_conf.get('options', {}).items():
     if option.get('type') == 'bool':
         option_type = bool
     default = option.get('default')
-    myhelp = f"{option.get('help')} [default: {default}]"
+    # myhelp = f"{option.get('help')} [default: {default}]"
+    myhelp = "%s [default: %s]" % (option.get('help'), default)
     parser.add_argument(
-        f'--{option_name}', type=option_type,
+        '--%s' % option_name, type=option_type,
         metavar=option.get('metavalue'), default=default, help=myhelp
     )
 
