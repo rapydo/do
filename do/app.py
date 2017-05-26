@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-""" DO!
-
-I can do things thanks to Python, YAML configurations and Docker
-
-NOTE: the command check does nothing
+"""
+Main App class
 """
 
+from do.arguments import current_args
 from do.project import project_configuration, apply_variables
 from do.gitter import clone, upstream
 from do.builds import find_and_build
@@ -17,17 +15,17 @@ log = get_logger(__name__)
 
 class Application(object):
 
-    def __init__(self, args):
+    def __init__(self, args=current_args):
 
-        self.action = args.get('command')
+        self.current_args = args
+
+        self.action = self.current_args.get('command')
         if self.action is None:
             raise AttributeError("Misconfiguration")
         else:
-            # print(f"\n********************\tDO: {self.action}")
             print("\n********************\tDO: %s" % self.action)
 
-        self.blueprint = args.get('blueprint')
-        self.current_args = args
+        self.blueprint = self.current_args.get('blueprint')
         self.run()
 
     def read_specs(self):

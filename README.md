@@ -1,7 +1,12 @@
 # do
-Do things with rapydo repositories
+Do things with RAPyDo ecosystem
 
 ---
 
-pip install --upgrade -r requirements.txt
+```bash
+$ git clone ...
+# install for testing
+$ pip3 install --editable .
+```
+
 

@@ -6,8 +6,6 @@ import argparse
 from do.utils.myyaml import load_yaml_file
 from do import ABSOLUTE_PATH
 
-# ABSOLUTE_PATH = '/Users/projects/tmp/do'
-
 parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)
 
 # Arguments definition
