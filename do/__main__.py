@@ -6,5 +6,9 @@
 from do.app import Application
 
 
-if __name__ == '__main__':
+def main():
     Application()
+
+
+if __name__ == '__main__':
+    main()
