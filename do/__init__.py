@@ -16,6 +16,9 @@ ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__)) + "/.."
 containers_yaml_path = os.path.join(os.curdir, CONTAINERS_YAML_DIRNAME)
 project_specs_yaml_path = os.path.join(os.curdir, PROJECT_YAML_SPECSDIR)
 
+
+# TODO: move below in utils (rapydo.utils package?)
+
 BASE_OPTION = '--version'
 
 
@@ -30,7 +33,11 @@ def check_executable(executable, option=BASE_OPTION, log=None):
     else:
         if option == BASE_OPTION:
             try:
-                output = output.split(',')[0].split()[::-1][0]
+                # try splitting on coma and/or parenthesis
+                # then last element on spaces
+                output = output \
+                    .split('(')[0].split(',')[0] \
+                    .split()[::-1][0]
             except BaseException:
                 pass
         return output
