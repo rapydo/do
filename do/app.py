@@ -4,7 +4,7 @@
 Main App class
 """
 
-from do import check_internet, check_executable
+from do import check_internet, check_executable, check_package
 from do.arguments import current_args
 from do.project import project_configuration, apply_variables
 from do.gitter import clone, upstream
@@ -18,27 +18,47 @@ class Application(object):
 
     def __init__(self, args=current_args):
 
+        self.current_args = args
+        self.action = self.current_args.get('command')
+
+        if self.action is None:
+            log.critical_exit("Internal misconfiguration")
+        else:
+            log.info("Do request: %s" % self.action)
+
         # Check if docker is installed
-        program = 'docker'
-        program_exists = check_executable(executable='docker', option='-v')
-        if not program_exists:
-            log.critical_exit('Please make sure %s is installed' % program)
+        self.check_program('docker')
+
+        # Check docker-compose version
+        pack = 'compose'
+        package_version = check_package(pack)
+        if package_version is None:
+            log.critical_exit("Could not find %s" % pack)
+        else:
+            log.debug("(CHECKED) %s version: %s" % (pack, package_version))
+
+        # Check if git is installed
+        self.check_program('git')
 
         # Check if connected to internet
         connected = check_internet()
         if not connected:
             log.critical_exit('Internet connection unavailable')
-
-        self.current_args = args
-
-        self.action = self.current_args.get('command')
-        if self.action is None:
-            log.critical_exit("Internal misconfiguration")
         else:
-            print("\n********************\tDO: %s" % self.action)
+            log.debug("(CHECKED) internet connection available")
+
+        # TODO: git check
 
         self.blueprint = self.current_args.get('blueprint')
         self.run()
+
+    def check_program(self, program):
+        program_version = check_executable(executable=program, log=log)
+        if program_version is None:
+            log.critical_exit('Please make sure %s is installed' % program)
+        else:
+            log.debug("(CHECKED) %s version: %s" % (program, program_version))
+        return
 
     def read_specs(self):
         """ Read project configuration """

@@ -3,18 +3,8 @@
 """
 My first Pypi package test
 
-#versions:
-
+example of versions:
 1.2.0 .dev1/.a1/.b1/.rc1/FINAL/.post1
-
-1.2.0.dev1  # Development release
-1.2.0a1     # Alpha Release
-1.2.0b1     # Beta Release
-1.2.0rc1    # Release Candidate
-1.2.0       # Final Release
-1.2.0.post1 # Post Release
-15.10       # Date based release
-23          # Serial release
 
 """
 
@@ -43,12 +33,11 @@ setup(
     install_requires=[
         "requests==2.11.1",
         "docker",
-        "docker-compose",
+        "docker-compose>=1.13",
         "gitpython",
         "dockerfile-parse",
         "beeprint",
         "better_exceptions",
-        # 'Werkzeug>=0.9',
     ],
     classifiers=[
         'Programming Language :: Python',

@@ -20,8 +20,7 @@ def project_configuration():
     }
     specs = load_yaml_file(**args)
     if specs is None or len(specs) < 0:
-        # log.critical_exit("Missing defaults for server configuration!")
-        pass
+        log.critical_exit("Missing defaults for server configuration!")
     else:
         log.debug("(CHECKED) found default rapydo configuration")
 
