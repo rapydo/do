@@ -4,7 +4,7 @@
 Main App class
 """
 
-from do import check_internet
+from do import check_internet, check_executable
 from do.arguments import current_args
 from do.project import project_configuration, apply_variables
 from do.gitter import clone, upstream
@@ -17,6 +17,12 @@ log = get_logger(__name__)
 class Application(object):
 
     def __init__(self, args=current_args):
+
+        # Check if docker is installed
+        program = 'docker'
+        program_exists = check_executable(executable='docker', option='-v')
+        if not program_exists:
+            log.critical_exit('Please make sure %s is installed' % program)
 
         # Check if connected to internet
         connected = check_internet()
