@@ -61,7 +61,7 @@ def read_yamls(blueprint, frontend=False, path=containers_yaml_path):
             compose = load_yaml_file(**composer)
 
             if len(compose.get('services', {})) < 1 and mandatory:
-                raise AttributeError("Missing services in file %s" % file)
+                log.critical_exit("No service defined in file %s" % file)
             else:
                 filepath = load_yaml_file(return_path=True, **composer)
                 all_files.append(filepath)

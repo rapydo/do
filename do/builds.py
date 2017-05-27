@@ -47,7 +47,7 @@ def find_templates_build(base_services):
             template_image = base_service.get('image')
 
             if template_image is None:
-                raise AttributeError(
+                log.critical_exit(
                     "Error with template build: %s\n"
                     "Template builds must have a name!"
                     % template_name

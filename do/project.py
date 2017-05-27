@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from do import defaults_path, project_specs_yaml_path, PROJECT_CONF_FILENAME
+from do import project_specs_yaml_path, PROJECT_CONF_FILENAME
 from do.utils.myyaml import load_yaml_file
 from do.utils.logs import get_logger
 
@@ -11,17 +11,28 @@ def project_configuration():
 
     # TODO: generalize this in rapydo.utils?
 
+    ##################
     # Read default configuration
-    specs = load_yaml_file('defaults', path=defaults_path)
-    if len(specs) < 0:
-        raise ValueError("Missing defaults for server configuration!")
-
-    # Read custom project configuration
     args = {
-        'file': PROJECT_CONF_FILENAME,
-        'path': project_specs_yaml_path
+        'file': 'defaults',
+        'path': project_specs_yaml_path,
+        'skip_error': True
     }
+    specs = load_yaml_file(**args)
+    if specs is None or len(specs) < 0:
+        # log.critical_exit("Missing defaults for server configuration!")
+        pass
+    else:
+        log.debug("(CHECKED) found default rapydo configuration")
+
+    ##################
+    # Read custom project configuration
+    args['file'] = PROJECT_CONF_FILENAME
     custom = load_yaml_file(**args)
+    if custom is None or len(custom) < 0:
+        log.critical_exit("Missing customization for server configuration!")
+    else:
+        log.debug("(CHECKED) found customized rapydo configuration")
 
     # Verify custom project configuration
     prj = custom.get('project')
@@ -32,7 +43,7 @@ def project_configuration():
         check2 = prj.get('description') == 'Title of my project'
         if check1 or check2:
             filepath = load_yaml_file(return_path=True, **args)
-            raise ValueError(
+            log.critical_exit(
                 "\n\nIt seems like your project is not yet configured...\n" +
                 "Please edit file %s" % filepath
             )

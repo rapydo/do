@@ -41,6 +41,7 @@ setup(
         ],
     },
     install_requires=[
+        "requests==2.11.1",
         "docker",
         "docker-compose",
         "gitpython",

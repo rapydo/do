@@ -6,10 +6,15 @@ import json
 import logging
 import traceback
 from logging.config import fileConfig
-from json.decoder import JSONDecodeError
+try:
+    from json.decoder import JSONDecodeError
+except ImportError:
+    # fix for Python 3.4+
+    JSONDecodeError = ValueError
+
 from do import ABSOLUTE_PATH
 
-AVOID_COLORS_ENV_LABEL = "WHATEVER"
+AVOID_COLORS_ENV_LABEL = "IDONTWANTCOLORS"
 
 #######################
 # DEBUG level is 10 (https://docs.python.org/3/howto/logging.html)

@@ -50,7 +50,11 @@ def load_yaml_file(file, path=None,
                     if len(docs) > 0:
                         return docs[0]
                     else:
-                        raise AttributeError("Missing YAML first document")
+                        message = "Missing YAML first document"
+                        if logger:
+                            log.critical_exit(message)
+                        else:
+                            raise AttributeError(message)
             except Exception as e:
                 error = e
     else:
@@ -61,8 +65,10 @@ def load_yaml_file(file, path=None,
         if logger:
             log.warning(message)
         else:
-            # raise NotImplementedError(f"Cannot log warning {message}")
             raise NotImplementedError("Cannot log warning %s" % message)
     else:
-        raise KeyError(message)
+        if logger:
+            log.warning(message)
+        else:
+            raise KeyError(message)
     return None

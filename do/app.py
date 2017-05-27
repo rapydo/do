@@ -4,6 +4,7 @@
 Main App class
 """
 
+from do import check_internet
 from do.arguments import current_args
 from do.project import project_configuration, apply_variables
 from do.gitter import clone, upstream
@@ -17,11 +18,16 @@ class Application(object):
 
     def __init__(self, args=current_args):
 
+        # Check if connected to internet
+        connected = check_internet()
+        if not connected:
+            log.critical_exit('Internet connection unavailable')
+
         self.current_args = args
 
         self.action = self.current_args.get('command')
         if self.action is None:
-            raise AttributeError("Misconfiguration")
+            log.critical_exit("Internal misconfiguration")
         else:
             print("\n********************\tDO: %s" % self.action)
 
@@ -64,7 +70,7 @@ class Application(object):
             repo = apply_variables(repo, myvars)
 
             if repo.pop('if', False):
-                clone(**repo, do=initialize)
+                clone(do=initialize, **repo)
 
         raise NotImplementedError("TO FINISH")
 
