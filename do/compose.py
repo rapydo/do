@@ -22,9 +22,8 @@ class Compose(object):
         super(Compose, self).__init__()
 
         self.files = files
-        self.options.update({'--file': self.files})
-        log.pp(self.options)
-        log.critical_exit("DEBUG ME HERE")
+        options.update({'--file': self.files})
+        self.options = options
 
         self.project_dir = PROJECT_DIR
         self.project_name = get_project_name(self.project_dir)

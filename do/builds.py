@@ -92,7 +92,7 @@ def find_overriden_templates(services, templates={}):
     return builds
 
 
-def find_and_build(bp, build=False, frontend=False):
+def find_and_build(bp, do_build=False, frontend=False):
 
     # Read necessary files
     services, files, base_services, base_files = read_yamls(bp, frontend)
@@ -106,16 +106,16 @@ def find_and_build(bp, build=False, frontend=False):
     builds = find_overriden_templates(services, templates)
 
     # 3. templates to be built (if requested)
+    cache = False
     if len(builds) > 0:
 
-        if build:
+        if do_build:
             dc = Compose(
                 files=base_files,
             )
             dc.force_template_build(builds)
         else:
             dimages = docker_images()
-            cache = False
             for image_tag, build in builds.items():
 
                 # TODO: BETTER CHECK: compare dates between git and docker;
@@ -125,12 +125,16 @@ def find_and_build(bp, build=False, frontend=False):
 
                 if image_tag in dimages:
                     log.warning(
-                        "Notice: using cache for image [%s]" % image_tag)
+                        "Notice: cached image [%s]" % image_tag)
                     cache = True
             if cache:
                 log.info(
                     "If you want to build these template(s) " +
-                    "add option \"%s %s\"" % ('--execute_build', str(True))
+                    "add option \"%s %s\"" %
+                    ('--force_build_dependencies', str(True))
                 )
+
+    if not cache:
+        log.debug("(CHECKED) no cache builds")
 
     return

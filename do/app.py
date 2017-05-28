@@ -27,7 +27,7 @@ class Application(object):
             log.info("Do request: %s" % self.action)
 
         # Check if docker is installed
-        self.check_program('docker')
+        self._check_program('docker')
 
         # Check docker-compose version
         pack = 'compose'
@@ -38,7 +38,7 @@ class Application(object):
             log.debug("(CHECKED) %s version: %s" % (pack, package_version))
 
         # Check if git is installed
-        self.check_program('git')
+        self._check_program('git')
 
         # Check if connected to internet
         connected = check_internet()
@@ -52,7 +52,7 @@ class Application(object):
         self.blueprint = self.current_args.get('blueprint')
         self.run()
 
-    def check_program(self, program):
+    def _check_program(self, program):
         program_version = check_executable(executable=program, log=log)
         if program_version is None:
             log.critical_exit('Please make sure %s is installed' % program)
@@ -60,7 +60,7 @@ class Application(object):
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
 
-    def read_specs(self):
+    def _read_specs(self):
         """ Read project configuration """
 
         self.specs = project_configuration()
@@ -75,7 +75,7 @@ class Application(object):
 
         log.very_verbose("Frontend is %s" % self.frontend)
 
-    def git_submodules(self):
+    def _git_submodules(self):
         """ Check and/or clone git projects """
 
         initialize = self.action == 'init'
@@ -98,17 +98,12 @@ class Application(object):
             if repo.pop('if', False):
                 clone(do=initialize, **repo)
 
-        raise NotImplementedError("TO FINISH")
+    def _build_dependencies(self):
+        """ Look up for builds which are depending on templates """
 
-    def builds(self):
-        """ Look up for builds depending on templates """
-
-        # FIXME: move here the logic
-        # TODO: pass the check/init option
         find_and_build(
-            bp=self.blueprint,
-            frontend=self.frontend,
-            build=self.current_args.get('force_build'),
+            bp=self.blueprint, frontend=self.frontend,
+            do_build=self.current_args.get('force_build_dependencies'),
         )
 
     def run(self):
@@ -118,17 +113,17 @@ class Application(object):
             # log.critical_exit(f"Command not yet implemented: {self.action}")
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
-        self.read_specs()
+        self._read_specs()
 
-        self.git_submodules()
+        self._git_submodules()
 
-        self.builds()
+        self._build_dependencies()
 
         # Do what you're supposed to
         func()
 
     def check(self):
-        raise AttributeError("Not completed yet")
+        log.info("All checked")
 
     def init(self):
-        raise AttributeError("Not completed yet")
+        log.info("Project initialized")
