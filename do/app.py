@@ -8,7 +8,10 @@ from do import check_internet, check_executable, check_package
 from do.arguments import current_args
 from do.project import project_configuration, apply_variables
 from do.gitter import clone, upstream
-from do.builds import find_and_build
+from do.builds import locate_builds
+from do.dockerizing import Dock
+from do.compose import Compose
+from do.configuration import read_yamls
 from do.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -28,6 +31,7 @@ class Application(object):
 
         # Check if docker is installed
         self._check_program('docker')
+        self.docker = Dock()
 
         # Check docker-compose version
         pack = 'compose'
@@ -101,10 +105,42 @@ class Application(object):
     def _build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
-        find_and_build(
-            bp=self.blueprint, frontend=self.frontend,
-            do_build=self.current_args.get('force_build_dependencies'),
-        )
+        # Read necessary files
+        self.services, self.files, self.base_services, base_files = \
+            read_yamls(self.blueprint, self.frontend)
+        log.debug("Confs used (with order): %s" % self.files)
+
+        builds = locate_builds(self.base_services, self.services)
+
+        if self.current_args.get('force_build_dependencies'):
+            dc = Compose(files=base_files)
+            dc.force_template_build(builds)
+        else:
+            self.verify_build_cache(builds)
+
+    def verify_build_cache(self, builds):
+        cache = False
+        if len(builds) > 0:
+
+            dimages = self.docker.images()
+            for image_tag, build in builds.items():
+
+                # TODO: BETTER CHECK: compare dates between git and docker;
+                # check if build template commit (git.blame) is older
+                # than image build datetime.
+                # SEE gitter.py
+
+                if image_tag in dimages:
+                    log.warning("cached image [%s]" % image_tag)
+                    cache = True
+            if cache:
+                log.info(
+                    "To build cached template(s) add option \"%s %s\"" %
+                    ('--force_build_dependencies', str(True))
+                )
+
+        if not cache:
+            log.debug("(CHECKED) no cache builds")
 
     def run(self):
 
@@ -127,3 +163,32 @@ class Application(object):
 
     def init(self):
         log.info("Project initialized")
+
+    def control(self):
+
+        command = self.current_args.get('innercommand')
+        services = self.current_args.get('services').split(',')
+
+        dc = Compose(files=self.files)
+
+        if command == 'start':
+            # print("SERVICES", services)
+            options = {
+                '--no-deps': False,
+                '-d': True,
+                '--abort-on-container-exit': False,
+                '--remove-orphans': False,
+                '--no-recreate': False,
+                '--force-recreate': False,
+                '--build': False,
+                '--no-build': False,
+                '--scale': {},
+                'SERVICE': services
+            }
+            dc.up(options)
+
+        elif command == 'stop':
+            dc.stop({'SERVICE': []})
+
+        else:
+            log.critical_exit("Not implemented yet")

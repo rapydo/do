@@ -65,3 +65,11 @@ class Compose(object):
             log.info("Built template: %s" % service)
 
         return
+
+    def up(self, options={}):
+        compose_handler = self.get_handle(self.project_dir)
+        compose_handler.up(options=options)
+
+    def stop(self, options={}):
+        compose_handler = self.get_handle(self.project_dir)
+        compose_handler.stop(options=options)
