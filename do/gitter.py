@@ -21,7 +21,11 @@ def upstream(url, path=None, key='upstream', do=False):
             upstream = gitobj.create_remote(key, url)
             log.info("Added remote %s: %s" % (key, url))
         else:
-            log.critical_exit("Missing upstream to rapydo/core")
+            log.critical_exit(
+                """Missing upstream to rapydo/core
+Suggestion: execute the init command
+                """
+            )
 
     current_url = next(upstream.urls)
     if current_url != url:
@@ -30,7 +34,11 @@ def upstream(url, path=None, key='upstream', do=False):
             log.info("Replaced %s to %s" % (key, url))
         else:
             log.critical_exit(
-                "Upstream misconfiguration. Found %s, Expected %s"
+                """Rapydo upstream misconfiguration
+Found: %s
+Expected: %s
+Suggestion: execute the init command
+                """
                 % (current_url, url)
             )
     else:
@@ -65,10 +73,13 @@ def comparing(gitobj, branch, online_url):
 
     if online_url != url:
         log.critical_exit(
-            """
-Unmatched local remote: %s\nExpected: %s
-Suggestion: remove the directory %s
+            """Unmatched local remote
+Found: %s\nExpected: %s
+Suggestion: remove %s and execute the init command
             """ % (url, online_url, gitobj.working_dir))
+        # TO FIX: before to suggest to delete we should verify if repo is clean
+        # i.e. verify if git status returns something
+
     else:
         pass
 

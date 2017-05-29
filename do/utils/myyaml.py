@@ -50,7 +50,7 @@ def load_yaml_file(file, path=None,
                     if len(docs) > 0:
                         return docs[0]
                     else:
-                        message = "Missing YAML first document"
+                        message = "YAML file is empty %s" % filepath
                         if logger:
                             log.critical_exit(message)
                         else:
