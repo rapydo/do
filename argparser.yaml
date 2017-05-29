@@ -43,19 +43,19 @@ subcommands:
     description: open a shell inside the specified container
   control:
     description: manage start/stop of the framework based on  current specified blueprint
-    innerrequired: True
-    innercommands:
+    controlrequired: True
+    controlcommands:
       # FIXME: complete this part
       start:
-        - some
+        - Start containers for this configuration
       stop:
-        - some
+        - Stop running containers without removing them
       restart:
-        - some
+        - Not implemented yet
       remove:
-        - some
+        - Not implemented yet
       freeze:
-        - some
+        - Not implemented yet
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"

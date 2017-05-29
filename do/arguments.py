@@ -39,14 +39,15 @@ for command_name, options in parse_conf.get('subcommands', {}).items():
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))
 
-    innercommands = options.get('innercommands', {})
-    if len(innercommands) > 0:
+    controlcommands = options.get('controlcommands', {})
+    if len(controlcommands) > 0:
         innerparser = subparse.add_subparsers(
-            dest='innercommand'
+            dest='controlcommand'
         )
-        innerparser.required = options.get('innerrequired', False)
-        for subcommand, suboptions in innercommands.items():
-            innerparser.add_parser(subcommand, help='some help')
+        innerparser.required = options.get('controlrequired', False)
+        for subcommand, suboptions in controlcommands.items():
+            subcommand_help = suboptions.pop(0)
+            innerparser.add_parser(subcommand, help=subcommand_help)
 
 # Reading input parameters
 current_args = parser.parse_args()
