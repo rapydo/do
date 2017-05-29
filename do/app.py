@@ -160,14 +160,27 @@ class Application(object):
         func()
 
     def check(self):
+
+        # NOTE: a SECURITY BUG?
+        # dc = Compose(files=self.files)
+        # for container in dc.get_handle().project.containers():
+        #     log.pp(container.client._auth_configs)
+        #     exit(1)
+
         log.info("All checked")
 
     def init(self):
         log.info("Project initialized")
 
     def clean(self):
-        # down --rmi local --volumes
-        pass
+        dc = Compose(files=self.files)
+        rm_volumes = self.current_args.get('rm_volumes', False)
+        options = {
+            '--volumes': rm_volumes,
+            '--remove-orphans': None,
+            '--rmi': 'local',  # 'all'
+        }
+        dc.command('down', options)
 
     def control(self):
 

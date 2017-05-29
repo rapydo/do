@@ -58,9 +58,9 @@ subcommands:
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
-    # suboptions:
-    #   whatever:
-    #     type: str
-    #     metavalue: SOME
-    #     default: DEBUG
-    #     help: bla bla
+    suboptions:
+      rm-volumes:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: remove also containers persistent data
