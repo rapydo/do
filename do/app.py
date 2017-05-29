@@ -166,7 +166,7 @@ class Application(object):
 
     def control(self):
 
-        command = self.current_args.get('innercommand')
+        command = self.current_args.get('controlcommand')
         services = self.current_args.get('services').split(',')
 
         dc = Compose(files=self.files)
