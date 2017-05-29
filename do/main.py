@@ -50,6 +50,10 @@ class Application(object):
 
         initialize = self.action == 'init'
         repos = self.vars.get('repos')
+        if repos is None:
+            raise AttributeError(
+                "Invalid configuration: repos section is missing")
+
         core = repos.pop('rapydo')
 
         upstream(
