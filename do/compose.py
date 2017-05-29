@@ -36,14 +36,14 @@ class Compose(object):
         # log.pp(services_list)
         return services_list
 
-    def get_handle(self, command_dir):
+    def get_handle(self):
         # TODO: check if this might be moved into __init__
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
     def force_template_build(self, builds, options={}):
 
-        compose_handler = self.get_handle(self.project_dir)
+        compose_handler = self.get_handle()
         force_options = {
             '--no-cache': True,
             '--pull': True,
@@ -52,7 +52,6 @@ class Compose(object):
         for image_tag, build in builds.items():
 
             service = build.get('service')
-            # compose_handler = self.get_handle(build.get('dir'))
             log.verbose("Building template for: %s" % service)
 
             # myoptions = {'SERVICE': [service], **force_options, **options}
@@ -66,10 +65,10 @@ class Compose(object):
 
         return
 
-    def up(self, options={}):
-        compose_handler = self.get_handle(self.project_dir)
-        compose_handler.up(options=options)
-
-    def stop(self, options={}):
-        compose_handler = self.get_handle(self.project_dir)
-        compose_handler.stop(options=options)
+    def command(self, command, options={}):
+        compose_handler = self.get_handle()
+        method = getattr(compose_handler, command)
+        if options.get('SERVICE', None) is None:
+            options['SERVICE'] = []
+        method(options=options)
+        log.info("Executed compose '%s'" % command)
