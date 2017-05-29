@@ -17,11 +17,17 @@ options:
     default: debug
     help: Blueprint marker of the configuration to launch
 
-  force_build:
+  services:
+    type: str
+    metavalue: SERVICES_COMA_SEPARATED
+    default: backend
+    help: List of services referring to a command
+
+  force_build_dependencies:
     type: bool
     metavalue: TRUE_OR_FALSE
     default: False
-    help: Force building of templates docker images available
+    help: Force building of templates docker images used in other builds
 
 subcommands:
   check:
@@ -35,7 +41,7 @@ subcommands:
     description: watch log tails of all or specified containers
   shell:
     description: open a shell inside the specified container
-  remote:
+  control:
     description: manage start/stop of the framework based on  current specified blueprint
     innerrequired: True
     innercommands:

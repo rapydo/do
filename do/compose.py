@@ -22,7 +22,8 @@ class Compose(object):
         super(Compose, self).__init__()
 
         self.files = files
-        self.options = {'--file': self.files, **options}
+        options.update({'--file': self.files})
+        self.options = options
 
         self.project_dir = PROJECT_DIR
         self.project_name = get_project_name(self.project_dir)
@@ -54,8 +55,21 @@ class Compose(object):
             # compose_handler = self.get_handle(build.get('dir'))
             log.verbose("Building template for: %s" % service)
 
-            myoptions = {'SERVICE': [service], **force_options, **options}
-            compose_handler.build(options=myoptions)
+            # myoptions = {'SERVICE': [service], **force_options, **options}
+            options.update(force_options)
+            options.update({'SERVICE': [service]})
+            log.pp(options)
+            log.critical_exit("DEBUG ME HERE /2")
+
+            compose_handler.build(options=options)
             log.info("Built template: %s" % service)
 
         return
+
+    def up(self, options={}):
+        compose_handler = self.get_handle(self.project_dir)
+        compose_handler.up(options=options)
+
+    def stop(self, options={}):
+        compose_handler = self.get_handle(self.project_dir)
+        compose_handler.stop(options=options)
