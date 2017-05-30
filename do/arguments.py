@@ -37,19 +37,24 @@ for option_name, options in sorted(parse_conf.get('options', {}).items()):
 
 # COMMANDS
 main_command = parse_conf.get('command')
+
+# Sub-parser of commands [check, init, etc]
 subparsers = parser.add_subparsers(
     title='Sub commands',
     dest=main_command.get('name'),
     help=main_command.get('help')
 )
+
 subparsers.required = True
 
 for command_name, options in sorted(parse_conf.get('subcommands', {}).items()):
 
+    # Creating a parser for each sub-command [check, init, etc]
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))
 
     controlcommands = options.get('controlcommands', {})
+    # Some subcommands can have further subcommands [control start, stop, etc]
     if len(controlcommands) > 0:
         innerparser = subparse.add_subparsers(
             dest='controlcommand'
@@ -57,6 +62,7 @@ for command_name, options in sorted(parse_conf.get('subcommands', {}).items()):
         innerparser.required = options.get('controlrequired', False)
         for subcommand, suboptions in controlcommands.items():
             subcommand_help = suboptions.pop(0)
+            # Creating a parser for each sub-sub-command [control start, stop]
             innerparser.add_parser(subcommand, help=subcommand_help)
 
     for option_name, suboptions in options.get('suboptions', {}).items():
