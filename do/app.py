@@ -270,10 +270,17 @@ class Application(object):
         shell_command = pieces[0]
         shell_args = pieces[1:]
 
-        log.verbose("Command request: %s + %s" % (shell_command, shell_args))
+        if len(services) != 1:
+            log.critical_exit(
+                "Commands can be executed only on one service." +
+                "\nCurrent request on: %s" % services)
+        else:
+            service = services.pop()
+            log.info("Command request: %s(%s+%s)"
+                     % (service.upper(), shell_command, shell_args))
 
         options = {
-            'SERVICE': services.pop(),
+            'SERVICE': service,
             'COMMAND': shell_command,
             'ARGS': shell_args,
             '--index': '1',

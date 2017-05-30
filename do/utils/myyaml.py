@@ -15,7 +15,6 @@ def load_yaml_file(file, path=None,
                    extension=YAML_EXT, return_path=False, logger=True):
     """
     Import data from a YAML file.
-    Reading is cached.
     """
 
     if logger:
@@ -60,7 +59,13 @@ def load_yaml_file(file, path=None,
     else:
         error = 'File does not exist'
 
+    # # IF dealing with a strange exception string (escaped)
+    # import codecs
+    # mystring, _ = codecs.getdecoder("unicode_escape")(str(error))
+    # message = "Failed to read YAML file [%s]: %s" % (filepath, mystring)
+
     message = "Failed to read YAML file [%s]: %s" % (filepath, error)
+
     if skip_error:
         if logger:
             log.warning(message)
@@ -70,5 +75,5 @@ def load_yaml_file(file, path=None,
         if logger:
             log.warning(message)
         else:
-            raise KeyError(message)
-    return None
+            raise AttributeError(message)
+    return {}

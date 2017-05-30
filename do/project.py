@@ -24,31 +24,12 @@ def project_configuration(development=False):
         args['file'] = f
         try:
             confs[f] = load_yaml_file(**args)
-            log.debug("(CHECKED) found *%s* rapydo configuration" % f)
-        except KeyError as e:
-            error = str(e).replace("\\n", "\n")
-
-            log.critical_exit(error)
+            log.debug("(CHECKED) found '%s' rapydo configuration" % f)
+        except AttributeError as e:
+            log.critical_exit(e)
 
     specs = confs['defaults']
     custom = confs[PROJECT_CONF_FILENAME]
-    # if specs is None or len(specs) < 0:
-    #     log.critical_exit("Missing defaults for server configuration!")
-    # else:
-    #     log.debug("(CHECKED) found default rapydo configuration")
-
-    ##################
-    # Read custom project configuration
-    # args['file'] = PROJECT_CONF_FILENAME
-    # try:
-    #     custom = load_yaml_file(**args)
-    #     log.debug("(CHECKED) found customized rapydo configuration")
-    # except KeyError as e:
-    #     log.critical_exit(e)
-    # if custom is None or len(custom) < 0:
-    #     log.critical_exit("Missing customization for server configuration!")
-    # else:
-    #     log.debug("(CHECKED) found customized rapydo configuration")
 
     # Verify custom project configuration
     prj = custom.get('project')
