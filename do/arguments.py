@@ -30,6 +30,7 @@ for option_name, option in parse_conf.get('options', {}).items():
 # COMMANDS
 main_command = parse_conf.get('command')
 subparsers = parser.add_subparsers(
+    title='Sub commands',
     dest=main_command.get('name'),
     help=main_command.get('help')
 )
