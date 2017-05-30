@@ -169,6 +169,9 @@ class Application(object):
 
         log.info("All checked")
 
+    def get_services(self, key='services', sep=','):
+        return self.current_args.get(key).split(sep)
+
     def init(self):
         log.info("Project initialized")
 
@@ -185,7 +188,7 @@ class Application(object):
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        services = self.current_args.get('services').split(',')
+        services = self.get_services()
 
         dc = Compose(files=self.files)
         options = {}
@@ -236,3 +239,22 @@ class Application(object):
             log.critical_exit("Unknown")
 
         dc.command(command, options)
+
+    def shell(self):
+        dc = Compose(files=self.files)
+        services = self.get_services()
+        user = 'root'
+        shell_command = 'bash'
+        shell_args = []
+
+        options = {
+            'SERVICE': services.pop(),
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '--index': 1,
+            '--user': user,
+            '--privileged': False,
+            '-T': None,
+            '-d': None
+        }
+        dc.command('exec_command', options)
