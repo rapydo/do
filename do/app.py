@@ -290,3 +290,11 @@ class Application(object):
             '-d': False,
         }
         dc.command('exec_command', options)
+
+    def build(self):
+        dc = Compose(files=self.files)
+        services = self.get_services()
+        options = {
+            'SERVICE': services,
+        }
+        dc.command('build', options)

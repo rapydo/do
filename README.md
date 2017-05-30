@@ -14,7 +14,7 @@ $ pip3 install --editable .
 
 # install from pypi test
 # see https://testpypi.python.org/pypi/rapydo-controller
-$ pip3 install -i https://testpypi.python.org/pypi rapydo-controller
+$ pip3 install --upgrade -i https://testpypi.python.org/pypi rapydo-controller
 ```
 
 ## Use it on your project

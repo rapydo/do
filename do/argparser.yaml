@@ -43,6 +43,8 @@ subcommands:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+  build:
+    description: force building of one or more services docker images
   log:
     description: watch log tails of all or specified containers
   shell:
