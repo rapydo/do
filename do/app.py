@@ -307,8 +307,13 @@ Verify that you are in the right folder, now you are in: %s
 
         # The command must be splitted into command + args_array
         pieces = whole_command.split()
-        shell_command = pieces[0]
-        shell_args = pieces[1:]
+        try:
+            shell_command = pieces[0]
+            shell_args = pieces[1:]
+        except IndexError:
+            # no command, use default
+            shell_command = None
+            shell_args = []
 
         if len(services) != 1:
             log.critical_exit(
@@ -319,17 +324,42 @@ Verify that you are in the right folder, now you are in: %s
             log.info("Command request: %s(%s+%s)"
                      % (service.upper(), shell_command, shell_args))
 
-        options = {
-            'SERVICE': service,
-            'COMMAND': shell_command,
-            'ARGS': shell_args,
-            '--index': '1',
-            '--user': user,
-            '--privileged': True,
-            '-T': False,
-            '-d': False,
-        }
-        dc.command('exec_command', options)
+        if service != 'restclient':
+
+            options = {
+                'SERVICE': service,
+                'COMMAND': shell_command,
+                'ARGS': shell_args,
+                '--index': '1',
+                '--user': user,
+                '--privileged': True,
+                '-T': False,
+                '-d': False,
+            }
+
+            dc.command('exec_command', options)
+
+        else:
+
+            options = {
+                'SERVICE': service,
+                'COMMAND': shell_command,
+                'ARGS': shell_args,
+                '--name': None,
+                '--user': user,
+                '--rm': True,
+                '--no-deps': True,
+                '--service-ports': False,
+                '-d': False,
+                '-T': False,
+                '--workdir': None,
+                '-e': None,
+                '--entrypoint': None,
+                '--volume': [],
+                '--publish': [],
+            }
+
+            dc.command('run', options)
 
     def build(self):
         dc = Compose(files=self.files)
