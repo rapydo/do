@@ -11,14 +11,23 @@ example of versions:
 from distutils.core import setup
 
 setup(
-    name='rapydo_do',
+    name='rapydo_controller',
     packages=[
-        'do'
-        # 'rapydo'
+        'do',  # 'rapydo'
+        'do.utils'
     ],
+    package_dir={'do': 'do'},
+    # https://docs.python.org/3.4/distutils/setupscript.html#installing-package-data
+    package_data={
+        'do': ['argparser.yaml', 'logging.ini']
+    },
+    # data_files=[
+    #     # writes in /usr/local/config?
+    #     ('config', ['argparser.yaml', 'logging.ini']),
+    # ],
     python_requires='>=3.4',
     description='Makes you do REST API development with the RAPyDo framework',
-    version='0.1.dev1',
+    version='0.2.dev1',
     license='MIT',
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
