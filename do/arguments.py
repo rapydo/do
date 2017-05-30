@@ -8,18 +8,27 @@ from do import ABSOLUTE_PATH
 
 
 def prepare_params(options):
-    option_type = str
-    if options.get('type') == 'bool':
-        option_type = bool
-    default = options.get('default')
-    myhelp = "%s [default: %s]" % (options.get('help'), default)
 
-    return {
-        'type': option_type,
-        'default': default,
-        'metavar': options.get('metavalue'),
-        'help': myhelp
-    }
+    pconf = {}
+    default = options.get('default')
+    pconf['default'] = default
+
+    myhelp = "%s [default: %s]" % (options.get('help'), default)
+    pconf['help'] = myhelp
+
+    if options.get('type') == 'bool':
+
+        if default:
+            pconf['action'] = 'store_false'
+        else:
+            pconf['action'] = 'store_true'
+
+    else:
+        # type and metavar are allowed for bool
+        pconf['type'] = str
+        pconf['metavar'] = options.get('metavalue')
+
+    return pconf
 
 
 parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)

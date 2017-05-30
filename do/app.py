@@ -23,6 +23,7 @@ class Application(object):
 
         self.current_args = args
         self.action = self.current_args.get('action')
+        self.development = self.current_args.get('development')
 
         if self.action is None:
             log.critical_exit("Internal misconfiguration")
@@ -60,7 +61,7 @@ class Application(object):
     def _read_specs(self):
         """ Read project configuration """
 
-        self.specs = project_configuration()
+        self.specs = project_configuration(development=self.development)
 
         self.vars = self.specs \
             .get('variables', {}) \
@@ -72,7 +73,7 @@ class Application(object):
 
         log.very_verbose("Frontend is %s" % self.frontend)
 
-    def _git_submodules(self):
+    def _git_submodules(self, development=False):
         """ Check and/or clone git projects """
 
         initialize = self.action == 'init'
@@ -87,15 +88,16 @@ class Application(object):
         repos = self.vars.get('repos')
         core = repos.pop('rapydo')
 
-        upstream(
-            url=core.get('online_url'),
-            path=core.get('path'),
-            do=initialize
-        )
+        if not development:
+            upstream(
+                url=core.get('online_url'),
+                path=core.get('path'),
+                do=initialize
+            )
 
         myvars = {'frontend': self.frontend}
 
-        for _, repo in repos.items():
+        for _, repo in sorted(repos.items()):
 
             # substitute $$ values
             repo = apply_variables(repo, myvars)
@@ -152,7 +154,7 @@ class Application(object):
 
         self._read_specs()
 
-        self._git_submodules()
+        self._git_submodules(development=self.development)
 
         self._build_dependencies()
 

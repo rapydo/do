@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from urllib.parse import urlparse
 from git import Repo
 from do import PROJECT_DIR
 from do.utils.logs import get_logger
@@ -72,24 +73,43 @@ def comparing(gitobj, branch, online_url):
     url = gitobj.remotes.origin.url
 
     if online_url != url:
-        log.critical_exit(
-            """Unmatched local remote
+
+        local_url = urlparse(url)
+        expected_url = urlparse(online_url)
+
+        # Remove username in the URL, if any
+        # i.e. youruser@github.com became github.com
+        local_netloc = local_url.netloc.split("@").pop()
+        expected_netloc = local_url.netloc.split("@").pop()
+
+        if local_url.scheme != expected_url.scheme:
+            url_match = False
+        elif local_netloc != expected_netloc:
+            url_match = False
+        elif local_url.path != expected_url.path:
+            url_match = False
+        else:
+            url_match = True
+
+        if not url_match:
+            log.critical_exit(
+                """Unmatched local remote
 Found: %s\nExpected: %s
 Suggestion: remove %s and execute the init command
             """ % (url, online_url, gitobj.working_dir))
         # TO FIX: before to suggest to delete we should verify if repo is clean
         # i.e. verify if git status returns something
-
-    else:
-        pass
+        else:
+            log.verbose(
+                "Local remote differs but is accepted, found %s, expected: %s)"
+                % (url, online_url)
+            )
 
     if branch != str(gitobj.active_branch):
         log.critical_exit(
             "Wrong branch %s, expected %s.\nSuggested: cd %s; git checkout %s;"
             % (gitobj.active_branch, branch, gitobj.working_dir, branch)
         )
-    else:
-        pass
 
     # gitobj.commit()
 

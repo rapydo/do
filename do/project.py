@@ -7,7 +7,7 @@ from do.utils.logs import get_logger
 log = get_logger(__name__)
 
 
-def project_configuration():
+def project_configuration(development=False):
 
     # TODO: generalize this in rapydo.utils?
 
@@ -35,7 +35,7 @@ def project_configuration():
     prj = custom.get('project')
     if prj is None:
         raise AttributeError("Missing project configuration")
-    else:
+    elif not development:
         check1 = prj.get('title') == 'My project'
         check2 = prj.get('description') == 'Title of my project'
         if check1 or check2:
