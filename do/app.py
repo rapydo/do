@@ -4,10 +4,11 @@
 Main App class
 """
 
+import os.path
 from do import check_internet, check_executable, check_package
 from do.arguments import current_args
 from do.project import project_configuration, apply_variables
-from do.gitter import clone, upstream
+from do.gitter import clone, upstream, get_local
 from do.builds import locate_builds
 from do.dockerizing import Dock
 from do.compose import Compose
@@ -57,6 +58,43 @@ class Application(object):
         else:
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
+
+    def _inspect_current_folder(self):
+        """
+        Since the rapydo command only works on rapydo-core or a rapydo fork
+        we want to ensure that the current folder have a structure rapydo-like
+        This check is only based on file existence.
+        Further checks are performed later in the following steps
+        """
+        local_git = get_local(".")
+
+        if local_git is None:
+            log.critical_exit(
+                """You are not in a git repository
+\nPlease note that this command only works from inside a rapydo-like repository
+Verify that you are in the right folder, now you are in: %s
+                """ % (os.getcwd())
+            )
+
+        required_files = [
+            'specs/project_configuration.yaml',
+            'specs/defaults.yaml',
+            'apis',
+            'confs',
+            'containers',
+            'models',
+            'specs',
+            'swagger'
+        ]
+
+        for fname in required_files:
+            if not os.path.exists(fname):
+                log.critical_exit(
+                    """File or folder not found %s
+\nPlease note that this command only works from inside a rapydo-like repository
+Verify that you are in the right folder, now you are in: %s
+                    """ % (fname, os.getcwd())
+                )
 
     def _read_specs(self):
         """ Read project configuration """
@@ -151,6 +189,8 @@ class Application(object):
         if func is None:
             # log.critical_exit(f"Command not yet implemented: {self.action}")
             log.critical_exit("Command not yet implemented: %s" % self.action)
+
+        self._inspect_current_folder()
 
         self._read_specs()
 

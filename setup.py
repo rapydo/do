@@ -9,6 +9,7 @@ example of versions:
 """
 
 from distutils.core import setup
+from do import __version__
 
 setup(
     name='rapydo_controller',
@@ -27,7 +28,7 @@ setup(
     # ],
     python_requires='>=3.4',
     description='Makes you do REST API development with the RAPyDo framework',
-    version='0.2.dev1',
+    version=__version__,
     license='MIT',
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',

@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 from do.utils.myyaml import load_yaml_file
+from do import __version__
 from do import ABSOLUTE_PATH
 
 
@@ -44,6 +45,8 @@ for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
     parser.add_argument('--%s' % option_name, **params)
 
+parser.add_argument('--version', action='version',
+                    version='rapydo version %s' % __version__)
 # Sub-parser of commands [check, init, etc]
 main_command = parse_conf.get('action')
 
