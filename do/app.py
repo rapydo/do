@@ -240,6 +240,22 @@ class Application(object):
 
         dc.command(command, options)
 
+    def log(self):
+        dc = Compose(files=self.files)
+        services = self.get_services()
+        options = {
+            'SERVICE': services,
+            '--follow': True,
+            '--tail': 'all',
+            '--no-color': False,
+            '--timestamps': None,
+        }
+        try:
+            dc.command('logs', options)
+        except KeyboardInterrupt:
+            log.info("Stopped by keyboard")
+            pass
+
     def shell(self):
         dc = Compose(files=self.files)
 
