@@ -35,10 +35,9 @@ for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
     parser.add_argument('--%s' % option_name, **params)
 
-# COMMANDS
-main_command = parse_conf.get('command')
-
 # Sub-parser of commands [check, init, etc]
+main_command = parse_conf.get('action')
+
 subparsers = parser.add_subparsers(
     title='Sub commands',
     dest=main_command.get('name'),

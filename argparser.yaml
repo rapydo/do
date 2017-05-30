@@ -1,7 +1,7 @@
 
 description: Do actions with your RAPyDo project
-command:
-  name: command
+action:
+  name: action
   help: all possible commands
 
 options:
@@ -41,6 +41,17 @@ subcommands:
     description: watch log tails of all or specified containers
   shell:
     description: open a shell inside the specified container
+    suboptions:
+      user:
+        type: str
+        metavalue: UNIX_EXISTING_USER
+        default: root
+        help: user existing inside selected service
+      command:
+        type: str
+        metavalue: TERMINAL_COMMAND_UNIX-LIKE
+        default: bash
+        help: UNIX command to be executed on selected running service
   control:
     description: manage start/stop of the framework based on  current specified blueprint
     controlrequired: True

@@ -22,7 +22,7 @@ class Application(object):
     def __init__(self, args=current_args):
 
         self.current_args = args
-        self.action = self.current_args.get('command')
+        self.action = self.current_args.get('action')
 
         if self.action is None:
             log.critical_exit("Internal misconfiguration")
@@ -169,6 +169,9 @@ class Application(object):
 
         log.info("All checked")
 
+    def get_services(self, key='services', sep=','):
+        return self.current_args.get(key).split(sep)
+
     def init(self):
         log.info("Project initialized")
 
@@ -185,7 +188,7 @@ class Application(object):
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        services = self.current_args.get('services').split(',')
+        services = self.get_services()
 
         dc = Compose(files=self.files)
         options = {}
@@ -236,3 +239,45 @@ class Application(object):
             log.critical_exit("Unknown")
 
         dc.command(command, options)
+
+    def log(self):
+        dc = Compose(files=self.files)
+        services = self.get_services()
+        options = {
+            'SERVICE': services,
+            '--follow': True,
+            '--tail': 'all',
+            '--no-color': False,
+            '--timestamps': None,
+        }
+        try:
+            dc.command('logs', options)
+        except KeyboardInterrupt:
+            log.info("Stopped by keyboard")
+            pass
+
+    def shell(self):
+        dc = Compose(files=self.files)
+
+        services = self.get_services()
+        user = self.current_args.get('user')
+        whole_command = self.current_args.get('command', 'whoami')
+
+        # The command must be splitted into command + args_array
+        pieces = whole_command.split()
+        shell_command = pieces[0]
+        shell_args = pieces[1:]
+
+        log.verbose("Command request: %s + %s" % (shell_command, shell_args))
+
+        options = {
+            'SERVICE': services.pop(),
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '--index': '1',
+            '--user': user,
+            '--privileged': True,
+            '-T': False,
+            '-d': False,
+        }
+        dc.command('exec_command', options)
