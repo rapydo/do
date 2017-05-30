@@ -6,6 +6,9 @@ import argparse
 from do.utils.myyaml import load_yaml_file
 from do import ABSOLUTE_PATH
 
+# TO FIX: sync this version with version configured in setup.py
+version = '0.2.dev1'
+
 
 def prepare_params(options):
 
@@ -44,6 +47,8 @@ for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
     parser.add_argument('--%s' % option_name, **params)
 
+parser.add_argument('--version', action='version',
+                    version='rapydo version {version}'.format(version=version))
 # Sub-parser of commands [check, init, etc]
 main_command = parse_conf.get('action')
 
