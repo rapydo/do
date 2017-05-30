@@ -36,7 +36,7 @@ for option_name, options in parse_conf.get('options', {}).items():
     parser.add_argument('--%s' % option_name, **params)
 
 # COMMANDS
-main_command = parse_conf.get('command')
+main_command = parse_conf.get('action')
 subparsers = parser.add_subparsers(
     dest=main_command.get('name'),
     help=main_command.get('help')

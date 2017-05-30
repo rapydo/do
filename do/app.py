@@ -22,7 +22,7 @@ class Application(object):
     def __init__(self, args=current_args):
 
         self.current_args = args
-        self.action = self.current_args.get('command')
+        self.action = self.current_args.get('action')
 
         if self.action is None:
             log.critical_exit("Internal misconfiguration")
@@ -242,19 +242,26 @@ class Application(object):
 
     def shell(self):
         dc = Compose(files=self.files)
+
         services = self.get_services()
-        user = 'root'
-        shell_command = 'bash'
-        shell_args = []
+        user = self.current_args.get('user')
+        whole_command = self.current_args.get('command', 'whoami')
+
+        # The command must be splitted into command + args_array
+        pieces = whole_command.split()
+        shell_command = pieces[0]
+        shell_args = pieces[1:]
+
+        log.verbose("Command request: %s + %s" % (shell_command, shell_args))
 
         options = {
             'SERVICE': services.pop(),
             'COMMAND': shell_command,
             'ARGS': shell_args,
-            '--index': 1,
+            '--index': '1',
             '--user': user,
-            '--privileged': False,
-            '-T': None,
-            '-d': None
+            '--privileged': True,
+            '-T': False,
+            '-d': False,
         }
         dc.command('exec_command', options)
