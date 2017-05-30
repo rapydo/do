@@ -44,13 +44,6 @@ class Application(object):
         # Check if git is installed
         self._check_program('git')
 
-        # Check if connected to internet
-        connected = check_internet()
-        if not connected:
-            log.critical_exit('Internet connection unavailable')
-        else:
-            log.debug("(CHECKED) internet connection available")
-
         # TODO: git check
 
         self.blueprint = self.current_args.get('blueprint')
@@ -83,6 +76,14 @@ class Application(object):
         """ Check and/or clone git projects """
 
         initialize = self.action == 'init'
+        if initialize:
+            # Check if connected to internet
+            connected = check_internet()
+            if not connected:
+                log.critical_exit('Internet connection unavailable')
+            else:
+                log.debug("(CHECKED) internet connection available")
+
         repos = self.vars.get('repos')
         core = repos.pop('rapydo')
 
@@ -159,10 +160,27 @@ class Application(object):
         func()
 
     def check(self):
+
+        # NOTE: a SECURITY BUG?
+        # dc = Compose(files=self.files)
+        # for container in dc.get_handle().project.containers():
+        #     log.pp(container.client._auth_configs)
+        #     exit(1)
+
         log.info("All checked")
 
     def init(self):
         log.info("Project initialized")
+
+    def clean(self):
+        dc = Compose(files=self.files)
+        rm_volumes = self.current_args.get('rm_volumes', False)
+        options = {
+            '--volumes': rm_volumes,
+            '--remove-orphans': None,
+            '--rmi': 'local',  # 'all'
+        }
+        dc.command('down', options)
 
     def control(self):
 
@@ -170,6 +188,7 @@ class Application(object):
         services = self.current_args.get('services').split(',')
 
         dc = Compose(files=self.files)
+        options = {}
 
         if command == 'start':
             # print("SERVICES", services)
@@ -185,10 +204,35 @@ class Application(object):
                 '--scale': {},
                 'SERVICE': services
             }
-            dc.up(options)
+            command = 'up'
 
         elif command == 'stop':
-            dc.stop({'SERVICE': []})
+            pass
+        elif command == 'restart':
+            pass
+        elif command == 'remove':
+            dc.command('stop')
+            options = {
+                # '--stop': True,  # BUG? not working
+                '--force': True,
+                '-v': False,  # dangerous?
+                'SERVICE': []
+            }
+            command = 'rm'
+        elif command == 'toggle_freeze':
+
+            command = 'pause'
+            for container in dc.get_handle().project.containers():
+
+                # WOW
+                # for key, value in container.dictionary.items():
+                #     print("TEST", container, key, value)
+
+                if container.dictionary.get('State').get('Status') == 'paused':
+                    command = 'unpause'
+                    break
 
         else:
-            log.critical_exit("Not implemented yet")
+            log.critical_exit("Unknown")
+
+        dc.command(command, options)

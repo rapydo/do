@@ -45,23 +45,22 @@ subcommands:
     description: manage start/stop of the framework based on  current specified blueprint
     controlrequired: True
     controlcommands:
-      # FIXME: complete this part
       start:
         - Start containers for this configuration
       stop:
-        - Stop running containers without removing them
+        - Stop running containers, but do not remove them
       restart:
-        - Not implemented yet
+        - Restart running containers
       remove:
-        - Not implemented yet
-      freeze:
-        - Not implemented yet
+        - Stop containers if running and remove them
+      toggle_freeze:
+        - Toggle a temporary block/pause of runing services
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
-    # suboptions:
-    #   whatever:
-    #     type: str
-    #     metavalue: SOME
-    #     default: DEBUG
-    #     help: bla bla
+    suboptions:
+      rm-volumes:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: remove also containers persistent data

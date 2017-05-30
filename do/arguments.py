@@ -6,6 +6,22 @@ import argparse
 from do.utils.myyaml import load_yaml_file
 from do import ABSOLUTE_PATH
 
+
+def prepare_params(options):
+    option_type = str
+    if options.get('type') == 'bool':
+        option_type = bool
+    default = options.get('default')
+    myhelp = "%s [default: %s]" % (options.get('help'), default)
+
+    return {
+        'type': option_type,
+        'default': default,
+        'metavar': options.get('metavalue'),
+        'help': myhelp
+    }
+
+
 parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)
 
 # Arguments definition
@@ -15,17 +31,9 @@ parser = argparse.ArgumentParser(
 )
 
 # PARAMETERS
-for option_name, option in parse_conf.get('options', {}).items():
-    option_type = str
-    if option.get('type') == 'bool':
-        option_type = bool
-    default = option.get('default')
-    # myhelp = f"{option.get('help')} [default: {default}]"
-    myhelp = "%s [default: %s]" % (option.get('help'), default)
-    parser.add_argument(
-        '--%s' % option_name, type=option_type,
-        metavar=option.get('metavalue'), default=default, help=myhelp
-    )
+for option_name, options in parse_conf.get('options', {}).items():
+    params = prepare_params(options)
+    parser.add_argument('--%s' % option_name, **params)
 
 # COMMANDS
 main_command = parse_conf.get('command')
@@ -37,6 +45,7 @@ subparsers = parser.add_subparsers(
 subparsers.required = True
 
 for command_name, options in parse_conf.get('subcommands', {}).items():
+
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))
 
@@ -49,6 +58,10 @@ for command_name, options in parse_conf.get('subcommands', {}).items():
         for subcommand, suboptions in controlcommands.items():
             subcommand_help = suboptions.pop(0)
             innerparser.add_parser(subcommand, help=subcommand_help)
+
+    for option_name, suboptions in options.get('suboptions', {}).items():
+        params = prepare_params(suboptions)
+        subparse.add_argument('--%s' % option_name, **params)
 
 # Reading input parameters
 current_args = parser.parse_args()
