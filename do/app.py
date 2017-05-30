@@ -97,7 +97,7 @@ class Application(object):
 
         myvars = {'frontend': self.frontend}
 
-        for _, repo in repos.items():
+        for _, repo in sorted(repos.items()):
 
             # substitute $$ values
             repo = apply_variables(repo, myvars)
