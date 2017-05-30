@@ -31,19 +31,20 @@ parser = argparse.ArgumentParser(
 )
 
 # PARAMETERS
-for option_name, options in parse_conf.get('options', {}).items():
+for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
     parser.add_argument('--%s' % option_name, **params)
 
 # COMMANDS
 main_command = parse_conf.get('action')
 subparsers = parser.add_subparsers(
+    title='Sub commands',
     dest=main_command.get('name'),
     help=main_command.get('help')
 )
 subparsers.required = True
 
-for command_name, options in parse_conf.get('subcommands', {}).items():
+for command_name, options in sorted(parse_conf.get('subcommands', {}).items()):
 
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))

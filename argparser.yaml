@@ -65,7 +65,7 @@ subcommands:
       remove:
         - Stop containers if running and remove them
       toggle_freeze:
-        - Toggle a temporary block/pause of runing services
+        - Toggle a temporary block/pause of running services
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
