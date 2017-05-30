@@ -27,7 +27,7 @@ setup(
     # ],
     python_requires='>=3.4',
     description='Makes you do REST API development with the RAPyDo framework',
-    version='0.1.dev1',
+    version='0.2.dev1',
     license='MIT',
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
