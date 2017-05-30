@@ -10,8 +10,8 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
-from do import PROJECT_DIR
-from do.utils.logs import get_logger
+from rapydo import PROJECT_DIR
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 

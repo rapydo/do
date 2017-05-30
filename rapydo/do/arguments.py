@@ -3,9 +3,9 @@
 import os
 import sys
 import argparse
-from do.utils.myyaml import load_yaml_file
-from do import __version__
-from do import ABSOLUTE_PATH
+from rapydo import ABSOLUTE_PATH
+from rapydo.do import __version__
+from rapydo.utils.myyaml import load_yaml_file
 
 
 def prepare_params(options):
@@ -32,7 +32,8 @@ def prepare_params(options):
     return pconf
 
 
-parse_conf = load_yaml_file('argparser', path=ABSOLUTE_PATH, logger=False)
+conf_path = os.path.join(ABSOLUTE_PATH, __package__.split('.')[::-1][0])
+parse_conf = load_yaml_file('argparser', path=conf_path, logger=False)
 
 # Arguments definition
 parser = argparse.ArgumentParser(
@@ -88,6 +89,6 @@ current_args = vars(current_args)
 os.environ['DEBUG_LEVEL'] = current_args.get('log_level')
 
 if True:
-    from do.utils.logs import get_logger
+    from rapydo.utils.logs import get_logger
     log = get_logger(__name__)
     log.verbose("Parsed arguments: %s" % current_args)

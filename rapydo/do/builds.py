@@ -9,8 +9,8 @@ Parse dockerfiles and check for builds
 
 import os
 from dockerfile_parse import DockerfileParser
-from do import containers_yaml_path
-from do.utils.logs import get_logger
+from rapydo.do import containers_yaml_path
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 

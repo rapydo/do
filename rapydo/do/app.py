@@ -5,15 +5,15 @@ Main App class
 """
 
 import os.path
-from do import check_internet, check_executable, check_package
-from do.arguments import current_args
-from do.project import project_configuration, apply_variables
-from do.gitter import clone, upstream, get_local
-from do.builds import locate_builds
-from do.dockerizing import Dock
-from do.compose import Compose
-from do.configuration import read_yamls
-from do.utils.logs import get_logger
+from rapydo.utils.checks import SystemVerifications as sv
+from rapydo.do.arguments import current_args
+from rapydo.do.project import project_configuration, apply_variables
+from rapydo.do.gitter import clone, upstream, get_local
+from rapydo.do.builds import locate_builds
+from rapydo.do.dockerizing import Dock
+from rapydo.do.compose import Compose
+from rapydo.do.configuration import read_yamls
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 
@@ -37,7 +37,7 @@ class Application(object):
 
         # Check docker-compose version
         pack = 'compose'
-        package_version = check_package(pack)
+        package_version = sv.check_package(pack)
         if package_version is None:
             log.critical_exit("Could not find %s" % pack)
         else:
@@ -52,7 +52,7 @@ class Application(object):
         self.run()
 
     def _check_program(self, program):
-        program_version = check_executable(executable=program, log=log)
+        program_version = sv.check_executable(executable=program, log=log)
         if program_version is None:
             log.critical_exit('Please make sure %s is installed' % program)
         else:
@@ -117,7 +117,7 @@ Verify that you are in the right folder, now you are in: %s
         initialize = self.action == 'init'
         if initialize:
             # Check if connected to internet
-            connected = check_internet()
+            connected = sv.check_internet()
             if not connected:
                 log.critical_exit('Internet connection unavailable')
             else:

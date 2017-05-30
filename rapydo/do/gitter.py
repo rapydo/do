@@ -4,8 +4,8 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError
-from do import PROJECT_DIR
-from do.utils.logs import get_logger
+from rapydo import PROJECT_DIR
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 

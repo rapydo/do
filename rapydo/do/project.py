@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from do import project_specs_yaml_path, PROJECT_CONF_FILENAME
-from do.utils.myyaml import load_yaml_file
-from do.utils.logs import get_logger
+from rapydo.do import project_specs_yaml_path, PROJECT_CONF_FILENAME
+from rapydo.utils.myyaml import load_yaml_file
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 

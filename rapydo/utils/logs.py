@@ -12,7 +12,7 @@ except ImportError:
     # fix for Python 3.4+
     JSONDecodeError = ValueError
 
-from do import ABSOLUTE_PATH
+from rapydo import ABSOLUTE_PATH
 
 AVOID_COLORS_ENV_LABEL = "IDONTWANTCOLORS"
 
@@ -28,7 +28,8 @@ MAX_CHAR_LEN = 200
 OBSCURE_VALUE = '****'
 OBSCURED_FIELDS = ['password', 'pwd', 'token', 'file', 'filename']
 
-LOG_CONFIG = os.path.join(ABSOLUTE_PATH, 'logging.ini')
+conf_path = os.path.join(ABSOLUTE_PATH, __package__.split('.')[::-1][0])
+LOG_CONFIG = os.path.join(conf_path, 'logging.ini')
 
 
 def critical_exit(self, message, *args, **kws):

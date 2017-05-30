@@ -1,43 +1,33 @@
 # -*- coding: utf-8 -*-
 
-"""
-My first Pypi package test
-
-example of versions:
-1.2.0 .dev1/.a1/.b1/.rc1/FINAL/.post1
-
-"""
-
 from distutils.core import setup
-from do import __version__
+from rapydo.do import __version__
 
 setup(
     name='rapydo_controller',
-    packages=[
-        'do',  # 'rapydo'
-        'do.utils'
-    ],
-    package_dir={'do': 'do'},
-    # https://docs.python.org/3.4/distutils/setupscript.html#installing-package-data
-    package_data={
-        'do': ['argparser.yaml', 'logging.ini']
-    },
-    # data_files=[
-    #     # writes in /usr/local/config?
-    #     ('config', ['argparser.yaml', 'logging.ini']),
-    # ],
-    python_requires='>=3.4',
     description='Makes you do REST API development with the RAPyDo framework',
     version=__version__,
-    license='MIT',
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
     url='https://github.com/rapydo/do',
-    keywords=['http', 'api', 'rest', 'web', 'backend'],
-    # download_url='https://github.com/author/repo/tarball/1.0',
+    license='MIT',
+    packages=[
+        'rapydo',
+        'rapydo.do',
+        'rapydo.utils'
+    ],
+    package_data={
+        'rapydo.do': [
+            'argparser.yaml'
+        ],
+        'rapydo.utils': [
+            'logging.ini'
+        ]
+    },
+    python_requires='>=3.4',
     entry_points={
         'console_scripts': [
-            'rapydo=do.__main__:main',
+            'rapydo=rapydo.do.__main__:main',
         ],
     },
     install_requires=[
@@ -52,5 +42,7 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'Intended Audience :: Developers',
-    ]
+    ],
+    keywords=['http', 'api', 'rest', 'web', 'backend']
+    # download_url='https://github.com/author/repo/tarball/1.0',
 )

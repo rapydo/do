@@ -3,7 +3,7 @@
     Command line script main
 """
 
-from do.app import Application
+from rapydo.do.app import Application
 
 
 def main():

@@ -2,10 +2,10 @@
 
 """ Reading yaml files for this project """
 
-from do import containers_yaml_path
-from do.compose import Compose
-from do.utils.myyaml import load_yaml_file
-from do.utils.logs import get_logger
+from rapydo.do import containers_yaml_path
+from rapydo.do.compose import Compose
+from rapydo.utils.myyaml import load_yaml_file
+from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
 
