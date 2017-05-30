@@ -3,7 +3,7 @@ Do things with RAPyDo ecosystem
 
 ---
 
-## Install the controller
+## Install the controller
 
 ```bash
 # clone and install in 'development' mode
@@ -17,7 +17,7 @@ $ pip3 install --editable .
 $ pip3 install --upgrade -i https://testpypi.python.org/pypi rapydo-controller
 ```
 
-## Use it on your project
+## Use it on your project
 
 ```bash
 # clone rapydo and use it
@@ -26,4 +26,12 @@ $ rapydo check
 $ rapydo -h
 ```
 
+## Developers
+
+1. change version in `do/__init__.py`
+2. build and publish in testing with
+
+```bash
+./make
+```
 
