@@ -53,7 +53,7 @@ subcommands:
       user:
         type: str
         metavalue: UNIX_EXISTING_USER
-        default: root
+        default: ''
         help: user existing inside selected service
       command:
         type: str
