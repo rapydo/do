@@ -3,10 +3,19 @@
 import os
 from urllib.parse import urlparse
 from git import Repo
+from git.exc import InvalidGitRepositoryError
 from do import PROJECT_DIR
 from do.utils.logs import get_logger
 
 log = get_logger(__name__)
+
+
+def get_local(path):
+    try:
+        gitobj = Repo(path)
+        return gitobj.remotes.origin.url
+    except InvalidGitRepositoryError:
+        return None
 
 
 def upstream(url, path=None, key='upstream', do=False):
