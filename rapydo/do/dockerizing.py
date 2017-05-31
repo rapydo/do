@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import docker
+# from rapydo.utils.logs import get_logger
+
+# log = get_logger(__name__)
 
 
 class Dock(object):
+
     def __init__(self):
         super(Dock, self).__init__()
         self.client = docker.from_env()

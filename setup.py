@@ -12,7 +12,7 @@ setup(
     url='https://github.com/rapydo/do',
     license='MIT',
     packages=[
-        'rapydo',
+        # 'rapydo',
         'rapydo.do',
         'rapydo.utils'
     ],

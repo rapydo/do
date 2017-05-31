@@ -6,13 +6,14 @@ import json
 import logging
 import traceback
 from logging.config import fileConfig
+
 try:
     from json.decoder import JSONDecodeError
 except ImportError:
     # fix for Python 3.4+
     JSONDecodeError = ValueError
 
-from rapydo import ABSOLUTE_PATH
+from rapydo.utils import helpers
 
 AVOID_COLORS_ENV_LABEL = "IDONTWANTCOLORS"
 
@@ -28,8 +29,7 @@ MAX_CHAR_LEN = 200
 OBSCURE_VALUE = '****'
 OBSCURED_FIELDS = ['password', 'pwd', 'token', 'file', 'filename']
 
-conf_path = os.path.join(ABSOLUTE_PATH, __package__.split('.')[::-1][0])
-LOG_CONFIG = os.path.join(conf_path, 'logging.ini')
+ini_file = os.path.join(helpers.script_abspath(__file__), 'logging.ini')
 
 
 def critical_exit(self, message, *args, **kws):
@@ -142,7 +142,7 @@ class LogMe(object):
         # Make sure there is at least one logger
         logging.getLogger(__name__).addHandler(NullHandler())
         # Format
-        fileConfig(LOG_CONFIG)
+        fileConfig(ini_file)
 
         #####################
         # modify logging labels colors

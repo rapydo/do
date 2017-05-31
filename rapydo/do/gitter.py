@@ -4,7 +4,7 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError
-from rapydo import PROJECT_DIR
+from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -21,7 +21,7 @@ def get_local(path):
 def upstream(url, path=None, key='upstream', do=False):
 
     if path is None:
-        path = PROJECT_DIR
+        path = helpers.current_dir()
 
     gitobj = Repo(path)
     try:
@@ -57,13 +57,11 @@ Suggestion: execute the init command
 
 def clone(online_url, path, branch='master', do=False):
 
-    local_path = os.path.join(PROJECT_DIR, path)
-
-    # check if directory exist
-    if os.path.exists(local_path):
-        gitobj = Repo(local_path)
-        # log.debug(f"(CHECKED)\tPath {local_path} already exists")
+    local_path = os.path.join(helpers.current_dir(), path)
+    local_path_exists = os.path.exists(local_path)
+    if local_path_exists:
         log.debug("(CHECKED)\tPath %s already exists" % local_path)
+        gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
         log.info("Cloned repo %s as %s" % (online_url, path))
@@ -71,7 +69,6 @@ def clone(online_url, path, branch='master', do=False):
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
 
     # switch
-
     return comparing(gitobj, branch, online_url=online_url)
 
 
@@ -120,8 +117,11 @@ Suggestion: remove %s and execute the init command
             % (gitobj.active_branch, branch, gitobj.working_dir, branch)
         )
 
-    # gitobj.commit()
 
-    # gitobj.blame(rev='HEAD', file='docker-compose.yml')
-    # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
-    # tmp.committed_datetime
+# TODO: compare commit
+# def todo():
+#     gitobj.commit()
+
+#     gitobj.blame(rev='HEAD', file='docker-compose.yml')
+#     tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
+#     tmp.committed_datetime

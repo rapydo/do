@@ -3,7 +3,7 @@
 import os
 import sys
 import argparse
-from rapydo import ABSOLUTE_PATH
+from rapydo.utils import helpers
 from rapydo.do import __version__
 from rapydo.utils.myyaml import load_yaml_file
 
@@ -32,8 +32,8 @@ def prepare_params(options):
     return pconf
 
 
-conf_path = os.path.join(ABSOLUTE_PATH, __package__.split('.')[::-1][0])
-parse_conf = load_yaml_file('argparser', path=conf_path, logger=False)
+parse_conf = load_yaml_file(
+    'argparser', path=helpers.script_abspath(__file__), logger=False)
 
 # Arguments definition
 parser = argparse.ArgumentParser(

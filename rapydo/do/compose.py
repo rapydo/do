@@ -10,7 +10,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
-from rapydo import PROJECT_DIR
+from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -25,7 +25,7 @@ class Compose(object):
         options.update({'--file': self.files})
         self.options = options
 
-        self.project_dir = PROJECT_DIR
+        self.project_dir = helpers.current_dir()
         self.project_name = get_project_name(self.project_dir)
         # log.very_verbose(f"Client compose '{self.project_name}': {files}")
         log.very_verbose("Client compose %s: %s" % (self.project_name, files))

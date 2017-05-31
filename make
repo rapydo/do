@@ -1,6 +1,7 @@
 #!/bin/bash
 
 dev="-r testpypi"
+# dev=""
 
 rm -f dist/*
 python3.6 setup.py sdist

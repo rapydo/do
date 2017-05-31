@@ -5,14 +5,15 @@ Main App class
 """
 
 import os.path
-from rapydo.utils.checks import SystemVerifications as sv
 from rapydo.do.arguments import current_args
+from rapydo.utils import checks
 from rapydo.do.project import project_configuration, apply_variables
-from rapydo.do.gitter import clone, upstream, get_local
+from rapydo.do import gitter
 from rapydo.do.builds import locate_builds
 from rapydo.do.dockerizing import Dock
 from rapydo.do.compose import Compose
 from rapydo.do.configuration import read_yamls
+
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -22,6 +23,7 @@ class Application(object):
 
     def __init__(self, args=current_args):
 
+        self.tested_connection = False
         self.current_args = args
         self.action = self.current_args.get('action')
         self.development = self.current_args.get('development')
@@ -30,6 +32,7 @@ class Application(object):
             log.critical_exit("Internal misconfiguration")
         else:
             log.info("Do request: %s" % self.action)
+        self.initialize = self.action == 'init'
 
         # Check if docker is installed
         self._check_program('docker')
@@ -37,7 +40,7 @@ class Application(object):
 
         # Check docker-compose version
         pack = 'compose'
-        package_version = sv.check_package(pack)
+        package_version = checks.check_package(pack)
         if package_version is None:
             log.critical_exit("Could not find %s" % pack)
         else:
@@ -46,13 +49,11 @@ class Application(object):
         # Check if git is installed
         self._check_program('git')
 
-        # TODO: git check
-
         self.blueprint = self.current_args.get('blueprint')
         self.run()
 
     def _check_program(self, program):
-        program_version = sv.check_executable(executable=program, log=log)
+        program_version = checks.check_executable(executable=program, log=log)
         if program_version is None:
             log.critical_exit('Please make sure %s is installed' % program)
         else:
@@ -66,7 +67,7 @@ class Application(object):
         This check is only based on file existence.
         Further checks are performed later in the following steps
         """
-        local_git = get_local(".")
+        local_git = gitter.get_local(".")
 
         if local_git is None:
             log.critical_exit(
@@ -111,37 +112,50 @@ Verify that you are in the right folder, now you are in: %s
 
         log.very_verbose("Frontend is %s" % self.frontend)
 
+    def _verify_connected(self):
+        """ Check if connected to internet """
+
+        connected = checks.check_internet()
+        if not connected:
+            log.critical_exit('Internet connection unavailable')
+        else:
+            log.debug("(CHECKED) internet connection available")
+            self.tested_connection = True
+        return
+
+    def _working_clone(self, repo):
+
+        # substitute values starting with '$$'
+        myvars = {'frontend': self.frontend}
+        repo = apply_variables(repo, myvars)
+
+        # Is this single repo enabled?
+        repo_enabled = repo.pop('if', False)
+        if not repo_enabled:
+            return
+        else:
+            repo['do'] = self.initialize
+
+        if not self.tested_connection and self.initialize:
+            self._verify_connected()
+
+        return gitter.clone(**repo)
+
     def _git_submodules(self, development=False):
         """ Check and/or clone git projects """
-
-        initialize = self.action == 'init'
-        if initialize:
-            # Check if connected to internet
-            connected = sv.check_internet()
-            if not connected:
-                log.critical_exit('Internet connection unavailable')
-            else:
-                log.debug("(CHECKED) internet connection available")
 
         repos = self.vars.get('repos')
         core = repos.pop('rapydo')
 
         if not development:
-            upstream(
+            gitter.upstream(
                 url=core.get('online_url'),
                 path=core.get('path'),
-                do=initialize
+                do=self.initialize
             )
 
-        myvars = {'frontend': self.frontend}
-
         for _, repo in sorted(repos.items()):
-
-            # substitute $$ values
-            repo = apply_variables(repo, myvars)
-
-            if repo.pop('if', False):
-                clone(do=initialize, **repo)
+            self._working_clone(repo)
 
     def _build_dependencies(self):
         """ Look up for builds which are depending on templates """
@@ -157,9 +171,9 @@ Verify that you are in the right folder, now you are in: %s
             dc = Compose(files=base_files)
             dc.force_template_build(builds)
         else:
-            self.verify_build_cache(builds)
+            self._verify_build_cache(builds)
 
-    def verify_build_cache(self, builds):
+    def _verify_build_cache(self, builds):
         cache = False
         if len(builds) > 0:
 
@@ -184,21 +198,24 @@ Verify that you are in the right folder, now you are in: %s
             log.debug("(CHECKED) no cache builds")
 
     def run(self):
+        """
+        The heart of the application.
+        This run a single command.
+        """
 
+        # Verify if we implemented the requested command
         func = getattr(self, self.action, None)
         if func is None:
-            # log.critical_exit(f"Command not yet implemented: {self.action}")
             log.critical_exit("Command not yet implemented: %s" % self.action)
-
+        # Step 1
         self._inspect_current_folder()
-
+        # Step 2
         self._read_specs()
-
+        # Step 3
         self._git_submodules(development=self.development)
-
+        # Step 4
         self._build_dependencies()
-
-        # Do what you're supposed to
+        # Final step, launch the command
         func()
 
     def check(self):
