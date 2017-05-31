@@ -148,15 +148,19 @@ Verify that you are in the right folder, now you are in: %s
         repos = self.vars.get('repos')
         core = repos.pop('rapydo')
 
+        gits = {}
+
         if not development:
-            gitter.upstream(
+            gits['main'] = gitter.upstream(
                 url=core.get('online_url'),
                 path=core.get('path'),
                 do=self.initialize
             )
 
-        for _, repo in sorted(repos.items()):
-            self._working_clone(repo)
+        for name, repo in sorted(repos.items()):
+            gits[name] = self._working_clone(repo)
+
+        self.gits = gits
 
     def _build_dependencies(self):
         """ Look up for builds which are depending on templates """
@@ -166,6 +170,15 @@ Verify that you are in the right folder, now you are in: %s
             read_yamls(self.blueprint, self.frontend)
         log.debug("Confs used (with order): %s" % self.files)
 
+        ####################
+        # TODO: check all builds against their Dockefile latest commit
+
+        pass
+        # log.pp(self.services)
+        # exit(1)
+
+        ####################
+        # Compare builds depending on templates
         builds = locate_builds(self.base_services, self.services)
 
         if self.current_args.get('force_build'):
@@ -175,20 +188,25 @@ Verify that you are in the right folder, now you are in: %s
             self._verify_build_cache(builds)
 
     def _verify_build_cache(self, builds):
+
         cache = False
         if len(builds) > 0:
 
             dimages = self.docker.images()
             for image_tag, build in builds.items():
 
-                # TODO: BETTER CHECK: compare dates between git and docker;
-                # check if build template commit (git.blame) is older
-                # than image build datetime.
-                # SEE gitter.py
-
                 if image_tag in dimages:
-                    log.warning("cached image [%s]" % image_tag)
-                    cache = True
+
+                    # compare dates between git and docker
+                    path = os.path.join(build.get('path'), 'Dockerfile')
+                    if gitter.check_file_younger_than(
+                        self.gits.get('build-templates'),
+                        file=path,
+                        timestamp=build.get('timestamp')
+                    ):
+                        log.warning("cached image [%s]" % image_tag)
+                        cache = True
+
             if cache:
                 log.info(
                     "To build cached template(s) add option \"%s %s\"" %
@@ -389,6 +407,24 @@ Verify that you are in the right folder, now you are in: %s
         else:
             log.debug("(CHECKED) %s already exists" % COMPOSE_ENVIRONMENT_FILE)
 
+            # - stat file of .env
+            mixed_env = os.stat(envfile)
+
+            # compare blame file with some date
+            if gitter.check_file_younger_than(
+                self.gits.get('main'),
+                file='specs/defaults.yaml',
+                timestamp=mixed_env.st_mtime
+            ):
+                log.warning(
+                    "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
+                    "Add --force_env to update."
+                )
+
+        # TODO: read docker-compose config and search for PLACEHOLDERS
+        # return list to be setted
+        # check: only on services involved in current blueprint
+
     def _run(self):
         """
         The heart of the application.
@@ -404,9 +440,9 @@ Verify that you are in the right folder, now you are in: %s
         # Step 2
         self._read_specs()
         # Step 3
-        self._make_env()
-        # Step 4
         self._git_submodules(development=self.development)
+        # Step 4
+        self._make_env()
         # Step 5
         self._build_dependencies()
         # Final step, launch the command

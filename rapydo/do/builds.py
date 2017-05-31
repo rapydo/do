@@ -10,6 +10,7 @@ Parse dockerfiles and check for builds
 import os
 from dockerfile_parse import DockerfileParser
 from rapydo.do import containers_yaml_path
+from rapydo.do.dockerizing import Dock
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -18,9 +19,11 @@ log = get_logger(__name__)
 def find_templates_build(base_services):
 
     templates = {}
+    docker = Dock()
 
     for base_service in base_services:
 
+        # log.pp(base_service)
         template_build = base_service.get('build')
 
         if template_build is not None:
@@ -37,7 +40,8 @@ def find_templates_build(base_services):
             else:
                 templates[template_image] = {
                     'service': template_name,
-                    'path': template_build.get('context')
+                    'path': template_build.get('context'),
+                    'timestamp': docker.image_attribute(template_image)
                 }
 
     return templates
@@ -76,8 +80,13 @@ def find_overriden_templates(services, templates={}):
 
 def locate_builds(base_services, services):
 
+    # TODO: cool progress bar in cli for the whole function START
+
     # 1. find templates and store them
     templates = find_templates_build(base_services)
 
     # 2. find templates that were overridden
-    return find_overriden_templates(services, templates)
+    response = find_overriden_templates(services, templates)
+
+    # TODO: cool progress bar in cli for the whole function END
+    return response

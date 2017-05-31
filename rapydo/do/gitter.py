@@ -54,6 +54,8 @@ Suggestion: execute the init command
     else:
         log.debug("(CHECKED)\tUpstream is set correctly")
 
+    return gitobj
+
 
 def clone(online_url, path, branch='master', do=False):
 
@@ -69,7 +71,8 @@ def clone(online_url, path, branch='master', do=False):
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
 
     # switch
-    return comparing(gitobj, branch, online_url=online_url)
+    comparing(gitobj, branch, online_url=online_url)
+    return gitobj
 
 
 def comparing(gitobj, branch, online_url):
@@ -103,8 +106,8 @@ def comparing(gitobj, branch, online_url):
 Found: %s\nExpected: %s
 Suggestion: remove %s and execute the init command
             """ % (url, online_url, gitobj.working_dir))
-        # TO FIX: before to suggest to delete we should verify if repo is clean
-        # i.e. verify if git status returns something
+        # TO FIX: before suggesting to delete verify if the repo is clean
+        # i.e. verify if git status find out something is modified
         else:
             log.verbose(
                 "Local remote differs but is accepted, found %s, expected: %s)"
@@ -118,10 +121,15 @@ Suggestion: remove %s and execute the init command
         )
 
 
-# TODO: compare commit
-# def todo():
-#     gitobj.commit()
+def check_file_younger_than(gitobj, file, timestamp):
+    # gitobj.commit()
+    commits = gitobj.blame(rev='HEAD', file=file)
+    dates = []
+    for commit in commits:
+        current_blame = gitobj.commit(rev=str(commit[0]))
+        dates.append(current_blame.committed_datetime)
 
-#     gitobj.blame(rev='HEAD', file='docker-compose.yml')
-#     tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
-#     tmp.committed_datetime
+    # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
+
+    from rapydo.utils import time
+    return time.timestamp_from_string(timestamp) < max(dates)
