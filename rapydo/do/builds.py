@@ -7,10 +7,10 @@ Parse dockerfiles and check for builds
 # https://docker-py.readthedocs.io/en/stable/
 """
 
-import os
 from dockerfile_parse import DockerfileParser
-from rapydo.do import containers_yaml_path
+from rapydo.do import CONTAINERS_YAML_DIRNAME
 from rapydo.do.dockerizing import Dock
+from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -57,7 +57,7 @@ def find_overriden_templates(services, templates={}):
         if builder is not None:
 
             dpath = builder.get('context')
-            dockerfile = os.path.join(containers_yaml_path, dpath)
+            dockerfile = helpers.current_dir(CONTAINERS_YAML_DIRNAME, dpath)
             dfp = DockerfileParser(dockerfile)
 
             try:

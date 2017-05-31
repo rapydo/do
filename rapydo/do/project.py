@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from rapydo.do import project_specs_yaml_path, PROJECT_CONF_FILENAME
+from rapydo.do import PROJECT_YAML_SPECSDIR, PROJECT_CONF_FILENAME
+from rapydo.utils import helpers
 from rapydo.utils.myyaml import load_yaml_file
 from rapydo.utils.logs import get_logger
 
@@ -14,7 +15,7 @@ def configuration(development=False):
     ##################
     # Read default configuration
     args = {
-        'path': project_specs_yaml_path,
+        'path': helpers.current_dir(PROJECT_YAML_SPECSDIR),
         'skip_error': False,
         'logger': False
     }

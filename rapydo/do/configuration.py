@@ -2,8 +2,9 @@
 
 """ Reading yaml files for this project """
 
-from rapydo.do import containers_yaml_path
+from rapydo.do import CONTAINERS_YAML_DIRNAME
 from rapydo.do.compose import Compose
+from rapydo.utils import helpers
 from rapydo.utils.myyaml import load_yaml_file
 from rapydo.utils.logs import get_logger
 
@@ -30,7 +31,10 @@ COMPOSER_FRONTEND_YAML = {
 }
 
 
-def read_yamls(blueprint, frontend=False, path=containers_yaml_path):
+def read_yamls(blueprint, frontend=False, path=None):
+
+    if path is None:
+        path = helpers.current_dir(CONTAINERS_YAML_DIRNAME)
 
     composers = []
     base_files = []

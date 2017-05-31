@@ -13,8 +13,8 @@ def module_from_package(package):
     return package.split('.')[::-1][0]
 
 
-def current_dir():
-    return os.curdir
+def current_dir(*suffixes):
+    return os.path.join(os.curdir, *suffixes)
 
 
 def get_api_url(request_object, production=False):
