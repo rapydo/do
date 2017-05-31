@@ -38,7 +38,8 @@ def project_configuration(development=False):
     elif not development:
         check1 = prj.get('title') == 'My project'
         check2 = prj.get('description') == 'Title of my project'
-        if check1 or check2:
+        check3 = prj.get('name') == 'rapydo'
+        if check1 or check2 or check3:
             filepath = load_yaml_file(return_path=True, **args)
             log.critical_exit(
                 "\n\nIt seems like your project is not yet configured...\n" +

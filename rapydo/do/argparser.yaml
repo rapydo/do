@@ -23,11 +23,16 @@ options:
     default: backend
     help: List of services referring to a command
 
-  force_build_dependencies:
+  force_build:
     type: bool
     # metavalue: TRUE_OR_FALSE
     default: False
     help: Force building of templates docker images used in other builds
+
+  force_env:
+    type: bool
+    default: False
+    help: Force recreation of the docker compose .env file even if existing
 
   development:
     type: bool

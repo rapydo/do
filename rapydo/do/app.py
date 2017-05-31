@@ -7,8 +7,10 @@ Main App class
 import os.path
 from rapydo.do.arguments import current_args
 from rapydo.utils import checks
+from rapydo.utils import helpers
 from rapydo.do.project import project_configuration, apply_variables
 from rapydo.do import gitter
+from rapydo.do import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from rapydo.do.builds import locate_builds
 from rapydo.do.dockerizing import Dock
 from rapydo.do.compose import Compose
@@ -50,7 +52,8 @@ class Application(object):
         self._check_program('git')
 
         self.blueprint = self.current_args.get('blueprint')
-        self.run()
+        self.project_dir = helpers.current_dir()
+        self._run()
 
     def _check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
@@ -102,9 +105,7 @@ Verify that you are in the right folder, now you are in: %s
 
         self.specs = project_configuration(development=self.development)
 
-        self.vars = self.specs \
-            .get('variables', {}) \
-            .get('python', {})
+        self.vars = self.specs.get('variables', {})
 
         self.frontend = self.vars \
             .get('frontend', {}) \
@@ -167,7 +168,7 @@ Verify that you are in the right folder, now you are in: %s
 
         builds = locate_builds(self.base_services, self.services)
 
-        if self.current_args.get('force_build_dependencies'):
+        if self.current_args.get('force_build'):
             dc = Compose(files=base_files)
             dc.force_template_build(builds)
         else:
@@ -191,32 +192,11 @@ Verify that you are in the right folder, now you are in: %s
             if cache:
                 log.info(
                     "To build cached template(s) add option \"%s %s\"" %
-                    ('--force_build_dependencies', str(True))
+                    ('--force_build', str(True))
                 )
 
         if not cache:
             log.debug("(CHECKED) no cache builds")
-
-    def run(self):
-        """
-        The heart of the application.
-        This run a single command.
-        """
-
-        # Verify if we implemented the requested command
-        func = getattr(self, self.action, None)
-        if func is None:
-            log.critical_exit("Command not yet implemented: %s" % self.action)
-        # Step 1
-        self._inspect_current_folder()
-        # Step 2
-        self._read_specs()
-        # Step 3
-        self._git_submodules(development=self.development)
-        # Step 4
-        self._build_dependencies()
-        # Final step, launch the command
-        func()
 
     def check(self):
 
@@ -385,3 +365,49 @@ Verify that you are in the right folder, now you are in: %s
             'SERVICE': services,
         }
         dc.command('build', options)
+
+    def _make_env(self):
+
+        envfile = os.path.join(self.project_dir, COMPOSE_ENVIRONMENT_FILE)
+        if self.current_args.get('force_env'):
+            try:
+                os.unlink(envfile)
+                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+            except FileNotFoundError:
+                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
+
+        if not os.path.isfile(envfile):
+            with open(envfile, 'w+') as whandle:
+                env = self.vars.get('env')
+                env.update({'PLACEHOLDER': PLACEHOLDER})
+
+                for key, value in sorted(env.items()):
+                    if ' ' in str(value):
+                        value = "'%s'" % value
+                    whandle.write("%s=%s\n" % (key, value))
+                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+        else:
+            log.debug("(CHECKED) %s already exists" % COMPOSE_ENVIRONMENT_FILE)
+
+    def _run(self):
+        """
+        The heart of the application.
+        This run a single command.
+        """
+
+        # Verify if we implemented the requested command
+        func = getattr(self, self.action, None)
+        if func is None:
+            log.critical_exit("Command not yet implemented: %s" % self.action)
+        # Step 1
+        self._inspect_current_folder()
+        # Step 2
+        self._read_specs()
+        # Step 3
+        self._make_env()
+        # Step 4
+        self._git_submodules(development=self.development)
+        # Step 5
+        self._build_dependencies()
+        # Final step, launch the command
+        func()
