@@ -162,13 +162,14 @@ Verify that you are in the right folder, now you are in: %s
 
         self.gits = gits
 
-    def _build_dependencies(self):
-        """ Look up for builds which are depending on templates """
-
+    def _read_composer(self):
         # Read necessary files
         self.services, self.files, self.base_services, base_files = \
             read_yamls(self.blueprint, self.frontend)
         log.debug("Confs used (with order): %s" % self.files)
+
+    def _build_dependencies(self):
+        """ Look up for builds which are depending on templates """
 
         ####################
         # TODO: check all builds against their Dockefile latest commit
@@ -226,8 +227,74 @@ Verify that you are in the right folder, now you are in: %s
 
         log.info("All checked")
 
-    def get_services(self, key='services', sep=','):
+    def _get_services(self, key='services', sep=','):
         return self.current_args.get(key).split(sep)
+
+    def _make_env(self):
+
+        envfile = os.path.join(self.project_dir, COMPOSE_ENVIRONMENT_FILE)
+        if self.current_args.get('force_env'):
+            try:
+                os.unlink(envfile)
+                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+            except FileNotFoundError:
+                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
+
+        if not os.path.isfile(envfile):
+            with open(envfile, 'w+') as whandle:
+                env = self.vars.get('env')
+                env.update({'PLACEHOLDER': PLACEHOLDER})
+
+                for key, value in sorted(env.items()):
+                    if ' ' in str(value):
+                        value = "'%s'" % value
+                    whandle.write("%s=%s\n" % (key, value))
+                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+        else:
+            log.debug("(CHECKED) %s already exists" % COMPOSE_ENVIRONMENT_FILE)
+
+            # Stat file
+            mixed_env = os.stat(envfile)
+
+            # compare blame commit date against file modification date
+            if gitter.check_file_younger_than(
+                self.gits.get('main'),
+                file='specs/defaults.yaml',
+                timestamp=mixed_env.st_mtime
+            ):
+                log.warning(
+                    "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
+                    "Add --force_env to update."
+                )
+
+    def _check_placeholders(self):
+
+        #######################
+        # TODO: check only on services involved in current blueprint
+        # which is equal to services 'activated' + 'depends_on'
+        # log.pp(self.services)
+        # exit(1)
+        pass
+
+        #######################
+        # Search for PLACEHOLDERS
+        missing = []
+        for service in self.services:
+            for key, value in service.get('environment', {}).items():
+                # print("TEST", key, value)
+                # if value == PLACEHOLDER:
+                if PLACEHOLDER in str(value):
+                    missing.append(key)
+
+        if len(missing) > 0:
+            log.critical_exit(
+                "Missing critical params for configuration:\n%s" % missing)
+
+        return missing
+
+    ################################
+    # ### COMMANDS
+    ################################
 
     def init(self):
         log.info("Project initialized")
@@ -245,7 +312,7 @@ Verify that you are in the right folder, now you are in: %s
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        services = self.get_services()
+        services = self._get_services()
 
         dc = Compose(files=self.files)
         options = {}
@@ -299,7 +366,7 @@ Verify that you are in the right folder, now you are in: %s
 
     def log(self):
         dc = Compose(files=self.files)
-        services = self.get_services()
+        services = self._get_services()
         options = {
             'SERVICE': services,
             '--follow': True,
@@ -316,7 +383,7 @@ Verify that you are in the right folder, now you are in: %s
     def shell(self):
         dc = Compose(files=self.files)
 
-        services = self.get_services()
+        services = self._get_services()
         user = self.current_args.get('user')
         whole_command = self.current_args.get('command', 'whoami')
 
@@ -378,52 +445,15 @@ Verify that you are in the right folder, now you are in: %s
 
     def build(self):
         dc = Compose(files=self.files)
-        services = self.get_services()
+        services = self._get_services()
         options = {
             'SERVICE': services,
         }
         dc.command('build', options)
 
-    def _make_env(self):
-
-        envfile = os.path.join(self.project_dir, COMPOSE_ENVIRONMENT_FILE)
-        if self.current_args.get('force_env'):
-            try:
-                os.unlink(envfile)
-                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
-            except FileNotFoundError:
-                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
-
-        if not os.path.isfile(envfile):
-            with open(envfile, 'w+') as whandle:
-                env = self.vars.get('env')
-                env.update({'PLACEHOLDER': PLACEHOLDER})
-
-                for key, value in sorted(env.items()):
-                    if ' ' in str(value):
-                        value = "'%s'" % value
-                    whandle.write("%s=%s\n" % (key, value))
-                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
-        else:
-            log.debug("(CHECKED) %s already exists" % COMPOSE_ENVIRONMENT_FILE)
-
-            # - stat file of .env
-            mixed_env = os.stat(envfile)
-
-            # compare blame file with some date
-            if gitter.check_file_younger_than(
-                self.gits.get('main'),
-                file='specs/defaults.yaml',
-                timestamp=mixed_env.st_mtime
-            ):
-                log.warning(
-                    "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-                    "Add --force_env to update."
-                )
-
-        # TODO: read docker-compose config and search for PLACEHOLDERS
-        # return list to be setted
-        # check: only on services involved in current blueprint
+    ################################
+    # ### RUN ONE COMMAND OFF
+    ################################
 
     def _run(self):
         """
@@ -435,15 +465,15 @@ Verify that you are in the right folder, now you are in: %s
         func = getattr(self, self.action, None)
         if func is None:
             log.critical_exit("Command not yet implemented: %s" % self.action)
-        # Step 1
+
+        # preparing steps
         self._inspect_current_folder()
-        # Step 2
         self._read_specs()
-        # Step 3
         self._git_submodules(development=self.development)
-        # Step 4
         self._make_env()
-        # Step 5
+        self._read_composer()
+        self._check_placeholders()
         self._build_dependencies()
+
         # Final step, launch the command
         func()
