@@ -66,9 +66,12 @@ class Compose(object):
         return
 
     def command(self, command, options={}):
+
         compose_handler = self.get_handle()
         method = getattr(compose_handler, command)
+
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
+
+        log.info("Executing in compose: '%s'" % command)
         method(options=options)
-        log.info("Executed compose '%s'" % command)

@@ -8,7 +8,7 @@ import os.path
 from rapydo.do.arguments import current_args
 from rapydo.utils import checks
 from rapydo.utils import helpers
-from rapydo.do.project import project_configuration, apply_variables
+from rapydo.do import project
 from rapydo.do import gitter
 from rapydo.do import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from rapydo.do.builds import locate_builds
@@ -103,7 +103,7 @@ Verify that you are in the right folder, now you are in: %s
     def _read_specs(self):
         """ Read project configuration """
 
-        self.specs = project_configuration(development=self.development)
+        self.specs = project.configuration(development=self.development)
 
         self.vars = self.specs.get('variables', {})
 
@@ -128,7 +128,7 @@ Verify that you are in the right folder, now you are in: %s
 
         # substitute values starting with '$$'
         myvars = {'frontend': self.frontend}
-        repo = apply_variables(repo, myvars)
+        repo = project.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
         repo_enabled = repo.pop('if', False)
@@ -164,7 +164,7 @@ Verify that you are in the right folder, now you are in: %s
 
     def _read_composer(self):
         # Read necessary files
-        self.services, self.files, self.base_services, base_files = \
+        self.services, self.files, self.base_services, self.base_files = \
             read_yamls(self.blueprint, self.frontend)
         log.debug("Confs used (with order): %s" % self.files)
 
@@ -183,7 +183,7 @@ Verify that you are in the right folder, now you are in: %s
         builds = locate_builds(self.base_services, self.services)
 
         if self.current_args.get('force_build'):
-            dc = Compose(files=base_files)
+            dc = Compose(files=self.base_files)
             dc.force_template_build(builds)
         else:
             self._verify_build_cache(builds)
@@ -216,16 +216,6 @@ Verify that you are in the right folder, now you are in: %s
 
         if not cache:
             log.debug("(CHECKED) no cache builds")
-
-    def check(self):
-
-        # NOTE: a SECURITY BUG?
-        # dc = Compose(files=self.files)
-        # for container in dc.get_handle().project.containers():
-        #     log.pp(container.client._auth_configs)
-        #     exit(1)
-
-        log.info("All checked")
 
     def _get_services(self, key='services', sep=','):
         return self.current_args.get(key).split(sep)
@@ -269,26 +259,23 @@ Verify that you are in the right folder, now you are in: %s
 
     def _check_placeholders(self):
 
-        #######################
-        # TODO: check only on services involved in current blueprint
-        # which is equal to services 'activated' + 'depends_on'
-        # log.pp(self.services)
-        # exit(1)
-        pass
+        self.services_dict, self.active_services = \
+            project.find_active(self.services)
+        log.info("Active services: %s" % self.active_services)
 
-        #######################
-        # Search for PLACEHOLDERS
         missing = []
-        for service in self.services:
+        for service_name in self.active_services:
+            service = self.services_dict.get(service_name)
+
             for key, value in service.get('environment', {}).items():
-                # print("TEST", key, value)
-                # if value == PLACEHOLDER:
                 if PLACEHOLDER in str(value):
                     missing.append(key)
 
         if len(missing) > 0:
             log.critical_exit(
                 "Missing critical params for configuration:\n%s" % missing)
+        else:
+            log.debug("(CHECKED) no placeholders")
 
         return missing
 
@@ -296,8 +283,22 @@ Verify that you are in the right folder, now you are in: %s
     # ### COMMANDS
     ################################
 
+    def check(self):
+
+        # NOTE: a SECURITY BUG?
+        # dc = Compose(files=self.files)
+        # for container in dc.get_handle().project.containers():
+        #     log.pp(container.client._auth_configs)
+        #     exit(1)
+
+        log.info("All checked")
+
     def init(self):
         log.info("Project initialized")
+
+    def status(self):
+        dc = Compose(files=self.files)
+        dc.command('ps', {'-q': None})
 
     def clean(self):
         dc = Compose(files=self.files)
@@ -312,7 +313,7 @@ Verify that you are in the right folder, now you are in: %s
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        services = self._get_services()
+        # services = self._get_services()
 
         dc = Compose(files=self.files)
         options = {}
@@ -329,7 +330,8 @@ Verify that you are in the right folder, now you are in: %s
                 '--build': False,
                 '--no-build': False,
                 '--scale': {},
-                'SERVICE': services
+                # 'SERVICE': services
+                'SERVICE': self.active_services
             }
             command = 'up'
 
@@ -366,13 +368,14 @@ Verify that you are in the right folder, now you are in: %s
 
     def log(self):
         dc = Compose(files=self.files)
-        services = self._get_services()
+        # services = self._get_services()
         options = {
-            'SERVICE': services,
             '--follow': True,
             '--tail': 'all',
             '--no-color': False,
             '--timestamps': None,
+            # 'SERVICE': services,
+            'SERVICE': self.active_services
         }
         try:
             dc.command('logs', options)
@@ -445,9 +448,9 @@ Verify that you are in the right folder, now you are in: %s
 
     def build(self):
         dc = Compose(files=self.files)
-        services = self._get_services()
+        # services = self._get_services()
         options = {
-            'SERVICE': services,
+            'SERVICE': self.active_services
         }
         dc.command('build', options)
 

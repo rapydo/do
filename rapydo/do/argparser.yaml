@@ -20,7 +20,7 @@ options:
   services:
     type: str
     metavalue: SERVICES_COMA_SEPARATED
-    default: backend
+    default: active services
     help: List of services referring to a command
 
   force_build:
@@ -48,6 +48,8 @@ subcommands:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+  status:
+    description: list current status of containers
   build:
     description: force building of one or more services docker images
   log:
