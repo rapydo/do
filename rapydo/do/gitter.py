@@ -52,7 +52,7 @@ Suggestion: execute the init command
                 % (current_url, url)
             )
     else:
-        log.debug("(CHECKED)\tUpstream is set correctly")
+        log.debug("(CHECKED) ppstream is set correctly")
 
     return gitobj
 
@@ -62,7 +62,7 @@ def clone(online_url, path, branch='master', do=False):
     local_path = os.path.join(helpers.current_dir(), path)
     local_path_exists = os.path.exists(local_path)
     if local_path_exists:
-        log.debug("(CHECKED)\tPath %s already exists" % local_path)
+        log.debug("(CHECKED) path %s already exists" % local_path)
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)

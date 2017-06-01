@@ -293,7 +293,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.critical_exit(
                 "Missing critical params for configuration:\n%s" % missing)
         else:
-            log.debug("(CHECKED) no placeholders")
+            log.debug("(CHECKED) no PLACEHOLDER variable to be replaced")
 
         return missing
 
