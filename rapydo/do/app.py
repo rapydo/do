@@ -165,7 +165,8 @@ Verify that you are in the right folder, now you are in: %s
     def _git_check_updates(self):
 
         for name, gitobj in self.gits.items():
-            gitter.check_updates(name, gitobj)
+            if gitobj is not None:
+                gitter.check_updates(name, gitobj)
 
     def _read_composer(self):
         # Read necessary files
