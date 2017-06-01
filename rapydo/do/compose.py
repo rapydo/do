@@ -57,8 +57,6 @@ class Compose(object):
             # myoptions = {'SERVICE': [service], **force_options, **options}
             options.update(force_options)
             options.update({'SERVICE': [service]})
-            log.pp(options)
-            log.critical_exit("DEBUG ME HERE /2")
 
             compose_handler.build(options=options)
             log.info("Built template: %s" % service)
@@ -73,5 +71,5 @@ class Compose(object):
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.info("Executing in compose: '%s'" % command)
+        log.info("Requesting within compose: '%s'" % command)
         method(options=options)

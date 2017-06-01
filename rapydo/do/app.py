@@ -184,6 +184,7 @@ Verify that you are in the right folder, now you are in: %s
 
         if self.current_args.get('force_build'):
             dc = Compose(files=self.base_files)
+            log.debug("Forcing rebuild for cached templates")
             dc.force_template_build(builds)
         else:
             self._verify_build_cache(builds)
@@ -194,6 +195,7 @@ Verify that you are in the right folder, now you are in: %s
         if len(builds) > 0:
 
             dimages = self.docker.images()
+
             for image_tag, build in builds.items():
 
                 if image_tag in dimages:
@@ -207,6 +209,9 @@ Verify that you are in the right folder, now you are in: %s
                     ):
                         log.warning("cached image [%s]" % image_tag)
                         cache = True
+                else:
+                    dc = Compose(files=self.base_files)
+                    dc.force_template_build(builds={image_tag: build})
 
             if cache:
                 log.info(

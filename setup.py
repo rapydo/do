@@ -64,7 +64,7 @@ setup(
         "dockerfile-parse",
         "beeprint",
         "better_exceptions",
-        "pytz"
+        "pytz"  # utils
     ],
     classifiers=[
         'Programming Language :: Python',
