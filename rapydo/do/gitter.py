@@ -137,14 +137,22 @@ def check_file_younger_than(gitobj, file, timestamp):
 
 def check_updates(path, gitobj):
 
+    if path == 'main':
+        # For now we skip the main repo, because it could be password protected
+        return
+
+    for remote in gitobj.remotes:
+        log.verbose("Fetching %s" % remote)
+        remote.fetch()
+
     branch = gitobj.active_branch
-    remove_branch = "origin/%s" % branch
-    max_remove = 20
+    remote_branch = "origin/%s" % branch
+    max_remote = 20
     log.verbose("Inspecting %s/%s" % (path, branch))
     last_local_commit = list(gitobj.iter_commits(branch, max_count=1)).pop()
 
     remote_commits = list(
-        gitobj.iter_commits(remove_branch, max_count=max_remove))
+        gitobj.iter_commits(remote_branch, max_count=max_remote))
 
     log.verbose("Last local commit for %s is %s" % (path, last_local_commit))
     behind = 0
