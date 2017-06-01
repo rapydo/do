@@ -133,3 +133,37 @@ def check_file_younger_than(gitobj, file, timestamp):
 
     from rapydo.utils import time
     return time.timestamp_from_string(timestamp) < max(dates)
+
+
+def check_updates(path, gitobj):
+
+    branch = gitobj.active_branch
+    remove_branch = "origin/%s" % branch
+    max_remove = 20
+    log.verbose("Inspecting %s/%s" % (path, branch))
+    last_local_commit = list(gitobj.iter_commits(branch, max_count=1)).pop()
+
+    remote_commits = list(
+        gitobj.iter_commits(remove_branch, max_count=max_remove))
+
+    log.verbose("Last local commit for %s is %s" % (path, last_local_commit))
+    behind = 0
+    for c in remote_commits:
+        if c == last_local_commit:
+            break
+        behind += 1
+        if behind == 1:
+            log.warning("%s repo should be updated!" % (path))
+
+        message = c.message.strip()
+
+        sha = c.hexsha[0:7]
+        if len(message) > 60:
+            message = message[0:57] + "..."
+        log.info(
+
+            "Missing commit in %s: %s (%s)"
+            % (path, sha, message))
+
+    if behind == 0:
+        log.debug("(CHECKED) %s repo is updated" % (path))

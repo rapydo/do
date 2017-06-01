@@ -162,6 +162,11 @@ Verify that you are in the right folder, now you are in: %s
 
         self.gits = gits
 
+    def _git_check_updates(self):
+
+        for name, gitobj in self.gits.items():
+            gitter.check_updates(name, gitobj)
+
     def _read_composer(self):
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
@@ -210,8 +215,16 @@ Verify that you are in the right folder, now you are in: %s
                         log.warning("cached image [%s]" % image_tag)
                         cache = True
                 else:
-                    dc = Compose(files=self.base_files)
-                    dc.force_template_build(builds={image_tag: build})
+                    if self.action == 'check':
+                        log.critical_exit(
+                            """Missing template build for %s
+\nSuggestion: execute the init command
+                            """ % build['service'])
+                    else:
+                        log.debug(
+                            "Missing template build for%s" % build['service'])
+                        dc = Compose(files=self.base_files)
+                        dc.force_template_build(builds={image_tag: build})
 
             if cache:
                 log.info(
@@ -496,6 +509,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self._inspect_current_folder()
         self._read_specs()
         self._git_submodules(development=self.development)
+        self._git_check_updates()
         self._make_env()
         self._read_composer()
         self._check_placeholders()
