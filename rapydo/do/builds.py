@@ -69,8 +69,9 @@ def find_overriden_templates(services, templates={}):
             if dfp.baseimage.endswith(':template'):
                 if dfp.baseimage not in templates:
                     log.critical_exit(
-                        "Template build misconfiguration with: %s"
-                        % service.get('name')
+                        """Unable to find the %s in this project
+\nPlease inspect the FROM image in %s/Dockerfile
+                        """ % (dfp.baseimage, dockerfile)
                     )
                 else:
                     builds[dfp.baseimage] = templates.get(dfp.baseimage)
