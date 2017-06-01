@@ -52,7 +52,7 @@ Suggestion: execute the init command
                 % (current_url, url)
             )
     else:
-        log.debug("(CHECKED) ppstream is set correctly")
+        log.debug("(CHECKED) upstream is set correctly")
 
     return gitobj
 
