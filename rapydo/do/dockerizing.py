@@ -25,8 +25,9 @@ class Dock(object):
     def images(self):
         images = []
         for obj in self.client.images.list():
-            for tag in obj.attrs.get('RepoTags', []):
-                images.append(tag)
+            tags = obj.attrs.get('RepoTags')
+            if tags is not None:
+                images.extend(tags)
         # log.debug("Docker:%s" % images)
         return images
 
