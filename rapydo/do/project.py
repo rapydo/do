@@ -71,6 +71,9 @@ def mix_dictionary(base, custom):
 
 def walk_services(actives, dependecies, index=0):
 
+    if index >= len(actives):
+        return actives
+
     next_active = actives[index]
 
     for service in dependecies.get(next_active, []):

@@ -261,7 +261,15 @@ Verify that you are in the right folder, now you are in: %s
 
         self.services_dict, self.active_services = \
             project.find_active(self.services)
-        log.info("Active services: %s" % self.active_services)
+
+        if len(self.active_services) == 0:
+            log.critical_exit(
+                """You have no active service
+\nSuggestion: to activate a top-level service edit your compose yaml
+and add the variable "ACTIVATE: 1" in the service enviroment
+                """)
+        else:
+            log.info("Active services: %s" % self.active_services)
 
         missing = []
         for service_name in self.active_services:
