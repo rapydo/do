@@ -52,7 +52,7 @@ Suggestion: execute the init command
                 % (current_url, url)
             )
     else:
-        log.debug("(CHECKED) ppstream is set correctly")
+        log.debug("(CHECKED) upstream is set correctly")
 
     return gitobj
 
@@ -137,6 +137,7 @@ def check_file_younger_than(gitobj, file, timestamp):
 
 def check_updates(path, gitobj):
 
+    # TO FIX: to be discussed
     if path == 'main':
         # For now we skip the main repo, because it could be password protected
         return
