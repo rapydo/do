@@ -5,7 +5,7 @@ Main App class
 """
 
 import os.path
-from rapydo.do.arguments import current_args
+from rapydo.do.arguments import current_args, parse_conf
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.do import project
@@ -217,8 +217,18 @@ Verify that you are in the right folder, now you are in: %s
         if not cache:
             log.debug("(CHECKED) no cache builds")
 
-    def _get_services(self, key='services', sep=','):
-        return self.current_args.get(key).split(sep)
+    def _get_services(self, key='services', sep=',', avoid_default=False):
+        """ FIXME: Deprecated """
+
+        value = self.current_args.get(key).split(sep)
+        if avoid_default:
+            default = \
+                parse_conf.get('options', {}) \
+                .get('services') \
+                .get('default')
+            if value == [default]:
+                log.critical_exit("You must set '--services' option")
+        return value
 
     def _make_env(self):
 
@@ -394,7 +404,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def shell(self):
         dc = Compose(files=self.files)
 
-        services = self._get_services()
+        services = self._get_services(avoid_default=True)
         user = self.current_args.get('user')
         whole_command = self.current_args.get('command', 'whoami')
 

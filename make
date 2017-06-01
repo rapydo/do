@@ -1,8 +1,9 @@
 #!/bin/bash
 
-dev="-r testpypi"
-# dev=""
+# dev="-r testpypi"
+dev=""
 
+# env python3 md2text.py
 rm -f dist/*
 python3.6 setup.py sdist
 

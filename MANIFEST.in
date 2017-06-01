@@ -1,4 +1,4 @@
-include LICENSE AUTHORS
+include LICENSE AUTHORS README.md
 
 global-exclude *.py[co]
 
