@@ -3,24 +3,18 @@ Do things with RAPyDo ecosystem
 
 ---
 
-## Install the controller
+## Install
+
+Use the official python package manager
 
 ```bash
-# clone and install in 'development' mode
-$ git clone https://github.com/rapydo/do.git
-$ pip3 install --editable .
-
-# or 
-
-# install from pypi test
-# see https://testpypi.python.org/pypi/rapydo-controller
-$ pip3 install --upgrade -i https://testpypi.python.org/pypi rapydo-controller
+$ pip3 install --upgrade rapydo-controller
 ```
 
-## Use it on your project
+## Use it on your REST API project
 
 ```bash
-# clone rapydo and use it
+# clone/fork rapydo framework and use it
 $ git clone https://github.com/rapydo/core.git
 $ rapydo check
 $ rapydo -h
@@ -28,10 +22,31 @@ $ rapydo -h
 
 ## Developers
 
-1. change version in `do/__init__.py`
+Do you want to partecipate?
+
+You are very welcome! `^_^`
+
+### Become a developer
+
+```bash
+# clone and install in 'development' mode
+$ git clone https://github.com/rapydo/do.git
+$ pip3 install --no-cache-dir --upgrade --editable .
+```
+
+Now you can start developing your patch.
+
+### Release a new version
+
+1. change version inside the file `rapydo/do/__init__.py`
 2. build and publish in testing with
 
 ```bash
 ./make
 ```
 
+Note: this action expects you to: 
+
+- being registered on PyPi
+- have a `~/.pypirc` file configured
+- know what you're doing `:D`

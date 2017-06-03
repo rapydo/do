@@ -24,25 +24,29 @@ Links
 * `github <http://github.com/rapydo>`_
 """
 
-import os
-import codecs
 from rapydo.do import __version__
 
 from distutils.core import setup
 # from setuptools import setup
 
+#################
+# FIXME: use it or not? from pip code:
 
-def read(*parts):
-    here = os.path.abspath(os.path.dirname(__file__))
-    return codecs.open(os.path.join(here, *parts), 'r').read()
+# # import os
+# # import codecs
 
-# long_description = read('README.rst')
+# # def read(*parts):
+# #     here = os.path.abspath(os.path.dirname(__file__))
+# #     return codecs.open(os.path.join(here, *parts), 'r').read()
+
+# # long_description = read('README.rst')
 
 
+#################
 setup(
     name='rapydo_controller',
     description='Do development and deploy with the RAPyDo framework',
-    long_description=read(__doc__),
+    long_description=__doc__,
     version=__version__,
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
