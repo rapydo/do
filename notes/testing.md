@@ -20,6 +20,7 @@ pip install ipython
 
 ## Testing with alpine docker-in-docker base
 
+```bash
 docker run --rm --name dind -it \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v (pwd):/tmp/code -w /tmp/code \
@@ -27,5 +28,6 @@ docker run --rm --name dind -it \
 
 apk update
 apk add git python3
+```
 
 

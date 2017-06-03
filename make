@@ -3,8 +3,12 @@
 # dev="-r testpypi"
 dev=""
 
-# env python3 md2text.py
-rm -f dist/*
+pandoc --from=markdown --to=rst \
+	--output=README.rst README.md
+# env python3 -c \
+# 	"from rapydo.utils import converter as c; c.convert_markdown_file('README.md');"
+
+# rm -f dist/*
 python3.6 setup.py sdist
 
 version=$(ls -1rt dist | tail -n 1)

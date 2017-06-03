@@ -1,52 +1,23 @@
-"""
-RAPyDo controller
------
 
-Welcome to our new RAPyDo framework.
-
-This project is based on Flask and aims at making easy for a web developer
-to write Python code on his own HTTP-API;
-Forget about the difficult setup of the server, authentication,
-plugin of services, testing connections, documenting your endpoints
-and injecting components into Flask.
-
-How to start
-````````````
-
-.. code:: bash
-
-    $ pip install rapydo-controller
-    $ rapydo
-
-
-Links
-`````
-* `github <http://github.com/rapydo>`_
-"""
-
+import os
+import codecs
 from rapydo.do import __version__
 
 from distutils.core import setup
 # from setuptools import setup
 
-#################
-# FIXME: use it or not? from pip code:
-
-# # import os
-# # import codecs
-
-# # def read(*parts):
-# #     here = os.path.abspath(os.path.dirname(__file__))
-# #     return codecs.open(os.path.join(here, *parts), 'r').read()
-
-# # long_description = read('README.rst')
+here = os.path.abspath(os.path.dirname(__file__))
 
 
-#################
+def read(*parts):
+    return codecs.open(os.path.join(here, *parts), 'r').read()
+
+
 setup(
     name='rapydo_controller',
     description='Do development and deploy with the RAPyDo framework',
-    long_description=__doc__,
+    # long_description=__doc__,
+    long_description=read('README.rst'),
     version=__version__,
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
