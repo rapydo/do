@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import requests
 import docker
 from rapydo.utils.logs import get_logger
 
@@ -8,9 +9,37 @@ log = get_logger(__name__)
 
 class Dock(object):
 
+    client = None
+
     def __init__(self):
         super(Dock, self).__init__()
-        self.client = docker.from_env()
+
+        if not self.is_daemon_alive():
+            log.critical_exit("Docker daemon not reachable")
+
+    def is_daemon_alive(self):
+
+        if self.client is None:
+            self.client = docker.from_env()
+        else:
+            pass
+
+        # from requests.packages.urllib3 import exceptions as reqex
+        # try:
+        #     self.client.containers.list()
+        # except (FileNotFoundError, reqex.ProtocolError, ConnectionError):
+        #     return False
+        # else:
+        #     return True
+
+        try:
+            return self.client.ping()
+        # this is the case of docker daemon not started
+        except requests.exceptions.ConnectionError:
+            return False
+        # this is the case of docker daemon starting or not working properly
+        except docker.errors.APIError:
+            return False
 
     def image_info(self, tag):
         obj = self.client.images.list(name=tag)
