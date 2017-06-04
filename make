@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# dev="-r testpypi"
-dev=""
+dev="-r testpypi"
+# dev=""
 
 pandoc --from=markdown --to=rst \
 	--output=README.rst README.md

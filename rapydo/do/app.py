@@ -510,7 +510,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self._inspect_current_folder()
         self._read_specs()
         self._git_submodules(development=self.development)
-        self._git_check_updates()
+        # FIXME: does not work with branches @mdantonio
+        # self._git_check_updates()
         self._make_env()
         self._read_composer()
         self._check_placeholders()

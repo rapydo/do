@@ -28,6 +28,11 @@ docker run --rm --name dind -it \
 
 apk update
 apk add git python3
+
+# add pip...
+# install rapydo-controller
+
+# TRY
 ```
 
 
