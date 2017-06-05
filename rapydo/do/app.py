@@ -58,7 +58,10 @@ class Application(object):
     def _check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
         if program_version is None:
-            log.critical_exit('Please make sure %s is installed' % program)
+            log.critical_exit(
+                "Missing requirement.\n" +
+                "Please make sure that '%s' is installed" % program
+            )
         else:
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
