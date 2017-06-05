@@ -1,4 +1,4 @@
-include LICENSE AUTHORS README.md
+include LICENSE AUTHORS README.md README.rst
 
 exclude .travis.yml
 exclude dev-requirements.txt

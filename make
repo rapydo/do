@@ -1,12 +1,11 @@
 #!/bin/bash
 
-dev="-r testpypi"
-# dev=""
+# dev="-r testpypi"
+dev=""
 
-pandoc --from=markdown --to=rst \
+pandoc \
+	--from=markdown --to=rst \
 	--output=README.rst README.md
-# env python3 -c \
-# 	"from rapydo.utils import converter as c; c.convert_markdown_file('README.md');"
 
 # rm -f dist/*
 python3.6 setup.py sdist
