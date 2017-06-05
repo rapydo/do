@@ -73,3 +73,4 @@ class Compose(object):
 
         log.info("Requesting within compose: '%s'" % command)
         method(options=options)
+        log.very_verbose("Executed compose %s w/%s" % (command, options))

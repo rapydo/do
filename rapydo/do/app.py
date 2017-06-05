@@ -265,7 +265,12 @@ Verify that you are in the right folder, now you are in: %s
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
-                    if ' ' in str(value):
+                    if value is None:
+                        value = ''
+                    else:
+                        value = str(value)
+                    # log.print("ENV values. %s:*%s*" % (key, value))
+                    if ' ' in value:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
                 log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
@@ -485,9 +490,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def build(self):
         dc = Compose(files=self.files)
-        # services = self._get_services()
+        services = self._get_services()
         options = {
-            'SERVICE': self.active_services
+            'SERVICE': services,
+            # FIXME: user should be able to set them from cli
+            '--no-cache': False,
+            '--pull': False,
         }
         dc.command('build', options)
 
