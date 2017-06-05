@@ -239,17 +239,22 @@ Verify that you are in the right folder, now you are in: %s
         if not cache:
             log.debug("(CHECKED) no cache builds")
 
-    def _get_services(self, key='services', sep=',', avoid_default=False):
-        """ FIXME: Deprecated """
+    def _get_services(self, key='services', sep=',',
+                      default=None, avoid_default=False):
 
         value = self.current_args.get(key).split(sep)
-        if avoid_default:
-            default = \
+        if avoid_default or default is not None:
+            config_default = \
                 parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
-            if value == [default]:
-                log.critical_exit("You must set '--services' option")
+            if value == [config_default]:
+                if avoid_default:
+                    log.critical_exit("You must set '--services' option")
+                elif default is not None:
+                    value = default
+                else:
+                    pass
         return value
 
     def _make_env(self):
@@ -493,10 +498,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def build(self):
         dc = Compose(files=self.files)
-        services = self._get_services()
+        services = self._get_services(default=self.active_services)
+
         options = {
             'SERVICE': services,
-            # FIXME: user should be able to set them from cli
+            # FIXME: user should be able to set the two below from cli
             '--no-cache': False,
             '--pull': False,
         }
