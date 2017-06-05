@@ -363,7 +363,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        # services = self._get_services()
+        services = self._get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
         options = {}
@@ -380,8 +380,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 '--build': False,
                 '--no-build': False,
                 '--scale': {},
-                # 'SERVICE': services
-                'SERVICE': self.active_services
+                'SERVICE': services
             }
             command = 'up'
 
