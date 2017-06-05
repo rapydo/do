@@ -418,15 +418,17 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def log(self):
         dc = Compose(files=self.files)
-        # services = self._get_services()
+        services = self._get_services(default=self.active_services)
+
         options = {
-            '--follow': True,
+            # '--follow': True,
+            '--follow': False,
             '--tail': 'all',
             '--no-color': False,
             '--timestamps': None,
-            # 'SERVICE': services,
-            'SERVICE': self.active_services
+            'SERVICE': services,
         }
+
         try:
             dc.command('logs', options)
         except KeyboardInterrupt:
