@@ -4,9 +4,11 @@
 """
 
 from rapydo.do.app import Application
+import better_exceptions as be
 
 
 def main():
+    be  # activate better exceptions
     Application()
 
 
