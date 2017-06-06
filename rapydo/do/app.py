@@ -521,6 +521,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('build', options)
 
+    def custom(self):
+        # TODO
+        raise NotImplementedError("TODO")
+
+    def ssl_certificate(self):
+        # TODO
+        raise NotImplementedError("TODO")
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################

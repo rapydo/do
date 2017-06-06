@@ -65,6 +65,15 @@ subcommands:
     description: force building of one or more services docker images
   log:
     description: watch log tails of all or specified containers
+  custom:
+    description: execute predefined custom commands inside containers
+  ssl_certificate:
+    container_exec:
+      name: letsencrypt
+      description: Issue a production certificate with service Letsencrypt
+      command: updatecertificates
+      service: proxy
+      user: root
   shell:
     description: open a shell inside the specified container
     suboptions:
