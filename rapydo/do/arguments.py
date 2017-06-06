@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 
+"""
+Automatically create and parse commands
+based on a YAML configuration file.
+
+NOTE: we can't have a logger here,
+before knowing the level of debug.
+"""
+
 import os
 import sys
 import argparse
-from rapydo.utils import helpers
 from rapydo.do import __version__
+from rapydo.utils import helpers
 from rapydo.utils.myyaml import load_yaml_file
 
 
@@ -32,9 +40,28 @@ def prepare_params(options):
     return pconf
 
 
+# ##########################
+# READ MAIN FILE WITH COMMANDS AND OPTIONS
 parse_conf = load_yaml_file(
-    'argparser', path=helpers.script_abspath(__file__), logger=False)
+    'argparser', path=helpers.script_abspath(__file__),
+    logger=False
+)
 
+# ##########################
+# READ PROJECT INIT FILE: .projectrc
+pinit_conf = load_yaml_file(
+    '.projectrc',
+    path=helpers.current_dir(),
+    skip_error=True, logger=False, extension=None
+)
+
+# Mix with parse_conf
+for key, value in pinit_conf.items():
+    new_default = pinit_conf.get(key, None)
+    if new_default is not None:
+        parse_conf['options'][key]['default'] = new_default
+
+# ##########################
 # Arguments definition
 parser = argparse.ArgumentParser(
     prog=sys.argv[0],
@@ -52,14 +79,33 @@ parser.add_argument('--version', action='version',
 main_command = parse_conf.get('action')
 
 subparsers = parser.add_subparsers(
-    title='Sub commands',
+    title='Available commands',
     dest=main_command.get('name'),
     help=main_command.get('help')
 )
 
 subparsers.required = True
 
-for command_name, options in sorted(parse_conf.get('subcommands', {}).items()):
+# ##########################
+# COMMANDS
+
+# BASE normal commands
+mycommands = parse_conf.get('subcommands', {})
+
+
+def extend(conf):
+    """ Extending cli commands """
+
+    # for name, options in conf.get('commands').items():
+    #     print("TEST", name, options)
+    #     exit(1)
+
+    pass
+
+
+# ##########################
+# loop
+for command_name, options in sorted(mycommands.items()):
 
     # Creating a parser for each sub-command [check, init, etc]
     subparse = subparsers.add_parser(
@@ -80,6 +126,11 @@ for command_name, options in sorted(parse_conf.get('subcommands', {}).items()):
     for option_name, suboptions in options.get('suboptions', {}).items():
         params = prepare_params(suboptions)
         subparse.add_argument('--%s' % option_name, **params)
+
+# Print usage if no arguments provided
+if len(sys.argv) == 1:
+    parser.print_help()
+    sys.exit(1)
 
 # Reading input parameters
 current_args = parser.parse_args()

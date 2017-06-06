@@ -17,6 +17,13 @@ options:
     default: debug
     help: Blueprint marker of the configuration to launch
 
+  hostname:
+    type: str
+    metavalue: MACHINE_HOST_NAME
+    default: localhost
+    help: "Host name of the current machine where running the server
+        (NOTE: only used in production mode)"
+
   services:
     type: str
     metavalue: SERVICES_COMA_SEPARATED
@@ -48,6 +55,10 @@ subcommands:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+  # TODO: a tutorial mode to improve the project step by step
+  # instead of all at once like init
+  # tutorial:
+  #   description: Step-by-step guide to make your project RAPyDo compliant
   status:
     description: list current status of containers
   build:

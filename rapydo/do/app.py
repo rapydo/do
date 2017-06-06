@@ -5,7 +5,15 @@ Main App class
 """
 
 import os.path
-from rapydo.do.arguments import current_args, parse_conf
+try:
+    from rapydo.do import arguments
+except SystemExit:
+    raise
+except BaseException as e:
+    from rapydo.utils.logs import get_logger
+    log = get_logger(__name__)
+    log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
+
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.do import project
@@ -23,7 +31,7 @@ log = get_logger(__name__)
 
 class Application(object):
 
-    def __init__(self, args=current_args):
+    def __init__(self, args=arguments.current_args):
 
         self.tested_connection = False
         self.current_args = args
@@ -83,6 +91,7 @@ Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
             )
 
+        # FIXME: move in a configuration file?
         required_files = [
             'specs/project_configuration.yaml',
             'specs/defaults.yaml',
@@ -245,7 +254,7 @@ Verify that you are in the right folder, now you are in: %s
         value = self.current_args.get(key).split(sep)
         if avoid_default or default is not None:
             config_default = \
-                parse_conf.get('options', {}) \
+                arguments.parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
             if value == [config_default]:
@@ -270,6 +279,9 @@ Verify that you are in the right folder, now you are in: %s
         if not os.path.isfile(envfile):
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
+                env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+                log.pp(env)
+                exit(1)
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -514,25 +526,36 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     ################################
 
     def _run(self):
+        """ RUN THE APPLICATION
+
+        The heart of the app: it runs a single controller command.
         """
-        The heart of the application.
-        This run a single command.
-        """
+
+        # NOTE: Argument are parsed inside the __init__ method
+
+        # Initial inspection
+        self._inspect_current_folder()
+        self._read_specs()  # Should be the first thing
+
+        # TODO: read EXEC COMMANDS from YAML
+        arguments.extend(self.specs.get('controller', {}))
 
         # Verify if we implemented the requested command
         func = getattr(self, self.action, None)
         if func is None:
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
-        # preparing steps
-        self._inspect_current_folder()
-        self._read_specs()
+        # GIT related
         self._git_submodules(development=self.development)
         # FIXME: does not work with branches @mdantonio
         # self._git_check_updates()
+
+        # Compose services and variables
         self._make_env()
         self._read_composer()
         self._check_placeholders()
+
+        # Build or check template containers images
         self._build_dependencies()
 
         # Final step, launch the command
