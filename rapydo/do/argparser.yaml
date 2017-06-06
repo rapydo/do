@@ -68,9 +68,10 @@ subcommands:
   custom:
     description: execute predefined custom commands inside containers
   ssl_certificate:
+    description: Issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
-      description: Issue a production certificate with service Letsencrypt
+      # description: Issue a production certificate with service Letsencrypt
       command: updatecertificates
       service: proxy
       user: root

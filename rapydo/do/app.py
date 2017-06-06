@@ -446,15 +446,28 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stopped by keyboard")
             pass
 
-    def shell(self):
+    def shell(self, user=None, command=None, service=None):
+
         dc = Compose(files=self.files)
 
-        services = self._get_services(avoid_default=True)
-        user = self.current_args.get('user')
-        whole_command = self.current_args.get('command', 'whoami')
+        if service is None:
+            services = self._get_services(avoid_default=True)
+
+            if len(services) != 1:
+                log.critical_exit(
+                    "Commands can be executed only on one service." +
+                    "\nCurrent request on: %s" % services)
+            else:
+                service = services.pop()
+
+        if user is None:
+            user = self.current_args.get('user')
+
+        if command is None:
+            command = self.current_args.get('command', 'whoami')
 
         # The command must be splitted into command + args_array
-        pieces = whole_command.split()
+        pieces = command.split()
         try:
             shell_command = pieces[0]
             shell_args = pieces[1:]
@@ -462,33 +475,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             # no command, use default
             shell_command = None
             shell_args = []
-
-        if len(services) != 1:
-            log.critical_exit(
-                "Commands can be executed only on one service." +
-                "\nCurrent request on: %s" % services)
         else:
-            service = services.pop()
             log.info("Command request: %s(%s+%s)"
                      % (service.upper(), shell_command, shell_args))
 
-        if service != 'restclient':
-
-            options = {
-                'SERVICE': service,
-                'COMMAND': shell_command,
-                'ARGS': shell_args,
-                '--index': '1',
-                '--user': user,
-                '--privileged': True,
-                '-T': False,
-                '-d': False,
-            }
-
-            dc.command('exec_command', options)
-
-        else:
-
+        if service == 'restclient':
+            # NOTE: an api client requires a run for an isolated service
             options = {
                 'SERVICE': service,
                 'COMMAND': shell_command,
@@ -506,8 +498,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 '--volume': [],
                 '--publish': [],
             }
-
             dc.command('run', options)
+
+        else:
+            options = {
+                'SERVICE': service,
+                'COMMAND': shell_command,
+                'ARGS': shell_args,
+                '--index': '1',
+                '--user': user,
+                '--privileged': True,
+                '-T': False,
+                '-d': False,
+            }
+            dc.command('exec_command', options)
 
     def build(self):
         dc = Compose(files=self.files)
@@ -526,8 +530,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         raise NotImplementedError("TODO")
 
     def ssl_certificate(self):
-        # TODO
-        raise NotImplementedError("TODO")
+
+        # Use my method name in a meta programming style
+        import inspect
+        current_method_name = inspect.currentframe().f_code.co_name
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'letsencrypt'
+
+        return self.shell(**meta)
 
     ################################
     # ### RUN ONE COMMAND OFF
