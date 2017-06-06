@@ -3,6 +3,8 @@
 # dev="-r testpypi"
 dev=""
 
+git update-index --assume-unchanged README.rst
+# pip3 install --upgrade -r dev-requirements.txt
 pandoc \
 	--from=markdown --to=rst \
 	--output=README.rst README.md
