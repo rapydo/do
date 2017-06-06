@@ -525,9 +525,22 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('build', options)
 
+    def _custom_parse_args(self):
+
+        # custom options
+        arguments.extra_command_parser.add_parser('test', help='just a test')
+        arguments.extra_command_parser.add_parser('test1', help='just a test')
+        arguments.extra_command_parser.add_parser('test2', help='just a test')
+        # parse it
+        self.custom_command = \
+            vars(arguments.extra_parser.parse_args(
+                arguments.remaining_args
+            )).get('custom')
+
     def custom(self):
+        log.warning("Custom command: %s" % self.custom_command)
         # TODO
-        raise NotImplementedError("TODO")
+        raise NotImplementedError("TO FINISH")
 
     def ssl_certificate(self):
 
@@ -561,8 +574,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self._inspect_current_folder()
         self._read_specs()  # Should be the first thing
 
-        # TODO: read EXEC COMMANDS from YAML
-        arguments.extend(self.specs.get('controller', {}))
+        if self.action == 'custom':
+            self._custom_parse_args()
 
         # Verify if we implemented the requested command
         func = getattr(self, self.action, None)

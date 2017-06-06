@@ -92,19 +92,6 @@ subparsers.required = True
 # BASE normal commands
 mycommands = parse_conf.get('subcommands', {})
 
-
-def extend(conf):
-    """ Extending cli commands """
-
-    # for name, options in conf.get('commands').items():
-    #     print("TEST", name, options)
-    #     exit(1)
-
-    pass
-
-
-# ##########################
-# loop
 for command_name, options in sorted(mycommands.items()):
 
     # Creating a parser for each sub-command [check, init, etc]
@@ -127,19 +114,43 @@ for command_name, options in sorted(mycommands.items()):
         params = prepare_params(suboptions)
         subparse.add_argument('--%s' % option_name, **params)
 
+# ##########################
 # Print usage if no arguments provided
 if len(sys.argv) == 1:
     parser.print_help()
     sys.exit(1)
 
+# ##########################
 # Reading input parameters
-current_args = parser.parse_args()
-current_args = vars(current_args)
 
+"""
+# Partial parsing
+# https://docs.python.org/3.4/library/argparse.html#partial-parsing
+# Example
+# https://gist.github.com/von/949337/
+"""
+
+# current_args = parser.parse_args()
+current_args_namespace, remaining_args = parser.parse_known_args()
+current_args = vars(current_args_namespace)
+
+# custom commands as a separate parser
+extra_parser = argparse.ArgumentParser(
+    description='Custom rapydo commands',
+    usage='rapydo custom COMMAND\n\nUnknown custom command!'
+)
+extra_command_parser = extra_parser.add_subparsers(
+    title='Available custom commands',
+    dest='custom', help='help peppe'
+)
+extra_command_parser.required = True
+
+# ##########################
 # Log level
-os.environ['DEBUG_LEVEL'] = current_args.get('log_level')
+key = 'DEBUG_LEVEL'
+os.environ[key] = current_args.get('log_level')
 
-if True:
+if os.environ.get(key) is not None:
     from rapydo.utils.logs import get_logger
     log = get_logger(__name__)
     log.verbose("Parsed arguments: %s" % current_args)
