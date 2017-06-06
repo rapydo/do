@@ -7,6 +7,7 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 
+import compose.cli.errors as cerrors
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
@@ -72,5 +73,9 @@ class Compose(object):
             options['SERVICE'] = []
 
         log.info("Requesting within compose: '%s'" % command)
-        method(options=options)
-        log.very_verbose("Executed compose %s w/%s" % (command, options))
+        try:
+            method(options=options)
+        except cerrors.UserError as e:
+            log.critical_exit("Failed command execution:\n%s" % e)
+        else:
+            log.very_verbose("Executed compose %s w/%s" % (command, options))
