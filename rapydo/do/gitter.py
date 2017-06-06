@@ -18,6 +18,10 @@ def get_local(path):
         return None
 
 
+def get_repo(path):
+    return Repo(path)
+
+
 def upstream(url, path=None, key='upstream', do=False):
 
     if path is None:

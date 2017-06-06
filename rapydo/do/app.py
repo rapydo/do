@@ -150,7 +150,9 @@ Verify that you are in the right folder, now you are in: %s
 
         gits = {}
 
-        if not development:
+        if development:
+            gits['main'] = gitter.get_repo(".")
+        else:
             gits['main'] = gitter.upstream(
                 url=core.get('online_url'),
                 path=core.get('path'),
