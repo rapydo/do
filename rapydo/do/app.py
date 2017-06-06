@@ -282,8 +282,6 @@ Verify that you are in the right folder, now you are in: %s
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
-                log.pp(env)
-                exit(1)
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
