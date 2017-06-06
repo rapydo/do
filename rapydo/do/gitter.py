@@ -61,6 +61,39 @@ Suggestion: execute the init command
     return gitobj
 
 
+def switch_branch(gitobj, branch_name='master'):
+
+    if gitobj.active_branch.name == branch_name:
+        return False
+
+    switch = False
+    remote_branches = gitobj.remotes[0].fetch()
+
+    for remote_branch in remote_branches:
+
+        if remote_branch.name.endswith('/' + branch_name):
+            # Create a new HEAD
+            chkout = gitobj.create_head(
+                branch_name, remote_branch.commit)
+            # Switch to the new HEAD (like checkout)
+            gitobj.head.reference = chkout
+            # reset the index and working tree to match the pointed-to commit
+            gitobj.head.reset(index=True, working_tree=True)
+            # Verify that no problem are available
+            assert not gitobj.head.is_detached
+            log.verbose("Switching %s to %s" % (gitobj.git_dir, branch_name))
+            # Signal
+            switch = True
+            break
+        else:
+            pass
+
+    if not switch:
+        log.critical_exit("Requested branch '%s' was not found" % branch_name)
+
+    return True
+
+
 def clone(online_url, path, branch='master', do=False):
 
     local_path = os.path.join(helpers.current_dir(), path)
@@ -70,7 +103,8 @@ def clone(online_url, path, branch='master', do=False):
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        log.info("Cloned repo %s as %s" % (online_url, path))
+        switch_branch(gitobj, branch)
+        log.info("Cloned repo %s@%s as %s" % (online_url, branch, path))
     else:
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
 

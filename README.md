@@ -7,7 +7,7 @@ Do things with RAPyDo ecosystem
 
 ---
 
-## The project
+## The project
 
 Welcome to our new `RAPyDo` framework.
 

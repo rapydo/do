@@ -5,7 +5,15 @@ Main App class
 """
 
 import os.path
-from rapydo.do.arguments import current_args, parse_conf
+try:
+    from rapydo.do import arguments
+except SystemExit:
+    raise
+except BaseException as e:
+    from rapydo.utils.logs import get_logger
+    log = get_logger(__name__)
+    log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
+
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.do import project
@@ -23,7 +31,7 @@ log = get_logger(__name__)
 
 class Application(object):
 
-    def __init__(self, args=current_args):
+    def __init__(self, args=arguments.current_args):
 
         self.tested_connection = False
         self.current_args = args
@@ -58,7 +66,10 @@ class Application(object):
     def _check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
         if program_version is None:
-            log.critical_exit('Please make sure %s is installed' % program)
+            log.critical_exit(
+                "Missing requirement.\n" +
+                "Please make sure that '%s' is installed" % program
+            )
         else:
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
@@ -80,6 +91,7 @@ Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
             )
 
+        # FIXME: move in a configuration file?
         required_files = [
             'specs/project_configuration.yaml',
             'specs/defaults.yaml',
@@ -238,17 +250,22 @@ Verify that you are in the right folder, now you are in: %s
         if not cache:
             log.debug("(CHECKED) no cache builds")
 
-    def _get_services(self, key='services', sep=',', avoid_default=False):
-        """ FIXME: Deprecated """
+    def _get_services(self, key='services', sep=',',
+                      default=None, avoid_default=False):
 
         value = self.current_args.get(key).split(sep)
-        if avoid_default:
-            default = \
-                parse_conf.get('options', {}) \
+        if avoid_default or default is not None:
+            config_default = \
+                arguments.parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
-            if value == [default]:
-                log.critical_exit("You must set '--services' option")
+            if value == [config_default]:
+                if avoid_default:
+                    log.critical_exit("You must set '--services' option")
+                elif default is not None:
+                    value = default
+                else:
+                    pass
         return value
 
     def _make_env(self):
@@ -264,10 +281,18 @@ Verify that you are in the right folder, now you are in: %s
         if not os.path.isfile(envfile):
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
+                env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+                log.pp(env)
+                exit(1)
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
-                    if ' ' in str(value):
+                    if value is None:
+                        value = ''
+                    else:
+                        value = str(value)
+                    # log.print("ENV values. %s:*%s*" % (key, value))
+                    if ' ' in value:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
                 log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
@@ -352,7 +377,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def control(self):
 
         command = self.current_args.get('controlcommand')
-        # services = self._get_services()
+        services = self._get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
         options = {}
@@ -369,8 +394,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 '--build': False,
                 '--no-build': False,
                 '--scale': {},
-                # 'SERVICE': services
-                'SERVICE': self.active_services
+                'SERVICE': services
             }
             command = 'up'
 
@@ -407,15 +431,17 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def log(self):
         dc = Compose(files=self.files)
-        # services = self._get_services()
+        services = self._get_services(default=self.active_services)
+
         options = {
-            '--follow': True,
+            # '--follow': True,
+            '--follow': False,
             '--tail': 'all',
             '--no-color': False,
             '--timestamps': None,
-            # 'SERVICE': services,
-            'SERVICE': self.active_services
+            'SERVICE': services,
         }
+
         try:
             dc.command('logs', options)
         except KeyboardInterrupt:
@@ -487,35 +513,59 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def build(self):
         dc = Compose(files=self.files)
-        # services = self._get_services()
+        services = self._get_services(default=self.active_services)
+
         options = {
-            'SERVICE': self.active_services
+            'SERVICE': services,
+            # FIXME: user should be able to set the two below from cli
+            '--no-cache': False,
+            '--pull': False,
         }
         dc.command('build', options)
+
+    def custom(self):
+        # TODO
+        raise NotImplementedError("TODO")
+
+    def ssl_certificate(self):
+        # TODO
+        raise NotImplementedError("TODO")
 
     ################################
     # ### RUN ONE COMMAND OFF
     ################################
 
     def _run(self):
+        """ RUN THE APPLICATION
+
+        The heart of the app: it runs a single controller command.
         """
-        The heart of the application.
-        This run a single command.
-        """
+
+        # NOTE: Argument are parsed inside the __init__ method
+
+        # Initial inspection
+        self._inspect_current_folder()
+        self._read_specs()  # Should be the first thing
+
+        # TODO: read EXEC COMMANDS from YAML
+        arguments.extend(self.specs.get('controller', {}))
 
         # Verify if we implemented the requested command
         func = getattr(self, self.action, None)
         if func is None:
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
-        # preparing steps
-        self._inspect_current_folder()
-        self._read_specs()
+        # GIT related
         self._git_submodules(development=self.development)
-        self._git_check_updates()
+        # FIXME: does not work with branches @mdantonio
+        # self._git_check_updates()
+
+        # Compose services and variables
         self._make_env()
         self._read_composer()
         self._check_placeholders()
+
+        # Build or check template containers images
         self._build_dependencies()
 
         # Final step, launch the command

@@ -15,21 +15,19 @@ def read(*parts):
 
 setup(
     name='rapydo_controller',
+    version=__version__,
     description='Do development and deploy with the RAPyDo framework',
     # long_description=__doc__,
     long_description=read('README.rst'),
-    version=__version__,
+    # keywords='http api rest web backend rapydo',
+    keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
     url='https://github.com/rapydo/do',
     license='MIT',
-    packages=[
-        'rapydo.do',
-    ],
+    packages=['rapydo.do'],
     package_data={
-        'rapydo.do': [
-            'argparser.yaml'
-        ],
+        'rapydo.do': ['argparser.yaml'],
     },
     python_requires='>=3.4',
     entry_points={
@@ -39,12 +37,12 @@ setup(
     },
     install_requires=[
         "rapydo-utils",
-        "requests==2.11.1",
         "docker",
         "docker-compose>=1.13",
         "gitpython",
         "dockerfile-parse",
-        "better_exceptions"
+        "better_exceptions",
+        "requests==2.11.1",
     ],
     # tests_require=[  # from PIP code
     #     'pytest',
@@ -61,6 +59,5 @@ setup(
         'Programming Language :: Python',
         'Intended Audience :: Developers',
     ],
-    keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
-    zip_safe=False,
+    # zip_safe=False,
 )

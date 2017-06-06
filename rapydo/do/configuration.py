@@ -15,21 +15,6 @@ FRONTEND_PATH = 'frontend'
 COMPOSE_FILE = 'docker-compose'
 SHORT_YAML_EXT = 'yml'
 
-COMPOSER_BACKEND_YAML = {
-    'name': 'backend',
-    'file': COMPOSE_FILE,
-    'extension': SHORT_YAML_EXT,
-    'path': BACKEND_PATH,
-    'mandatory': True
-}
-COMPOSER_FRONTEND_YAML = {
-    'name': 'frontend',
-    'file': COMPOSE_FILE,
-    'extension': SHORT_YAML_EXT,
-    'path': FRONTEND_PATH,
-    'mandatory': False
-}
-
 
 def read_yamls(blueprint, frontend=False, path=None):
 
@@ -40,17 +25,30 @@ def read_yamls(blueprint, frontend=False, path=None):
     base_files = []
     all_files = []
 
-    composers.append(COMPOSER_BACKEND_YAML)
-    if frontend:
-        composers.append(COMPOSER_FRONTEND_YAML)
+    # FIXME: move this dictionaries into defaults
 
+    ######################
+    # Base = backend + frontend
     composers.append({
-        'name': 'common', 'file': 'commons',
+        'name': 'backend', 'file': 'backend', 'base': True,
+        'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': True
+    })
+
+    if frontend:
+        composers.append({
+            'name': 'frontend', 'file': 'frontend', 'base': True,
+            'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': False
+        })
+
+    ######################
+    # vanilla = commons + blueprint
+    composers.append({
+        'name': 'common', 'file': 'commons', 'base': False,
         'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': False
     })
 
     composers.append({
-        'name': 'blueprint', 'file': blueprint,
+        'name': 'blueprint', 'file': blueprint, 'base': False,
         'extension': SHORT_YAML_EXT, 'path': path, 'mandatory': True
     })
 
@@ -60,6 +58,7 @@ def read_yamls(blueprint, frontend=False, path=None):
         name = composer.pop('name')
         file = composer.get('file', 'unknown')
         mandatory = composer.pop('mandatory', False)
+        base = composer.pop('base', False)
 
         try:
             compose = load_yaml_file(**composer)
@@ -72,7 +71,9 @@ def read_yamls(blueprint, frontend=False, path=None):
             else:
                 filepath = load_yaml_file(return_path=True, **composer)
                 all_files.append(filepath)
-                if path != composer.get('path'):
+
+                # if path != composer.get('path'):
+                if base:
                     base_files.append(filepath)
 
         except KeyError as e:
