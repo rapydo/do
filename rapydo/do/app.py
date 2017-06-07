@@ -10,6 +10,7 @@ try:
 except SystemExit:
     raise
 except BaseException as e:
+    # raise
     from rapydo.utils.logs import get_logger
     log = get_logger(__name__)
     log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
