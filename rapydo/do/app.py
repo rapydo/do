@@ -530,10 +530,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # custom options from configuration file
         self.custom_commands = self.specs \
             .get('controller', {}).get('commands', {})
+
+        if len(self.custom_commands) < 1:
+            log.critical_exit("No custom commands defined")
+
         for name, custom in self.custom_commands.items():
             arguments.extra_command_parser.add_parser(
                 name, help=custom.get('description')
             )
+
+        if len(arguments.remaining_args) != 1:
+            arguments.extra_parser.print_help()
+            import sys
+            sys.exit(1)
+
         # parse it
         self.custom_command = \
             vars(
@@ -580,6 +590,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self._inspect_current_folder()
         self._read_specs()  # Should be the first thing
 
+        # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
             self._custom_parse_args()
 

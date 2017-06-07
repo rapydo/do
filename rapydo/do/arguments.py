@@ -136,12 +136,12 @@ current_args = vars(current_args_namespace)
 
 # custom commands as a separate parser
 extra_parser = argparse.ArgumentParser(
-    description='Custom rapydo commands',
-    usage='$ rapydo custom COMMAND\n\nUnknown custom command!'
+    description='Custom rapydo commands from your project configuration',
+    add_help=False, usage='\n$ rapydo custom CUSTOM_COMMAND'
 )
 extra_command_parser = extra_parser.add_subparsers(
     title='Available custom commands',
-    dest='custom', help='help peppe'
+    dest='custom', help='list of custom commands'
 )
 extra_command_parser.required = True
 
