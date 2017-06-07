@@ -527,20 +527,26 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _custom_parse_args(self):
 
-        # custom options
-        arguments.extra_command_parser.add_parser('test', help='just a test')
-        arguments.extra_command_parser.add_parser('test1', help='just a test')
-        arguments.extra_command_parser.add_parser('test2', help='just a test')
+        # custom options from configuration file
+        self.custom_commands = self.specs \
+            .get('controller', {}).get('commands', {})
+        for name, custom in self.custom_commands.items():
+            arguments.extra_command_parser.add_parser(
+                name, help=custom.get('description')
+            )
         # parse it
         self.custom_command = \
-            vars(arguments.extra_parser.parse_args(
-                arguments.remaining_args
-            )).get('custom')
+            vars(
+                arguments.extra_parser.parse_args(
+                    arguments.remaining_args
+                )
+            ).get('custom')
 
     def custom(self):
-        log.warning("Custom command: %s" % self.custom_command)
-        # TODO
-        raise NotImplementedError("TO FINISH")
+        log.debug("Custom command: %s" % self.custom_command)
+        meta = self.custom_commands.get(self.custom_command)
+        meta.pop('description', None)
+        return self.shell(**meta)
 
     def ssl_certificate(self):
 
