@@ -173,6 +173,16 @@ def check_file_younger_than(gitobj, file, timestamp):
     return time.timestamp_from_string(timestamp) < max(dates)
 
 
+def update(path, gitobj):
+    # TO FIX: to be discussed
+    if path == 'main':
+        # For now we skip the main repo, because it could be password protected
+        return
+    for remote in gitobj.remotes:
+        log.info("Updating %s" % path)
+        remote.pull()
+
+
 def check_updates(path, gitobj):
 
     # TO FIX: to be discussed

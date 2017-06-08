@@ -111,3 +111,7 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: remove also containers persistent data
+
+  update:
+    description: update the current project
+    
