@@ -3,7 +3,7 @@
 import os
 from urllib.parse import urlparse
 from git import Repo
-from git.exc import InvalidGitRepositoryError
+from git.exc import InvalidGitRepositoryError, GitCommandError
 from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
@@ -190,27 +190,35 @@ def check_updates(path, gitobj):
     log.verbose("Inspecting %s/%s" % (path, branch))
     last_local_commit = list(gitobj.iter_commits(branch, max_count=1)).pop()
 
-    remote_commits = list(
-        gitobj.iter_commits(remote_branch, max_count=max_remote))
+    remote_commits = gitobj.iter_commits(remote_branch, max_count=max_remote)
 
-    log.verbose("Last local commit for %s is %s" % (path, last_local_commit))
-    behind = 0
-    for c in remote_commits:
-        if c == last_local_commit:
-            break
-        behind += 1
-        if behind == 1:
-            log.warning("%s repo should be updated!" % (path))
-
-        message = c.message.strip()
-
-        sha = c.hexsha[0:7]
-        if len(message) > 60:
-            message = message[0:57] + "..."
+    try:
+        remote_commits_list = list(remote_commits)
+    except GitCommandError:
         log.info(
+            "Remote branch %s not found for %s repo. Is it a local branch?"
+            % (remote_branch, path)
+        )
+    else:
 
-            "Missing commit in %s: %s (%s)"
-            % (path, sha, message))
+        log.verbose(
+            "Last local commit for %s is %s" % (path, last_local_commit))
+        behind = 0
+        for c in remote_commits_list:
+            if c == last_local_commit:
+                break
+            behind += 1
+            if behind == 1:
+                log.warning("%s repo should be updated!" % (path))
 
-    if behind == 0:
-        log.debug("(CHECKED) %s repo is updated" % (path))
+            message = c.message.strip().replace('\n', "")
+
+            sha = c.hexsha[0:7]
+            if len(message) > 60:
+                message = message[0:57] + "..."
+            log.warning(
+                "Missing commit in %s: %s (%s)"
+                % (path, sha, message))
+
+        if behind == 0:
+            log.debug("(CHECKED) %s repo is updated" % (path))

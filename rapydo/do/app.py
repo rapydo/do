@@ -602,8 +602,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # GIT related
         self._git_submodules(development=self.development)
-        # FIXME: does not work with branches @mdantonio
-        # self._git_check_updates()
+        self._git_check_updates()
 
         # Compose services and variables
         self._make_env()
