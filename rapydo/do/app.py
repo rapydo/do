@@ -48,7 +48,7 @@ class Application(object):
         self.check = self.action == 'check'
 
         # Check if docker is installed
-        self._check_program('docker')
+        self.check_program('docker')
         self.docker = Dock()
 
         # Check docker-compose version
@@ -60,13 +60,13 @@ class Application(object):
             log.debug("(CHECKED) %s version: %s" % (pack, package_version))
 
         # Check if git is installed
-        self._check_program('git')
+        self.check_program('git')
 
         self.blueprint = self.current_args.get('blueprint')
         self.project_dir = helpers.current_dir()
-        self._run()
+        self.run()
 
-    def _check_program(self, program):
+    def check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
         if program_version is None:
             log.critical_exit(
@@ -77,7 +77,7 @@ class Application(object):
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
 
-    def _inspect_current_folder(self):
+    def inspect_current_folder(self):
         """
         Since the rapydo command only works on rapydo-core or a rapydo fork
         we want to ensure that the current folder have a structure rapydo-like
@@ -115,7 +115,7 @@ Verify that you are in the right folder, now you are in: %s
                     """ % (fname, os.getcwd())
                 )
 
-    def _read_specs(self):
+    def read_specs(self):
         """ Read project configuration """
 
         self.specs = project.configuration(development=self.development)
@@ -128,7 +128,7 @@ Verify that you are in the right folder, now you are in: %s
 
         log.very_verbose("Frontend is %s" % self.frontend)
 
-    def _verify_connected(self):
+    def verify_connected(self):
         """ Check if connected to internet """
 
         connected = checks.check_internet()
@@ -139,7 +139,7 @@ Verify that you are in the right folder, now you are in: %s
             self.tested_connection = True
         return
 
-    def _working_clone(self, repo):
+    def working_clone(self, repo):
 
         # substitute values starting with '$$'
         myvars = {'frontend': self.frontend}
@@ -153,11 +153,11 @@ Verify that you are in the right folder, now you are in: %s
             repo['do'] = self.initialize
 
         if not self.tested_connection and self.initialize:
-            self._verify_connected()
+            self.verify_connected()
 
         return gitter.clone(**repo)
 
-    def _git_submodules(self, development=False):
+    def git_submodules(self, development=False):
         """ Check and/or clone git projects """
 
         repos = self.vars.get('repos')
@@ -175,17 +175,23 @@ Verify that you are in the right folder, now you are in: %s
             )
 
         for name, repo in sorted(repos.items()):
-            gits[name] = self._working_clone(repo)
+            gits[name] = self.working_clone(repo)
 
         self.gits = gits
 
-    def _read_composer(self):
+    def git_update_repos(self):
+
+        for name, gitobj in self.gits.items():
+            if gitobj is not None:
+                gitter.update(name, gitobj)
+
+    def read_composer(self):
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
             read_yamls(self.blueprint, self.frontend)
         log.debug("Confs used (with order): %s" % self.files)
 
-    def _build_dependencies(self):
+    def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
         ####################
@@ -204,9 +210,9 @@ Verify that you are in the right folder, now you are in: %s
             log.debug("Forcing rebuild for cached templates")
             dc.force_template_build(builds)
         else:
-            self._verify_build_cache(builds)
+            self.verify_build_cache(builds)
 
-    def _verify_build_cache(self, builds):
+    def verify_build_cache(self, builds):
 
         cache = False
         if len(builds) > 0:
@@ -247,7 +253,7 @@ Verify that you are in the right folder, now you are in: %s
         if not cache:
             log.debug("(CHECKED) no cache builds")
 
-    def _get_services(self, key='services', sep=',',
+    def get_services(self, key='services', sep=',',
                       default=None, avoid_default=False):
 
         value = self.current_args.get(key).split(sep)
@@ -265,7 +271,7 @@ Verify that you are in the right folder, now you are in: %s
                     pass
         return value
 
-    def _make_env(self):
+    def make_env(self):
 
         envfile = os.path.join(self.project_dir, COMPOSE_ENVIRONMENT_FILE)
         if self.current_args.get('force_env'):
@@ -308,7 +314,7 @@ Verify that you are in the right folder, now you are in: %s
                     "Add --force_env to update."
                 )
 
-    def _check_placeholders(self):
+    def check_placeholders(self):
 
         self.services_dict, self.active_services = \
             project.find_active(self.services)
@@ -342,7 +348,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     # ### COMMANDS
     ################################
 
-    def check(self):
+    def _check(self):
 
         # NOTE: a SECURITY BUG?
         # dc = Compose(files=self.files)
@@ -352,14 +358,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         log.info("All checked")
 
-    def init(self):
+    def _init(self):
         log.info("Project initialized")
 
-    def status(self):
+    def _status(self):
         dc = Compose(files=self.files)
         dc.command('ps', {'-q': None})
 
-    def clean(self):
+    def _clean(self):
         dc = Compose(files=self.files)
         rm_volumes = self.current_args.get('rm_volumes', False)
         options = {
@@ -369,22 +375,22 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('down', options)
 
-    def update(self):
+    def _update(self):
         log.info("Update subrepo")
 
         raise NotImplementedError()
 
-    def control(self):
+    def _control(self):
 
         command = self.current_args.get('controlcommand')
-        services = self._get_services(default=self.active_services)
+        services = self.get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
-        options = {}
+        options = {'SERVICE': services}
 
         if command == 'start':
             # print("SERVICES", services)
-            options = {
+            options.update({
                 '--no-deps': False,
                 '-d': True,
                 '--abort-on-container-exit': False,
@@ -394,8 +400,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 '--build': False,
                 '--no-build': False,
                 '--scale': {},
-                'SERVICE': services
-            }
+            })
             command = 'up'
 
         elif command == 'stop':
@@ -404,12 +409,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             pass
         elif command == 'remove':
             dc.command('stop')
-            options = {
+            options.update({
                 # '--stop': True,  # BUG? not working
                 '--force': True,
                 '-v': False,  # dangerous?
-                'SERVICE': []
-            }
+                # 'SERVICE': []
+            })
             command = 'rm'
         elif command == 'toggle_freeze':
 
@@ -429,9 +434,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         dc.command(command, options)
 
-    def log(self):
+    def _log(self):
         dc = Compose(files=self.files)
-        services = self._get_services(default=self.active_services)
+        services = self.get_services(default=self.active_services)
 
         options = {
             # '--follow': True,
@@ -448,12 +453,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stopped by keyboard")
             pass
 
-    def shell(self, user=None, command=None, service=None):
+    def _shell(self, user=None, command=None, service=None):
 
         dc = Compose(files=self.files)
 
         if service is None:
-            services = self._get_services(avoid_default=True)
+            services = self.get_services(avoid_default=True)
 
             if len(services) != 1:
                 log.critical_exit(
@@ -464,9 +469,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
+            if user.strip() == '':
+                user = None
 
         if command is None:
-            command = self.current_args.get('command', 'whoami')
+            default = 'echo hello world'
+            command = self.current_args.get('command', default)
+            if service == 'restclient':
+                if command == 'bash':
+                    command = ''
 
         # The command must be splitted into command + args_array
         pieces = command.split()
@@ -489,13 +500,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 'ARGS': shell_args,
                 '--name': None,
                 '--user': user,
+                # '--user': None,
                 '--rm': True,
                 '--no-deps': True,
                 '--service-ports': False,
                 '-d': False,
                 '-T': False,
                 '--workdir': None,
-                '-e': None,
+                '-e': [],
                 '--entrypoint': None,
                 '--volume': [],
                 '--publish': [],
@@ -515,9 +527,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             }
             dc.command('exec_command', options)
 
-    def build(self):
+    def _build(self):
         dc = Compose(files=self.files)
-        services = self._get_services(default=self.active_services)
+        services = self.get_services(default=self.active_services)
 
         options = {
             'SERVICE': services,
@@ -527,7 +539,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('build', options)
 
-    def _custom_parse_args(self):
+    def custom_parse_args(self):
 
         # custom options from configuration file
         self.custom_commands = self.specs \
@@ -554,13 +566,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
-    def custom(self):
+    def _custom(self):
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)
         meta.pop('description', None)
-        return self.shell(**meta)
+        return self._shell(**meta)
 
-    def ssl_certificate(self):
+    def _ssl_certificate(self):
 
         # Use my method name in a meta programming style
         import inspect
@@ -584,7 +596,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         ignore_submodule = self.current_args.get('ignore_submodule', '')
         return ignore_submodule.split(",")
 
-    def _run(self):
+    def run(self):
         """ RUN THE APPLICATION
 
         The heart of the app: it runs a single controller command.
@@ -593,15 +605,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # NOTE: Argument are parsed inside the __init__ method
 
         # Initial inspection
-        self._inspect_current_folder()
-        self._read_specs()  # Should be the first thing
+        self.inspect_current_folder()
+        self.read_specs()  # Should be the first thing
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
-            self._custom_parse_args()
+            self.custom_parse_args()
 
         # Verify if we implemented the requested command
-        func = getattr(self, self.action, None)
+        func = getattr(self, '_' + self.action, None)
         if func is None:
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
@@ -621,12 +633,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                         gitter.check_unstaged(name, gitobj)
 
         # Compose services and variables
-        self._make_env()
-        self._read_composer()
-        self._check_placeholders()
+        self.make_env()
+        self.read_composer()
+        self.check_placeholders()
 
         # Build or check template containers images
-        self._build_dependencies()
+        self.build_dependencies()
 
         # Final step, launch the command
         func()
