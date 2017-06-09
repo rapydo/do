@@ -45,6 +45,7 @@ class Application(object):
             log.info("Do request: %s" % self.action)
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
+        self.check = self.action == 'check'
 
         # Check if docker is installed
         self._check_program('docker')
@@ -616,7 +617,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self._git_submodules(development=self.development)
         if self.update:
             self._git_update_repos()
-        else:
+        elif self.check:
             self._git_check_updates()
 
         # Compose services and variables

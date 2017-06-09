@@ -247,7 +247,8 @@ def check_updates(path, gitobj):
         if len(commits_ahead_list) > 0:
             log.warning("You have commits not pushed on %s repo" % (path))
         else:
-            log.debug("(CHECKED) %s repo is synchronized with remote" % (path))
+            log.debug(
+                "(CHECKED) You have pushed all commits on %s repo" % (path))
         for c in commits_ahead_list:
             message = c.message.strip().replace('\n', "")
 
