@@ -44,6 +44,8 @@ class Application(object):
         else:
             log.info("Do request: %s" % self.action)
         self.initialize = self.action == 'init'
+        self.update = self.action == 'update'
+        self.check = self.action == 'check'
 
         # Check if docker is installed
         self._check_program('docker')
@@ -177,11 +179,11 @@ Verify that you are in the right folder, now you are in: %s
 
         self.gits = gits
 
-    def _git_check_updates(self):
+    def _git_update_repos(self):
 
         for name, gitobj in self.gits.items():
             if gitobj is not None:
-                gitter.check_updates(name, gitobj)
+                gitter.update(name, gitobj)
 
     def _read_composer(self):
         # Read necessary files
@@ -372,6 +374,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--rmi': 'local',  # 'all'
         }
         dc.command('down', options)
+
+    def update(self):
+        log.info("Update subrepo")
+
+        raise NotImplementedError()
 
     def control(self):
 
@@ -608,8 +615,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # GIT related
         self._git_submodules(development=self.development)
-        # FIXME: does not work with branches @mdantonio
-        # self._git_check_updates()
+        if self.update:
+            self._git_update_repos()
+        elif self.check:
+            for name, gitobj in sorted(self.gits.items()):
+                if gitobj is not None:
+                    gitter.check_updates(name, gitobj)
+                    gitter.check_unstaged(name, gitobj)
 
         # Compose services and variables
         self._make_env()

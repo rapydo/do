@@ -3,7 +3,7 @@
 import os
 from urllib.parse import urlparse
 from git import Repo
-from git.exc import InvalidGitRepositoryError
+from git.exc import InvalidGitRepositoryError, GitCommandError
 from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
@@ -173,44 +173,95 @@ def check_file_younger_than(gitobj, file, timestamp):
     return time.timestamp_from_string(timestamp) < max(dates)
 
 
-def check_updates(path, gitobj):
+def get_unstaged_files(gitobj):
 
-    # TO FIX: to be discussed
-    if path == 'main':
-        # For now we skip the main repo, because it could be password protected
+    return gitobj.index.diff(None)
+
+
+def update(path, gitobj):
+
+    has_unstaged = len(get_unstaged_files(gitobj)) > 0
+
+    if has_unstaged:
+        log.warning(
+            "Unable to update %s repo, you have unstaged files" % (path))
         return
 
+    branch = gitobj.active_branch
     for remote in gitobj.remotes:
-        log.verbose("Fetching %s" % remote)
+        if remote.name != 'origin':
+            continue
+
+        log.info("Updating %s %s (branch = %s)" % (remote, path, branch))
+        remote.pull(branch)
+
+
+def check_unstaged(path, gitobj):
+
+    modified_files = get_unstaged_files(gitobj)
+    if len(modified_files) > 0:
+        log.warning("You have unstaged files on %s" % path)
+
+
+def check_updates(path, gitobj):
+
+    for remote in gitobj.remotes:
+        log.verbose("Fetching %s on %s" % (remote, path))
         remote.fetch()
 
     branch = gitobj.active_branch
-    remote_branch = "origin/%s" % branch
+    behind_check = "%s..origin/%s" % (branch, branch)
+    ahead_check = "origin/%s..%s" % (branch, branch)
+
     max_remote = 20
     log.verbose("Inspecting %s/%s" % (path, branch))
-    last_local_commit = list(gitobj.iter_commits(branch, max_count=1)).pop()
 
-    remote_commits = list(
-        gitobj.iter_commits(remote_branch, max_count=max_remote))
+    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
 
-    log.verbose("Last local commit for %s is %s" % (path, last_local_commit))
-    behind = 0
-    for c in remote_commits:
-        if c == last_local_commit:
-            break
-        behind += 1
-        if behind == 1:
-            log.warning("%s repo should be updated!" % (path))
-
-        message = c.message.strip()
-
-        sha = c.hexsha[0:7]
-        if len(message) > 60:
-            message = message[0:57] + "..."
+    try:
+        commits_behind_list = list(commits_behind)
+    except GitCommandError:
         log.info(
+            "Remote branch %s not found for %s repo. Is it a local branch?"
+            % (branch, path)
+        )
+    else:
 
-            "Missing commit in %s: %s (%s)"
-            % (path, sha, message))
+        if len(commits_behind_list) > 0:
+            log.warning("%s repo should be updated!" % (path))
+        else:
+            log.debug("(CHECKED) %s repo is updated" % (path))
+        for c in commits_behind_list:
+            message = c.message.strip().replace('\n', "")
 
-    if behind == 0:
-        log.debug("(CHECKED) %s repo is updated" % (path))
+            sha = c.hexsha[0:7]
+            if len(message) > 60:
+                message = message[0:57] + "..."
+            log.warning(
+                "Missing commit in %s: %s (%s)"
+                % (path, sha, message))
+
+    try:
+        commits_ahead_list = list(commits_ahead)
+    except GitCommandError:
+        log.info(
+            "Remote branch %s not found for %s repo. Is it a local branch?"
+            % (branch, path)
+        )
+    else:
+
+        if len(commits_ahead_list) > 0:
+            log.warning("You have commits not pushed on %s repo" % (path))
+        else:
+            log.debug(
+                "(CHECKED) You have pushed all commits on %s repo" % (path))
+        for c in commits_ahead_list:
+            message = c.message.strip().replace('\n', "")
+
+            sha = c.hexsha[0:7]
+            if len(message) > 60:
+                message = message[0:57] + "..."
+            log.warning(
+                "Unpushed commit in %s: %s (%s)"
+                % (path, sha, message))
