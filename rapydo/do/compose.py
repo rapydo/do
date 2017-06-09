@@ -7,7 +7,9 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 
-import compose.cli.errors as cerrors
+from rapydo.do.dockerizing import docker_errors
+import compose.cli.errors as clierrors
+import compose.config.errors as conferrors
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
@@ -32,10 +34,14 @@ class Compose(object):
         log.very_verbose("Client compose %s: %s" % (self.project_name, files))
 
     def config(self):
-        _, services_list, _, _, _ = \
-            get_config_from_options('.', self.options)
-        # log.pp(services_list)
-        return services_list
+        try:
+            _, services_list, _, _, _ = \
+                get_config_from_options('.', self.options)
+        except conferrors.ConfigurationError as e:
+            log.critical_exit("Wrong compose configuration:\n%s" % e)
+        else:
+            # log.pp(services_list)
+            return services_list
 
     def get_handle(self):
         # TODO: check if this might be moved into __init__
@@ -75,7 +81,9 @@ class Compose(object):
         log.info("Requesting within compose: '%s'" % command)
         try:
             method(options=options)
-        except cerrors.UserError as e:
+        except clierrors.UserError as e:
             log.critical_exit("Failed command execution:\n%s" % e)
+        except docker_errors as e:
+            log.critical_exit("Failed docker container:\n%s" % e)
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))

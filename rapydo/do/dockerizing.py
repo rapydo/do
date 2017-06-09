@@ -2,6 +2,7 @@
 
 import requests
 import docker
+from docker.errors import APIError as docker_errors
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -38,7 +39,7 @@ class Dock(object):
         except requests.exceptions.ConnectionError:
             return False
         # this is the case of docker daemon starting or not working properly
-        except docker.errors.APIError:
+        except docker_errors:
             return False
 
     def image_info(self, tag):

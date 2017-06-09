@@ -379,11 +379,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         services = self._get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
-        options = {}
+        options = {'SERVICE': services}
 
         if command == 'start':
             # print("SERVICES", services)
-            options = {
+            options.update({
                 '--no-deps': False,
                 '-d': True,
                 '--abort-on-container-exit': False,
@@ -393,8 +393,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 '--build': False,
                 '--no-build': False,
                 '--scale': {},
-                'SERVICE': services
-            }
+            })
             command = 'up'
 
         elif command == 'stop':
@@ -403,12 +402,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             pass
         elif command == 'remove':
             dc.command('stop')
-            options = {
+            options.update({
                 # '--stop': True,  # BUG? not working
                 '--force': True,
                 '-v': False,  # dangerous?
-                'SERVICE': []
-            }
+                # 'SERVICE': []
+            })
             command = 'rm'
         elif command == 'toggle_freeze':
 
@@ -463,9 +462,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
+            if user.strip() == '':
+                user = None
 
         if command is None:
-            command = self.current_args.get('command', 'whoami')
+            default = 'echo hello world'
+            command = self.current_args.get('command', default)
+            if service == 'restclient':
+                if command == 'bash':
+                    command = ''
 
         # The command must be splitted into command + args_array
         pieces = command.split()
@@ -488,13 +493,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 'ARGS': shell_args,
                 '--name': None,
                 '--user': user,
+                # '--user': None,
                 '--rm': True,
                 '--no-deps': True,
                 '--service-ports': False,
                 '-d': False,
                 '-T': False,
                 '--workdir': None,
-                '-e': None,
+                '-e': [],
                 '--entrypoint': None,
                 '--volume': [],
                 '--publish': [],
