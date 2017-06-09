@@ -173,14 +173,27 @@ def check_file_younger_than(gitobj, file, timestamp):
     return time.timestamp_from_string(timestamp) < max(dates)
 
 
+def get_unstaged_files(gitobj):
+
+    return gitobj.index.diff(None)
+
+
 def update(path, gitobj):
-    # TO FIX: to be discussed
-    if path == 'main':
-        # For now we skip the main repo, because it could be password protected
+
+    has_unstaged = len(get_unstaged_files(gitobj)) > 0
+
+    if has_unstaged:
+        log.warning(
+            "Unable to update %s repo, you have unstaged files" % (path))
         return
+
+    branch = gitobj.active_branch
     for remote in gitobj.remotes:
-        log.info("Updating %s" % path)
-        remote.pull()
+        if remote.name != 'origin':
+            continue
+
+        log.info("Updating %s %s (branch = %s)" % (remote, path, branch))
+        remote.pull(branch)
 
 
 def check_updates(path, gitobj):
