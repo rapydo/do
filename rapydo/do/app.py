@@ -618,7 +618,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
         # GIT related
-        self._git_submodules(development=self.development)
+        self.git_submodules(development=self.development)
         if self.update or self.check:
             ignore_submodule_list = self.get_ignore_submodules()
             for name, gitobj in sorted(self.gits.items()):
