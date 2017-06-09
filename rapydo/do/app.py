@@ -179,12 +179,6 @@ Verify that you are in the right folder, now you are in: %s
 
         self.gits = gits
 
-    def _git_update_repos(self):
-
-        for name, gitobj in self.gits.items():
-            if gitobj is not None:
-                gitter.update(name, gitobj)
-
     def _read_composer(self):
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
@@ -586,6 +580,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     # ### RUN ONE COMMAND OFF
     ################################
 
+    def get_ignore_submodules(self):
+        ignore_submodule = self.current_args.get('ignore_submodule', '')
+        return ignore_submodule.split(",")
+
     def _run(self):
         """ RUN THE APPLICATION
 
@@ -609,13 +607,18 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # GIT related
         self._git_submodules(development=self.development)
-        if self.update:
-            self._git_update_repos()
-        elif self.check:
+        if self.update or self.check:
+            ignore_submodule_list = self.get_ignore_submodules()
             for name, gitobj in sorted(self.gits.items()):
+                if name in ignore_submodule_list:
+                    log.debug("Skipping %s on %s" % (self.action, name))
+                    continue
                 if gitobj is not None:
-                    gitter.check_updates(name, gitobj)
-                    gitter.check_unstaged(name, gitobj)
+                    if self.update:
+                        gitter.update(name, gitobj)
+                    elif self.check:
+                        gitter.check_updates(name, gitobj)
+                        gitter.check_unstaged(name, gitobj)
 
         # Compose services and variables
         self._make_env()
