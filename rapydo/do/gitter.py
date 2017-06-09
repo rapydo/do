@@ -196,6 +196,13 @@ def update(path, gitobj):
         remote.pull(branch)
 
 
+def check_unstaged(path, gitobj):
+
+    modified_files = get_unstaged_files(gitobj)
+    if len(modified_files) > 0:
+        log.warning("You have unstaged files on %s" % path)
+
+
 def check_updates(path, gitobj):
 
     for remote in gitobj.remotes:

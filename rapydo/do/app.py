@@ -179,12 +179,6 @@ Verify that you are in the right folder, now you are in: %s
 
         self.gits = gits
 
-    def _git_check_updates(self):
-
-        for name, gitobj in self.gits.items():
-            if gitobj is not None:
-                gitter.check_updates(name, gitobj)
-
     def _git_update_repos(self):
 
         for name, gitobj in self.gits.items():
@@ -618,7 +612,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.update:
             self._git_update_repos()
         elif self.check:
-            self._git_check_updates()
+            for name, gitobj in sorted(self.gits.items()):
+                if gitobj is not None:
+                    gitter.check_updates(name, gitobj)
+                    gitter.check_unstaged(name, gitobj)
 
         # Compose services and variables
         self._make_env()
