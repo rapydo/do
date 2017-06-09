@@ -185,42 +185,34 @@ def update(path, gitobj):
 
 def check_updates(path, gitobj):
 
-    # TO FIX: to be discussed
-    if path == 'main':
-        # For now we skip the main repo, because it could be password protected
-        return
-
     for remote in gitobj.remotes:
-        log.verbose("Fetching %s" % remote)
+        log.verbose("Fetching %s on %s" % (remote, path))
         remote.fetch()
 
     branch = gitobj.active_branch
-    remote_branch = "origin/%s" % branch
+    behind_check = "%s..origin/%s" % (branch, branch)
+    ahead_check = "origin/%s..%s" % (branch, branch)
+
     max_remote = 20
     log.verbose("Inspecting %s/%s" % (path, branch))
-    last_local_commit = list(gitobj.iter_commits(branch, max_count=1)).pop()
 
-    remote_commits = gitobj.iter_commits(remote_branch, max_count=max_remote)
+    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
 
     try:
-        remote_commits_list = list(remote_commits)
+        commits_behind_list = list(commits_behind)
     except GitCommandError:
         log.info(
             "Remote branch %s not found for %s repo. Is it a local branch?"
-            % (remote_branch, path)
+            % (branch, path)
         )
     else:
 
-        log.verbose(
-            "Last local commit for %s is %s" % (path, last_local_commit))
-        behind = 0
-        for c in remote_commits_list:
-            if c == last_local_commit:
-                break
-            behind += 1
-            if behind == 1:
-                log.warning("%s repo should be updated!" % (path))
-
+        if len(commits_behind_list) > 0:
+            log.warning("%s repo should be updated!" % (path))
+        else:
+            log.debug("(CHECKED) %s repo is updated" % (path))
+        for c in commits_behind_list:
             message = c.message.strip().replace('\n', "")
 
             sha = c.hexsha[0:7]
@@ -230,5 +222,25 @@ def check_updates(path, gitobj):
                 "Missing commit in %s: %s (%s)"
                 % (path, sha, message))
 
-        if behind == 0:
-            log.debug("(CHECKED) %s repo is updated" % (path))
+    try:
+        commits_ahead_list = list(commits_ahead)
+    except GitCommandError:
+        log.info(
+            "Remote branch %s not found for %s repo. Is it a local branch?"
+            % (branch, path)
+        )
+    else:
+
+        if len(commits_ahead_list) > 0:
+            log.warning("You have commits not pushed on %s repo" % (path))
+        else:
+            log.debug("(CHECKED) %s repo is synchronized with remote" % (path))
+        for c in commits_ahead_list:
+            message = c.message.strip().replace('\n', "")
+
+            sha = c.hexsha[0:7]
+            if len(message) > 60:
+                message = message[0:57] + "..."
+            log.warning(
+                "Unpushed commit in %s: %s (%s)"
+                % (path, sha, message))
