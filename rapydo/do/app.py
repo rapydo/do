@@ -246,8 +246,7 @@ Verify that you are in the right folder, now you are in: %s
 
             if cache:
                 log.info(
-                    "To build cached template(s) add option \"%s %s\"" %
-                    ('--force_build', str(True))
+                    "To build cached template(s) add option \"--force_build\""
                 )
 
         if not cache:
@@ -270,9 +269,9 @@ Verify that you are in the right folder, now you are in: %s
                 log.exit("Missing %s folder" % bower_dir)
 
             if self.initialize:
-                log.warning("Not implement: install bower libs")
+                log.warning("Not implemented: install bower libs")
             elif self.update:
-                log.warning("Not implement: update bower libs")
+                log.warning("Not implemented: update bower libs")
 
     def get_services(self, key='services', sep=',',
                      default=None, avoid_default=False):
