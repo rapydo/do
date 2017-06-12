@@ -203,21 +203,25 @@ def check_unstaged(path, gitobj):
         log.warning("You have unstaged files on %s" % path)
 
 
-def check_updates(path, gitobj):
+def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
 
     for remote in gitobj.remotes:
+        if remote.name != fetch_remote:
+            log.verbose("Skipping fetch of remote %s on %s" % (remote, path))
+            continue
         log.verbose("Fetching %s on %s" % (remote, path))
         remote.fetch()
 
     branch = gitobj.active_branch
-    behind_check = "%s..origin/%s" % (branch, branch)
-    ahead_check = "origin/%s..%s" % (branch, branch)
+    if remote_branch is None:
+        remote_branch = gitobj.active_branch
 
     max_remote = 20
     log.verbose("Inspecting %s/%s" % (path, branch))
 
+    # CHECKING COMMITS BEHIND (TO BE PULLED) #
+    behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
     commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
-    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
 
     try:
         commits_behind_list = list(commits_behind)
@@ -239,29 +243,33 @@ def check_updates(path, gitobj):
             if len(message) > 60:
                 message = message[0:57] + "..."
             log.warning(
-                "Missing commit in %s: %s (%s)"
+                "Missing commit from %s: %s (%s)"
                 % (path, sha, message))
 
-    try:
-        commits_ahead_list = list(commits_ahead)
-    except GitCommandError:
-        log.info(
-            "Remote branch %s not found for %s repo. Is it a local branch?"
-            % (branch, path)
-        )
-    else:
-
-        if len(commits_ahead_list) > 0:
-            log.warning("You have commits not pushed on %s repo" % (path))
+    # CHECKING COMMITS AHEAD (TO BE PUSHED) #
+    if remote_branch == branch:
+        ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
+        commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
+        try:
+            commits_ahead_list = list(commits_ahead)
+        except GitCommandError:
+            log.info(
+                "Remote branch %s not found for %s repo. Is it a local branch?"
+                % (branch, path)
+            )
         else:
-            log.debug(
-                "(CHECKED) You have pushed all commits on %s repo" % (path))
-        for c in commits_ahead_list:
-            message = c.message.strip().replace('\n', "")
 
-            sha = c.hexsha[0:7]
-            if len(message) > 60:
-                message = message[0:57] + "..."
-            log.warning(
-                "Unpushed commit in %s: %s (%s)"
-                % (path, sha, message))
+            if len(commits_ahead_list) > 0:
+                log.warning("You have commits not pushed on %s repo" % (path))
+            else:
+                log.debug(
+                    "(CHECKED) You pushed all commits on %s repo" % (path))
+            for c in commits_ahead_list:
+                message = c.message.strip().replace('\n', "")
+
+                sha = c.hexsha[0:7]
+                if len(message) > 60:
+                    message = message[0:57] + "..."
+                log.warning(
+                    "Unpushed commit in %s: %s (%s)"
+                    % (path, sha, message))

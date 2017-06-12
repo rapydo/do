@@ -240,7 +240,7 @@ Verify that you are in the right folder, now you are in: %s
                             """ % build['service'])
                     else:
                         log.debug(
-                            "Missing template build for%s" % build['service'])
+                            "Missing template build for %s" % build['service'])
                         dc = Compose(files=self.base_files)
                         dc.force_template_build(builds={image_tag: build})
 
@@ -253,8 +253,29 @@ Verify that you are in the right folder, now you are in: %s
         if not cache:
             log.debug("(CHECKED) no cache builds")
 
+    def bower_libs(self):
+
+        if self.frontend:
+            # TO FIX: put these paths somewhere
+            # (duplicated in check, init and update)
+            lib_dir = "libs"
+            bower_json = os.path.join(lib_dir, "bower.json")
+            bower_dir = os.path.join(lib_dir, "bower_components")
+            ###################################
+            if not os.path.isdir(lib_dir):
+                log.exit("Missing %s folder" % lib_dir)
+            if not os.path.isfile(bower_json):
+                log.exit("Missing %s configuration" % bower_json)
+            if not os.path.isdir(bower_dir):
+                log.exit("Missing %s folder" % bower_dir)
+
+            if self.initialize:
+                log.warning("Not implement: install bower libs")
+            elif self.update:
+                log.warning("Not implement: update bower libs")
+
     def get_services(self, key='services', sep=',',
-                      default=None, avoid_default=False):
+                     default=None, avoid_default=False):
 
         value = self.current_args.get(key).split(sep)
         if avoid_default or default is not None:
@@ -376,9 +397,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc.command('down', options)
 
     def _update(self):
-        log.info("Update subrepo")
-
-        raise NotImplementedError()
+        log.info("All updated")
 
     def _control(self):
 
@@ -632,6 +651,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                         gitter.check_updates(name, gitobj)
                         gitter.check_unstaged(name, gitobj)
 
+        if self.check:
+            verify_upstream = self.current_args.get('verify_upstream', False)
+            if verify_upstream:
+                gitter.check_updates(
+                    'upstream', self.gits['main'],
+                    fetch_remote='upstream',
+                    remote_branch='master'
+                )
+
         # Compose services and variables
         self.make_env()
         self.read_composer()
@@ -639,6 +667,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Build or check template containers images
         self.build_dependencies()
+
+        # Install or check bower libraries (if frotend is enabled)
+        self.bower_libs()
 
         # Final step, launch the command
         func()

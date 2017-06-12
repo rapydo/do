@@ -55,8 +55,13 @@ subcommands:
       ignore_submodule:
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: ''
+        default: 'upstream'
         help: ignore a given list of submodules (command delimited)
+      verify_upstream:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: include upstream repo (rapydo-core) to checked submodules
 
   init:
     description: "
@@ -69,7 +74,7 @@ subcommands:
       ignore_submodule:
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: ''
+        default: 'upstream'
         help: ignore a given list of submodules (command delimited)
   # TODO: a tutorial mode to improve the project step by step
   # instead of all at once like init
