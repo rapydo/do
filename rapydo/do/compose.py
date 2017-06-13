@@ -44,7 +44,6 @@ class Compose(object):
             return services_list
 
     def get_handle(self):
-        # TODO: check if this might be moved into __init__
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 

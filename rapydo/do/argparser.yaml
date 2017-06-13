@@ -5,17 +5,25 @@ action:
   help: all possible commands
 
 options:
+
+  project:  # FIXME: isn't this a blueprint?
+    type: str
+    metavalue: PROJECT_NAME
+    help: The name of the project to use inside the './projects' directory
+    # The only one if exists otherwise list the projects.
+    default: null
+
+  blueprint:  # FIXME: probably not the right name anymore?
+    type: str
+    metavalue: CONTAINERS_YAML_BLUEPRINT
+    default: debug
+    help: Blueprint marker of the configuration to launch
+
   log-level:
     type: str
     metavalue: LEVEL_OF_DEBUGGER
     default: DEBUG
     help: Level of verbosity
-
-  blueprint:
-    type: str
-    metavalue: CONTAINERS_YAML_BLUEPRINT
-    default: debug
-    help: Blueprint marker of the configuration to launch
 
   hostname:
     type: str
@@ -128,4 +136,3 @@ subcommands:
         default: False
         help: remove also containers persistent data
 
-    

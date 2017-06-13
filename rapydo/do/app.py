@@ -17,6 +17,8 @@ except BaseException as e:
 
 from rapydo.utils import checks
 from rapydo.utils import helpers
+from rapydo.utils import PROJECT_DIR
+from rapydo.utils.configuration import DEFAULT_CONFIG_FILEPATH
 from rapydo.do import project
 from rapydo.do import gitter
 from rapydo.do import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
@@ -33,22 +35,55 @@ log = get_logger(__name__)
 class Application(object):
 
     def __init__(self, args=arguments.current_args):
-
-        self.tested_connection = False
         self.current_args = args
-        self.action = self.current_args.get('action')
-        self.development = self.current_args.get('development')
+        self.run()
 
+    def get_args(self):
+        # Action
+        self.action = self.current_args.get('action')
         if self.action is None:
             log.critical_exit("Internal misconfiguration")
         else:
             log.info("Do request: %s" % self.action)
+
+        # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
         self.check = self.action == 'check'
 
+        # Others
+        self.tested_connection = False
+        self.blueprint = self.current_args.get('blueprint')
+        self.development = self.current_args.get('development')
+
+        self.project = self.current_args.get('project')
+        projects = helpers.list_path(PROJECT_DIR)
+        if self.project is None:
+            prj_num = len(projects)
+
+            if prj_num == 0:
+                log.critical_exit("No projects found")
+            elif prj_num > 1:
+                log.exit(
+                    "Please select the --project option on one " +
+                    "of the following:\n\n %s\n" % projects)
+            else:
+                # make it the default
+                self.project = projects.pop()
+                self.current_args['project'] = self.project
+        else:
+            if self.project not in projects:
+                log.critical_exit(
+                    "Wrong project '%s'.\n" % self.project +
+                    "Select one of the following:\n\n %s\n" % projects)
+
+        log.debug("(CHECKED) Selected project: %s" % self.project)
+
+    def check_installed_software(self):
+
         # Check if docker is installed
         self.check_program('docker')
+        # Use it
         self.docker = Dock()
 
         # Check docker-compose version
@@ -61,10 +96,6 @@ class Application(object):
 
         # Check if git is installed
         self.check_program('git')
-
-        self.blueprint = self.current_args.get('blueprint')
-        self.project_dir = helpers.current_dir()
-        self.run()
 
     def check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
@@ -96,14 +127,23 @@ Verify that you are in the right folder, now you are in: %s
 
         # FIXME: move in a configuration file?
         required_files = [
-            'specs/project_configuration.yaml',
-            'specs/defaults.yaml',
-            'apis',
+            # NEW
+            'projects/eudat/project_configuration.yaml',  # prj conf
+            'projects/eudat/backend',  # python code
+            'projects/eudat/confs',  # containers configuration
             'confs',
-            'containers',
-            'models',
-            'specs',
-            'swagger'
+            # 'data',  # ?
+            # 'docs',  # ?
+            'projects',
+            'submodules'
+            # OLD
+            # 'specs/defaults.yaml',  # inside rapydo.utils
+            # 'specs/project_configuration.yaml',
+            # 'apis',
+            # 'containers',
+            # 'models',
+            # 'specs',
+            # 'swagger'
         ]
 
         for fname in required_files:
@@ -118,14 +158,16 @@ Verify that you are in the right folder, now you are in: %s
     def read_specs(self):
         """ Read project configuration """
 
-        self.specs = project.configuration(development=self.development)
-
+        self.specs = project.read_configuration(
+            project=self.project,
+            development=self.development
+        )
         self.vars = self.specs.get('variables', {})
+        log.debug("(CHECKED) Loaded containers configuration")
 
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
-
         log.very_verbose("Frontend is %s" % self.frontend)
 
     def verify_connected(self):
@@ -152,6 +194,7 @@ Verify that you are in the right folder, now you are in: %s
         else:
             repo['do'] = self.initialize
 
+        # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
             self.verify_connected()
 
@@ -185,23 +228,45 @@ Verify that you are in the right folder, now you are in: %s
             if gitobj is not None:
                 gitter.update(name, gitobj)
 
-    def read_composer(self):
+    def prepare_composers(self):
+
+        confs = self.vars.get('composers', {})
+
+        from rapydo.utils import CONTAINERS_YAML_DIRNAME
+        from rapydo.utils import helpers
+
+        # substitute values starting with '$$'
+        myvars = {
+            'frontend': self.frontend,
+            'blueprint': self.blueprint,
+            'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
+            'customconf': helpers.project_dir(
+                self.project,
+                CONTAINERS_YAML_DIRNAME
+            )
+        }
+        newconfs = {}
+        for name, conf in confs.items():
+            newconfs[name] = project.apply_variables(conf, myvars)
+        return newconfs
+
+    def read_composers(self):
+
+        # Find configuration that tells us which files have to be read
+        composers = self.prepare_composers()
+
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
-            read_yamls(self.blueprint, self.frontend)
-        log.debug("Confs used (with order): %s" % self.files)
+            read_yamls(composers)
+        log.debug("(CHECKED) Configuration order:\n%s" % self.files)
 
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
-        ####################
         # TODO: check all builds against their Dockefile latest commit
-
-        pass
         # log.pp(self.services)
         # exit(1)
 
-        ####################
         # Compare builds depending on templates
         builds = locate_builds(self.base_services, self.services)
 
@@ -273,7 +338,7 @@ Verify that you are in the right folder, now you are in: %s
 
     def make_env(self):
 
-        envfile = os.path.join(self.project_dir, COMPOSE_ENVIRONMENT_FILE)
+        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         if self.current_args.get('force_env'):
             try:
                 os.unlink(envfile)
@@ -303,16 +368,18 @@ Verify that you are in the right folder, now you are in: %s
             # Stat file
             mixed_env = os.stat(envfile)
 
-            # compare blame commit date against file modification date
-            if gitter.check_file_younger_than(
-                self.gits.get('main'),
-                file='specs/defaults.yaml',
-                timestamp=mixed_env.st_mtime
-            ):
-                log.warning(
-                    "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-                    "Add --force_env to update."
-                )
+            # FIXME: get it back
+            if False:
+                # compare blame commit date against file modification date
+                if gitter.check_file_younger_than(
+                    self.gits.get('main'),
+                    file=DEFAULT_CONFIG_FILEPATH,
+                    timestamp=mixed_env.st_mtime
+                ):
+                    log.warning(
+                        "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
+                        "Add --force_env to update."
+                    )
 
     def check_placeholders(self):
 
@@ -326,7 +393,7 @@ Verify that you are in the right folder, now you are in: %s
 and add the variable "ACTIVATE: 1" in the service enviroment
                 """)
         else:
-            log.info("Active services: %s" % self.active_services)
+            log.info("(CHECKED) Active services: %s" % self.active_services)
 
         missing = []
         for service_name in self.active_services:
@@ -588,25 +655,47 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         return self.shell(**meta)
 
-    ################################
-    # ### RUN ONE COMMAND OFF
-    ################################
-
     def get_ignore_submodules(self):
         ignore_submodule = self.current_args.get('ignore_submodule', '')
         return ignore_submodule.split(",")
 
-    def run(self):
-        """ RUN THE APPLICATION
+    def git_checks(self):
 
+        # TODO: check internet connection before this
+
+        # FIXME: give the user an option to skip this
+        # or eventually print it in a clearer way
+        # (a table? there is python ascii table plugin)
+
+        ignore_submodule_list = self.get_ignore_submodules()
+
+        for name, gitobj in sorted(self.gits.items()):
+            if name in ignore_submodule_list:
+                log.debug("Skipping %s on %s" % (self.action, name))
+                continue
+            if gitobj is not None:
+                if self.update:
+                    gitter.update(name, gitobj)
+                elif self.check:
+                    gitter.check_updates(name, gitobj)
+                    gitter.check_unstaged(name, gitobj)
+
+    ################################
+    # ### RUN ONE COMMAND OFF
+    ################################
+
+    def run(self):
+        """
+        RUN THE APPLICATION!
         The heart of the app: it runs a single controller command.
         """
 
-        # NOTE: Argument are parsed inside the __init__ method
+        self.get_args()
 
         # Initial inspection
+        self.check_installed_software()
         self.inspect_current_folder()
-        self.read_specs()  # Should be the first thing
+        self.read_specs()  # read project configuration
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
@@ -619,22 +708,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # GIT related
         self.git_submodules(development=self.development)
-        if self.update or self.check:
-            ignore_submodule_list = self.get_ignore_submodules()
-            for name, gitobj in sorted(self.gits.items()):
-                if name in ignore_submodule_list:
-                    log.debug("Skipping %s on %s" % (self.action, name))
-                    continue
-                if gitobj is not None:
-                    if self.update:
-                        gitter.update(name, gitobj)
-                    elif self.check:
-                        gitter.check_updates(name, gitobj)
-                        gitter.check_unstaged(name, gitobj)
+
+        # FIXME: get this back
+        # if self.update or self.check:
+        if False:
+            self.git_checks()
 
         # Compose services and variables
         self.make_env()
-        self.read_composer()
+        self.read_composers()
         self.check_placeholders()
 
         # Build or check template containers images

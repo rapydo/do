@@ -4,6 +4,7 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
+from rapydo.do import SUBMODULES_DIR
 from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
 
@@ -96,8 +97,9 @@ def switch_branch(gitobj, branch_name='master'):
 
 def clone(online_url, path, branch='master', do=False):
 
-    local_path = os.path.join(helpers.current_dir(), path)
+    local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
     local_path_exists = os.path.exists(local_path)
+
     if local_path_exists:
         log.debug("(CHECKED) path %s already exists" % local_path)
         gitobj = Repo(local_path)

@@ -4,8 +4,7 @@ __version__ = '0.3.0'
 
 FRAMEWORK_NAME = 'RAPyDo'
 
-CONTAINERS_YAML_DIRNAME = 'containers'
-PROJECT_YAML_SPECSDIR = 'specs'
-PROJECT_CONF_FILENAME = 'project_configuration'
+# PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'
+SUBMODULES_DIR = 'submodules'
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'

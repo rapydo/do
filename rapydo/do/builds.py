@@ -8,7 +8,7 @@ Parse dockerfiles and check for builds
 """
 
 from dockerfile_parse import DockerfileParser
-from rapydo.do import CONTAINERS_YAML_DIRNAME
+from rapydo.utils import CONTAINERS_YAML_DIRNAME
 from rapydo.do.dockerizing import Dock
 from rapydo.utils import helpers
 from rapydo.utils.logs import get_logger
