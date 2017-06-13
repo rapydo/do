@@ -8,6 +8,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 """
 
 from rapydo.do.dockerizing import docker_errors
+import compose.service
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
 from compose.cli.command import \
@@ -80,7 +81,9 @@ class Compose(object):
         log.info("Requesting within compose: '%s'" % command)
         try:
             method(options=options)
-        except clierrors.UserError as e:
+        except (
+            clierrors.UserError, compose.service.BuildError,
+        ) as e:
             log.critical_exit("Failed command execution:\n%s" % e)
         except docker_errors as e:
             log.critical_exit("Failed docker container:\n%s" % e)
