@@ -65,6 +65,10 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         default: ''
         help: ignore a given list of submodules (command delimited)
+      skip_heavy_git_ops:
+        type: bool
+        default: False
+        help: ignore the heaviest check operations on git commits
 
   init:
     description: "
@@ -87,6 +91,12 @@ subcommands:
     description: list current status of containers
   build:
     description: force building of one or more services docker images
+    suboptions:
+      force:
+        type: bool
+        # metavalue: TRUE_OR_FALSE
+        default: False
+        help: remove caches of previous builds on this service
   log:
     description: watch log tails of all or specified containers
   custom:

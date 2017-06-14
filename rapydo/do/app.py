@@ -339,7 +339,7 @@ Verify that you are in the right folder, now you are in: %s
                     pass
         return value
 
-    def make_env(self):
+    def make_env(self, do=False):
 
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         if self.current_args.get('force_env'):
@@ -371,11 +371,11 @@ Verify that you are in the right folder, now you are in: %s
             # Stat file
             mixed_env = os.stat(envfile)
 
-            # FIXME: get it back
-            if False:
-                # compare blame commit date against file modification date
+            # compare blame commit date against file modification date
+            # NOTE: HEAVY OPERATION
+            if do:
                 if gitter.check_file_younger_than(
-                    self.gits.get('main'),
+                    self.gits.get('utils'),
                     file=DEFAULT_CONFIG_FILEPATH,
                     timestamp=mixed_env.st_mtime
                 ):
@@ -383,6 +383,8 @@ Verify that you are in the right folder, now you are in: %s
                         "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
                         "Add --force_env to update."
                     )
+            # else:
+            #     log.verbose("Skipping heavy operations")
 
     def check_placeholders(self):
 
@@ -459,9 +461,38 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     gitter.check_updates(name, gitobj)
                     gitter.check_unstaged(name, gitobj)
 
+    def custom_parse_args(self):
+
+        # custom options from configuration file
+        self.custom_commands = self.specs \
+            .get('controller', {}).get('commands', {})
+
+        if len(self.custom_commands) < 1:
+            log.critical_exit("No custom commands defined")
+
+        for name, custom in self.custom_commands.items():
+            arguments.extra_command_parser.add_parser(
+                name, help=custom.get('description')
+            )
+
+        if len(arguments.remaining_args) != 1:
+            arguments.extra_parser.print_help()
+            import sys
+            sys.exit(1)
+
+        # parse it
+        self.custom_command = \
+            vars(
+                arguments.extra_parser.parse_args(
+                    arguments.remaining_args
+                )
+            ).get('custom')
+
     ################################
-    # ### COMMANDS
+    # ##    COMMANDS    ##         #
     ################################
+
+    # TODO: make the commands availabe in this file in alphabetical order
 
     def _check(self):
 
@@ -660,33 +691,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('build', options)
 
-    def custom_parse_args(self):
-
-        # custom options from configuration file
-        self.custom_commands = self.specs \
-            .get('controller', {}).get('commands', {})
-
-        if len(self.custom_commands) < 1:
-            log.critical_exit("No custom commands defined")
-
-        for name, custom in self.custom_commands.items():
-            arguments.extra_command_parser.add_parser(
-                name, help=custom.get('description')
-            )
-
-        if len(arguments.remaining_args) != 1:
-            arguments.extra_parser.print_help()
-            import sys
-            sys.exit(1)
-
-        # parse it
-        self.custom_command = \
-            vars(
-                arguments.extra_parser.parse_args(
-                    arguments.remaining_args
-                )
-            ).get('custom')
-
     def _custom(self):
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)
@@ -735,16 +739,23 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if func is None:
             log.critical_exit("Command not yet implemented: %s" % self.action)
 
+        # Detect if heavy ops are allowed
+        do_heavy_ops = False
+        do_heavy_ops = self.update or self.check
+        if self.check:
+            if self.current_args.get('skip_heavy_git_ops', False):
+                do_heavy_ops = False
+
         # GIT related
         self.git_submodules(development=self.development)
-
-        # FIXME: get this back
-        # if self.update or self.check:
-        if False:
+        if do_heavy_ops:
+            # NOTE: HEAVY OPERATION
             self.git_checks()
+        else:
+            log.verbose("Skipping heavy operations")
 
         # Compose services and variables
-        self.make_env()
+        self.make_env(do=do_heavy_ops)
         self.read_composers()
         self.check_placeholders()
 
