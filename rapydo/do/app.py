@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""
-Main App class
-"""
-
-import os.path
 try:
     from rapydo.do import arguments
 except SystemExit:
@@ -15,6 +10,7 @@ except BaseException as e:
     log = get_logger(__name__)
     log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
+import os.path
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.utils import PROJECT_DIR
@@ -33,6 +29,13 @@ log = get_logger(__name__)
 
 
 class Application(object):
+
+    """
+    ## Main application class
+
+    It handles all implemented commands,
+    which were defined in `argparser.yaml`
+    """
 
     def __init__(self, args=arguments.current_args):
         self.current_args = args
@@ -411,13 +414,58 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         return missing
 
+    def manage_one_service(self, service=None):
+
+        if service is None:
+            services = self.get_services(avoid_default=True)
+
+            if len(services) != 1:
+                log.critical_exit(
+                    "Commands can be executed only on one service." +
+                    "\nCurrent request on: %s" % services)
+            else:
+                service = services.pop()
+
+        return service
+
+    def container_info(self, service_name):
+        return self.services_dict.get(service_name, None)
+
+    def container_service_exists(self, service_name):
+        return self.container_info(service_name) is not None
+
+    def get_ignore_submodules(self):
+        ignore_submodule = self.current_args.get('ignore_submodule', '')
+        return ignore_submodule.split(",")
+
+    def git_checks(self):
+
+        # TODO: check internet connection before this
+
+        # FIXME: give the user an option to skip this
+        # or eventually print it in a clearer way
+        # (a table? there is python ascii table plugin)
+
+        ignore_submodule_list = self.get_ignore_submodules()
+
+        for name, gitobj in sorted(self.gits.items()):
+            if name in ignore_submodule_list:
+                log.debug("Skipping %s on %s" % (self.action, name))
+                continue
+            if gitobj is not None:
+                if self.update:
+                    gitter.update(name, gitobj)
+                elif self.check:
+                    gitter.check_updates(name, gitobj)
+                    gitter.check_unstaged(name, gitobj)
+
     ################################
     # ### COMMANDS
     ################################
 
     def _check(self):
 
-        # NOTE: a SECURITY BUG?
+        # NOTE: Do we consider what we have here a SECURITY BUG?
         # dc = Compose(files=self.files)
         # for container in dc.get_handle().project.containers():
         #     log.pp(container.client._auth_configs)
@@ -514,24 +562,57 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             dc.command('logs', options)
         except KeyboardInterrupt:
             log.info("Stopped by keyboard")
-            pass
 
-    def _interface(self):
-        pass
+    def _interfaces(self):
+        db = self.manage_one_service()
+        service = db + 'ui'
+        port = self.current_args.get('port')
+        if not self.container_service_exists(service):
+            log.critical_exit("Container '%s' is not defined" % service)
+
+        options = {
+            'SERVICE': service,
+            '--publish': [], '--service-ports': False,
+            'COMMAND': None,
+            'ARGS': [], '-e': [], '--volume': [],
+            '--rm': True, '--no-deps': True,
+            '--name': None, '--user': None,
+            '--workdir': None, '--entrypoint': None,
+            '-d': False, '-T': False,
+        }
+
+        if port is not None:
+            try:
+                int(port)
+            except TypeError:
+                log.critical_exit("Port must be a valid integer")
+
+            info = self.container_info(service)
+            try:
+                current_ports = info.get('ports', []).pop(0)
+            except IndexError:
+                log.critical_exit("No default port found?")
+
+                # TODO: inspect the image to get the default exposed
+                # $ docker inspect mongo-express:0.40.0 \
+                #    | jq ".[0].ContainerConfig.ExposedPorts"
+                # {
+                #   "8081/tcp": {}
+                # }
+
+            options['--publish'].append("%s:%s" % (port, current_ports.target))
+
+        else:
+            # Default: open service ports requested within compose config
+            options['--service-ports'] = True
+
+        dc = Compose(files=self.files)
+        dc.command('run', options)
 
     def _shell(self, user=None, command=None, service=None):
 
         dc = Compose(files=self.files)
-
-        if service is None:
-            services = self.get_services(avoid_default=True)
-
-            if len(services) != 1:
-                log.critical_exit(
-                    "Commands can be executed only on one service." +
-                    "\nCurrent request on: %s" % services)
-            else:
-                service = services.pop()
+        service = self.manage_one_service(service)
 
         if user is None:
             user = self.current_args.get('user')
@@ -554,22 +635,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         else:
             log.info("Command request: %s(%s+%s)"
                      % (service.upper(), shell_command, shell_args))
-
-        # if service == 'restclient':
-
-        #     # # api CLIENT requires a run for an isolated service
-        #     # options = {
-        #     #     'SERVICE': service,
-        #     #     'COMMAND': shell_command, 'ARGS': shell_args,
-        #     #     '--name': None, '--user': user,
-        #     #     '--rm': True, '--no-deps': True,
-        #     #     '--service-ports': False, '-d': False, '-T': False,
-        #     #     '--workdir': None, '--entrypoint': None,
-        #     #     '-e': [], '--volume': [], '--publish': [],
-        #     # }
-        #     # dc.command('run', options)
-
-        # else:
 
         options = {
             'SERVICE': service,
@@ -643,31 +708,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         assert meta.pop('name') == 'letsencrypt'
 
         return self.shell(**meta)
-
-    def get_ignore_submodules(self):
-        ignore_submodule = self.current_args.get('ignore_submodule', '')
-        return ignore_submodule.split(",")
-
-    def git_checks(self):
-
-        # TODO: check internet connection before this
-
-        # FIXME: give the user an option to skip this
-        # or eventually print it in a clearer way
-        # (a table? there is python ascii table plugin)
-
-        ignore_submodule_list = self.get_ignore_submodules()
-
-        for name, gitobj in sorted(self.gits.items()):
-            if name in ignore_submodule_list:
-                log.debug("Skipping %s on %s" % (self.action, name))
-                continue
-            if gitobj is not None:
-                if self.update:
-                    gitter.update(name, gitobj)
-                elif self.check:
-                    gitter.check_updates(name, gitobj)
-                    gitter.check_unstaged(name, gitobj)
 
     ################################
     # ### RUN ONE COMMAND OFF

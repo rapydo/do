@@ -3,12 +3,13 @@
 """
 Integration with Docker compose
 
-# NOTE: A way to silence compose output:
+# NOTE: A way to possibly silence compose output:
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 
 from rapydo.do.dockerizing import docker_errors
 import compose.service
+import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
 from compose.cli.command import \
@@ -31,7 +32,6 @@ class Compose(object):
 
         self.project_dir = helpers.current_dir()
         self.project_name = get_project_name(self.project_dir)
-        # log.very_verbose(f"Client compose '{self.project_name}': {files}")
         log.very_verbose("Client compose %s: %s" % (self.project_name, files))
 
     def config(self):
@@ -82,7 +82,9 @@ class Compose(object):
         try:
             method(options=options)
         except (
-            clierrors.UserError, compose.service.BuildError,
+            clierrors.UserError,
+            cerrors.OperationFailedError,
+            compose.service.BuildError,
         ) as e:
             log.critical_exit("Failed command execution:\n%s" % e)
         except docker_errors as e:

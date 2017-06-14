@@ -95,10 +95,18 @@ subcommands:
     description: Issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
-      # description: Issue a production certificate with service Letsencrypt
       command: updatecertificates
       service: proxy
       user: root
+      # description: useless here
+  interfaces:
+    description: run off some predefined interfaces to services
+    suboptions:
+      port:
+        type: int
+        metavalue: INTEGER_PORT_FOR_SERVICE
+        default: null
+        help: the port which would be associated to the service
   shell:
     description: open a shell inside the specified container
     suboptions:
