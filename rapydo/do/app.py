@@ -56,11 +56,16 @@ class Application(object):
 
         # Others
         self.tested_connection = False
-        self.blueprint = self.current_args.get('blueprint')
         self.development = self.current_args.get('development')
-
         self.project = self.current_args.get('project')
-        projects = helpers.list_path(PROJECT_DIR)
+
+    def check_projects(self):
+
+        try:
+            projects = helpers.list_path(PROJECT_DIR)
+        except FileNotFoundError:
+            log.critical_exit("Could not access the dir '%s'" % PROJECT_DIR)
+
         if self.project is None:
             prj_num = len(projects)
 
@@ -241,7 +246,7 @@ Verify that you are in the right folder, now you are in: %s
         # substitute values starting with '$$'
         myvars = {
             'frontend': self.frontend,
-            'blueprint': self.blueprint,
+            'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
             'customconf': helpers.project_dir(
                 self.project,
@@ -268,17 +273,12 @@ Verify that you are in the right folder, now you are in: %s
 
         # TODO: check all builds against their Dockefile latest commit
         # log.pp(self.services)
-        # exit(1)
+        pass
 
         # Compare builds depending on templates
-        builds = locate_builds(self.base_services, self.services)
-
-        if self.current_args.get('force_build'):
-            dc = Compose(files=self.base_files)
-            log.debug("Forcing rebuild for cached templates")
-            dc.force_template_build(builds)
-        else:
-            self.verify_build_cache(builds)
+        self.builds = locate_builds(self.base_services, self.services)
+        if not self.current_args.get('rebuild_templates', False):
+            self.verify_build_cache(self.builds)
 
     def verify_build_cache(self, builds):
 
@@ -298,7 +298,12 @@ Verify that you are in the right folder, now you are in: %s
                         file=path,
                         timestamp=build.get('timestamp')
                     ):
-                        log.warning("cached image [%s]" % image_tag)
+                        log.warning(
+                            "Cached image [%s]" % image_tag +
+                            ". Re-build it with:\n$ rapydo --service %s"
+                            % build.get('service') +
+                            " build --rebuild_templates"
+                        )
                         cache = True
                 else:
                     if self.action == 'check':
@@ -312,13 +317,15 @@ Verify that you are in the right folder, now you are in: %s
                         dc = Compose(files=self.base_files)
                         dc.force_template_build(builds={image_tag: build})
 
-            if cache:
-                log.info(
-                    "To build cached template(s) add option \"--force_build\""
-                )
+            # if cache:
+            #     log.warning(
+            #         "To re-build cached template(s) use the command:\n" +
+            #         "$ rapydo --service %s build --rebuild_templates"
+            #         % build.get('service')
+            #     )
 
-        if not cache:
-            log.debug("(CHECKED) no cache builds")
+            if not cache:
+                log.debug("(CHECKED) no cache builds")
 
     def bower_libs(self):
 
@@ -698,6 +705,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc.command('exec_command', options)
 
     def _build(self):
+
+        if self.current_args.get('rebuild_templates'):
+            dc = Compose(files=self.base_files)
+            log.debug("Forcing rebuild for cached templates")
+            dc.force_template_build(self.builds)
+
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
@@ -741,11 +754,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         The heart of the app: it runs a single controller command.
         """
 
-        self.get_args()
-
         # Initial inspection
+        self.get_args()
         self.check_installed_software()
         self.inspect_current_folder()
+        self.check_projects()
         self.read_specs()  # read project configuration
 
         # Generate and get the extra arguments in case of a custom command

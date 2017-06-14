@@ -1,10 +1,27 @@
 
-# TO DO
+## Things to do
 
 > to do is to be
 > to be is to do
 > do be do be do 
 
+---
+
+- [ ] time to do @releases
+    * Release rapydo-utils
+    * Release rapydo-controller
+    * Release rapydo-http
+- [ ] fix Travis
+- [ ] EUDAT release 0.4.1 or 0.4.2
+- [ ] fix mongo auth call to dev b2access
+- [ ] Translate app.py commands into a subpackage `commands`
+- [ ] tutorial mode [rapydo/issues#12]
+- [ ] update environment (git pull, image builds, update requirements?)
+- [ ] review TODO / FIXME in do
+
+---
+
+## Already done
 
 - [x] fix restclient
 - [x] fix tests inside container
@@ -12,7 +29,5 @@
 - [x] put @mongo back
 - [x] generic operation with 'run' services like sqladmin or swaggerui
 - [x] put back gitter things
-- [ ] auth service selection in yaml?
-- [ ] review TODO / FIXME in do
-- [ ] fix mongo auth call to dev b2access
-- [ ] time to do @releases
+- [x] auth service selection in yaml?
+- [x] some fixes

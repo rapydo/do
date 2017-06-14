@@ -30,7 +30,7 @@ def walk_services(actives, dependecies, index=0):
 
 def find_active(services):
     """
-    Check only services involved in current blueprint,
+    Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
     """
 

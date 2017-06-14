@@ -66,7 +66,9 @@ def find_overriden_templates(services, templates={}):
             except FileNotFoundError as e:
                 log.critical_exit(e)
 
-            if dfp.baseimage.endswith(':template'):
+            if dfp.baseimage is None:
+                dfp.baseimage = 'unknown_build'
+            elif dfp.baseimage.endswith(':template'):
                 if dfp.baseimage not in templates:
                     log.critical_exit(
                         """Unable to find the %s in this project

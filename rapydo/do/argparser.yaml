@@ -6,18 +6,19 @@ action:
 
 options:
 
-  project:  # FIXME: isn't this a blueprint?
+  project:
+    # NOTE: this is the equivalent of the old concept of `blueprint`
     type: str
     metavalue: PROJECT_NAME
     help: The name of the project to use inside the './projects' directory
     # The only one if exists otherwise list the projects.
     default: null
 
-  blueprint:  # FIXME: probably not the right name anymore?
+  mode:
     type: str
-    metavalue: CONTAINERS_YAML_BLUEPRINT
+    metavalue: CONTAINERS_YAML_SELECTED_MODE
     default: debug
-    help: Blueprint marker of the configuration to launch
+    help: The mode is like a 'blueprint' marker of the configuration to launch
 
   log-level:
     type: str
@@ -37,12 +38,6 @@ options:
     metavalue: SERVICES_COMA_SEPARATED
     default: active services
     help: List of services referring to a command
-
-  force_build:
-    type: bool
-    # metavalue: TRUE_OR_FALSE
-    default: False
-    help: Force building of templates docker images used in other builds
 
   force_env:
     type: bool
@@ -95,6 +90,11 @@ subcommands:
   build:
     description: force building of one or more services docker images
     suboptions:
+      rebuild_templates:
+        type: bool
+        # metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force building of templates docker images used in other builds
       force:
         type: bool
         # metavalue: TRUE_OR_FALSE
