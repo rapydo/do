@@ -37,13 +37,12 @@ setup(
     },
     install_requires=[
         "rapydo-utils==0.3.4",
-        # "https://github.com/rapydo/utils.git",
-        "docker",
-        "docker-compose>=1.13",
+        "requests==2.11.1",
+        "docker-compose==1.13.0",
+        # "docker",
         "gitpython",
         "dockerfile-parse",
         "better_exceptions",
-        "requests==2.11.1",
     ],
     # tests_require=[  # from PIP code
     #     'pytest',

@@ -1,17 +1,19 @@
 
 # TO DO
 
+> to do is to be
+> to be is to do
+> do be do be do 
+
+
 - [x] fix restclient
-- [ ] fix tests inside container
+- [x] fix tests inside container
+- [x] fix restclient bash open
+- [x] put @mongo back
 - [ ] FIXME: get it back / if False
-- [ ] review TODO / FIXME
-- [ ] fix restclient bash open
-- [ ] and generalize with other 'run' services like sqladmin or swaggerui
-
-- [ ] Bug in authentication:
-
-```bash
-
-(psycopg2.ProgrammingError) column external_accounts.irodsuser does not exist\nLINE 1: ...al_accounts.user_id AS external_accounts_user_id, external_a...\n ^\n [SQL: 'SELECT external_accounts.username AS external_accounts_username, external_accounts.token AS external_accounts_token, external_accounts.token_expiration AS external_accounts_token_expiration, external_accounts.email AS external_accounts_email, external_accounts.certificate_cn AS external_accounts_certificate_cn, external_accounts.certificate_dn AS external_accounts_certificate_dn, external_accounts.proxyfile AS external_accounts_proxyfile, external_accounts.description AS external_accounts_description, external_accounts.user_id AS external_accounts_user_id, external_accounts.irodsuser AS external_accounts_irodsuser, external_accounts.unity AS external_accounts_unity \\nFROM external_accounts \\nWHERE EXISTS (SELECT 1 \\nFROM \"user\" \\nWHERE \"user\".id = external_accounts.user_id AND \"user\".id = %(id_1)s) \\n LIMIT %(param_1)s'] [parameters: {'id_1': 1, 'param_1': 1}]
-
-```
+- [ ] auth service selection in yaml?
+- [ ] review TODO / FIXME in do
+- [ ] fix mongo auth call to dev b2access
+- [ ] time to do @releases
+- [ ] generic operation with 'run' services like sqladmin or swaggerui
+- [ ] force activate on one service?

@@ -488,10 +488,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             command = 'pause'
             for container in dc.get_handle().project.containers():
 
-                # WOW
-                # for key, value in container.dictionary.items():
-                #     print("TEST", container, key, value)
-
                 if container.dictionary.get('State').get('Status') == 'paused':
                     command = 'unpause'
                     break
@@ -506,7 +502,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         services = self.get_services(default=self.active_services)
 
         options = {
-            # '--follow': True,
+            # '--follow': True,  # FIXME: give this option here too
             '--follow': False,
             '--tail': 'all',
             '--no-color': False,
@@ -519,6 +515,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         except KeyboardInterrupt:
             log.info("Stopped by keyboard")
             pass
+
+    def _interface(self):
+        pass
 
     def _shell(self, user=None, command=None, service=None):
 
@@ -542,9 +541,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if command is None:
             default = 'echo hello world'
             command = self.current_args.get('command', default)
-            if service == 'restclient':
-                if command == 'bash':
-                    command = ''
 
         # The command must be splitted into command + args_array
         pieces = command.split()
@@ -559,40 +555,33 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Command request: %s(%s+%s)"
                      % (service.upper(), shell_command, shell_args))
 
-        if service == 'restclient':
-            # NOTE: an api client requires a run for an isolated service
-            options = {
-                'SERVICE': service,
-                'COMMAND': shell_command,
-                'ARGS': shell_args,
-                '--name': None,
-                '--user': user,
-                # '--user': None,
-                '--rm': True,
-                '--no-deps': True,
-                '--service-ports': False,
-                '-d': False,
-                '-T': False,
-                '--workdir': None,
-                '-e': [],
-                '--entrypoint': None,
-                '--volume': [],
-                '--publish': [],
-            }
-            dc.command('run', options)
+        # if service == 'restclient':
 
-        else:
-            options = {
-                'SERVICE': service,
-                'COMMAND': shell_command,
-                'ARGS': shell_args,
-                '--index': '1',
-                '--user': user,
-                '--privileged': True,
-                '-T': False,
-                '-d': False,
-            }
-            dc.command('exec_command', options)
+        #     # # api CLIENT requires a run for an isolated service
+        #     # options = {
+        #     #     'SERVICE': service,
+        #     #     'COMMAND': shell_command, 'ARGS': shell_args,
+        #     #     '--name': None, '--user': user,
+        #     #     '--rm': True, '--no-deps': True,
+        #     #     '--service-ports': False, '-d': False, '-T': False,
+        #     #     '--workdir': None, '--entrypoint': None,
+        #     #     '-e': [], '--volume': [], '--publish': [],
+        #     # }
+        #     # dc.command('run', options)
+
+        # else:
+
+        options = {
+            'SERVICE': service,
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '--index': '1',
+            '--user': user,
+            '--privileged': True,
+            '-T': False,
+            '-d': False,
+        }
+        dc.command('exec_command', options)
 
     def _build(self):
         dc = Compose(files=self.files)
