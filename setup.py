@@ -6,6 +6,9 @@ from rapydo.do import __version__
 from distutils.core import setup
 # from setuptools import setup
 
+# import platform
+# print(platform.python_version())
+
 here = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -36,13 +39,14 @@ setup(
         ],
     },
     install_requires=[
-        "rapydo-utils==0.4.0",
-        "requests==2.11.1",
+        "rapydo-utils==0.4.1",
         "docker-compose==1.13.0",
         # "docker",
         "gitpython",
         "dockerfile-parse",
         "better_exceptions",
+        "requests==2.11.1",
+        # requests==2.18.1 # otherwise it goes with this, which break things
     ],
     # tests_require=[  # from PIP code
     #     'pytest',

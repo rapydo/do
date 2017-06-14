@@ -163,7 +163,10 @@ Suggestion: remove %s and execute the init command
 
 def check_file_younger_than(gitobj, file, timestamp):
     # gitobj.commit()
-    commits = gitobj.blame(rev='HEAD', file=file)
+    try:
+        commits = gitobj.blame(rev='HEAD', file=file)
+    except GitCommandError as e:
+        log.exit("Failed 'blame' operation on %s.\n%s" % (file, e))
     dates = []
     for commit in commits:
         current_blame = gitobj.commit(rev=str(commit[0]))

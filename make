@@ -1,4 +1,6 @@
 #!/bin/bash
+# THIS IS THE MOST UPDATED VERSION OF MY MAKE
+# N.B. could be replaced with a Makefile indeed
 
 if [ "$1" == 'prod' ]; then
 	# OR PRODUCTION
@@ -18,7 +20,10 @@ pandoc \
 python3.6 setup.py sdist
 
 version=$(ls -1rt dist | tail -n 1)
-twine register dist/$version $dev
+
+## Can be skipped if using upload.pypi.io/legacy?
+# twine register dist/$version $dev
+
 twine upload dist/$version $dev
 
 if [ "$2" == 'bump' ]; then
