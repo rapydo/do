@@ -32,10 +32,10 @@ docker run --rm --name dind -it \
     docker:17.05.0-ce ash
 
 apk update
-apk add git python3
-
-# add pip...
-# install rapydo-controller
+apk add git python3 curl
+# curl -k https://bootstrap.pypa.io/get-pip.py > get-pip.py
+# python get-pip.py
+pip3.5 install --upgrade pip rapydo-controller
 
 # TRY
 ```
