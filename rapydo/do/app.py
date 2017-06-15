@@ -175,7 +175,22 @@ Verify that you are in the right folder, now you are in: %s
     def inspect_project_folder(self):
         required_files = [
             'confs',
+            'backend',
+            'backend/apis',
+            'backend/models',
+            'backend/swagger',
+            'backend/tests',
         ]
+
+        if self.frontend:
+            required_files.extend(
+                [
+                    'frontend',
+                    'frontend/js',
+                    'frontend/templates',
+                    'frontend/bower.json',
+                ]
+            )
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
@@ -365,13 +380,14 @@ Verify that you are in the right folder, now you are in: %s
             # TO FIX: put these paths somewhere
             # (duplicated in check, init and update)
             lib_dir = "libs"
-            bower_json = os.path.join(lib_dir, "bower.json")
+            # This file is already check in inspect_project_folder fucntion
+            # bower_json = os.path.join(lib_dir, "bower.json")
             bower_dir = os.path.join(lib_dir, "bower_components")
             ###################################
             if not os.path.isdir(lib_dir):
                 log.exit("Missing %s folder" % lib_dir)
-            if not os.path.isfile(bower_json):
-                log.exit("Missing %s configuration" % bower_json)
+            # if not os.path.isfile(bower_json):
+            #     log.exit("Missing %s configuration" % bower_json)
             if not os.path.isdir(bower_dir):
                 log.exit("Missing %s folder" % bower_dir)
 
@@ -792,8 +808,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
-        self.inspect_project_folder()
         self.read_specs()  # read project configuration
+        self.inspect_project_folder()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
