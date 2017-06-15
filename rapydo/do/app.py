@@ -140,27 +140,19 @@ Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
             )
 
-        # FIXME: move in a configuration file?
+        # FIXME: move in a project_defaults.yaml?
         required_files = [
-            # NEW
             PROJECT_DIR,
-            # 'projects/eudat/project_configuration.yaml',  # prj conf
-            # 'projects/eudat/backend',  # python code
-            # 'projects/eudat/confs',  # containers configuration
+            # The project dir details:
+            # 'projects/*/project_configuration.yaml',  # prj conf
+            # 'projects/*/backend',  # python code
+            # 'projects/*/confs',  # containers configuration
             'confs',
             'confs/backend.yml',
             'confs/frontend.yml',  # it is optional, but we expect to find it
             # 'data',  # ?
             # 'docs',  # ?
             'submodules'
-            # OLD
-            # 'specs/defaults.yaml',  # inside rapydo.utils
-            # 'specs/project_configuration.yaml',
-            # 'apis',
-            # 'containers',
-            # 'models',
-            # 'specs',
-            # 'swagger'
         ]
 
         for fname in required_files:
@@ -173,6 +165,8 @@ Verify that you are in the right folder, now you are in: %s
                 )
 
     def inspect_project_folder(self):
+
+        # FIXME: move in a project_defaults.yaml?
         required_files = [
             'confs',
             'backend',
