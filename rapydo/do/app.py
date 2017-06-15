@@ -180,6 +180,7 @@ Verify that you are in the right folder, now you are in: %s
             'backend/models',
             'backend/swagger',
             'backend/tests',
+            'backend/__main__.py',
         ]
 
         if self.frontend:
@@ -255,11 +256,8 @@ Verify that you are in the right folder, now you are in: %s
 
         local = gitter.get_repo(".")
 
-        # check if the local git corresponds to rapydo_core
-        # we do not want to check the branch, so we pass the
-        # local.active_branch to perform an always-true check
         is_core = gitter.compare_repository(
-            local, str(local.active_branch), core_url, check_only=True)
+            local, None, core_url, check_only=True)
 
         if is_core:
             log.info("You are working on rapydo-core, not a fork")

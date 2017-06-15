@@ -19,6 +19,14 @@ def get_local(path):
         return None
 
 
+def get_active_branch(gitobj):
+    try:
+        return str(gitobj.active_branch)
+    except TypeError as e:
+        log.warning(str(e))
+        return None
+
+
 def get_repo(path):
     return Repo(path)
 
@@ -156,13 +164,21 @@ Suggestion: remove %s and execute the init command
                 % (url, online_url)
             )
 
-    if branch != str(gitobj.active_branch):
-        if check_only:
-            return False
-        log.critical_exit(
-            "Wrong branch %s, expected %s.\nSuggested: cd %s; git checkout %s;"
-            % (gitobj.active_branch, branch, gitobj.working_dir, branch)
-        )
+    if branch is None:
+        # No more checks, we are ok
+        return True
+
+    active_branch = get_active_branch(gitobj)
+
+    if active_branch is not None:
+        if branch != active_branch:
+            if check_only:
+                return False
+            log.critical_exit(
+                """Wrong branch %s, expected %s.
+    Suggested: cd %s; git checkout %s;"""
+                % (active_branch, branch, gitobj.working_dir, branch)
+            )
     return True
 
 
@@ -222,46 +238,23 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         log.verbose("Fetching %s on %s" % (remote, path))
         remote.fetch()
 
-    branch = gitobj.active_branch
-    if remote_branch is None:
-        remote_branch = gitobj.active_branch
-
-    max_remote = 20
-    log.verbose("Inspecting %s/%s" % (path, branch))
-
-    # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
-    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
-
-    try:
-        commits_behind_list = list(commits_behind)
-    except GitCommandError:
-        log.info(
-            "Remote branch %s not found for %s repo. Is it a local branch?"
-            % (branch, path)
-        )
+    branch = get_active_branch(gitobj)
+    if branch is None:
+        log.warning("%s repo is detached? Unable to verify updates!" % (path))
     else:
 
-        if len(commits_behind_list) > 0:
-            log.warning("%s repo should be updated!" % (path))
-        else:
-            log.debug("(CHECKED) %s repo is updated" % (path))
-        for c in commits_behind_list:
-            message = c.message.strip().replace('\n', "")
+        if remote_branch is None:
+            remote_branch = branch
 
-            sha = c.hexsha[0:7]
-            if len(message) > 60:
-                message = message[0:57] + "..."
-            log.warning(
-                "Missing commit from %s: %s (%s)"
-                % (path, sha, message))
+        max_remote = 20
+        log.verbose("Inspecting %s/%s" % (path, branch))
 
-    # CHECKING COMMITS AHEAD (TO BE PUSHED) #
-    if remote_branch == branch:
-        ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
-        commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
+        # CHECKING COMMITS BEHIND (TO BE PULLED) #
+        behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
+        commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+
         try:
-            commits_ahead_list = list(commits_ahead)
+            commits_behind_list = list(commits_behind)
         except GitCommandError:
             log.info(
                 "Remote branch %s not found for %s repo. Is it a local branch?"
@@ -269,17 +262,46 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
             )
         else:
 
-            if len(commits_ahead_list) > 0:
-                log.warning("You have commits not pushed on %s repo" % (path))
+            if len(commits_behind_list) > 0:
+                log.warning("%s repo should be updated!" % (path))
             else:
-                log.debug(
-                    "(CHECKED) You pushed all commits on %s repo" % (path))
-            for c in commits_ahead_list:
+                log.debug("(CHECKED) %s repo is updated" % (path))
+            for c in commits_behind_list:
                 message = c.message.strip().replace('\n', "")
 
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
                 log.warning(
-                    "Unpushed commit in %s: %s (%s)"
+                    "Missing commit from %s: %s (%s)"
                     % (path, sha, message))
+
+        # CHECKING COMMITS AHEAD (TO BE PUSHED) #
+        if remote_branch == branch:
+            ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
+            commits_ahead = gitobj.iter_commits(
+                ahead_check, max_count=max_remote)
+            try:
+                commits_ahead_list = list(commits_ahead)
+            except GitCommandError:
+                log.info(
+                    "Remote branch %s not found for %s. Is it a local branch?"
+                    % (branch, path)
+                )
+            else:
+
+                if len(commits_ahead_list) > 0:
+                    log.warning(
+                        "You have commits not pushed on %s repo" % (path))
+                else:
+                    log.debug(
+                        "(CHECKED) You pushed all commits on %s repo" % (path))
+                for c in commits_ahead_list:
+                    message = c.message.strip().replace('\n', "")
+
+                    sha = c.hexsha[0:7]
+                    if len(message) > 60:
+                        message = message[0:57] + "..."
+                    log.warning(
+                        "Unpushed commit in %s: %s (%s)"
+                        % (path, sha, message))
