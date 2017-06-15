@@ -11,6 +11,7 @@ except BaseException as e:
     log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
 import os.path
+from collections import OrderedDict
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
@@ -146,6 +147,8 @@ Verify that you are in the right folder, now you are in: %s
             # 'projects/eudat/backend',  # python code
             # 'projects/eudat/confs',  # containers configuration
             'confs',
+            'confs/backend.yml',
+            'confs/frontend.yml',  # it is optional, but we expect to find it
             # 'data',  # ?
             # 'docs',  # ?
             'submodules'
@@ -166,6 +169,18 @@ Verify that you are in the right folder, now you are in: %s
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s
                     """ % (fname, os.getcwd())
+                )
+
+    def inspect_project_folder(self):
+        required_files = [
+            'confs',
+        ]
+        for fname in required_files:
+            fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if not os.path.exists(fpath):
+                log.critical_exit(
+                    """Project %s is invalid: file or folder not found %s
+                    """ % (self.project, fpath)
                 )
 
     def read_specs(self):
@@ -268,19 +283,20 @@ Verify that you are in the right folder, now you are in: %s
                 CONTAINERS_YAML_DIRNAME
             )
         }
-        newconfs = {}
+        compose_files = OrderedDict()
         for name, conf in confs.items():
-            newconfs[name] = project.apply_variables(conf, myvars)
-        return newconfs
+            compose_files[name] = project.apply_variables(conf, myvars)
+        return compose_files
 
     def read_composers(self):
 
         # Find configuration that tells us which files have to be read
-        composers = self.prepare_composers()
+        compose_files = self.prepare_composers()
+        # log.exit(compose_files)
 
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
-            read_yamls(composers)
+            read_yamls(compose_files)
         log.debug("(CHECKED) Configuration order:\n%s" % self.files)
 
     def build_dependencies(self):
@@ -774,6 +790,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
+        self.inspect_project_folder()
         self.read_specs()  # read project configuration
 
         # Generate and get the extra arguments in case of a custom command
