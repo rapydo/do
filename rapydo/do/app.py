@@ -43,6 +43,7 @@ class Application(object):
         self.run()
 
     def get_args(self):
+
         # Action
         self.action = self.current_args.get('action')
         if self.action is None:
@@ -56,6 +57,7 @@ class Application(object):
         self.check = self.action == 'check'
 
         # Others
+        self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
 
@@ -90,8 +92,7 @@ class Application(object):
 
         log.debug("(CHECKED) Selected project: %s" % self.project)
 
-        if self.project == DEFAULT_TEMPLATE_PROJECT:
-            self.is_template = True
+        self.is_template = self.project == DEFAULT_TEMPLATE_PROJECT
 
     def check_installed_software(self):
 
@@ -255,7 +256,7 @@ Verify that you are in the right folder, now you are in: %s
                 do=self.initialize
             )
 
-        for name, repo in sorted(repos.items()):
+        for name, repo in repos.items():
             gits[name] = self.working_clone(repo)
 
         self.gits = gits
@@ -500,7 +501,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def git_checks(self):
 
-        # TODO: check internet connection before this
+        # TODO: give an option to skip things when you are not connected
+        self.verify_connected()
 
         # FIXME: give the user an option to skip this
         # or eventually print it in a clearer way
@@ -820,6 +822,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.check:
             verify_upstream = self.current_args.get('verify_upstream', False)
             if verify_upstream:
+                self.verify_connected()
                 gitter.check_updates(
                     'upstream', self.gits['main'],
                     fetch_remote='upstream',

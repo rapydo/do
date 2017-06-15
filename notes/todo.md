@@ -7,17 +7,16 @@
 
 ---
 
-- [x] time to do @releases: rapydo(utils, controller, http)
-- [ ] fix Travis
-- [ ] pull 0.4.1 from Rob?
-- [ ] EUDAT release 0.4.1 or 0.4.2
-- [ ] pull rapydo/core?
+- [x] SERIOUS BUG: yaml order on dictionary elements
 - [ ] fix mongo auth call to dev b2access
-- [ ] BUG: if git is not installed the import from git fails
+- [ ] EUDAT release 0.5 + changelog + milestones
+- [ ] EUDAT pull rapydo/core? @ohboy
+- [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] Translate app.py commands into a subpackage `commands`
 - [ ] tutorial mode [rapydo/issues#12]
 - [ ] update environment (git pull, image builds, update requirements?)
 - [ ] review TODO / FIXME in do
+
 
 ---
 
@@ -31,3 +30,6 @@
 - [x] put back gitter things
 - [x] auth service selection in yaml?
 - [x] some fixes
+- [x] time to do @releases: rapydo(utils, controller, http)
+- [x] fix Travis
+- [x] pull 0.4.1 from Rob?
