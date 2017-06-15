@@ -13,7 +13,7 @@ except BaseException as e:
 import os.path
 from rapydo.utils import checks
 from rapydo.utils import helpers
-from rapydo.utils import PROJECT_DIR
+from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from rapydo.utils.configuration import DEFAULT_CONFIG_FILEPATH
 from rapydo.do import project
 from rapydo.do import gitter
@@ -56,7 +56,6 @@ class Application(object):
 
         # Others
         self.tested_connection = False
-        self.development = self.current_args.get('development')
         self.project = self.current_args.get('project')
 
     def check_projects(self):
@@ -70,7 +69,10 @@ class Application(object):
             prj_num = len(projects)
 
             if prj_num == 0:
-                log.critical_exit("No projects found")
+                log.critical_exit(
+                    "No project found (%s folder is empty?)"
+                    % PROJECT_DIR
+                )
             elif prj_num > 1:
                 log.exit(
                     "Please select the --project option on one " +
@@ -86,6 +88,9 @@ class Application(object):
                     "Select one of the following:\n\n %s\n" % projects)
 
         log.debug("(CHECKED) Selected project: %s" % self.project)
+
+        if self.project == DEFAULT_TEMPLATE_PROJECT:
+            self.is_template = True
 
     def check_installed_software(self):
 
@@ -116,7 +121,7 @@ class Application(object):
             log.debug("(CHECKED) %s version: %s" % (program, program_version))
         return
 
-    def inspect_current_folder(self):
+    def inspect_main_folder(self):
         """
         Since the rapydo command only works on rapydo-core or a rapydo fork
         we want to ensure that the current folder have a structure rapydo-like
@@ -136,13 +141,13 @@ Verify that you are in the right folder, now you are in: %s
         # FIXME: move in a configuration file?
         required_files = [
             # NEW
-            'projects/eudat/project_configuration.yaml',  # prj conf
-            'projects/eudat/backend',  # python code
-            'projects/eudat/confs',  # containers configuration
+            PROJECT_DIR,
+            # 'projects/eudat/project_configuration.yaml',  # prj conf
+            # 'projects/eudat/backend',  # python code
+            # 'projects/eudat/confs',  # containers configuration
             'confs',
             # 'data',  # ?
             # 'docs',  # ?
-            'projects',
             'submodules'
             # OLD
             # 'specs/defaults.yaml',  # inside rapydo.utils
@@ -168,7 +173,7 @@ Verify that you are in the right folder, now you are in: %s
 
         self.specs = project.read_configuration(
             project=self.project,
-            development=self.development
+            is_template=self.is_template
         )
         self.vars = self.specs.get('variables', {})
         log.debug("(CHECKED) Loaded containers configuration")
@@ -208,19 +213,29 @@ Verify that you are in the right folder, now you are in: %s
 
         return gitter.clone(**repo)
 
-    def git_submodules(self, development=False):
+    def git_submodules(self):
         """ Check and/or clone git projects """
 
         repos = self.vars.get('repos')
         core = repos.pop('rapydo')
+        core_url = core.get('online_url')
 
         gits = {}
 
-        if development:
-            gits['main'] = gitter.get_repo(".")
+        local = gitter.get_repo(".")
+
+        # check if the local git corresponds to rapydo_core
+        # we do not want to check the branch, so we pass the
+        # local.active_branch to perform an always-true check
+        is_core = gitter.compare_repository(
+            local, str(local.active_branch), core_url, check_only=True)
+
+        if is_core:
+            log.info("You are working on rapydo-core, not a fork")
+            gits['main'] = local
         else:
             gits['main'] = gitter.upstream(
-                url=core.get('online_url'),
+                url=core_url,
                 path=core.get('path'),
                 do=self.initialize
             )
@@ -757,7 +772,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Initial inspection
         self.get_args()
         self.check_installed_software()
-        self.inspect_current_folder()
+        self.inspect_main_folder()
         self.check_projects()
         self.read_specs()  # read project configuration
 
@@ -778,7 +793,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 do_heavy_ops = False
 
         # GIT related
-        self.git_submodules(development=self.development)
+        self.git_submodules()
         if do_heavy_ops:
             # NOTE: HEAVY OPERATION
             self.git_checks()

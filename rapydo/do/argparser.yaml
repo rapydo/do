@@ -44,11 +44,10 @@ options:
     default: False
     help: Force recreation of the docker compose .env file even if existing
 
-  development:
-    type: bool
-    # metavalue: TRUE_OR_FALSE
-    default: False
-    help: Allow to execute the code directly from rapydo core
+  # development:
+  #   type: bool
+  #   default: False
+  #   help: Allow to execute the code directly from rapydo core
 
 subcommands:
   check:

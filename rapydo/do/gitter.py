@@ -111,11 +111,11 @@ def clone(online_url, path, branch='master', do=False):
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
 
     # switch
-    comparing(gitobj, branch, online_url=online_url)
+    compare_repository(gitobj, branch, online_url=online_url)
     return gitobj
 
 
-def comparing(gitobj, branch, online_url):
+def compare_repository(gitobj, branch, online_url, check_only=False):
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -141,6 +141,8 @@ def comparing(gitobj, branch, online_url):
             url_match = True
 
         if not url_match:
+            if check_only:
+                return False
             log.critical_exit(
                 """Unmatched local remote
 Found: %s\nExpected: %s
@@ -155,10 +157,13 @@ Suggestion: remove %s and execute the init command
             )
 
     if branch != str(gitobj.active_branch):
+        if check_only:
+            return False
         log.critical_exit(
             "Wrong branch %s, expected %s.\nSuggested: cd %s; git checkout %s;"
             % (gitobj.active_branch, branch, gitobj.working_dir, branch)
         )
+    return True
 
 
 def check_file_younger_than(gitobj, file, timestamp):

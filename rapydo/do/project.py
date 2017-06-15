@@ -6,8 +6,8 @@ from rapydo.utils.logs import get_logger
 log = get_logger(__name__)
 
 
-def read_configuration(project, development=False):
-    return configuration.read(project, development)
+def read_configuration(project, is_template=False):
+    return configuration.read(project, is_template)
 
 
 def walk_services(actives, dependecies, index=0):
