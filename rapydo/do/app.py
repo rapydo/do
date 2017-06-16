@@ -406,7 +406,7 @@ Verify that you are in the right folder, now you are in: %s
                     pass
         return value
 
-    def make_env(self, do=False):
+    def make_env(self):
 
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         if self.current_args.get('force_env'):
@@ -439,19 +439,15 @@ Verify that you are in the right folder, now you are in: %s
             mixed_env = os.stat(envfile)
 
             # compare blame commit date against file modification date
-            # NOTE: HEAVY OPERATION
-            if do:
-                if gitter.check_file_younger_than(
-                    self.gits.get('utils'),
-                    file=DEFAULT_CONFIG_FILEPATH,
-                    timestamp=mixed_env.st_mtime
-                ):
-                    log.warning(
-                        "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-                        "Add --force_env to update."
-                    )
-            # else:
-            #     log.verbose("Skipping heavy operations")
+            if gitter.check_file_younger_than(
+                self.gits.get('utils'),
+                file=DEFAULT_CONFIG_FILEPATH,
+                timestamp=mixed_env.st_mtime
+            ):
+                log.warning(
+                    "%s seems outdated. "
+                    % COMPOSE_ENVIRONMENT_FILE +
+                    "Add --force-env to update.")
 
     def check_placeholders(self):
 
@@ -800,7 +796,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
-        self.read_specs()  # read project configuration
+        self.read_specs()  # here we really read project configuration
         self.inspect_project_folder()
 
         # Generate and get the extra arguments in case of a custom command
@@ -838,7 +834,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
 
         # Compose services and variables
-        self.make_env(do=do_heavy_ops)
+        self.make_env()
         self.read_composers()
         self.check_placeholders()
 

@@ -41,6 +41,18 @@ def prepare_params(options):
 
 
 # ##########################
+# Check on format
+for element in sys.argv:
+    if '_' in element:
+        raise ValueError(
+            "Wrong \"%s\" option provided.\n" % element +
+            "Arguments containing '_' are not allowed.\n" +
+            "Use '-' instead\n")
+# NOTE: the standard is to use only '-' separators for arguments
+# but beware that argparse converts them into '_' when you want to retrieve it
+
+
+# ##########################
 # READ MAIN FILE WITH COMMANDS AND OPTIONS
 parse_conf = load_yaml_file(
     'argparser', path=helpers.script_abspath(__file__),

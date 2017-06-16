@@ -39,7 +39,7 @@ options:
     default: active services
     help: List of services referring to a command
 
-  force_env:
+  force-env:
     type: bool
     default: False
     help: Force recreation of the docker compose .env file even if existing
@@ -54,16 +54,16 @@ subcommands:
     description: "only verify if currently compliant to RAPyDo specs
         (NOTE: this is done at every call)"
     suboptions:
-      ignore_submodule:
+      ignore-submodule:
         type: str
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip_heavy_git_ops:
+      skip-heavy-git-ops:
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      verify_upstream:
+      verify-upstream:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
@@ -75,7 +75,7 @@ subcommands:
   update:
     description: update the current project
     suboptions:
-      ignore_submodule:
+      ignore-submodule:
         type: str
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
@@ -89,7 +89,7 @@ subcommands:
   build:
     description: force building of one or more services docker images
     suboptions:
-      rebuild_templates:
+      rebuild-templates:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
@@ -103,7 +103,7 @@ subcommands:
     description: watch log tails of all or specified containers
   custom:
     description: execute predefined custom commands inside containers
-  ssl_certificate:
+  ssl-certificate:
     description: Issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
