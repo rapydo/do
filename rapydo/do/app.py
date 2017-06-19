@@ -57,9 +57,11 @@ class Application(object):
         self.check = self.action == 'check'
 
         # Others
+        self.gits = None
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.non_harmful_commands = ['status', 'log', 'shell']
 
     def check_projects(self):
 
@@ -439,15 +441,16 @@ Verify that you are in the right folder, now you are in: %s
             mixed_env = os.stat(envfile)
 
             # compare blame commit date against file modification date
-            if gitter.check_file_younger_than(
-                self.gits.get('utils'),
-                file=DEFAULT_CONFIG_FILEPATH,
-                timestamp=mixed_env.st_mtime
-            ):
-                log.warning(
-                    "%s seems outdated. "
-                    % COMPOSE_ENVIRONMENT_FILE +
-                    "Add --force-env to update.")
+            if self.gits is not None:
+                if gitter.check_file_younger_than(
+                    self.gits.get('utils'),
+                    file=DEFAULT_CONFIG_FILEPATH,
+                    timestamp=mixed_env.st_mtime
+                ):
+                    log.warning(
+                        "%s seems outdated. "
+                        % COMPOSE_ENVIRONMENT_FILE +
+                        "Add --force-env to update.")
 
     def check_placeholders(self):
 
@@ -816,12 +819,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 do_heavy_ops = False
 
         # GIT related
-        self.git_submodules()
-        if do_heavy_ops:
-            # NOTE: HEAVY OPERATION
-            self.git_checks()
-        else:
-            log.verbose("Skipping heavy operations")
+        if self.action not in self.non_harmful_commands:
+            self.git_submodules()
+            if do_heavy_ops:
+                # NOTE: HEAVY OPERATION
+                self.git_checks()
+            else:
+                log.verbose("Skipping heavy operations")
 
         if self.check:
             verify_upstream = self.current_args.get('verify_upstream', False)
@@ -838,11 +842,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.read_composers()
         self.check_placeholders()
 
-        # Build or check template containers images
-        self.build_dependencies()
-
-        # Install or check bower libraries (if frotend is enabled)
-        self.bower_libs()
+        if self.action not in self.non_harmful_commands or not do_heavy_ops:
+            # Build or check template containers images
+            self.build_dependencies()
+            # Install or check bower libraries (if frontend is enabled)
+            self.bower_libs()
 
         # Final step, launch the command
         func()
