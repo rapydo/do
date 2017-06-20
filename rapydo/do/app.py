@@ -341,7 +341,7 @@ Verify that you are in the right folder, now you are in: %s
                             "Cached image [%s]" % image_tag +
                             ". Re-build it with:\n$ rapydo --service %s"
                             % build.get('service') +
-                            " build --rebuild_templates"
+                            " build --rebuild-templates"
                         )
                         cache = True
                 else:
