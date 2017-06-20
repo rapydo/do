@@ -65,7 +65,7 @@ Suggestion: execute the init command
                 % (current_url, url)
             )
     else:
-        log.debug("(CHECKED) upstream is set correctly")
+        log.checked("Upstream is set correctly")
 
     return gitobj
 
@@ -109,7 +109,7 @@ def clone(online_url, path, branch='master', do=False):
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:
-        log.debug("(CHECKED) path %s already exists" % local_path)
+        log.checked("Path %s already exists" % local_path)
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
@@ -251,7 +251,8 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
 
         # CHECKING COMMITS BEHIND (TO BE PULLED) #
         behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
-        commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+        commits_behind = gitobj.iter_commits(
+            behind_check, max_count=max_remote)
 
         try:
             commits_behind_list = list(commits_behind)
@@ -265,7 +266,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
             if len(commits_behind_list) > 0:
                 log.warning("%s repo should be updated!" % (path))
             else:
-                log.debug("(CHECKED) %s repo is updated" % (path))
+                log.checked("%s repo is updated" % (path))
             for c in commits_behind_list:
                 message = c.message.strip().replace('\n', "")
 
@@ -294,8 +295,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
                     log.warning(
                         "You have commits not pushed on %s repo" % (path))
                 else:
-                    log.debug(
-                        "(CHECKED) You pushed all commits on %s repo" % (path))
+                    log.checked("You pushed all commits on %s repo" % (path))
                 for c in commits_ahead_list:
                     message = c.message.strip().replace('\n', "")
 
