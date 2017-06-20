@@ -57,11 +57,9 @@ class Application(object):
         self.check = self.action == 'check'
 
         # Others
-        self.gits = None
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
-        self.non_harmful_commands = ['status', 'log', 'shell']
 
     def check_projects(self):
 
@@ -92,7 +90,7 @@ class Application(object):
                     "Wrong project '%s'.\n" % self.project +
                     "Select one of the following:\n\n %s\n" % projects)
 
-        log.debug("(CHECKED) Selected project: %s" % self.project)
+        log.checked("Selected project: %s" % self.project)
 
         self.is_template = self.project == DEFAULT_TEMPLATE_PROJECT
 
@@ -109,7 +107,7 @@ class Application(object):
         if package_version is None:
             log.critical_exit("Could not find %s" % pack)
         else:
-            log.debug("(CHECKED) %s version: %s" % (pack, package_version))
+            log.checked("%s version: %s" % (pack, package_version))
 
         # Check if git is installed
         self.check_program('git')
@@ -122,7 +120,7 @@ class Application(object):
                 "Please make sure that '%s' is installed" % program
             )
         else:
-            log.debug("(CHECKED) %s version: %s" % (program, program_version))
+            log.checked("%s version: %s" % (program, program_version))
         return
 
     def inspect_main_folder(self):
@@ -204,7 +202,7 @@ Verify that you are in the right folder, now you are in: %s
             is_template=self.is_template
         )
         self.vars = self.specs.get('variables', {})
-        log.debug("(CHECKED) Loaded containers configuration")
+        log.checked("Loaded containers configuration")
 
         self.frontend = self.vars \
             .get('frontend', {}) \
@@ -218,7 +216,7 @@ Verify that you are in the right folder, now you are in: %s
         if not connected:
             log.critical_exit('Internet connection unavailable')
         else:
-            log.debug("(CHECKED) internet connection available")
+            log.checked("Internet connection available")
             self.tested_connection = True
         return
 
@@ -307,7 +305,7 @@ Verify that you are in the right folder, now you are in: %s
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
             read_yamls(compose_files)
-        log.debug("(CHECKED) Configuration order:\n%s" % self.files)
+        log.verbose("Configuration order:\n%s" % self.files)
 
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
@@ -366,29 +364,53 @@ Verify that you are in the right folder, now you are in: %s
             #     )
 
             if not cache:
-                log.debug("(CHECKED) no cache builds")
+                log.checked("No cache found for docker builds")
 
     def bower_libs(self):
 
-        if self.frontend:
-            # TO FIX: put these paths somewhere
-            # (duplicated in check, init and update)
-            lib_dir = "libs"
-            # This file is already check in inspect_project_folder fucntion
-            # bower_json = os.path.join(lib_dir, "bower.json")
-            bower_dir = os.path.join(lib_dir, "bower_components")
-            ###################################
-            if not os.path.isdir(lib_dir):
-                log.exit("Missing %s folder" % lib_dir)
-            # if not os.path.isfile(bower_json):
-            #     log.exit("Missing %s configuration" % bower_json)
-            if not os.path.isdir(bower_dir):
-                log.exit("Missing %s folder" % bower_dir)
+        if self.check or self.initialize or self.update:
+            if self.frontend:
+                bower_dir = os.path.join("bower_components")
 
-            if self.initialize:
-                log.warning("Not implemented: install bower libs")
-            elif self.update:
-                log.warning("Not implemented: update bower libs")
+                install_bower = False
+                if self.update:
+                    # FIX ME: to be enabled for update
+                    install_bower = False
+                elif not os.path.isdir(bower_dir):
+                    install_bower = True
+                else:
+                    libs = helpers.list_path(bower_dir)
+                    if len(libs) <= 0:
+                        install_bower = True
+
+                if install_bower:
+
+                    if self.check:
+                        log.exit(
+                            """Missing bower libs in %s
+\nSuggestion: execute the init command"""
+                            % bower_dir
+                        )
+                    else:
+                        args = [
+                            "install",
+                            "--config.directory=/libs/bower_components"
+                        ]
+                        options = {
+                            'SERVICE': "bower",
+                            '--publish': [], '--service-ports': False,
+                            'COMMAND': "bower",
+                            'ARGS': args, '-e': [], '--volume': [],
+                            '--rm': True, '--no-deps': True,
+                            '--name': None, '--user': None,
+                            '--workdir': None, '--entrypoint': None,
+                            '-d': False, '-T': False,
+                        }
+                        log.info("Installing bower libs...")
+                        dc = Compose(files=self.files)
+                        dc.command('run', options)
+                else:
+                    log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
                      default=None, avoid_default=False):
@@ -408,7 +430,7 @@ Verify that you are in the right folder, now you are in: %s
                     pass
         return value
 
-    def make_env(self):
+    def make_env(self, do=False):
 
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         if self.current_args.get('force_env'):
@@ -435,22 +457,25 @@ Verify that you are in the right folder, now you are in: %s
                     whandle.write("%s=%s\n" % (key, value))
                 log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
-            log.debug("(CHECKED) %s already exists" % COMPOSE_ENVIRONMENT_FILE)
+            log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
 
             # Stat file
             mixed_env = os.stat(envfile)
 
             # compare blame commit date against file modification date
-            if self.gits is not None:
+            # NOTE: HEAVY OPERATION
+            if do:
                 if gitter.check_file_younger_than(
                     self.gits.get('utils'),
                     file=DEFAULT_CONFIG_FILEPATH,
                     timestamp=mixed_env.st_mtime
                 ):
                     log.warning(
-                        "%s seems outdated. "
-                        % COMPOSE_ENVIRONMENT_FILE +
-                        "Add --force-env to update.")
+                        "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
+                        "Add --force_env to update."
+                    )
+            # else:
+            #     log.verbose("Skipping heavy operations")
 
     def check_placeholders(self):
 
@@ -464,7 +489,7 @@ Verify that you are in the right folder, now you are in: %s
 and add the variable "ACTIVATE: 1" in the service enviroment
                 """)
         else:
-            log.info("(CHECKED) Active services: %s" % self.active_services)
+            log.checked("Active services: %s" % self.active_services)
 
         missing = []
         for service_name in self.active_services:
@@ -478,7 +503,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.critical_exit(
                 "Missing critical params for configuration:\n%s" % missing)
         else:
-            log.debug("(CHECKED) no PLACEHOLDER variable to be replaced")
+            log.checked("No PLACEHOLDER variable to be replaced")
 
         return missing
 
@@ -799,7 +824,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
-        self.read_specs()  # here we really read project configuration
+        self.read_specs()  # read project configuration
         self.inspect_project_folder()
 
         # Generate and get the extra arguments in case of a custom command
@@ -819,13 +844,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 do_heavy_ops = False
 
         # GIT related
-        if self.action not in self.non_harmful_commands:
-            self.git_submodules()
-            if do_heavy_ops:
-                # NOTE: HEAVY OPERATION
-                self.git_checks()
-            else:
-                log.verbose("Skipping heavy operations")
+        self.git_submodules()
+        if do_heavy_ops:
+            # NOTE: HEAVY OPERATION
+            self.git_checks()
+        else:
+            log.verbose("Skipping heavy operations")
 
         if self.check:
             verify_upstream = self.current_args.get('verify_upstream', False)
@@ -838,15 +862,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
 
         # Compose services and variables
-        self.make_env()
+        self.make_env(do=do_heavy_ops)
         self.read_composers()
         self.check_placeholders()
 
-        if self.action not in self.non_harmful_commands or not do_heavy_ops:
-            # Build or check template containers images
-            self.build_dependencies()
-            # Install or check bower libraries (if frontend is enabled)
-            self.bower_libs()
+        # Build or check template containers images
+        self.build_dependencies()
+
+        # Install or check bower libraries (if frontend is enabled)
+        self.bower_libs()
 
         # Final step, launch the command
         func()
