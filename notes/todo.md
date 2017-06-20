@@ -7,25 +7,37 @@
 
 ---
 
-- [x] BUG: services.yaml was not saved
-- [x] BUG: swagger dir not saved as recursive
-- [x] BUG: rapydo wrong blame. projects_defaults.yaml position
-- [x] BUG: uwsgi.ini needs `PROJECT.__main__`
-    - rebuild backend image
-- [ ] EUDAT: release 0.5 + changelog + milestones
+```bash
+rapydo-utils/0.4.4
+rapydo-http/0.2.8
+rapydo-controller/0.3.5
+```
+
+---
+
+- [x] EUDAT: release 0.5 + changelog + milestones
     - [x] check with b2access dev
     - [x] check production locally with self signed cert
-    - [ ] add b2safe dev #PROBLEMS
-    - [ ] check with domain and prototype online
+    - [x] add b2safe dev
+    - [x] check with domain and prototype online
+- [x] BUG: env variables stripper (detect)
+- [x] BUG: PYTHONPATH fix on all modes?
+- [x] BUG: compatibility with docker-compose > 1.13
+- [ ] TASK: close the squash issue
+- [ ] TODO: how to template and update; @cookiecutter
 - [ ] TEST: setup.py with setuptools
-    - utils
-    - controller/do
-    - backend/http
+    + utils
+    + controller/do
+    + backend/http
 - [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] TASK: tutorial (walkthrough) mode [rapydo/issues#12]
+- [ ] TASK: PDF with swagger2markdown
 - [ ] REFACTOR: Translate app.py commands into a subpackage `commands`
 - [ ] HOW TO: update environment (git pull, image builds, update requirements?)
 - [ ] TEST: eudat re-pull rapydo/core? @ohboy
+- [ ] EPOS: test code with mongo; @epos
+    + squash
+- [ ] TODO: evaluate tini: https://hynek.me/articles/docker-signals
 
 
 ---
@@ -44,3 +56,8 @@
 - [x] fix Travis
 - [x] pull 0.4.1 from Rob?
 - [x] SERIOUS BUG: yaml order on dictionary elements
+- [x] BUG: services.yaml was not saved
+- [x] BUG: swagger dir not saved as recursive
+- [x] BUG: rapydo wrong blame. projects_defaults.yaml position
+- [x] BUG: uwsgi.ini needs `PROJECT.__main__`
+    - rebuild backend image
