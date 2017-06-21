@@ -15,14 +15,6 @@ rapydo-controller/0.3.5
 
 ---
 
-- [x] EUDAT: release 0.5 + changelog + milestones
-    - [x] check with b2access dev
-    - [x] check production locally with self signed cert
-    - [x] add b2safe dev
-    - [x] check with domain and prototype online
-- [x] BUG: env variables stripper (detect)
-- [x] BUG: PYTHONPATH fix on all modes?
-- [x] BUG: compatibility with docker-compose > 1.13
 - [ ] TASK: close the squash issue
 - [ ] TODO: how to template and update; @cookiecutter
 - [ ] TEST: setup.py with setuptools
@@ -35,7 +27,7 @@ rapydo-controller/0.3.5
 - [ ] REFACTOR: Translate app.py commands into a subpackage `commands`
 - [ ] HOW TO: update environment (git pull, image builds, update requirements?)
 - [ ] TEST: eudat re-pull rapydo/core? @ohboy
-- [ ] EPOS: test code with mongo; @epos
+- [ ] EPOS: test code with mongo
     + squash
 - [ ] TODO: evaluate tini: https://hynek.me/articles/docker-signals
 
@@ -61,3 +53,11 @@ rapydo-controller/0.3.5
 - [x] BUG: rapydo wrong blame. projects_defaults.yaml position
 - [x] BUG: uwsgi.ini needs `PROJECT.__main__`
     - rebuild backend image
+- [x] EUDAT: release 0.5 + changelog + milestones
+    - [x] check with b2access dev
+    - [x] check production locally with self signed cert
+    - [x] add b2safe dev
+    - [x] check with domain and prototype online
+- [x] BUG: env variables stripper (detect)
+- [x] BUG: PYTHONPATH fix on all modes?
+- [x] BUG: compatibility with docker-compose > 1.13

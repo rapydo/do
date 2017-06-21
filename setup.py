@@ -39,7 +39,7 @@ setup(
         ],
     },
     install_requires=[
-        "rapydo-utils==0.4.4",
+        "rapydo-utils==0.4.5",
         "docker-compose>=1.13",
         # "docker",
         "gitpython",
