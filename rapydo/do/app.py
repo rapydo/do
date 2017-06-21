@@ -392,10 +392,15 @@ Verify that you are in the right folder, now you are in: %s
                             % bower_dir
                         )
                     else:
-                        args = [
-                            "install",
-                            "--config.directory=/libs/bower_components"
-                        ]
+
+                        if self.initialize:
+                            args = ["install"]
+                        else:
+                            args = ["update"]
+
+                        args.append(
+                            "--config.directory=/libs/bower_components")
+
                         options = {
                             'SERVICE': "bower",
                             '--publish': [], '--service-ports': False,
@@ -809,6 +814,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         return self.shell(**meta)
 
+    def _bower_install(self):
+
+        log.exit("Not yet implemented. How to take an input?")
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################
@@ -832,9 +841,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             self.custom_parse_args()
 
         # Verify if we implemented the requested command
-        func = getattr(self, '_' + self.action, None)
+        function = "_%s" % self.action.replace("-", "_")
+        func = getattr(self, function, None)
         if func is None:
-            log.critical_exit("Command not yet implemented: %s" % self.action)
+            log.critical_exit(
+                "Command not yet implemented: %s (expected function: %s)"
+                % (self.action, function))
 
         # Detect if heavy ops are allowed
         do_heavy_ops = False
