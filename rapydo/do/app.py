@@ -341,7 +341,7 @@ Verify that you are in the right folder, now you are in: %s
                             "Cached image [%s]" % image_tag +
                             ". Re-build it with:\n$ rapydo --service %s"
                             % build.get('service') +
-                            " build --rebuild_templates"
+                            " build --rebuild-templates"
                         )
                         cache = True
                 else:
@@ -374,8 +374,7 @@ Verify that you are in the right folder, now you are in: %s
 
                 install_bower = False
                 if self.update:
-                    # FIX ME: to be enabled for update
-                    install_bower = False
+                    install_bower = True
                 elif not os.path.isdir(bower_dir):
                     install_bower = True
                 else:
@@ -392,10 +391,32 @@ Verify that you are in the right folder, now you are in: %s
                             % bower_dir
                         )
                     else:
-                        args = [
-                            "install",
-                            "--config.directory=/libs/bower_components"
-                        ]
+
+                        # SMART WAY -> use it this a _interface method:
+                        # if self.initialize:
+                        #     bower_command = "bower install"
+                        # else:
+                        #     bower_command = "bower update"
+
+                        # bower_command += \
+                        #     "--config.directory=/libs/bower_components"
+
+                        # self._shell(
+                        #     command=bower_command, service="bower")
+
+                        # ##############################################
+                        # ROUGH WAY
+
+                        if self.initialize:
+                            args = [
+                                "install",
+                                "--config.directory=/libs/bower_components"
+                            ]
+                        else:
+                            args = [
+                                "update",
+                                "--config.directory=/libs/bower_components"
+                            ]
                         options = {
                             'SERVICE': "bower",
                             '--publish': [], '--service-ports': False,
@@ -406,9 +427,12 @@ Verify that you are in the right folder, now you are in: %s
                             '--workdir': None, '--entrypoint': None,
                             '-d': False, '-T': False,
                         }
-                        log.info("Installing bower libs...")
+
+                        log.info("Installing bower libs (%s)" % args)
                         dc = Compose(files=self.files)
                         dc.command('run', options)
+                        # ##############################################
+
                 else:
                     log.checked("Bower libs already installed")
 
@@ -472,7 +496,7 @@ Verify that you are in the right folder, now you are in: %s
                 ):
                     log.warning(
                         "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-                        "Add --force_env to update."
+                        "Add --force-env to update."
                     )
             # else:
             #     log.verbose("Skipping heavy operations")
@@ -737,7 +761,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
-            if user.strip() == '':
+            if user is not None and user.strip() == '':
                 user = None
 
         if command is None:
@@ -796,8 +820,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _ssl_certificate(self):
 
         # Use my method name in a meta programming style
-        import inspect
-        current_method_name = inspect.currentframe().f_code.co_name
+        # import inspect
+        # TO FIX: this name is wrong...
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "ssl-certificate"
 
         meta = arguments.parse_conf \
             .get('subcommands') \
@@ -807,7 +833,59 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
-        return self.shell(**meta)
+        # TO FIX: are you sure? _shell do not require a running container?
+        return self._shell(**meta)
+
+    def _bower_install(self):
+
+        lib = self.current_args.get("lib", None)
+        if lib is None:
+            log.exit("Missing bower lib, please add the --lib option")
+
+        # Use my method name in a meta programming style
+        # import inspect
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "bower-install"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'bower'
+
+        bower_command = "bower install %s --save" % lib
+
+        # TO FIX: shell requires a running container.
+        # Use something like _interfaces
+        self._shell(
+            command=bower_command, service="bower")
+
+    def _bower_update(self):
+
+        lib = self.current_args.get("lib", None)
+        if lib is None:
+            log.exit("Missing bower lib, please add the --lib option")
+
+        # Use my method name in a meta programming style
+        # import inspect
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "bower-install"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'bower'
+
+        bower_command = "bower update %s" % lib
+        # TO FIX: shell requires a running container.
+        # Use something like _interfaces
+        self._shell(
+            command=bower_command, service="bower")
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -832,9 +910,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             self.custom_parse_args()
 
         # Verify if we implemented the requested command
-        func = getattr(self, '_' + self.action, None)
+        function = "_%s" % self.action.replace("-", "_")
+        func = getattr(self, function, None)
         if func is None:
-            log.critical_exit("Command not yet implemented: %s" % self.action)
+            log.critical_exit(
+                "Command not yet implemented: %s (expected function: %s)"
+                % (self.action, function))
 
         # Detect if heavy ops are allowed
         do_heavy_ops = False

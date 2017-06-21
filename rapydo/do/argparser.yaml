@@ -111,6 +111,32 @@ subcommands:
       service: proxy
       user: root
       # description: useless here
+  bower-install:
+    description: Install a new lib with bower
+    container_exec:
+      name: bower
+      # command: bower install 
+      service: bower
+      user: develop
+    suboptions:
+      lib:
+        type: str
+        metavalue: BOWER_LIB_TO_INSTALL
+        default: null
+        help: the bower lib to be installed
+  bower-update:
+    description: Update a lib with bower
+    container_exec:
+      name: bower
+      # command: bower update
+      service: bower
+      user: develop
+    suboptions:
+      lib:
+        type: str
+        metavalue: BOWER_LIB_TO_INSTALL
+        default: null
+        help: the bower lib to be installed
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
