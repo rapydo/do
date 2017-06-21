@@ -374,8 +374,7 @@ Verify that you are in the right folder, now you are in: %s
 
                 install_bower = False
                 if self.update:
-                    # FIX ME: to be enabled for update
-                    install_bower = False
+                    install_bower = True
                 elif not os.path.isdir(bower_dir):
                     install_bower = True
                 else:
@@ -393,16 +392,47 @@ Verify that you are in the right folder, now you are in: %s
                         )
                     else:
 
+                        # SMART WAY -> use it this a _interface method:
+                        # if self.initialize:
+                        #     bower_command = "bower install"
+                        # else:
+                        #     bower_command = "bower update"
+
+                        # bower_command += \
+                        #     "--config.directory=/libs/bower_components"
+
+                        # self._shell(
+                        #     command=bower_command, service="bower")
+
+                        # ##############################################
+                        # ROUGH WAY
+
                         if self.initialize:
-                            bower_command = "bower install"
+                            args = [
+                                "install",
+                                "--config.directory=/libs/bower_components"
+                            ]
                         else:
-                            bower_command = "bower update"
+                            args = [
+                                "update",
+                                "--config.directory=/libs/bower_components"
+                            ]
+                        options = {
+                            'SERVICE': "bower",
+                            '--publish': [], '--service-ports': False,
+                            'COMMAND': "bower",
+                            'ARGS': args, '-e': [], '--volume': [],
+                            '--rm': True, '--no-deps': True,
+                            '--name': None, '--user': None,
+                            '--workdir': None, '--entrypoint': None,
+                            '-d': False, '-T': False,
+                        }
 
-                        bower_command += \
-                            "--config.directory=/libs/bower_components"
+                        log.info("Installing bower libs (%s)" % args)
+                        dc = Compose(files=self.files)
+                        dc.command('run', options)
+                        # ##############################################
 
-                        self._shell(
-                            command=bower_command, service="bower")
                 else:
                     log.checked("Bower libs already installed")
 
@@ -790,9 +820,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _ssl_certificate(self):
 
         # Use my method name in a meta programming style
-        import inspect
+        # import inspect
         # TO FIX: this name is wrong...
-        current_method_name = inspect.currentframe().f_code.co_name
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "ssl-certificate"
 
         meta = arguments.parse_conf \
             .get('subcommands') \
