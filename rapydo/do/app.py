@@ -394,26 +394,15 @@ Verify that you are in the right folder, now you are in: %s
                     else:
 
                         if self.initialize:
-                            args = ["install"]
+                            bower_command = "bower install"
                         else:
-                            args = ["update"]
+                            bower_command = "bower update"
 
-                        args.append(
-                            "--config.directory=/libs/bower_components")
+                        bower_command += \
+                            "--config.directory=/libs/bower_components"
 
-                        options = {
-                            'SERVICE': "bower",
-                            '--publish': [], '--service-ports': False,
-                            'COMMAND': "bower",
-                            'ARGS': args, '-e': [], '--volume': [],
-                            '--rm': True, '--no-deps': True,
-                            '--name': None, '--user': None,
-                            '--workdir': None, '--entrypoint': None,
-                            '-d': False, '-T': False,
-                        }
-                        log.info("Installing bower libs...")
-                        dc = Compose(files=self.files)
-                        dc.command('run', options)
+                        self._shell(
+                            command=bower_command, service="bower")
                 else:
                     log.checked("Bower libs already installed")
 
@@ -742,7 +731,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
-            if user.strip() == '':
+            if user is not None and user.strip() == '':
                 user = None
 
         if command is None:
@@ -802,6 +791,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Use my method name in a meta programming style
         import inspect
+        # TO FIX: this name is wrong...
         current_method_name = inspect.currentframe().f_code.co_name
 
         meta = arguments.parse_conf \
@@ -812,11 +802,59 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
-        return self.shell(**meta)
+        # TO FIX: are you sure? _shell do not require a running container?
+        return self._shell(**meta)
 
     def _bower_install(self):
 
-        log.exit("Not yet implemented. How to take an input?")
+        lib = self.current_args.get("lib", None)
+        if lib is None:
+            log.exit("Missing bower lib, please add the --lib option")
+
+        # Use my method name in a meta programming style
+        # import inspect
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "bower-install"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'bower'
+
+        bower_command = "bower install %s --save" % lib
+
+        # TO FIX: shell requires a running container.
+        # Use something like _interfaces
+        self._shell(
+            command=bower_command, service="bower")
+
+    def _bower_update(self):
+
+        lib = self.current_args.get("lib", None)
+        if lib is None:
+            log.exit("Missing bower lib, please add the --lib option")
+
+        # Use my method name in a meta programming style
+        # import inspect
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "bower-install"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'bower'
+
+        bower_command = "bower update %s" % lib
+        # TO FIX: shell requires a running container.
+        # Use something like _interfaces
+        self._shell(
+            command=bower_command, service="bower")
 
     ################################
     # ### RUN ONE COMMAND OFF
