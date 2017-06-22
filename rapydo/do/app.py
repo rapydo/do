@@ -8,7 +8,7 @@ except BaseException as e:
     # raise
     from rapydo.utils.logs import get_logger
     log = get_logger(__name__)
-    log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
+    log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
 import os.path
 from collections import OrderedDict
@@ -47,7 +47,7 @@ class Application(object):
         # Action
         self.action = self.current_args.get('action')
         if self.action is None:
-            log.critical_exit("Internal misconfiguration")
+            log.exit("Internal misconfiguration")
         else:
             log.info("Do request: %s" % self.action)
 
@@ -66,13 +66,13 @@ class Application(object):
         try:
             projects = helpers.list_path(PROJECT_DIR)
         except FileNotFoundError:
-            log.critical_exit("Could not access the dir '%s'" % PROJECT_DIR)
+            log.exit("Could not access the dir '%s'" % PROJECT_DIR)
 
         if self.project is None:
             prj_num = len(projects)
 
             if prj_num == 0:
-                log.critical_exit(
+                log.exit(
                     "No project found (%s folder is empty?)"
                     % PROJECT_DIR
                 )
@@ -86,7 +86,7 @@ class Application(object):
                 self.current_args['project'] = self.project
         else:
             if self.project not in projects:
-                log.critical_exit(
+                log.exit(
                     "Wrong project '%s'.\n" % self.project +
                     "Select one of the following:\n\n %s\n" % projects)
 
@@ -105,7 +105,7 @@ class Application(object):
         pack = 'compose'
         package_version = checks.check_package(pack)
         if package_version is None:
-            log.critical_exit("Could not find %s" % pack)
+            log.exit("Could not find %s" % pack)
         else:
             log.checked("%s version: %s" % (pack, package_version))
 
@@ -115,7 +115,7 @@ class Application(object):
     def check_program(self, program):
         program_version = checks.check_executable(executable=program, log=log)
         if program_version is None:
-            log.critical_exit(
+            log.exit(
                 "Missing requirement.\n" +
                 "Please make sure that '%s' is installed" % program
             )
@@ -133,7 +133,7 @@ class Application(object):
         local_git = gitter.get_local(".")
 
         if local_git is None:
-            log.critical_exit(
+            log.exit(
                 """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s
@@ -143,25 +143,32 @@ Verify that you are in the right folder, now you are in: %s
         # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
-            # The project dir details:
-            # 'projects/*/project_configuration.yaml',  # prj conf
-            # 'projects/*/backend',  # python code
-            # 'projects/*/confs',  # containers configuration
+            # NOTE: to be moved outside rapydo-core?
             'confs',
             'confs/backend.yml',
             'confs/frontend.yml',  # it is optional, but we expect to find it
-            # 'data',  # ?
-            # 'docs',  # ?
+
+            'data',
+            'projects',
             'submodules'
         ]
 
         for fname in required_files:
             if not os.path.exists(fname):
-                log.critical_exit(
+
+                extra = ""
+
+                if fname == 'data':
+                    extra = """
+\nPlease also note that the data dir is not automatically created,
+if you are in the right repository consider to create it by hand
+"""
+
+                log.exit(
                     """File or folder not found %s
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s
-                    """ % (fname, os.getcwd())
+Verify that you are in the right folder, now you are in: %s%s
+                    """ % (fname, os.getcwd(), extra)
                 )
 
     def inspect_project_folder(self):
@@ -189,7 +196,7 @@ Verify that you are in the right folder, now you are in: %s
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
-                log.critical_exit(
+                log.exit(
                     """Project %s is invalid: file or folder not found %s
                     """ % (self.project, fpath)
                 )
@@ -214,7 +221,7 @@ Verify that you are in the right folder, now you are in: %s
 
         connected = checks.check_internet()
         if not connected:
-            log.critical_exit('Internet connection unavailable')
+            log.exit('Internet connection unavailable')
         else:
             log.checked("Internet connection available")
             self.tested_connection = True
@@ -346,7 +353,7 @@ Verify that you are in the right folder, now you are in: %s
                         cache = True
                 else:
                     if self.action == 'check':
-                        log.critical_exit(
+                        log.exit(
                             """Missing template build for %s
 \nSuggestion: execute the init command
                             """ % build['service'])
@@ -370,7 +377,7 @@ Verify that you are in the right folder, now you are in: %s
 
         if self.check or self.initialize or self.update:
             if self.frontend:
-                bower_dir = os.path.join("bower_components")
+                bower_dir = os.path.join("data", "bower_components")
 
                 install_bower = False
                 if self.update:
@@ -447,7 +454,7 @@ Verify that you are in the right folder, now you are in: %s
                 .get('default')
             if value == [config_default]:
                 if avoid_default:
-                    log.critical_exit("You must set '--services' option")
+                    log.exit("You must set '--services' option")
                 elif default is not None:
                     value = default
                 else:
@@ -507,7 +514,7 @@ Verify that you are in the right folder, now you are in: %s
             project.find_active(self.services)
 
         if len(self.active_services) == 0:
-            log.critical_exit(
+            log.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your compose yaml
 and add the variable "ACTIVATE: 1" in the service enviroment
@@ -524,7 +531,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     missing.append(key)
 
         if len(missing) > 0:
-            log.critical_exit(
+            log.exit(
                 "Missing critical params for configuration:\n%s" % missing)
         else:
             log.checked("No PLACEHOLDER variable to be replaced")
@@ -537,7 +544,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             services = self.get_services(avoid_default=True)
 
             if len(services) != 1:
-                log.critical_exit(
+                log.exit(
                     "Commands can be executed only on one service." +
                     "\nCurrent request on: %s" % services)
             else:
@@ -584,7 +591,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             .get('controller', {}).get('commands', {})
 
         if len(self.custom_commands) < 1:
-            log.critical_exit("No custom commands defined")
+            log.exit("No custom commands defined")
 
         for name, custom in self.custom_commands.items():
             arguments.extra_command_parser.add_parser(
@@ -686,7 +693,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     break
 
         else:
-            log.critical_exit("Unknown")
+            log.exit("Unknown")
 
         dc.command(command, options)
 
@@ -713,7 +720,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = db + 'ui'
         port = self.current_args.get('port')
         if not self.container_service_exists(service):
-            log.critical_exit("Container '%s' is not defined" % service)
+            log.exit("Container '%s' is not defined" % service)
 
         options = {
             'SERVICE': service,
@@ -730,13 +737,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             try:
                 int(port)
             except TypeError:
-                log.critical_exit("Port must be a valid integer")
+                log.exit("Port must be a valid integer")
 
             info = self.container_info(service)
             try:
                 current_ports = info.get('ports', []).pop(0)
             except IndexError:
-                log.critical_exit("No default port found?")
+                log.exit("No default port found?")
 
                 # TODO: inspect the image to get the default exposed
                 # $ docker inspect mongo-express:0.40.0 \
@@ -913,7 +920,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         function = "_%s" % self.action.replace("-", "_")
         func = getattr(self, function, None)
         if func is None:
-            log.critical_exit(
+            log.exit(
                 "Command not yet implemented: %s (expected function: %s)"
                 % (self.action, function))
 
