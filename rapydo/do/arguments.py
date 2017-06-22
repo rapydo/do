@@ -37,6 +37,9 @@ def prepare_params(options):
         pconf['type'] = str
         pconf['metavar'] = options.get('metavalue')
 
+    if 'alias' in options:
+        pconf['alias'] = options['alias']
+
     return pconf
 
 
@@ -83,7 +86,12 @@ parser = argparse.ArgumentParser(
 # PARAMETERS
 for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
-    parser.add_argument('--%s' % option_name, **params)
+    alias = params.pop('alias', None)
+    param_name = '--%s' % option_name
+    if alias is None:
+        parser.add_argument(param_name, **params)
+    else:
+        parser.add_argument(param_name, '-%s' % alias, **params)
 
 parser.add_argument('--version', action='version',
                     version='rapydo version %s' % __version__)
@@ -124,7 +132,12 @@ for command_name, options in sorted(mycommands.items()):
 
     for option_name, suboptions in options.get('suboptions', {}).items():
         params = prepare_params(suboptions)
-        subparse.add_argument('--%s' % option_name, **params)
+        alias = params.pop('alias', None)
+        param_name = '--%s' % option_name
+        if alias is None:
+            subparse.add_argument(param_name, **params)
+        else:
+            subparse.add_argument(param_name, '-%s' % alias, **params)
 
 # ##########################
 # Print usage if no arguments provided
