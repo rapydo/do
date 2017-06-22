@@ -72,7 +72,7 @@ subcommands:
         default: False
         help: ignore the heaviest check operations on git commits
       verify-upstream:
-        alias: v
+        alias: u
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
