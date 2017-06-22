@@ -236,7 +236,10 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
             log.verbose("Skipping fetch of remote %s on %s" % (remote, path))
             continue
         log.verbose("Fetching %s on %s" % (remote, path))
-        remote.fetch()
+        try:
+            remote.fetch()
+        except GitCommandError as e:
+            log.exit(str(e))
 
     branch = get_active_branch(gitobj)
     if branch is None:
