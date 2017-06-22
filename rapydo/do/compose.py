@@ -36,12 +36,13 @@ class Compose(object):
 
     def config(self):
         try:
-            _, services_list, _, _, _ = \
-                get_config_from_options('.', self.options)
+            compose_output_tuple = get_config_from_options('.', self.options)
+            # NOTE: for compatibility with docker-compose > 1.13
+            # services is always the second element
+            services_list = compose_output_tuple[1]
         except conferrors.ConfigurationError as e:
             log.critical_exit("Wrong compose configuration:\n%s" % e)
         else:
-            # log.pp(services_list)
             return services_list
 
     def get_handle(self):
