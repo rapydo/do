@@ -399,46 +399,17 @@ Verify that you are in the right folder, now you are in: %s%s
                         )
                     else:
 
-                        # SMART WAY -> use it this a _interface method:
-                        # if self.initialize:
-                        #     bower_command = "bower install"
-                        # else:
-                        #     bower_command = "bower update"
-
-                        # bower_command += \
-                        #     "--config.directory=/libs/bower_components"
-
-                        # self._shell(
-                        #     command=bower_command, service="bower")
-
-                        # ##############################################
-                        # ROUGH WAY
-
                         if self.initialize:
-                            args = [
-                                "install",
-                                "--config.directory=/libs/bower_components"
-                            ]
+                            bower_command = "bower install"
                         else:
-                            args = [
-                                "update",
-                                "--config.directory=/libs/bower_components"
-                            ]
-                        options = {
-                            'SERVICE': "bower",
-                            '--publish': [], '--service-ports': False,
-                            'COMMAND': "bower",
-                            'ARGS': args, '-e': [], '--volume': [],
-                            '--rm': True, '--no-deps': True,
-                            '--name': None, '--user': None,
-                            '--workdir': None, '--entrypoint': None,
-                            '-d': False, '-T': False,
-                        }
+                            bower_command = "bower update"
 
-                        log.info("Installing bower libs (%s)" % args)
+                        bower_command += \
+                            " --config.directory=/libs/bower_components"
+
                         dc = Compose(files=self.files)
-                        dc.command('run', options)
-                        # ##############################################
+                        dc.create_volatile_container(
+                            "bower", command=bower_command)
 
                 else:
                     log.checked("Bower libs already installed")
@@ -718,21 +689,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _interfaces(self):
         db = self.manage_one_service()
         service = db + 'ui'
-        port = self.current_args.get('port')
+
+        # TO FIX: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
             log.exit("Container '%s' is not defined" % service)
 
-        options = {
-            'SERVICE': service,
-            '--publish': [], '--service-ports': False,
-            'COMMAND': None,
-            'ARGS': [], '-e': [], '--volume': [],
-            '--rm': True, '--no-deps': True,
-            '--name': None, '--user': None,
-            '--workdir': None, '--entrypoint': None,
-            '-d': False, '-T': False,
-        }
+        port = self.current_args.get('port')
+        publish = []
 
+        # TO FIX: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
@@ -752,14 +717,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 #   "8081/tcp": {}
                 # }
 
-            options['--publish'].append("%s:%s" % (port, current_ports.target))
-
-        else:
-            # Default: open service ports requested within compose config
-            options['--service-ports'] = True
+            publish.append("%s:%s" % (port, current_ports.target))
 
         dc = Compose(files=self.files)
-        dc.command('run', options)
+        dc.create_volatile_container(service, publish=publish)
 
     def _shell(self, user=None, command=None, service=None):
 
@@ -829,8 +790,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         user = meta.get('user', None)
         command = meta.get('command', None)
         dc = Compose(files=self.files)
-        # **meta ... explicit is not better tha implicit???
         return dc.exec_command(service, user=user, command=command)
+        # **meta ... explicit is not better than implicit???
         # return self._shell(**meta)
 
     def _bower_install(self):
@@ -852,12 +813,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'bower'
 
-        bower_command = "bower install %s --save" % lib
+        conf_dir = "--config.directory=/libs/bower_components"
+        bower_command = "bower install %s %s --save" % (conf_dir, lib)
 
-        # TO FIX: shell requires a running container.
-        # Use something like _interfaces
-        self._shell(
-            command=bower_command, service="bower")
+        dc = Compose(files=self.files)
+        dc.create_volatile_container("bower", command=bower_command)
 
     def _bower_update(self):
 
@@ -878,11 +838,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'bower'
 
-        bower_command = "bower update %s" % lib
-        # TO FIX: shell requires a running container.
-        # Use something like _interfaces
-        self._shell(
-            command=bower_command, service="bower")
+        conf_dir = "--config.directory=/libs/bower_components"
+        bower_command = "bower update %s %s" % (conf_dir, lib)
+
+        dc = Compose(files=self.files)
+        dc.create_volatile_container("bower", command=bower_command)
 
     ################################
     # ### RUN ONE COMMAND OFF

@@ -98,7 +98,7 @@ class Compose(object):
             Split a command into command + args_array
         """
         if command is None:
-            return (None, None)
+            return (None, [])
 
         pieces = command.split()
         try:
@@ -111,10 +111,31 @@ class Compose(object):
 
         return (shell_command, shell_args)
 
-    def create_volatile_container(self):
+    def create_volatile_container(self, service, command=None, publish=[]):
         """
             Execute a command on a not container
         """
+
+        if len(publish) <= 0:
+            service_post = True
+        else:
+            service_post = False
+
+        shell_command, shell_args = self.split_command(command)
+
+        options = {
+            'SERVICE': service,
+            '--publish': publish, '--service-ports': service_post,
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '-e': [], '--volume': [],
+            '--rm': True, '--no-deps': True,
+            '--name': None, '--user': None,
+            '--workdir': None, '--entrypoint': None,
+            '-d': False, '-T': False,
+        }
+
+        self.command('run', options)
 
     def exec_command(self, service, user=None, command=None):
         """
