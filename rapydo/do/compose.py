@@ -92,3 +92,48 @@ class Compose(object):
             log.critical_exit("Failed docker container:\n%s" % e)
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
+
+    def split_command(self, command):
+        """
+            Split a command into command + args_array
+        """
+        if command is None:
+            return (None, None)
+
+        pieces = command.split()
+        try:
+            shell_command = pieces[0]
+            shell_args = pieces[1:]
+        except IndexError:
+            # no command, use default
+            shell_command = None
+            shell_args = []
+
+        return (shell_command, shell_args)
+
+    def create_volatile_container(self):
+        """
+            Execute a command on a not container
+        """
+
+    def exec_command(self, service, user=None, command=None):
+        """
+            Execute a command on a running container
+        """
+
+        shell_command, shell_args = self.split_command(command)
+        if shell_command is not None:
+            log.info("Command request: %s(%s+%s)"
+                     % (service.upper(), shell_command, shell_args))
+
+        options = {
+            'SERVICE': service,
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '--index': '1',
+            '--user': user,
+            '--privileged': True,
+            '-T': False,
+            '-d': False,
+        }
+        self.command('exec_command', options)

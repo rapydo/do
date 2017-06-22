@@ -775,30 +775,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        # The command must be splitted into command + args_array
-        pieces = command.split()
-        try:
-            shell_command = pieces[0]
-            shell_args = pieces[1:]
-        except IndexError:
-            # no command, use default
-            shell_command = None
-            shell_args = []
-        else:
-            log.info("Command request: %s(%s+%s)"
-                     % (service.upper(), shell_command, shell_args))
-
-        options = {
-            'SERVICE': service,
-            'COMMAND': shell_command,
-            'ARGS': shell_args,
-            '--index': '1',
-            '--user': user,
-            '--privileged': True,
-            '-T': False,
-            '-d': False,
-        }
-        dc.command('exec_command', options)
+        dc.exec_command(service, user=user, command=command)
 
     def _build(self):
 
@@ -822,7 +799,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)
         meta.pop('description', None)
-        return self._shell(**meta)
+
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
 
@@ -840,8 +822,16 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
-        # TO FIX: are you sure? _shell do not require a running container?
-        return self._shell(**meta)
+        # TO FIX: I changed several things but i'm unable to test it
+        # due to other problem occured before arriving here...
+        # TEST ME AS SOON AS POSSIBLE!
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        # **meta ... explicit is not better tha implicit???
+        return dc.exec_command(service, user=user, command=command)
+        # return self._shell(**meta)
 
     def _bower_install(self):
 
