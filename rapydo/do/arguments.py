@@ -72,9 +72,32 @@ pinit_conf = load_yaml_file(
 
 # Mix with parse_conf
 for key, value in pinit_conf.items():
-    new_default = pinit_conf.get(key, None)
-    if new_default is not None:
-        parse_conf['options'][key]['default'] = new_default
+    value = pinit_conf.get(key, None)
+
+    if value is None:
+        continue
+
+    if not isinstance(value, dict):
+        # This is a first level option
+        if key in parse_conf['options']:
+            parse_conf['options'][key]['default'] = value
+        else:
+            print("\nUnknown parameter %s found in .projectrc\n" % key)
+    else:
+        # This is a second level parameter
+        if key not in parse_conf['subcommands']:
+            print("\nUnknown command %s found in .projectrc\n" % key)
+        else:
+            conf = parse_conf['subcommands'][key]['suboptions']
+            for subkey, subvalue in value.items():
+                if subkey in conf:
+                    conf[subkey]['default'] = subvalue
+                else:
+                    print(
+                        "\nUnknown parameter %s/%s found in .projectrc\n"
+                        % (key, subkey)
+                    )
+
 
 # ##########################
 # Arguments definition
