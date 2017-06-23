@@ -783,9 +783,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
-        # TO FIX: I changed several things but i'm unable to test it
-        # due to other problem occured before arriving here...
-        # TEST ME AS SOON AS POSSIBLE!
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
@@ -793,6 +790,27 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         return dc.exec_command(service, user=user, command=command)
         # **meta ... explicit is not better than implicit???
         # return self._shell(**meta)
+
+    def _ssl_dhparam(self):
+        # Use my method name in a meta programming style
+        # import inspect
+        # TO FIX: this name is wrong...
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "ssl-dhparam"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'dhparam'
+
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
 
     def _bower_install(self):
 
