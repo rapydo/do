@@ -102,12 +102,7 @@ class Application(object):
         self.docker = Dock()
 
         # Check docker-compose version
-        pack = 'compose'
-        package_version = checks.check_package(pack)
-        if package_version is None:
-            log.exit("Could not find %s" % pack)
-        else:
-            log.checked("%s version: %s" % (pack, package_version))
+        self.check_python_package('compose')
 
         # Check if git is installed
         self.check_program('git')
@@ -120,8 +115,17 @@ class Application(object):
                 "Please make sure that '%s' is installed" % program
             )
         else:
+            # FIXME: the version should be checked against a min/max version?
             log.checked("%s version: %s" % (program, program_version))
         return
+
+    def check_python_package(self, package):
+        package_version = checks.check_package(package)
+        if package_version is None:
+            log.exit("Could not find %s" % pack)
+        else:
+            # FIXME: the version should be checked against a min/max version?
+            log.checked("%s version: %s" % (pack, package_version))
 
     def inspect_main_folder(self):
         """
