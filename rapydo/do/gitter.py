@@ -281,7 +281,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
                     % (path, sha, message))
 
         # CHECKING COMMITS AHEAD (TO BE PUSHED) #
-        if remote_branch == branch:
+        if path != 'upstream' and remote_branch == branch:
             ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
             commits_ahead = gitobj.iter_commits(
                 ahead_check, max_count=max_remote)
