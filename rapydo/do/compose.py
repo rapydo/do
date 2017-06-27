@@ -157,4 +157,8 @@ class Compose(object):
             '-T': False,
             '-d': False,
         }
-        self.command('exec_command', options)
+        try:
+            self.command('exec_command', options)
+        except compose.project.NoSuchService:
+            log.exit(
+                "Cannot find a running container with this name: %s" % service)
