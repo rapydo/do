@@ -40,6 +40,9 @@ def prepare_params(options):
     if 'alias' in options:
         pconf['alias'] = options['alias']
 
+    if 'positional' in options:
+        pconf['positional'] = options['positional']
+
     return pconf
 
 
@@ -156,8 +159,11 @@ for command_name, options in sorted(mycommands.items()):
     for option_name, suboptions in options.get('suboptions', {}).items():
         params = prepare_params(suboptions)
         alias = params.pop('alias', None)
+        positional = params.pop('positional', False)
         param_name = '--%s' % option_name
-        if alias is None:
+        if positional:
+            subparse.add_argument(option_name, **params)
+        elif alias is None:
             subparse.add_argument(param_name, **params)
         else:
             subparse.add_argument(param_name, '-%s' % alias, **params)

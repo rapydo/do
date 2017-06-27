@@ -415,18 +415,21 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
-                     default=None, avoid_default=False):
+                     default=None
+                     # , avoid_default=False
+                     ):
 
         value = self.current_args.get(key).split(sep)
-        if avoid_default or default is not None:
+        # if avoid_default or default is not None:
+        if default is not None:
             config_default = \
                 arguments.parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
             if value == [config_default]:
-                if avoid_default:
-                    log.exit("You must set '--services' option")
-                elif default is not None:
+                # if avoid_default:
+                #     log.exit("You must set '--services' option")
+                if default is not None:
                     value = default
                 else:
                     pass
@@ -509,19 +512,19 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         return missing
 
-    def manage_one_service(self, service=None):
+    # def manage_one_service(self, service=None):
 
-        if service is None:
-            services = self.get_services(avoid_default=True)
+    #     if service is None:
+    #         services = self.get_services(avoid_default=True)
 
-            if len(services) != 1:
-                log.exit(
-                    "Commands can be executed only on one service." +
-                    "\nCurrent request on: %s" % services)
-            else:
-                service = services.pop()
+    #         if len(services) != 1:
+    #             log.exit(
+    #                 "Commands can be executed only on one service." +
+    #                 "\nCurrent request on: %s" % services)
+    #         else:
+    #             service = services.pop()
 
-        return service
+    #     return service
 
     def container_info(self, service_name):
         return self.services_dict.get(service_name, None)
@@ -687,7 +690,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stopped by keyboard")
 
     def _interfaces(self):
-        db = self.manage_one_service()
+        # db = self.manage_one_service()
+        db = self.current_args.get('service')
         service = db + 'ui'
 
         # TO FIX: this check should be moved inside create_volatile_container
@@ -725,7 +729,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _shell(self, user=None, command=None, service=None):
 
         dc = Compose(files=self.files)
-        service = self.manage_one_service(service)
+        service = self.current_args.get('service')
+        # service = self.manage_one_service(service)
 
         if user is None:
             user = self.current_args.get('user')

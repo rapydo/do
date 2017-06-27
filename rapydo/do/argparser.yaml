@@ -161,6 +161,11 @@ subcommands:
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
+      service:
+        positional: true
+        type: str
+        metavalue: SERVICE
+        default: null
       port:
         alias: p
         type: int
@@ -170,6 +175,11 @@ subcommands:
   shell:
     description: open a shell inside the specified container
     suboptions:
+      service:
+        positional: true
+        type: str
+        metavalue: SERVICE
+        default: null
       user:
         alias: u
         type: str
