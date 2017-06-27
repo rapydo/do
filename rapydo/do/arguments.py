@@ -144,17 +144,18 @@ for command_name, options in sorted(mycommands.items()):
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))
 
-    controlcommands = options.get('controlcommands', {})
-    # Some subcommands can have further subcommands [control start, stop, etc]
-    if len(controlcommands) > 0:
-        innerparser = subparse.add_subparsers(
-            dest='controlcommand'
-        )
-        innerparser.required = options.get('controlrequired', False)
-        for subcommand, suboptions in controlcommands.items():
-            subcommand_help = suboptions.pop(0)
-            # Creating a parser for each sub-sub-command [control start, stop]
-            innerparser.add_parser(subcommand, help=subcommand_help)
+    # controlcommands = options.get('controlcommands', {})
+    # # Some subcommands can have further subcommands
+    # [control start, stop, etc]
+    # if len(controlcommands) > 0:
+    #     innerparser = subparse.add_subparsers(
+    #         dest='controlcommand'
+    #     )
+    #     innerparser.required = options.get('controlrequired', False)
+    #     for subcommand, suboptions in controlcommands.items():
+    #         subcommand_help = suboptions.pop(0)
+    #         # Creating a parser for each sub-sub-command [control start/stop]
+    #         innerparser.add_parser(subcommand, help=subcommand_help)
 
     for option_name, suboptions in options.get('suboptions', {}).items():
         params = prepare_params(suboptions)

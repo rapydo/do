@@ -661,55 +661,118 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _update(self):
         log.info("All updated")
 
-    def _control(self):
+    def _start(self):
+        services = self.get_services(default=self.active_services)
 
-        command = self.current_args.get('controlcommand')
+        options = {
+            'SERVICE': services,
+            '--no-deps': False,
+            '-d': True,
+            '--abort-on-container-exit': False,
+            '--remove-orphans': False,
+            '--no-recreate': False,
+            '--force-recreate': False,
+            '--build': False,
+            '--no-build': False,
+            '--scale': {},
+        }
+
+        dc = Compose(files=self.files)
+        dc.command('up', options)
+
+    def _stop(self):
+        services = self.get_services(default=self.active_services)
+
+        options = {'SERVICE': services}
+
+        dc = Compose(files=self.files)
+        dc.command('stop', options)
+
+    def _restart(self):
+        services = self.get_services(default=self.active_services)
+
+        options = {'SERVICE': services}
+
+        dc = Compose(files=self.files)
+        dc.command('restart', options)
+
+    def _remove(self):
         services = self.get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
+
+        options = {
+            'SERVICE': services,
+            # '--stop': True,  # BUG? not working
+            '--force': True,
+            '-v': False,  # dangerous?
+        }
+        dc.command('stop')
+        dc.command('rm', options)
+
+    def _toggle_freeze(self):
+        services = self.get_services(default=self.active_services)
+
         options = {'SERVICE': services}
+        dc = Compose(files=self.files)
+        command = 'pause'
+        for container in dc.get_handle().project.containers():
 
-        if command == 'start':
-            # print("SERVICES", services)
-            options.update({
-                '--no-deps': False,
-                '-d': True,
-                '--abort-on-container-exit': False,
-                '--remove-orphans': False,
-                '--no-recreate': False,
-                '--force-recreate': False,
-                '--build': False,
-                '--no-build': False,
-                '--scale': {},
-            })
-            command = 'up'
-
-        elif command == 'stop':
-            pass
-        elif command == 'restart':
-            pass
-        elif command == 'remove':
-            dc.command('stop')
-            options.update({
-                # '--stop': True,  # BUG? not working
-                '--force': True,
-                '-v': False,  # dangerous?
-                # 'SERVICE': []
-            })
-            command = 'rm'
-        elif command == 'toggle_freeze':
-
-            command = 'pause'
-            for container in dc.get_handle().project.containers():
-
-                if container.dictionary.get('State').get('Status') == 'paused':
-                    command = 'unpause'
-                    break
-
-        else:
-            log.exit("Unknown")
-
+            if container.dictionary.get('State').get('Status') == 'paused':
+                command = 'unpause'
+                break
         dc.command(command, options)
+
+    # def _control(self):
+
+    #     command = self.current_args.get('controlcommand')
+    #     services = self.get_services(default=self.active_services)
+
+    #     dc = Compose(files=self.files)
+    #     options = {'SERVICE': services}
+
+    #     if command == 'start':
+    #         # print("SERVICES", services)
+    #         options.update({
+    #             '--no-deps': False,
+    #             '-d': True,
+    #             '--abort-on-container-exit': False,
+    #             '--remove-orphans': False,
+    #             '--no-recreate': False,
+    #             '--force-recreate': False,
+    #             '--build': False,
+    #             '--no-build': False,
+    #             '--scale': {},
+    #         })
+    #         command = 'up'
+
+    #     elif command == 'stop':
+    #         pass
+    #     elif command == 'restart':
+    #         pass
+    #     elif command == 'remove':
+    #         dc.command('stop')
+    #         options.update({
+    #             # '--stop': True,  # BUG? not working
+    #             '--force': True,
+    #             '-v': False,  # dangerous?
+    #             # 'SERVICE': []
+    #         })
+    #         command = 'rm'
+    #     elif command == 'toggle_freeze':
+
+    #         command = 'pause'
+    #         for container in dc.get_handle().project.containers():
+
+    #            if container.dictionary.get(
+    #                'State').get('Status') == 'paused':
+    #                 command = 'unpause'
+    #                 break
+
+    #     else:
+    #         log.exit("Unknown")
+
+    #     dc.command(command, options)
 
     def _log(self):
         dc = Compose(files=self.files)

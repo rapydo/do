@@ -192,20 +192,31 @@ subcommands:
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
         default: bash
         help: UNIX command to be executed on selected running service
-  control:
-    description: manage start/stop of the framework based on  current specified blueprint
-    controlrequired: True
-    controlcommands:
-      start:
-        - Start containers for this configuration
-      stop:
-        - Stop running containers, but do not remove them
-      restart:
-        - Restart running containers
-      remove:
-        - Stop containers if running and remove them
-      toggle_freeze:
-        - Toggle a temporary block/pause of running services
+  start:
+    description: Start containers for this configuration
+  stop:
+    description: Stop running containers, but do not remove them
+  restart:
+    description: Restart running containers
+  remove:
+    description: Stop containers if running and remove them
+  toggle_freeze:
+    description: Toggle a temporary block/pause of running services
+        
+  # control:
+  #   description: manage start/stop of the framework based on  current specified blueprint
+  #   controlrequired: True
+  #   controlcommands:
+  #     start:
+  #       - Start containers for this configuration
+  #     stop:
+  #       - Stop running containers, but do not remove them
+  #     restart:
+  #       - Restart running containers
+  #     remove:
+  #       - Stop containers if running and remove them
+  #     toggle_freeze:
+  #       - Toggle a temporary block/pause of running services
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
