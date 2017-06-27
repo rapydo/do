@@ -317,6 +317,11 @@ Verify that you are in the right folder, now you are in: %s%s
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
+        if self.action == 'shell' \
+           or self.action == 'ssl-certificate' \
+           or self.action == 'ssl-dhparam':
+            return
+
         # TODO: check all builds against their Dockefile latest commit
         # log.pp(self.services)
         pass
