@@ -12,6 +12,7 @@ except BaseException as e:
 
 import os.path
 from collections import OrderedDict
+from distutils.version import LooseVersion
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
@@ -97,35 +98,63 @@ class Application(object):
     def check_installed_software(self):
 
         # Check if docker is installed
-        self.check_program('docker')
+        self.check_program('docker', min_version="1.13")
         # Use it
         self.docker = Dock()
 
         # Check docker-compose version
-        self.check_python_package('compose')
+        self.check_python_package('compose', min_version="1.11")
 
         # Check if git is installed
         self.check_program('git')
 
-    def check_program(self, program):
-        program_version = checks.check_executable(executable=program, log=log)
-        if program_version is None:
+    def check_program(self, program, min_version=None, max_version=None):
+        found_version = checks.check_executable(executable=program, log=log)
+        if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
                 "Please make sure that '%s' is installed" % program
             )
-        else:
-            # FIXME: the version should be checked against a min/max version?
-            log.checked("%s version: %s" % (program, program_version))
-        return
 
-    def check_python_package(self, package):
-        package_version = checks.check_package(package)
-        if package_version is None:
-            log.exit("Could not find %s" % pack)
-        else:
-            # FIXME: the version should be checked against a min/max version?
-            log.checked("%s version: %s" % (pack, package_version))
+        if min_version is not None:
+            if LooseVersion(min_version) > LooseVersion(found_version):
+                version_error = "Minimum supported version for %s is %s" \
+                    % (program, min_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        if max_version is not None:
+            if LooseVersion(max_version) < LooseVersion(found_version):
+                version_error = "Maximum supported version for %s is %s" \
+                    % (program, max_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        log.checked("%s version: %s" % (program, found_version))
+
+    def check_python_package(
+            self, package, min_version=None, max_version=None):
+
+        found_version = checks.check_package(package)
+        if found_version is None:
+            log.exit(
+                "Could not find the following python package: %s" % package)
+
+        if min_version is not None:
+            if LooseVersion(min_version) > LooseVersion(found_version):
+                version_error = "Minimum supported version for %s is %s" \
+                    % (package, min_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        if max_version is not None:
+            if LooseVersion(max_version) < LooseVersion(found_version):
+                version_error = "Maximum supported version for %s is %s" \
+                    % (package, max_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        log.checked("%s version: %s" % (package, found_version))
 
     def inspect_main_folder(self):
         """
