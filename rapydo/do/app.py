@@ -25,6 +25,7 @@ from rapydo.do.dockerizing import Dock
 from rapydo.do.compose import Compose
 from rapydo.do.configuration import read_yamls
 
+from rapydo.utils.globals import mem
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -47,6 +48,7 @@ class Application(object):
 
         # Action
         self.action = self.current_args.get('action')
+        mem.action = self.action
         if self.action is None:
             log.exit("Internal misconfiguration")
         else:
