@@ -92,3 +92,73 @@ class Compose(object):
             log.critical_exit("Failed docker container:\n%s" % e)
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
+
+    def split_command(self, command):
+        """
+            Split a command into command + args_array
+        """
+        if command is None:
+            return (None, [])
+
+        pieces = command.split()
+        try:
+            shell_command = pieces[0]
+            shell_args = pieces[1:]
+        except IndexError:
+            # no command, use default
+            shell_command = None
+            shell_args = []
+
+        return (shell_command, shell_args)
+
+    def create_volatile_container(self, service, command=None, publish=[]):
+        """
+            Execute a command on a not container
+        """
+
+        if len(publish) <= 0:
+            service_post = True
+        else:
+            service_post = False
+
+        shell_command, shell_args = self.split_command(command)
+
+        options = {
+            'SERVICE': service,
+            '--publish': publish, '--service-ports': service_post,
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '-e': [], '--volume': [],
+            '--rm': True, '--no-deps': True,
+            '--name': None, '--user': None,
+            '--workdir': None, '--entrypoint': None,
+            '-d': False, '-T': False,
+        }
+
+        self.command('run', options)
+
+    def exec_command(self, service, user=None, command=None):
+        """
+            Execute a command on a running container
+        """
+
+        shell_command, shell_args = self.split_command(command)
+        if shell_command is not None:
+            log.info("Command request: %s(%s+%s)"
+                     % (service.upper(), shell_command, shell_args))
+
+        options = {
+            'SERVICE': service,
+            'COMMAND': shell_command,
+            'ARGS': shell_args,
+            '--index': '1',
+            '--user': user,
+            '--privileged': True,
+            '-T': False,
+            '-d': False,
+        }
+        try:
+            self.command('exec_command', options)
+        except compose.project.NoSuchService:
+            log.exit(
+                "Cannot find a running container with this name: %s" % service)

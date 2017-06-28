@@ -7,6 +7,7 @@ action:
 options:
 
   project:
+    alias: p
     # NOTE: this is the equivalent of the old concept of `blueprint`
     type: str
     metavalue: PROJECT_NAME
@@ -15,18 +16,21 @@ options:
     default: null
 
   mode:
+    alias: m
     type: str
     metavalue: CONTAINERS_YAML_SELECTED_MODE
     default: debug
     help: The mode is like a 'blueprint' marker of the configuration to launch
 
   log-level:
+    alias: l
     type: str
     metavalue: LEVEL_OF_DEBUGGER
     default: DEBUG
     help: Level of verbosity
 
   hostname:
+    alias: H
     type: str
     metavalue: MACHINE_HOST_NAME
     default: localhost
@@ -34,12 +38,14 @@ options:
         (NOTE: only used in production mode)"
 
   services:
+    alias: s
     type: str
     metavalue: SERVICES_COMA_SEPARATED
     default: active services
     help: List of services referring to a command
 
   force-env:
+    alias: env
     type: bool
     default: False
     help: Force recreation of the docker compose .env file even if existing
@@ -55,15 +61,18 @@ subcommands:
         (NOTE: this is done at every call)"
     suboptions:
       ignore-submodule:
+        alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
         help: ignore a given list of submodules (command delimited)
       skip-heavy-git-ops:
+        alias: s
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
       verify-upstream:
+        alias: u
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
@@ -76,6 +85,7 @@ subcommands:
     description: update the current project
     suboptions:
       ignore-submodule:
+        alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
@@ -90,11 +100,13 @@ subcommands:
     description: force building of one or more services docker images
     suboptions:
       rebuild-templates:
+        alias: r
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
         help: Force building of templates docker images used in other builds
       force:
+        alias: f
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
@@ -111,6 +123,13 @@ subcommands:
       service: proxy
       user: root
       # description: useless here
+  ssl-dhparam:
+    description: Generate DH DSA parameters, 4096 bit long prime. **It could take long time**
+    container_exec:
+      name: dhparam
+      command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
+      service: proxy
+      user: root
   bower-install:
     description: Install a new lib with bower
     container_exec:
@@ -120,6 +139,7 @@ subcommands:
       user: develop
     suboptions:
       lib:
+        alias: l
         type: str
         metavalue: BOWER_LIB_TO_INSTALL
         default: null
@@ -133,6 +153,7 @@ subcommands:
       user: develop
     suboptions:
       lib:
+        alias: l
         type: str
         metavalue: BOWER_LIB_TO_INSTALL
         default: null
@@ -140,7 +161,13 @@ subcommands:
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
+      service:
+        positional: true
+        type: str
+        metavalue: SERVICE
+        default: null
       port:
+        alias: p
         type: int
         metavalue: INTEGER_PORT_FOR_SERVICE
         default: null
@@ -148,35 +175,54 @@ subcommands:
   shell:
     description: open a shell inside the specified container
     suboptions:
+      service:
+        positional: true
+        type: str
+        metavalue: SERVICE
+        default: null
       user:
+        alias: u
         type: str
         metavalue: UNIX_EXISTING_USER
         default: ''
         help: user existing inside selected service
       command:
+        alias: c
         type: str
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
         default: bash
         help: UNIX command to be executed on selected running service
-  control:
-    description: manage start/stop of the framework based on  current specified blueprint
-    controlrequired: True
-    controlcommands:
-      start:
-        - Start containers for this configuration
-      stop:
-        - Stop running containers, but do not remove them
-      restart:
-        - Restart running containers
-      remove:
-        - Stop containers if running and remove them
-      toggle_freeze:
-        - Toggle a temporary block/pause of running services
+  start:
+    description: Start containers for this configuration
+  stop:
+    description: Stop running containers, but do not remove them
+  restart:
+    description: Restart running containers
+  remove:
+    description: Stop containers if running and remove them
+  toggle_freeze:
+    description: Toggle a temporary block/pause of running services
+        
+  # control:
+  #   description: manage start/stop of the framework based on  current specified blueprint
+  #   controlrequired: True
+  #   controlcommands:
+  #     start:
+  #       - Start containers for this configuration
+  #     stop:
+  #       - Stop running containers, but do not remove them
+  #     restart:
+  #       - Restart running containers
+  #     remove:
+  #       - Stop containers if running and remove them
+  #     toggle_freeze:
+  #       - Toggle a temporary block/pause of running services
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
     suboptions:
       rm-volumes:
+        alias: rm
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False

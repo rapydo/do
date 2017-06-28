@@ -37,6 +37,12 @@ def prepare_params(options):
         pconf['type'] = str
         pconf['metavar'] = options.get('metavalue')
 
+    if 'alias' in options:
+        pconf['alias'] = options['alias']
+
+    if 'positional' in options:
+        pconf['positional'] = options['positional']
+
     return pconf
 
 
@@ -69,9 +75,32 @@ pinit_conf = load_yaml_file(
 
 # Mix with parse_conf
 for key, value in pinit_conf.items():
-    new_default = pinit_conf.get(key, None)
-    if new_default is not None:
-        parse_conf['options'][key]['default'] = new_default
+    value = pinit_conf.get(key, None)
+
+    if value is None:
+        continue
+
+    if not isinstance(value, dict):
+        # This is a first level option
+        if key in parse_conf['options']:
+            parse_conf['options'][key]['default'] = value
+        else:
+            print("\nUnknown parameter %s found in .projectrc\n" % key)
+    else:
+        # This is a second level parameter
+        if key not in parse_conf['subcommands']:
+            print("\nUnknown command %s found in .projectrc\n" % key)
+        else:
+            conf = parse_conf['subcommands'][key]['suboptions']
+            for subkey, subvalue in value.items():
+                if subkey in conf:
+                    conf[subkey]['default'] = subvalue
+                else:
+                    print(
+                        "\nUnknown parameter %s/%s found in .projectrc\n"
+                        % (key, subkey)
+                    )
+
 
 # ##########################
 # Arguments definition
@@ -83,7 +112,12 @@ parser = argparse.ArgumentParser(
 # PARAMETERS
 for option_name, options in sorted(parse_conf.get('options', {}).items()):
     params = prepare_params(options)
-    parser.add_argument('--%s' % option_name, **params)
+    alias = params.pop('alias', None)
+    param_name = '--%s' % option_name
+    if alias is None:
+        parser.add_argument(param_name, **params)
+    else:
+        parser.add_argument(param_name, '-%s' % alias, **params)
 
 parser.add_argument('--version', action='version',
                     version='rapydo version %s' % __version__)
@@ -110,21 +144,30 @@ for command_name, options in sorted(mycommands.items()):
     subparse = subparsers.add_parser(
         command_name, help=options.get('description'))
 
-    controlcommands = options.get('controlcommands', {})
-    # Some subcommands can have further subcommands [control start, stop, etc]
-    if len(controlcommands) > 0:
-        innerparser = subparse.add_subparsers(
-            dest='controlcommand'
-        )
-        innerparser.required = options.get('controlrequired', False)
-        for subcommand, suboptions in controlcommands.items():
-            subcommand_help = suboptions.pop(0)
-            # Creating a parser for each sub-sub-command [control start, stop]
-            innerparser.add_parser(subcommand, help=subcommand_help)
+    # controlcommands = options.get('controlcommands', {})
+    # # Some subcommands can have further subcommands
+    # [control start, stop, etc]
+    # if len(controlcommands) > 0:
+    #     innerparser = subparse.add_subparsers(
+    #         dest='controlcommand'
+    #     )
+    #     innerparser.required = options.get('controlrequired', False)
+    #     for subcommand, suboptions in controlcommands.items():
+    #         subcommand_help = suboptions.pop(0)
+    #         # Creating a parser for each sub-sub-command [control start/stop]
+    #         innerparser.add_parser(subcommand, help=subcommand_help)
 
     for option_name, suboptions in options.get('suboptions', {}).items():
         params = prepare_params(suboptions)
-        subparse.add_argument('--%s' % option_name, **params)
+        alias = params.pop('alias', None)
+        positional = params.pop('positional', False)
+        param_name = '--%s' % option_name
+        if positional:
+            subparse.add_argument(option_name, **params)
+        elif alias is None:
+            subparse.add_argument(param_name, **params)
+        else:
+            subparse.add_argument(param_name, '-%s' % alias, **params)
 
 # ##########################
 # Print usage if no arguments provided

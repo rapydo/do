@@ -8,10 +8,11 @@ except BaseException as e:
     # raise
     from rapydo.utils.logs import get_logger
     log = get_logger(__name__)
-    log.critical_exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
+    log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
 import os.path
 from collections import OrderedDict
+from distutils.version import LooseVersion
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
@@ -24,6 +25,7 @@ from rapydo.do.dockerizing import Dock
 from rapydo.do.compose import Compose
 from rapydo.do.configuration import read_yamls
 
+from rapydo.utils.globals import mem
 from rapydo.utils.logs import get_logger
 
 log = get_logger(__name__)
@@ -46,8 +48,9 @@ class Application(object):
 
         # Action
         self.action = self.current_args.get('action')
+        mem.action = self.action
         if self.action is None:
-            log.critical_exit("Internal misconfiguration")
+            log.exit("Internal misconfiguration")
         else:
             log.info("Do request: %s" % self.action)
 
@@ -66,13 +69,13 @@ class Application(object):
         try:
             projects = helpers.list_path(PROJECT_DIR)
         except FileNotFoundError:
-            log.critical_exit("Could not access the dir '%s'" % PROJECT_DIR)
+            log.exit("Could not access the dir '%s'" % PROJECT_DIR)
 
         if self.project is None:
             prj_num = len(projects)
 
             if prj_num == 0:
-                log.critical_exit(
+                log.exit(
                     "No project found (%s folder is empty?)"
                     % PROJECT_DIR
                 )
@@ -86,7 +89,7 @@ class Application(object):
                 self.current_args['project'] = self.project
         else:
             if self.project not in projects:
-                log.critical_exit(
+                log.exit(
                     "Wrong project '%s'.\n" % self.project +
                     "Select one of the following:\n\n %s\n" % projects)
 
@@ -97,31 +100,63 @@ class Application(object):
     def check_installed_software(self):
 
         # Check if docker is installed
-        self.check_program('docker')
+        self.check_program('docker', min_version="1.13")
         # Use it
         self.docker = Dock()
 
         # Check docker-compose version
-        pack = 'compose'
-        package_version = checks.check_package(pack)
-        if package_version is None:
-            log.critical_exit("Could not find %s" % pack)
-        else:
-            log.checked("%s version: %s" % (pack, package_version))
+        self.check_python_package('compose', min_version="1.11")
 
         # Check if git is installed
         self.check_program('git')
 
-    def check_program(self, program):
-        program_version = checks.check_executable(executable=program, log=log)
-        if program_version is None:
-            log.critical_exit(
+    def check_program(self, program, min_version=None, max_version=None):
+        found_version = checks.check_executable(executable=program, log=log)
+        if found_version is None:
+            log.exit(
                 "Missing requirement.\n" +
                 "Please make sure that '%s' is installed" % program
             )
-        else:
-            log.checked("%s version: %s" % (program, program_version))
-        return
+
+        if min_version is not None:
+            if LooseVersion(min_version) > LooseVersion(found_version):
+                version_error = "Minimum supported version for %s is %s" \
+                    % (program, min_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        if max_version is not None:
+            if LooseVersion(max_version) < LooseVersion(found_version):
+                version_error = "Maximum supported version for %s is %s" \
+                    % (program, max_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        log.checked("%s version: %s" % (program, found_version))
+
+    def check_python_package(
+            self, package, min_version=None, max_version=None):
+
+        found_version = checks.check_package(package)
+        if found_version is None:
+            log.exit(
+                "Could not find the following python package: %s" % package)
+
+        if min_version is not None:
+            if LooseVersion(min_version) > LooseVersion(found_version):
+                version_error = "Minimum supported version for %s is %s" \
+                    % (package, min_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        if max_version is not None:
+            if LooseVersion(max_version) < LooseVersion(found_version):
+                version_error = "Maximum supported version for %s is %s" \
+                    % (package, max_version)
+                version_error += ", found %s " % (found_version)
+                log.exit(version_error)
+
+        log.checked("%s version: %s" % (package, found_version))
 
     def inspect_main_folder(self):
         """
@@ -133,7 +168,7 @@ class Application(object):
         local_git = gitter.get_local(".")
 
         if local_git is None:
-            log.critical_exit(
+            log.exit(
                 """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s
@@ -143,25 +178,32 @@ Verify that you are in the right folder, now you are in: %s
         # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
-            # The project dir details:
-            # 'projects/*/project_configuration.yaml',  # prj conf
-            # 'projects/*/backend',  # python code
-            # 'projects/*/confs',  # containers configuration
+            # NOTE: to be moved outside rapydo-core?
             'confs',
             'confs/backend.yml',
             'confs/frontend.yml',  # it is optional, but we expect to find it
-            # 'data',  # ?
-            # 'docs',  # ?
+
+            'data',
+            'projects',
             'submodules'
         ]
 
         for fname in required_files:
             if not os.path.exists(fname):
-                log.critical_exit(
+
+                extra = ""
+
+                if fname == 'data':
+                    extra = """
+\nPlease also note that the data dir is not automatically created,
+if you are in the right repository consider to create it by hand
+"""
+
+                log.exit(
                     """File or folder not found %s
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s
-                    """ % (fname, os.getcwd())
+Verify that you are in the right folder, now you are in: %s%s
+                    """ % (fname, os.getcwd(), extra)
                 )
 
     def inspect_project_folder(self):
@@ -189,7 +231,7 @@ Verify that you are in the right folder, now you are in: %s
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
-                log.critical_exit(
+                log.exit(
                     """Project %s is invalid: file or folder not found %s
                     """ % (self.project, fpath)
                 )
@@ -214,7 +256,7 @@ Verify that you are in the right folder, now you are in: %s
 
         connected = checks.check_internet()
         if not connected:
-            log.critical_exit('Internet connection unavailable')
+            log.exit('Internet connection unavailable')
         else:
             log.checked("Internet connection available")
             self.tested_connection = True
@@ -310,6 +352,11 @@ Verify that you are in the right folder, now you are in: %s
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
+        if self.action == 'shell' \
+           or self.action == 'ssl-certificate' \
+           or self.action == 'ssl-dhparam':
+            return
+
         # TODO: check all builds against their Dockefile latest commit
         # log.pp(self.services)
         pass
@@ -346,7 +393,7 @@ Verify that you are in the right folder, now you are in: %s
                         cache = True
                 else:
                     if self.action == 'check':
-                        log.critical_exit(
+                        log.exit(
                             """Missing template build for %s
 \nSuggestion: execute the init command
                             """ % build['service'])
@@ -370,7 +417,7 @@ Verify that you are in the right folder, now you are in: %s
 
         if self.check or self.initialize or self.update:
             if self.frontend:
-                bower_dir = os.path.join("bower_components")
+                bower_dir = os.path.join("data", "bower_components")
 
                 install_bower = False
                 if self.update:
@@ -392,63 +439,37 @@ Verify that you are in the right folder, now you are in: %s
                         )
                     else:
 
-                        # SMART WAY -> use it this a _interface method:
-                        # if self.initialize:
-                        #     bower_command = "bower install"
-                        # else:
-                        #     bower_command = "bower update"
-
-                        # bower_command += \
-                        #     "--config.directory=/libs/bower_components"
-
-                        # self._shell(
-                        #     command=bower_command, service="bower")
-
-                        # ##############################################
-                        # ROUGH WAY
-
                         if self.initialize:
-                            args = [
-                                "install",
-                                "--config.directory=/libs/bower_components"
-                            ]
+                            bower_command = "bower install"
                         else:
-                            args = [
-                                "update",
-                                "--config.directory=/libs/bower_components"
-                            ]
-                        options = {
-                            'SERVICE': "bower",
-                            '--publish': [], '--service-ports': False,
-                            'COMMAND': "bower",
-                            'ARGS': args, '-e': [], '--volume': [],
-                            '--rm': True, '--no-deps': True,
-                            '--name': None, '--user': None,
-                            '--workdir': None, '--entrypoint': None,
-                            '-d': False, '-T': False,
-                        }
+                            bower_command = "bower update"
 
-                        log.info("Installing bower libs (%s)" % args)
+                        bower_command += \
+                            " --config.directory=/libs/bower_components"
+
                         dc = Compose(files=self.files)
-                        dc.command('run', options)
-                        # ##############################################
+                        dc.create_volatile_container(
+                            "bower", command=bower_command)
 
                 else:
                     log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
-                     default=None, avoid_default=False):
+                     default=None
+                     # , avoid_default=False
+                     ):
 
         value = self.current_args.get(key).split(sep)
-        if avoid_default or default is not None:
+        # if avoid_default or default is not None:
+        if default is not None:
             config_default = \
                 arguments.parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
             if value == [config_default]:
-                if avoid_default:
-                    log.critical_exit("You must set '--services' option")
-                elif default is not None:
+                # if avoid_default:
+                #     log.exit("You must set '--services' option")
+                if default is not None:
                     value = default
                 else:
                     pass
@@ -507,7 +528,7 @@ Verify that you are in the right folder, now you are in: %s
             project.find_active(self.services)
 
         if len(self.active_services) == 0:
-            log.critical_exit(
+            log.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your compose yaml
 and add the variable "ACTIVATE: 1" in the service enviroment
@@ -524,26 +545,26 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     missing.append(key)
 
         if len(missing) > 0:
-            log.critical_exit(
+            log.exit(
                 "Missing critical params for configuration:\n%s" % missing)
         else:
             log.checked("No PLACEHOLDER variable to be replaced")
 
         return missing
 
-    def manage_one_service(self, service=None):
+    # def manage_one_service(self, service=None):
 
-        if service is None:
-            services = self.get_services(avoid_default=True)
+    #     if service is None:
+    #         services = self.get_services(avoid_default=True)
 
-            if len(services) != 1:
-                log.critical_exit(
-                    "Commands can be executed only on one service." +
-                    "\nCurrent request on: %s" % services)
-            else:
-                service = services.pop()
+    #         if len(services) != 1:
+    #             log.exit(
+    #                 "Commands can be executed only on one service." +
+    #                 "\nCurrent request on: %s" % services)
+    #         else:
+    #             service = services.pop()
 
-        return service
+    #     return service
 
     def container_info(self, service_name):
         return self.services_dict.get(service_name, None)
@@ -584,7 +605,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             .get('controller', {}).get('commands', {})
 
         if len(self.custom_commands) < 1:
-            log.critical_exit("No custom commands defined")
+            log.exit("No custom commands defined")
 
         for name, custom in self.custom_commands.items():
             arguments.extra_command_parser.add_parser(
@@ -640,55 +661,118 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _update(self):
         log.info("All updated")
 
-    def _control(self):
+    def _start(self):
+        services = self.get_services(default=self.active_services)
 
-        command = self.current_args.get('controlcommand')
+        options = {
+            'SERVICE': services,
+            '--no-deps': False,
+            '-d': True,
+            '--abort-on-container-exit': False,
+            '--remove-orphans': False,
+            '--no-recreate': False,
+            '--force-recreate': False,
+            '--build': False,
+            '--no-build': False,
+            '--scale': {},
+        }
+
+        dc = Compose(files=self.files)
+        dc.command('up', options)
+
+    def _stop(self):
+        services = self.get_services(default=self.active_services)
+
+        options = {'SERVICE': services}
+
+        dc = Compose(files=self.files)
+        dc.command('stop', options)
+
+    def _restart(self):
+        services = self.get_services(default=self.active_services)
+
+        options = {'SERVICE': services}
+
+        dc = Compose(files=self.files)
+        dc.command('restart', options)
+
+    def _remove(self):
         services = self.get_services(default=self.active_services)
 
         dc = Compose(files=self.files)
+
+        options = {
+            'SERVICE': services,
+            # '--stop': True,  # BUG? not working
+            '--force': True,
+            '-v': False,  # dangerous?
+        }
+        dc.command('stop')
+        dc.command('rm', options)
+
+    def _toggle_freeze(self):
+        services = self.get_services(default=self.active_services)
+
         options = {'SERVICE': services}
+        dc = Compose(files=self.files)
+        command = 'pause'
+        for container in dc.get_handle().project.containers():
 
-        if command == 'start':
-            # print("SERVICES", services)
-            options.update({
-                '--no-deps': False,
-                '-d': True,
-                '--abort-on-container-exit': False,
-                '--remove-orphans': False,
-                '--no-recreate': False,
-                '--force-recreate': False,
-                '--build': False,
-                '--no-build': False,
-                '--scale': {},
-            })
-            command = 'up'
-
-        elif command == 'stop':
-            pass
-        elif command == 'restart':
-            pass
-        elif command == 'remove':
-            dc.command('stop')
-            options.update({
-                # '--stop': True,  # BUG? not working
-                '--force': True,
-                '-v': False,  # dangerous?
-                # 'SERVICE': []
-            })
-            command = 'rm'
-        elif command == 'toggle_freeze':
-
-            command = 'pause'
-            for container in dc.get_handle().project.containers():
-
-                if container.dictionary.get('State').get('Status') == 'paused':
-                    command = 'unpause'
-                    break
-
-        else:
-            log.critical_exit("Unknown")
-
+            if container.dictionary.get('State').get('Status') == 'paused':
+                command = 'unpause'
+                break
         dc.command(command, options)
+
+    # def _control(self):
+
+    #     command = self.current_args.get('controlcommand')
+    #     services = self.get_services(default=self.active_services)
+
+    #     dc = Compose(files=self.files)
+    #     options = {'SERVICE': services}
+
+    #     if command == 'start':
+    #         # print("SERVICES", services)
+    #         options.update({
+    #             '--no-deps': False,
+    #             '-d': True,
+    #             '--abort-on-container-exit': False,
+    #             '--remove-orphans': False,
+    #             '--no-recreate': False,
+    #             '--force-recreate': False,
+    #             '--build': False,
+    #             '--no-build': False,
+    #             '--scale': {},
+    #         })
+    #         command = 'up'
+
+    #     elif command == 'stop':
+    #         pass
+    #     elif command == 'restart':
+    #         pass
+    #     elif command == 'remove':
+    #         dc.command('stop')
+    #         options.update({
+    #             # '--stop': True,  # BUG? not working
+    #             '--force': True,
+    #             '-v': False,  # dangerous?
+    #             # 'SERVICE': []
+    #         })
+    #         command = 'rm'
+    #     elif command == 'toggle_freeze':
+
+    #         command = 'pause'
+    #         for container in dc.get_handle().project.containers():
+
+    #            if container.dictionary.get(
+    #                'State').get('Status') == 'paused':
+    #                 command = 'unpause'
+    #                 break
+
+    #     else:
+    #         log.exit("Unknown")
+
+    #     dc.command(command, options)
 
     def _log(self):
         dc = Compose(files=self.files)
@@ -709,34 +793,29 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stopped by keyboard")
 
     def _interfaces(self):
-        db = self.manage_one_service()
+        # db = self.manage_one_service()
+        db = self.current_args.get('service')
         service = db + 'ui'
-        port = self.current_args.get('port')
+
+        # TO FIX: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
-            log.critical_exit("Container '%s' is not defined" % service)
+            log.exit("Container '%s' is not defined" % service)
 
-        options = {
-            'SERVICE': service,
-            '--publish': [], '--service-ports': False,
-            'COMMAND': None,
-            'ARGS': [], '-e': [], '--volume': [],
-            '--rm': True, '--no-deps': True,
-            '--name': None, '--user': None,
-            '--workdir': None, '--entrypoint': None,
-            '-d': False, '-T': False,
-        }
+        port = self.current_args.get('port')
+        publish = []
 
+        # TO FIX: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
             except TypeError:
-                log.critical_exit("Port must be a valid integer")
+                log.exit("Port must be a valid integer")
 
             info = self.container_info(service)
             try:
                 current_ports = info.get('ports', []).pop(0)
             except IndexError:
-                log.critical_exit("No default port found?")
+                log.exit("No default port found?")
 
                 # TODO: inspect the image to get the default exposed
                 # $ docker inspect mongo-express:0.40.0 \
@@ -745,19 +824,16 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 #   "8081/tcp": {}
                 # }
 
-            options['--publish'].append("%s:%s" % (port, current_ports.target))
-
-        else:
-            # Default: open service ports requested within compose config
-            options['--service-ports'] = True
+            publish.append("%s:%s" % (port, current_ports.target))
 
         dc = Compose(files=self.files)
-        dc.command('run', options)
+        dc.create_volatile_container(service, publish=publish)
 
     def _shell(self, user=None, command=None, service=None):
 
         dc = Compose(files=self.files)
-        service = self.manage_one_service(service)
+        service = self.current_args.get('service')
+        # service = self.manage_one_service(service)
 
         if user is None:
             user = self.current_args.get('user')
@@ -768,30 +844,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        # The command must be splitted into command + args_array
-        pieces = command.split()
-        try:
-            shell_command = pieces[0]
-            shell_args = pieces[1:]
-        except IndexError:
-            # no command, use default
-            shell_command = None
-            shell_args = []
-        else:
-            log.info("Command request: %s(%s+%s)"
-                     % (service.upper(), shell_command, shell_args))
-
-        options = {
-            'SERVICE': service,
-            'COMMAND': shell_command,
-            'ARGS': shell_args,
-            '--index': '1',
-            '--user': user,
-            '--privileged': True,
-            '-T': False,
-            '-d': False,
-        }
-        dc.command('exec_command', options)
+        dc.exec_command(service, user=user, command=command)
 
     def _build(self):
 
@@ -815,7 +868,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)
         meta.pop('description', None)
-        return self._shell(**meta)
+
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
 
@@ -833,8 +891,34 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
-        # TO FIX: are you sure? _shell do not require a running container?
-        return self._shell(**meta)
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
+        # **meta ... explicit is not better than implicit???
+        # return self._shell(**meta)
+
+    def _ssl_dhparam(self):
+        # Use my method name in a meta programming style
+        # import inspect
+        # TO FIX: this name is wrong...
+        # current_method_name = inspect.currentframe().f_code.co_name
+        current_method_name = "ssl-dhparam"
+
+        meta = arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'dhparam'
+
+        service = meta.get('service')
+        user = meta.get('user', None)
+        command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
 
     def _bower_install(self):
 
@@ -855,12 +939,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'bower'
 
-        bower_command = "bower install %s --save" % lib
+        conf_dir = "--config.directory=/libs/bower_components"
+        bower_command = "bower install %s %s --save" % (conf_dir, lib)
 
-        # TO FIX: shell requires a running container.
-        # Use something like _interfaces
-        self._shell(
-            command=bower_command, service="bower")
+        dc = Compose(files=self.files)
+        dc.create_volatile_container("bower", command=bower_command)
 
     def _bower_update(self):
 
@@ -881,11 +964,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Verify all is good
         assert meta.pop('name') == 'bower'
 
-        bower_command = "bower update %s" % lib
-        # TO FIX: shell requires a running container.
-        # Use something like _interfaces
-        self._shell(
-            command=bower_command, service="bower")
+        conf_dir = "--config.directory=/libs/bower_components"
+        bower_command = "bower update %s %s" % (conf_dir, lib)
+
+        dc = Compose(files=self.files)
+        dc.create_volatile_container("bower", command=bower_command)
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -913,7 +996,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         function = "_%s" % self.action.replace("-", "_")
         func = getattr(self, function, None)
         if func is None:
-            log.critical_exit(
+            log.exit(
                 "Command not yet implemented: %s (expected function: %s)"
                 % (self.action, function))
 
