@@ -8,23 +8,24 @@
 ---
 
 ```bash
-rapydo-utils/0.4.4
+rapydo-utils/0.4.5
+rapydo-controller/0.3.6
 rapydo-http/0.2.8
-rapydo-controller/0.3.5
 ```
 
 ---
 
 - [ ] TASK: close the squash issue
-- [ ] TODO: how to template and update; @cookiecutter
 - [ ] TEST: setup.py with setuptools
-    + utils
-    + controller/do
-    + backend/http
+    - [ ] utils
+    - [ ] controller/do
+    - [ ] backend/http
+- [ ] TEST: invoke as cli base
+- [ ] TODO: template and update w/ @cookiecutter
 - [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] TASK: tutorial (walkthrough) mode [rapydo/issues#12]
 - [ ] TASK: PDF with swagger2markdown
-- [ ] REFACTOR: Translate app.py commands into a subpackage `commands`
+- [ ] REFACTOR: checks into a subpackage of classes
 - [ ] HOW TO: update environment (git pull, image builds, update requirements?)
 - [ ] TEST: eudat re-pull rapydo/core? @ohboy
 - [ ] EPOS: test code with mongo
