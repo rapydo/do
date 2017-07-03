@@ -39,13 +39,13 @@ setup(
         ],
     },
     install_requires=[
-        "rapydo-utils==0.4.5",
+        "rapydo-utils==0.4.6",
         # ###### DOCKER
         # combo that works
         "docker-compose==1.14",
         "docker==2.4.2",
-        # ###### others
         "dockerfile-parse",
+        # ###### others
         "gitpython",
         "better_exceptions",
         # ###### BUG FIX

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.5'
+__version__ = '0.4'
 
 FRAMEWORK_NAME = 'RAPyDo'
 
