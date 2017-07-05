@@ -7,11 +7,29 @@
 
 ---
 
+CLI APPS:
+- keep
+- python-gist
+- tnote
+- buku
+
+---
+
 ```bash
 rapydo-utils/0.4.5
 rapydo-controller/0.3.6
 rapydo-http/0.2.8
 ```
+
+---
+
+- [ ] SEADATA: testbed
+    - [ ] b2safe
+        + cineca, csc, dkrz
+        + stfc, gr.net
+    - [ ] b2stage
+    - [ ] proxy to http api
+    - [ ] docker registry b2host
 
 ---
 

@@ -40,29 +40,20 @@ setup(
     },
     install_requires=[
         "rapydo-utils==0.4.6",
-        "docker-compose>=1.13",
+        # ###### DOCKER
+        # combo that works
+        "docker-compose==1.14",
         "docker==2.4.2",
-        # "docker",
-        "gitpython",
         "dockerfile-parse",
+        # ###### others
+        "gitpython",
         "better_exceptions",
+        # ###### BUG FIX
         "requests==2.11.1",
         # requests==2.18.1 # otherwise it goes with this, which break things
     ],
-    # tests_require=[  # from PIP code
-    #     'pytest',
-    #     'mock',
-    #     'pretend',
-    #     'scripttest>=1.3',
-    #     'virtualenv>=1.10',
-    #     'freezegun',
-    # ],
-    # extras_require={
-    #     'testing': tests_require,
-    # },
     classifiers=[
         'Programming Language :: Python',
         'Intended Audience :: Developers',
-    ],
-    # zip_safe=False,
+    ]
 )
