@@ -48,8 +48,7 @@ options:
   cache-env:
     alias: env
     type: bool
-    # default: False
-    default: True
+    default: False
     # help: Force recreation of the docker compose .env file even if existing
     help: Cache the docker compose .env file instead of recreating it
 

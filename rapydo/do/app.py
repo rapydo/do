@@ -506,7 +506,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
             # log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
-            log.checked("%s using CACHE" % COMPOSE_ENVIRONMENT_FILE)
+            log.debug("Using cache for %s" % COMPOSE_ENVIRONMENT_FILE)
 
             # FIXME: 'do' here is deprecated and could be removed as parameter
 
