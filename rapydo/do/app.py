@@ -477,9 +477,10 @@ Verify that you are in the right folder, now you are in: %s%s
         return value
 
     def make_env(self, do=False):
-
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
-        if self.current_args.get('force_env'):
+
+        # if self.current_args.get('force_env'):
+        if not self.current_args.get('cache_env'):
             try:
                 os.unlink(envfile)
                 log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
@@ -490,6 +491,7 @@ Verify that you are in the right folder, now you are in: %s%s
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+                env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -503,25 +505,28 @@ Verify that you are in the right folder, now you are in: %s%s
                     whandle.write("%s=%s\n" % (key, value))
                 log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
-            log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
+            # log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
+            log.checked("%s using CACHE" % COMPOSE_ENVIRONMENT_FILE)
 
-            # Stat file
-            mixed_env = os.stat(envfile)
+            # FIXME: 'do' here is deprecated and could be removed as parameter
 
-            # compare blame commit date against file modification date
-            # NOTE: HEAVY OPERATION
-            if do:
-                if gitter.check_file_younger_than(
-                    self.gits.get('utils'),
-                    file=DEFAULT_CONFIG_FILEPATH,
-                    timestamp=mixed_env.st_mtime
-                ):
-                    log.warning(
-                        "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-                        "Add --force-env to update."
-                    )
-            # else:
-            #     log.verbose("Skipping heavy operations")
+            # # Stat file
+            # mixed_env = os.stat(envfile)
+
+            # # compare blame commit date against file modification date
+            # # NOTE: HEAVY OPERATION
+            # if do:
+            #     if gitter.check_file_younger_than(
+            #         self.gits.get('utils'),
+            #         file=DEFAULT_CONFIG_FILEPATH,
+            #         timestamp=mixed_env.st_mtime
+            #     ):
+            #         log.warning(
+            #             "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
+            #             "Add --force-env to update."
+            #         )
+            # # else:
+            # #     log.verbose("Skipping heavy operations")
 
     def check_placeholders(self):
 
@@ -1027,7 +1032,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
 
         # Compose services and variables
-        self.make_env(do=do_heavy_ops)
+        if self.action not in ['check', 'init']:
+            self.make_env(do=do_heavy_ops)
         self.read_composers()
         self.check_placeholders()
 

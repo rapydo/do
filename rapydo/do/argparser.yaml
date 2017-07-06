@@ -44,11 +44,14 @@ options:
     default: active services
     help: List of services referring to a command
 
-  force-env:
+  # force-env:
+  cache-env:
     alias: env
     type: bool
-    default: False
-    help: Force recreation of the docker compose .env file even if existing
+    # default: False
+    default: True
+    # help: Force recreation of the docker compose .env file even if existing
+    help: Cache the docker compose .env file instead of recreating it
 
   # development:
   #   type: bool
@@ -134,7 +137,7 @@ subcommands:
     description: Install a new lib with bower
     container_exec:
       name: bower
-      # command: bower install 
+      # command: bower install
       service: bower
       user: develop
     suboptions:
@@ -202,7 +205,7 @@ subcommands:
     description: Stop containers if running and remove them
   toggle_freeze:
     description: Toggle a temporary block/pause of running services
-        
+
   # control:
   #   description: manage start/stop of the framework based on  current specified blueprint
   #   controlrequired: True

@@ -7,21 +7,65 @@
 
 ---
 
-CLI APPS:
-- keep
-- python-gist
-- tnote
-- buku
+development/
+    rapydo/
+        controller
+        utilities
+        restapi
+        build-templates
+    eudat/
+        submodules
+            links
+
+git tags = github releases
 
 ---
 
+### DOING
+
+- [x] TASK: close the squash issue
+- [x] TASK: fix core backend run
+- [x] TEST: invoke as cli base
+- [x] TODO: remove COMPOSE_PROJECT_NAME and use --project
+- [x] FIX: skip oauth2 if not needed
+- [x] TODO: change TOFIX in FIXME (backend)
+- [x] TODO: make env at each command (not for check and init)
+- [ ] TEST: setup.py with setuptools + remove subpackage of "rapydo.X"
+    - [ ] utils
+    - [ ] controller/do
+    - [ ] backend/http
+    - [ ] @develop
+- [ ] BUG: network problems with start:
 ```bash
-rapydo-utils/0.4.5
-rapydo-controller/0.3.6
-rapydo-http/0.2.8
+Client Error: Conflict ("cannot create network  (br-52cc0f455211): conflicts with network  (br-d5c22ead14f6): networks have overlapping IPv4")
+```
+- [ ] TODO: recheck quick_start.sh
+- [ ] TODO: template and update w/ @cookiecutter
+- [ ] BUG: if git is not installed the import from git python lib fails
+- [ ] TASK: automatic certificate generation
+    - [ ] cron on host
+    - [ ] three commands: add, check, remove
+- [ ] TASK: tutorial (walkthrough) mode [rapydo/issues#12]
+- [ ] COOL: aliases and combo
+- [ ] REFACTOR: checks into a subpackage of classes
+- [ ] HOWTO: update environment (git pull, image builds, update requirements?)
+- [ ] TEST: eudat re-pull rapydo/core? @ohboy
+- [ ] EPOS: test code with mongo + squash
+- [ ] TODO: evaluate tini: https://hynek.me/articles/docker-signals
+
+---
+
+### versions
+
+```bash
+rapydo-utils/0.5.0
+rapydo-controller/0.5.0
+rapydo-http/0.5.0
 ```
 
 ---
+
+### EU
 
 - [ ] SEADATA: testbed
     - [ ] b2safe
@@ -33,27 +77,18 @@ rapydo-http/0.2.8
 
 ---
 
-- [ ] TASK: close the squash issue
-- [ ] TEST: setup.py with setuptools
-    - [ ] utils
-    - [ ] controller/do
-    - [ ] backend/http
-- [ ] TEST: invoke as cli base
-- [ ] TODO: template and update w/ @cookiecutter
-- [ ] BUG: if git is not installed the import from git python lib fails
-- [ ] TASK: tutorial (walkthrough) mode [rapydo/issues#12]
-- [ ] TASK: PDF with swagger2markdown
-- [ ] REFACTOR: checks into a subpackage of classes
-- [ ] HOW TO: update environment (git pull, image builds, update requirements?)
-- [ ] TEST: eudat re-pull rapydo/core? @ohboy
-- [ ] EPOS: test code with mongo
-    + squash
-- [ ] TODO: evaluate tini: https://hynek.me/articles/docker-signals
+### sponsor :D
+
+CLI APPS:
+- keep
+- python-gist
+- tnote
+- buku
 
 
 ---
 
-## Already done
+### Already done
 
 - [x] fix restclient
 - [x] fix tests inside container
