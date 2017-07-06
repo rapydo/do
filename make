@@ -17,7 +17,7 @@ pandoc \
 	--output=README.rst README.md
 
 # rm -f dist/*
-python3.6 setup.py sdist
+python3 setup.py sdist
 
 version=$(ls -1rt dist | tail -n 1)
 
