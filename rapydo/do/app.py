@@ -1040,15 +1040,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Compose services and variables
 
-        make_env = False
-        if self.frontend:
-            # always do make env, due to bower
-            make_env = True
-        elif self.action not in ['check', 'init']:
-            make_env = True
-
-        if make_env:
-            self.make_env(do=do_heavy_ops)
+        self.make_env(do=do_heavy_ops)
 
         self.read_composers()
         self.check_placeholders()
