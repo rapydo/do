@@ -976,6 +976,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc = Compose(files=self.files)
         dc.create_volatile_container("bower", command=bower_command)
 
+    def _env(self):
+
+        log.info("List of configured variables:")
+        for var in sorted(self.current_args):
+            val = self.current_args.get(var)
+            print("%s: %s" % (var, val))
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################

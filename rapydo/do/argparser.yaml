@@ -230,3 +230,5 @@ subcommands:
         default: False
         help: remove also containers persistent data
 
+  env:
+    description: "Print all configured variables"
