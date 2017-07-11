@@ -1,13 +1,11 @@
+# -*- coding: utf-8 -*-
 
 import os
 import codecs
 from rapydo.do import __version__
 
-from distutils.core import setup
-# from setuptools import setup
-
-# import platform
-# print(platform.python_version())
+# from distutils.core import setup
+from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -23,7 +21,7 @@ setup(
     # long_description=__doc__,
     long_description=read('README.rst'),
     # keywords='http api rest web backend rapydo',
-    keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
+    # keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
     url='https://github.com/rapydo/do',
@@ -36,6 +34,7 @@ setup(
     entry_points={
         'console_scripts': [
             'rapydo=rapydo.do.__main__:main',
+            'do=rapydo.do.__main__:main',
         ],
     },
     install_requires=[
