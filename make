@@ -1,6 +1,4 @@
 #!/bin/bash
-# THIS IS THE MOST UPDATED VERSION OF MY MAKE
-# N.B. could be replaced with a Makefile indeed
 
 if [ "$1" == 'prod' ]; then
 	# OR PRODUCTION
@@ -10,6 +8,7 @@ else
 	dev="-r testpypi"
 fi
 
+# Generate RST from markdown
 git update-index --assume-unchanged README.rst
 # pip3 install --upgrade -r dev-requirements.txt
 pandoc \

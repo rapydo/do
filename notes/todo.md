@@ -4,11 +4,31 @@
 > to do is to be
 > to be is to do
 > do be do be do 
-
+> 
 ---
 
+### DOING
+
+- [x] TODO: recheck quick_start.sh
+- [ ] TEST: new packaging
+    * setup.py with setuptools 
+    * remove subpackage of "rapydo.X"
+    * add travis and automatic deploy from git tags
+    - [x] utilities
+    - [ ] controller
+    - [ ] restapi
+    - [ ] build-templates github release
+- [ ] COM: develop
+    - [ ] replace 'make' functionalities
+    - [ ] unittext mocking context
+    - [ ] remove 'make' for every packaging project
+    - [ ] git tags = github releases
+    - [ ] multiple package dependencies: bonobo
+    - [ ] template w/ @cookiecutter
+    - [ ] update w/ @cookiecutter
+
 development/
-    rapydo/
+    tools/
         controller
         utilities
         restapi
@@ -17,31 +37,13 @@ development/
         submodules
             links
 
-git tags = github releases
 
----
-
-### DOING
-
-- [x] TASK: close the squash issue
-- [x] TASK: fix core backend run
-- [x] TEST: invoke as cli base
-- [x] TODO: remove COMPOSE_PROJECT_NAME and use --project
-- [x] FIX: skip oauth2 if not needed
-- [x] TODO: change TOFIX in FIXME (backend)
-- [x] TODO: make env at each command (not for check and init)
-- [ ] TEST: setup.py with setuptools + remove subpackage of "rapydo.X"
-    - [ ] utils
-    - [ ] controller/do
-    - [ ] backend/http
-    - [ ] @develop
-- [ ] BUG: network problems with start:
-```bash
-Client Error: Conflict ("cannot create network  (br-52cc0f455211): conflicts with network  (br-d5c22ead14f6): networks have overlapping IPv4")
-```
-- [ ] TODO: recheck quick_start.sh
-- [ ] TODO: template and update w/ @cookiecutter
 - [ ] BUG: if git is not installed the import from git python lib fails
+- [ ] BUG: network problems with start:
+    [link](http://olicallaghan.com/post/a-survival-guide-to-communication-between-docker-containers)
+    ```bash
+    Client Error: Conflict ("cannot create network  (br-52cc0f455211): conflicts with network  (br-d5c22ead14f6): networks have overlapping IPv4")
+    ```
 - [ ] TASK: automatic certificate generation
     - [ ] cron on host
     - [ ] three commands: add, check, remove
@@ -82,8 +84,8 @@ rapydo-http/0.5.0
 CLI APPS:
 - keep
 - python-gist
-- tnote
 - buku
+- tnote
 
 
 ---
@@ -115,3 +117,10 @@ CLI APPS:
 - [x] BUG: env variables stripper (detect)
 - [x] BUG: PYTHONPATH fix on all modes?
 - [x] BUG: compatibility with docker-compose > 1.13
+- [x] TASK: close the squash issue
+- [x] TASK: fix core backend run
+- [x] TEST: invoke as cli base
+- [x] TODO: remove COMPOSE_PROJECT_NAME and use --project
+- [x] FIX: skip oauth2 if not needed
+- [x] TODO: change TOFIX in FIXME (backend)
+- [x] TODO: make env at each command (not for check and init)
