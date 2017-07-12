@@ -38,7 +38,8 @@ setup(
         ],
     },
     install_requires=[
-        "rapydo-utils==0.4.6",
+        # "rapydo-utils==0.5.0",
+        "rapydo-utils==0.4.7",
         # ###### DOCKER
         # combo that works
         "docker-compose==1.14",

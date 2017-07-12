@@ -9,7 +9,6 @@
 
 ### DOING
 
-- [x] TODO: recheck quick_start.sh
 - [ ] TEST: new packaging
     * setup.py with setuptools 
     * remove subpackage of "rapydo.X"
@@ -18,26 +17,6 @@
     - [ ] controller
     - [ ] restapi
     - [ ] build-templates github release
-- [ ] COM: develop
-    - [ ] replace 'make' functionalities
-    - [ ] unittext mocking context
-    - [ ] remove 'make' for every packaging project
-    - [ ] git tags = github releases
-    - [ ] multiple package dependencies: bonobo
-    - [ ] template w/ @cookiecutter
-    - [ ] update w/ @cookiecutter
-
-development/
-    tools/
-        controller
-        utilities
-        restapi
-        build-templates
-    eudat/
-        submodules
-            links
-
-
 - [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] BUG: network problems with start:
     [link](http://olicallaghan.com/post/a-survival-guide-to-communication-between-docker-containers)
@@ -124,3 +103,4 @@ CLI APPS:
 - [x] FIX: skip oauth2 if not needed
 - [x] TODO: change TOFIX in FIXME (backend)
 - [x] TODO: make env at each command (not for check and init)
+- [x] TODO: recheck quick_start.sh

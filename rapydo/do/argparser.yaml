@@ -121,10 +121,9 @@ subcommands:
     description: Issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
-      command: updatecertificates
+      command: /bin/bash updatecertificates
       service: proxy
       user: root
-      # description: useless here
   ssl-dhparam:
     description: Generate DH DSA parameters, 4096 bit long prime. **It could take long time**
     container_exec:
