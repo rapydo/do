@@ -178,12 +178,10 @@ if len(sys.argv) == 1:
 # ##########################
 # Reading input parameters
 
-"""
 # Partial parsing
 # https://docs.python.org/3.4/library/argparse.html#partial-parsing
 # Example
 # https://gist.github.com/von/949337/
-"""
 
 # current_args = parser.parse_args()
 current_args_namespace, remaining_args = parser.parse_known_args()
