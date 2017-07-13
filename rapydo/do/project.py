@@ -51,7 +51,7 @@ def find_active(services):
     return all_services, active_services
 
 
-def apply_variables(dictionary={}, variables={}):
+def apply_variables(dictionary, variables):
 
     new_dict = {}
     for key, value in dictionary.items():

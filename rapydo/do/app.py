@@ -16,7 +16,8 @@ from distutils.version import LooseVersion
 from rapydo.utils import checks
 from rapydo.utils import helpers
 from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
-from rapydo.utils.configuration import DEFAULT_CONFIG_FILEPATH
+from rapydo.utils import CONTAINERS_YAML_DIRNAME
+# from rapydo.utils.configuration import DEFAULT_CONFIG_FILEPATH
 from rapydo.do import project
 from rapydo.do import gitter
 from rapydo.do import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
@@ -321,9 +322,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
         confs = self.vars.get('composers', {})
 
-        from rapydo.utils import CONTAINERS_YAML_DIRNAME
-        from rapydo.utils import helpers
-
         # substitute values starting with '$$'
         myvars = {
             'frontend': self.frontend,
@@ -360,7 +358,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # TODO: check all builds against their Dockefile latest commit
         # log.pp(self.services)
-        pass
 
         # Compare builds depending on templates
         self.builds = locate_builds(self.base_services, self.services)
@@ -382,7 +379,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     path = os.path.join(build.get('path'), 'Dockerfile')
                     if gitter.check_file_younger_than(
                         self.gits.get('build-templates'),
-                        file=path,
+                        filename=path,
                         timestamp=build.get('timestamp')
                     ):
                         log.warning(
@@ -476,7 +473,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     pass
         return value
 
-    def make_env(self, do=False):
+    # def make_env(self, do=False):
+    def make_env(self):
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
 
         # if self.current_args.get('force_env'):
@@ -518,7 +516,7 @@ Verify that you are in the right folder, now you are in: %s%s
             # if do:
             #     if gitter.check_file_younger_than(
             #         self.gits.get('utils'),
-            #         file=DEFAULT_CONFIG_FILEPATH,
+            #         filename=DEFAULT_CONFIG_FILEPATH,
             #         timestamp=mixed_env.st_mtime
             #     ):
             #         log.warning(
@@ -1040,7 +1038,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Compose services and variables
 
-        self.make_env(do=do_heavy_ops)
+        # self.make_env(do=do_heavy_ops)
+        self.make_env()
 
         self.read_composers()
         self.check_placeholders()

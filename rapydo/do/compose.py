@@ -23,12 +23,13 @@ log = get_logger(__name__)
 
 class Compose(object):
 
-    def __init__(self, files, options={}):
+    # def __init__(self, files, options={}):
+    def __init__(self, files):
         super(Compose, self).__init__()
 
         self.files = files
-        options.update({'--file': self.files})
-        self.options = options
+        # options.update({'--file': self.files})
+        self.options = {'--file': self.files}
 
         self.project_dir = helpers.current_dir()
         self.project_name = get_project_name(self.project_dir)
@@ -49,15 +50,16 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def force_template_build(self, builds, options={}):
+    def force_template_build(self, builds):
 
+        options={}
         compose_handler = self.get_handle()
         force_options = {
             '--no-cache': True,
             '--pull': True,
         }
 
-        for image_tag, build in builds.items():
+        for _, build in builds.items():
 
             service = build.get('service')
             log.verbose("Building template for: %s" % service)
@@ -71,10 +73,13 @@ class Compose(object):
 
         return
 
-    def command(self, command, options={}):
+    def command(self, command, options=None):
 
         compose_handler = self.get_handle()
         method = getattr(compose_handler, command)
+
+        if options is None:
+            options = {}
 
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
@@ -111,10 +116,13 @@ class Compose(object):
 
         return (shell_command, shell_args)
 
-    def create_volatile_container(self, service, command=None, publish=[]):
+    def create_volatile_container(self, service, command=None, publish=None):
         """
             Execute a command on a not container
         """
+
+        if publish is None:
+            publish = []
 
         if len(publish) <= 0:
             service_post = True

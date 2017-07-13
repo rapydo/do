@@ -47,7 +47,7 @@ def find_templates_build(base_services):
     return templates
 
 
-def find_overriden_templates(services, templates={}):
+def find_overriden_templates(services, templates):
 
     builds = {}
 
