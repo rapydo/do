@@ -2,4 +2,4 @@
 pytest
 pytest-cov
 coveralls
-twine
+rapydo-utils
