@@ -7,7 +7,7 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 
-from rapydo.do.dockerizing import docker_errors
+from controller.dockerizing import docker_errors
 import compose.service
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
@@ -15,8 +15,8 @@ import compose.config.errors as conferrors
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
-from rapydo.utils import helpers
-from rapydo.utils.logs import get_logger
+from utilities import helpers
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 

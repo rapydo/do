@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 
 try:
-    from rapydo.do import arguments
+    from controller import arguments
 except SystemExit:
     raise
 except BaseException as e:
     # raise
-    from rapydo.utils.logs import get_logger
+    from utilities.logs import get_logger
     log = get_logger(__name__)
     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
 import os.path
 from collections import OrderedDict
 from distutils.version import LooseVersion
-from rapydo.utils import checks
-from rapydo.utils import helpers
-from rapydo.utils import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
-from rapydo.utils import CONTAINERS_YAML_DIRNAME
-# from rapydo.utils.configuration import DEFAULT_CONFIG_FILEPATH
-from rapydo.do import project
-from rapydo.do import gitter
-from rapydo.do import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
-from rapydo.do.builds import locate_builds
-from rapydo.do.dockerizing import Dock
-from rapydo.do.compose import Compose
-from rapydo.do.configuration import read_yamls
+from utilities import checks
+from utilities import helpers
+from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
+from utilities import CONTAINERS_YAML_DIRNAME
+# from utilities.configuration import DEFAULT_CONFIG_FILEPATH
+from controller import project
+from controller import gitter
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller.builds import locate_builds
+from controller.dockerizing import Dock
+from controller.compose import Compose
+from controller.configuration import read_yamls
 
-from rapydo.utils.globals import mem
-from rapydo.utils.logs import get_logger
+from utilities.globals import mem
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 

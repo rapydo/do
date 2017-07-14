@@ -11,9 +11,9 @@ before knowing the level of debug.
 import os
 import sys
 import argparse
-from rapydo.do import __version__
-from rapydo.utils import helpers
-from rapydo.utils.myyaml import load_yaml_file
+from controller import __version__
+from utilities import helpers
+from utilities.myyaml import load_yaml_file
 
 
 def prepare_params(options):
@@ -204,6 +204,6 @@ key = 'DEBUG_LEVEL'
 os.environ[key] = current_args.get('log_level')
 
 if os.environ.get(key) is not None:
-    from rapydo.utils.logs import get_logger
+    from utilities.logs import get_logger
     log = get_logger(__name__)
     log.verbose("Parsed arguments: %s" % current_args)

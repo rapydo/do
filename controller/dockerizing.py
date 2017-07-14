@@ -3,7 +3,7 @@
 import requests
 import docker
 from docker.errors import APIError as docker_errors
-from rapydo.utils.logs import get_logger
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 

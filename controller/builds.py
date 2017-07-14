@@ -8,10 +8,10 @@ Parse dockerfiles and check for builds
 """
 
 from dockerfile_parse import DockerfileParser
-from rapydo.utils import CONTAINERS_YAML_DIRNAME
-from rapydo.do.dockerizing import Dock
-from rapydo.utils import helpers
-from rapydo.utils.logs import get_logger
+from utilities import CONTAINERS_YAML_DIRNAME
+from controller.dockerizing import Dock
+from utilities import helpers
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 

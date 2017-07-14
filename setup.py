@@ -1,45 +1,30 @@
 # -*- coding: utf-8 -*-
 
-import os
-import codecs
 from setuptools import setup
-# from rapydo.do import __version__
-# will import the version from the same package for all repos
 from utilities import __version__
+from controller import __package__ as main_package
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-
-def read(*parts):
-    return codecs.open(os.path.join(here, *parts), 'r').read()
-
+app = '%s.__main__:main' % main_package
 
 setup(
     name='rapydo_controller',
     version=__version__,
     description='Do development and deploy with the RAPyDo framework',
-    # long_description=__doc__,
-    long_description=read('README.rst'),
-    # keywords='http api rest web backend rapydo',
-    # keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
-    author="Paolo D'Onorio De Meo",
-    author_email='p.donorio.de.meo@gmail.com',
-    url='https://github.com/rapydo/do',
+    url='https://rapydo.github.io/do',
     license='MIT',
-    packages=['rapydo.do'],
+    packages=[main_package],
     package_data={
-        'rapydo.do': ['argparser.yaml'],
+        main_package: ['argparser.yaml'],
     },
     python_requires='>=3.4',
     entry_points={
         'console_scripts': [
-            'rapydo=rapydo.do.__main__:main',
-            'do=rapydo.do.__main__:main',
+            'rapydo=%s' % app,
+            'do=%s' % app,
         ],
     },
     install_requires=[
-        # "rapydo-utils==0.5.0",
-        "rapydo-utils==0.4.7",
+        "rapydo-utils==%s" % __version__,
         # ###### DOCKER
         # combo that works
         "docker-compose==1.14",
@@ -52,6 +37,11 @@ setup(
         "requests==2.11.1",
         # requests==2.18.1 # otherwise it goes with this, which break things
     ],
+    keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
+    # FIXME: import from utils
+    author="Paolo D'Onorio De Meo",
+    author_email='p.donorio.de.meo@gmail.com',
+    # FIXME: import from utils
     classifiers=[
         'Programming Language :: Python',
         'Intended Audience :: Developers',

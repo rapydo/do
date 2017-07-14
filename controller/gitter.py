@@ -4,9 +4,9 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
-from rapydo.do import SUBMODULES_DIR
-from rapydo.utils import helpers
-from rapydo.utils.logs import get_logger
+from controller import SUBMODULES_DIR
+from utilities import helpers
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 
@@ -195,7 +195,7 @@ def check_file_younger_than(gitobj, filename, timestamp):
 
     # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
 
-    from rapydo.utils import time
+    from utilities import time
     return time.timestamp_from_string(timestamp) < max(dates)
 
 

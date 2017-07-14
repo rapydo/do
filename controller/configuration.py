@@ -2,9 +2,9 @@
 
 """ Reading yaml files for this project """
 
-from rapydo.do.compose import Compose
-from rapydo.utils.myyaml import load_yaml_file, SHORT_YAML_EXT
-from rapydo.utils.logs import get_logger
+from controller.compose import Compose
+from utilities.myyaml import load_yaml_file, SHORT_YAML_EXT
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 

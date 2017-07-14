@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from rapydo.utils import configuration
-from rapydo.utils.logs import get_logger
+from utilities import configuration
+from utilities.logs import get_logger
 
 log = get_logger(__name__)
 
