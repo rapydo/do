@@ -20,6 +20,7 @@ script:
 - git clone https://github.com/rapydo/core.git
 - cd core
 - mkdir data
+# use -s to avoid 'io.UnsupportedOperation: redirected stdin is pseudofile, has no fileno()' on docker compose
 - py.test -s --cov=controller ../tests
 after_success:
 - coveralls
