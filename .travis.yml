@@ -10,6 +10,8 @@ install:
 script:
 - rapydo --help
 - rapydo --version
+- git clone https://github.com/rapydo/core.git
+- cd core 
 - py.test --cov=controller
 after_success:
 - coveralls

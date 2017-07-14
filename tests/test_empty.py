@@ -9,9 +9,6 @@ def test_do():
     arguments = ArgParser(
         args=['/usr/local/bin/rapydo', 'check']
     )
-    try:
-        Application(arguments)
-    except BaseException:
-        pass
+    Application(arguments)
 
     assert True
