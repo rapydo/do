@@ -7,7 +7,7 @@ log = get_logger(__name__)
 
 def test_do():
     arguments = ArgParser(
-        args=['/usr/local/bin/rapydo', 'check']
+        args=['/usr/local/bin/rapydo', 'init']
     )
     Application(arguments)
 
