@@ -12,6 +12,7 @@ script:
 - rapydo --version
 - git clone https://github.com/rapydo/core.git
 - cd core 
+- mkdir data
 - py.test --cov=controller
 after_success:
 - coveralls
