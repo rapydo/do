@@ -9,6 +9,9 @@
 
 ### DOING
 
+- [ ] Fix the 'exception_label' in errors (e.g. [B2SAFE])
+- [ ] Make the 'mode' more clear in output
+- [ ] Can we infer the mode of a running container?
 - [ ] TEST: new packaging
     * setup.py with setuptools 
     * remove subpackage of "rapydo.X"

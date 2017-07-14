@@ -2,10 +2,10 @@
 
 import os
 import codecs
-from rapydo.do import __version__
-
-# from distutils.core import setup
 from setuptools import setup
+# from rapydo.do import __version__
+# will import the version from the same package for all repos
+from utilities import __version__
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -55,5 +55,10 @@ setup(
     classifiers=[
         'Programming Language :: Python',
         'Intended Audience :: Developers',
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ]
 )
