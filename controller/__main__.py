@@ -5,19 +5,26 @@
 """
 
 import better_exceptions as be
-from controller.app import Application
-from utilities.logs import get_logger
+from controller.arguments import ArgParser
 
-log = get_logger(__name__)
+
+def activate_log():
+    from utilities.logs import get_logger
+    return get_logger(__name__)
 
 
 def main():
     be  # activate better exceptions
     try:
-        Application()
+        arguments = ArgParser()
+
+        from controller.app import Application
+        Application(arguments)
     except KeyboardInterrupt:
+        log = activate_log()
         log.critical("Interrupted by the user")
     else:
+        log = activate_log()
         log.verbose("Application completed")
 
 

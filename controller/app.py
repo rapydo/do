@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-try:
-    from controller import arguments
-except SystemExit:
-    raise
-except BaseException as e:
-    # raise
-    from utilities.logs import get_logger
-    log = get_logger(__name__)
-    log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
+from controller.arguments import ArgParser
+# try:
+#     from controller import arguments
+# except SystemExit:
+#     raise
+# except BaseException as e:
+#     # raise
+#     from utilities.logs import get_logger
+#     log = get_logger(__name__)
+#     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
 import os.path
 from collections import OrderedDict
@@ -41,8 +42,9 @@ class Application(object):
     which were defined in `argparser.yaml`
     """
 
-    def __init__(self, args=arguments.current_args):
-        self.current_args = args
+    def __init__(self, arguments):
+        self.arguments = arguments
+        self.current_args = self.arguments.current_args
         self.run()
 
     def get_args(self):
@@ -461,7 +463,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # if avoid_default or default is not None:
         if default is not None:
             config_default = \
-                arguments.parse_conf.get('options', {}) \
+                self.arguments.parse_conf.get('options', {}) \
                 .get('services') \
                 .get('default')
             if value == [config_default]:
@@ -612,20 +614,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.exit("No custom commands defined")
 
         for name, custom in self.custom_commands.items():
-            arguments.extra_command_parser.add_parser(
+            self.arguments.extra_command_parser.add_parser(
                 name, help=custom.get('description')
             )
 
-        if len(arguments.remaining_args) != 1:
-            arguments.extra_parser.print_help()
+        if len(self.arguments.remaining_args) != 1:
+            self.arguments.extra_parser.print_help()
             import sys
             sys.exit(1)
 
         # parse it
         self.custom_command = \
             vars(
-                arguments.extra_parser.parse_args(
-                    arguments.remaining_args
+                self.arguments.extra_parser.parse_args(
+                    self.arguments.remaining_args
                 )
             ).get('custom')
 
@@ -887,7 +889,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-certificate"
 
-        meta = arguments.parse_conf \
+        meta = self.arguments.parse_conf \
             .get('subcommands') \
             .get(current_method_name, {}) \
             .get('container_exec', {})
@@ -910,7 +912,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-dhparam"
 
-        meta = arguments.parse_conf \
+        meta = self.arguments.parse_conf \
             .get('subcommands') \
             .get(current_method_name, {}) \
             .get('container_exec', {})
@@ -935,7 +937,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "bower-install"
 
-        meta = arguments.parse_conf \
+        meta = self.arguments.parse_conf \
             .get('subcommands') \
             .get(current_method_name, {}) \
             .get('container_exec', {})
@@ -960,7 +962,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "bower-install"
 
-        meta = arguments.parse_conf \
+        meta = self.arguments.parse_conf \
             .get('subcommands') \
             .get(current_method_name, {}) \
             .get('container_exec', {})
