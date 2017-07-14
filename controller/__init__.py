@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.4.3'
-# __version__ = '0.5.0'
-
 FRAMEWORK_NAME = 'RAPyDo'
+__version__ = '0.5.0'
 
 # PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'

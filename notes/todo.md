@@ -9,17 +9,10 @@
 
 ### DOING
 
+- [ ] new packaging
 - [ ] Fix the 'exception_label' in errors (e.g. [B2SAFE])
 - [ ] Make the 'mode' more clear in output
 - [ ] Can we infer the mode of a running container?
-- [ ] TEST: new packaging
-    * setup.py with setuptools 
-    * remove subpackage of "rapydo.X"
-    * add travis and automatic deploy from git tags
-    - [x] utilities
-    - [ ] controller
-    - [ ] restapi
-    - [ ] build-templates github release
 - [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] BUG: network problems with start:
     [link](http://olicallaghan.com/post/a-survival-guide-to-communication-between-docker-containers)

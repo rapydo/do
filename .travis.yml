@@ -1,4 +1,7 @@
 language: python
+sudo: required
+dist: trusty
+group: deprecated-2017Q2
 python:
 - 3.4
 - 3.5
@@ -6,16 +9,18 @@ python:
 services:
 - docker
 before_install:
-- pip install --upgrade -r dev-requirements.txt
+- sudo apt-get update
+- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
 install:
+- pip install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
 script:
 - rapydo --help
 - rapydo --version
 - git clone https://github.com/rapydo/core.git
-- cd core 
+- cd core
 - mkdir data
-- py.test --cov=controller ../tests
+- py.test -s --cov=controller ../tests
 after_success:
 - coveralls
 deploy:

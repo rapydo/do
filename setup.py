@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
-from utilities import __version__
-from controller import __package__ as main_package
+from controller import \
+    __package__ as main_package, __version__ as current_version
 
 app = '%s.__main__:main' % main_package
 
 setup(
     name='rapydo_controller',
-    version=__version__,
+    version=current_version,
     description='Do development and deploy with the RAPyDo framework',
     url='https://rapydo.github.io/do',
     license='MIT',
@@ -24,18 +24,15 @@ setup(
         ],
     },
     install_requires=[
-        "rapydo-utils==%s" % __version__,
-        # ###### DOCKER
-        # combo that works
+        "rapydo-utils==%s" % current_version,
         "docker-compose==1.14",
         "docker==2.4.2",
         "dockerfile-parse",
-        # ###### others
         "gitpython",
         "better_exceptions",
-        # ###### BUG FIX
-        "requests==2.11.1",
-        # requests==2.18.1 # otherwise it goes with this, which break things
+        # necessary for docker-compose
+        # https://github.com/docker/compose/issues/4431
+        "requests==2.11.1"
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     # FIXME: import from utils
