@@ -13,7 +13,7 @@ script:
 - git clone https://github.com/rapydo/core.git
 - cd core 
 - mkdir data
-- py.test --cov=controller
+- py.test --cov=controller tests
 after_success:
 - coveralls
 deploy:
