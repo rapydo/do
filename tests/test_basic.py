@@ -28,7 +28,7 @@ def exec_command(command):
     arguments = ArgParser(args=command)
 
     try:
-        app = Application(arguments)
+        Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
         log.info('completed')
@@ -36,16 +36,16 @@ def exec_command(command):
     log_contents = log_capture_string.getvalue().split("\n")
     log_capture_string.close()
 
-    return app, log_contents
+    return log_contents
 
 
 def test_do():
 
-    _, log_contents = exec_command("rapydo init")
-    assert log_contents[-1] == "Project initialized"
+    log_contents = exec_command("rapydo init")
+    assert "Project initialized" in log_contents
 
-    _, _ = exec_command("rapydo update")
-    _, _ = exec_command("rapydo start")
-    _, _ = exec_command("rapydo remove")
+    exec_command("rapydo update")
+    exec_command("rapydo start")
+    exec_command("rapydo remove")
 
     assert True
