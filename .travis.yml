@@ -21,7 +21,7 @@ script:
 - cd core
 - mkdir data
 # use -s to avoid 'io.UnsupportedOperation: redirected stdin is pseudofile, has no fileno()' on docker compose
-- py.test -s --cov=controller ../tests
+- py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
 deploy:
