@@ -22,59 +22,12 @@ class ArgParser(object):
         if args is None:
             args = sys.argv
 
-        # Check on format
-        for element in args:
-            if '_' in element:
-                raise ValueError(
-                    "Wrong \"%s\" option provided.\n" % element +
-                    "Arguments containing '_' are not allowed.\n" +
-                    "Use '-' instead\n")
-        # NOTE: the standard is to use only '-' separators for arguments
-        # beware: argparse converts them into '_' when you want to retrieve it
+        # This method can raise ValueErrors
+        self.check_args(args)
 
-        # ##########################
-        # READ MAIN FILE WITH COMMANDS AND OPTIONS
-        self.parse_conf = load_yaml_file(
-            'argparser', path=helpers.script_abspath(__file__),
-            logger=False
-        )
+        # This method saves configuration objects in self
+        self.read_configuration()
 
-        # ##########################
-        # READ PROJECT INIT FILE: .projectrc
-        pinit_conf = load_yaml_file(
-            '.projectrc',
-            path=helpers.current_dir(),
-            skip_error=True, logger=False, extension=None
-        )
-
-        # Mix with parse_conf
-        for key, value in pinit_conf.items():
-            value = pinit_conf.get(key, None)
-
-            if value is None:
-                continue
-
-            if not isinstance(value, dict):
-                # This is a first level option
-                if key in self.parse_conf['options']:
-                    self.parse_conf['options'][key]['default'] = value
-                else:
-                    print("\nUnknown parameter %s found in .projectrc\n" % key)
-            else:
-                # This is a second level parameter
-                if key not in self.parse_conf['subcommands']:
-                    print("\nUnknown command %s found in .projectrc\n" % key)
-                else:
-                    conf = self.parse_conf['subcommands'][key]['suboptions']
-                    for subkey, subvalue in value.items():
-                        if subkey in conf:
-                            conf[subkey]['default'] = subvalue
-                        else:
-                            print("""
-Unknown parameter %s/%s found in .projectrc\n
-""" % (key, subkey))
-
-        # ##########################
         # Arguments definition
         parser = argparse.ArgumentParser(
             prog=args[0],
@@ -183,6 +136,59 @@ Unknown parameter %s/%s found in .projectrc\n
             from utilities.logs import get_logger
             log = get_logger(__name__)
             log.verbose("Parsed arguments: %s" % self.current_args)
+
+    def check_args(self, args):
+        # Check on format
+        for element in args:
+            if '_' in element:
+                raise ValueError(
+                    "Wrong \"%s\" option provided.\n" % element +
+                    "Arguments containing '_' are not allowed.\n" +
+                    "Use '-' instead\n")
+        # NOTE: the standard is to use only '-' separators for arguments
+        # beware: argparse converts them into '_' when you want to retrieve it
+
+    def read_configuration(self):
+        # READ MAIN FILE WITH COMMANDS AND OPTIONS
+        self.parse_conf = load_yaml_file(
+            'argparser', path=helpers.script_abspath(__file__),
+            logger=False
+        )
+
+        # ##########################
+        # READ PROJECT INIT FILE: .projectrc
+        pinit_conf = load_yaml_file(
+            '.projectrc',
+            path=helpers.current_dir(),
+            skip_error=True, logger=False, extension=None
+        )
+
+        # Mix with parse_conf
+        for key, value in pinit_conf.items():
+            value = pinit_conf.get(key, None)
+
+            if value is None:
+                continue
+
+            if not isinstance(value, dict):
+                # This is a first level option
+                if key in self.parse_conf['options']:
+                    self.parse_conf['options'][key]['default'] = value
+                else:
+                    print("\nUnknown parameter %s found in .projectrc\n" % key)
+            else:
+                # This is a second level parameter
+                if key not in self.parse_conf['subcommands']:
+                    print("\nUnknown command %s found in .projectrc\n" % key)
+                else:
+                    conf = self.parse_conf['subcommands'][key]['suboptions']
+                    for subkey, subvalue in value.items():
+                        if subkey in conf:
+                            conf[subkey]['default'] = subvalue
+                        else:
+                            print("""
+Unknown parameter %s/%s found in .projectrc\n
+""" % (key, subkey))
 
     def prepare_params(self, options):
 
