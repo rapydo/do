@@ -2,13 +2,16 @@
 
 from setuptools import setup
 from controller import \
-    __package__ as main_package, __version__ as current_version
+    __package__ as main_package, \
+    __version__ as current_version
 
 app = '%s.__main__:main' % main_package
 
 setup(
     name='rapydo_controller',
     version=current_version,
+    author="Paolo D'Onorio De Meo",
+    author_email='p.donorio.de.meo@gmail.com',
     description='Do development and deploy with the RAPyDo framework',
     url='https://rapydo.github.io/do',
     license='MIT',
@@ -35,10 +38,6 @@ setup(
         "requests==2.11.1"
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
-    # FIXME: import from utils
-    author="Paolo D'Onorio De Meo",
-    author_email='p.donorio.de.meo@gmail.com',
-    # FIXME: import from utils
     classifiers=[
         'Programming Language :: Python',
         'Intended Audience :: Developers',
