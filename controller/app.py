@@ -114,7 +114,7 @@ class Application(object):
         self.check_program('git')
 
     def check_program(self, program, min_version=None, max_version=None):
-        found_version = checks.check_executable(executable=program, log=log)
+        found_version = checks.check_executable(executable=program)
         if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
