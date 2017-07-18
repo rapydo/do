@@ -842,8 +842,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
+            # if 'user' is empty, put None to get the docker-compose default
             if user is not None and user.strip() == '':
-                user = None
+                if service in ['backend', 'restclient']:
+                    user = 'developer'
+                else:
+                    user = None
+        log.verbose("Command as user '%s'" % user)
 
         if command is None:
             default = 'echo hello world'
@@ -1037,11 +1042,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     remote_branch='master'
                 )
 
-        # Compose services and variables
-
         # self.make_env(do=do_heavy_ops)
         self.make_env()
 
+        # Compose services and variables
         self.read_composers()
         self.check_placeholders()
 
