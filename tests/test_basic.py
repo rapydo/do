@@ -51,11 +51,31 @@ def test_do(capfd):
     #         h.setFormatter(formatter)
 
     err = exec_command(capfd, "rapydo init")
-
     assert "Project initialized" in err
 
-    exec_command(capfd, "rapydo update")
-    exec_command(capfd, "rapydo start")
-    exec_command(capfd, "rapydo remove")
+    err = exec_command(capfd, "rapydo update")
+    assert "All updated" in err
 
-    assert True
+    err = exec_command(capfd, "rapydo check")
+    assert "All checked" in err
+
+    err = exec_command(capfd, "rapydo start")
+    assert "Stack started" in err
+
+    err = exec_command(capfd, "rapydo toggle_freeze")
+    assert "Stack paused" in err
+
+    err = exec_command(capfd, "rapydo toggle_freeze")
+    assert "Stack unpaused" in err
+
+    err = exec_command(capfd, "rapydo stop")
+    assert "Stack stoped" in err
+
+    err = exec_command(capfd, "rapydo restart")
+    assert "Stack restarted" in err
+
+    err = exec_command(capfd, "rapydo remove")
+    assert "Stack removed" in err
+
+    err = exec_command(capfd, "rapydo clean")
+    assert "Stack cleaned" in err
