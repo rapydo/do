@@ -884,6 +884,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('build', options)
 
+        log.info("Images built")
+
     def _custom(self):
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)

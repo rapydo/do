@@ -56,11 +56,23 @@ def test_do(capfd):
     err = exec_command(capfd, "rapydo update")
     assert "All updated" in err
 
+    err = exec_command(capfd, "rapydo build")
+    assert "Image built" in err
+
     err = exec_command(capfd, "rapydo check")
     assert "All checked" in err
 
+    err = exec_command(capfd, "rapydo env")
+    assert "project: template" in err
+
     err = exec_command(capfd, "rapydo start")
     assert "Stack started" in err
+
+    # Output not checked
+    exec_command(capfd, "rapydo status")
+    exec_command(capfd, "rapydo logs")
+    exec_command(capfd, "rapydo bower-install test")
+    exec_command(capfd, "rapydo update test")
 
     err = exec_command(capfd, "rapydo toggle-freeze")
     assert "Stack paused" in err
