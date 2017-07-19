@@ -28,14 +28,16 @@ def exec_command(capfd, command):
         log.info('completed')
 
     out, err = capfd.readouterr()
+    out = out.split("\n")
     err = err.split("\n")
 
+    out = [cut_log(x) for x in out]
     err = [cut_log(x) for x in err]
 
     for e in err:
         print(e)
 
-    return err
+    return out, err
 
 
 def test_do(capfd):
@@ -50,22 +52,22 @@ def test_do(capfd):
     #     for h in logger.handlers:
     #         h.setFormatter(formatter)
 
-    err = exec_command(capfd, "rapydo init")
+    _, err = exec_command(capfd, "rapydo init")
     assert "Project initialized" in err
 
-    err = exec_command(capfd, "rapydo update")
+    _, err = exec_command(capfd, "rapydo update")
     assert "All updated" in err
 
-    # err = exec_command(capfd, "rapydo build")
+    # _, err = exec_command(capfd, "rapydo build")
     # assert "Image built" in err
 
-    err = exec_command(capfd, "rapydo check")
+    _, err = exec_command(capfd, "rapydo check")
     assert "All checked" in err
 
-    err = exec_command(capfd, "rapydo env")
-    assert "project: template" in err
+    out, err = exec_command(capfd, "rapydo env")
+    assert "project: template" in out
 
-    err = exec_command(capfd, "rapydo start")
+    _, err = exec_command(capfd, "rapydo start")
     assert "Stack started" in err
 
     # Output not checked
@@ -74,20 +76,20 @@ def test_do(capfd):
     exec_command(capfd, "rapydo bower-install test")
     exec_command(capfd, "rapydo update test")
 
-    err = exec_command(capfd, "rapydo toggle-freeze")
+    _, err = exec_command(capfd, "rapydo toggle-freeze")
     assert "Stack paused" in err
 
-    err = exec_command(capfd, "rapydo toggle-freeze")
+    _, err = exec_command(capfd, "rapydo toggle-freeze")
     assert "Stack unpaused" in err
 
-    err = exec_command(capfd, "rapydo stop")
+    _, err = exec_command(capfd, "rapydo stop")
     assert "Stack stoped" in err
 
-    err = exec_command(capfd, "rapydo restart")
+    _, err = exec_command(capfd, "rapydo restart")
     assert "Stack restarted" in err
 
-    err = exec_command(capfd, "rapydo remove")
+    _, err = exec_command(capfd, "rapydo remove")
     assert "Stack removed" in err
 
-    err = exec_command(capfd, "rapydo clean")
+    _, err = exec_command(capfd, "rapydo clean")
     assert "Stack cleaned" in err
