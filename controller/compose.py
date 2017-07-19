@@ -87,6 +87,8 @@ class Compose(object):
         log.info("Requesting within compose: '%s'" % command)
         try:
             method(options=options)
+        except SystemExit:
+            log.very_verbose("Executed compose %s w/%s" % (command, options))
         except (
             clierrors.UserError,
             cerrors.OperationFailedError,

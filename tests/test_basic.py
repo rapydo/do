@@ -19,14 +19,6 @@ def cut_log(message):
 def exec_command(capfd, command):
     command = command.split(" ")
 
-    # formatter = logging.Formatter('%(levelname)s - %(message)s')
-    # loggers = logging.Logger.manager.loggerDict.items()
-    # for _, logger in loggers:
-    #     if not isinstance(logger, logging.Logger):
-    #         continue
-    #     for h in logger.handlers:
-    #         h.setFormatter(formatter)
-
     arguments = ArgParser(args=command)
 
     try:
@@ -47,6 +39,16 @@ def exec_command(capfd, command):
 
 
 def test_do(capfd):
+
+    # import logging
+    # formatter = logging.Formatter('%(levelname)s - %(message)s')
+    # loggers = logging.Logger.manager.loggerDict.items()
+    # print(loggers)
+    # for _, logger in loggers:
+    #     if not isinstance(logger, logging.Logger):
+    #         continue
+    #     for h in logger.handlers:
+    #         h.setFormatter(formatter)
 
     err = exec_command(capfd, "rapydo init")
 
