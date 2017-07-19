@@ -56,8 +56,8 @@ def test_do(capfd):
     err = exec_command(capfd, "rapydo update")
     assert "All updated" in err
 
-    err = exec_command(capfd, "rapydo build")
-    assert "Image built" in err
+    # err = exec_command(capfd, "rapydo build")
+    # assert "Image built" in err
 
     err = exec_command(capfd, "rapydo check")
     assert "All checked" in err
