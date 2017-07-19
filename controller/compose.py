@@ -52,26 +52,28 @@ class Compose(object):
 
     def force_template_build(self, builds):
 
-        options={}
-        compose_handler = self.get_handle()
-        force_options = {
-            '--no-cache': True,
-            '--pull': True,
-        }
+        try:
+            options={}
+            compose_handler = self.get_handle()
+            force_options = {
+                '--no-cache': True,
+                '--pull': True,
+            }
 
-        for _, build in builds.items():
+            for _, build in builds.items():
 
-            service = build.get('service')
-            log.verbose("Building template for: %s" % service)
+                service = build.get('service')
+                log.verbose("Building template for: %s" % service)
 
-            # myoptions = {'SERVICE': [service], **force_options, **options}
-            options.update(force_options)
-            options.update({'SERVICE': [service]})
+                options.update(force_options)
+                options.update({'SERVICE': [service]})
 
-            compose_handler.build(options=options)
-            log.info("Built template: %s" % service)
+                compose_handler.build(options=options)
+                log.info("Built template: %s" % service)
 
-        return
+            return
+        except SystemExit:
+            log.info("SystemExit during template building")
 
     def command(self, command, options=None):
 
