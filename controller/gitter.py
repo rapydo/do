@@ -229,7 +229,7 @@ def check_unstaged(path, gitobj):
         log.warning("You have unstaged files on %s" % path)
 
 
-def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
+def fetch(path, gitobj, fetch_remote='origin'):
 
     for remote in gitobj.remotes:
         if remote.name != fetch_remote:
@@ -240,6 +240,11 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
             remote.fetch()
         except GitCommandError as e:
             log.exit(str(e))
+
+
+def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
+
+    fetch(path, gitobj, fetch_remote)
 
     branch = get_active_branch(gitobj)
     if branch is None:

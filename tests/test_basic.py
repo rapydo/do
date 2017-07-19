@@ -31,7 +31,6 @@ def exec_command(capfd, command):
 
     try:
         Application(arguments)
-        pass
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
         log.info('completed')
@@ -51,7 +50,7 @@ def test_do(capfd):
 
     err = exec_command(capfd, "rapydo init")
 
-    # assert "Project initialized" in err
+    assert "Project initialized" in err
 
     exec_command(capfd, "rapydo update")
     exec_command(capfd, "rapydo start")

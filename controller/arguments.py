@@ -128,6 +128,9 @@ class ArgParser(object):
         self.extra_command_parser.required = True
 
         # ##########################
+        self.enable_logs()
+
+    def enable_logs(self):
         # Log level
         key = 'DEBUG_LEVEL'
         os.environ[key] = self.current_args.get('log_level')
