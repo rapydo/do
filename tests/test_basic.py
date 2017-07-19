@@ -62,10 +62,10 @@ def test_do(capfd):
     err = exec_command(capfd, "rapydo start")
     assert "Stack started" in err
 
-    err = exec_command(capfd, "rapydo toggle_freeze")
+    err = exec_command(capfd, "rapydo toggle-freeze")
     assert "Stack paused" in err
 
-    err = exec_command(capfd, "rapydo toggle_freeze")
+    err = exec_command(capfd, "rapydo toggle-freeze")
     assert "Stack unpaused" in err
 
     err = exec_command(capfd, "rapydo stop")

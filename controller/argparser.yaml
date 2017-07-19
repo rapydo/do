@@ -201,7 +201,7 @@ subcommands:
     description: Restart running containers
   remove:
     description: Stop containers if running and remove them
-  toggle_freeze:
+  toggle-freeze:
     description: Toggle a temporary block/pause of running services
 
   # control:
