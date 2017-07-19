@@ -72,7 +72,7 @@ def test_do(capfd):
 
     # Output not checked
     exec_command(capfd, "rapydo status")
-    exec_command(capfd, "rapydo logs")
+    exec_command(capfd, "rapydo log")
     exec_command(capfd, "rapydo bower-install test")
     exec_command(capfd, "rapydo update test")
 
