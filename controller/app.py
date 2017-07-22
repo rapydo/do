@@ -663,6 +663,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc.command('down', options)
 
+        log.info("Stack cleaned")
+
     def _update(self):
         log.info("All updated")
 
@@ -685,6 +687,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc = Compose(files=self.files)
         dc.command('up', options)
 
+        log.info("Stack started")
+
     def _stop(self):
         services = self.get_services(default=self.active_services)
 
@@ -693,6 +697,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc = Compose(files=self.files)
         dc.command('stop', options)
 
+        log.info("Stack stoped")
+
     def _restart(self):
         services = self.get_services(default=self.active_services)
 
@@ -700,6 +706,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         dc = Compose(files=self.files)
         dc.command('restart', options)
+
+        log.info("Stack restarted")
 
     def _remove(self):
         services = self.get_services(default=self.active_services)
@@ -715,6 +723,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc.command('stop')
         dc.command('rm', options)
 
+        log.info("Stack removed")
+
     def _toggle_freeze(self):
         services = self.get_services(default=self.active_services)
 
@@ -727,6 +737,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 command = 'unpause'
                 break
         dc.command(command, options)
+
+        if command == "pause":
+            log.info("Stack paused")
+        elif command == "unpause":
+            log.info("Stack unpaused")
 
     # def _control(self):
 
@@ -873,6 +888,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--pull': False,
         }
         dc.command('build', options)
+
+        log.info("Images built")
 
     def _custom(self):
         log.debug("Custom command: %s" % self.custom_command)
