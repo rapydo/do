@@ -52,6 +52,8 @@ def test_do(capfd):
     #     for h in logger.handlers:
     #         h.setFormatter(formatter)
 
+    #########################
+
     _, err = exec_command(capfd, "rapydo init")
     assert "Project initialized" in err
 
@@ -93,3 +95,11 @@ def test_do(capfd):
 
     _, err = exec_command(capfd, "rapydo clean")
     assert "Stack cleaned" in err
+
+    #########################
+
+    out, err = exec_command(capfd, "rapydo template foo")
+    # print(out)
+    # print("paolo")
+    # print(err)
+    assert 'what about it?' in err
