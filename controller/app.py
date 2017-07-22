@@ -987,6 +987,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             val = self.current_args.get(var)
             print("%s: %s" % (var, val))
 
+    def _coverall(self):
+        """
+- check for .coverage.yml to exists and not to be empty
+- we need a service in confs/backend.yml
+to configure the container with the right volumes
+- we can add a docker entrypoint directly in build_templates to this service.
+Steps inside:
+1. link the coverage file
+2. link the main directory into /code
+3. launch coveralls from /code
+        """
+
+        log.info("TODO")
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################

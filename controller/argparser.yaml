@@ -6,6 +6,11 @@ action:
 
 options:
 
+  # TODO: add the --env option (or --print-env)
+  # env:
+  #   alias: e
+  #   help: print the variables to be used with the command and exit
+
   project:
     alias: p
     # NOTE: this is the equivalent of the old concept of `blueprint`
@@ -231,3 +236,6 @@ subcommands:
 
   env:
     description: "Print all configured variables"
+
+  coverall:
+    description: "Send coverage computed to coveralls.io website"
