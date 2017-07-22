@@ -239,3 +239,12 @@ subcommands:
 
   coverall:
     description: "Send coverage computed to coveralls.io website"
+
+  template:
+    description: "Create a new endpoint template for your REST API"
+    suboptions:
+      endpoint:
+        positional: true
+        type: str
+        metavalue: ENDPOINT_NAME
+        default: foo

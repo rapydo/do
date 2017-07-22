@@ -114,7 +114,7 @@ class Application(object):
         self.check_program('git')
 
     def check_program(self, program, min_version=None, max_version=None):
-        found_version = checks.check_executable(executable=program, log=log)
+        found_version = checks.check_executable(executable=program)
         if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
@@ -998,8 +998,13 @@ Steps inside:
 2. link the main directory into /code
 3. launch coveralls from /code
         """
+        log.error("TO DO!")
 
-        log.info("TODO")
+    def _template(self):
+        from controller import scaffold
+        test = scaffold.justatest()
+        print("\nTEST\n" + test)
+        log.warning("what about it?")
 
     ################################
     # ### RUN ONE COMMAND OFF
