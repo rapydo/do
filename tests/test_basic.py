@@ -75,13 +75,24 @@ def test_do(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert "INFO Created .env file" in err
+    assert "INFO Requesting within compose: 'up'" in err
     assert "INFO Stack started" in err
 
-    # Output not checked
-    exec_command(capfd, "rapydo status")
+    _, err = exec_command(capfd, "rapydo status")
+    assert "INFO Requesting within compose: 'ps'" in err
+
     exec_command(capfd, "rapydo log")
-    exec_command(capfd, "rapydo bower-install test")
-    exec_command(capfd, "rapydo update test")
+    assert "INFO Requesting within compose: 'logs'" in err
+
+    exec_command(capfd, "rapydo bower-install jquery")
+    assert "EXIT Missing bower lib, please add the --lib option" in err
+    exec_command(capfd, "rapydo bower-install --lib jquery")
+    assert "INFO Requesting within compose: 'run'" in err
+
+    exec_command(capfd, "rapydo bower-update jquery")
+    assert "EXIT Missing bower lib, please add the --lib option" in err
+    exec_command(capfd, "rapydo bower-update --lib jquery")
+    assert "INFO Requesting within compose: 'run'" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
     assert "INFO Created .env file" in err
@@ -101,6 +112,7 @@ def test_do(capfd):
 
     _, err = exec_command(capfd, "rapydo remove")
     assert "INFO Created .env file" in err
+    assert "INFO Requesting within compose: 'stop'" in err
     assert "INFO Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")
