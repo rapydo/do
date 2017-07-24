@@ -37,13 +37,7 @@ class ArgParser(object):
         # PARAMETERS
         sorted_options = sorted(self.parse_conf.get('options', {}).items())
         for option_name, options in sorted_options:
-            params = self.prepare_params(options)
-            alias = params.pop('alias', None)
-            param_name = '--%s' % option_name
-            if alias is None:
-                parser.add_argument(param_name, **params)
-            else:
-                parser.add_argument(param_name, '-%s' % alias, **params)
+            self.add_parser_argument(parser, option_name, options)
 
         parser.add_argument('--version', action='version',
                             version='rapydo version %s' % __version__)
@@ -86,16 +80,7 @@ class ArgParser(object):
 
             suboptions = options.get('suboptions', {}).items()
             for option_name, suboptions in suboptions:
-                params = self.prepare_params(suboptions)
-                alias = params.pop('alias', None)
-                positional = params.pop('positional', False)
-                param_name = '--%s' % option_name
-                if positional:
-                    subparse.add_argument(option_name, **params)
-                elif alias is None:
-                    subparse.add_argument(param_name, **params)
-                else:
-                    subparse.add_argument(param_name, '-%s' % alias, **params)
+                self.add_parser_argument(subparse, option_name, suboptions)
 
         # ##########################
         # Print usage if no arguments provided
@@ -129,6 +114,18 @@ class ArgParser(object):
 
         # ##########################
         self.enable_logs()
+
+    def add_parser_argument(self, parser, option_name, options):
+        params = self.prepare_params(options)
+        alias = params.pop('alias', None)
+        positional = params.pop('positional', False)
+        param_name = '--%s' % option_name
+        if positional:
+            parser.add_argument(option_name, **params)
+        elif alias is None:
+            parser.add_argument(param_name, **params)
+        else:
+            parser.add_argument(param_name, '-%s' % alias, **params)
 
     def enable_logs(self):
         # Log level

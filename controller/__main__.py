@@ -13,8 +13,12 @@ def activate_log():
     return get_logger(__name__)
 
 
+def activate_better_exceptions():
+    be
+
+
 def main():
-    be  # activate better exceptions
+    activate_better_exceptions()
     try:
         arguments = ArgParser()
 
