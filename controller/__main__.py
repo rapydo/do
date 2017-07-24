@@ -16,6 +16,11 @@ def activate_log():
 def activate_better_exceptions():
     be
 
+    # Ok, I'm just trying to remove the annoying message from Landscape.io:
+    # Statement seems to have no effect
+    if be is None:
+        print("Errors while activating better exceptions?")
+
 
 def main():
     activate_better_exceptions()
