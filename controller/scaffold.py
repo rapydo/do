@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
+from utilities.myyaml import YAML_EXT
 from utilities import template
 from utilities import path
 from utilities import PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR
+from utilities.logs import get_logger
+
+log = get_logger(__name__)
 
 TEMPLATE_DIR = 'templates'
 
@@ -38,12 +42,20 @@ class NewEndpointScaffold(object):
 
     def render(self, filename, data, outdir='custom'):
 
+        mypath = path.join(outdir, filename)
+        if path.file_exists_and_nonzero(mypath):
+            log.warning("%s already exists" % filename)
+            return False
+
+        filepath = str(mypath)
+
         # FIXME: decide where template dir is
         template_dir = TEMPLATE_DIR
         templated_content = template.render(filename, template_dir, **data)
 
-        filepath = str(path.join(outdir, filename))
         self.save_template(filepath, templated_content)
+        log.debug("rendered %s" % filepath)
+        return True
 
     # OLD VERSION
     # def render(self, template_file, output_file, data):
@@ -53,13 +65,17 @@ class NewEndpointScaffold(object):
 
     def swagger_specs(self):
         self.render(
-            'specs.yaml',
+            'specs.%s' % YAML_EXT,
             data={'endpoint_name': self.endpoint_name},
             outdir=self.swagger_path
         )
 
     def swagger_first_operation(self):
-        pass
+        self.render(
+            'get.%s' % YAML_EXT,
+            data={'endpoint_name': self.endpoint_name},
+            outdir=self.swagger_path
+        )
 
     def swagger(self):
 
@@ -74,10 +90,10 @@ class NewEndpointScaffold(object):
         pass
 
     def _run(self):
-        self.swagger_dir()
-        self.swagger_specs()
+        self.swagger()
 
         # # YET TODO
-        print("file")
-        self.swagger_first_operation()
+        print("todo")
+        self.rest_class()
+        self.test_class()
         print("completed")
