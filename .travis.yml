@@ -1,4 +1,6 @@
 language: python
+env:
+  - TESTING: 1
 sudo: required
 dist: trusty
 group: deprecated-2017Q2
