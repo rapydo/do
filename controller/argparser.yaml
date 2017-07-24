@@ -244,7 +244,19 @@ subcommands:
     description: "Create a new endpoint template for your REST API"
     suboptions:
       endpoint:
-        positional: true
+        positional: yes  # note: yes is equivalent to True in YAML
         type: str
         metavalue: ENDPOINT_NAME
         default: foo
+      'yes':
+        alias: y
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: say yes to all answers
+      service:
+        alias: s
+        type: str
+        metavalue: CONNECTED_SERVICE
+        default: sqlalchemy
+        help: The first service that will be connected inside the code

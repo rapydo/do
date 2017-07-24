@@ -1018,14 +1018,17 @@ Steps inside:
         log.error("TO DO!")
 
     def _template(self):
-        name = self.current_args.get('endpoint')
+        endpoint_name = self.current_args.get('endpoint')
+        service_name = self.current_args.get('service')
+
         from controller.scaffold import NewEndpointScaffold
-        scaffold = NewEndpointScaffold(self.project, name)
+        scaffold = NewEndpointScaffold(
+            self.project,
+            endpoint_name,
+            service_name
+        )
+
         print(scaffold)
-
-        # test = scaffold.justatest()
-        # print("\nTEST\n" + test)
-
         log.warning("what about it?")
 
     ################################
