@@ -7,20 +7,6 @@ from utilities import PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR
 TEMPLATE_DIR = 'templates'
 
 
-def justatest(file='test.py'):
-    data = {
-        'name': "PEPPE!",
-        # "items": ["oranges", "bananas", "steak", "milk"]
-    }
-    templated = template.render(file, TEMPLATE_DIR, **data)
-
-    # to save the results
-    with open("my_new_file.html", "wb") as fh:
-        fh.write(templated)
-
-    return True
-
-
 class NewEndpointScaffold(object):
     """
     Scaffold necessary directories and file to create
@@ -42,11 +28,35 @@ class NewEndpointScaffold(object):
             SWAGGER_DIR,
             self.endpoint_name
         ]
-        p = path.build(swagger_endpoint_path)
-        path.create(p, directory=True, force=True)
+        self.swagger_path = path.build(swagger_endpoint_path)
+        path.create(self.swagger_path, directory=True, force=True)
+
+    @staticmethod
+    def save_template(filename, content):
+        with open(filename, "w") as fh:
+            fh.write(content)
+
+    def render(self, filename, data, outdir='custom'):
+
+        # FIXME: decide where template dir is
+        template_dir = TEMPLATE_DIR
+        templated_content = template.render(filename, template_dir, **data)
+
+        filepath = str(path.join(outdir, filename))
+        self.save_template(filepath, templated_content)
+
+    # OLD VERSION
+    # def render(self, template_file, output_file, data):
+    #     templated_content = template.render(
+    #         template_file, template_dir, **data)
+    #     self.save_template(output_file, templated_content)
 
     def swagger_specs(self):
-        pass
+        self.render(
+            'specs.yaml',
+            data={'endpoint_name': self.endpoint_name},
+            outdir=self.swagger_path
+        )
 
     def swagger_first_operation(self):
         pass
@@ -65,10 +75,9 @@ class NewEndpointScaffold(object):
 
     def _run(self):
         self.swagger_dir()
+        self.swagger_specs()
 
         # # YET TODO
-        print("specs")
-        self.swagger_specs()
         print("file")
         self.swagger_first_operation()
         print("completed")
