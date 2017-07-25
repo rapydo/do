@@ -3,6 +3,7 @@ from git import Repo
 from controller.arguments import ArgParser
 from controller.app import Application
 from utilities.logs import get_logger
+from utilities.basher import BashCommands
 
 log = get_logger(__name__)
 
@@ -28,7 +29,7 @@ def exec_command(capfd, command):
     return out, err
 
 
-def test_do(capfd):
+def test_init_and_check(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
@@ -64,7 +65,7 @@ def test_do(capfd):
 
     # Check upstream url
     # Also check .env cache
-    _, err = exec_command(capfd, "rapydo --cache-env check")
+    _, err = exec_command(capfd, "rapydo --cache-env check -s")
     assert "INFO \u2713 Upstream is set correctly" in err
     assert "DEBUG Using cache for .env" in err
     assert "INFO All checked" in err
@@ -72,6 +73,34 @@ def test_do(capfd):
     out, err = exec_command(capfd, "rapydo env")
     assert "INFO Created .env file" in err
     assert "project: template" in out
+
+
+def test_two_projects(capfd):
+    bash = BashCommands()
+    bash.copy_folder("projects/template", "projects/second")
+
+    _, err = exec_command(capfd, "rapydo -env check -s")
+    e = "EXIT Please select the --project option on one of the following:"
+    assert e in err
+    assert " ['template', 'second']" in err
+
+    _, err = exec_command(capfd, "rapydo -env -p template check -s")
+    assert "INFO All checked" in err
+
+    _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
+    assert "EXIT Wrong project 'xyz'." in err
+    assert "Select one of the following:" in err
+    assert " ['template', 'second']" in err
+
+    # create .projectrc
+    with open('.projectrc', 'w') as f:
+        f.write("project: template")
+
+    _, err = exec_command(capfd, "rapydo -env check -s")
+    assert "INFO All checked" in err
+
+
+def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert "INFO Created .env file" in err
