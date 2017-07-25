@@ -8,7 +8,7 @@ from rapydo.utils.logs import get_logger
 from rapydo.rest.definition import EndpointResource
 # from rapydo.services.detect import detector
 
-service_name = {{ service_name }}
+service_name = "{{ service_name }}"
 # NOTE: if you need to operate based on service availability
 # SERVICE_AVAILABLE = detector.check_availability(service_name)
 
