@@ -19,8 +19,7 @@ script:
 - rapydo --help
 - rapydo --version
 - git clone https://github.com/rapydo/core.git
-- cd core
-- mkdir data
+- cd core && git checkout $TRAVIS_BRANCH && mkdir data
 - py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
