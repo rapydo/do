@@ -745,67 +745,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         elif command == "unpause":
             log.info("Stack unpaused")
 
-    # def _control(self):
-
-    #     command = self.current_args.get('controlcommand')
-    #     services = self.get_services(default=self.active_services)
-
-    #     dc = Compose(files=self.files)
-    #     options = {'SERVICE': services}
-
-    #     if command == 'start':
-    #         # print("SERVICES", services)
-    #         options.update({
-    #             '--no-deps': False,
-    #             '-d': True,
-    #             '--abort-on-container-exit': False,
-    #             '--remove-orphans': False,
-    #             '--no-recreate': False,
-    #             '--force-recreate': False,
-    #             '--build': False,
-    #             '--no-build': False,
-    #             '--scale': {},
-    #         })
-    #         command = 'up'
-
-    #     elif command == 'stop':
-    #         pass
-    #     elif command == 'restart':
-    #         pass
-    #     elif command == 'remove':
-    #         dc.command('stop')
-    #         options.update({
-    #             # '--stop': True,  # BUG? not working
-    #             '--force': True,
-    #             '-v': False,  # dangerous?
-    #             # 'SERVICE': []
-    #         })
-    #         command = 'rm'
-    #     elif command == 'toggle_freeze':
-
-    #         command = 'pause'
-    #         for container in dc.get_handle().project.containers():
-
-    #            if container.dictionary.get(
-    #                'State').get('Status') == 'paused':
-    #                 command = 'unpause'
-    #                 break
-
-    #     else:
-    #         log.exit("Unknown")
-
-    #     dc.command(command, options)
-
     def _log(self):
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
-            # '--follow': True,  # FIXME: give this option here too
-            '--follow': False,
+            '--follow': self.current_args.get('follow', False),
             '--tail': 'all',
             '--no-color': False,
-            '--timestamps': None,
+            '--timestamps': True,
             'SERVICE': services,
         }
 

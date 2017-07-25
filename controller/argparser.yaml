@@ -120,6 +120,13 @@ subcommands:
         help: remove caches of previous builds on this service
   log:
     description: watch log tails of all or specified containers
+    suboptions:
+      follow:
+        alias: f
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: tail logs
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:
@@ -208,21 +215,6 @@ subcommands:
     description: Stop containers if running and remove them
   toggle-freeze:
     description: Toggle a temporary block/pause of running services
-
-  # control:
-  #   description: manage start/stop of the framework based on  current specified blueprint
-  #   controlrequired: True
-  #   controlcommands:
-  #     start:
-  #       - Start containers for this configuration
-  #     stop:
-  #       - Stop running containers, but do not remove them
-  #     restart:
-  #       - Restart running containers
-  #     remove:
-  #       - Stop containers if running and remove them
-  #     toggle_freeze:
-  #       - Toggle a temporary block/pause of running services
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
@@ -233,13 +225,10 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: remove also containers persistent data
-
   env:
     description: "Print all configured variables"
-
   # coverall:
   #   description: "Send coverage computed to coveralls.io website"
-
   template:
     description: "Create a new endpoint template for your REST API"
     suboptions:
