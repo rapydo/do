@@ -1,0 +1,9 @@
+file: {{ endpoint_name }}
+class: {{ endpoint_name.capitalize() }}
+schema:
+  expose: true
+mapping:
+  {{ endpoint_name }}: "/{{ endpoint_name }}"
+labels:
+  - custom
+  - {{ endpoint_name }}

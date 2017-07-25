@@ -1,0 +1,9 @@
+common:
+  custom:
+    authentication: false
+
+{{ endpoint_name }}:
+  summary: Unauthenticated {{ endpoint_name }} endpoint
+  responses:
+    '200':
+      description: "returning 'Hello World!' string"

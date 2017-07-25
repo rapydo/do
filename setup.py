@@ -17,7 +17,13 @@ setup(
     license='MIT',
     packages=[main_package],
     package_data={
-        main_package: ['argparser.yaml'],
+        main_package: [
+            'argparser.yaml',
+            'templates/class.py',
+            'templates/get.yaml',
+            'templates/specs.yaml',
+            'templates/unittests.py',
+        ],
     },
     python_requires='>=3.4',
     entry_points={
