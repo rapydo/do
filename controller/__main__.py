@@ -13,17 +13,8 @@ def activate_log():
     return get_logger(__name__)
 
 
-def activate_better_exceptions():
-    x = be
-
-    # Ok, I'm just trying to remove the annoying message from Landscape.io:
-    # Statement seems to have no effect
-    if x is None:
-        print("Errors while activating better exceptions?")
-
-
 def main():
-    activate_better_exceptions()
+    be  # pylint:disable=pointless-statement
     try:
         arguments = ArgParser()
 
