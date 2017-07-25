@@ -237,8 +237,8 @@ subcommands:
   env:
     description: "Print all configured variables"
 
-  coverall:
-    description: "Send coverage computed to coveralls.io website"
+  # coverall:
+  #   description: "Send coverage computed to coveralls.io website"
 
   template:
     description: "Create a new endpoint template for your REST API"

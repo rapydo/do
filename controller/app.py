@@ -17,6 +17,7 @@ from utilities import checks
 from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
+from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import project
 from controller import gitter
@@ -24,9 +25,8 @@ from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
+from controller.scaffold import NewEndpointScaffold
 from controller.configuration import read_yamls
-
-from utilities.globals import mem
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -353,7 +353,8 @@ Verify that you are in the right folder, now you are in: %s%s
         """ Look up for builds which are depending on templates """
 
         if self.action == 'shell' \
-           or self.action == 'ssl-certificate' \
+           or self.action == 'template' \
+           or self.action == 'coveralls' \
            or self.action == 'ssl-dhparam':
             return
 
@@ -361,6 +362,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # log.pp(self.services)
 
         # Compare builds depending on templates
+        # NOTE: slow operation!
         self.builds = locate_builds(self.base_services, self.services)
         if not self.current_args.get('rebuild_templates', False):
             self.verify_build_cache(self.builds)
@@ -1004,6 +1006,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             val = self.current_args.get(var)
             print("%s: %s" % (var, val))
 
+    def _template(self):
+        endpoint_name = self.current_args.get('endpoint')
+        service_name = self.current_args.get('service')
+        force = self.current_args.get('yes')
+        NewEndpointScaffold(self.project, force, endpoint_name, service_name)
+
     def _coverall(self):
         """
 - check for .coverage.yml to exists and not to be empty
@@ -1016,20 +1024,6 @@ Steps inside:
 3. launch coveralls from /code
         """
         log.error("TO DO!")
-
-    def _template(self):
-        endpoint_name = self.current_args.get('endpoint')
-        service_name = self.current_args.get('service')
-        force = self.current_args.get('yes')
-
-        from controller.scaffold import NewEndpointScaffold
-        scaffold = NewEndpointScaffold(
-            self.project, force,
-            endpoint_name, service_name
-        )
-
-        print(scaffold)
-        log.warning("what about it?")
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -1071,8 +1065,7 @@ Steps inside:
         # GIT related
         self.git_submodules()
         if do_heavy_ops:
-            # NOTE: HEAVY OPERATION
-            self.git_checks()
+            self.git_checks()  # NOTE: this might be an heavy operation
         else:
             log.verbose("Skipping heavy operations")
 

@@ -9,6 +9,7 @@ FRAMEWORK_NAME = 'RAPyDo'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
+TEMPLATE_DIR = 'templates'
 
 ##################
 # NOTE: telling the app if testing or not

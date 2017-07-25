@@ -2,6 +2,8 @@
 # import logging
 from controller.arguments import ArgParser
 from controller.app import Application
+from utilities import PROJECT_DIR, \
+    BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -98,8 +100,18 @@ def test_do(capfd):
 
     #########################
 
-    out, err = exec_command(capfd, "rapydo template foo")
-    # print(out)
-    # print("paolo")
-    # print(err)
-    assert 'what about it?' in err
+    endpoint_name = 'justatest'
+    out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
+
+    # parsing responses like:
+    # "rendered projects/template/backend/swagger/justatest/specs.yaml"
+    base_response = 'rendered %s/template/%s' % (PROJECT_DIR, BACKEND_DIR)
+
+    assert '%s/%s/%s/specs.yaml' % \
+        (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s/get.yaml' % \
+        (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s.py' % \
+        (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
+    assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
+    assert 'Scaffold completed' in err

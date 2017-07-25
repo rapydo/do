@@ -6,11 +6,10 @@ from utilities import path
 from utilities import helpers
 from utilities import \
     PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
+from controller import TEMPLATE_DIR
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
-
-TEMPLATE_DIR = 'templates'
 
 
 class NewEndpointScaffold(object):
@@ -75,9 +74,7 @@ class NewEndpointScaffold(object):
             log.info("%s already exists. Overwriting." % filename)
 
         filepath = str(mypath)
-
-        # FIXME: decide where template dir is
-        template_dir = TEMPLATE_DIR
+        template_dir = helpers.script_abspath(__file__, TEMPLATE_DIR)
         if template_filename is None:
             template_filename = filename
         templated_content = template.render(
@@ -113,7 +110,7 @@ class NewEndpointScaffold(object):
             self.backend_dir, ENDPOINTS_CODE_DIR)
         filepath = path.join(self.class_path, filename)
 
-        if self.class_path.exists():
+        if filepath.exists():
             log.warning('File %s already exists' % filepath)
             if not self.force_yes:
                 helpers.ask_yes_or_no(
@@ -138,7 +135,7 @@ class NewEndpointScaffold(object):
             self.backend_dir, 'tests')
         filepath = path.join(self.tests_path, filename)
 
-        if self.tests_path.exists():
+        if filepath.exists():
             log.warning('File %s already exists' % filepath)
             if not self.force_yes:
                 helpers.ask_yes_or_no(
