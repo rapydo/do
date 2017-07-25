@@ -61,8 +61,11 @@ def find_overriden_templates(services, templates):
             dfp = DockerfileParser(dockerfile)
 
             try:
-                dfp.content
-                log.very_verbose("Parsed dockerfile %s" % dpath)
+                cont = dfp.content
+                if cont is None:
+                    log.warning("Dockerfile is empty?")
+                else:
+                    log.very_verbose("Parsed dockerfile %s" % dpath)
             except FileNotFoundError as e:
                 log.critical_exit(e)
 

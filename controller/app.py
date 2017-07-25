@@ -1070,8 +1070,8 @@ Steps inside:
             log.verbose("Skipping heavy operations")
 
         if self.check:
-            verify_upstream = self.current_args.get('verify_upstream', False)
-            if verify_upstream:
+            if self.current_args.get('verify_upstream', False):
+                # FIXME: connection verification should be made only once
                 self.verify_connected()
                 gitter.check_updates(
                     'upstream', self.gits['main'],

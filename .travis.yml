@@ -20,6 +20,7 @@ script:
 - rapydo --version
 - git clone https://github.com/rapydo/core.git
 - cd core && git checkout $TRAVIS_BRANCH && mkdir data
+- export TESTING=1 # does not work in travis env command
 - py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls

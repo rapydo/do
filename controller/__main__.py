@@ -14,7 +14,7 @@ def activate_log():
 
 
 def main():
-    be  # activate better exceptions
+    be  # pylint:disable=pointless-statement
     try:
         arguments = ArgParser()
 
