@@ -31,7 +31,8 @@ def exec_command(capfd, command):
     return out, err
 
 
-def test_init_and_check(capfd):
+# def test_init_and_check(capfd):
+def test_all(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
@@ -77,7 +78,7 @@ def test_init_and_check(capfd):
     assert "project: template" in out
 
 
-def test_two_projects(capfd):
+# def test_two_projects(capfd):
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
 
@@ -102,7 +103,7 @@ def test_two_projects(capfd):
     assert "INFO All checked" in err
 
 
-def test_from_start_to_clean(capfd):
+# def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert "INFO Created .env file" in err
