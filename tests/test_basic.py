@@ -153,7 +153,6 @@ def test_all(capfd):
     assert "INFO Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")
-    assert "Stack cleaned" in err
     assert "INFO Created .env file" in err
     assert "INFO Stack cleaned" in err
 
