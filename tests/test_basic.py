@@ -155,10 +155,12 @@ def test_from_start_to_clean(capfd):
 
     endpoint_name = 'justatest'
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
+    # log.pp(err)
 
     # parsing responses like:
     # "rendered projects/template/backend/swagger/justatest/specs.yaml"
-    base_response = 'rendered %s/template/%s' % (PROJECT_DIR, BACKEND_DIR)
+    base_response = 'DEBUG rendered %s/template/%s' % \
+        (PROJECT_DIR, BACKEND_DIR)
 
     assert '%s/%s/%s/specs.yaml' % \
         (base_response, SWAGGER_DIR, endpoint_name) in err
@@ -167,4 +169,4 @@ def test_from_start_to_clean(capfd):
     assert '%s/%s/%s.py' % \
         (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
-    assert 'Scaffold completed' in err
+    assert 'INFO Scaffold completed' in err

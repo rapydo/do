@@ -42,7 +42,7 @@ class NewEndpointScaffold(object):
         self.swagger()
         self.rest_class()
         self.test_class()
-        log.debug('Scaffold completed')
+        log.info('Scaffold completed')
 
     def swagger_dir(self):
 
