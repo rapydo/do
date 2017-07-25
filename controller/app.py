@@ -1020,12 +1020,12 @@ Steps inside:
     def _template(self):
         endpoint_name = self.current_args.get('endpoint')
         service_name = self.current_args.get('service')
+        force = self.current_args.get('yes')
 
         from controller.scaffold import NewEndpointScaffold
         scaffold = NewEndpointScaffold(
-            self.project,
-            endpoint_name,
-            service_name
+            self.project, force,
+            endpoint_name, service_name
         )
 
         print(scaffold)

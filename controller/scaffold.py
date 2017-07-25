@@ -19,11 +19,13 @@ class NewEndpointScaffold(object):
     a new endpoint within the RAPyDo framework
     """
 
-    def __init__(self, project, endpoint_name='foo', service_name=None):
-        super(NewEndpointScaffold, self).__init__()
+    def __init__(self,
+                 project, force=False,
+                 endpoint_name='foo', service_name=None):
 
         # custom init
         self.custom_project = project
+        self.force_yes = force
         self.original_name = endpoint_name
         self.endpoint_name = endpoint_name.lower()
         self.service_name = service_name
@@ -37,6 +39,12 @@ class NewEndpointScaffold(object):
         # execute
         self._run()
 
+    def _run(self):
+        self.swagger()
+        self.rest_class()
+        self.test_class()
+        log.debug('Scaffold completed')
+
     def swagger_dir(self):
 
         self.swagger_path = path.join(
@@ -44,10 +52,11 @@ class NewEndpointScaffold(object):
 
         if self.swagger_path.exists():
             log.warning('Path %s already exists' % self.swagger_path)
-            helpers.ask_yes_or_no(
-                'Would you like to proceed and overwrite definition?',
-                error='Cannot overwrite definition'
-            )
+            if not self.force_yes:
+                helpers.ask_yes_or_no(
+                    'Would you like to proceed and overwrite definition?',
+                    error='Cannot overwrite definition'
+                )
 
         path.create(self.swagger_path, directory=True, force=True)
 
@@ -106,10 +115,11 @@ class NewEndpointScaffold(object):
 
         if self.class_path.exists():
             log.warning('File %s already exists' % filepath)
-            helpers.ask_yes_or_no(
-                'Would you like to proceed and overwrite that code?',
-                error='Cannot overwrite the original file'
-            )
+            if not self.force_yes:
+                helpers.ask_yes_or_no(
+                    'Would you like to proceed and overwrite that code?',
+                    error='Cannot overwrite the original file'
+                )
 
         self.render(
             filename,
@@ -122,13 +132,23 @@ class NewEndpointScaffold(object):
         )
 
     def test_class(self):
-        pass
 
-    def _run(self):
-        self.swagger()
+        filename = 'test_%s.py' % self.endpoint_name
+        self.tests_path = path.join(
+            self.backend_dir, 'tests')
+        filepath = path.join(self.tests_path, filename)
 
-        # # YET TODO
-        print("todo")
-        self.rest_class()
-        self.test_class()
-        print("completed")
+        if self.tests_path.exists():
+            log.warning('File %s already exists' % filepath)
+            if not self.force_yes:
+                helpers.ask_yes_or_no(
+                    'Would you like to proceed and overwrite that code?',
+                    error='Cannot overwrite the original file'
+                )
+
+        self.render(
+            filename,
+            template_filename='unittests.py',
+            data={'endpoint_name': self.endpoint_name},
+            outdir=self.tests_path
+        )
