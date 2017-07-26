@@ -1,18 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# try:
-#     from controller import arguments
-# except SystemExit:
-#     raise
-# except BaseException as e:
-#     # raise
-#     from utilities.logs import get_logger
-#     log = get_logger(__name__)
-#     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
-
 import os.path
 from collections import OrderedDict
 from distutils.version import LooseVersion
+from utilities import path
 from utilities import checks
 from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
@@ -962,7 +953,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _coverall(self):
 
-        from utilities import path
         basemsg = "COVERAGE cannot be computed"
 
         # Travis coverall.io token
@@ -971,12 +961,25 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # TODO: if missing link instructions on the website
 
         # Compose file with service > coverage
-        compose_file = path.existing(['.', 'confs', 'coverage.yml'], basemsg)
+        from utilities import CONF_PATH
+        compose_file = path.existing(['.', CONF_PATH, 'coverage.yml'], basemsg)
         service = project.check_coverage_service(compose_file)
         # TODO: if missing link a template
 
+        # Copy coverage file from docker
+        self.vars.get('env')
+        covfile = '.coverage'
+        mittdir = '/code'
+        destdir = '.'
+        self.docker.copy_file(
+            service_name='backend',
+            containers_prefix=self.project,
+            mitt=str(path.join(mittdir, covfile)),
+            dest=str(path.join(destdir, covfile)),
+        )
+
         # Coverage file where coverage percentage was saved
-        path.existing(['.', 'confs', '.coverage'], basemsg)
+        path.existing(['.', covfile], basemsg)
         # NOTE: should not be missing if the file above is from the template
 
         # Execute
@@ -985,13 +988,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--no-deps': False,
             '-d': False,
             '--abort-on-container-exit': True,
-            '--remove-orphans': True,
+            '--remove-orphans': False,
             '--no-recreate': True,
             '--force-recreate': False,
             '--build': False,
             '--no-build': False,
             '--no-color': False,
-            '--scale': {},
+            '--scale': ['%s=1' % service]
         }
         dc = Compose(files=[compose_file])
         dc.command('up', options)

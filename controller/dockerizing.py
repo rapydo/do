@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import io
+import tarfile
 import requests
 import docker
 from docker.errors import APIError as docker_errors
@@ -61,6 +63,56 @@ class Dock(object):
         # log.debug("Docker:%s" % images)
         return images
 
-    # def some_docker():
-    #     containers = client.containers.list()
-    #     log.debug("Docker:%s" % containers)
+    def get_container(self, substring, only_prefix=None):
+
+        containers = self.client.containers.list()
+        log.very_verbose("Docker:%s" % containers)
+
+        for container in containers:
+            name = container.attrs.get('Name')
+            if only_prefix is not None and only_prefix not in name:
+                continue
+            if substring in name:
+                return container
+
+        return None
+
+    def copy_file(self, service_name, containers_prefix, mitt, dest):
+
+        container = self.get_container(
+            '_%s_1' % service_name, only_prefix=containers_prefix)
+        if container is None:
+            log.exit("Are docker containers running?")
+
+        tar_content = self.get_tar_content(container, mitt)
+        real_content = self.recover_tar_stream(tar_content, mitt)
+
+        with open(dest, 'w') as handler:
+            handler.write(real_content)
+
+    def get_tar_content(self, container, path):
+        # http://docker-py.readthedocs.io/en/1.5.0/api/#get_archive
+
+        try:
+            content, stats = self.client.api.get_archive(
+                container=container.attrs,
+                path=path,
+            )
+        except docker.errors.NotFound:
+            log.exit("Path %s not found in container %s" % (path, container))
+
+        return content
+
+    def recover_tar_stream(self, tarstream, filepath):
+
+        tar = tarfile.open(fileobj=io.BytesIO(tarstream.read()))
+
+        members = tar.getmembers().copy()
+        tarinfo = members.pop()
+        current_file = tarinfo.get_info().get('name')
+        if not filepath.endswith(current_file):
+            log.exit("Something went wrong")
+
+        efo = tar.extractfile(current_file)
+        efo.seek(0)
+        return efo.read().decode()
