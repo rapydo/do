@@ -227,8 +227,6 @@ subcommands:
         help: remove also containers persistent data
   env:
     description: "Print all configured variables"
-  # coverall:
-  #   description: "Send coverage computed to coveralls.io website"
   template:
     description: "Create a new endpoint template for your REST API"
     suboptions:
@@ -249,3 +247,5 @@ subcommands:
         metavalue: CONNECTED_SERVICE
         default: sqlalchemy
         help: The first service that will be connected inside the code
+  coverall:
+    description: "Send coverage computed to coveralls.io website"

@@ -961,17 +961,40 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         NewEndpointScaffold(self.project, force, endpoint_name, service_name)
 
     def _coverall(self):
-        """
-- check for .coverage.yml to exists and not to be empty
-- we need a service in confs/backend.yml
-to configure the container with the right volumes
-- we can add a docker entrypoint directly in build_templates to this service.
-Steps inside:
-1. link the coverage file
-2. link the main directory into /code
-3. launch coveralls from /code
-        """
-        log.error("TO DO!")
+
+        from utilities import path
+        basemsg = "COVERAGE cannot be computed"
+
+        # Travis coverall.io token
+        file = path.existing(['.', '.coveralls.yml'], basemsg)
+        project.check_coveralls(file)
+        # TODO: if missing link instructions on the website
+
+        # Compose file with service > coverage
+        compose_file = path.existing(['.', 'confs', 'coverage.yml'], basemsg)
+        service = project.check_coverage_service(compose_file)
+        # TODO: if missing link a template
+
+        # Coverage file where coverage percentage was saved
+        path.existing(['.', 'confs', '.coverage'], basemsg)
+        # NOTE: should not be missing if the file above is from the template
+
+        # Execute
+        options = {
+            'SERVICE': [service],
+            '--no-deps': False,
+            '-d': False,
+            '--abort-on-container-exit': True,
+            '--remove-orphans': True,
+            '--no-recreate': True,
+            '--force-recreate': False,
+            '--build': False,
+            '--no-build': False,
+            '--no-color': False,
+            '--scale': {},
+        }
+        dc = Compose(files=[compose_file])
+        dc.command('up', options)
 
     ################################
     # ### RUN ONE COMMAND OFF
