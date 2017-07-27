@@ -946,9 +946,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             print("%s: %s" % (var, val))
 
     def _template(self):
-        endpoint_name = self.current_args.get('endpoint')
         service_name = self.current_args.get('service')
         force = self.current_args.get('yes')
+        endpoint_name = self.current_args.get('endpoint')
+
         NewEndpointScaffold(self.project, force, endpoint_name, service_name)
 
     def _coverall(self):

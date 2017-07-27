@@ -26,9 +26,21 @@ class NewEndpointScaffold(object):
         self.custom_project = project
         self.force_yes = force
         self.original_name = endpoint_name
-        self.endpoint_name = endpoint_name.lower()
         self.service_name = service_name
 
+        names = []
+        self.class_name = ''
+        for piece in endpoint_name.lower().replace(' ', '-').split('-'):
+            if not piece.isalnum():
+                log.exit("Only alpha-numeric chars are allowed: %s" % piece)
+            else:
+                names.append(piece)
+                self.class_name += piece.capitalize()
+
+        self.endpoint_dir = '_'.join(names)
+        self.endpoint_name = self.endpoint_dir.replace('_', '')
+
+        # setting the base dir for all scaffold things inside the project
         self.backend_dir = path.build([
             PROJECT_DIR,
             self.custom_project,
@@ -47,7 +59,7 @@ class NewEndpointScaffold(object):
     def swagger_dir(self):
 
         self.swagger_path = path.join(
-            self.backend_dir, SWAGGER_DIR, self.endpoint_name)
+            self.backend_dir, SWAGGER_DIR, self.endpoint_dir)
 
         if self.swagger_path.exists():
             log.warning('Path %s already exists' % self.swagger_path)
@@ -87,7 +99,11 @@ class NewEndpointScaffold(object):
     def swagger_specs(self):
         self.render(
             'specs.%s' % YAML_EXT,
-            data={'endpoint_name': self.endpoint_name},
+            data={
+                'endpoint_name': self.endpoint_name,
+                'endpoint_label': self.endpoint_dir,
+                'class_name': self.class_name,
+            },
             outdir=self.swagger_path
         )
 
@@ -123,6 +139,7 @@ class NewEndpointScaffold(object):
             template_filename='class.py',
             data={
                 'endpoint_name': self.endpoint_name,
+                'class_name': self.class_name,
                 'service_name': self.service_name
             },
             outdir=self.class_path
@@ -146,6 +163,9 @@ class NewEndpointScaffold(object):
         self.render(
             filename,
             template_filename='unittests.py',
-            data={'endpoint_name': self.endpoint_name},
+            data={
+                'endpoint_name': self.endpoint_name,
+                'class_name': self.class_name,
+            },
             outdir=self.tests_path
         )

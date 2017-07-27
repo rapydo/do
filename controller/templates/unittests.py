@@ -11,7 +11,7 @@ from utilities.logs import get_logger
 log = get_logger(__name__)
 
 
-class Test{{ endpoint_name.capitalize() }}(RestTestsAuthenticatedBase):
+class Test{{ class_name }}(RestTestsAuthenticatedBase):
 
     """ Quickstart:
     - setUp and tearDown methods before and after each test
