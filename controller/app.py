@@ -651,7 +651,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         rm_volumes = self.current_args.get('rm_volumes', False)
         options = {
             '--volumes': rm_volumes,
-            '--remove-orphans': None,
+            '--remove-orphans': True,
             '--rmi': 'local',  # 'all'
         }
         dc.command('down', options)
@@ -998,6 +998,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--scale': ['%s=1' % service]
         }
         dc = Compose(files=[compose_file])
+
+        # TODO: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
     ################################

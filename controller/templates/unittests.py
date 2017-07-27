@@ -33,14 +33,14 @@ class Test{{ class_name }}(RestTestsAuthenticatedBase):
         endpoint = (self._api_uri + self._main_endpoint)
         log.info('*** Testing GET call on %s' % endpoint)
 
-        # If NO authorization required
+        # If NO authorization required
         r = self.app.get(endpoint, headers=self.__class__.auth_header)
-        # If authorization required
+        # If authorization required
         # r = self.app.get(endpoint, headers=self.__class__.auth_header)
 
         # Assert what is right or wrong
         self.assertEqual(r.status_code, self._hcodes.HTTP_OK_BASIC)
         data = json.loads(r.get_data(as_text=True))
-        # pretty print data obtained from API to check the content
-        # log.pp(data)
+        # pretty print data obtained from API to check the content
+        # log.pp(data)
         self.assertEqual(data['Response']['data'], 'Hello world!')
