@@ -19,7 +19,8 @@ script:
 - rapydo --help
 - rapydo --version
 - git clone https://github.com/rapydo/core.git
-- cd core && git checkout $TRAVIS_BRANCH && mkdir data
+- (( BRANCH = TRAVIS_PULL_REQUEST==1 ? TRAVIS_PULL_REQUEST_BRANCH : TRAVIS_BRANCH ))
+- cd core && git checkout $BRANCH && mkdir data
 - TESTING=1 py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
