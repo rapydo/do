@@ -9,16 +9,16 @@
 
 ### DOING
 
-- [ ] new packaging
-- [ ] Fix the 'exception_label' in errors (e.g. [B2SAFE])
-- [ ] Make the 'mode' more clear in output
-- [ ] Can we infer the mode of a running container?
-- [ ] BUG: if git is not installed the import from git python lib fails
+- [x] new packaging
 - [ ] BUG: network problems with start:
     [link](http://olicallaghan.com/post/a-survival-guide-to-communication-between-docker-containers)
     ```bash
     Client Error: Conflict ("cannot create network  (br-52cc0f455211): conflicts with network  (br-d5c22ead14f6): networks have overlapping IPv4")
     ```
+- [ ] Fix the 'exception_label' in errors (e.g. [B2SAFE])
+- [ ] Make the 'mode' more clear in output
+- [ ] Can we infer the mode of a running container?
+- [ ] BUG: if git is not installed the import from git python lib fails
 - [ ] TASK: automatic certificate generation
     - [ ] cron on host
     - [ ] three commands: add, check, remove

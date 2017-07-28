@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# try:
-#     from controller import arguments
-# except SystemExit:
-#     raise
-# except BaseException as e:
-#     # raise
-#     from utilities.logs import get_logger
-#     log = get_logger(__name__)
-#     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
-
 import os.path
 from collections import OrderedDict
 from distutils.version import LooseVersion
+from utilities import path
 from utilities import checks
 from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
+from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import project
 from controller import gitter
@@ -24,9 +16,8 @@ from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
+from controller.scaffold import NewEndpointScaffold
 from controller.configuration import read_yamls
-
-from utilities.globals import mem
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -353,7 +344,8 @@ Verify that you are in the right folder, now you are in: %s%s
         """ Look up for builds which are depending on templates """
 
         if self.action == 'shell' \
-           or self.action == 'ssl-certificate' \
+           or self.action == 'template' \
+           or self.action == 'coveralls' \
            or self.action == 'ssl-dhparam':
             return
 
@@ -361,6 +353,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # log.pp(self.services)
 
         # Compare builds depending on templates
+        # NOTE: slow operation!
         self.builds = locate_builds(self.base_services, self.services)
         if not self.current_args.get('rebuild_templates', False):
             self.verify_build_cache(self.builds)
@@ -658,7 +651,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         rm_volumes = self.current_args.get('rm_volumes', False)
         options = {
             '--volumes': rm_volumes,
-            '--remove-orphans': None,
+            '--remove-orphans': True,
             '--rmi': 'local',  # 'all'
         }
         dc.command('down', options)
@@ -743,67 +736,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         elif command == "unpause":
             log.info("Stack unpaused")
 
-    # def _control(self):
-
-    #     command = self.current_args.get('controlcommand')
-    #     services = self.get_services(default=self.active_services)
-
-    #     dc = Compose(files=self.files)
-    #     options = {'SERVICE': services}
-
-    #     if command == 'start':
-    #         # print("SERVICES", services)
-    #         options.update({
-    #             '--no-deps': False,
-    #             '-d': True,
-    #             '--abort-on-container-exit': False,
-    #             '--remove-orphans': False,
-    #             '--no-recreate': False,
-    #             '--force-recreate': False,
-    #             '--build': False,
-    #             '--no-build': False,
-    #             '--scale': {},
-    #         })
-    #         command = 'up'
-
-    #     elif command == 'stop':
-    #         pass
-    #     elif command == 'restart':
-    #         pass
-    #     elif command == 'remove':
-    #         dc.command('stop')
-    #         options.update({
-    #             # '--stop': True,  # BUG? not working
-    #             '--force': True,
-    #             '-v': False,  # dangerous?
-    #             # 'SERVICE': []
-    #         })
-    #         command = 'rm'
-    #     elif command == 'toggle_freeze':
-
-    #         command = 'pause'
-    #         for container in dc.get_handle().project.containers():
-
-    #            if container.dictionary.get(
-    #                'State').get('Status') == 'paused':
-    #                 command = 'unpause'
-    #                 break
-
-    #     else:
-    #         log.exit("Unknown")
-
-    #     dc.command(command, options)
-
     def _log(self):
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
-            # '--follow': True,  # FIXME: give this option here too
-            '--follow': False,
+            '--follow': self.current_args.get('follow', False),
             '--tail': 'all',
             '--no-color': False,
-            '--timestamps': None,
+            '--timestamps': True,
             'SERVICE': services,
         }
 
@@ -857,8 +798,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         if user is None:
             user = self.current_args.get('user')
+            # if 'user' is empty, put None to get the docker-compose default
             if user is not None and user.strip() == '':
-                user = None
+                if service in ['backend', 'restclient']:
+                    user = 'developer'
+                else:
+                    user = None
+        log.verbose("Command as user '%s'" % user)
 
         if command is None:
             default = 'echo hello world'
@@ -999,6 +945,63 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             val = self.current_args.get(var)
             print("%s: %s" % (var, val))
 
+    def _template(self):
+        service_name = self.current_args.get('service')
+        force = self.current_args.get('yes')
+        endpoint_name = self.current_args.get('endpoint')
+
+        NewEndpointScaffold(self.project, force, endpoint_name, service_name)
+
+    def _coverall(self):
+
+        basemsg = "COVERAGE cannot be computed"
+
+        # Travis coverall.io token
+        file = path.existing(['.', '.coveralls.yml'], basemsg)
+        project.check_coveralls(file)
+        # TODO: if missing link instructions on the website
+
+        # Compose file with service > coverage
+        from utilities import CONF_PATH
+        compose_file = path.existing(['.', CONF_PATH, 'coverage.yml'], basemsg)
+        service = project.check_coverage_service(compose_file)
+        # TODO: if missing link a template
+
+        # Copy coverage file from docker
+        self.vars.get('env')
+        covfile = '.coverage'
+        mittdir = '/code'
+        destdir = '.'
+        self.docker.copy_file(
+            service_name='backend',
+            containers_prefix=self.project,
+            mitt=str(path.join(mittdir, covfile)),
+            dest=str(path.join(destdir, covfile)),
+        )
+
+        # Coverage file where coverage percentage was saved
+        path.existing(['.', covfile], basemsg)
+        # NOTE: should not be missing if the file above is from the template
+
+        # Execute
+        options = {
+            'SERVICE': [service],
+            '--no-deps': False,
+            '-d': False,
+            '--abort-on-container-exit': True,
+            '--remove-orphans': False,
+            '--no-recreate': True,
+            '--force-recreate': False,
+            '--build': False,
+            '--no-build': False,
+            '--no-color': False,
+            '--scale': ['%s=1' % service]
+        }
+        dc = Compose(files=[compose_file])
+
+        # TODO: check if this command could be 'run' instead of using 'up'
+        dc.command('up', options)
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################
@@ -1039,8 +1042,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # GIT related
         self.git_submodules()
         if do_heavy_ops:
-            # NOTE: HEAVY OPERATION
-            self.git_checks()
+            self.git_checks()  # NOTE: this might be an heavy operation
         else:
             log.verbose("Skipping heavy operations")
 
@@ -1054,11 +1056,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     remote_branch='master'
                 )
 
-        # Compose services and variables
-
         # self.make_env(do=do_heavy_ops)
         self.make_env()
 
+        # Compose services and variables
         self.read_composers()
         self.check_placeholders()
 
