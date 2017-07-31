@@ -174,3 +174,16 @@ class Compose(object):
         except compose.project.NoSuchService:
             log.exit(
                 "Cannot find a running container with this name: %s" % service)
+
+    def get_defaults(self, command='configure'):
+        """
+        TODO: test this defaults for commands
+        """
+        from compose.cli.docopt_command import docopt_full_help
+        from compose.cli.main import TopLevelCommand
+        from inspect import getdoc
+
+        compose_options = {}
+        docstring = getdoc(getattr(TopLevelCommand, command))
+        return docopt_full_help(
+            docstring, compose_options, options_first=True)
