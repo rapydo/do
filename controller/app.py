@@ -1002,6 +1002,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # TODO: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
+    def _upgrade(self):
+        log.warning("TODO!")
+        pass
+
     ################################
     # ### RUN ONE COMMAND OFF
     ################################

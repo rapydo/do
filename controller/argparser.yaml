@@ -249,3 +249,5 @@ subcommands:
         help: The first service that will be connected inside the code
   coverall:
     description: "Send coverage computed to coveralls.io website"
+  upgrade:
+    description: "Upgrade your current project to known versions"
