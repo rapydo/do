@@ -57,10 +57,10 @@ options:
     # help: Force recreation of the docker compose .env file even if existing
     help: Cache the docker compose .env file instead of recreating it
 
-  # development:
-  #   type: bool
-  #   default: False
-  #   help: Allow to execute the code directly from rapydo core
+  development:
+    type: bool
+    default: False
+    help: Allow to execute the code directly from rapydo core
 
 subcommands:
   check:
@@ -250,4 +250,9 @@ subcommands:
   coverall:
     description: "Send coverage computed to coveralls.io website"
   upgrade:
-    description: "Upgrade your current project to known versions"
+    description: "Upgrade your current project to new official releases"
+    suboptions:
+      release:
+        type: str
+        metavalue: RELEASE_VERSION
+        default: null

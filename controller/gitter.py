@@ -11,9 +11,13 @@ from utilities.logs import get_logger
 log = get_logger(__name__)
 
 
+def get_repo(path):
+    return Repo(path)
+
+
 def get_local(path):
     try:
-        gitobj = Repo(path)
+        gitobj = get_repo(path)
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
         return None
@@ -25,10 +29,6 @@ def get_active_branch(gitobj):
     except TypeError as e:
         log.warning(str(e))
         return None
-
-
-def get_repo(path):
-    return Repo(path)
 
 
 def upstream(url, path=None, key='upstream', do=False):

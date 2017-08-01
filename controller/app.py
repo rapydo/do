@@ -56,6 +56,7 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.development = self.current_args.get('development')
 
     def check_projects(self):
 
@@ -159,6 +160,9 @@ class Application(object):
         This check is only based on file existence.
         Further checks are performed later in the following steps
         """
+
+        # FIXME: a better way to select current directory
+        # TODO: save this local object as self.gits['local']
         local_git = gitter.get_local(".")
 
         if local_git is None:
@@ -1002,9 +1006,48 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # TODO: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
+    def available_releases(self, releases):
+
+        log.warning('List of releases:')
+        print('\n###########')
+        for release, info in releases.items():
+            print('Release %s: %s [%s]' %
+                  (release, info.get('type'), info.get('status')))
+        print('')
+
     def _upgrade(self):
-        log.warning("TODO!")
-        pass
+        releases = self.specs.get('releases', {})
+
+        gitobj = self.gits.get('main')
+        current_release = gitter.get_active_branch(gitobj)
+        log.info('Current release: %s' % current_release)
+
+        new_release = self.current_args.get('release')
+
+        if new_release is None:
+            self.available_releases(releases)
+            return False
+        else:
+            if new_release not in releases:
+                self.available_releases(releases)
+                log.exit('Release %s not found' % new_release)
+            else:
+                log.info('Requested release: %s' % new_release)
+            if new_release == current_release:
+                log.warning('Already at %s' % current_release)
+                return False
+
+        if LooseVersion(new_release) < LooseVersion(current_release):
+            log.exit('Cannot upgrade to previous version')
+
+        status = releases.get(new_release).get('status')
+        if status != 'released':
+            if self.development and status == 'developing':
+                pass
+            else:
+                log.exit("This version has yet to be released")
+
+        raise NotImplementedError('Version upgrade')
 
     ################################
     # ### RUN ONE COMMAND OFF
