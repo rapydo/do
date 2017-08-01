@@ -105,7 +105,7 @@ class Application(object):
         self.check_program('git')
 
     def check_program(self, program, min_version=None, max_version=None):
-        found_version = checks.check_executable(executable=program)
+        found_version = checks.executable(executable=program)
         if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
@@ -131,7 +131,7 @@ class Application(object):
     def check_python_package(
             self, package, min_version=None, max_version=None):
 
-        found_version = checks.check_package(package)
+        found_version = checks.package(package)
         if found_version is None:
             log.exit(
                 "Could not find the following python package: %s" % package)
@@ -248,7 +248,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def verify_connected(self):
         """ Check if connected to internet """
 
-        connected = checks.check_internet()
+        connected = checks.internet_connection_available()
         if not connected:
             log.exit('Internet connection unavailable')
         else:
