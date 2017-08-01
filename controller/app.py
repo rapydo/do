@@ -1017,6 +1017,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _upgrade(self):
         releases = self.specs.get('releases', {})
+        if len(releases) < 1:
+            log.exit('This project does not support releases yet')
 
         gitobj = self.gits.get('main')
         current_release = gitter.get_active_branch(gitobj)
