@@ -52,6 +52,12 @@ options:
     # help: Force recreation of the docker compose .env file even if existing
     help: Cache the docker compose .env file instead of recreating it
 
+  no-bower:
+    type: bool
+    default: False
+    # help: Force recreation of the docker compose .env file even if existing
+    help: Skip bower management
+
   # development:
   #   type: bool
   #   default: False

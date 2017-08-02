@@ -252,6 +252,7 @@ Verify that you are in the right folder, now you are in: %s%s
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
+
         log.very_verbose("Frontend is %s" % self.frontend)
 
     def verify_connected(self):
@@ -415,7 +416,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def bower_libs(self):
 
         if self.check or self.initialize or self.update:
-            if self.frontend:
+            if self.frontend and not self.current_args.get('no_bower'):
                 bower_dir = os.path.join("data", "bower_components")
 
                 install_bower = False
