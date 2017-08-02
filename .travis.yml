@@ -12,7 +12,7 @@ before_install:
 - sudo apt-get update
 - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
 install:
-- pwd
+- pip install --upgrade setuptools # bug fix
 - pip install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
 script:
