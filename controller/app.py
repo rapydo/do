@@ -66,6 +66,7 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        log.debug("Selected project: %s" % self.project)
 
     def check_projects(self):
 
