@@ -10,6 +10,7 @@
 #     log = get_logger(__name__)
 #     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
 
+import os
 import os.path
 from collections import OrderedDict
 from distutils.version import LooseVersion
@@ -415,44 +416,47 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def bower_libs(self):
 
+        do_bower = False
+
         if self.check or self.initialize or self.update:
-            if self.frontend and not self.current_args.get('no_bower'):
-                bower_dir = os.path.join("data", "bower_components")
+            do_bower = True
 
-                install_bower = False
-                if self.update:
-                    install_bower = True
-                elif not os.path.isdir(bower_dir):
-                    install_bower = True
-                else:
-                    libs = helpers.list_path(bower_dir)
-                    if len(libs) <= 0:
-                        install_bower = True
+        if not do_bower:
+            log.info("Skipping bower: not required for this command")
+        elif not self.frontend:
+            log.debug("Skipping bower: frontend is disabled")
+        elif self.current_args.get('no_bower'):
+            log.info("Skipping bower: user requested no-bower option")
+        else:
+            bower_dir = os.path.join("data", "bower_components")
 
-                if install_bower:
+            install_bower = False
+            if self.update:
+                install_bower = True
+            elif not os.path.isdir(bower_dir):
+                install_bower = True
+            elif len(helpers.list_path(bower_dir)) <= 0:
+                install_bower = True
 
-                    if self.check:
-                        log.exit(
-                            """Missing bower libs in %s
+            if not install_bower:
+                log.checked("Bower libs already installed")
+            elif self.check:
+                log.exit(
+                    """Missing bower libs in %s
 \nSuggestion: execute the init command"""
-                            % bower_dir
-                        )
-                    else:
+                    % bower_dir
+                )
+            else:
 
-                        if self.initialize:
-                            bower_command = "bower install"
-                        else:
-                            bower_command = "bower update"
-
-                        bower_command += \
-                            " --config.directory=/libs/bower_components"
-
-                        dc = Compose(files=self.files)
-                        dc.create_volatile_container(
-                            "bower", command=bower_command)
-
+                if self.initialize:
+                    bower_command = "bower install"
                 else:
-                    log.checked("Bower libs already installed")
+                    bower_command = "bower update"
+
+                bower_command += " --config.directory=/libs/bower_components"
+
+                dc = Compose(files=self.files)
+                dc.create_volatile_container("bower", command=bower_command)
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -1009,6 +1013,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         RUN THE APPLICATION!
         The heart of the app: it runs a single controller command.
         """
+
+        if "TESTING" in os.environ:
+            log.info("Controller is running in TESTING mode")
 
         # Initial inspection
         self.get_args()

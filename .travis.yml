@@ -21,8 +21,8 @@ script:
 - git clone https://github.com/rapydo/core.git
 - cd core
 - mkdir data
-# - export TESTING=1
-- TESTING=1 py.test -s -x --cov=controller ../tests
+- export TESTING=1
+- py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
 - pwd
