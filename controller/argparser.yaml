@@ -63,10 +63,10 @@ options:
     # help: Force recreation of the docker compose .env file even if existing
     help: Skip bower management
 
-  # development:
-  #   type: bool
-  #   default: False
-  #   help: Allow to execute the code directly from rapydo core
+  development:
+    type: bool
+    default: False
+    help: Allow to execute the code directly from rapydo core
 
 subcommands:
   check:
@@ -255,3 +255,10 @@ subcommands:
         help: The first service that will be connected inside the code
   coverall:
     description: "Send coverage computed to coveralls.io website"
+  upgrade:
+    description: "Upgrade your current project to new official releases"
+    suboptions:
+      release:
+        type: str
+        metavalue: RELEASE_VERSION
+        default: null

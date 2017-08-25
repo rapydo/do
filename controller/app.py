@@ -68,6 +68,7 @@ class Application(object):
         self.tested_connection = False
         self.project = self.current_args.get('project')
         log.debug("Selected project: %s" % self.project)
+        self.development = self.current_args.get('development')
 
     def check_projects(self):
 
@@ -117,7 +118,7 @@ class Application(object):
         self.check_program('git')
 
     def check_program(self, program, min_version=None, max_version=None):
-        found_version = checks.check_executable(executable=program)
+        found_version = checks.executable(executable=program)
         if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
@@ -143,7 +144,7 @@ class Application(object):
     def check_python_package(
             self, package, min_version=None, max_version=None):
 
-        found_version = checks.check_package(package)
+        found_version = checks.package(package)
         if found_version is None:
             log.exit(
                 "Could not find the following python package: %s" % package)
@@ -171,6 +172,9 @@ class Application(object):
         This check is only based on file existence.
         Further checks are performed later in the following steps
         """
+
+        # FIXME: a better way to select current directory
+        # TODO: save this local object as self.gits['local']
         local_git = gitter.get_local(".")
 
         if local_git is None:
@@ -261,7 +265,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def verify_connected(self):
         """ Check if connected to internet """
 
-        connected = checks.check_internet()
+        connected = checks.internet_connection_available()
         if not connected:
             log.exit('Internet connection unavailable')
         else:
@@ -1017,6 +1021,51 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # TODO: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
+
+    def available_releases(self, releases):
+
+        log.warning('List of releases:')
+        print('\n###########')
+        for release, info in releases.items():
+            print('Release %s: %s [%s]' %
+                  (release, info.get('type'), info.get('status')))
+        print('')
+
+    def _upgrade(self):
+        releases = self.specs.get('releases', {})
+        if len(releases) < 1:
+            log.exit('This project does not support releases yet')
+
+        gitobj = self.gits.get('main')
+        current_release = gitter.get_active_branch(gitobj)
+        log.info('Current release: %s' % current_release)
+
+        new_release = self.current_args.get('release')
+
+        if new_release is None:
+            self.available_releases(releases)
+            return False
+        else:
+            if new_release not in releases:
+                self.available_releases(releases)
+                log.exit('Release %s not found' % new_release)
+            else:
+                log.info('Requested release: %s' % new_release)
+            if new_release == current_release:
+                log.warning('Already at %s' % current_release)
+                return False
+
+        if LooseVersion(new_release) < LooseVersion(current_release):
+            log.exit('Cannot upgrade to previous version')
+
+        status = releases.get(new_release).get('status')
+        if status != 'released':
+            if self.development and status == 'developing':
+                pass
+            else:
+                log.exit("This version has yet to be released")
+
+        raise NotImplementedError('Version upgrade')
 
     ################################
     # ### RUN ONE COMMAND OFF

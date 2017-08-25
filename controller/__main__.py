@@ -23,6 +23,8 @@ def main():
     except KeyboardInterrupt:
         log = activate_log()
         log.critical("Interrupted by the user")
+    except NotImplementedError as e:
+        print('NOT IMPLEMENTED (yet): %s' % e)
     else:
         log = activate_log()
         log.verbose("Application completed")
