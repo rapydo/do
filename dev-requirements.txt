@@ -1,6 +1,7 @@
 
 pytest
 pytest-cov
-coveralls
-rapydo-utils
 plumbum
+coveralls
+plumbum
+git+https://github.com/rapydo/utils.git@0.5.2

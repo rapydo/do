@@ -2,13 +2,14 @@
 
 import sys
 
-__version__ = '0.5.1'
+__version__ = '0.5.2'
 
 FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
+TEMPLATE_DIR = 'templates'
 
 ##################
 # NOTE: telling the app if testing or not

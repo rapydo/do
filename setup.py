@@ -17,7 +17,13 @@ setup(
     license='MIT',
     packages=[main_package],
     package_data={
-        main_package: ['argparser.yaml'],
+        main_package: [
+            'argparser.yaml',
+            'templates/class.py',
+            'templates/get.yaml',
+            'templates/specs.yaml',
+            'templates/unittests.py',
+        ],
     },
     python_requires='>=3.4',
     entry_points={
@@ -33,6 +39,7 @@ setup(
         "dockerfile-parse",
         "gitpython",
         "better_exceptions",
+        "jinja2",
         # necessary for docker-compose
         # https://github.com/docker/compose/issues/4431
         "requests==2.11.1"

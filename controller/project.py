@@ -62,3 +62,22 @@ def apply_variables(dictionary, variables):
         new_dict[key] = value
 
     return new_dict
+
+
+def check_coveralls(path, key='repo_token'):
+    compose = configuration.load_yaml_file(path)
+    if len(compose.get(key, '').strip()) > 0:
+        log.very_verbose('Found the %s' % key)
+    else:
+        log.exit('Missing "%s": %s' % (key, path))
+
+
+def check_coverage_service(path, service='coverage'):
+    compose = configuration.load_yaml_file(path)
+    services = compose.get('services', {})
+    if services.get(service) is None:
+        log.exit('Missing "%s" service in compose: %s' % (service, path))
+    else:
+        log.very_verbose('Found %s service' % service)
+
+    return service
