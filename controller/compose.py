@@ -20,6 +20,8 @@ from utilities.logs import get_logger
 
 log = get_logger(__name__)
 
+compose_log = 'docker-compose command: '
+
 
 class Compose(object):
 
@@ -86,7 +88,7 @@ class Compose(object):
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.info("Requesting within compose: '%s'" % command)
+        log.debug("%s'%s'" % (compose_log, command))
         try:
             method(options=options)
         except SystemExit:
@@ -155,10 +157,6 @@ class Compose(object):
         """
 
         shell_command, shell_args = self.split_command(command)
-        if shell_command is not None:
-            log.info("Command request: %s(%s+%s)"
-                     % (service.upper(), shell_command, shell_args))
-
         options = {
             'SERVICE': service,
             'COMMAND': shell_command,
@@ -169,6 +167,9 @@ class Compose(object):
             '-T': False,
             '-d': False,
         }
+        if shell_command is not None:
+            log.debug("Command: %s(%s+%s)"
+                      % (service.lower(), shell_command, shell_args))
         try:
             self.command('exec_command', options)
         except compose.project.NoSuchService:

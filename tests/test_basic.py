@@ -1,6 +1,7 @@
 
 from git import Repo
 from controller.arguments import ArgParser
+from controller.compose import compose_log
 from controller.app import Application
 from utilities import PROJECT_DIR, \
     BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
@@ -8,6 +9,8 @@ from utilities.logs import get_logger
 from utilities.basher import BashCommands
 
 log = get_logger(__name__)
+
+compose_log_prefix = 'DEBUG %s' % compose_log
 
 
 def exec_command(capfd, command):
@@ -107,29 +110,29 @@ def test_all(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert "INFO Created .env file" in err
-    assert "INFO Requesting within compose: 'up'" in err
+    assert compose_log_prefix + "'up'" in err
     assert "INFO Stack started" in err
 
     _, err = exec_command(capfd, "rapydo status")
-    assert "INFO Requesting within compose: 'ps'" in err
+    assert compose_log_prefix + "'ps'" in err
 
     exec_command(capfd, "rapydo log")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'logs'" in err
+    # assert compose_log_prefix + "'logs'" in err
 
     exec_command(capfd, "rapydo bower-install jquery")
     # FIXME: how is possible that this message is not found??
     # assert "EXIT Missing bower lib, please add the --lib option" in err
     exec_command(capfd, "rapydo bower-install --lib jquery")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'run'" in err
+    # assert compose_log_prefix + "'run'" in err
 
     exec_command(capfd, "rapydo bower-update jquery")
     # FIXME: how is possible that this message is not found??
     # assert "EXIT Missing bower lib, please add the --lib option" in err
     exec_command(capfd, "rapydo bower-update --lib jquery")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'run'" in err
+    # assert compose_log_prefix + "'run'" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
     assert "INFO Created .env file" in err
@@ -149,7 +152,7 @@ def test_all(capfd):
 
     _, err = exec_command(capfd, "rapydo remove")
     assert "INFO Created .env file" in err
-    assert "INFO Requesting within compose: 'stop'" in err
+    assert compose_log_prefix + "'stop'" in err
     assert "INFO Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")

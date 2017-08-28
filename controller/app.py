@@ -479,9 +479,9 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.current_args.get('cache_env'):
             try:
                 os.unlink(envfile)
-                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+                log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
             except FileNotFoundError:
-                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
+                log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
             with open(envfile, 'w+') as whandle:
@@ -499,12 +499,11 @@ Verify that you are in the right folder, now you are in: %s%s
                     if ' ' in value:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
-                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+                log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
-            # log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
-            log.debug("Using cache for %s" % COMPOSE_ENVIRONMENT_FILE)
+            log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 
-            # FIXME: 'do' here is deprecated and could be removed as parameter
+            # FIXME: 'do' var is deprecated and should be removed as parameter
 
             # # Stat file
             # mixed_env = os.stat(envfile)
