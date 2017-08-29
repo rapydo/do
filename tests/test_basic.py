@@ -11,7 +11,10 @@ from utilities.basher import BashCommands
 log = get_logger(__name__)
 
 compose_log_prefix = 'DEBUG %s' % compose_log
-env_log_prefix = 'VERBOSE ✓ Created .env file'
+symbol = '✓'
+env_log = '%s Created .env file' % symbol
+env_log_prefix_verbose = 'VERBOSE ' + env_log
+env_log_prefix_info = 'INFO ' + env_log
 
 
 def exec_command(capfd, command):
@@ -41,12 +44,12 @@ def test_all(capfd):
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
     # _, err = exec_command(capfd, "rapydo build")
@@ -54,7 +57,7 @@ def test_all(capfd):
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
-    assert env_log_prefix in err
+    assert env_log_prefix_info in err
     assert "INFO You are working on rapydo-core, not a fork" in err
     assert "INFO All checked" in err
 
@@ -68,7 +71,7 @@ def test_all(capfd):
 
     # Create upstream url
     _, err = exec_command(capfd, "rapydo init")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # Check upstream url
@@ -79,7 +82,7 @@ def test_all(capfd):
     assert "INFO All checked" in err
 
     out, err = exec_command(capfd, "rapydo env")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "project: template" in out
 
 
@@ -111,7 +114,7 @@ def test_all(capfd):
 # def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert compose_log_prefix + "'up'" in err
     assert "INFO Stack started" in err
 
@@ -137,28 +140,28 @@ def test_all(capfd):
     # assert compose_log_prefix + "'run'" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack paused" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack unpaused" in err
 
     _, err = exec_command(capfd, "rapydo stop")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack stoped" in err
 
     _, err = exec_command(capfd, "rapydo restart")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack restarted" in err
 
     _, err = exec_command(capfd, "rapydo remove")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert compose_log_prefix + "'stop'" in err
     assert "INFO Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")
-    assert env_log_prefix in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
 
     ###################
