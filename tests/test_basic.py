@@ -81,7 +81,7 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
     log.pp(err)
     assert "INFO \u2713 Upstream is set correctly" in err
-    assert env_log_prefix_info in err
+    assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
     out, err = exec_command(capfd, "rapydo env")
