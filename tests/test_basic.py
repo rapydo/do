@@ -16,7 +16,7 @@ env_log = '%s Created .env file' % symbol
 env_log_prefix_verbose = 'VERBOSE ' + env_log
 env_log_prefix_info = 'INFO ' + env_log
 env_cached_log = 'Using cached .env'
-env_cached_log_verbose = 'VERBOSE ' + env_cached_log
+env_cached_log_verbose = 'VERY_VERBOSE ' + env_cached_log
 
 
 def exec_command(capfd, command):
@@ -79,6 +79,7 @@ def test_all(capfd):
     # Check upstream url
     # Also check .env cache
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
+    log.pp(err)
     assert "INFO \u2713 Upstream is set correctly" in err
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
