@@ -78,7 +78,7 @@ def test_all(capfd):
     # Also check .env cache
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
     assert "INFO \u2713 Upstream is set correctly" in err
-    assert "DEBUG Using cache for .env" in err
+    assert env_log_prefix_verbose in err
     assert "INFO All checked" in err
 
     out, err = exec_command(capfd, "rapydo env")
