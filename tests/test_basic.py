@@ -15,6 +15,8 @@ symbol = '✓'
 env_log = '%s Created .env file' % symbol
 env_log_prefix_verbose = 'VERBOSE ' + env_log
 env_log_prefix_info = 'INFO ' + env_log
+env_cached_log = 'Using cached .env'
+env_cached_log_verbose = 'VERBOSE ' + env_cached_log
 
 
 def exec_command(capfd, command):
@@ -57,7 +59,7 @@ def test_all(capfd):
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
-    assert env_log_prefix_info in err
+    assert env_cached_log_verbose in err
     assert "INFO You are working on rapydo-core, not a fork" in err
     assert "INFO All checked" in err
 
