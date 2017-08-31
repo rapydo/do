@@ -8,6 +8,19 @@ set -e
 #
 
 
+cat <<-EOF
+
+	##################################################################
+	BEWARE! this script is still under development and may be unstable
+
+	CTRL-C to abort this operation
+	sleeping 10 seconds....
+	##################################################################
+EOF
+
+sleep 10
+
+
 # In case you need some parameter
 # mirror=''
 # while [ $# -gt 0 ]; do
