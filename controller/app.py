@@ -404,7 +404,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     if self.action == 'check':
                         log.exit(
                             """Missing template build for %s
-\nSuggestion: execute the init command
+\nSuggestion: execute the init or update command
                             """ % build['service'])
                     else:
                         log.debug(

@@ -2,7 +2,7 @@
 
 import sys
 
-__version__ = '0.5.4'
+__version__ = '0.6.0'
 
 FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
