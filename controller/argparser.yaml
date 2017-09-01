@@ -207,6 +207,13 @@ subcommands:
         help: UNIX command to be executed on selected running service
   start:
     description: Start containers for this configuration
+    suboptions:
+      from-upgrade:
+        alias: fu
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: rebuild images and use them to restart existing containers
   stop:
     description: Stop running containers, but do not remove them
   restart:

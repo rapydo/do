@@ -671,11 +671,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             'SERVICE': services,
             '--no-deps': False,
             '-d': True,
+            # rebuild images changed with an upgrade
+            '--build': self.current_args.get('from_upgrade'),
+            # switching in an easier way between modules
+            '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
-            '--remove-orphans': False,
             '--no-recreate': False,
             '--force-recreate': False,
-            '--build': False,
             '--no-build': False,
             '--scale': {},
         }
