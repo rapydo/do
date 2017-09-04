@@ -29,27 +29,34 @@ cat <<-EOF
     NOTE: you will need administration privileges.
 
     CTRL-C to abort this operation
-    sleeping 10 seconds....
+    sleeping 5 seconds....
     ##################################################################
 EOF
 
-sleep 10
+sleep 5
 
-# In case you need some parameter
-# mirror=''
-# while [ $# -gt 0 ]; do
-#   case "$1" in
-#       --mirror)
-#           mirror="$2"
-#           shift
-#           ;;
-#       *)
-#           echo "Illegal option $1"
-#           ;;
-#   esac
-#   shift $(( $# > 0 ? 1 : 0 ))
-# done
+version='master'
+while [ $# -gt 0 ]; do
+  case "$1" in
+      --version)
+          version="$2"
+          shift
+          ;;
+      *)
+          echo "Illegal option $1"
+          ;;
+  esac
+  shift $(( $# > 0 ? 1 : 0 ))
+done
 
+
+cat <<-EOF
+    ##################################################################
+    Selected version: $version
+    ##################################################################
+EOF
+
+exit 1
 command_exists() {
     command -v "$@" > /dev/null 2>&1
 }
