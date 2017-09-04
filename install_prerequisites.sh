@@ -42,6 +42,10 @@ while [ $# -gt 0 ]; do
           version="$2"
           shift
           ;;
+      version)
+          version="$2"
+          shift
+          ;;
       *)
           echo "Illegal option $1"
           ;;
