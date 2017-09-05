@@ -6,7 +6,7 @@ action:
 
 options:
 
-  # TODO: add the --env option (or --print-env)
+  # TODO: add the --env option (or --print-env) for all commands
   # env:
   #   alias: e
   #   help: print the variables to be used with the command and exit
@@ -16,7 +16,7 @@ options:
     # NOTE: this is the equivalent of the old concept of `blueprint`
     type: str
     metavalue: PROJECT_NAME
-    help: The name of the project to use inside the './projects' directory
+    help: name of the project to be found inside the './projects' directory
     # The only one if exists otherwise list the projects.
     default: null
 
@@ -25,21 +25,21 @@ options:
     type: str
     metavalue: CONTAINERS_YAML_SELECTED_MODE
     default: debug
-    help: The mode is like a 'blueprint' marker of the configuration to launch
+    help: mode is like a 'blueprint' marker of the configuration to launch
 
   log-level:
     alias: l
     type: str
     metavalue: LEVEL_OF_DEBUGGER
     default: DEBUG
-    help: Level of verbosity
+    help: level of verbosity
 
   hostname:
     alias: H
     type: str
     metavalue: MACHINE_HOST_NAME
     default: localhost
-    help: "Host name of the current machine where running the server
+    help: "host name of the current machine where the server is running
         (NOTE: only used in production mode)"
 
   services:
@@ -47,7 +47,7 @@ options:
     type: str
     metavalue: SERVICES_COMA_SEPARATED
     default: active services
-    help: List of services referring to a command
+    help: list of services referring to a command
 
   # force-env:
   cache-env:
@@ -55,12 +55,12 @@ options:
     type: bool
     default: False
     # help: Force recreation of the docker compose .env file even if existing
-    help: Cache the docker compose .env file instead of recreating it
+    help: cache the docker compose .env file instead of recreating it
 
   development:
     type: bool
     default: False
-    help: Allow to execute the code directly from rapydo core
+    help: allow to execute the code directly from rapydo 'core' template
 
 subcommands:
   check:
@@ -97,10 +97,6 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-  # TODO: a tutorial mode to improve the project step by step
-  # instead of all at once like init
-  # tutorial:
-  #   description: Step-by-step guide to make your project RAPyDo compliant
   status:
     description: list current status of containers
   build:
@@ -111,7 +107,7 @@ subcommands:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: Force building of templates docker images used in other builds
+        help: force building of templates docker images used in other builds
       force:
         alias: f
         type: bool
@@ -130,21 +126,21 @@ subcommands:
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:
-    description: Issue a production certificate with service Letsencrypt
+    description: issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
       command: /bin/bash updatecertificates
       service: proxy
       user: root
   ssl-dhparam:
-    description: Generate DH DSA parameters, 4096 bit long prime. **It could take long time**
+    description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
       name: dhparam
       command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
       service: proxy
       user: root
   bower-install:
-    description: Install a new lib with bower
+    description: install a new front-end library with bower
     container_exec:
       name: bower
       # command: bower install
@@ -156,9 +152,9 @@ subcommands:
         type: str
         metavalue: BOWER_LIB_TO_INSTALL
         default: null
-        help: the bower lib to be installed
+        help: the bower library to be installed
   bower-update:
-    description: Update a lib with bower
+    description: update a front-end library with bower
     container_exec:
       name: bower
       # command: bower update
@@ -170,7 +166,7 @@ subcommands:
         type: str
         metavalue: BOWER_LIB_TO_INSTALL
         default: null
-        help: the bower lib to be installed
+        help: the bower library to be installed
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
@@ -184,9 +180,9 @@ subcommands:
         type: int
         metavalue: INTEGER_PORT_FOR_SERVICE
         default: null
-        help: the port which would be associated to the service
+        help: port to be associated to the current service interface
   shell:
-    description: open a shell inside the specified container
+    description: open a shell inside one available 'dockerized' service
     suboptions:
       service:
         positional: true
@@ -206,7 +202,7 @@ subcommands:
         default: bash
         help: UNIX command to be executed on selected running service
   start:
-    description: Start containers for this configuration
+    description: start containers for this configuration
     suboptions:
       from-upgrade:
         alias: fu
@@ -215,13 +211,13 @@ subcommands:
         default: False
         help: rebuild images and use them to restart existing containers
   stop:
-    description: Stop running containers, but do not remove them
+    description: stop running containers, but do not remove them
   restart:
-    description: Restart running containers
+    description: restart running containers
   remove:
-    description: Stop containers if running and remove them
+    description: stop containers (if running) and also remove them
   toggle-freeze:
-    description: Toggle a temporary block/pause of running services
+    description: toggle a temporary block/pause on running containers
   clean:
     description: "remove all:
       containers, networks and OPTIONALLY data volumes"
@@ -233,9 +229,9 @@ subcommands:
         default: False
         help: remove also containers persistent data
   env:
-    description: "Print all configured variables"
+    description: print all configured variables
   template:
-    description: "Create a new endpoint template for your REST API"
+    description: create a new endpoint based on a template
     suboptions:
       endpoint:
         positional: yes  # note: yes is equivalent to True in YAML
@@ -253,13 +249,17 @@ subcommands:
         type: str
         metavalue: CONNECTED_SERVICE
         default: sqlalchemy
-        help: The first service that will be connected inside the code
+        help: the first service that will be connected inside the code
   coverall:
-    description: "Send coverage computed to coveralls.io website"
+    description: send coverage computed to coveralls.io website
   upgrade:
-    description: "Upgrade your current project to new official releases"
+    description: upgrade your current project to new official releases
     suboptions:
       release:
         type: str
         metavalue: RELEASE_VERSION
         default: null
+  # TODO: a tutorial mode to improve the project step by step
+  # instead of all at once like init
+  # tutorial:
+  #   description: Step-by-step guide to make your project RAPyDo compliant
