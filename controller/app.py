@@ -821,7 +821,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        dc.exec_command(service, user=user, command=command)
+        return dc.exec_command(service, user=user, command=command)
 
     def _build(self):
 

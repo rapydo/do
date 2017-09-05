@@ -89,10 +89,21 @@ class Compose(object):
             options['SERVICE'] = []
 
         log.debug("%s'%s'" % (compose_log, command))
+
+        out = None
         try:
-            method(options=options)
-        except SystemExit:
-            log.very_verbose("Executed compose %s w/%s" % (command, options))
+            out = method(options=options)
+        except SystemExit as e:
+            # NOTE: we check the status here.
+            # System exit is received also when a normal command finished.
+            if e.code < 0:
+                log.warning("Invalid code returned: %s", e.code)
+            elif e.code > 0:
+                log.warning("Compose received: system.exit(%s)", e.code)
+                log.exit(error_code=e.code)
+            else:
+                log.very_verbose(
+                    "Executed compose %s w/%s" % (command, options))
         except (
             clierrors.UserError,
             cerrors.OperationFailedError,
@@ -103,6 +114,8 @@ class Compose(object):
             log.critical_exit("Failed docker container:\n%s" % e)
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
+
+        return out
 
     def split_command(self, command):
         """
@@ -149,7 +162,7 @@ class Compose(object):
             '-d': False, '-T': False,
         }
 
-        self.command('run', options)
+        return self.command('run', options)
 
     def exec_command(self, service, user=None, command=None):
         """
@@ -171,10 +184,12 @@ class Compose(object):
             log.debug("Command: %s(%s+%s)"
                       % (service.lower(), shell_command, shell_args))
         try:
-            self.command('exec_command', options)
+            out = self.command('exec_command', options)
         except compose.project.NoSuchService:
             log.exit(
                 "Cannot find a running container with this name: %s" % service)
+        else:
+            return out
 
     def get_defaults(self, command='configure'):
         """
