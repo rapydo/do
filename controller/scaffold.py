@@ -113,7 +113,7 @@ class EndpointScaffold(object):
                 "This is a BASE endpoint of the RAPyDo framework.\n" +
                 "Do not modify it unless your are not a RAPyDo developer.")
 
-        with open(python_file_path) as fh:
+        with open(str(python_file_path)) as fh:
             content = fh.read()
             if 'class %s(EndpointResource)' % python_class not in content:
                 log.critical(
