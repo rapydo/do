@@ -230,6 +230,14 @@ subcommands:
         help: remove also containers persistent data
   env:
     description: print all configured variables
+  find:
+    description: create a new endpoint based on a template
+    suboptions:
+      endpoint:
+        positional: no
+        type: str
+        metavalue: ENDPOINT_NAME
+        help: an existing endpoint name to search inside the swagger definition
   template:
     description: create a new endpoint based on a template
     suboptions:
@@ -238,12 +246,13 @@ subcommands:
         type: str
         metavalue: ENDPOINT_NAME
         default: foo
+        help: the endpoint name to be created
       'yes':
         alias: y
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: say yes to all answers
+        help: say yes to all questions
       service:
         alias: s
         type: str

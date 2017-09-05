@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from utilities.myyaml import YAML_EXT
+from utilities.myyaml import YAML_EXT, load_yaml_file
 from utilities import template
 from utilities import path
 from utilities import helpers
 from utilities import \
-    PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
-from controller import TEMPLATE_DIR
+    PROJECT_DIR, BACKEND_DIR, MAIN_PACKAGE, SWAGGER_DIR, ENDPOINTS_CODE_DIR
+from controller import TEMPLATE_DIR, SUBMODULES_DIR
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
 
 
-class NewEndpointScaffold(object):
+class EndpointScaffold(object):
     """
     Scaffold necessary directories and file to create
     a new endpoint within the RAPyDo framework
@@ -30,6 +30,7 @@ class NewEndpointScaffold(object):
 
         names = []
         self.class_name = ''
+        endpoint_name = endpoint_name.lstrip('/')
         for piece in endpoint_name.lower().replace(' ', '-').split('-'):
             if not piece.isalnum():
                 log.exit("Only alpha-numeric chars are allowed: %s" % piece)
@@ -40,6 +41,8 @@ class NewEndpointScaffold(object):
         self.endpoint_dir = '_'.join(names)
         self.endpoint_name = self.endpoint_dir.replace('_', '')
 
+        self.specs_file = 'specs.%s' % YAML_EXT
+
         # setting the base dir for all scaffold things inside the project
         self.backend_dir = path.build([
             PROJECT_DIR,
@@ -47,14 +50,81 @@ class NewEndpointScaffold(object):
             BACKEND_DIR,
         ])
 
-        # execute
-        self._run()
+        self.base_backend_dir = path.build([
+            SUBMODULES_DIR,
+            BACKEND_DIR,
+            MAIN_PACKAGE,
+        ])
 
-    def _run(self):
+    def create(self):
         self.swagger()
         self.rest_class()
         self.test_class()
         log.info('Scaffold completed')
+
+    def info(self):
+
+        infos = '\n'
+        base_endpoint = False
+        endpoint = self.endpoint_name
+
+        # look inside extended swagger definition
+        backend = self.backend_dir
+        needle = self.find_swagger(endpoint, backend)
+
+        # or look inside base swagger definition of rapydo
+        if needle is None:
+            backend = self.base_backend_dir
+            needle = self.find_swagger(endpoint, backend)
+            base_endpoint = True
+            python_file_dir = path.join(backend, 'resources')
+        else:
+            python_file_dir = path.join(backend, ENDPOINTS_CODE_DIR)
+
+        if needle is None:
+            log.exit('No endpoint "%s" found in current swagger definition'
+                     % endpoint)
+        else:
+            pass
+            # log.pp(needle)
+
+        # needle.get('swagger')
+
+        infos += 'Endpoint path:\t%s/%s\n' % (needle.get('baseuri'), endpoint)
+        python_file_path = path.join(
+            python_file_dir, needle.get('file') + '.py')
+        infos += 'Labels:\t\t%s\n' % ", ".join(needle.get('labels'))
+        infos += 'Python file:\t%s\n' % python_file_path
+        infos += 'Python class:\t%s\n' % needle.get('class')
+
+        log.info("Informations found about '%s':\n%s", endpoint, infos)
+
+        if base_endpoint:
+            log.warning(
+                "This is a BASE endpoint of the RAPyDo framework.\n" +
+                "Do not modify it unless your are not a RAPyDo developer.")
+
+    def find_swagger(self, endpoint=None, backend_dir=None):
+
+        swagdir = path.join(backend_dir, SWAGGER_DIR)
+        needle = None
+
+        for current_specs_file in swagdir.glob('*/%s' % self.specs_file):
+            content = load_yaml_file(current_specs_file)
+
+            for name, value in content.get('mapping', {}).items():
+                # print(current_specs_file, name, value)
+                if value == '/' + endpoint:
+                    needle = content
+                    mypath = str(current_specs_file) \
+                        .replace('/' + self.specs_file, '')
+                    needle['swagger'] = helpers.last_dir(mypath)
+                    break
+
+            if needle is not None:
+                break
+
+        return needle
 
     def swagger_dir(self):
 
@@ -98,7 +168,7 @@ class NewEndpointScaffold(object):
 
     def swagger_specs(self):
         self.render(
-            'specs.%s' % YAML_EXT,
+            self.specs_file,
             data={
                 'endpoint_name': self.endpoint_name,
                 'endpoint_label': self.endpoint_dir,

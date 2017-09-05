@@ -16,7 +16,7 @@ from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
-from controller.scaffold import NewEndpointScaffold
+from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from utilities.logs import get_logger
 
@@ -665,14 +665,19 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
+
+        if self.current_args.get('from_upgrade'):
+            log.warning("Rebuilding images from an upgrade")
+            self.current_args['rebuild_templates'] = True
+            self._build()
+
         services = self.get_services(default=self.active_services)
 
         options = {
             'SERVICE': services,
             '--no-deps': False,
             '-d': True,
-            # rebuild images changed with an upgrade
-            '--build': self.current_args.get('from_upgrade'),
+            '--build': False,
             # switching in an easier way between modules
             '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
@@ -829,7 +834,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {
             'SERVICE': services,
-            # FIXME: user should be able to set the two below from cli
+            # TODO: user should be allowed to set the two below from cli
             '--no-cache': False,
             '--pull': False,
         }
@@ -955,7 +960,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         force = self.current_args.get('yes')
         endpoint_name = self.current_args.get('endpoint')
 
-        NewEndpointScaffold(self.project, force, endpoint_name, service_name)
+        new_endpoint = EndpointScaffold(
+            self.project, force, endpoint_name, service_name)
+        new_endpoint.create()
+
+    def _find(self):
+        endpoint_name = self.current_args.get('endpoint')
+
+        if endpoint_name is not None:
+            lookup = EndpointScaffold(
+                self.project, endpoint_name=endpoint_name)
+            lookup.info()
+        else:
+            log.exit("Please, specify something to look for.\n" +
+                     "Add --help to list available options.")
 
     def _coverall(self):
 
@@ -1004,7 +1022,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc = Compose(files=[compose_file])
 
-        # TODO: check if this command could be 'run' instead of using 'up'
+        # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
     def available_releases(self, releases):
@@ -1049,6 +1067,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 pass
             else:
                 log.exit("This version has yet to be released")
+
+        # 1. check submodules modifications
+
+        # 2. git checkout new version
+
+        # 3. rapydo init on new submodules
+
+        # 4. rapydo start --from-upgrade
+        # NOTE: this would rebuild images and templates
 
         raise NotImplementedError('Version upgrade')
 
