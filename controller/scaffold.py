@@ -88,21 +88,37 @@ class EndpointScaffold(object):
             pass
             # log.pp(needle)
 
-        # needle.get('swagger')
+        current_dir = path.current()
 
-        infos += 'Endpoint path:\t%s/%s\n' % (needle.get('baseuri'), endpoint)
-        python_file_path = path.join(
-            python_file_dir, needle.get('file') + '.py')
+        uri = path.join(needle.get('baseuri', '/api'), endpoint)
+        infos += 'Endpoint path:\t%s\n' % uri
+
+        swagger_dir = path.join(
+            current_dir, backend, SWAGGER_DIR, needle.get('swagger'))
+        infos += 'Swagger path:\t%s/\n' % swagger_dir
+
         infos += 'Labels:\t\t%s\n' % ", ".join(needle.get('labels'))
-        infos += 'Python file:\t%s\n' % python_file_path
-        infos += 'Python class:\t%s\n' % needle.get('class')
 
-        log.info("Informations found about '%s':\n%s", endpoint, infos)
+        python_file_path = path.join(
+            current_dir, python_file_dir, needle.get('file') + '.py')
+        infos += 'Python file:\t%s\n' % python_file_path
+
+        python_class = needle.get('class')
+        infos += 'Python class:\t%s\n' % python_class
+
+        log.info("Informations about '%s':\n%s", endpoint, infos)
 
         if base_endpoint:
             log.warning(
                 "This is a BASE endpoint of the RAPyDo framework.\n" +
                 "Do not modify it unless your are not a RAPyDo developer.")
+
+        with open(python_file_path) as fh:
+            content = fh.read()
+            if 'class %s(EndpointResource)' % python_class not in content:
+                log.critical(
+                    "Class '%s' definition not found in python file"
+                    % python_class)
 
     def find_swagger(self, endpoint=None, backend_dir=None):
 
