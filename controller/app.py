@@ -35,6 +35,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+
         self.run()
 
     def get_args(self):
@@ -1100,6 +1101,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
             self.custom_parse_args()
+        else:
+            try:
+                argname = next(iter(self.arguments.remaining_args))
+            except StopIteration:
+                pass
+            else:
+                log.exit(
+                    "Unknown argument:'%s'.\nUse --help to list options",
+                    argname)
 
         # Verify if we implemented the requested command
         function = "_%s" % self.action.replace("-", "_")

@@ -223,6 +223,7 @@ subcommands:
       containers, networks and OPTIONALLY data volumes"
     suboptions:
       rm-volumes:
+      # remove-all-volumes:
         alias: rm
         type: bool
         metavalue: TRUE_OR_FALSE
