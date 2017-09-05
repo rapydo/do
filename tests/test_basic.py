@@ -167,12 +167,8 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
 
-    ###################
-
     endpoint_name = 'justatest'
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
-    # log.pp(err)
-
     # parsing responses like:
     # "rendered projects/template/backend/swagger/justatest/specs.yaml"
     base_response = 'DEBUG rendered %s/template/%s' % \
@@ -186,3 +182,8 @@ def test_all(capfd):
         (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
+
+    out, err = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
+    assert "Endpoint path:\t/api/%s" % endpoint_name in err
+    assert "Labels:\t\tcustom, %s" % endpoint_name in err
+    assert "Python class:\t%s" % endpoint_name.capitalize() in err
