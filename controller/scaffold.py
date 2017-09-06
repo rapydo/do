@@ -115,7 +115,7 @@ class EndpointScaffold(object):
 
         with open(str(python_file_path)) as fh:
             content = fh.read()
-            if 'class %s(EndpointResource)' % python_class not in content:
+            if 'class %s(' % python_class not in content:
                 log.critical(
                     "Class '%s' definition not found in python file"
                     % python_class)
