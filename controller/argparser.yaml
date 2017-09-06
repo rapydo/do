@@ -268,8 +268,9 @@ subcommands:
       release:
         type: str
         metavalue: RELEASE_VERSION
-        default: null
-  # TODO: a tutorial mode to improve the project step by step
-  # instead of all at once like init
+        help: release number you want to upgrade to
+
   # tutorial:
   #   description: Step-by-step guide to make your project RAPyDo compliant
+  # TODO: a tutorial mode to improve the project step by step
+  # instead of all at once like init

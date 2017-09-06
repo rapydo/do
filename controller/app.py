@@ -12,7 +12,7 @@ from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import project
 from controller import gitter
-from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
@@ -283,7 +283,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def git_submodules(self):
         """ Check and/or clone git projects """
 
-        repos = self.vars.get('repos')
+        repos = self.vars.get('repos').copy()
         core = repos.pop('rapydo')
         core_url = core.get('online_url')
 
@@ -627,6 +627,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
+    def rebuild_from_upgrade(self):
+        log.warning("Rebuilding images from an upgrade")
+        self.current_args['rebuild_templates'] = True
+        self._build()
+
     ################################
     # ##    COMMANDS    ##         #
     ################################
@@ -666,11 +671,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
-
         if self.current_args.get('from_upgrade'):
-            log.warning("Rebuilding images from an upgrade")
-            self.current_args['rebuild_templates'] = True
-            self._build()
+            self.rebuild_from_upgrade()
 
         services = self.get_services(default=self.active_services)
 
@@ -1069,16 +1071,55 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             else:
                 log.exit("This version has yet to be released")
 
-        # 1. check submodules modifications
+        ##########################
 
-        # 2. git checkout new version
+        # # 0. if current main repo is being developed, stop this
+        # # NOTE: I am not checking for commits to be pushed
+        name = 'main'
+        mygit = self.gits.pop(name)
+        if gitter.check_unstaged(name, mygit):
+            log.exit('Interrupting')
 
-        # 3. rapydo init on new submodules
+        # 1. git checkout new version
+        if gitter.switch_branch(mygit, new_release):  # , remote=False):
+            log.info("Main active branch: %s", new_release)
+        else:
+            log.exit("Failed changing main repository to %s", new_release)
 
-        # 4. rapydo start --from-upgrade
+        # 2. check submodules versions
+        # if different move current to `submodules/.backup/$VERSION/$TOOL`
+        for name, gitobj in sorted(self.gits.items()):
+
+            # Skip non existing submodules or missing
+            if gitobj is None:
+                continue
+
+            if gitter.check_unstaged(name, gitobj):
+                current_dir = gitobj.working_dir
+                current_version = gitter.get_active_branch(gitobj)
+                backup_dir = helpers.current_fullpath(
+                    SUBMODULES_DIR, '.backup', current_version, name)
+                import shutil
+                try:
+                    shutil.move(current_dir, backup_dir)
+                except BaseException as e:
+                    log.exit(
+                        "Failed to backup %s.\n%s(%s)",
+                        name, e.__class__.__name__, e)
+                log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+
+        # 3. reinit submodules
+        self.read_specs()  # read again project configuration!
+        self.initialize = True
+        self.git_submodules()
+
+        # 4. rebuild images
         # NOTE: this would rebuild images and templates
+        self.rebuild_from_upgrade()
 
-        raise NotImplementedError('Version upgrade')
+        # 5. safely restart?
+        # docker-compose up --force-recreate
+        pass
 
     ################################
     # ### RUN ONE COMMAND OFF
