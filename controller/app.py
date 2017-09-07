@@ -18,7 +18,8 @@ from controller.dockerizing import Dock
 from controller.compose import Compose
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities.logs import get_logger
+from utilities.logs import get_logger, suppress_stdout
+
 
 log = get_logger(__name__)
 
@@ -771,14 +772,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         db = self.current_args.get('service')
         service = db + 'ui'
 
-        # TO FIX: this check should be moved inside create_volatile_container
+        # FIXME: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
             log.exit("Container '%s' is not defined" % service)
 
         port = self.current_args.get('port')
         publish = []
 
-        # TO FIX: these checks should be moved inside create_volatile_container
+        # FIXME: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
@@ -801,7 +802,25 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             publish.append("%s:%s" % (port, current_ports.target))
 
         dc = Compose(files=self.files)
-        dc.create_volatile_container(service, publish=publish)
+
+        host = self.current_args.get('hostname')
+        # FIXME: to be completed
+        uris = {
+            'swaggerui':
+                'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
+                (host, host, '8080'),
+
+        }
+
+        uri = uris.get(service)
+        if uri is not None:
+            log.info(
+                "You can access %s web page here:\n%s", service, uri)
+        else:
+            log.info("Launching interface: %s", service)
+        with suppress_stdout():
+            # NOTE: this is suppressing also image build...
+            dc.create_volatile_container(service, publish=publish)
 
     def _shell(self, user=None, command=None, service=None):
 
