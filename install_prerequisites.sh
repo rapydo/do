@@ -300,3 +300,10 @@ EOF
 # wrapped up in a function so that we have some protection against only getting
 # half the file during "curl | sh"
 do_install
+
+# # TODO: install the rapydo controller
+
+# git+https://github.com/rapydo/utils.git@0.5.4
+# requests==2.11.1
+# git+https://github.com/rapydo/do.git@0.5.4
+
