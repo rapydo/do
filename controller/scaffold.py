@@ -130,7 +130,8 @@ class EndpointScaffold(object):
 
             for name, value in content.get('mapping', {}).items():
                 # print(current_specs_file, name, value)
-                if value == '/' + endpoint:
+                if value == '/' + endpoint or \
+                   value.startswith('/' + endpoint + '/'):
                     needle = content
                     mypath = str(current_specs_file) \
                         .replace('/' + self.specs_file, '')
