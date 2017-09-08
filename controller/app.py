@@ -1065,6 +1065,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         current_release = gitter.get_active_branch(gitobj)
         log.info('Current release: %s' % current_release)
 
+        if current_release == 'master':
+            log.exit("Cannot upgrade from master. Please work on a branch.")
+
         new_release = self.current_args.get('release')
 
         if new_release is None:
