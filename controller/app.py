@@ -12,13 +12,14 @@ from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import project
 from controller import gitter
-from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
-from controller.scaffold import NewEndpointScaffold
+from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities.logs import get_logger
+from utilities.logs import get_logger, suppress_stdout
+
 
 log = get_logger(__name__)
 
@@ -35,6 +36,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+
         self.run()
 
     def get_args(self):
@@ -283,7 +285,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def git_submodules(self):
         """ Check and/or clone git projects """
 
-        repos = self.vars.get('repos')
+        repos = self.vars.get('repos').copy()
         core = repos.pop('rapydo')
         core_url = core.get('online_url')
 
@@ -628,6 +630,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
+    def rebuild_from_upgrade(self):
+        log.warning("Rebuilding images from an upgrade")
+        self.current_args['rebuild_templates'] = True
+        self._build()
+
     ################################
     # ##    COMMANDS    ##         #
     ################################
@@ -667,6 +674,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
+        if self.current_args.get('from_upgrade'):
+            self.rebuild_from_upgrade()
+
         services = self.get_services(default=self.active_services)
 
         options = {
@@ -765,14 +775,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         db = self.current_args.get('service')
         service = db + 'ui'
 
-        # TO FIX: this check should be moved inside create_volatile_container
+        # FIXME: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
             log.exit("Container '%s' is not defined" % service)
 
         port = self.current_args.get('port')
         publish = []
 
-        # TO FIX: these checks should be moved inside create_volatile_container
+        # FIXME: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
@@ -795,7 +805,25 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             publish.append("%s:%s" % (port, current_ports.target))
 
         dc = Compose(files=self.files)
-        dc.create_volatile_container(service, publish=publish)
+
+        host = self.current_args.get('hostname')
+        # FIXME: to be completed
+        uris = {
+            'swaggerui':
+                'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
+                (host, host, '8080'),
+
+        }
+
+        uri = uris.get(service)
+        if uri is not None:
+            log.info(
+                "You can access %s web page here:\n%s", service, uri)
+        else:
+            log.info("Launching interface: %s", service)
+        with suppress_stdout():
+            # NOTE: this is suppressing also image build...
+            dc.create_volatile_container(service, publish=publish)
 
     def _shell(self, user=None, command=None, service=None):
 
@@ -817,7 +845,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        dc.exec_command(service, user=user, command=command)
+        return dc.exec_command(service, user=user, command=command)
 
     def _build(self):
 
@@ -831,7 +859,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {
             'SERVICE': services,
-            # FIXME: user should be able to set the two below from cli
+            # TODO: user should be allowed to set the two below from cli
             '--no-cache': False,
             '--pull': False,
         }
@@ -957,7 +985,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         force = self.current_args.get('yes')
         endpoint_name = self.current_args.get('endpoint')
 
-        NewEndpointScaffold(self.project, force, endpoint_name, service_name)
+        new_endpoint = EndpointScaffold(
+            self.project, force, endpoint_name, service_name)
+        new_endpoint.create()
+
+    def _find(self):
+        endpoint_name = self.current_args.get('endpoint')
+
+        if endpoint_name is not None:
+            lookup = EndpointScaffold(
+                self.project, endpoint_name=endpoint_name)
+            lookup.info()
+        else:
+            log.exit("Please, specify something to look for.\n" +
+                     "Add --help to list available options.")
 
     def _coverall(self):
 
@@ -1006,7 +1047,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc = Compose(files=[compose_file])
 
-        # TODO: check if this command could be 'run' instead of using 'up'
+        # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
     def available_releases(self, releases):
@@ -1026,6 +1067,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         gitobj = self.gits.get('main')
         current_release = gitter.get_active_branch(gitobj)
         log.info('Current release: %s' % current_release)
+
+        if current_release == 'master':
+            log.exit("Cannot upgrade from master. Please work on a branch.")
 
         new_release = self.current_args.get('release')
 
@@ -1052,7 +1096,55 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             else:
                 log.exit("This version has yet to be released")
 
-        raise NotImplementedError('Version upgrade')
+        ##########################
+
+        # # 0. if current main repo is being developed, stop this
+        # # NOTE: I am not checking for commits to be pushed
+        name = 'main'
+        mygit = self.gits.pop(name)
+        if gitter.check_unstaged(name, mygit):
+            log.exit('Interrupting')
+
+        # 1. git checkout new version
+        if gitter.switch_branch(mygit, new_release):  # , remote=False):
+            log.info("Main active branch: %s", new_release)
+        else:
+            log.exit("Failed changing main repository to %s", new_release)
+
+        # 2. check submodules versions
+        # if different move current to `submodules/.backup/$VERSION/$TOOL`
+        for name, gitobj in sorted(self.gits.items()):
+
+            # Skip non existing submodules or missing
+            if gitobj is None:
+                continue
+
+            if gitter.check_unstaged(name, gitobj):
+                current_dir = gitobj.working_dir
+                current_version = gitter.get_active_branch(gitobj)
+                backup_dir = helpers.current_fullpath(
+                    SUBMODULES_DIR, '.backup', current_version, name)
+                import shutil
+                try:
+                    shutil.move(current_dir, backup_dir)
+                except BaseException as e:
+                    log.exit(
+                        "Failed to backup %s.\n%s(%s)",
+                        name, e.__class__.__name__, e)
+                log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+
+        # 3. reinit submodules
+        self.read_specs()  # read again project configuration!
+        self.initialize = True
+        self.git_submodules()
+
+        # 4. rebuild images
+        # NOTE: this would rebuild images and templates
+        self.rebuild_from_upgrade()
+
+        # 5. safely restart?
+        # docker-compose up --force-recreate
+        pass
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -1075,6 +1167,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
             self.custom_parse_args()
+        else:
+            try:
+                argname = next(iter(self.arguments.remaining_args))
+            except StopIteration:
+                pass
+            else:
+                log.exit(
+                    "Unknown argument:'%s'.\nUse --help to list options",
+                    argname)
 
         # Verify if we implemented the requested command
         function = "_%s" % self.action.replace("-", "_")

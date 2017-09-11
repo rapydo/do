@@ -1,6 +1,7 @@
 
 from git import Repo
 from controller.arguments import ArgParser
+from controller.compose import compose_log
 from controller.app import Application
 from utilities import PROJECT_DIR, \
     BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
@@ -8,6 +9,14 @@ from utilities.logs import get_logger
 from utilities.basher import BashCommands
 
 log = get_logger(__name__)
+
+compose_log_prefix = 'DEBUG %s' % compose_log
+symbol = '✓'
+env_log = '%s Created .env file' % symbol
+env_log_prefix_verbose = 'VERBOSE ' + env_log
+env_log_prefix_info = 'INFO ' + env_log
+env_cached_log = 'Using cached .env'
+env_cached_log_verbose = 'VERY_VERBOSE ' + env_cached_log
 
 
 def exec_command(capfd, command):
@@ -36,12 +45,13 @@ def test_all(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
-    assert "INFO Created .env file" in err
+    log.pp(err)
+    assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
     # _, err = exec_command(capfd, "rapydo build")
@@ -49,7 +59,7 @@ def test_all(capfd):
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_info in err
     assert "INFO You are working on rapydo-core, not a fork" in err
     assert "INFO All checked" in err
 
@@ -63,18 +73,19 @@ def test_all(capfd):
 
     # Create upstream url
     _, err = exec_command(capfd, "rapydo init")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # Check upstream url
     # Also check .env cache
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
+    log.pp(err)
     assert "INFO \u2713 Upstream is set correctly" in err
-    assert "DEBUG Using cache for .env" in err
+    assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
     out, err = exec_command(capfd, "rapydo env")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "project: template" in out
 
 
@@ -106,62 +117,58 @@ def test_all(capfd):
 # def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
-    assert "INFO Created .env file" in err
-    assert "INFO Requesting within compose: 'up'" in err
+    assert env_log_prefix_verbose in err
+    assert compose_log_prefix + "'up'" in err
     assert "INFO Stack started" in err
 
     _, err = exec_command(capfd, "rapydo status")
-    assert "INFO Requesting within compose: 'ps'" in err
+    assert compose_log_prefix + "'ps'" in err
 
     exec_command(capfd, "rapydo log")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'logs'" in err
+    # assert compose_log_prefix + "'logs'" in err
 
     exec_command(capfd, "rapydo bower-install jquery")
     # FIXME: how is possible that this message is not found??
     # assert "EXIT Missing bower lib, please add the --lib option" in err
     exec_command(capfd, "rapydo bower-install --lib jquery")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'run'" in err
+    # assert compose_log_prefix + "'run'" in err
 
     exec_command(capfd, "rapydo bower-update jquery")
     # FIXME: how is possible that this message is not found??
     # assert "EXIT Missing bower lib, please add the --lib option" in err
     exec_command(capfd, "rapydo bower-update --lib jquery")
     # FIXME: how is possible that this message is not found??
-    # assert "INFO Requesting within compose: 'run'" in err
+    # assert compose_log_prefix + "'run'" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack paused" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack unpaused" in err
 
     _, err = exec_command(capfd, "rapydo stop")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack stoped" in err
 
     _, err = exec_command(capfd, "rapydo restart")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack restarted" in err
 
     _, err = exec_command(capfd, "rapydo remove")
-    assert "INFO Created .env file" in err
-    assert "INFO Requesting within compose: 'stop'" in err
+    assert env_log_prefix_verbose in err
+    assert compose_log_prefix + "'stop'" in err
     assert "INFO Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")
-    assert "INFO Created .env file" in err
+    assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
-
-    ###################
 
     endpoint_name = 'justatest'
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
-    # log.pp(err)
-
     # parsing responses like:
     # "rendered projects/template/backend/swagger/justatest/specs.yaml"
     base_response = 'DEBUG rendered %s/template/%s' % \
@@ -175,3 +182,8 @@ def test_all(capfd):
         (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
+
+    out, err = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
+    assert "Endpoint path:\t/api/%s" % endpoint_name in err
+    assert "Labels:\t\tcustom, %s" % endpoint_name in err
+    assert "Python class:\t%s" % endpoint_name.capitalize() in err

@@ -70,20 +70,26 @@ Suggestion: execute the init command
     return gitobj
 
 
-def switch_branch(gitobj, branch_name='master'):
+def switch_branch(gitobj, branch_name='master', remote=True):
 
     if gitobj.active_branch.name == branch_name:
         return False
 
+    if remote:
+        branches = gitobj.remotes[0].fetch()
+    else:
+        branches = gitobj.branches
     switch = False
-    remote_branches = gitobj.remotes[0].fetch()
 
-    for remote_branch in remote_branches:
+    for branch in branches:
+        if remote:
+            check = branch.name.endswith('/' + branch_name)
+        else:
+            check = branch.name == branch_name
 
-        if remote_branch.name.endswith('/' + branch_name):
+        if check:
             # Create a new HEAD
-            chkout = gitobj.create_head(
-                branch_name, remote_branch.commit)
+            chkout = gitobj.create_head(branch_name, branch.commit)
             # Switch to the new HEAD (like checkout)
             gitobj.head.reference = chkout
             # reset the index and working tree to match the pointed-to commit
@@ -200,8 +206,16 @@ def check_file_younger_than(gitobj, filename, timestamp):
 
 
 def get_unstaged_files(gitobj):
+    """
+    ref: http://gitpython.readthedocs.io/en/stable/
+        tutorial.html#obtaining-diff-information
+    """
 
-    return gitobj.index.diff(None)
+    diff = []
+    diff.extend(gitobj.index.diff(gitobj.head.commit))
+    diff.extend(gitobj.index.diff(None))
+    diff.extend(gitobj.untracked_files)
+    return diff
 
 
 def update(path, gitobj):
@@ -222,11 +236,12 @@ def update(path, gitobj):
         remote.pull(branch)
 
 
-def check_unstaged(path, gitobj):
+def check_unstaged(path, gitobj, logme=True):
 
-    modified_files = get_unstaged_files(gitobj)
-    if len(modified_files) > 0:
+    unstaged = len(get_unstaged_files(gitobj)) > 0
+    if unstaged and logme:
         log.warning("You have unstaged files on %s" % path)
+    return unstaged
 
 
 def fetch(path, gitobj, fetch_remote='origin'):
