@@ -1,16 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# try:
-#     from controller import arguments
-# except SystemExit:
-#     raise
-# except BaseException as e:
-#     # raise
-#     from utilities.logs import get_logger
-#     log = get_logger(__name__)
-#     log.exit("FATAL ERROR [%s]:\n\n%s" % (type(e), e))
-
-import os
 import os.path
 from collections import OrderedDict
 from distutils.version import LooseVersion
@@ -67,7 +56,6 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
-        log.debug("Selected project: %s" % self.project)
         self.development = self.current_args.get('development')
 
     def check_projects(self):
@@ -334,6 +322,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # substitute values starting with '$$'
         myvars = {
             'frontend': self.frontend,
+            'logging': self.current_args.get('collect_logs'),
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
             'customconf': helpers.project_dir(
@@ -404,7 +393,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     if self.action == 'check':
                         log.exit(
                             """Missing template build for %s
-\nSuggestion: execute the init or update command
+\nSuggestion: execute the init command
                             """ % build['service'])
                     else:
                         log.debug(
@@ -424,47 +413,44 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def bower_libs(self):
 
-        do_bower = False
-
         if self.check or self.initialize or self.update:
-            do_bower = True
+            if self.frontend:
+                bower_dir = os.path.join("data", "bower_components")
 
-        if not do_bower:
-            log.info("Skipping bower: not required for this command")
-        elif not self.frontend:
-            log.debug("Skipping bower: frontend is disabled")
-        elif self.current_args.get('no_bower'):
-            log.info("Skipping bower: user requested no-bower option")
-        else:
-            bower_dir = os.path.join("data", "bower_components")
-
-            install_bower = False
-            if self.update:
-                install_bower = True
-            elif not os.path.isdir(bower_dir):
-                install_bower = True
-            elif len(helpers.list_path(bower_dir)) <= 0:
-                install_bower = True
-
-            if not install_bower:
-                log.checked("Bower libs already installed")
-            elif self.check:
-                log.exit(
-                    """Missing bower libs in %s
-\nSuggestion: execute the init command"""
-                    % bower_dir
-                )
-            else:
-
-                if self.initialize:
-                    bower_command = "bower install"
+                install_bower = False
+                if self.update:
+                    install_bower = True
+                elif not os.path.isdir(bower_dir):
+                    install_bower = True
                 else:
-                    bower_command = "bower update"
+                    libs = helpers.list_path(bower_dir)
+                    if len(libs) <= 0:
+                        install_bower = True
 
-                bower_command += " --config.directory=/libs/bower_components"
+                if install_bower:
 
-                dc = Compose(files=self.files)
-                dc.create_volatile_container("bower", command=bower_command)
+                    if self.check:
+                        log.exit(
+                            """Missing bower libs in %s
+\nSuggestion: execute the init command"""
+                            % bower_dir
+                        )
+                    else:
+
+                        if self.initialize:
+                            bower_command = "bower install"
+                        else:
+                            bower_command = "bower update"
+
+                        bower_command += \
+                            " --config.directory=/libs/bower_components"
+
+                        dc = Compose(files=self.files)
+                        dc.create_volatile_container(
+                            "bower", command=bower_command)
+
+                else:
+                    log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -495,9 +481,9 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.current_args.get('cache_env'):
             try:
                 os.unlink(envfile)
-                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+                log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
             except FileNotFoundError:
-                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
+                log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
             with open(envfile, 'w+') as whandle:
@@ -515,12 +501,11 @@ Verify that you are in the right folder, now you are in: %s%s
                     if ' ' in value:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
-                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+                log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
-            # log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
-            log.debug("Using cache for %s" % COMPOSE_ENVIRONMENT_FILE)
+            log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 
-            # FIXME: 'do' here is deprecated and could be removed as parameter
+            # FIXME: 'do' var is deprecated and should be removed as parameter
 
             # # Stat file
             # mixed_env = os.stat(envfile)
@@ -688,11 +673,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             'SERVICE': services,
             '--no-deps': False,
             '-d': True,
+            # rebuild images changed with an upgrade
+            '--build': self.current_args.get('from_upgrade'),
+            # switching in an easier way between modules
+            '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
-            '--remove-orphans': False,
             '--no-recreate': False,
             '--force-recreate': False,
-            '--build': False,
             '--no-build': False,
             '--scale': {},
         }
@@ -1076,9 +1063,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         RUN THE APPLICATION!
         The heart of the app: it runs a single controller command.
         """
-
-        if "TESTING" in os.environ:
-            log.info("Controller is running in TESTING mode")
 
         # Initial inspection
         self.get_args()

@@ -34,6 +34,11 @@ options:
     default: DEBUG
     help: Level of verbosity
 
+  collect-logs:
+    type: bool
+    default: False
+    help: Collect logs from containers on ELK pipeline
+
   hostname:
     alias: H
     type: str
@@ -45,7 +50,7 @@ options:
   services:
     alias: s
     type: str
-    metavalue: SERVICES_COMA_SEPARATED
+    metavalue: SERVICES_COMMA_SEPARATED
     default: active services
     help: List of services referring to a command
 
@@ -56,12 +61,6 @@ options:
     default: False
     # help: Force recreation of the docker compose .env file even if existing
     help: Cache the docker compose .env file instead of recreating it
-
-  no-bower:
-    type: bool
-    default: False
-    # help: Force recreation of the docker compose .env file even if existing
-    help: Skip bower management
 
   development:
     type: bool
@@ -213,6 +212,13 @@ subcommands:
         help: UNIX command to be executed on selected running service
   start:
     description: Start containers for this configuration
+    suboptions:
+      from-upgrade:
+        alias: fu
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: rebuild images and use them to restart existing containers
   stop:
     description: Stop running containers, but do not remove them
   restart:
