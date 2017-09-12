@@ -416,11 +416,14 @@ Verify that you are in the right folder, now you are in: %s%s
     def bower_libs(self):
 
         if self.check or self.initialize or self.update:
+
             if self.frontend:
                 bower_dir = os.path.join("data", "bower_components")
 
                 install_bower = False
-                if self.update:
+                if self.current_args.get('skip_bower'):
+                    install_bower = False
+                elif self.update:
                     install_bower = True
                 elif not os.path.isdir(bower_dir):
                     install_bower = True
@@ -451,6 +454,8 @@ Verify that you are in the right folder, now you are in: %s%s
                         dc.create_volatile_container(
                             "bower", command=bower_command)
 
+                elif self.current_args.get('skip_bower'):
+                    log.info("Skipping bower checks")
                 else:
                     log.checked("Bower libs already installed")
 

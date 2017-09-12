@@ -102,6 +102,12 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
         help: ignore a given list of submodules (command delimited)
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
+
   status:
     description: list current status of containers
   build:
