@@ -8,7 +8,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 """
 
 from controller.dockerizing import docker_errors
-import compose.service
+from compose.service import BuildError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -55,7 +55,7 @@ class Compose(object):
     def force_template_build(self, builds):
 
         try:
-            options={}
+            options = {}
             compose_handler = self.get_handle()
             force_options = {
                 '--no-cache': True,
@@ -107,7 +107,7 @@ class Compose(object):
         except (
             clierrors.UserError,
             cerrors.OperationFailedError,
-            compose.service.BuildError,
+            BuildError,
         ) as e:
             log.critical_exit("Failed command execution:\n%s" % e)
         except docker_errors as e:
