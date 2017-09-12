@@ -8,7 +8,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 """
 
 from controller.dockerizing import docker_errors
-import compose.service
+from compose.service import BuildError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -19,6 +19,8 @@ from utilities import helpers
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
+
+compose_log = 'docker-compose command: '
 
 
 class Compose(object):
@@ -53,7 +55,7 @@ class Compose(object):
     def force_template_build(self, builds):
 
         try:
-            options={}
+            options = {}
             compose_handler = self.get_handle()
             force_options = {
                 '--no-cache': True,
@@ -86,21 +88,34 @@ class Compose(object):
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.info("Requesting within compose: '%s'" % command)
+        log.debug("%s'%s'" % (compose_log, command))
+
+        out = None
         try:
-            method(options=options)
-        except SystemExit:
-            log.very_verbose("Executed compose %s w/%s" % (command, options))
+            out = method(options=options)
+        except SystemExit as e:
+            # NOTE: we check the status here.
+            # System exit is received also when a normal command finished.
+            if e.code < 0:
+                log.warning("Invalid code returned: %s", e.code)
+            elif e.code > 0:
+                log.warning("Compose received: system.exit(%s)", e.code)
+                log.exit(error_code=e.code)
+            else:
+                log.very_verbose(
+                    "Executed compose %s w/%s" % (command, options))
         except (
             clierrors.UserError,
             cerrors.OperationFailedError,
-            compose.service.BuildError,
+            BuildError,
         ) as e:
             log.critical_exit("Failed command execution:\n%s" % e)
         except docker_errors as e:
             log.critical_exit("Failed docker container:\n%s" % e)
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
+
+        return out
 
     def split_command(self, command):
         """
@@ -147,7 +162,7 @@ class Compose(object):
             '-d': False, '-T': False,
         }
 
-        self.command('run', options)
+        return self.command('run', options)
 
     def exec_command(self, service, user=None, command=None):
         """
@@ -155,10 +170,6 @@ class Compose(object):
         """
 
         shell_command, shell_args = self.split_command(command)
-        if shell_command is not None:
-            log.info("Command request: %s(%s+%s)"
-                     % (service.upper(), shell_command, shell_args))
-
         options = {
             'SERVICE': service,
             'COMMAND': shell_command,
@@ -169,8 +180,26 @@ class Compose(object):
             '-T': False,
             '-d': False,
         }
+        if shell_command is not None:
+            log.debug("Command: %s(%s+%s)"
+                      % (service.lower(), shell_command, shell_args))
         try:
-            self.command('exec_command', options)
+            out = self.command('exec_command', options)
         except compose.project.NoSuchService:
             log.exit(
                 "Cannot find a running container with this name: %s" % service)
+        else:
+            return out
+
+    def get_defaults(self, command='configure'):
+        """
+        TODO: test this defaults for commands
+        """
+        from compose.cli.docopt_command import docopt_full_help
+        from compose.cli.main import TopLevelCommand
+        from inspect import getdoc
+
+        compose_options = {}
+        docstring = getdoc(getattr(TopLevelCommand, command))
+        return docopt_full_help(
+            docstring, compose_options, options_first=True)

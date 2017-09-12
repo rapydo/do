@@ -140,13 +140,13 @@ class ArgParser(object):
     def check_args(self, args):
         # Check on format
         for element in args:
-            if '_' in element:
+            if element.startswith('--') and '_' in element:
                 raise ValueError(
                     "Wrong \"%s\" option provided.\n" % element +
                     "Arguments containing '_' are not allowed.\n" +
                     "Use '-' instead\n")
         # NOTE: the standard is to use only '-' separators for arguments
-        # beware: argparse converts them into '_' when you want to retrieve it
+        # beware: argparse converts them into '_' when you want to retrieve
 
     def read_configuration(self):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS

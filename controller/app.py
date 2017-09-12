@@ -12,13 +12,13 @@ from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import project
 from controller import gitter
-from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
-from controller.scaffold import NewEndpointScaffold
+from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities.logs import get_logger
+from utilities.logs import get_logger, suppress_stdout
 
 log = get_logger(__name__)
 
@@ -35,6 +35,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+
         self.run()
 
     def get_args(self):
@@ -56,6 +57,7 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.development = self.current_args.get('development')
 
     def check_projects(self):
 
@@ -105,7 +107,7 @@ class Application(object):
         self.check_program('git')
 
     def check_program(self, program, min_version=None, max_version=None):
-        found_version = checks.check_executable(executable=program)
+        found_version = checks.executable(executable=program)
         if found_version is None:
             log.exit(
                 "Missing requirement.\n" +
@@ -131,7 +133,7 @@ class Application(object):
     def check_python_package(
             self, package, min_version=None, max_version=None):
 
-        found_version = checks.check_package(package)
+        found_version = checks.package(package)
         if found_version is None:
             log.exit(
                 "Could not find the following python package: %s" % package)
@@ -159,6 +161,9 @@ class Application(object):
         This check is only based on file existence.
         Further checks are performed later in the following steps
         """
+
+        # FIXME: a better way to select current directory
+        # TODO: save this local object as self.gits['local']
         local_git = gitter.get_local(".")
 
         if local_git is None:
@@ -248,7 +253,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def verify_connected(self):
         """ Check if connected to internet """
 
-        connected = checks.check_internet()
+        connected = checks.internet_connection_available()
         if not connected:
             log.exit('Internet connection unavailable')
         else:
@@ -278,7 +283,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def git_submodules(self):
         """ Check and/or clone git projects """
 
-        repos = self.vars.get('repos')
+        repos = self.vars.get('repos').copy()
         core = repos.pop('rapydo')
         core_url = core.get('online_url')
 
@@ -475,9 +480,9 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.current_args.get('cache_env'):
             try:
                 os.unlink(envfile)
-                log.debug("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+                log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
             except FileNotFoundError:
-                log.verbose("No %s to be removed" % COMPOSE_ENVIRONMENT_FILE)
+                log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
             with open(envfile, 'w+') as whandle:
@@ -495,12 +500,11 @@ Verify that you are in the right folder, now you are in: %s%s
                     if ' ' in value:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
-                log.info("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+                log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
         else:
-            # log.checked("%s already exists" % COMPOSE_ENVIRONMENT_FILE)
-            log.debug("Using cache for %s" % COMPOSE_ENVIRONMENT_FILE)
+            log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 
-            # FIXME: 'do' here is deprecated and could be removed as parameter
+            # FIXME: 'do' var is deprecated and should be removed as parameter
 
             # # Stat file
             # mixed_env = os.stat(envfile)
@@ -623,6 +627,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
+    def rebuild_from_upgrade(self):
+        log.warning("Rebuilding images from an upgrade")
+        self.current_args['rebuild_templates'] = True
+        self._build()
+
     ################################
     # ##    COMMANDS    ##         #
     ################################
@@ -662,17 +671,21 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
+        if self.current_args.get('from_upgrade'):
+            self.rebuild_from_upgrade()
+
         services = self.get_services(default=self.active_services)
 
         options = {
             'SERVICE': services,
             '--no-deps': False,
             '-d': True,
+            '--build': False,
+            # switching in an easier way between modules
+            '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
-            '--remove-orphans': False,
             '--no-recreate': False,
             '--force-recreate': False,
-            '--build': False,
             '--no-build': False,
             '--scale': {},
         }
@@ -758,14 +771,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         db = self.current_args.get('service')
         service = db + 'ui'
 
-        # TO FIX: this check should be moved inside create_volatile_container
+        # FIXME: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
             log.exit("Container '%s' is not defined" % service)
 
         port = self.current_args.get('port')
         publish = []
 
-        # TO FIX: these checks should be moved inside create_volatile_container
+        # FIXME: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
@@ -788,7 +801,25 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             publish.append("%s:%s" % (port, current_ports.target))
 
         dc = Compose(files=self.files)
-        dc.create_volatile_container(service, publish=publish)
+
+        host = self.current_args.get('hostname')
+        # FIXME: to be completed
+        uris = {
+            'swaggerui':
+                'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
+                (host, host, '8080'),
+
+        }
+
+        uri = uris.get(service)
+        if uri is not None:
+            log.info(
+                "You can access %s web page here:\n%s", service, uri)
+        else:
+            log.info("Launching interface: %s", service)
+        with suppress_stdout():
+            # NOTE: this is suppressing also image build...
+            dc.create_volatile_container(service, publish=publish)
 
     def _shell(self, user=None, command=None, service=None):
 
@@ -810,7 +841,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        dc.exec_command(service, user=user, command=command)
+        return dc.exec_command(service, user=user, command=command)
 
     def _build(self):
 
@@ -824,7 +855,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {
             'SERVICE': services,
-            # FIXME: user should be able to set the two below from cli
+            # TODO: user should be allowed to set the two below from cli
             '--no-cache': False,
             '--pull': False,
         }
@@ -950,7 +981,20 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         force = self.current_args.get('yes')
         endpoint_name = self.current_args.get('endpoint')
 
-        NewEndpointScaffold(self.project, force, endpoint_name, service_name)
+        new_endpoint = EndpointScaffold(
+            self.project, force, endpoint_name, service_name)
+        new_endpoint.create()
+
+    def _find(self):
+        endpoint_name = self.current_args.get('endpoint')
+
+        if endpoint_name is not None:
+            lookup = EndpointScaffold(
+                self.project, endpoint_name=endpoint_name)
+            lookup.info()
+        else:
+            log.exit("Please, specify something to look for.\n" +
+                     "Add --help to list available options.")
 
     def _coverall(self):
 
@@ -999,8 +1043,104 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         }
         dc = Compose(files=[compose_file])
 
-        # TODO: check if this command could be 'run' instead of using 'up'
+        # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
+
+    def available_releases(self, releases):
+
+        log.warning('List of releases:')
+        print('\n###########')
+        for release, info in releases.items():
+            print('Release %s: %s [%s]' %
+                  (release, info.get('type'), info.get('status')))
+        print('')
+
+    def _upgrade(self):
+        releases = self.specs.get('releases', {})
+        if len(releases) < 1:
+            log.exit('This project does not support releases yet')
+
+        gitobj = self.gits.get('main')
+        current_release = gitter.get_active_branch(gitobj)
+        log.info('Current release: %s' % current_release)
+
+        if current_release == 'master':
+            log.exit("Cannot upgrade from master. Please work on a branch.")
+
+        new_release = self.current_args.get('release')
+
+        if new_release is None:
+            self.available_releases(releases)
+            return False
+        else:
+            if new_release not in releases:
+                self.available_releases(releases)
+                log.exit('Release %s not found' % new_release)
+            else:
+                log.info('Requested release: %s' % new_release)
+            if new_release == current_release:
+                log.warning('Already at %s' % current_release)
+                return False
+
+        if LooseVersion(new_release) < LooseVersion(current_release):
+            log.exit('Cannot upgrade to previous version')
+
+        status = releases.get(new_release).get('status')
+        if status != 'released':
+            if self.development and status == 'developing':
+                pass
+            else:
+                log.exit("This version has yet to be released")
+
+        ##########################
+
+        # # 0. if current main repo is being developed, stop this
+        # # NOTE: I am not checking for commits to be pushed
+        name = 'main'
+        mygit = self.gits.pop(name)
+        if gitter.check_unstaged(name, mygit):
+            log.exit('Interrupting')
+
+        # 1. git checkout new version
+        if gitter.switch_branch(mygit, new_release):  # , remote=False):
+            log.info("Main active branch: %s", new_release)
+        else:
+            log.exit("Failed changing main repository to %s", new_release)
+
+        # 2. check submodules versions
+        # if different move current to `submodules/.backup/$VERSION/$TOOL`
+        for name, gitobj in sorted(self.gits.items()):
+
+            # Skip non existing submodules or missing
+            if gitobj is None:
+                continue
+
+            if gitter.check_unstaged(name, gitobj):
+                current_dir = gitobj.working_dir
+                current_version = gitter.get_active_branch(gitobj)
+                backup_dir = helpers.current_fullpath(
+                    SUBMODULES_DIR, '.backup', current_version, name)
+                import shutil
+                try:
+                    shutil.move(current_dir, backup_dir)
+                except BaseException as e:
+                    log.exit(
+                        "Failed to backup %s.\n%s(%s)",
+                        name, e.__class__.__name__, e)
+                log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+
+        # 3. reinit submodules
+        self.read_specs()  # read again project configuration!
+        self.initialize = True
+        self.git_submodules()
+
+        # 4. rebuild images
+        # NOTE: this would rebuild images and templates
+        self.rebuild_from_upgrade()
+
+        # 5. safely restart?
+        # docker-compose up --force-recreate
+        pass
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -1023,6 +1163,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
             self.custom_parse_args()
+        else:
+            try:
+                argname = next(iter(self.arguments.remaining_args))
+            except StopIteration:
+                pass
+            else:
+                log.exit(
+                    "Unknown argument:'%s'.\nUse --help to list options",
+                    argname)
 
         # Verify if we implemented the requested command
         function = "_%s" % self.action.replace("-", "_")
