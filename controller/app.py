@@ -418,7 +418,8 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.check or self.initialize or self.update:
 
             if self.frontend:
-                bower_dir = os.path.join("data", "bower_components")
+                bower_dir = os.path.join(
+                    "data", self.project, "bower_components")
 
                 install_bower = False
                 if self.current_args.get('skip_bower'):
@@ -435,11 +436,32 @@ Verify that you are in the right folder, now you are in: %s%s
                 if install_bower:
 
                     if self.check:
+
+                        # TODO: remove this check
+                        # Added this check on 12th Sep 2017 just to help users
+                        old_bdir = os.path.join("data", "bower_components")
+                        if os.path.isdir(old_bdir):
+                            log.exit(
+                                """ The position of bower data dir changed!
+
+Old position: %s
+New position: %s
+
+You can do several things:
+- mkdir -p %s && mv %s %s
+- execute rapydo init
+- execute rapydo update
+""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
+                            )
+
+                        #############################################
+
                         log.exit(
                             """Missing bower libs in %s
 \nSuggestion: execute the init command"""
                             % bower_dir
                         )
+
                     else:
 
                         if self.initialize:
