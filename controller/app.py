@@ -1227,13 +1227,19 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.verbose("Skipping heavy operations")
 
         if self.check:
+
+            remote_branch = self.vars.get(
+                'repos', []).get(
+                'rapydo', []).get(
+                'branch', 'master')
+
             if self.current_args.get('verify_upstream', False):
                 # FIXME: connection verification should be made only once
                 self.verify_connected()
                 gitter.check_updates(
                     'upstream', self.gits['main'],
                     fetch_remote='upstream',
-                    remote_branch='master'
+                    remote_branch=remote_branch
                 )
 
         # self.make_env(do=do_heavy_ops)
