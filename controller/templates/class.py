@@ -23,7 +23,6 @@ service_name = "{{ service_name }}"
 class {{ class_name }}(EndpointResource):
 
     def get(self):
-
         # Write server logs, on different levels:
         # very_verbose, verbose, debug, info, warning, error, critical, exit
         log.info("Received a test HTTP request")
