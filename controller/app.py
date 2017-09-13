@@ -475,6 +475,8 @@ You can do several things:
                         dc.create_volatile_container(
                             "bower", command=bower_command)
 
+                        log.info("Bower libs downloaded")
+
                 elif self.current_args.get('skip_bower'):
                     log.info("Skipping bower checks")
                 else:
