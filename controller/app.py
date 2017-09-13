@@ -20,7 +20,6 @@ from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from utilities.logs import get_logger, suppress_stdout
 
-
 log = get_logger(__name__)
 
 

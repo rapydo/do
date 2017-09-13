@@ -40,6 +40,7 @@ class EndpointScaffold(object):
 
         self.endpoint_dir = '_'.join(names)
         self.endpoint_name = self.endpoint_dir.replace('_', '')
+        self.specs_file = 'specs.%s' % YAML_EXT
 
         self.specs_file = 'specs.%s' % YAML_EXT
 

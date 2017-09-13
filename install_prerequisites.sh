@@ -1,6 +1,5 @@
 #!/bin/sh
 set -e
-#
 
 # This script is meant for quick & easy install via:
 #   'curl -sSL https://github.com/rapydo/do/blob/master/install_prerequisites.sh | sh'
