@@ -89,10 +89,21 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: include upstream repo (rapydo-core) to checked submodules
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
   init:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+    suboptions:
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
   update:
     description: update the current project
     suboptions:
