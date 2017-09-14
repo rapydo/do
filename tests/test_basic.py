@@ -114,7 +114,9 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
-    assert " ['template', 'second']" in err
+    # We can no longer test this, we have several projects and the number is
+    # dyanamic... we do not want to update this list every new project...
+    # assert " ['template', 'second']" in err
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
