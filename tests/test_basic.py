@@ -1,4 +1,5 @@
 
+import os
 from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
@@ -42,6 +43,10 @@ def exec_command(capfd, command):
 
 # def test_init_and_check(capfd):
 def test_all(capfd):
+
+    # create .projectrc
+    with open('.projectrc', 'w') as f:
+        f.write("project: template")
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
@@ -90,6 +95,7 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "project: template" in out
 
+    os.remove(".projectrc")
 
 # def test_two_projects(capfd):
     bash = BashCommands()
