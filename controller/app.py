@@ -423,9 +423,10 @@ Verify that you are in the right folder, now you are in: %s%s
                 install_bower = False
                 if self.current_args.get('skip_bower'):
                     install_bower = False
-                elif self.update:
-                    install_bower = True
                 elif not os.path.isdir(bower_dir):
+                    install_bower = True
+                    os.makedirs(bower_dir)
+                elif self.update:
                     install_bower = True
                 else:
                     libs = helpers.list_path(bower_dir)
