@@ -104,7 +104,9 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env check -s")
     e = "EXIT Please select the --project option on one of the following:"
     assert e in err
-    assert " ['template', 'second']" in err
+    # We can no longer test this, we have several projects and the number is
+    # dyanamic... we do not want to update this list every new project...
+    # assert " ['template', 'second']" in err
 
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
