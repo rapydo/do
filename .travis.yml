@@ -16,11 +16,17 @@ install:
 - pip install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
 script:
-- rapydo --help
 - rapydo --version
+- rapydo --help
 - git clone https://github.com/rapydo/core.git
 - BRANCH=`[ TRAVIS_PULL_REQUEST ] && echo $TRAVIS_PULL_REQUEST_BRANCH || echo $TRAVIS_BRANCH`
-- echo $BRANCH && cd core && git checkout $BRANCH && mkdir data
+- echo "TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}"
+- echo "TRAVIS_PULL_REQUEST_BRANCH = ${TRAVIS_PULL_REQUEST_BRANCH}"
+- echo "TRAVIS_BRANCH = ${TRAVIS_BRANCH}"
+- echo "BRANCH = ${BRANCH}"
+- cd core
+- git checkout $BRANCH
+- mkdir data
 - TESTING=1 py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
