@@ -9,6 +9,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 
 from controller.dockerizing import docker_errors
 from compose.service import BuildError
+from compose.project import NoSuchService
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -185,7 +186,7 @@ class Compose(object):
                       % (service.lower(), shell_command, shell_args))
         try:
             out = self.command('exec_command', options)
-        except compose.project.NoSuchService:
+        except NoSuchService:
             log.exit(
                 "Cannot find a running container with this name: %s" % service)
         else:

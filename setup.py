@@ -35,11 +35,9 @@ setup(
     install_requires=[
         "rapydo-utils==%s" % current_version,
         "docker-compose==1.15.0",  # NOTE: you get an error with 1.16!
-        # "docker==2.5.1",  # doable
-        "docker==2.4.2",
+        "docker==2.5.1",
         "dockerfile-parse",
         "gitpython",
-        "better_exceptions",
         "jinja2",
         # # necessary for docker-compose
         # # https://github.com/docker/compose/issues/4431
