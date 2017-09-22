@@ -248,6 +248,7 @@ Verify that you are in the right folder, now you are in: %s%s
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
+
         log.very_verbose("Frontend is %s" % self.frontend)
 
     def verify_connected(self):
@@ -322,6 +323,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # substitute values starting with '$$'
         myvars = {
             'frontend': self.frontend,
+            'logging': self.current_args.get('collect_logs'),
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
             'customconf': helpers.project_dir(
@@ -413,13 +415,18 @@ Verify that you are in the right folder, now you are in: %s%s
     def bower_libs(self):
 
         if self.check or self.initialize or self.update:
+
             if self.frontend:
-                bower_dir = os.path.join("data", "bower_components")
+                bower_dir = os.path.join(
+                    "data", self.project, "bower_components")
 
                 install_bower = False
-                if self.update:
-                    install_bower = True
+                if self.current_args.get('skip_bower'):
+                    install_bower = False
                 elif not os.path.isdir(bower_dir):
+                    install_bower = True
+                    os.makedirs(bower_dir)
+                elif self.update:
                     install_bower = True
                 else:
                     libs = helpers.list_path(bower_dir)
@@ -429,11 +436,32 @@ Verify that you are in the right folder, now you are in: %s%s
                 if install_bower:
 
                     if self.check:
+
+                        # TODO: remove this check
+                        # Added this check on 12th Sep 2017 just to help users
+                        old_bdir = os.path.join("data", "bower_components")
+                        if os.path.isdir(old_bdir):
+                            log.exit(
+                                """ The position of bower data dir changed!
+
+Old position: %s
+New position: %s
+
+You can do several things:
+- mkdir -p %s && mv %s %s
+- execute rapydo init
+- execute rapydo update
+""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
+                            )
+
+                        #############################################
+
                         log.exit(
                             """Missing bower libs in %s
 \nSuggestion: execute the init command"""
                             % bower_dir
                         )
+
                     else:
 
                         if self.initialize:
@@ -448,6 +476,10 @@ Verify that you are in the right folder, now you are in: %s%s
                         dc.create_volatile_container(
                             "bower", command=bower_command)
 
+                        log.info("Bower libs downloaded")
+
+                elif self.current_args.get('skip_bower'):
+                    log.info("Skipping bower checks")
                 else:
                     log.checked("Bower libs already installed")
 
@@ -680,7 +712,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             'SERVICE': services,
             '--no-deps': False,
             '-d': True,
-            '--build': False,
+            # rebuild images changed with an upgrade
+            '--build': self.current_args.get('from_upgrade'),
             # switching in an easier way between modules
             '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
@@ -1196,13 +1229,19 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.verbose("Skipping heavy operations")
 
         if self.check:
+
+            remote_branch = self.vars.get(
+                'repos', []).get(
+                'rapydo', []).get(
+                'branch', 'master')
+
             if self.current_args.get('verify_upstream', False):
                 # FIXME: connection verification should be made only once
                 self.verify_connected()
                 gitter.check_updates(
                     'upstream', self.gits['main'],
                     fetch_remote='upstream',
-                    remote_branch='master'
+                    remote_branch=remote_branch
                 )
 
         # self.make_env(do=do_heavy_ops)

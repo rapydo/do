@@ -94,7 +94,8 @@ class Dock(object):
         # http://docker-py.readthedocs.io/en/1.5.0/api/#get_archive
 
         try:
-            content, stats = self.client.api.get_archive(
+            # content, stats = self.client.api.get_archive(
+            content, _ = self.client.api.get_archive(
                 container=container.attrs,
                 path=path,
             )

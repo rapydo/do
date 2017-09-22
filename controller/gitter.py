@@ -182,7 +182,7 @@ Suggestion: remove %s and execute the init command
                 return False
             log.critical_exit(
                 """Wrong branch %s, expected %s.
-    Suggested: cd %s; git checkout %s;"""
+    Suggested: cd %s; git checkout %s; cd -;"""
                 % (active_branch, branch, gitobj.working_dir, branch)
             )
     return True
