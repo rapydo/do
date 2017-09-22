@@ -1,4 +1,5 @@
 
+import os
 from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
@@ -43,15 +44,21 @@ def exec_command(capfd, command):
 # def test_init_and_check(capfd):
 def test_all(capfd):
 
+    # create .projectrc
+    with open('.projectrc', 'w') as f:
+        f.write("project: template")
+
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
+    assert "INFO Bower libs downloaded" in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
     assert env_log_prefix_verbose in err
+    assert "INFO Bower libs downloaded" in err
     assert "INFO All updated" in err
 
     # _, err = exec_command(capfd, "rapydo build")
@@ -88,6 +95,7 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "project: template" in out
 
+    os.remove(".projectrc")
 
 # def test_two_projects(capfd):
     bash = BashCommands()
@@ -96,7 +104,9 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env check -s")
     e = "EXIT Please select the --project option on one of the following:"
     assert e in err
-    assert " ['template', 'second']" in err
+    # We can no longer test this, we have several projects and the number is
+    # dyanamic... we do not want to update this list every new project...
+    # assert " ['template', 'second']" in err
 
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
@@ -104,7 +114,9 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
-    assert " ['template', 'second']" in err
+    # We can no longer test this, we have several projects and the number is
+    # dyanamic... we do not want to update this list every new project...
+    # assert " ['template', 'second']" in err
 
     # create .projectrc
     with open('.projectrc', 'w') as f:

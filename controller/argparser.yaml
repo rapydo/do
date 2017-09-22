@@ -34,6 +34,11 @@ options:
     default: DEBUG
     help: level of verbosity
 
+  collect-logs:
+    type: bool
+    default: False
+    help: Collect logs from containers on ELK pipeline
+
   hostname:
     alias: H
     type: str
@@ -45,7 +50,7 @@ options:
   services:
     alias: s
     type: str
-    metavalue: SERVICES_COMA_SEPARATED
+    metavalue: SERVICES_COMMA_SEPARATED
     default: active services
     help: list of services referring to a command
 
@@ -84,10 +89,21 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: include upstream repo (rapydo-core) to checked submodules
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
   init:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+    suboptions:
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
   update:
     description: update the current project
     suboptions:
@@ -97,6 +113,12 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         default: 'upstream'
         help: ignore a given list of submodules (command delimited)
+      skip-bower:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: skip update of bower libs
+
   status:
     description: list current status of containers
   build:
@@ -202,7 +224,7 @@ subcommands:
         default: bash
         help: UNIX command to be executed on selected running service
   start:
-    description: start containers for this configuration
+    description: Start containers for this configuration
     suboptions:
       from-upgrade:
         alias: fu

@@ -7,6 +7,7 @@ from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR
 from utilities import helpers
 from utilities.logs import get_logger
+from utilities.time import date_from_string
 
 log = get_logger(__name__)
 
@@ -182,14 +183,25 @@ Suggestion: remove %s and execute the init command
                 return False
             log.critical_exit(
                 """Wrong branch %s, expected %s.
-    Suggested: cd %s; git checkout %s;"""
+    Suggested: cd %s; git checkout %s; cd -;"""
                 % (active_branch, branch, gitobj.working_dir, branch)
             )
     return True
 
 
 def check_file_younger_than(gitobj, filename, timestamp):
-    # gitobj.commit()
+
+    # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
+    # i.e. were convertable to float
+    # From dockerpy 2.5.1 we are obtained strings like this:
+    # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
+    try:
+        # verify if timestamp is already an epoch
+        float(timestamp)
+    except ValueError:
+        # otherwise, convert it
+        timestamp = date_from_string(timestamp).timestamp()
+
     try:
         commits = gitobj.blame(rev='HEAD', file=filename)
     except GitCommandError as e:
