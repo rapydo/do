@@ -10,6 +10,7 @@ from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
+from controller import __version__
 from controller import project
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
@@ -242,6 +243,7 @@ Verify that you are in the right folder, now you are in: %s%s
             project=self.project,
             is_template=self.is_template
         )
+
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
 
@@ -279,6 +281,8 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.tested_connection and self.initialize:
             self.verify_connected()
 
+        if repo['branch'] == '__current__':
+            repo['branch'] = __version__
         return gitter.clone(**repo)
 
     def git_submodules(self):
