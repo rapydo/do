@@ -15,6 +15,7 @@ import compose.config.errors as conferrors
 from compose.cli.command import \
     get_project_name, get_config_from_options, project_from_options
 from compose.cli.main import TopLevelCommand
+from compose.project import NoSuchService
 from utilities import helpers
 from utilities.logs import get_logger
 
@@ -185,7 +186,7 @@ class Compose(object):
                       % (service.lower(), shell_command, shell_args))
         try:
             out = self.command('exec_command', options)
-        except compose.project.NoSuchService:
+        except NoSuchService:
             log.exit(
                 "Cannot find a running container with this name: %s" % service)
         else:
