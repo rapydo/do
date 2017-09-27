@@ -504,8 +504,7 @@ You can do several things:
                 #     log.exit("You must set '--services' option")
                 if default is not None:
                     value = default
-                else:
-                    pass
+
         return value
 
     # def make_env(self, do=False):
@@ -1177,7 +1176,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # 5. safely restart?
         # docker-compose up --force-recreate
-        pass
 
     ################################
     # ### RUN ONE COMMAND OFF

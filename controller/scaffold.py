@@ -127,8 +127,7 @@ class EndpointScaffold(object):
         for current_specs_file in swagdir.glob('*/%s' % self.specs_file):
             content = load_yaml_file(str(current_specs_file))
 
-            for name, value in content.get('mapping', {}).items():
-                # print(current_specs_file, name, value)
+            for _, value in content.get('mapping', {}).items():
                 if value == '/' + endpoint or \
                    value.startswith('/' + endpoint + '/'):
                     needle = content
