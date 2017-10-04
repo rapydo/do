@@ -10,7 +10,6 @@ from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
-from controller import __version__
 from controller import project
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
@@ -264,7 +263,7 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, repo):
+    def working_clone(self, name, repo):
 
         # substitute values starting with '$$'
         myvars = {'frontend': self.frontend}
@@ -281,15 +280,25 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.tested_connection and self.initialize:
             self.verify_connected()
 
-        if repo['branch'] == '__current__':
+        ################
+        # NOTE: simpler now, as we set:
+
+        # - repo path to the repo name
+        if 'path' not in repo:
+            repo['path'] = name
+        # - version is the one we have on the working controller
+        from controller import __version__
+        if 'branch' not in repo:
             repo['branch'] = __version__
+
         return gitter.clone(**repo)
 
     def git_submodules(self):
         """ Check and/or clone git projects """
 
+        core_key = 'core'
         repos = self.vars.get('repos').copy()
-        core = repos.pop('rapydo')
+        core = repos.pop(core_key)
         core_url = core.get('online_url')
 
         gits = {}
@@ -303,14 +312,14 @@ Verify that you are in the right folder, now you are in: %s%s
             log.info("You are working on rapydo-core, not a fork")
             gits['main'] = local
         else:
+            core_path = core.get('path')
+            if core_path is None:
+                core_path = core_key
             gits['main'] = gitter.upstream(
-                url=core_url,
-                path=core.get('path'),
-                do=self.initialize
-            )
+                url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
-            gits[name] = self.working_clone(repo)
+            gits[name] = self.working_clone(name, repo)
 
         self.gits = gits
 
@@ -1236,7 +1245,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             remote_branch = self.vars.get(
                 'repos', []).get(
-                'rapydo', []).get(
+                'core', []).get(
                 'branch', 'master')
 
             if self.current_args.get('verify_upstream', False):
