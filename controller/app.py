@@ -1128,13 +1128,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 log.warning('Already at %s' % current_release)
                 return False
 
-        try:
-            if LooseVersion(new_release) < LooseVersion(current_release):
-                log.exit('Cannot upgrade to previous version')
-        except TypeError as e:
-            log.exit("Unable to compare %s with %s (%s)" % (
-                new_release, current_release, e)
-            )
+        if not self.current_args.get('downgrade'):
+            try:
+                if LooseVersion(new_release) < LooseVersion(current_release):
+                    log.exit('Cannot upgrade to previous version')
+            except TypeError as e:
+                log.exit("Unable to compare %s with %s (%s)" % (
+                    new_release, current_release, e)
+                )
 
         status = releases.get(new_release).get('status')
         if status != 'released':
