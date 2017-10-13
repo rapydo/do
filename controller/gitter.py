@@ -19,6 +19,10 @@ def get_repo(path):
 def get_local(path):
     try:
         gitobj = get_repo(path)
+
+        if len(gitobj.remotes) == 0:
+            log.warning("Unable to fetch remotes from %s" % path)
+            return None
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
         return None
