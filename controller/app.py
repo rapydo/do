@@ -57,6 +57,14 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+
+        if "_" in self.project:
+            suggest = "\nPlease consider to rename %s into %s" % (
+                self.project, self.project.replace("_", "")
+            )
+            log.exit(
+                "Wrong project name, _ is not a valid character. %s" % suggest)
+
         self.development = self.current_args.get('development')
 
     def check_projects(self):
