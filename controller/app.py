@@ -59,18 +59,21 @@ class Application(object):
         self.tested_connection = False
         self.project = self.current_args.get('project')
 
-        if "_" in self.project:
-            suggest = "\nPlease consider to rename %s into %s" % (
-                self.project, self.project.replace("_", "")
-            )
-            log.exit(
-                "Wrong project name, _ is not a valid character. %s" % suggest)
+        if self.project is not None:
+            if "_" in self.project:
+                suggest = "\nPlease consider to rename %s into %s" % (
+                    self.project, self.project.replace("_", "")
+                )
+                log.exit(
+                    "Wrong project name, _ is not a valid character. %s" %
+                    suggest
+                )
 
-        if self.project in self.reserved_project_names:
-            log.exit(
-                "You selected a reserved name, cannot use %s as project name"
-                % self.project
-            )
+            if self.project in self.reserved_project_names:
+                log.exit(
+                    "You selected a reserved name, invalid project name: %s"
+                    % self.project
+                )
 
         self.development = self.current_args.get('development')
 
