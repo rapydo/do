@@ -35,6 +35,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+        self.reserved_project_names = self.get_reserved_project_names()
 
         self.run()
 
@@ -57,6 +58,23 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+
+        if self.project is not None:
+            if "_" in self.project:
+                suggest = "\nPlease consider to rename %s into %s" % (
+                    self.project, self.project.replace("_", "")
+                )
+                log.exit(
+                    "Wrong project name, _ is not a valid character. %s" %
+                    suggest
+                )
+
+            if self.project in self.reserved_project_names:
+                log.exit(
+                    "You selected a reserved name, invalid project name: %s"
+                    % self.project
+                )
+
         self.development = self.current_args.get('development')
 
     def check_projects(self):
@@ -1278,3 +1296,61 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Final step, launch the command
         func()
+
+    # issues/57
+    # I'm temporary here... to be decided how to handle me
+    def get_reserved_project_names(self):
+        names = [
+            'abc',
+            'attr',
+            'base64',
+            'better_exceptions',
+            'bravado_core',
+            'celery',
+            'click',
+            'collections',
+            'datetime',
+            'dateutil',
+            'elasticsearch_dsl',
+            'email',
+            'errno',
+            'flask',
+            'flask_injector',
+            'flask_oauthlib',
+            'flask_restful',
+            'flask_sqlalchemy',
+            'functools',
+            'glob',
+            'hashlib',
+            'hmac',
+            'injector',
+            'inspect',
+            'io',
+            'irods',
+            'iRODSPickleSession',
+            'json',
+            'jwt',
+            'logging',
+            'neo4j',
+            'neomodel',
+            'os',
+            'pickle',
+            'plumbum',
+            'pymodm',
+            'pymongo',
+            'pyotp',
+            'pyqrcode',
+            'pytz',
+            'random',
+            're',
+            'smtplib',
+            'socket',
+            'sqlalchemy',
+            'string',
+            'submodules',
+            'sys',
+            'time',
+            'unittest',
+            'werkzeug'
+        ]
+        return names
