@@ -548,10 +548,12 @@ You can do several things:
                 log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
+
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+                env['DOCKER_PRIVILEGED_MODE'] = 1
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -564,6 +566,7 @@ You can do several things:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
                 log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+
         else:
             log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 

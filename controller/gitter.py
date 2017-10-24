@@ -243,13 +243,14 @@ def update(path, gitobj):
             "Unable to update %s repo, you have unstaged files" % (path))
         return
 
-    branch = gitobj.active_branch
     for remote in gitobj.remotes:
-        if remote.name != 'origin':
-            continue
-
-        log.info("Updating %s %s (branch = %s)" % (remote, path, branch))
-        remote.pull(branch)
+        if remote.name == 'origin':
+            try:
+                branch = gitobj.active_branch
+                log.info("Updating %s %s (branch %s)" % (remote, path, branch))
+                remote.pull(branch)
+            except TypeError as e:
+                log.warning("Unable to update %s repo, %s" % (path, e))
 
 
 def check_unstaged(path, gitobj, logme=True):
