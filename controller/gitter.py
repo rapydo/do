@@ -19,6 +19,10 @@ def get_repo(path):
 def get_local(path):
     try:
         gitobj = get_repo(path)
+
+        if len(gitobj.remotes) == 0:
+            log.warning("Unable to fetch remotes from %s" % path)
+            return None
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
         return None
@@ -239,25 +243,17 @@ def update(path, gitobj):
             "Unable to update %s repo, you have unstaged files" % (path))
         return
 
-    branch = None
-    try:
-        branch = gitobj.active_branch
-    except TypeError as e:
-        log.error(e)
-        if TESTING:
-            log.warning("Unable to update repository: %s" % path)
-        else:
-            log.exit("Unable to update repository: %s" % path)
-
-    if branch is None:
-        return 
-
     for remote in gitobj.remotes:
-        if remote.name != 'origin':
-            continue
-
-        log.info("Updating %s %s (branch = %s)" % (remote, path, branch))
-        remote.pull(branch)
+        if remote.name == 'origin':
+            try:
+                branch = gitobj.active_branch
+                log.info("Updating %s %s (branch %s)" % (remote, path, branch))
+                remote.pull(branch)
+            except TypeError as e:
+                if TESTING:
+                    log.warning("Unable to update %s repo, %s" % (path, e))
+                else:
+                    log.exit("Unable to update %s repo, %s" % (path, e))
 
 
 def check_unstaged(path, gitobj, logme=True):

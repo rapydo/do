@@ -4,7 +4,6 @@
 Run unittests inside the RAPyDo framework
 """
 
-import json
 from tests import RestTestsAuthenticatedBase
 from utilities.logs import get_logger
 
@@ -20,6 +19,12 @@ class Test{{ class_name }}(RestTestsAuthenticatedBase):
     """
 
     _main_endpoint = '/{{ endpoint_name }}'
+
+    # def setUp(self):
+    #     """ override original setup to create custom data at each request """
+
+    #     super().setUp()  # Call father's method
+    #     log.debug('### Create some custom data ###\n')
 
     def test_01_GET_giveityourname(self):
         """
@@ -37,15 +42,14 @@ class Test{{ class_name }}(RestTestsAuthenticatedBase):
 
         # Assert what is right or wrong
         self.assertEqual(r.status_code, self._hcodes.HTTP_OK_BASIC)
-        data = json.loads(r.get_data(as_text=True))
+        output = self.get_content(r)
 
         # pretty print data obtained from API to check the content
-        # log.pp(data)
-        self.assertEqual(data['Response']['data'], 'Hello world!')
+        # log.pp(output)
+        self.assertEqual(output, 'Hello world!')
 
     # def tearDown(self):
-    #     """ override original teardown if you create custom data """
+    #     """ override teardown: remove custom data at each request """
 
     #     log.debug('### Cleaning custom data ###\n')
     #     super().tearDown()
-

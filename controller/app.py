@@ -36,6 +36,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+        self.reserved_project_names = self.get_reserved_project_names()
 
         self.run()
 
@@ -58,6 +59,23 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+
+        if self.project is not None:
+            if "_" in self.project:
+                suggest = "\nPlease consider to rename %s into %s" % (
+                    self.project, self.project.replace("_", "")
+                )
+                log.exit(
+                    "Wrong project name, _ is not a valid character. %s" %
+                    suggest
+                )
+
+            if self.project in self.reserved_project_names:
+                log.exit(
+                    "You selected a reserved name, invalid project name: %s"
+                    % self.project
+                )
+
         self.development = self.current_args.get('development')
 
     def check_projects(self):
@@ -264,7 +282,7 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, repo):
+    def working_clone(self, name, repo):
 
         # substitute values starting with '$$'
         myvars = {'frontend': self.frontend}
@@ -281,15 +299,23 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.tested_connection and self.initialize:
             self.verify_connected()
 
-        if repo['branch'] == '__current__':
+        ################
+        # - repo path to the repo name
+        if 'path' not in repo:
+            repo['path'] = name
+        # - version is the one we have on the working controller
+        from controller import __version__
+        if 'branch' not in repo:
             repo['branch'] = __version__
+
         return gitter.clone(**repo)
 
     def git_submodules(self):
         """ Check and/or clone git projects """
 
+        core_key = 'core'
         repos = self.vars.get('repos').copy()
-        core = repos.pop('rapydo')
+        core = repos.pop(core_key)
         core_url = core.get('online_url')
 
         gits = {}
@@ -303,14 +329,14 @@ Verify that you are in the right folder, now you are in: %s%s
             log.info("You are working on rapydo-core, not a fork")
             gits['main'] = local
         else:
+            core_path = core.get('path')
+            if core_path is None:
+                core_path = core_key
             gits['main'] = gitter.upstream(
-                url=core_url,
-                path=core.get('path'),
-                do=self.initialize
-            )
+                url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
-            gits[name] = self.working_clone(repo)
+            gits[name] = self.working_clone(name, repo)
 
         self.gits = gits
 
@@ -521,10 +547,12 @@ You can do several things:
                 log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
+
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+                env['DOCKER_PRIVILEGED_MODE'] = 1
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -537,6 +565,7 @@ You can do several things:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
                 log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+
         else:
             log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 
@@ -1119,8 +1148,14 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 log.warning('Already at %s' % current_release)
                 return False
 
-        if LooseVersion(new_release) < LooseVersion(current_release):
-            log.exit('Cannot upgrade to previous version')
+        if not self.current_args.get('downgrade'):
+            try:
+                if LooseVersion(new_release) < LooseVersion(current_release):
+                    log.exit('Cannot upgrade to previous version')
+            except TypeError as e:
+                log.exit("Unable to compare %s with %s (%s)" % (
+                    new_release, current_release, e)
+                )
 
         status = releases.get(new_release).get('status')
         if status != 'released':
@@ -1236,7 +1271,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             remote_branch = self.vars.get(
                 'repos', []).get(
-                'rapydo', []).get(
+                'core', []).get(
                 'branch', 'master')
 
             if self.current_args.get('verify_upstream', False):
@@ -1263,3 +1298,61 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Final step, launch the command
         func()
+
+    # issues/57
+    # I'm temporary here... to be decided how to handle me
+    def get_reserved_project_names(self):
+        names = [
+            'abc',
+            'attr',
+            'base64',
+            'better_exceptions',
+            'bravado_core',
+            'celery',
+            'click',
+            'collections',
+            'datetime',
+            'dateutil',
+            'elasticsearch_dsl',
+            'email',
+            'errno',
+            'flask',
+            'flask_injector',
+            'flask_oauthlib',
+            'flask_restful',
+            'flask_sqlalchemy',
+            'functools',
+            'glob',
+            'hashlib',
+            'hmac',
+            'injector',
+            'inspect',
+            'io',
+            'irods',
+            'iRODSPickleSession',
+            'json',
+            'jwt',
+            'logging',
+            'neo4j',
+            'neomodel',
+            'os',
+            'pickle',
+            'plumbum',
+            'pymodm',
+            'pymongo',
+            'pyotp',
+            'pyqrcode',
+            'pytz',
+            'random',
+            're',
+            'smtplib',
+            'socket',
+            'sqlalchemy',
+            'string',
+            'submodules',
+            'sys',
+            'time',
+            'unittest',
+            'werkzeug'
+        ]
+        return names
