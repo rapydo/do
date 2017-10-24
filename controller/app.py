@@ -61,6 +61,7 @@ class Application(object):
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.version = None
+        self.releases = {}
 
         if self.project is not None:
             if "_" in self.project:
@@ -272,8 +273,51 @@ Verify that you are in the right folder, now you are in: %s%s
             .get('enable', False)
         log.very_verbose("Frontend is %s" % self.frontend)
 
+        # Your project version
         self.version = self.specs.get('project', {}).get('version', None)
-        self.rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+
+        # Check if project supports releases
+        self.releases = self.specs.get('releases', {})
+        if len(self.releases) > 0:
+            log.verbose("Your project supports releases")
+
+            # Check if the current version is listed in releases
+            if self.version not in self.releases:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "current version (%s) not found" % self.version
+                )
+            current_release = self.releases.get(self.version)
+            self.rapydo_version = current_release.get("rapydo")
+
+            # rapydo version is mandatory
+            if self.rapydo_version is None:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "missing rapydo version in release %s" % self.version
+                )
+
+        # If your project does not support releases, you can specify
+        # rapydo version in the project block
+        rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+        if self.rapydo_version is None:
+            self.rapydo = rapydo_version
+
+        # You specified a rapydo version both in project and releases
+        elif rapydo_version is not None:
+
+            if rapydo_version == self.rapydo_version:
+                log.warning(
+                    "You specified rapydo version in both project and release")
+            else:
+                err = "Rapydo version mismatch. "
+                err += "You specified %s in project" % rapydo_version
+                err += " and %s in current release." % self.rapydo_version
+                err += "\nYou should remove such information from project"
+                log.exit(err)
+
+        # If your project requires a specific rapydo version, check if you are
+        # the rapydo-controller matching that version
         if self.rapydo_version is not None:
 
             r = LooseVersion(self.rapydo_version)
@@ -1142,8 +1186,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         print('')
 
     def _upgrade(self):
-        releases = self.specs.get('releases', {})
-        if len(releases) < 1:
+        if len(self.releases) < 1:
             log.exit('This project does not support releases yet')
 
         gitobj = self.gits.get('main')
@@ -1156,11 +1199,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         new_release = self.current_args.get('release')
 
         if new_release is None:
-            self.available_releases(releases)
+            self.available_releases(self.releases)
             return False
         else:
-            if new_release not in releases:
-                self.available_releases(releases)
+            if new_release not in self.releases:
+                self.available_releases(self.releases)
                 log.exit('Release %s not found' % new_release)
             else:
                 log.info('Requested release: %s' % new_release)
