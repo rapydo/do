@@ -60,6 +60,7 @@ class Application(object):
         self.tested_connection = False
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
+        self.version = None
 
         if self.project is not None:
             if "_" in self.project:
@@ -271,22 +272,24 @@ Verify that you are in the right folder, now you are in: %s%s
             .get('enable', False)
         log.very_verbose("Frontend is %s" % self.frontend)
 
+        self.version = self.specs.get('project', {}).get('version', None)
         self.rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+        if self.rapydo_version is not None:
 
-        r = LooseVersion(self.rapydo_version)
-        c = LooseVersion(__version__)
-        if r != c:
-            if r > c:
-                action = "Upgrade your controller to version %s" % r
-            else:
-                action = "Downgrade your controller to version %s" % r
-                action += "\nor upgrade your project"
+            r = LooseVersion(self.rapydo_version)
+            c = LooseVersion(__version__)
+            if r != c:
+                if r > c:
+                    action = "Upgrade your controller to version %s" % r
+                else:
+                    action = "Downgrade your controller to version %s" % r
+                    action += "\nor upgrade your project"
 
-            exit_message = "This project requires rapydo-controller %s" % r
-            exit_message += ", you are using %s" % c
-            exit_message += "\n\n%s\n" % action
+                exit_message = "This project requires rapydo-controller %s" % r
+                exit_message += ", you are using %s" % c
+                exit_message += "\n\n%s\n" % action
 
-            log.exit(exit_message)
+                log.exit(exit_message)
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -1133,6 +1136,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.warning('List of releases:')
         print('\n###########')
         for release, info in releases.items():
+
             print('Release %s: %s [%s]' %
                   (release, info.get('type'), info.get('status')))
         print('')
