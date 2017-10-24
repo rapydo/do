@@ -59,6 +59,7 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.rapydo_version = None  # To be retrieved from projet_configuration
 
         if self.project is not None:
             if "_" in self.project:
@@ -268,8 +269,24 @@ Verify that you are in the right folder, now you are in: %s%s
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
-
         log.very_verbose("Frontend is %s" % self.frontend)
+
+        self.rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+
+        r = LooseVersion(self.rapydo_version)
+        c = LooseVersion(__version__)
+        if r != c:
+            if r > c:
+                action = "Upgrade your controller to version %s" % r
+            else:
+                action = "Downgrade your controller to version %s" % r
+                action += "\nor upgrade your project"
+
+            exit_message = "This project requires rapydo-controller %s" % r
+            exit_message += ", you are using %s" % c
+            exit_message += "\n\n%s\n" % action
+
+            log.exit(exit_message)
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -304,7 +321,6 @@ Verify that you are in the right folder, now you are in: %s%s
         if 'path' not in repo:
             repo['path'] = name
         # - version is the one we have on the working controller
-        from controller import __version__
         if 'branch' not in repo:
             repo['branch'] = __version__
 
