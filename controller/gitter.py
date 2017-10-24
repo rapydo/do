@@ -4,7 +4,7 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
-from controller import SUBMODULES_DIR
+from controller import SUBMODULES_DIR, TESTING
 from utilities import helpers
 from utilities.logs import get_logger
 from utilities.time import date_from_string
@@ -250,7 +250,10 @@ def update(path, gitobj):
                 log.info("Updating %s %s (branch %s)" % (remote, path, branch))
                 remote.pull(branch)
             except TypeError as e:
-                log.warning("Unable to update %s repo, %s" % (path, e))
+                if TESTING:
+                    log.warning("Unable to update %s repo, %s" % (path, e))
+                else:
+                    log.exit("Unable to update %s repo, %s" % (path, e))
 
 
 def check_unstaged(path, gitobj, logme=True):
