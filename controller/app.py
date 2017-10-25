@@ -709,7 +709,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def git_checks(self):
 
         # TODO: give an option to skip things when you are not connected
-        self.verify_connected()
+        if not self.tested_connection:
+            self.verify_connected()
 
         # FIXME: give the user an option to skip this
         # or eventually print it in a clearer way
