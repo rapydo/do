@@ -1220,7 +1220,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     new_release, current_release, e)
                 )
 
-        status = releases.get(new_release).get('status')
+        status = self.releases.get(new_release).get('status')
         if status != 'released':
             if self.development and status == 'developing':
                 pass

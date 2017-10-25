@@ -197,7 +197,6 @@ class Compose(object):
         TODO: test this defaults for commands
         """
         from compose.cli.docopt_command import docopt_full_help
-        from compose.cli.main import TopLevelCommand
         from inspect import getdoc
 
         compose_options = {}
