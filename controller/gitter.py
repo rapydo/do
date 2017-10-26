@@ -218,7 +218,8 @@ def check_file_younger_than(gitobj, filename, timestamp):
     # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
 
     from utilities import time
-    return time.timestamp_from_string(timestamp) < max(dates)
+    m = max(dates)
+    return time.timestamp_from_string(timestamp) < m, timestamp, m
 
 
 def get_unstaged_files(gitobj):

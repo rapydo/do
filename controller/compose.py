@@ -53,26 +53,24 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def force_template_build(self, builds):
+    def build_images(self, builds, force_pull=True):
 
         try:
-            options = {}
             compose_handler = self.get_handle()
-            force_options = {
-                '--no-cache': True,
-                '--pull': True,
-            }
 
-            for _, build in builds.items():
+            for image, build in builds.items():
 
                 service = build.get('service')
-                log.verbose("Building template for: %s" % service)
+                log.verbose("Building image: %s" % image)
 
-                options.update(force_options)
-                options.update({'SERVICE': [service]})
+                options = {
+                    '--no-cache': True,
+                    '--pull': force_pull,
+                    'SERVICE': [service]
+                }
 
                 compose_handler.build(options=options)
-                log.info("Built template: %s" % service)
+                log.info("Built image: %s" % image)
 
             return
         except SystemExit:

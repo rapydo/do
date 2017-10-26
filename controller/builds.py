@@ -47,9 +47,11 @@ def find_templates_build(base_services):
     return templates
 
 
-def find_overwritten_templates(services, templates):
+def find_templates_override(services, templates):
 
-    builds = {}
+    # Template and vanilla builds involved in override
+    tbuilds = {}
+    vbuilds = {}
 
     for service in services:
 
@@ -79,20 +81,26 @@ def find_overwritten_templates(services, templates):
                         """ % (dfp.baseimage, dockerfile)
                     )
                 else:
-                    builds[dfp.baseimage] = templates.get(dfp.baseimage)
+                    vanilla_img = service.get('image')
+                    template_img = dfp.baseimage
+                    log.verbose("%s overrides %s", vanilla_img, template_img)
+                    tbuilds[template_img] = templates.get(template_img)
+                    vbuilds[vanilla_img] = template_img
 
-    return builds
+    return tbuilds, vbuilds
 
 
 def locate_builds(base_services, services):
-
     # TODO: cool progress bar in cli for the whole function START
 
-    # 1. find templates and store them
+    # All builds used for the current configuration (templates + custom)
+    builds = find_templates_build(services)
+
+    # All template builds
     templates = find_templates_build(base_services)
 
-    # 2. find templates that were overwritten
-    response = find_overwritten_templates(services, templates)
+    # 2. find templates that were extended in vanilla
+    template_imgs, vanilla_imgs = find_templates_override(services, templates)
 
     # TODO: cool progress bar in cli for the whole function END
-    return response
+    return builds, template_imgs, vanilla_imgs
