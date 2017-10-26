@@ -47,7 +47,7 @@ def find_templates_build(base_services):
     return templates
 
 
-def find_overriden_templates(services, templates):
+def find_overwritten_templates(services, templates):
 
     builds = {}
 
@@ -91,8 +91,8 @@ def locate_builds(base_services, services):
     # 1. find templates and store them
     templates = find_templates_build(base_services)
 
-    # 2. find templates that were overridden
-    response = find_overriden_templates(services, templates)
+    # 2. find templates that were overwritten
+    response = find_overwritten_templates(services, templates)
 
     # TODO: cool progress bar in cli for the whole function END
     return response
