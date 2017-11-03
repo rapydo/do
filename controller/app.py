@@ -2,6 +2,7 @@
 
 import os.path
 from collections import OrderedDict
+from datetime import datetime
 from distutils.version import LooseVersion
 from utilities import path
 from utilities import checks
@@ -10,6 +11,7 @@ from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities.globals import mem
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
+from controller import __version__
 from controller import project
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
@@ -35,6 +37,7 @@ class Application(object):
     def __init__(self, arguments):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
+        self.reserved_project_names = self.get_reserved_project_names()
 
         self.run()
 
@@ -57,6 +60,26 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.rapydo_version = None  # To be retrieved from projet_configuration
+        self.version = None
+        self.releases = {}
+
+        if self.project is not None:
+            if "_" in self.project:
+                suggest = "\nPlease consider to rename %s into %s" % (
+                    self.project, self.project.replace("_", "")
+                )
+                log.exit(
+                    "Wrong project name, _ is not a valid character. %s" %
+                    suggest
+                )
+
+            if self.project in self.reserved_project_names:
+                log.exit(
+                    "You selected a reserved name, invalid project name: %s"
+                    % self.project
+                )
+
         self.development = self.current_args.get('development')
 
     def check_projects(self):
@@ -215,7 +238,7 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/models',
             'backend/swagger',
             'backend/tests',
-            'backend/__main__.py',
+            'backend/__main__.py',  # NOTE: to be removed
         ]
 
         if self.frontend:
@@ -242,14 +265,76 @@ Verify that you are in the right folder, now you are in: %s%s
             project=self.project,
             is_template=self.is_template
         )
+
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
 
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
-
         log.very_verbose("Frontend is %s" % self.frontend)
+
+        # Your project version
+        self.version = self.specs.get('project', {}).get('version', None)
+
+        # Check if project supports releases
+        self.releases = self.specs.get('releases', {})
+        if len(self.releases) > 0:
+            log.verbose("Your project supports releases")
+
+            # Check if the current version is listed in releases
+            if self.version not in self.releases:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "current version (%s) not found" % self.version
+                )
+            current_release = self.releases.get(self.version)
+            self.rapydo_version = current_release.get("rapydo")
+
+            # rapydo version is mandatory
+            if self.rapydo_version is None:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "missing rapydo version in release %s" % self.version
+                )
+
+        # If your project does not support releases, you can specify
+        # rapydo version in the project block
+        rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+        if self.rapydo_version is None:
+            self.rapydo = rapydo_version
+
+        # You specified a rapydo version both in project and releases
+        elif rapydo_version is not None:
+
+            if rapydo_version == self.rapydo_version:
+                log.warning(
+                    "You specified rapydo version in both project and release")
+            else:
+                err = "Rapydo version mismatch. "
+                err += "You specified %s in project" % rapydo_version
+                err += " and %s in current release." % self.rapydo_version
+                err += "\nYou should remove such information from project"
+                log.exit(err)
+
+        # If your project requires a specific rapydo version, check if you are
+        # the rapydo-controller matching that version
+        if self.rapydo_version is not None:
+
+            r = LooseVersion(self.rapydo_version)
+            c = LooseVersion(__version__)
+            if r != c:
+                if r > c:
+                    action = "Upgrade your controller to version %s" % r
+                else:
+                    action = "Downgrade your controller to version %s" % r
+                    action += "\nor upgrade your project"
+
+                exit_message = "This project requires rapydo-controller %s" % r
+                exit_message += ", you are using %s" % c
+                exit_message += "\n\n%s\n" % action
+
+                log.exit(exit_message)
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -262,7 +347,7 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, repo):
+    def working_clone(self, name, repo):
 
         # substitute values starting with '$$'
         myvars = {'frontend': self.frontend}
@@ -279,13 +364,22 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.tested_connection and self.initialize:
             self.verify_connected()
 
+        ################
+        # - repo path to the repo name
+        if 'path' not in repo:
+            repo['path'] = name
+        # - version is the one we have on the working controller
+        if 'branch' not in repo:
+            repo['branch'] = __version__
+
         return gitter.clone(**repo)
 
     def git_submodules(self):
         """ Check and/or clone git projects """
 
+        core_key = 'core'
         repos = self.vars.get('repos').copy()
-        core = repos.pop('rapydo')
+        core = repos.pop(core_key)
         core_url = core.get('online_url')
 
         gits = {}
@@ -299,14 +393,14 @@ Verify that you are in the right folder, now you are in: %s%s
             log.info("You are working on rapydo-core, not a fork")
             gits['main'] = local
         else:
+            core_path = core.get('path')
+            if core_path is None:
+                core_path = core_key
             gits['main'] = gitter.upstream(
-                url=core_url,
-                path=core.get('path'),
-                do=self.initialize
-            )
+                url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
-            gits[name] = self.working_clone(repo)
+            gits[name] = self.working_clone(name, repo)
 
         self.gits = gits
 
@@ -361,56 +455,117 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # Compare builds depending on templates
         # NOTE: slow operation!
-        self.builds = locate_builds(self.base_services, self.services)
+        self.builds, self.template_builds, overriding_imgs = locate_builds(
+            self.base_services, self.services)
+
+        dimages = self.docker.images()
+
         if not self.current_args.get('rebuild_templates', False):
-            self.verify_build_cache(self.builds)
+            self.verify_template_builds(dimages, self.template_builds)
 
-    def verify_build_cache(self, builds):
+        if self.action in ['check', 'init', 'update']:
+            self.verify_obsolete_builds(dimages, self.builds, overriding_imgs)
 
-        cache = False
-        if len(builds) > 0:
+    def build_is_obsolete(self, build):
+        # compare dates between git and docker
+        path = build.get('path')
+        Dockerfile = os.path.join(path, 'Dockerfile')
 
-            dimages = self.docker.images()
+        build_templates = self.gits.get('build-templates')
+        vanilla = self.gits.get('main')
 
-            for image_tag, build in builds.items():
+        if path.startswith(build_templates.working_dir):
+            git_repo = build_templates
+        elif path.startswith(vanilla.working_dir):
+            git_repo = vanilla
+        else:
+            log.exit("Unable to find git repo containing %s" % Dockerfile)
 
-                if image_tag in dimages:
+        obsolete, build_ts, last_commit = gitter.check_file_younger_than(
+            gitobj=git_repo,
+            filename=Dockerfile,
+            timestamp=build.get('timestamp')
+        )
 
-                    # compare dates between git and docker
-                    path = os.path.join(build.get('path'), 'Dockerfile')
-                    if gitter.check_file_younger_than(
-                        self.gits.get('build-templates'),
-                        filename=path,
-                        timestamp=build.get('timestamp')
-                    ):
-                        log.warning(
-                            "Cached image [%s]" % image_tag +
-                            ". Re-build it with:\n$ rapydo --service %s"
-                            % build.get('service') +
-                            " build --rebuild-templates"
-                        )
-                        cache = True
+        return obsolete, build_ts, last_commit
+
+    def verify_template_builds(self, docker_images, builds):
+
+        if len(builds) == 0:
+            log.debug("No template build to be verified")
+            return
+
+        for image_tag, build in builds.items():
+
+            if image_tag not in docker_images:
+                message = "Missing template build for %s" % build['service']
+                if self.action == 'check':
+                    message += "\nSuggestion: execute the init command"
+                    log.exit(message)
                 else:
-                    if self.action == 'check':
-                        log.exit(
-                            """Missing template build for %s
-\nSuggestion: execute the init command
-                            """ % build['service'])
-                    else:
-                        log.debug(
-                            "Missing template build for %s" % build['service'])
-                        dc = Compose(files=self.base_files)
-                        dc.force_template_build(builds={image_tag: build})
+                    log.debug(message)
+                    dc = Compose(files=self.base_files)
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
 
-            # if cache:
-            #     log.warning(
-            #         "To re-build cached template(s) use the command:\n" +
-            #         "$ rapydo --service %s build --rebuild_templates"
-            #         % build.get('service')
-            #     )
+                continue
 
-            if not cache:
-                log.checked("No cache found for docker builds")
+            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+            if obsolete:
+                fmt = "%Y-%m-%d %H:%M:%S"
+                b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                c = last_commit.strftime(fmt)
+                message = "Template image %s is obsolete" % image_tag
+                message += " (built on %s" % b
+                message += " but changed on %s)" % c
+                if self.current_args.get('rebuild'):
+                    log.info("%s, rebuilding", message)
+                    dc = Compose(files=self.base_files)
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
+                else:
+                    message += "\nRebuild it with:"
+                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += " build --rebuild-templates"
+                    log.warning(message)
+
+    def verify_obsolete_builds(self, docker_images, builds, overriding_imgs):
+
+        if len(builds) == 0:
+            log.debug("No build to be verified")
+            return
+
+        for image_tag, build in builds.items():
+
+            if image_tag not in docker_images:
+                # Missing images will be created at startup
+                continue
+
+            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+            if obsolete:
+                fmt = "%Y-%m-%d %H:%M:%S"
+                b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                c = last_commit.strftime(fmt)
+                message = "Image %s is obsolete" % image_tag
+                message += " (built on %s" % b
+                message += " but changed on %s)" % c
+                if self.current_args.get('rebuild'):
+                    log.info("%s, rebuilding", message)
+                    dc = Compose(files=self.files)
+
+                    # Cannot force pull when building an image
+                    # overriding a template build
+                    force_pull = image_tag not in overriding_imgs
+                    dc.build_images(
+                        builds={image_tag: build},
+                        force_pull=force_pull,
+                        current_version=__version__
+                    )
+                else:
+                    message += "\nRebuild it with:"
+                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += " build"
+                    log.warning(message)
 
     def bower_libs(self):
 
@@ -517,10 +672,12 @@ You can do several things:
                 log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
         if not os.path.isfile(envfile):
+
             with open(envfile, 'w+') as whandle:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+                env['DOCKER_PRIVILEGED_MODE'] = 1
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -533,28 +690,9 @@ You can do several things:
                         value = "'%s'" % value
                     whandle.write("%s=%s\n" % (key, value))
                 log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+
         else:
             log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
-
-            # FIXME: 'do' var is deprecated and should be removed as parameter
-
-            # # Stat file
-            # mixed_env = os.stat(envfile)
-
-            # # compare blame commit date against file modification date
-            # # NOTE: HEAVY OPERATION
-            # if do:
-            #     if gitter.check_file_younger_than(
-            #         self.gits.get('utils'),
-            #         filename=DEFAULT_CONFIG_FILEPATH,
-            #         timestamp=mixed_env.st_mtime
-            #     ):
-            #         log.warning(
-            #             "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-            #             "Add --force-env to update."
-            #         )
-            # # else:
-            # #     log.verbose("Skipping heavy operations")
 
     def check_placeholders(self):
 
@@ -613,7 +751,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def git_checks(self):
 
         # TODO: give an option to skip things when you are not connected
-        self.verify_connected()
+        if not self.tested_connection:
+            self.verify_connected()
 
         # FIXME: give the user an option to skip this
         # or eventually print it in a clearer way
@@ -881,7 +1020,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.current_args.get('rebuild_templates'):
             dc = Compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.force_template_build(self.builds)
+            dc.build_images(self.template_builds, current_version=__version__)
 
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
@@ -1084,13 +1223,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.warning('List of releases:')
         print('\n###########')
         for release, info in releases.items():
+
             print('Release %s: %s [%s]' %
                   (release, info.get('type'), info.get('status')))
         print('')
 
     def _upgrade(self):
-        releases = self.specs.get('releases', {})
-        if len(releases) < 1:
+        if len(self.releases) < 1:
             log.exit('This project does not support releases yet')
 
         gitobj = self.gits.get('main')
@@ -1103,11 +1242,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         new_release = self.current_args.get('release')
 
         if new_release is None:
-            self.available_releases(releases)
+            self.available_releases(self.releases)
             return False
         else:
-            if new_release not in releases:
-                self.available_releases(releases)
+            if new_release not in self.releases:
+                self.available_releases(self.releases)
                 log.exit('Release %s not found' % new_release)
             else:
                 log.info('Requested release: %s' % new_release)
@@ -1115,10 +1254,16 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 log.warning('Already at %s' % current_release)
                 return False
 
-        if LooseVersion(new_release) < LooseVersion(current_release):
-            log.exit('Cannot upgrade to previous version')
+        if not self.current_args.get('downgrade'):
+            try:
+                if LooseVersion(new_release) < LooseVersion(current_release):
+                    log.exit('Cannot upgrade to previous version')
+            except TypeError as e:
+                log.exit("Unable to compare %s with %s (%s)" % (
+                    new_release, current_release, e)
+                )
 
-        status = releases.get(new_release).get('status')
+        status = self.releases.get(new_release).get('status')
         if status != 'released':
             if self.development and status == 'developing':
                 pass
@@ -1232,7 +1377,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             remote_branch = self.vars.get(
                 'repos', []).get(
-                'rapydo', []).get(
+                'core', []).get(
                 'branch', 'master')
 
             if self.current_args.get('verify_upstream', False):
@@ -1259,3 +1404,61 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Final step, launch the command
         func()
+
+    # issues/57
+    # I'm temporary here... to be decided how to handle me
+    def get_reserved_project_names(self):
+        names = [
+            'abc',
+            'attr',
+            'base64',
+            'better_exceptions',
+            'bravado_core',
+            'celery',
+            'click',
+            'collections',
+            'datetime',
+            'dateutil',
+            'elasticsearch_dsl',
+            'email',
+            'errno',
+            'flask',
+            'flask_injector',
+            'flask_oauthlib',
+            'flask_restful',
+            'flask_sqlalchemy',
+            'functools',
+            'glob',
+            'hashlib',
+            'hmac',
+            'injector',
+            'inspect',
+            'io',
+            'irods',
+            'iRODSPickleSession',
+            'json',
+            'jwt',
+            'logging',
+            'neo4j',
+            'neomodel',
+            'os',
+            'pickle',
+            'plumbum',
+            'pymodm',
+            'pymongo',
+            'pyotp',
+            'pyqrcode',
+            'pytz',
+            'random',
+            're',
+            'smtplib',
+            'socket',
+            'sqlalchemy',
+            'string',
+            'submodules',
+            'sys',
+            'time',
+            'unittest',
+            'werkzeug'
+        ]
+        return names

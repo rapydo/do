@@ -53,7 +53,7 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def force_template_build(self, builds):
+    def build_images(self, builds, force_pull=True, current_version=None):
 
         try:
             options = {}
@@ -70,6 +70,11 @@ class Compose(object):
 
                 options.update(force_options)
                 options.update({'SERVICE': [service]})
+
+                # NOTE: we can set only 1 variable since options is a dict
+                if current_version is not None:
+                    var = {"RAPYDO_VERSION": current_version}
+                    options['--build-arg'] = var
 
                 compose_handler.build(options=options)
                 log.info("Built template: %s" % service)

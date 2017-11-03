@@ -290,7 +290,17 @@ subcommands:
       release:
         type: str
         metavalue: RELEASE_VERSION
-        help: release number you want to upgrade to
+        help: release version you want to upgrade to
+      downgrade:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: allow downgrade to previous versions
+      current:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: upgrade to current branch. Incompatible with release option
 
   # tutorial:
   #   description: Step-by-step guide to make your project RAPyDo compliant
