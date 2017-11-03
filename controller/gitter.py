@@ -187,7 +187,7 @@ Suggestion: remove %s and execute the init command
                 return False
             log.critical_exit(
                 """Wrong branch %s, expected %s.
-    Suggested: cd %s; git checkout %s; cd -;"""
+Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
                 % (active_branch, branch, gitobj.working_dir, branch)
             )
     return True
@@ -218,7 +218,8 @@ def check_file_younger_than(gitobj, filename, timestamp):
     # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
 
     from utilities import time
-    return time.timestamp_from_string(timestamp) < max(dates)
+    m = max(dates)
+    return time.timestamp_from_string(timestamp) < m, timestamp, m
 
 
 def get_unstaged_files(gitobj):

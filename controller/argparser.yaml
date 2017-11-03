@@ -118,6 +118,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: skip update of bower libs
+      rebuild:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: rebuild templates if required
 
   status:
     description: list current status of containers

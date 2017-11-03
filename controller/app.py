@@ -2,6 +2,7 @@
 
 import os.path
 from collections import OrderedDict
+from datetime import datetime
 from distutils.version import LooseVersion
 from utilities import path
 from utilities import checks
@@ -59,6 +60,9 @@ class Application(object):
         self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
+        self.rapydo_version = None  # To be retrieved from projet_configuration
+        self.version = None
+        self.releases = {}
 
         if self.project is not None:
             if "_" in self.project:
@@ -234,7 +238,7 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/models',
             'backend/swagger',
             'backend/tests',
-            'backend/__main__.py',
+            'backend/__main__.py',  # NOTE: to be removed
         ]
 
         if self.frontend:
@@ -268,8 +272,69 @@ Verify that you are in the right folder, now you are in: %s%s
         self.frontend = self.vars \
             .get('frontend', {}) \
             .get('enable', False)
-
         log.very_verbose("Frontend is %s" % self.frontend)
+
+        # Your project version
+        self.version = self.specs.get('project', {}).get('version', None)
+
+        # Check if project supports releases
+        self.releases = self.specs.get('releases', {})
+        if len(self.releases) > 0:
+            log.verbose("Your project supports releases")
+
+            # Check if the current version is listed in releases
+            if self.version not in self.releases:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "current version (%s) not found" % self.version
+                )
+            current_release = self.releases.get(self.version)
+            self.rapydo_version = current_release.get("rapydo")
+
+            # rapydo version is mandatory
+            if self.rapydo_version is None:
+                log.exit(
+                    "Releases misconfiguration: "+
+                    "missing rapydo version in release %s" % self.version
+                )
+
+        # If your project does not support releases, you can specify
+        # rapydo version in the project block
+        rapydo_version = self.specs.get('project', {}).get('rapydo', None)
+        if self.rapydo_version is None:
+            self.rapydo = rapydo_version
+
+        # You specified a rapydo version both in project and releases
+        elif rapydo_version is not None:
+
+            if rapydo_version == self.rapydo_version:
+                log.warning(
+                    "You specified rapydo version in both project and release")
+            else:
+                err = "Rapydo version mismatch. "
+                err += "You specified %s in project" % rapydo_version
+                err += " and %s in current release." % self.rapydo_version
+                err += "\nYou should remove such information from project"
+                log.exit(err)
+
+        # If your project requires a specific rapydo version, check if you are
+        # the rapydo-controller matching that version
+        if self.rapydo_version is not None:
+
+            r = LooseVersion(self.rapydo_version)
+            c = LooseVersion(__version__)
+            if r != c:
+                if r > c:
+                    action = "Upgrade your controller to version %s" % r
+                else:
+                    action = "Downgrade your controller to version %s" % r
+                    action += "\nor upgrade your project"
+
+                exit_message = "This project requires rapydo-controller %s" % r
+                exit_message += ", you are using %s" % c
+                exit_message += "\n\n%s\n" % action
+
+                log.exit(exit_message)
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -304,7 +369,6 @@ Verify that you are in the right folder, now you are in: %s%s
         if 'path' not in repo:
             repo['path'] = name
         # - version is the one we have on the working controller
-        from controller import __version__
         if 'branch' not in repo:
             repo['branch'] = __version__
 
@@ -391,56 +455,113 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # Compare builds depending on templates
         # NOTE: slow operation!
-        self.builds = locate_builds(self.base_services, self.services)
+        self.builds, self.template_builds, overriding_imgs = locate_builds(
+            self.base_services, self.services)
+
+        dimages = self.docker.images()
+
         if not self.current_args.get('rebuild_templates', False):
-            self.verify_build_cache(self.builds)
+            self.verify_template_builds(dimages, self.template_builds)
 
-    def verify_build_cache(self, builds):
+        if self.action in ['check', 'init', 'update']:
+            self.verify_obsolete_builds(dimages, self.builds, overriding_imgs)
 
-        cache = False
-        if len(builds) > 0:
+    def build_is_obsolete(self, build):
+        # compare dates between git and docker
+        path = build.get('path')
+        Dockerfile = os.path.join(path, 'Dockerfile')
 
-            dimages = self.docker.images()
+        build_templates = self.gits.get('build-templates')
+        vanilla = self.gits.get('main')
 
-            for image_tag, build in builds.items():
+        if path.startswith(build_templates.working_dir):
+            git_repo = build_templates
+        elif path.startswith(vanilla.working_dir):
+            git_repo = vanilla
+        else:
+            log.exit("Unable to find git repo containing %s" % Dockerfile)
 
-                if image_tag in dimages:
+        obsolete, build_ts, last_commit = gitter.check_file_younger_than(
+            gitobj=git_repo,
+            filename=Dockerfile,
+            timestamp=build.get('timestamp')
+        )
 
-                    # compare dates between git and docker
-                    path = os.path.join(build.get('path'), 'Dockerfile')
-                    if gitter.check_file_younger_than(
-                        self.gits.get('build-templates'),
-                        filename=path,
-                        timestamp=build.get('timestamp')
-                    ):
-                        log.warning(
-                            "Cached image [%s]" % image_tag +
-                            ". Re-build it with:\n$ rapydo --service %s"
-                            % build.get('service') +
-                            " build --rebuild-templates"
-                        )
-                        cache = True
+        return obsolete, build_ts, last_commit
+
+    def verify_template_builds(self, docker_images, builds):
+
+        if len(builds) == 0:
+            log.debug("No template build to be verified")
+            return
+
+        for image_tag, build in builds.items():
+
+            if image_tag not in docker_images:
+                message = "Missing template build for %s" % build['service']
+                if self.action == 'check':
+                    message += "\nSuggestion: execute the init command"
+                    log.exit(message)
                 else:
-                    if self.action == 'check':
-                        log.exit(
-                            """Missing template build for %s
-\nSuggestion: execute the init command
-                            """ % build['service'])
-                    else:
-                        log.debug(
-                            "Missing template build for %s" % build['service'])
-                        dc = Compose(files=self.base_files)
-                        dc.force_template_build(builds={image_tag: build})
+                    log.debug(message)
+                    dc = Compose(files=self.base_files)
+                    dc.build_images(builds={image_tag: build})
 
-            # if cache:
-            #     log.warning(
-            #         "To re-build cached template(s) use the command:\n" +
-            #         "$ rapydo --service %s build --rebuild_templates"
-            #         % build.get('service')
-            #     )
+                continue
 
-            if not cache:
-                log.checked("No cache found for docker builds")
+            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+            if obsolete:
+                fmt = "%Y-%m-%d %H:%M:%S"
+                b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                c = last_commit.strftime(fmt)
+                message = "Template image %s is obsolete" % image_tag
+                message += " (built on %s" % b
+                message += " but changed on %s)" % c
+                if self.current_args.get('rebuild'):
+                    log.info("%s, rebuilding", message)
+                    dc = Compose(files=self.base_files)
+                    dc.build_images(builds={image_tag: build})
+                else:
+                    message += "\nRebuild it with:"
+                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += " build --rebuild-templates"
+                    log.warning(message)
+
+    def verify_obsolete_builds(self, docker_images, builds, overriding_imgs):
+
+        if len(builds) == 0:
+            log.debug("No build to be verified")
+            return
+
+        for image_tag, build in builds.items():
+
+            if image_tag not in docker_images:
+                # Missing images will be created at startup
+                continue
+
+            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+            if obsolete:
+                fmt = "%Y-%m-%d %H:%M:%S"
+                b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                c = last_commit.strftime(fmt)
+                message = "Image %s is obsolete" % image_tag
+                message += " (built on %s" % b
+                message += " but changed on %s)" % c
+                if self.current_args.get('rebuild'):
+                    log.info("%s, rebuilding", message)
+                    dc = Compose(files=self.files)
+
+                    # Cannot force pull when building an image
+                    # overriding a template build
+                    force_pull = image_tag not in overriding_imgs
+                    dc.build_images(
+                        builds={image_tag: build}, force_pull=force_pull
+                    )
+                else:
+                    message += "\nRebuild it with:"
+                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += " build"
+                    log.warning(message)
 
     def bower_libs(self):
 
@@ -569,26 +690,6 @@ You can do several things:
         else:
             log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
 
-            # FIXME: 'do' var is deprecated and should be removed as parameter
-
-            # # Stat file
-            # mixed_env = os.stat(envfile)
-
-            # # compare blame commit date against file modification date
-            # # NOTE: HEAVY OPERATION
-            # if do:
-            #     if gitter.check_file_younger_than(
-            #         self.gits.get('utils'),
-            #         filename=DEFAULT_CONFIG_FILEPATH,
-            #         timestamp=mixed_env.st_mtime
-            #     ):
-            #         log.warning(
-            #             "%s seems outdated. " % COMPOSE_ENVIRONMENT_FILE +
-            #             "Add --force-env to update."
-            #         )
-            # # else:
-            # #     log.verbose("Skipping heavy operations")
-
     def check_placeholders(self):
 
         self.services_dict, self.active_services = \
@@ -646,7 +747,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def git_checks(self):
 
         # TODO: give an option to skip things when you are not connected
-        self.verify_connected()
+        if not self.tested_connection:
+            self.verify_connected()
 
         # FIXME: give the user an option to skip this
         # or eventually print it in a clearer way
@@ -914,7 +1016,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.current_args.get('rebuild_templates'):
             dc = Compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.force_template_build(self.builds)
+            dc.build_images(self.template_builds)
 
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
@@ -1117,13 +1219,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.warning('List of releases:')
         print('\n###########')
         for release, info in releases.items():
+
             print('Release %s: %s [%s]' %
                   (release, info.get('type'), info.get('status')))
         print('')
 
     def _upgrade(self):
-        releases = self.specs.get('releases', {})
-        if len(releases) < 1:
+        if len(self.releases) < 1:
             log.exit('This project does not support releases yet')
 
         gitobj = self.gits.get('main')
@@ -1136,11 +1238,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         new_release = self.current_args.get('release')
 
         if new_release is None:
-            self.available_releases(releases)
+            self.available_releases(self.releases)
             return False
         else:
-            if new_release not in releases:
-                self.available_releases(releases)
+            if new_release not in self.releases:
+                self.available_releases(self.releases)
                 log.exit('Release %s not found' % new_release)
             else:
                 log.info('Requested release: %s' % new_release)
@@ -1157,7 +1259,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                     new_release, current_release, e)
                 )
 
-        status = releases.get(new_release).get('status')
+        status = self.releases.get(new_release).get('status')
         if status != 'released':
             if self.development and status == 'developing':
                 pass
