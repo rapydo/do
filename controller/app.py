@@ -238,7 +238,7 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/models',
             'backend/swagger',
             'backend/tests',
-            'backend/__main__.py',
+            'backend/__main__.py',  # NOTE: to be removed
         ]
 
         if self.frontend:
