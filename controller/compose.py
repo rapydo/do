@@ -9,6 +9,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 
 from controller.dockerizing import docker_errors
 from compose.service import BuildError
+from compose.project import NoSuchService
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -56,20 +57,18 @@ class Compose(object):
     def build_images(self, builds, force_pull=True, current_version=None):
 
         try:
-            options = {}
             compose_handler = self.get_handle()
-            force_options = {
-                '--no-cache': True,
-                '--pull': True,
-            }
 
-            for _, build in builds.items():
+            for image, build in builds.items():
 
                 service = build.get('service')
-                log.verbose("Building template for: %s" % service)
+                log.verbose("Building image: %s" % image)
 
-                options.update(force_options)
-                options.update({'SERVICE': [service]})
+                options = {
+                    '--no-cache': True,
+                    '--pull': force_pull,
+                    'SERVICE': [service]
+                }
 
                 # NOTE: we can set only 1 variable since options is a dict
                 if current_version is not None:
@@ -77,7 +76,7 @@ class Compose(object):
                     options['--build-arg'] = var
 
                 compose_handler.build(options=options)
-                log.info("Built template: %s" % service)
+                log.info("Built image: %s" % image)
 
             return
         except SystemExit:
@@ -202,7 +201,6 @@ class Compose(object):
         TODO: test this defaults for commands
         """
         from compose.cli.docopt_command import docopt_full_help
-        from compose.cli.main import TopLevelCommand
         from inspect import getdoc
 
         compose_options = {}

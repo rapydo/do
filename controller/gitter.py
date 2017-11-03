@@ -4,9 +4,10 @@ import os
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
-from controller import SUBMODULES_DIR
+from controller import SUBMODULES_DIR, TESTING
 from utilities import helpers
 from utilities.logs import get_logger
+from utilities.time import date_from_string
 
 log = get_logger(__name__)
 
@@ -18,6 +19,10 @@ def get_repo(path):
 def get_local(path):
     try:
         gitobj = get_repo(path)
+
+        if len(gitobj.remotes) == 0:
+            log.warning("Unable to fetch remotes from %s" % path)
+            return None
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
         return None
@@ -182,14 +187,25 @@ Suggestion: remove %s and execute the init command
                 return False
             log.critical_exit(
                 """Wrong branch %s, expected %s.
-    Suggested: cd %s; git checkout %s; cd -;"""
+Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
                 % (active_branch, branch, gitobj.working_dir, branch)
             )
     return True
 
 
 def check_file_younger_than(gitobj, filename, timestamp):
-    # gitobj.commit()
+
+    # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
+    # i.e. were convertable to float
+    # From dockerpy 2.5.1 we are obtained strings like this:
+    # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
+    try:
+        # verify if timestamp is already an epoch
+        float(timestamp)
+    except ValueError:
+        # otherwise, convert it
+        timestamp = date_from_string(timestamp).timestamp()
+
     try:
         commits = gitobj.blame(rev='HEAD', file=filename)
     except GitCommandError as e:
@@ -202,7 +218,8 @@ def check_file_younger_than(gitobj, filename, timestamp):
     # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
 
     from utilities import time
-    return time.timestamp_from_string(timestamp) < max(dates)
+    m = max(dates)
+    return time.timestamp_from_string(timestamp) < m, timestamp, m
 
 
 def get_unstaged_files(gitobj):
@@ -227,13 +244,17 @@ def update(path, gitobj):
             "Unable to update %s repo, you have unstaged files" % (path))
         return
 
-    branch = gitobj.active_branch
     for remote in gitobj.remotes:
-        if remote.name != 'origin':
-            continue
-
-        log.info("Updating %s %s (branch = %s)" % (remote, path, branch))
-        remote.pull(branch)
+        if remote.name == 'origin':
+            try:
+                branch = gitobj.active_branch
+                log.info("Updating %s %s (branch %s)" % (remote, path, branch))
+                remote.pull(branch)
+            except TypeError as e:
+                if TESTING:
+                    log.warning("Unable to update %s repo, %s" % (path, e))
+                else:
+                    log.exit("Unable to update %s repo, %s" % (path, e))
 
 
 def check_unstaged(path, gitobj, logme=True):
