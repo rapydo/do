@@ -418,6 +418,7 @@ Verify that you are in the right folder, now you are in: %s%s
         myvars = {
             'frontend': self.frontend,
             'logging': self.current_args.get('collect_logs'),
+            'devel': self.development,
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
             'customconf': helpers.project_dir(
@@ -505,7 +506,8 @@ Verify that you are in the right folder, now you are in: %s%s
                 else:
                     log.debug(message)
                     dc = Compose(files=self.base_files)
-                    dc.build_images(builds={image_tag: build})
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
 
                 continue
 
@@ -520,10 +522,11 @@ Verify that you are in the right folder, now you are in: %s%s
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
                     dc = Compose(files=self.base_files)
-                    dc.build_images(builds={image_tag: build})
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build --rebuild-templates"
                     log.warning(message)
 
@@ -555,11 +558,13 @@ Verify that you are in the right folder, now you are in: %s%s
                     # overriding a template build
                     force_pull = image_tag not in overriding_imgs
                     dc.build_images(
-                        builds={image_tag: build}, force_pull=force_pull
+                        builds={image_tag: build},
+                        force_pull=force_pull,
+                        current_version=__version__
                     )
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build"
                     log.warning(message)
 
@@ -1016,7 +1021,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.current_args.get('rebuild_templates'):
             dc = Compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.build_images(self.template_builds)
+            dc.build_images(self.template_builds, current_version=__version__)
 
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
