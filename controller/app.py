@@ -681,6 +681,8 @@ You can do several things:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+                env['RAPYDO_VERSION'] = __version__
+                # FIXME: should be a parameter
                 env['DOCKER_PRIVILEGED_MODE'] = 1
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
