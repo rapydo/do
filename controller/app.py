@@ -350,7 +350,10 @@ Verify that you are in the right folder, now you are in: %s%s
     def working_clone(self, name, repo):
 
         # substitute values starting with '$$'
-        myvars = {'frontend': self.frontend}
+        myvars = {
+            'frontend': self.frontend,
+            'devel': self.development,
+        }
         repo = project.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
