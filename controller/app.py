@@ -418,6 +418,7 @@ Verify that you are in the right folder, now you are in: %s%s
         myvars = {
             'frontend': self.frontend,
             'logging': self.current_args.get('collect_logs'),
+            'devel': self.development,
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
             'customconf': helpers.project_dir(
@@ -524,8 +525,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     dc.build_images(
                         builds={image_tag: build}, current_version=__version__)
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build --rebuild-templates"
                     log.warning(message)
 
@@ -562,8 +563,8 @@ Verify that you are in the right folder, now you are in: %s%s
                         current_version=__version__
                     )
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build"
                     log.warning(message)
 
