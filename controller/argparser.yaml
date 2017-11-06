@@ -65,7 +65,7 @@ options:
   development:
     type: bool
     default: False
-    help: allow to execute the code directly from rapydo 'core' template
+    help: switch to development mode
 
 subcommands:
   check:
