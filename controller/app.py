@@ -124,7 +124,7 @@ class Application(object):
         self.docker = Dock()
 
         # Check docker-compose version
-        self.check_python_package('compose', min_version="1.11")
+        self.check_python_package('compose', min_version="1.17")
         self.check_python_package('docker', min_version="2.4.2")
 
         # Check if git is installed
@@ -730,7 +730,10 @@ You can do several things:
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
                 env['RAPYDO_VERSION'] = __version__
                 # FIXME: should be a parameter
-                env['DOCKER_PRIVILEGED_MODE'] = 1
+                if self.current_args.get('privileged'):
+                    env['DOCKER_PRIVILEGED_MODE'] = "true"
+                else:
+                    env['DOCKER_PRIVILEGED_MODE'] = "false"
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):

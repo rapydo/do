@@ -67,6 +67,11 @@ options:
     default: False
     help: switch to development mode
 
+  privileged:
+    type: bool
+    default: False
+    help: allow containers to start in privileged mode
+
 subcommands:
   check:
     description: "only verify if currently compliant to RAPyDo specs
