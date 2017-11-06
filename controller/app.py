@@ -10,6 +10,7 @@ from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities.globals import mem
+from utilities.time import date_from_string
 # from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import __version__
 from controller import project
@@ -465,10 +466,28 @@ Verify that you are in the right folder, now you are in: %s%s
         dimages = self.docker.images()
 
         if not self.current_args.get('rebuild_templates', False):
-            self.verify_template_builds(dimages, self.template_builds)
+            self.verify_template_builds(
+                dimages, self.template_builds)
 
         if self.action in ['check', 'init', 'update']:
-            self.verify_obsolete_builds(dimages, self.builds, overriding_imgs)
+            self.verify_obsolete_builds(
+                dimages, self.builds, overriding_imgs, self.template_builds)
+
+    def get_build_timestamp(self, timestamp, as_date=False):
+        # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
+        # i.e. were convertable to float
+        # From dockerpy 2.5.1 we are obtained strings like this:
+        # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
+        try:
+            # verify if timestamp is already an epoch
+            float(timestamp)
+        except ValueError:
+            # otherwise, convert it
+            timestamp = date_from_string(timestamp).timestamp()
+
+        if as_date:
+            return datetime.fromtimestamp(timestamp)
+        return timestamp
 
     def build_is_obsolete(self, build):
         # compare dates between git and docker
@@ -488,7 +507,7 @@ Verify that you are in the right folder, now you are in: %s%s
         obsolete, build_ts, last_commit = gitter.check_file_younger_than(
             gitobj=git_repo,
             filename=Dockerfile,
-            timestamp=build.get('timestamp')
+            timestamp=self.get_build_timestamp(build.get('timestamp'))
         )
 
         return obsolete, build_ts, last_commit
@@ -502,7 +521,8 @@ Verify that you are in the right folder, now you are in: %s%s
         for image_tag, build in builds.items():
 
             if image_tag not in docker_images:
-                message = "Missing template build for %s" % build['service']
+                message = "Missing template build for %s (%s)" % (
+                    build['service'], image_tag)
                 if self.action == 'check':
                     message += "\nSuggestion: execute the init command"
                     log.exit(message)
@@ -533,28 +553,55 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += " build --rebuild-templates"
                     log.warning(message)
 
-    def verify_obsolete_builds(self, docker_images, builds, overriding_imgs):
+    def verify_obsolete_builds(
+            self, docker_images, builds, overriding_imgs, template_builds):
 
         if len(builds) == 0:
             log.debug("No build to be verified")
             return
 
+        fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
             if image_tag not in docker_images:
                 # Missing images will be created at startup
                 continue
 
-            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
-            if obsolete:
-                fmt = "%Y-%m-%d %H:%M:%S"
-                b = datetime.fromtimestamp(build_ts).strftime(fmt)
-                c = last_commit.strftime(fmt)
-                message = "Image %s is obsolete" % image_tag
-                message += " (built on %s" % b
-                message += " but changed on %s)" % c
+            build_is_obsolete = False
+            message = ""
+
+            # if FROM image is newer, this build should be re-built
+            if image_tag in overriding_imgs:
+                from_img = overriding_imgs.get(image_tag)
+                from_build = template_builds.get(from_img)
+                from_timestamp = self.get_build_timestamp(
+                    from_build.get('timestamp'), as_date=True)
+                build_timestamp = self.get_build_timestamp(
+                    build.get('timestamp'), as_date=True)
+
+                if from_timestamp > build_timestamp:
+                    build_is_obsolete = True
+                    b = build_timestamp.strftime(fmt)
+                    c = from_timestamp.strftime(fmt)
+                    message = "Image %s is obsolete" % image_tag
+                    message += " (built on %s FROM %s" % (b, from_img)
+                    message += " that changed on %s)" % c
+
+            if not build_is_obsolete:
+                # Check if some recent commit modified the Dockerfile
+                obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+                if obsolete:
+                    build_is_obsolete = True
+                    b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                    c = last_commit.strftime(fmt)
+                    message = "Image %s is obsolete" % image_tag
+                    message += " (built on %s" % b
+                    message += " but changed on %s)" % c
+
+            if build_is_obsolete:
                 if self.current_args.get('rebuild'):
-                    log.info("%s, rebuilding", message)
+                    # log.info("%s, rebuilding", message)
+                    log.exit("%s, rebuilding", message)
                     dc = Compose(files=self.files)
 
                     # Cannot force pull when building an image
