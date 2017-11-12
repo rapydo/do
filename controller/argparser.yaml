@@ -264,7 +264,7 @@ subcommands:
   env:
     description: print all configured variables
   find:
-    description: create a new endpoint based on a template
+    description: show information about an existing endpoint
     suboptions:
       endpoint:
         positional: no
