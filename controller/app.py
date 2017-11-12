@@ -1224,6 +1224,34 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.exit("Please, specify something to look for.\n" +
                      "Add --help to list available options.")
 
+    def _scale(self):
+
+        scaling = self.current_args.get('value', '')
+        options = scaling.split('=')
+        if len(options) != 2:
+            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
+        else:
+            service, workers = options
+
+        services = self.get_services(default=self.active_services)
+        # NOTE: scale has become an option of compose 'up'
+        compose_options = {
+            'SERVICE': services,
+            '--no-deps': False,
+            '-d': True,
+            '--build': False,  # self.current_args.get('from_upgrade'),
+            '--remove-orphans': True,
+            '--abort-on-container-exit': False,
+            '--no-recreate': False,
+            '--force-recreate': False,
+            '--no-build': False,
+            # '--scale': {service: workers},
+            '--scale': [scaling],
+        }
+        # print("TEST", service, workers)
+        dc = Compose(files=self.files)
+        dc.command('up', compose_options)
+
     def _coverall(self):
 
         basemsg = "COVERAGE cannot be computed"
