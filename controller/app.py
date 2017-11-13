@@ -1276,12 +1276,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def available_releases(self, releases):
 
-        log.warning('List of releases:')
-        print('\n###########')
+        log.warning('List of available releases:')
+        print('')
         for release, info in releases.items():
 
-            print('Release %s: %s [%s]' %
-                  (release, info.get('type'), info.get('status')))
+            r = info.get("rapydo")
+            t = info.get('type')
+
+            print(' - %s %s (rapydo %s) [%s]' %
+                  (release, t, r, info.get('status')))
         print('')
 
     def _upgrade(self):
