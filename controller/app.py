@@ -1287,18 +1287,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                   (release, t, r, info.get('status')))
         print('')
 
-    def _upgrade(self):
-        if len(self.releases) < 1:
-            log.exit('This project does not support releases yet')
-
-        gitobj = self.gits.get('main')
-        current_release = gitter.get_active_branch(gitobj)
-        log.info('Current release: %s' % current_release)
-
+    def preliminary_upgrade_checks(self, current_release, new_release):
         if current_release == 'master':
             log.exit("Cannot upgrade from master. Please work on a branch.")
-
-        new_release = self.current_args.get('release')
 
         if new_release is None:
             self.available_releases(self.releases)
@@ -1329,17 +1320,30 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             else:
                 log.exit("This version has yet to be released")
 
-        ##########################
+        return True
+
+    def _upgrade(self):
+        if len(self.releases) < 1:
+            log.exit('This project does not support releases yet')
+
+        gitobj = self.gits.get('main')
+        current_release = gitter.get_active_branch(gitobj)
+        new_release = self.current_args.get('release')
+        log.info('Current release: %s' % current_release)
+
+        # To reduce the function complexity, I moved all preliminary check in
+        # a dedicated function. Note: that function can stop with log.exit
+        if not self.preliminary_upgrade_checks(current_release, new_release):
+            return False
 
         # # 0. if current main repo is being developed, stop this
         # # NOTE: I am not checking for commits to be pushed
-        name = 'main'
-        mygit = self.gits.pop(name)
-        if gitter.check_unstaged(name, mygit):
+        main_repo = self.gits.pop('main')
+        if gitter.check_unstaged('main', main_repo):
             log.exit('Interrupting')
 
         # 1. git checkout new version
-        if gitter.switch_branch(mygit, new_release):  # , remote=False):
+        if gitter.switch_branch(main_repo, new_release):  # , remote=False):
             log.info("Main active branch: %s", new_release)
         else:
             log.exit("Failed changing main repository to %s", new_release)
@@ -1372,12 +1376,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.git_submodules()
 
         # 4. rebuild images
-        # NOTE: this would rebuild images and templates
         self.rebuild_from_upgrade()
 
         # 5. safely restart?
         # docker-compose up --force-recreate
-        pass
 
     ################################
     # ### RUN ONE COMMAND OFF
