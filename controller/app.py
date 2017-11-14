@@ -25,6 +25,11 @@ from utilities.logs import get_logger, suppress_stdout
 
 log = get_logger(__name__)
 
+# FIXME: move somewhere
+STATUS_RELEASED = "released"
+STATUS_DISCONTINUED = "discontinued"
+STATUS_DEVELOPING = "developing"
+
 
 class Application(object):
 
@@ -318,24 +323,35 @@ Verify that you are in the right folder, now you are in: %s%s
                 err += "\nYou should remove such information from project"
                 log.exit(err)
 
-        # If your project requires a specific rapydo version, check if you are
-        # the rapydo-controller matching that version
-        if self.rapydo_version is not None:
+    def verify_rapydo_version(self, do_exit=True):
+        """
+        If your project requires a specific rapydo version, check if you are
+        the rapydo-controller matching that version
+        """
+        if self.rapydo_version is None:
+            return True
 
-            r = LooseVersion(self.rapydo_version)
-            c = LooseVersion(__version__)
-            if r != c:
-                if r > c:
-                    action = "Upgrade your controller to version %s" % r
-                else:
-                    action = "Downgrade your controller to version %s" % r
-                    action += "\nor upgrade your project"
+        r = LooseVersion(self.rapydo_version)
+        c = LooseVersion(__version__)
+        if r == c:
+            return True
 
-                exit_message = "This project requires rapydo-controller %s" % r
-                exit_message += ", you are using %s" % c
-                exit_message += "\n\n%s\n" % action
+        if r > c:
+            action = "Upgrade your controller to version %s" % r
+        else:
+            action = "Downgrade your controller to version %s" % r
+            action += " or upgrade your project"
 
-                log.exit(exit_message)
+        exit_message = "This project requires rapydo-controller %s" % r
+        exit_message += ", you are using %s" % c
+        exit_message += "\n\n%s\n" % action
+
+        if do_exit:
+            log.exit(exit_message)
+        else:
+            log.warning(exit_message)
+
+        return False
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -1314,11 +1330,17 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
 
         status = self.releases.get(new_release).get('status')
-        if status != 'released':
-            if self.development and status == 'developing':
-                pass
+        if status == STATUS_DISCONTINUED:
+            log.exit("This version is discontinued")
+        elif status == STATUS_RELEASED:
+            pass
+        elif status == STATUS_DEVELOPING:
+            if self.development:
+                log.verbose("Switching to a developing version")
             else:
                 log.exit("This version has yet to be released")
+        else:
+            log.exit("%s: unknown version status: %s", new_release, status)
 
         return True
 
@@ -1342,13 +1364,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if gitter.check_unstaged('main', main_repo):
             log.exit('Interrupting')
 
-        # 1. git checkout new version
-        if gitter.switch_branch(main_repo, new_release):  # , remote=False):
-            log.info("Main active branch: %s", new_release)
-        else:
-            log.exit("Failed changing main repository to %s", new_release)
-
-        # 2. check submodules versions
+        # 1. check submodules versions
         # if different move current to `submodules/.backup/$VERSION/$TOOL`
         for name, gitobj in sorted(self.gits.items()):
 
@@ -1358,20 +1374,40 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             if gitter.check_unstaged(name, gitobj):
                 current_dir = gitobj.working_dir
-                current_version = gitter.get_active_branch(gitobj)
-                backup_dir = helpers.current_fullpath(
-                    SUBMODULES_DIR, '.backup', current_version, name)
-                import shutil
-                try:
-                    shutil.move(current_dir, backup_dir)
-                except BaseException as e:
-                    log.exit(
-                        "Failed to backup %s.\n%s(%s)",
-                        name, e.__class__.__name__, e)
-                log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+                msg = "Unable to upgrade"
+                msg += "\n\nYou have unstaged files in: %s" % current_dir
+                msg += "\n\nPlease commit or undo these changes,"
+                msg += " then retry the upgrade\n"
+                log.exit(msg)
+                # current_version = gitter.get_active_branch(gitobj)
+                # backup_dir = helpers.current_fullpath(
+                #     SUBMODULES_DIR, '.backup', current_version, name)
+                # import shutil
+                # try:
+                #     shutil.move(current_dir, backup_dir)
+                # except BaseException as e:
+                #     log.exit(
+                #         "Failed to backup %s.\n%s(%s)",
+                #         name, e.__class__.__name__, e)
+                # log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+
+        # 2. git checkout new version
+        if gitter.switch_branch(main_repo, new_release):  # , remote=False):
+            log.info("Main active branch: %s", new_release)
+        else:
+            log.exit("Failed changing main repository to %s", new_release)
 
         # 3. reinit submodules
         self.read_specs()  # read again project configuration!
+        if not self.verify_rapydo_version(do_exit=False):
+            log.info("Trying to install controller %s", self.rapydo_version)
+            from utilities.packing import install, check_version
+
+            install("rapydo-controller==%s" % self.rapydo_version)
+            check_version("rapydo-controller")
+            log.exit(
+                "Not implemented (probabily we received a permission denied")
+
         self.initialize = True
         self.git_submodules()
 
@@ -1397,6 +1433,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.inspect_main_folder()
         self.check_projects()
         self.read_specs()  # read project configuration
+        self.verify_rapydo_version()
         self.inspect_project_folder()
 
         # Generate and get the extra arguments in case of a custom command
