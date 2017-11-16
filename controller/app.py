@@ -1050,8 +1050,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: to be completed
         uris = {
             'swaggerui':
-                'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
-                (host, host, '8080'),
+                # 'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
+                # (host, host, '8080'),
+                'http://%s?docExpansion=none' % host
 
         }
 
