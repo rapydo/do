@@ -263,8 +263,17 @@ subcommands:
         help: remove also containers persistent data
   env:
     description: print all configured variables
+  scale:
+    description: scale the number of containers for one service
+    suboptions:
+      value:
+        positional: yes
+        type: str
+        metavalue: "SERVICE=NUM_REPLICA"
+        default:
+        help: scale SERVICE to NUM_REPLICA
   find:
-    description: create a new endpoint based on a template
+    description: show information about an existing endpoint
     suboptions:
       endpoint:
         positional: no
