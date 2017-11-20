@@ -42,8 +42,6 @@ class EndpointScaffold(object):
         self.endpoint_name = self.endpoint_dir.replace('_', '')
         self.specs_file = 'specs.%s' % YAML_EXT
 
-        self.specs_file = 'specs.%s' % YAML_EXT
-
         # setting the base dir for all scaffold things inside the project
         self.backend_dir = path.build([
             PROJECT_DIR,
