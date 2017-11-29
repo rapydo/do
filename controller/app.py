@@ -133,7 +133,7 @@ class Application(object):
         self.check_python_package('docker', min_version="2.4.2")
 
         # Check if git is installed
-        self.check_program('git')
+        self.check_program('git', max_version='2.14.3')
 
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
