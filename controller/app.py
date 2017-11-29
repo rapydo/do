@@ -538,9 +538,13 @@ Verify that you are in the right folder, now you are in: %s%s
             log.debug("No template build to be verified")
             return
 
+        found_obsolete = 0
+        fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
             if image_tag not in docker_images:
+
+                found_obsolete += 1
                 message = "Missing template build for %s (%s)" % (
                     build['service'], image_tag)
                 if self.action == 'check':
@@ -556,7 +560,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
             obsolete, build_ts, last_commit = self.build_is_obsolete(build)
             if obsolete:
-                fmt = "%Y-%m-%d %H:%M:%S"
+                found_obsolete += 1
                 b = datetime.fromtimestamp(build_ts).strftime(fmt)
                 c = last_commit.strftime(fmt)
                 message = "Template image %s is obsolete" % image_tag
@@ -573,6 +577,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += " build --rebuild-templates"
                     log.warning(message)
 
+        if found_obsolete == 0:
+            log.debug("No template build to be updated")
+
     def verify_obsolete_builds(
             self, docker_images, builds, overriding_imgs, template_builds):
 
@@ -580,6 +587,7 @@ Verify that you are in the right folder, now you are in: %s%s
             log.debug("No build to be verified")
             return
 
+        found_obsolete = 0
         fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
@@ -619,6 +627,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += " but changed on %s)" % c
 
             if build_is_obsolete:
+                found_obsolete += 1
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
                     dc = Compose(files=self.files)
@@ -636,6 +645,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += "$ rapydo --services %s" % build.get('service')
                     message += " build"
                     log.warning(message)
+
+        if found_obsolete == 0:
+            log.debug("No build to be updated")
 
     def bower_libs(self):
 
