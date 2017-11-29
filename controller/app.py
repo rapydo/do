@@ -490,6 +490,10 @@ Verify that you are in the right folder, now you are in: %s%s
                 dimages, self.builds, overriding_imgs, self.template_builds)
 
     def get_build_timestamp(self, timestamp, as_date=False):
+
+        if timestamp is None:
+            log.warning("Received a null timestamp, defaulting to zero")
+            timestamp = 0
         # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
         # i.e. were convertable to float
         # From dockerpy 2.5.1 we are obtained strings like this:
@@ -616,8 +620,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
             if build_is_obsolete:
                 if self.current_args.get('rebuild'):
-                    # log.info("%s, rebuilding", message)
-                    log.exit("%s, rebuilding", message)
+                    log.info("%s, rebuilding", message)
                     dc = Compose(files=self.files)
 
                     # Cannot force pull when building an image
