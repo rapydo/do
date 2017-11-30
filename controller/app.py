@@ -9,13 +9,14 @@ from utilities import checks
 from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
+from utilities import configuration
 from utilities.globals import mem
 from utilities.time import date_from_string
-# from utilities.configuration import DEFAULT_CONFIG_FILEPATH
 from controller import __version__
 from controller import project
 from controller import gitter
-from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
@@ -69,6 +70,7 @@ class Application(object):
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.version = None
         self.releases = {}
+        self.gits = {}
 
         if self.project is not None:
             if "_" in self.project:
@@ -208,14 +210,15 @@ Verify that you are in the right folder, now you are in: %s
         # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
-            # NOTE: to be moved outside rapydo-core?
-            'confs',
-            'confs/backend.yml',
-            'confs/frontend.yml',  # it is optional, but we expect to find it
-
             'data',
             'projects',
             'submodules'
+        ]
+
+        obsolete_files = [
+            'confs',
+            'confs/backend.yml',
+            'confs/frontend.yml',  # it is optional, but we expect to find it
         ]
 
         for fname in required_files:
@@ -234,6 +237,13 @@ if you are in the right repository consider to create it by hand
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s%s
                     """ % (fname, os.getcwd(), extra)
+                )
+
+        for fname in obsolete_files:
+            if os.path.exists(fname):
+                log.exit(
+                    "Project %s contains an obsolete file or folder: %s",
+                    self.project, fname
                 )
 
     def inspect_project_folder(self):
@@ -279,8 +289,11 @@ Verify that you are in the right folder, now you are in: %s%s
     def read_specs(self):
         """ Read project configuration """
 
-        self.specs = project.read_configuration(
-            project=self.project,
+        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+        project_file_path = helpers.project_dir(self.project)
+        self.specs = configuration.read(
+            default_file_path,
+            project_path=project_file_path,
             is_template=self.is_template
         )
 
@@ -376,13 +389,16 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, name, repo):
+    def working_clone(self, name, repo, confs_only=False):
 
         # substitute values starting with '$$'
-        myvars = {
-            'frontend': self.frontend,
-            'devel': self.development,
-        }
+        if confs_only:
+            myvars = {}
+        else:
+            myvars = {
+                'frontend': self.frontend,
+                'devel': self.development,
+            }
         repo = project.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
@@ -406,35 +422,37 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return gitter.clone(**repo)
 
-    def git_submodules(self):
+    def git_submodules(self, confs_only=False):
         """ Check and/or clone git projects """
 
-        core_key = 'core'
-        repos = self.vars.get('repos').copy()
-        core = repos.pop(core_key)
-        core_url = core.get('online_url')
-
-        gits = {}
-
-        local = gitter.get_repo(".")
-
-        is_core = gitter.compare_repository(
-            local, None, core_url, check_only=True)
-
-        if is_core:
-            log.info("You are working on rapydo-core, not a fork")
-            gits['main'] = local
+        if confs_only:
+            repos = {}
+            repos[RAPYDO_CONFS] = {
+                "online_url": "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_CONFS),
+                "if": "true"
+            }
         else:
-            core_path = core.get('path')
-            if core_path is None:
-                core_path = core_key
-            gits['main'] = gitter.upstream(
-                url=core_url, path=core_path, do=self.initialize)
+            repos = self.vars.get('repos').copy()
+        # core_url = core.get('online_url')
+
+        # local = gitter.get_repo(".")
+
+        # is_core = gitter.compare_repository(
+        #     local, None, core_url, check_only=True)
+
+        # if is_core:
+        #     log.info("You are working on rapydo-core, not a fork")
+        #     gits['main'] = local
+        # else:
+        #     core_path = core.get('path')
+        #     if core_path is None:
+        #         core_path = core_key
+        #     gits['main'] = gitter.upstream(
+        #         url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
-            gits[name] = self.working_clone(name, repo)
-
-        self.gits = gits
+            self.gits[name] = self.working_clone(
+                name, repo, confs_only=confs_only)
 
     def git_update_repos(self):
 
@@ -452,7 +470,9 @@ Verify that you are in the right folder, now you are in: %s%s
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
             'mode': self.current_args.get('mode'),
-            'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
+            'baseconf': helpers.current_dir(
+                SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+            ),
             'customconf': helpers.project_dir(
                 self.project,
                 CONTAINERS_YAML_DIRNAME
@@ -467,7 +487,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # Find configuration that tells us which files have to be read
         compose_files = self.prepare_composers()
-        # log.exit(compose_files)
 
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
@@ -771,6 +790,10 @@ You can do several things:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+                # Relative paths from ./submodules/rapydo-confs/confs
+                env['SUBMODULE_DIR'] = "../.."
+                env['VANILLA_DIR'] = "../../.."
+
                 env['RAPYDO_VERSION'] = __version__
                 # FIXME: should be a parameter
                 if self.current_args.get('privileged'):
@@ -845,6 +868,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def get_ignore_submodules(self):
         ignore_submodule = self.current_args.get('ignore_submodule', '')
+        if ignore_submodule is None:
+            return ''
         return ignore_submodule.split(",")
 
     def git_checks(self):
@@ -1487,6 +1512,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.get_args()
         self.check_installed_software()
         self.inspect_main_folder()
+        self.git_submodules(confs_only=True)
         self.check_projects()
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
@@ -1520,28 +1546,29 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             if self.current_args.get('skip_heavy_git_ops', False):
                 do_heavy_ops = False
 
+        self.git_submodules(confs_only=False)
+
         # GIT related
-        self.git_submodules()
         if do_heavy_ops:
             self.git_checks()  # NOTE: this might be an heavy operation
         else:
             log.verbose("Skipping heavy operations")
 
-        if self.check:
+        # if self.check:
 
-            remote_branch = self.vars.get(
-                'repos', []).get(
-                'core', []).get(
-                'branch', 'master')
+        #     remote_branch = self.vars.get(
+        #         'repos', []).get(
+        #         'core', []).get(
+        #         'branch', 'master')
 
-            if self.current_args.get('verify_upstream', False):
-                # FIXME: connection verification should be made only once
-                self.verify_connected()
-                gitter.check_updates(
-                    'upstream', self.gits['main'],
-                    fetch_remote='upstream',
-                    remote_branch=remote_branch
-                )
+        #     if self.current_args.get('verify_upstream', False):
+        #         # FIXME: connection verification should be made only once
+        #         self.verify_connected()
+        #         gitter.check_updates(
+        #             'upstream', self.gits['main'],
+        #             fetch_remote='upstream',
+        #             remote_branch=remote_branch
+        #         )
 
         # self.make_env(do=do_heavy_ops)
         self.make_env()

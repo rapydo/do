@@ -81,19 +81,19 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: 'upstream'
+        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
       skip-heavy-git-ops:
         alias: s
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      verify-upstream:
-        alias: u
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: include upstream repo (rapydo-core) to checked submodules
+      # verify-upstream:
+      #   alias: u
+      #   type: bool
+      #   metavalue: TRUE_OR_FALSE
+      #   default: False
+      #   help: include upstream repo (rapydo-core) to checked submodules
       skip-bower:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -116,7 +116,7 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: 'upstream'
+        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
       skip-bower:
         type: bool
