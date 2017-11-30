@@ -69,13 +69,9 @@ def test_all(capfd):
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
 
-    # NOW with are on a fork of rapydo-core
+    # NOW we are on a fork of rapydo-core
     gitobj = Repo(".")
     gitobj.remotes.origin.set_url("just_a_non_url")
-
-    # Missing upstream url
-    _, err = exec_command(capfd, "rapydo check")
-    assert "EXIT Missing upstream to rapydo/core" in err
 
     # Create upstream url
     _, err = exec_command(capfd, "rapydo init")
