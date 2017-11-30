@@ -93,7 +93,10 @@ def switch_branch(gitobj, branch_name='master', remote=True):
 
         if check:
             # Create a new HEAD
-            chkout = gitobj.create_head(branch_name, branch.commit)
+            try:
+                chkout = gitobj.create_head(branch_name, branch.commit)
+            except OSError:
+                log.exit("Cannot create new head")
             # Switch to the new HEAD (like checkout)
             gitobj.head.reference = chkout
             # reset the index and working tree to match the pointed-to commit
