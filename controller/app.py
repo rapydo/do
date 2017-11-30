@@ -246,7 +246,9 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/models',
             'backend/swagger',
             'backend/tests',
-            'backend/__main__.py',  # NOTE: to be removed
+        ]
+        obsolete_files = [
+            'backend/__main__.py'
         ]
 
         if self.frontend:
@@ -264,6 +266,14 @@ Verify that you are in the right folder, now you are in: %s%s
                 log.exit(
                     """Project %s is invalid: file or folder not found %s
                     """ % (self.project, fpath)
+                )
+
+        for fname in obsolete_files:
+            fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if os.path.exists(fpath):
+                log.exit(
+                    "Project %s contains an obsolete file or folder: %s",
+                    self.project, fpath
                 )
 
     def read_specs(self):
@@ -795,7 +805,7 @@ You can do several things:
 and add the variable "ACTIVATE: 1" in the service enviroment
                 """)
         else:
-            log.checked("Active services: %s" % self.active_services)
+            log.checked("Active services: %s", self.active_services)
 
         missing = []
         for service_name in self.active_services:
