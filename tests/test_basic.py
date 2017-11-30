@@ -67,7 +67,6 @@ def test_all(capfd):
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
     assert env_log_prefix_info in err
-    assert "INFO You are working on rapydo-core, not a fork" in err
     assert "INFO All checked" in err
 
     # NOW with are on a fork of rapydo-core
