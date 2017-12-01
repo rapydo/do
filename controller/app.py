@@ -418,7 +418,7 @@ Verify that you are in the right folder, now you are in: %s%s
             repo['path'] = name
         # - version is the one we have on the working controller
         if 'branch' not in repo:
-            repo['branch'] = __version__
+            repo['branch'] = self.rapydo_version
 
         return gitter.clone(**repo)
 
@@ -1484,16 +1484,32 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Trying to install controller %s", self.rapydo_version)
             from utilities.packing import install, check_version
 
-            install("rapydo-controller==%s" % self.rapydo_version)
-            check_version("rapydo-controller")
-            log.exit(
-                "Not implemented (probabily we received a permission denied")
+            package = "rapydo-controller"
+
+            if install("%s==%s" % (package, self.rapydo_version)):
+                installed_version = check_version(package)
+                installed = (installed_version != self.rapydo_version)
+            else:
+                installed = False
+
+            if not installed:
+                log.error(
+                    "Failed to install %s %s", package, self.rapydo_version)
+                log.warning(
+                    "Rolling back previous branch on main repository")
+                if gitter.switch_branch(main_repo, current_release):
+                    log.info("Main repository back to %s", current_release)
+                else:
+                    log.error(
+                        "Failed switching main repository to %s",
+                        current_release)
+                log.exit("Upgrade failed")
 
         self.initialize = True
         self.git_submodules()
 
         # 4. rebuild images
-        self.rebuild_from_upgrade()
+        # self.rebuild_from_upgrade()
 
         # 5. safely restart?
         # docker-compose up --force-recreate

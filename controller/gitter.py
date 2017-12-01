@@ -118,10 +118,13 @@ def clone(online_url, path, branch='master', do=False):
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        switch_branch(gitobj, branch)
         log.info("Cloned repo %s@%s as %s" % (online_url, branch, path))
     else:
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
+
+    if do:
+        switch_branch(gitobj, branch)
+        log.info("Switched branch to %s on %s", branch, path)
 
     # switch
     compare_repository(gitobj, branch, online_url=online_url)
