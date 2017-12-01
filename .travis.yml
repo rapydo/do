@@ -18,14 +18,14 @@ install:
 script:
 - rapydo --version
 - rapydo --help
-- git clone https://github.com/rapydo/tests.git
+- git clone https://github.com/rapydo/tests.git rapydo_tests
 # - BRANCH=`[ TRAVIS_PULL_REQUEST ] && echo $TRAVIS_PULL_REQUEST_BRANCH || echo $TRAVIS_BRANCH`
 - BRANCH=`[  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH"`
 # - echo "TRAVIS_PULL_REQUEST = ${TRAVIS_PULL_REQUEST}"
 # - echo "TRAVIS_PULL_REQUEST_BRANCH = ${TRAVIS_PULL_REQUEST_BRANCH}"
 # - echo "TRAVIS_BRANCH = ${TRAVIS_BRANCH}"
 - echo "BRANCH = ${BRANCH}"
-- cd tests
+- cd rapydo_tests
 - git checkout $BRANCH
 - mkdir data
 - TESTING=1 py.test -s -x --cov=controller ../tests
