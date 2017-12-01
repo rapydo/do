@@ -77,41 +77,33 @@ def get_active_branch(gitobj):
 def switch_branch(gitobj, branch_name='master', remote=True):
 
     if gitobj.active_branch.name == branch_name:
+        log.warning("You are already on branch %s", branch_name)
         return False
 
     if remote:
         branches = gitobj.remotes[0].fetch()
     else:
         branches = gitobj.branches
-    switch = False
 
+    branch_found = False
     for branch in branches:
         if remote:
-            check = branch.name.endswith('/' + branch_name)
+            branch_found = branch.name.endswith('/' + branch_name)
         else:
-            check = branch.name == branch_name
+            branch_found = branch.name == branch_name
 
-        if check:
-            # Create a new HEAD
-            try:
-                chkout = gitobj.create_head(branch_name, branch.commit)
-            except OSError:
-                log.exit("Cannot create new head")
-            # Switch to the new HEAD (like checkout)
-            gitobj.head.reference = chkout
-            # reset the index and working tree to match the pointed-to commit
-            gitobj.head.reset(index=True, working_tree=True)
-            # Verify that no problem are available
-            assert not gitobj.head.is_detached
-            log.verbose("Switching %s to %s" % (gitobj.git_dir, branch_name))
-            # Signal
-            switch = True
+        if branch_found:
             break
-        else:
-            pass
 
-    if not switch:
-        log.critical_exit("Requested branch '%s' was not found" % branch_name)
+    if not branch_found:
+        log.warning("Branch %s not found", branch_name)
+        return False
+
+    try:
+        gitobj.git.checkout(branch_name)
+    except GitCommandError as e:
+        log.warning(str(e))
+        return False
 
     return True
 

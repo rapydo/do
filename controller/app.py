@@ -435,7 +435,7 @@ Verify that you are in the right folder, now you are in: %s%s
             repos = self.vars.get('repos').copy()
         # core_url = core.get('online_url')
 
-        # local = gitter.get_repo(".")
+        self.gits['main'] = gitter.get_repo(".")
 
         # is_core = gitter.compare_repository(
         #     local, None, core_url, check_only=True)
@@ -1398,7 +1398,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             else:
                 log.info('Requested release: %s' % new_release)
             if new_release == current_release:
-                log.warning('Already at %s' % current_release)
+                log.error('You are already using release %s' % current_release)
                 return False
 
         if not self.current_args.get('downgrade'):
@@ -1476,7 +1476,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if gitter.switch_branch(main_repo, new_release):  # , remote=False):
             log.info("Main active branch: %s", new_release)
         else:
-            log.exit("Failed changing main repository to %s", new_release)
+            log.exit("Failed switching main repository to %s", new_release)
 
         # 3. reinit submodules
         self.read_specs()  # read again project configuration!
