@@ -35,43 +35,43 @@ def get_active_branch(gitobj):
         return None
 
 
-def upstream(url, path=None, key='upstream', do=False):
+# def upstream(url, path=None, key='upstream', do=False):
 
-    if path is None:
-        path = helpers.current_dir()
+#     if path is None:
+#         path = helpers.current_dir()
 
-    gitobj = Repo(path)
-    try:
-        upstream = gitobj.remote(key)
-    except ValueError:
-        if do:
-            upstream = gitobj.create_remote(key, url)
-            log.info("Added remote %s: %s" % (key, url))
-        else:
-            log.critical_exit(
-                """Missing upstream to rapydo/core
-Suggestion: execute the init command
-                """
-            )
+#     gitobj = Repo(path)
+#     try:
+#         upstream = gitobj.remote(key)
+#     except ValueError:
+#         if do:
+#             upstream = gitobj.create_remote(key, url)
+#             log.info("Added remote %s: %s" % (key, url))
+#         else:
+#             log.critical_exit(
+#                 """Missing upstream to rapydo/core
+# Suggestion: execute the init command
+#                 """
+#             )
 
-    current_url = next(upstream.urls)
-    if current_url != url:
-        if do:
-            upstream.set_url(new_url=url, old_url=current_url)
-            log.info("Replaced %s to %s" % (key, url))
-        else:
-            log.critical_exit(
-                """Rapydo upstream misconfiguration
-Found: %s
-Expected: %s
-Suggestion: execute the init command
-                """
-                % (current_url, url)
-            )
-    else:
-        log.checked("Upstream is set correctly")
+#     current_url = next(upstream.urls)
+#     if current_url != url:
+#         if do:
+#             upstream.set_url(new_url=url, old_url=current_url)
+#             log.info("Replaced %s to %s" % (key, url))
+#         else:
+#             log.critical_exit(
+#                 """Rapydo upstream misconfiguration
+# Found: %s
+# Expected: %s
+# Suggestion: execute the init command
+#                 """
+#                 % (current_url, url)
+#             )
+#     else:
+#         log.checked("Upstream is set correctly")
 
-    return gitobj
+#     return gitobj
 
 
 def switch_branch(gitobj, branch_name='master', remote=True):
@@ -313,7 +313,8 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
                 % (path, sha, message))
 
     # CHECKING COMMITS AHEAD (TO BE PUSHED) #
-    if path != 'upstream' and remote_branch == branch:
+    # if path != 'upstream' and remote_branch == branch:
+    if remote_branch == branch:
         ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
         commits_ahead = gitobj.iter_commits(
             ahead_check, max_count=max_remote)
