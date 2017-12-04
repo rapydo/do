@@ -76,6 +76,10 @@ def get_active_branch(gitobj):
 
 def switch_branch(gitobj, branch_name='master', remote=True):
 
+    if branch_name is None:
+        log.error("Unable to switch to a none branch")
+        return False
+
     if gitobj.active_branch.name == branch_name:
         log.warning("You are already on branch %s", branch_name)
         return False
@@ -87,9 +91,6 @@ def switch_branch(gitobj, branch_name='master', remote=True):
 
     branch_found = False
     for branch in branches:
-        if branch.name is None:
-            continue
-
         if remote:
             branch_found = branch.name.endswith('/' + branch_name)
         else:
