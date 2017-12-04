@@ -418,7 +418,10 @@ Verify that you are in the right folder, now you are in: %s%s
             repo['path'] = name
         # - version is the one we have on the working controller
         if 'branch' not in repo:
-            repo['branch'] = self.rapydo_version
+            if confs_only or self.rapydo_version is None:
+                repo['branch'] = __version__
+            else:
+                repo['branch'] = self.rapydo_version
 
         return gitter.clone(**repo)
 
