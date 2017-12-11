@@ -39,8 +39,9 @@ class ArgParser(object):
         for option_name, options in sorted_options:
             self.add_parser_argument(parser, option_name, options)
 
+        version_string = 'rapydo version %s' % __version__
         parser.add_argument('--version', action='version',
-                            version='rapydo version %s' % __version__)
+                            version=version_string)
         # Sub-parser of commands [check, init, etc]
         main_command = self.parse_conf.get('action')
 

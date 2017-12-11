@@ -81,7 +81,8 @@ def switch_branch(gitobj, branch_name='master', remote=True):
         return False
 
     if gitobj.active_branch.name == branch_name:
-        log.warning("You are already on branch %s", branch_name)
+        path = os.path.basename(gitobj.working_dir)
+        log.info("You are already on branch %s on %s", branch_name, path)
         return False
 
     if remote:
@@ -109,6 +110,8 @@ def switch_branch(gitobj, branch_name='master', remote=True):
         log.warning(str(e))
         return False
 
+    path = os.path.basename(gitobj.working_dir)
+    log.info("Switched branch to %s on %s", branch, path)
     return True
 
 
@@ -128,7 +131,6 @@ def clone(online_url, path, branch='master', do=False):
 
     if do:
         switch_branch(gitobj, branch)
-        log.info("Switched branch to %s on %s", branch, path)
 
     # switch
     compare_repository(gitobj, branch, online_url=online_url)
