@@ -61,6 +61,7 @@ class Application(object):
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
+        self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
 
         # Others
@@ -195,11 +196,7 @@ class Application(object):
         Further checks are performed later in the following steps
         """
 
-        # FIXME: a better way to select current directory
-        # TODO: save this local object as self.gits['local']
-        local_git = gitter.get_local(".")
-
-        if local_git is None:
+        if gitter.get_local(".") is None:
             log.exit(
                 """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
@@ -405,6 +402,9 @@ Verify that you are in the right folder, now you are in: %s%s
         repo_enabled = repo.pop('if', False)
         if not repo_enabled:
             return
+
+        if self.upgrade and self.current_args.get('current'):
+            repo['do'] = True
         else:
             repo['do'] = self.initialize
 
@@ -1176,10 +1176,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _ssl_certificate(self):
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # TO FIX: this name is wrong...
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-certificate"
 
         meta = self.arguments.parse_conf \
@@ -1199,10 +1195,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # return self._shell(**meta)
 
     def _ssl_dhparam(self):
-        # Use my method name in a meta programming style
-        # import inspect
-        # TO FIX: this name is wrong...
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-dhparam"
 
         meta = self.arguments.parse_conf \
@@ -1225,9 +1217,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if lib is None:
             log.exit("Missing bower lib, please add the --lib option")
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "bower-install"
 
         meta = self.arguments.parse_conf \
@@ -1374,7 +1363,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
-    def available_releases(self, releases):
+    def available_releases(self, releases, current_release):
 
         log.warning('List of available releases:')
         print('')
@@ -1383,8 +1372,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             r = info.get("rapydo")
             t = info.get('type')
 
-            print(' - %s %s (rapydo %s) [%s]' %
-                  (release, t, r, info.get('status')))
+            if release == current_release:
+                extra = " *installed*"
+            else:
+                extra = ""
+
+            print(' - %s %s (rapydo %s) [%s]%s' %
+                  (release, t, r, info.get('status'), extra))
         print('')
 
     def preliminary_upgrade_checks(self, current_release, new_release):
@@ -1392,17 +1386,25 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.exit("Cannot upgrade from master. Please work on a branch.")
 
         if new_release is None:
-            self.available_releases(self.releases)
+            self.available_releases(self.releases, current_release)
             return False
-        else:
-            if new_release not in self.releases:
-                self.available_releases(self.releases)
-                log.exit('Release %s not found' % new_release)
-            else:
-                log.info('Requested release: %s' % new_release)
-            if new_release == current_release:
-                log.error('You are already using release %s' % current_release)
-                return False
+
+        if new_release == ".":
+            if current_release not in self.releases:
+                self.available_releases(self.releases, current_release)
+                log.exit('Release %s not found' % current_release)
+
+            return True
+
+        if new_release not in self.releases:
+            self.available_releases(self.releases, current_release)
+            log.exit('Release %s not found' % new_release)
+
+        if new_release == current_release:
+            log.error('You are already using release %s' % current_release)
+            return False
+
+        log.info('Requested release: %s' % new_release)
 
         if not self.current_args.get('downgrade'):
             try:
@@ -1434,7 +1436,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         gitobj = self.gits.get('main')
         current_release = gitter.get_active_branch(gitobj)
-        new_release = self.current_args.get('release')
+        if self.current_args.get('current'):
+            new_release = "."
+        else:
+            new_release = self.current_args.get('release')
         log.info('Current release: %s' % current_release)
 
         # To reduce the function complexity, I moved all preliminary check in
@@ -1471,12 +1476,13 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 #     shutil.move(current_dir, backup_dir)
                 # except BaseException as e:
                 #     log.exit(
-                #         "Failed to backup %s.\n%s(%s)",
                 #         name, e.__class__.__name__, e)
                 # log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
 
         # 2. git checkout new version
-        if gitter.switch_branch(main_repo, new_release):  # , remote=False):
+        if new_release == ".":
+            log.debug("Switch branch not required")
+        elif gitter.switch_branch(main_repo, new_release):  # , remote=False):
             log.info("Main active branch: %s", new_release)
         else:
             log.exit("Failed switching main repository to %s", new_release)
@@ -1512,7 +1518,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.git_submodules()
 
         # 4. rebuild images
-        # self.rebuild_from_upgrade()
+        self.rebuild_from_upgrade()
 
         # 5. safely restart?
         # docker-compose up --force-recreate

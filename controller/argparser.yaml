@@ -307,15 +307,18 @@ subcommands:
     description: upgrade your current project to new official releases
     suboptions:
       release:
+        alias: r
         type: str
         metavalue: RELEASE_VERSION
         help: release version you want to upgrade to
       downgrade:
+        alias: d
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
         help: allow downgrade to previous versions
       current:
+        alias: c
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
