@@ -137,7 +137,7 @@ class Application(object):
             'utilities', min_version=__version__, max_version=__version__)
 
         # Check if git is installed
-        self.check_program('git', max_version='2.14.3')
+        self.check_program('git')  # , max_version='2.14.3')
 
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)

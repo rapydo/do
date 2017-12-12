@@ -37,7 +37,7 @@ setup(
         "docker-compose==1.17.1",
         "docker==2.5.1",
         "dockerfile-parse",
-        "gitpython",
+        "gitpython==2.1.8",
         "jinja2",
         # # necessary for docker-compose
         # # https://github.com/docker/compose/issues/4431
