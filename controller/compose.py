@@ -164,6 +164,7 @@ class Compose(object):
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
             '-d': False, '-T': False,
+            '--label': None,
         }
 
         return self.command('run', options)
@@ -172,7 +173,6 @@ class Compose(object):
         """
             Execute a command on a running container
         """
-
         shell_command, shell_args = self.split_command(command)
         options = {
             'SERVICE': service,
@@ -183,6 +183,7 @@ class Compose(object):
             '--privileged': True,
             '-T': False,
             '-d': False,
+            '--env': None,
         }
         if shell_command is not None:
             log.debug("Command: %s(%s+%s)"
@@ -204,5 +205,6 @@ class Compose(object):
 
         compose_options = {}
         docstring = getdoc(getattr(TopLevelCommand, command))
+
         return docopt_full_help(
             docstring, compose_options, options_first=True)
