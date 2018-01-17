@@ -178,7 +178,9 @@ class EndpointScaffold(object):
             template_filename, template_dir, **data)
 
         self.save_template(filepath, templated_content)
-        log.debug("rendered %s" % filepath)
+        # NOTE: this below has to be INFO,
+        # otherwise the user doesn't get info on what paths were created
+        log.info("rendered %s" % filepath)
         return True
 
     def swagger_specs(self):
