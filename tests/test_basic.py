@@ -175,7 +175,7 @@ def test_all(capfd):
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
     # "rendered projects/template/backend/swagger/justatest/specs.yaml"
-    base_response = 'DEBUG rendered %s/template/%s' % \
+    base_response = 'INFO rendered %s/template/%s' % \
         (PROJECT_DIR, BACKEND_DIR)
 
     assert '%s/%s/%s/specs.yaml' % \
