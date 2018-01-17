@@ -9,12 +9,14 @@ from utilities import checks
 from utilities import helpers
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
+from utilities import configuration
 from utilities.globals import mem
-# from utilities.configuration import DEFAULT_CONFIG_FILEPATH
+from utilities.time import date_from_string
 from controller import __version__
 from controller import project
 from controller import gitter
-from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER, SUBMODULES_DIR
+from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
+from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
@@ -23,6 +25,11 @@ from controller.configuration import read_yamls
 from utilities.logs import get_logger, suppress_stdout
 
 log = get_logger(__name__)
+
+# FIXME: move somewhere
+STATUS_RELEASED = "released"
+STATUS_DISCONTINUED = "discontinued"
+STATUS_DEVELOPING = "developing"
 
 
 class Application(object):
@@ -54,6 +61,7 @@ class Application(object):
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
+        self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
 
         # Others
@@ -63,6 +71,7 @@ class Application(object):
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.version = None
         self.releases = {}
+        self.gits = {}
 
         if self.project is not None:
             if "_" in self.project:
@@ -123,11 +132,14 @@ class Application(object):
         self.docker = Dock()
 
         # Check docker-compose version
-        self.check_python_package('compose', min_version="1.11")
-        self.check_python_package('docker', min_version="2.4.2")
+        self.check_python_package('compose', min_version="1.18")
+        # self.check_python_package('docker', min_version="2.4.2")
+        self.check_python_package('docker', min_version="2.6.1")
+        self.check_python_package(
+            'utilities', min_version=__version__, max_version=__version__)
 
         # Check if git is installed
-        self.check_program('git')
+        self.check_program('git')  # , max_version='2.14.3')
 
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
@@ -185,11 +197,7 @@ class Application(object):
         Further checks are performed later in the following steps
         """
 
-        # FIXME: a better way to select current directory
-        # TODO: save this local object as self.gits['local']
-        local_git = gitter.get_local(".")
-
-        if local_git is None:
+        if gitter.get_local(".") is None:
             log.exit(
                 """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
@@ -200,14 +208,15 @@ Verify that you are in the right folder, now you are in: %s
         # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
-            # NOTE: to be moved outside rapydo-core?
-            'confs',
-            'confs/backend.yml',
-            'confs/frontend.yml',  # it is optional, but we expect to find it
-
             'data',
             'projects',
             'submodules'
+        ]
+
+        obsolete_files = [
+            'confs',
+            'confs/backend.yml',
+            'confs/frontend.yml',  # it is optional, but we expect to find it
         ]
 
         for fname in required_files:
@@ -228,6 +237,13 @@ Verify that you are in the right folder, now you are in: %s%s
                     """ % (fname, os.getcwd(), extra)
                 )
 
+        for fname in obsolete_files:
+            if os.path.exists(fname):
+                log.exit(
+                    "Project %s contains an obsolete file or folder: %s",
+                    self.project, fname
+                )
+
     def inspect_project_folder(self):
 
         # FIXME: move in a project_defaults.yaml?
@@ -238,7 +254,9 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/models',
             'backend/swagger',
             'backend/tests',
-            'backend/__main__.py',  # NOTE: to be removed
+        ]
+        obsolete_files = [
+            'backend/__main__.py'
         ]
 
         if self.frontend:
@@ -258,11 +276,22 @@ Verify that you are in the right folder, now you are in: %s%s
                     """ % (self.project, fpath)
                 )
 
+        for fname in obsolete_files:
+            fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if os.path.exists(fpath):
+                log.exit(
+                    "Project %s contains an obsolete file or folder: %s",
+                    self.project, fpath
+                )
+
     def read_specs(self):
         """ Read project configuration """
 
-        self.specs = project.read_configuration(
-            project=self.project,
+        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+        project_file_path = helpers.project_dir(self.project)
+        self.specs = configuration.read(
+            default_file_path,
+            project_path=project_file_path,
             is_template=self.is_template
         )
 
@@ -317,24 +346,35 @@ Verify that you are in the right folder, now you are in: %s%s
                 err += "\nYou should remove such information from project"
                 log.exit(err)
 
-        # If your project requires a specific rapydo version, check if you are
-        # the rapydo-controller matching that version
-        if self.rapydo_version is not None:
+    def verify_rapydo_version(self, do_exit=True):
+        """
+        If your project requires a specific rapydo version, check if you are
+        the rapydo-controller matching that version
+        """
+        if self.rapydo_version is None:
+            return True
 
-            r = LooseVersion(self.rapydo_version)
-            c = LooseVersion(__version__)
-            if r != c:
-                if r > c:
-                    action = "Upgrade your controller to version %s" % r
-                else:
-                    action = "Downgrade your controller to version %s" % r
-                    action += "\nor upgrade your project"
+        r = LooseVersion(self.rapydo_version)
+        c = LooseVersion(__version__)
+        if r == c:
+            return True
 
-                exit_message = "This project requires rapydo-controller %s" % r
-                exit_message += ", you are using %s" % c
-                exit_message += "\n\n%s\n" % action
+        if r > c:
+            action = "Upgrade your controller to version %s" % r
+        else:
+            action = "Downgrade your controller to version %s" % r
+            action += " or upgrade your project"
 
-                log.exit(exit_message)
+        exit_message = "This project requires rapydo-controller %s" % r
+        exit_message += ", you are using %s" % c
+        exit_message += "\n\n%s\n" % action
+
+        if do_exit:
+            log.exit(exit_message)
+        else:
+            log.warning(exit_message)
+
+        return False
 
     def verify_connected(self):
         """ Check if connected to internet """
@@ -347,16 +387,25 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, name, repo):
+    def working_clone(self, name, repo, confs_only=False):
 
         # substitute values starting with '$$'
-        myvars = {'frontend': self.frontend}
+        if confs_only:
+            myvars = {}
+        else:
+            myvars = {
+                'frontend': self.frontend,
+                'devel': self.development,
+            }
         repo = project.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
         repo_enabled = repo.pop('if', False)
         if not repo_enabled:
             return
+
+        if self.upgrade and self.current_args.get('current'):
+            repo['do'] = True
         else:
             repo['do'] = self.initialize
 
@@ -370,39 +419,44 @@ Verify that you are in the right folder, now you are in: %s%s
             repo['path'] = name
         # - version is the one we have on the working controller
         if 'branch' not in repo:
-            repo['branch'] = __version__
+            if confs_only or self.rapydo_version is None:
+                repo['branch'] = __version__
+            else:
+                repo['branch'] = self.rapydo_version
 
         return gitter.clone(**repo)
 
-    def git_submodules(self):
+    def git_submodules(self, confs_only=False):
         """ Check and/or clone git projects """
 
-        core_key = 'core'
-        repos = self.vars.get('repos').copy()
-        core = repos.pop(core_key)
-        core_url = core.get('online_url')
-
-        gits = {}
-
-        local = gitter.get_repo(".")
-
-        is_core = gitter.compare_repository(
-            local, None, core_url, check_only=True)
-
-        if is_core:
-            log.info("You are working on rapydo-core, not a fork")
-            gits['main'] = local
+        if confs_only:
+            repos = {}
+            repos[RAPYDO_CONFS] = {
+                "online_url": "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_CONFS),
+                "if": "true"
+            }
         else:
-            core_path = core.get('path')
-            if core_path is None:
-                core_path = core_key
-            gits['main'] = gitter.upstream(
-                url=core_url, path=core_path, do=self.initialize)
+            repos = self.vars.get('repos').copy()
+        # core_url = core.get('online_url')
+
+        self.gits['main'] = gitter.get_repo(".")
+
+        # is_core = gitter.compare_repository(
+        #     local, None, core_url, check_only=True)
+
+        # if is_core:
+        #     log.info("You are working on rapydo-core, not a fork")
+        #     gits['main'] = local
+        # else:
+        #     core_path = core.get('path')
+        #     if core_path is None:
+        #         core_path = core_key
+        #     gits['main'] = gitter.upstream(
+        #         url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
-            gits[name] = self.working_clone(name, repo)
-
-        self.gits = gits
+            self.gits[name] = self.working_clone(
+                name, repo, confs_only=confs_only)
 
     def git_update_repos(self):
 
@@ -418,8 +472,11 @@ Verify that you are in the right folder, now you are in: %s%s
         myvars = {
             'frontend': self.frontend,
             'logging': self.current_args.get('collect_logs'),
+            'devel': self.development,
             'mode': self.current_args.get('mode'),
-            'baseconf': helpers.current_dir(CONTAINERS_YAML_DIRNAME),
+            'baseconf': helpers.current_dir(
+                SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+            ),
             'customconf': helpers.project_dir(
                 self.project,
                 CONTAINERS_YAML_DIRNAME
@@ -434,7 +491,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # Find configuration that tells us which files have to be read
         compose_files = self.prepare_composers()
-        # log.exit(compose_files)
 
         # Read necessary files
         self.services, self.files, self.base_services, self.base_files = \
@@ -461,10 +517,32 @@ Verify that you are in the right folder, now you are in: %s%s
         dimages = self.docker.images()
 
         if not self.current_args.get('rebuild_templates', False):
-            self.verify_template_builds(dimages, self.template_builds)
+            self.verify_template_builds(
+                dimages, self.template_builds)
 
         if self.action in ['check', 'init', 'update']:
-            self.verify_obsolete_builds(dimages, self.builds, overriding_imgs)
+            self.verify_obsolete_builds(
+                dimages, self.builds, overriding_imgs, self.template_builds)
+
+    def get_build_timestamp(self, timestamp, as_date=False):
+
+        if timestamp is None:
+            log.warning("Received a null timestamp, defaulting to zero")
+            timestamp = 0
+        # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
+        # i.e. were convertable to float
+        # From dockerpy 2.5.1 we are obtained strings like this:
+        # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
+        try:
+            # verify if timestamp is already an epoch
+            float(timestamp)
+        except ValueError:
+            # otherwise, convert it
+            timestamp = date_from_string(timestamp).timestamp()
+
+        if as_date:
+            return datetime.fromtimestamp(timestamp)
+        return timestamp
 
     def build_is_obsolete(self, build):
         # compare dates between git and docker
@@ -484,7 +562,7 @@ Verify that you are in the right folder, now you are in: %s%s
         obsolete, build_ts, last_commit = gitter.check_file_younger_than(
             gitobj=git_repo,
             filename=Dockerfile,
-            timestamp=build.get('timestamp')
+            timestamp=self.get_build_timestamp(build.get('timestamp'))
         )
 
         return obsolete, build_ts, last_commit
@@ -495,23 +573,29 @@ Verify that you are in the right folder, now you are in: %s%s
             log.debug("No template build to be verified")
             return
 
+        found_obsolete = 0
+        fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
             if image_tag not in docker_images:
-                message = "Missing template build for %s" % build['service']
+
+                found_obsolete += 1
+                message = "Missing template build for %s (%s)" % (
+                    build['service'], image_tag)
                 if self.action == 'check':
                     message += "\nSuggestion: execute the init command"
                     log.exit(message)
                 else:
                     log.debug(message)
                     dc = Compose(files=self.base_files)
-                    dc.build_images(builds={image_tag: build})
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
 
                 continue
 
             obsolete, build_ts, last_commit = self.build_is_obsolete(build)
             if obsolete:
-                fmt = "%Y-%m-%d %H:%M:%S"
+                found_obsolete += 1
                 b = datetime.fromtimestamp(build_ts).strftime(fmt)
                 c = last_commit.strftime(fmt)
                 message = "Template image %s is obsolete" % image_tag
@@ -520,33 +604,65 @@ Verify that you are in the right folder, now you are in: %s%s
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
                     dc = Compose(files=self.base_files)
-                    dc.build_images(builds={image_tag: build})
+                    dc.build_images(
+                        builds={image_tag: build}, current_version=__version__)
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build --rebuild-templates"
                     log.warning(message)
 
-    def verify_obsolete_builds(self, docker_images, builds, overriding_imgs):
+        if found_obsolete == 0:
+            log.debug("No template build to be updated")
+
+    def verify_obsolete_builds(
+            self, docker_images, builds, overriding_imgs, template_builds):
 
         if len(builds) == 0:
             log.debug("No build to be verified")
             return
 
+        found_obsolete = 0
+        fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
             if image_tag not in docker_images:
                 # Missing images will be created at startup
                 continue
 
-            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
-            if obsolete:
-                fmt = "%Y-%m-%d %H:%M:%S"
-                b = datetime.fromtimestamp(build_ts).strftime(fmt)
-                c = last_commit.strftime(fmt)
-                message = "Image %s is obsolete" % image_tag
-                message += " (built on %s" % b
-                message += " but changed on %s)" % c
+            build_is_obsolete = False
+            message = ""
+
+            # if FROM image is newer, this build should be re-built
+            if image_tag in overriding_imgs:
+                from_img = overriding_imgs.get(image_tag)
+                from_build = template_builds.get(from_img)
+                from_timestamp = self.get_build_timestamp(
+                    from_build.get('timestamp'), as_date=True)
+                build_timestamp = self.get_build_timestamp(
+                    build.get('timestamp'), as_date=True)
+
+                if from_timestamp > build_timestamp:
+                    build_is_obsolete = True
+                    b = build_timestamp.strftime(fmt)
+                    c = from_timestamp.strftime(fmt)
+                    message = "Image %s is obsolete" % image_tag
+                    message += " (built on %s FROM %s" % (b, from_img)
+                    message += " that changed on %s)" % c
+
+            if not build_is_obsolete:
+                # Check if some recent commit modified the Dockerfile
+                obsolete, build_ts, last_commit = self.build_is_obsolete(build)
+                if obsolete:
+                    build_is_obsolete = True
+                    b = datetime.fromtimestamp(build_ts).strftime(fmt)
+                    c = last_commit.strftime(fmt)
+                    message = "Image %s is obsolete" % image_tag
+                    message += " (built on %s" % b
+                    message += " but changed on %s)" % c
+
+            if build_is_obsolete:
+                found_obsolete += 1
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
                     dc = Compose(files=self.files)
@@ -555,13 +671,18 @@ Verify that you are in the right folder, now you are in: %s%s
                     # overriding a template build
                     force_pull = image_tag not in overriding_imgs
                     dc.build_images(
-                        builds={image_tag: build}, force_pull=force_pull
+                        builds={image_tag: build},
+                        force_pull=force_pull,
+                        current_version=__version__
                     )
                 else:
-                    message += "\nRebuild it with:"
-                    message += "\n$ rapydo --service %s" % build.get('service')
+                    message += "\nRebuild it with:\n"
+                    message += "$ rapydo --services %s" % build.get('service')
                     message += " build"
                     log.warning(message)
+
+        if found_obsolete == 0:
+            log.debug("No build to be updated")
 
     def bower_libs(self):
 
@@ -673,7 +794,16 @@ You can do several things:
                 env = self.vars.get('env')
                 env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
                 env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
-                env['DOCKER_PRIVILEGED_MODE'] = 1
+                # Relative paths from ./submodules/rapydo-confs/confs
+                env['SUBMODULE_DIR'] = "../.."
+                env['VANILLA_DIR'] = "../../.."
+
+                env['RAPYDO_VERSION'] = __version__
+                # FIXME: should be a parameter
+                if self.current_args.get('privileged'):
+                    env['DOCKER_PRIVILEGED_MODE'] = "true"
+                else:
+                    env['DOCKER_PRIVILEGED_MODE'] = "false"
                 env.update({'PLACEHOLDER': PLACEHOLDER})
 
                 for key, value in sorted(env.items()):
@@ -702,7 +832,7 @@ You can do several things:
 and add the variable "ACTIVATE: 1" in the service enviroment
                 """)
         else:
-            log.checked("Active services: %s" % self.active_services)
+            log.checked("Active services: %s", self.active_services)
 
         missing = []
         for service_name in self.active_services:
@@ -742,6 +872,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def get_ignore_submodules(self):
         ignore_submodule = self.current_args.get('ignore_submodule', '')
+        if ignore_submodule is None:
+            return ''
         return ignore_submodule.split(",")
 
     def git_checks(self):
@@ -974,8 +1106,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: to be completed
         uris = {
             'swaggerui':
-                'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
-                (host, host, '8080'),
+                # 'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
+                # (host, host, '8080'),
+                'http://%s?docExpansion=none' % host
 
         }
 
@@ -1016,7 +1149,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.current_args.get('rebuild_templates'):
             dc = Compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.build_images(self.template_builds)
+            dc.build_images(self.template_builds, current_version=__version__)
 
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
@@ -1044,10 +1177,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _ssl_certificate(self):
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # TO FIX: this name is wrong...
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-certificate"
 
         meta = self.arguments.parse_conf \
@@ -1067,10 +1196,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # return self._shell(**meta)
 
     def _ssl_dhparam(self):
-        # Use my method name in a meta programming style
-        # import inspect
-        # TO FIX: this name is wrong...
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "ssl-dhparam"
 
         meta = self.arguments.parse_conf \
@@ -1093,9 +1218,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if lib is None:
             log.exit("Missing bower lib, please add the --lib option")
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # current_method_name = inspect.currentframe().f_code.co_name
         current_method_name = "bower-install"
 
         meta = self.arguments.parse_conf \
@@ -1164,6 +1286,34 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.exit("Please, specify something to look for.\n" +
                      "Add --help to list available options.")
 
+    def _scale(self):
+
+        scaling = self.current_args.get('value', '')
+        options = scaling.split('=')
+        if len(options) != 2:
+            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
+        else:
+            service, workers = options
+
+        services = self.get_services(default=self.active_services)
+        # NOTE: scale has become an option of compose 'up'
+        compose_options = {
+            'SERVICE': services,
+            '--no-deps': False,
+            '-d': True,
+            '--build': False,  # self.current_args.get('from_upgrade'),
+            '--remove-orphans': True,
+            '--abort-on-container-exit': False,
+            '--no-recreate': False,
+            '--force-recreate': False,
+            '--no-build': False,
+            # '--scale': {service: workers},
+            '--scale': [scaling],
+        }
+        # print("TEST", service, workers)
+        dc = Compose(files=self.files)
+        dc.command('up', compose_options)
+
     def _coverall(self):
 
         basemsg = "COVERAGE cannot be computed"
@@ -1214,41 +1364,48 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
-    def available_releases(self, releases):
+    def available_releases(self, releases, current_release):
 
-        log.warning('List of releases:')
-        print('\n###########')
+        log.warning('List of available releases:')
+        print('')
         for release, info in releases.items():
 
-            print('Release %s: %s [%s]' %
-                  (release, info.get('type'), info.get('status')))
+            r = info.get("rapydo")
+            t = info.get('type')
+
+            if release == current_release:
+                extra = " *installed*"
+            else:
+                extra = ""
+
+            print(' - %s %s (rapydo %s) [%s]%s' %
+                  (release, t, r, info.get('status'), extra))
         print('')
 
-    def _upgrade(self):
-        if len(self.releases) < 1:
-            log.exit('This project does not support releases yet')
-
-        gitobj = self.gits.get('main')
-        current_release = gitter.get_active_branch(gitobj)
-        log.info('Current release: %s' % current_release)
-
+    def preliminary_upgrade_checks(self, current_release, new_release):
         if current_release == 'master':
             log.exit("Cannot upgrade from master. Please work on a branch.")
 
-        new_release = self.current_args.get('release')
-
         if new_release is None:
-            self.available_releases(self.releases)
+            self.available_releases(self.releases, current_release)
             return False
-        else:
-            if new_release not in self.releases:
-                self.available_releases(self.releases)
-                log.exit('Release %s not found' % new_release)
-            else:
-                log.info('Requested release: %s' % new_release)
-            if new_release == current_release:
-                log.warning('Already at %s' % current_release)
-                return False
+
+        if new_release == ".":
+            if current_release not in self.releases:
+                self.available_releases(self.releases, current_release)
+                log.exit('Release %s not found' % current_release)
+
+            return True
+
+        if new_release not in self.releases:
+            self.available_releases(self.releases, current_release)
+            log.exit('Release %s not found' % new_release)
+
+        if new_release == current_release:
+            log.error('You are already using release %s' % current_release)
+            return False
+
+        log.info('Requested release: %s' % new_release)
 
         if not self.current_args.get('downgrade'):
             try:
@@ -1260,28 +1417,44 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
 
         status = self.releases.get(new_release).get('status')
-        if status != 'released':
-            if self.development and status == 'developing':
-                pass
+        if status == STATUS_DISCONTINUED:
+            log.exit("This version is discontinued")
+        elif status == STATUS_RELEASED:
+            pass
+        elif status == STATUS_DEVELOPING:
+            if self.development:
+                log.verbose("Switching to a developing version")
             else:
                 log.exit("This version has yet to be released")
+        else:
+            log.exit("%s: unknown version status: %s", new_release, status)
 
-        ##########################
+        return True
+
+    def _upgrade(self):
+        if len(self.releases) < 1:
+            log.exit('This project does not support releases yet')
+
+        gitobj = self.gits.get('main')
+        current_release = gitter.get_active_branch(gitobj)
+        if self.current_args.get('current'):
+            new_release = "."
+        else:
+            new_release = self.current_args.get('release')
+        log.info('Current release: %s' % current_release)
+
+        # To reduce the function complexity, I moved all preliminary check in
+        # a dedicated function. Note: that function can stop with log.exit
+        if not self.preliminary_upgrade_checks(current_release, new_release):
+            return False
 
         # # 0. if current main repo is being developed, stop this
         # # NOTE: I am not checking for commits to be pushed
-        name = 'main'
-        mygit = self.gits.pop(name)
-        if gitter.check_unstaged(name, mygit):
+        main_repo = self.gits.pop('main')
+        if gitter.check_unstaged('main', main_repo):
             log.exit('Interrupting')
 
-        # 1. git checkout new version
-        if gitter.switch_branch(mygit, new_release):  # , remote=False):
-            log.info("Main active branch: %s", new_release)
-        else:
-            log.exit("Failed changing main repository to %s", new_release)
-
-        # 2. check submodules versions
+        # 1. check submodules versions
         # if different move current to `submodules/.backup/$VERSION/$TOOL`
         for name, gitobj in sorted(self.gits.items()):
 
@@ -1291,30 +1464,65 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             if gitter.check_unstaged(name, gitobj):
                 current_dir = gitobj.working_dir
-                current_version = gitter.get_active_branch(gitobj)
-                backup_dir = helpers.current_fullpath(
-                    SUBMODULES_DIR, '.backup', current_version, name)
-                import shutil
-                try:
-                    shutil.move(current_dir, backup_dir)
-                except BaseException as e:
-                    log.exit(
-                        "Failed to backup %s.\n%s(%s)",
-                        name, e.__class__.__name__, e)
-                log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+                msg = "Unable to upgrade"
+                msg += "\n\nYou have unstaged files in: %s" % current_dir
+                msg += "\n\nPlease commit or undo these changes,"
+                msg += " then retry the upgrade\n"
+                log.exit(msg)
+                # current_version = gitter.get_active_branch(gitobj)
+                # backup_dir = helpers.current_fullpath(
+                #     SUBMODULES_DIR, '.backup', current_version, name)
+                # import shutil
+                # try:
+                #     shutil.move(current_dir, backup_dir)
+                # except BaseException as e:
+                #     log.exit(
+                #         name, e.__class__.__name__, e)
+                # log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+
+        # 2. git checkout new version
+        if new_release == ".":
+            log.debug("Switch branch not required")
+        elif gitter.switch_branch(main_repo, new_release):  # , remote=False):
+            log.info("Main active branch: %s", new_release)
+        else:
+            log.exit("Failed switching main repository to %s", new_release)
 
         # 3. reinit submodules
         self.read_specs()  # read again project configuration!
+        if not self.verify_rapydo_version(do_exit=False):
+            log.info("Trying to install controller %s", self.rapydo_version)
+            from utilities.packing import install, check_version
+
+            package = "rapydo-controller"
+
+            if install("%s==%s" % (package, self.rapydo_version)):
+                installed_version = check_version(package)
+                installed = (installed_version != self.rapydo_version)
+            else:
+                installed = False
+
+            if not installed:
+                log.error(
+                    "Failed to install %s %s", package, self.rapydo_version)
+                log.warning(
+                    "Rolling back previous branch on main repository")
+                if gitter.switch_branch(main_repo, current_release):
+                    log.info("Main repository back to %s", current_release)
+                else:
+                    log.error(
+                        "Failed switching main repository to %s",
+                        current_release)
+                log.exit("Upgrade failed")
+
         self.initialize = True
         self.git_submodules()
 
         # 4. rebuild images
-        # NOTE: this would rebuild images and templates
         self.rebuild_from_upgrade()
 
         # 5. safely restart?
         # docker-compose up --force-recreate
-        pass
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -1330,8 +1538,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.get_args()
         self.check_installed_software()
         self.inspect_main_folder()
+        self.git_submodules(confs_only=True)
         self.check_projects()
         self.read_specs()  # read project configuration
+        self.verify_rapydo_version()
         self.inspect_project_folder()
 
         # Generate and get the extra arguments in case of a custom command
@@ -1362,28 +1572,29 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             if self.current_args.get('skip_heavy_git_ops', False):
                 do_heavy_ops = False
 
+        self.git_submodules(confs_only=False)
+
         # GIT related
-        self.git_submodules()
         if do_heavy_ops:
             self.git_checks()  # NOTE: this might be an heavy operation
         else:
             log.verbose("Skipping heavy operations")
 
-        if self.check:
+        # if self.check:
 
-            remote_branch = self.vars.get(
-                'repos', []).get(
-                'core', []).get(
-                'branch', 'master')
+        #     remote_branch = self.vars.get(
+        #         'repos', []).get(
+        #         'core', []).get(
+        #         'branch', 'master')
 
-            if self.current_args.get('verify_upstream', False):
-                # FIXME: connection verification should be made only once
-                self.verify_connected()
-                gitter.check_updates(
-                    'upstream', self.gits['main'],
-                    fetch_remote='upstream',
-                    remote_branch=remote_branch
-                )
+        #     if self.current_args.get('verify_upstream', False):
+        #         # FIXME: connection verification should be made only once
+        #         self.verify_connected()
+        #         gitter.check_updates(
+        #             'upstream', self.gits['main'],
+        #             fetch_remote='upstream',
+        #             remote_branch=remote_branch
+        #         )
 
         # self.make_env(do=do_heavy_ops)
         self.make_env()

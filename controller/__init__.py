@@ -2,12 +2,14 @@
 
 import sys
 
-__version__ = '0.5.7'
+__version__ = '0.6.0'
 
 FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
+RAPYDO_CONFS = 'rapydo-confs'
+RAPYDO_GITHUB = "https://github.com/rapydo"
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
 TEMPLATE_DIR = 'templates'
 

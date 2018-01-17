@@ -65,7 +65,12 @@ options:
   development:
     type: bool
     default: False
-    help: allow to execute the code directly from rapydo 'core' template
+    help: switch to development mode
+
+  privileged:
+    type: bool
+    default: False
+    help: allow containers to start in privileged mode
 
 subcommands:
   check:
@@ -76,19 +81,19 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: 'upstream'
+        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
       skip-heavy-git-ops:
         alias: s
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      verify-upstream:
-        alias: u
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: include upstream repo (rapydo-core) to checked submodules
+      # verify-upstream:
+      #   alias: u
+      #   type: bool
+      #   metavalue: TRUE_OR_FALSE
+      #   default: False
+      #   help: include upstream repo (rapydo-core) to checked submodules
       skip-bower:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -111,7 +116,7 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        default: 'upstream'
+        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
       skip-bower:
         type: bool
@@ -258,8 +263,17 @@ subcommands:
         help: remove also containers persistent data
   env:
     description: print all configured variables
+  scale:
+    description: scale the number of containers for one service
+    suboptions:
+      value:
+        positional: yes
+        type: str
+        metavalue: "SERVICE=NUM_REPLICA"
+        default:
+        help: scale SERVICE to NUM_REPLICA
   find:
-    description: create a new endpoint based on a template
+    description: show information about an existing endpoint
     suboptions:
       endpoint:
         positional: no
@@ -293,14 +307,22 @@ subcommands:
     description: upgrade your current project to new official releases
     suboptions:
       release:
+        alias: r
         type: str
         metavalue: RELEASE_VERSION
-        help: release number you want to upgrade to
+        help: release version you want to upgrade to
       downgrade:
+        alias: d
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
         help: allow downgrade to previous versions
+      current:
+        alias: c
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: upgrade to current branch. Incompatible with release option
 
   # tutorial:
   #   description: Step-by-step guide to make your project RAPyDo compliant

@@ -73,7 +73,8 @@ def find_templates_override(services, templates):
 
             if dfp.baseimage is None:
                 dfp.baseimage = 'unknown_build'
-            elif dfp.baseimage.endswith(':template'):
+            # elif dfp.baseimage.endswith(':template'):
+            elif dfp.baseimage.startswith('rapydo/'):
                 if dfp.baseimage not in templates:
                     log.critical_exit(
                         """Unable to find the %s in this project

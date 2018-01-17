@@ -53,7 +53,7 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def build_images(self, builds, force_pull=True):
+    def build_images(self, builds, force_pull=True, current_version=None):
 
         try:
             compose_handler = self.get_handle()
@@ -68,6 +68,11 @@ class Compose(object):
                     '--pull': force_pull,
                     'SERVICE': [service]
                 }
+
+                # NOTE: we can set only 1 variable since options is a dict
+                if current_version is not None:
+                    var = {"RAPYDO_VERSION": current_version}
+                    options['--build-arg'] = var
 
                 compose_handler.build(options=options)
                 log.info("Built image: %s" % image)
@@ -159,6 +164,7 @@ class Compose(object):
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
             '-d': False, '-T': False,
+            '--label': None,
         }
 
         return self.command('run', options)
@@ -167,7 +173,6 @@ class Compose(object):
         """
             Execute a command on a running container
         """
-
         shell_command, shell_args = self.split_command(command)
         options = {
             'SERVICE': service,
@@ -178,6 +183,7 @@ class Compose(object):
             '--privileged': True,
             '-T': False,
             '-d': False,
+            '--env': None,
         }
         if shell_command is not None:
             log.debug("Command: %s(%s+%s)"
@@ -199,5 +205,6 @@ class Compose(object):
 
         compose_options = {}
         docstring = getdoc(getattr(TopLevelCommand, command))
+
         return docopt_full_help(
             docstring, compose_options, options_first=True)

@@ -34,15 +34,16 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.15.0",  # NOTE: you get an error with 1.16!
-        "docker==2.5.1",
+        "docker-compose==1.18",
+        # "docker==2.6.1",
+        "docker==2.7",
         "dockerfile-parse",
-        "gitpython",
+        "gitpython==2.1.8",
         "jinja2",
         # # necessary for docker-compose
         # # https://github.com/docker/compose/issues/4431
-        "requests==2.11.1"
-        # "requests==2.18.4",  # current...
+        # "requests==2.11.1"
+        "requests==2.18.4",  # current...
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[

@@ -7,7 +7,6 @@ from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
 from utilities import helpers
 from utilities.logs import get_logger
-from utilities.time import date_from_string
 
 log = get_logger(__name__)
 
@@ -36,81 +35,83 @@ def get_active_branch(gitobj):
         return None
 
 
-def upstream(url, path=None, key='upstream', do=False):
+# def upstream(url, path=None, key='upstream', do=False):
 
-    if path is None:
-        path = helpers.current_dir()
+#     if path is None:
+#         path = helpers.current_dir()
 
-    gitobj = Repo(path)
-    try:
-        upstream = gitobj.remote(key)
-    except ValueError:
-        if do:
-            upstream = gitobj.create_remote(key, url)
-            log.info("Added remote %s: %s" % (key, url))
-        else:
-            log.critical_exit(
-                """Missing upstream to rapydo/core
-Suggestion: execute the init command
-                """
-            )
+#     gitobj = Repo(path)
+#     try:
+#         upstream = gitobj.remote(key)
+#     except ValueError:
+#         if do:
+#             upstream = gitobj.create_remote(key, url)
+#             log.info("Added remote %s: %s" % (key, url))
+#         else:
+#             log.critical_exit(
+#                 """Missing upstream to rapydo/core
+# Suggestion: execute the init command
+#                 """
+#             )
 
-    current_url = next(upstream.urls)
-    if current_url != url:
-        if do:
-            upstream.set_url(new_url=url, old_url=current_url)
-            log.info("Replaced %s to %s" % (key, url))
-        else:
-            log.critical_exit(
-                """Rapydo upstream misconfiguration
-Found: %s
-Expected: %s
-Suggestion: execute the init command
-                """
-                % (current_url, url)
-            )
-    else:
-        log.checked("Upstream is set correctly")
+#     current_url = next(upstream.urls)
+#     if current_url != url:
+#         if do:
+#             upstream.set_url(new_url=url, old_url=current_url)
+#             log.info("Replaced %s to %s" % (key, url))
+#         else:
+#             log.critical_exit(
+#                 """Rapydo upstream misconfiguration
+# Found: %s
+# Expected: %s
+# Suggestion: execute the init command
+#                 """
+#                 % (current_url, url)
+#             )
+#     else:
+#         log.checked("Upstream is set correctly")
 
-    return gitobj
+#     return gitobj
 
 
 def switch_branch(gitobj, branch_name='master', remote=True):
 
+    if branch_name is None:
+        log.error("Unable to switch to a none branch")
+        return False
+
     if gitobj.active_branch.name == branch_name:
+        path = os.path.basename(gitobj.working_dir)
+        log.info("You are already on branch %s on %s", branch_name, path)
         return False
 
     if remote:
         branches = gitobj.remotes[0].fetch()
     else:
         branches = gitobj.branches
-    switch = False
 
+    branch_found = False
     for branch in branches:
         if remote:
-            check = branch.name.endswith('/' + branch_name)
+            branch_found = branch.name.endswith('/' + branch_name)
         else:
-            check = branch.name == branch_name
+            branch_found = branch.name == branch_name
 
-        if check:
-            # Create a new HEAD
-            chkout = gitobj.create_head(branch_name, branch.commit)
-            # Switch to the new HEAD (like checkout)
-            gitobj.head.reference = chkout
-            # reset the index and working tree to match the pointed-to commit
-            gitobj.head.reset(index=True, working_tree=True)
-            # Verify that no problem are available
-            assert not gitobj.head.is_detached
-            log.verbose("Switching %s to %s" % (gitobj.git_dir, branch_name))
-            # Signal
-            switch = True
+        if branch_found:
             break
-        else:
-            pass
 
-    if not switch:
-        log.critical_exit("Requested branch '%s' was not found" % branch_name)
+    if not branch_found:
+        log.warning("Branch %s not found", branch_name)
+        return False
 
+    try:
+        gitobj.git.checkout(branch_name)
+    except GitCommandError as e:
+        log.warning(str(e))
+        return False
+
+    path = os.path.basename(gitobj.working_dir)
+    log.info("Switched branch to %s on %s", branch, path)
     return True
 
 
@@ -124,10 +125,12 @@ def clone(online_url, path, branch='master', do=False):
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        switch_branch(gitobj, branch)
         log.info("Cloned repo %s@%s as %s" % (online_url, branch, path))
     else:
         log.critical_exit("Repo %s missing as %s" % (online_url, local_path))
+
+    if do:
+        switch_branch(gitobj, branch)
 
     # switch
     compare_repository(gitobj, branch, online_url=online_url)
@@ -194,17 +197,6 @@ Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
 
 
 def check_file_younger_than(gitobj, filename, timestamp):
-
-    # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
-    # i.e. were convertable to float
-    # From dockerpy 2.5.1 we are obtained strings like this:
-    # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
-    try:
-        # verify if timestamp is already an epoch
-        float(timestamp)
-    except ValueError:
-        # otherwise, convert it
-        timestamp = date_from_string(timestamp).timestamp()
 
     try:
         commits = gitobj.blame(rev='HEAD', file=filename)
@@ -322,7 +314,8 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
                 % (path, sha, message))
 
     # CHECKING COMMITS AHEAD (TO BE PUSHED) #
-    if path != 'upstream' and remote_branch == branch:
+    # if path != 'upstream' and remote_branch == branch:
+    if remote_branch == branch:
         ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
         commits_ahead = gitobj.iter_commits(
             ahead_check, max_count=max_remote)
