@@ -107,9 +107,10 @@ class Application(object):
                     % PROJECT_DIR
                 )
             elif prj_num > 1:
+                hint = "Hint: create a .projectrc file to save default options"
                 log.exit(
                     "Please select the --project option on one " +
-                    "of the following:\n\n %s\n" % projects)
+                    "of the following:\n\n %s\n\n%s\n", projects, hint)
             else:
                 # make it the default
                 self.project = projects.pop()
@@ -144,11 +145,17 @@ class Application(object):
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
-            log.exit(
-                "Missing requirement.\n" +
-                "Please make sure that '%s' is installed" % program
-            )
 
+            hints = ""
+
+            if program == "docker":
+                hints = "To install docker visit: https://get.docker.com"
+
+            if len(hints) > 0:
+                hints = "\n\n%s" % hints
+
+            log.exit(
+                "Missing requirement: '%s' not found.%s" % (program, hints))
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for %s is %s" \
