@@ -154,7 +154,13 @@ subcommands:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: tail logs
+        help: follow logs
+      tail:
+        alias: t
+        type: str
+        metavalue: INTEGER_NUM_LINES
+        default: "100"
+        help: logs
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:

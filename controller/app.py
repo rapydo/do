@@ -155,6 +155,7 @@ class Application(object):
                 hints = "\n\n%s" % hints
 
             log.exit(
+
                 "Missing requirement: '%s' not found.%s" % (program, hints))
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
@@ -1062,7 +1063,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {
             '--follow': self.current_args.get('follow', False),
-            '--tail': 'all',
+            '--tail': self.current_args.get('tail', "100"),
             '--no-color': False,
             '--timestamps': True,
             'SERVICE': services,
