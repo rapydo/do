@@ -389,9 +389,9 @@ Verify that you are in the right folder, now you are in: %s%s
 
         connected = checks.internet_connection_available()
         if not connected:
-            log.exit('Internet connection unavailable')
+            log.exit('Internet connection is unavailable')
         else:
-            log.checked("Internet connection available")
+            log.checked("Internet connection is available")
             self.tested_connection = True
         return
 
@@ -1217,6 +1217,31 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
+        dc = Compose(files=self.files)
+        return dc.exec_command(service, user=user, command=command)
+
+    def _npm_install(self):
+
+        lib = self.current_args.get("lib", None)
+        if lib is None:
+            log.exit("Missing lib, please add the --lib option")
+
+        current_method_name = "npm-install"
+
+        meta = self.arguments.parse_conf \
+            .get('subcommands') \
+            .get(current_method_name, {}) \
+            .get('container_exec', {})
+
+        # Verify all is good
+        assert meta.pop('name') == 'npm'
+
+        # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
+        # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
+        command = "npm --prefix /modules install --save-prod %s" % lib
+
+        service = meta.get('service')
+        user = meta.get('user', None)
         dc = Compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
