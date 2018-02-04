@@ -7,6 +7,7 @@ from distutils.version import LooseVersion
 from utilities import path
 from utilities import checks
 from utilities import helpers
+from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
@@ -295,6 +296,46 @@ Verify that you are in the right folder, now you are in: %s%s
                     "Project %s contains an obsolete file or folder: %s",
                     self.project, fpath
                 )
+
+    def check_permissions(self, path, current_os_user):
+
+        if not basher.path_is_readable(path):
+            log.warning("%s: path is not read", path)
+            return False
+
+        if not basher.path_is_writable(path):
+            log.warning("%s: path cannot be written", path)
+            return False
+        try:
+            owner = basher.file_os_owner(path)
+        except KeyError:
+            owner = basher.file_os_owner_raw(path)
+
+        if owner != current_os_user:
+            log.warning("%s: wrong owner (%s)", path, owner)
+            return False
+        return True
+
+    def inspect_permissions(self, root='.'):
+
+        os_user = basher.current_os_user()
+
+        for root, sub_folders, files in os.walk(root):
+
+            for folder in sub_folders:
+                if folder == '.git':
+                    continue
+                path = os.path.join(root, folder)
+                if self.check_permissions(path, os_user):
+                    self.inspect_permissions(root=path)
+
+            for file in files:
+                if file.endswith(".pyc"):
+                    continue
+                path = os.path.join(root, file)
+                self.check_permissions(path, os_user)
+
+            break
 
     def read_specs(self):
         """ Read project configuration """
@@ -1651,6 +1692,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
         self.inspect_project_folder()
+        self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
