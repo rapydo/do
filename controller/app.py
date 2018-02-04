@@ -326,7 +326,7 @@ Verify that you are in the right folder, now you are in: %s%s
             # Check if the current version is listed in releases
             if self.version not in self.releases:
                 log.exit(
-                    "Releases misconfiguration: "+
+                    "Releases misconfiguration: " +
                     "current version (%s) not found" % self.version
                 )
             current_release = self.releases.get(self.version)
@@ -335,7 +335,7 @@ Verify that you are in the right folder, now you are in: %s%s
             # rapydo version is mandatory
             if self.rapydo_version is None:
                 log.exit(
-                    "Releases misconfiguration: "+
+                    "Releases misconfiguration: " +
                     "missing rapydo version in release %s" % self.version
                 )
 
@@ -1502,13 +1502,30 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Trying to install controller %s", self.rapydo_version)
             from utilities.packing import install, check_version
 
+            installed = False
             package = "rapydo-controller"
+            controller_repository = "do"
+            utils_repository = "utils"
 
-            if install("%s==%s" % (package, self.rapydo_version)):
+            status = self.releases.get(new_release).get('status')
+            if status == STATUS_RELEASED:
+                controller = "%s==%s" % (package, self.rapydo_version)
+                installed = install(controller)
+            else:
+                utils = "git+https://github.com/rapydo/%s.git@%s" % (
+                    utils_repository, self.rapydo_version
+                )
+                controller = "git+https://github.com/rapydo/%s.git@%s" % (
+                    controller_repository, self.rapydo_version
+                )
+
+                installed = install(utils)
+                if installed:
+                    installed = install(controller)
+
+            if installed:
                 installed_version = check_version(package)
                 installed = (installed_version != self.rapydo_version)
-            else:
-                installed = False
 
             if not installed:
                 log.error(
