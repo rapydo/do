@@ -144,10 +144,7 @@ class Application(object):
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
-            log.exit(
-                "Missing requirement.\n" +
-                "Please make sure that '%s' is installed" % program
-            )
+            log.exit("Missing requirement: '%s' not found" % program)
 
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
@@ -1494,13 +1491,30 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Trying to install controller %s", self.rapydo_version)
             from utilities.packing import install, check_version
 
+            installed = False
             package = "rapydo-controller"
+            controller_repository = "do"
+            utils_repository = "utils"
 
-            if install("%s==%s" % (package, self.rapydo_version)):
+            status = self.releases.get(new_release).get('status')
+            if status == STATUS_RELEASED:
+                controller = "%s==%s" % (package, self.rapydo_version)
+                installed = install(controller)
+            else:
+                utils = "git+https://github.com/rapydo/%s.git@%s" % (
+                    utils_repository, self.rapydo_version
+                )
+                controller = "git+https://github.com/rapydo/%s.git@%s" % (
+                    controller_repository, self.rapydo_version
+                )
+
+                installed = install(utils)
+                if installed:
+                    installed = install(controller)
+
+            if installed:
                 installed_version = check_version(package)
                 installed = (installed_version != self.rapydo_version)
-            else:
-                installed = False
 
             if not installed:
                 log.error(
