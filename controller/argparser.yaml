@@ -258,8 +258,33 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: remove also containers persistent data
-  env:
-    description: print all configured variables
+  list:
+    description: print rapydo configurations
+    suboptions:
+      args:
+        alias: a
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List of configured rapydo arguments
+      env:
+        alias: e
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List environment variable (.env file)
+      services:
+        alias: s
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List running services
+      submodules:
+        alias: m
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List submodules
   scale:
     description: scale the number of containers for one service
     suboptions:

@@ -795,7 +795,22 @@ Verify that you are in the right folder, now you are in: %s%s
                     pass
         return value
 
-    # def make_env(self, do=False):
+    def read_env(self):
+        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        env = {}
+        if not os.path.isfile(envfile):
+            log.critical("Env file not found")
+            return env
+
+        with open(envfile, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.split("=")
+                k = line[0].strip()
+                v = line[1].strip()
+                env[k] = v
+        return env
+
     def make_env(self):
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
 
@@ -1267,12 +1282,80 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Install or update libraries
         return dc.exec_command(service, user=user, command=npm_command)
 
-    def _env(self):
+    def _list(self):
 
-        log.info("List of configured variables:")
-        for var in sorted(self.current_args):
-            val = self.current_args.get(var)
-            print("%s: %s" % (var, val))
+        printed_something = False
+        if self.current_args.get('args'):
+            printed_something = True
+            log.info("List of configured rapydo arguments:\n")
+            for var in sorted(self.current_args):
+                val = self.current_args.get(var)
+                print("%-20s\t%s" % (var, val))
+
+        if self.current_args.get('env'):
+            printed_something = True
+            log.info("List env variables:\n")
+            env = self.read_env()
+            for var in sorted(env):
+                val = env.get(var)
+                print("%-36s\t%s" % (var, val))
+
+        if self.current_args.get('services'):
+            printed_something = True
+            log.info("List of active services:\n")
+            pwd = helpers.current_fullpath()
+            print("%-12s %-24s %s" % ("Name", "Image", "Path"))
+
+            for service in self.services:
+                name = service.get('name')
+                if name in self.active_services:
+                    image = service.get("image")
+                    build = service.get("build")
+                    if build is None:
+                        print("%-12s %-24s" % (name, image))
+                    else:
+                        path = build.get('context')
+                        path = path.replace(pwd, "")
+                        if path.startswith("/"):
+                            path = path[1:]
+                        print("%-12s %-24s %s" % (name, image, path))
+
+                    # ports = service.get("ports")
+                    # if ports is not None:
+                    #     for port in ports:
+                    #         print("\t%s -> %s" % (port.target, port.published))
+
+                    # volumes = service.get("volumes")
+                    # if volumes is not None:
+                    #     for volume in volumes:
+                    #         vext = volume.external
+                    #         vext = vext.replace(pwd, "")
+                    #         if vext.startswith("/"):
+                    #             vext = vext[1:]
+                    #         vint = volume.internal
+                    #         print("\t%s -> %s" % (vext, vint))
+
+        if self.current_args.get('submodules'):
+            printed_something = True
+            log.info("List of submodules:\n")
+            pwd = helpers.current_fullpath()
+            print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
+            for name in self.gits:
+                repo = self.gits.get(name)
+                if repo is None:
+                    continue
+                branch = gitter.get_active_branch(repo)
+                path = repo.working_dir
+                path = path.replace(pwd, "")
+                if path.startswith("/"):
+                    path = path[1:]
+                print("%-18s %-18s %s" % (name, branch, path))
+
+        if not printed_something:
+            log.error(
+                "You have to specify what to list, " +
+                "please use rapydo list -h for available options"
+            )
 
     def _template(self):
         service_name = self.current_args.get('service')
