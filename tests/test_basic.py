@@ -52,13 +52,13 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
-    assert "INFO Frontend libs not found, will be installed at startup" in err
+    assert "WARNING Frontend libs not found, will be installed at startup" in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
     assert env_log_prefix_verbose in err
-    assert "INFO Frontend libs not found, will be installed at startup" in err
+    assert "WARNING Frontend libs not found, will be installed at startup" in err
     assert "INFO All updated" in err
 
     # _, err = exec_command(capfd, "rapydo build")
