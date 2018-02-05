@@ -39,6 +39,7 @@ setup(
         "dockerfile-parse",
         "gitpython==2.1.8",
         "jinja2",
+        "plumbum",
         "requests==2.18.4",  # current...
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
