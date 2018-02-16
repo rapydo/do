@@ -83,6 +83,11 @@ class Compose(object):
 
     def command(self, command, options=None):
 
+        # NOTE: debug defaults
+        # tmp = self.get_defaults(command)
+        # print("TEST", tmp, type(tmp))
+        # # exit(1)
+
         compose_handler = self.get_handle()
         method = getattr(compose_handler, command)
 
@@ -198,13 +203,28 @@ class Compose(object):
 
     def get_defaults(self, command='configure'):
         """
-        TODO: test this defaults for commands
+        FIXME: does not work equally for all commands (compose 1.19.0)
+
+        e.g.
+        - command 'up' (rapydo start), it works
+        - command 'exec_command' (rapydo shell backend), does not
+
+        In the second case it seems that 'docopt' python library
+        does not resolve the dictionary so it prints the usage and exit
         """
+
+        # NOTE: test this defaults for commands.
         from compose.cli.docopt_command import docopt_full_help
         from inspect import getdoc
 
         compose_options = {}
         docstring = getdoc(getattr(TopLevelCommand, command))
 
-        return docopt_full_help(
-            docstring, compose_options, options_first=True)
+        try:
+            obj = docopt_full_help(
+                docstring, compose_options, options_first=True)
+        except SystemExit:
+            print("UFF")
+            exit(1)
+        else:
+            return obj
