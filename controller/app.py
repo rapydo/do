@@ -7,6 +7,7 @@ from distutils.version import LooseVersion
 from utilities import path
 from utilities import checks
 from utilities import helpers
+from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
@@ -107,9 +108,10 @@ class Application(object):
                     % PROJECT_DIR
                 )
             elif prj_num > 1:
+                hint = "Hint: create a .projectrc file to save default options"
                 log.exit(
                     "Please select the --project option on one " +
-                    "of the following:\n\n %s\n" % projects)
+                    "of the following:\n\n %s\n\n%s\n", projects, hint)
             else:
                 # make it the default
                 self.project = projects.pop()
@@ -144,11 +146,18 @@ class Application(object):
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
-            log.exit(
-                "Missing requirement.\n" +
-                "Please make sure that '%s' is installed" % program
-            )
 
+            hints = ""
+
+            if program == "docker":
+                hints = "To install docker visit: https://get.docker.com"
+
+            if len(hints) > 0:
+                hints = "\n\n%s" % hints
+
+            log.exit(
+
+                "Missing requirement: '%s' not found.%s" % (program, hints))
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for %s is %s" \
@@ -205,7 +214,6 @@ Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
             )
 
-        # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
             'data',
@@ -216,7 +224,7 @@ Verify that you are in the right folder, now you are in: %s
         obsolete_files = [
             'confs',
             'confs/backend.yml',
-            'confs/frontend.yml',  # it is optional, but we expect to find it
+            'confs/frontend.yml',
         ]
 
         for fname in required_files:
@@ -256,16 +264,21 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/tests',
         ]
         obsolete_files = [
-            'backend/__main__.py'
+            'backend/__main__.py',
+            'frontend/bower.json',
         ]
 
         if self.frontend:
             required_files.extend(
                 [
                     'frontend',
+                    'frontend/package.json',
+                    'frontend/custom.ts',
                     'frontend/js',
+                    'frontend/js/app.js',
+                    'frontend/js/routing.extra.js',
                     'frontend/templates',
-                    'frontend/bower.json',
+                    'frontend/css/style.css',
                 ]
             )
         for fname in required_files:
@@ -283,6 +296,46 @@ Verify that you are in the right folder, now you are in: %s%s
                     "Project %s contains an obsolete file or folder: %s",
                     self.project, fpath
                 )
+
+    def check_permissions(self, path, current_os_user):
+
+        if not basher.path_is_readable(path):
+            log.warning("%s: path is not read", path)
+            return False
+
+        if not basher.path_is_writable(path):
+            log.warning("%s: path cannot be written", path)
+            return False
+        try:
+            owner = basher.file_os_owner(path)
+        except KeyError:
+            owner = basher.file_os_owner_raw(path)
+
+        if owner != current_os_user:
+            log.warning("%s: wrong owner (%s)", path, owner)
+            return False
+        return True
+
+    def inspect_permissions(self, root='.'):
+
+        os_user = basher.current_os_user()
+
+        for root, sub_folders, files in os.walk(root):
+
+            for folder in sub_folders:
+                if folder == '.git':
+                    continue
+                path = os.path.join(root, folder)
+                if self.check_permissions(path, os_user):
+                    self.inspect_permissions(root=path)
+
+            for file in files:
+                if file.endswith(".pyc"):
+                    continue
+                path = os.path.join(root, file)
+                self.check_permissions(path, os_user)
+
+            break
 
     def read_specs(self):
         """ Read project configuration """
@@ -314,7 +367,7 @@ Verify that you are in the right folder, now you are in: %s%s
             # Check if the current version is listed in releases
             if self.version not in self.releases:
                 log.exit(
-                    "Releases misconfiguration: "+
+                    "Releases misconfiguration: " +
                     "current version (%s) not found" % self.version
                 )
             current_release = self.releases.get(self.version)
@@ -323,7 +376,7 @@ Verify that you are in the right folder, now you are in: %s%s
             # rapydo version is mandatory
             if self.rapydo_version is None:
                 log.exit(
-                    "Releases misconfiguration: "+
+                    "Releases misconfiguration: " +
                     "missing rapydo version in release %s" % self.version
                 )
 
@@ -381,9 +434,9 @@ Verify that you are in the right folder, now you are in: %s%s
 
         connected = checks.internet_connection_available()
         if not connected:
-            log.exit('Internet connection unavailable')
+            log.exit('Internet connection is unavailable')
         else:
-            log.checked("Internet connection available")
+            log.checked("Internet connection is available")
             self.tested_connection = True
         return
 
@@ -485,6 +538,18 @@ Verify that you are in the right folder, now you are in: %s%s
         compose_files = OrderedDict()
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
+
+        # TOFIX: temporary fix to let to use both angularjs and angular
+        # One completed the porting from angularjs to angular
+        # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
+        # and remove this piece of code
+        if 'frontend' in compose_files:
+            repos = self.vars.get('repos')
+            branch = repos.get('frontend').get('branch')
+            if branch != 'master':
+                compose_files['frontend']['file'] = 'frontend-a2'
+        # ################################################################# #
+
         return compose_files
 
     def read_composers(self):
@@ -684,76 +749,71 @@ Verify that you are in the right folder, now you are in: %s%s
         if found_obsolete == 0:
             log.debug("No build to be updated")
 
-    def bower_libs(self):
+    def frontend_libs(self):
 
-        if self.check or self.initialize or self.update:
+        if not any([self.check, self.initialize, self.update]):
+            return False
 
-            if self.frontend:
-                bower_dir = os.path.join(
-                    "data", self.project, "bower_components")
+        if not self.frontend:
+            return False
 
-                install_bower = False
-                if self.current_args.get('skip_bower'):
-                    install_bower = False
-                elif not os.path.isdir(bower_dir):
-                    install_bower = True
-                    os.makedirs(bower_dir)
-                elif self.update:
-                    install_bower = True
-                else:
-                    libs = helpers.list_path(bower_dir)
-                    if len(libs) <= 0:
-                        install_bower = True
+        if self.current_args.get('skip_npm'):
+            log.info("Skipping npm checks")
+            return False
 
-                if install_bower:
+        libs_dir = os.path.join("data", self.project, "frontend")
+        modules_dir = os.path.join(libs_dir, "node_modules")
 
-                    if self.check:
+        install = False
+        if not os.path.isdir(libs_dir):
+            install = True
+            os.makedirs(libs_dir)
+            log.warning(
+                "Libs folder not found, creating %s" % libs_dir)
+        if not os.path.isdir(modules_dir):
+            install = True
+            os.makedirs(modules_dir)
+            log.warning(
+                "Modules folder not found, creating %s" % modules_dir)
+        if self.update:
+            install = True
 
-                        # TODO: remove this check
-                        # Added this check on 12th Sep 2017 just to help users
-                        old_bdir = os.path.join("data", "bower_components")
-                        if os.path.isdir(old_bdir):
-                            log.exit(
-                                """ The position of bower data dir changed!
+        if not install:
 
-Old position: %s
-New position: %s
+            if not os.path.exists(os.path.join(libs_dir, "package.json")):
+                install = True
+                log.warning(
+                    "Package.json not found, will be created at startup")
 
-You can do several things:
-- mkdir -p %s && mv %s %s
-- execute rapydo init
-- execute rapydo update
-""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
-                            )
+            libs = helpers.list_path(modules_dir)
 
-                        #############################################
+            if len(libs) <= 0:
+                install = True
+            else:
+                log.checked("Found %d frontend libs installed" % len(libs))
 
-                        log.exit(
-                            """Missing bower libs in %s
-\nSuggestion: execute the init command"""
-                            % bower_dir
-                        )
+        if not install:
+            log.checked("Frontend libs installed")
+        elif self.check:
+            log.warning(
+                "Frontend libs not found, will be installed at startup")
+        else:
+            log.warning(
+                "Frontend libs not found, will be installed at startup")
 
-                    else:
+            # if self.initialize:
+            #     bower_command = "bower install"
+            # else:
+            #     bower_command = "bower update"
 
-                        if self.initialize:
-                            bower_command = "bower install"
-                        else:
-                            bower_command = "bower update"
+            # bower_command += \
+            #     " --config.directory=/libs/bower_components"
 
-                        bower_command += \
-                            " --config.directory=/libs/bower_components"
+            # dc = Compose(files=self.files)
+            # dc.create_volatile_container(
+            #     "bower", command=bower_command)
 
-                        dc = Compose(files=self.files)
-                        dc.create_volatile_container(
-                            "bower", command=bower_command)
-
-                        log.info("Bower libs downloaded")
-
-                elif self.current_args.get('skip_bower'):
-                    log.info("Skipping bower checks")
-                else:
-                    log.checked("Bower libs already installed")
+            # log.info("Bower libs downloaded")
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -776,7 +836,22 @@ You can do several things:
                     pass
         return value
 
-    # def make_env(self, do=False):
+    def read_env(self):
+        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        env = {}
+        if not os.path.isfile(envfile):
+            log.critical("Env file not found")
+            return env
+
+        with open(envfile, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.split("=")
+                k = line[0].strip()
+                v = line[1].strip()
+                env[k] = v
+        return env
+
     def make_env(self):
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
 
@@ -1056,7 +1131,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {
             '--follow': self.current_args.get('follow', False),
-            '--tail': 'all',
+            '--tail': self.current_args.get('tail', "100"),
             '--no-color': False,
             '--timestamps': True,
             'SERVICE': services,
@@ -1213,59 +1288,116 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc = Compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
-    def _bower_install(self):
+    def _npm(self):
 
-        lib = self.current_args.get("lib", None)
-        if lib is None:
-            log.exit("Missing bower lib, please add the --lib option")
-
-        current_method_name = "bower-install"
+        # lib = self.current_args.get("lib", None)
+        # if lib is None:
+        #     log.warning("Missing lib: installing all from package.json")
 
         meta = self.arguments.parse_conf \
             .get('subcommands') \
-            .get(current_method_name, {}) \
+            .get("npm", {}) \
             .get('container_exec', {})
 
         # Verify all is good
-        assert meta.pop('name') == 'bower'
+        assert meta.pop('name') == 'npm'
 
-        conf_dir = "--config.directory=/libs/bower_components"
-        bower_command = "bower install %s %s --save" % (conf_dir, lib)
-
+        service = meta.get('service')
+        user = meta.get('user', None)
         dc = Compose(files=self.files)
-        dc.create_volatile_container("bower", command=bower_command)
 
-    def _bower_update(self):
+        # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
+        # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
+        npm_command = "npm --prefix /modules "
 
-        lib = self.current_args.get("lib", None)
-        if lib is None:
-            log.exit("Missing bower lib, please add the --lib option")
+        if self.current_args.get("update", False):
+            npm_command += "update"
+        else:
+            npm_command += "install"
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # current_method_name = inspect.currentframe().f_code.co_name
-        current_method_name = "bower-install"
+        # if lib is not None:
+        #     npm_command += " --save-prod %s" % lib
 
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        # Re-created merged package.json file
+        merge_command = "node /rapydo/nodejs/merge.js"
+        dc.exec_command(service, user=user, command=merge_command)
+        # Install or update libraries
+        return dc.exec_command(service, user=user, command=npm_command)
 
-        # Verify all is good
-        assert meta.pop('name') == 'bower'
+    def _list(self):
 
-        conf_dir = "--config.directory=/libs/bower_components"
-        bower_command = "bower update %s %s" % (conf_dir, lib)
+        printed_something = False
+        if self.current_args.get('args'):
+            printed_something = True
+            log.info("List of configured rapydo arguments:\n")
+            for var in sorted(self.current_args):
+                val = self.current_args.get(var)
+                print("%-20s\t%s" % (var, val))
 
-        dc = Compose(files=self.files)
-        dc.create_volatile_container("bower", command=bower_command)
+        if self.current_args.get('env'):
+            printed_something = True
+            log.info("List env variables:\n")
+            env = self.read_env()
+            for var in sorted(env):
+                val = env.get(var)
+                print("%-36s\t%s" % (var, val))
 
-    def _env(self):
+        if self.current_args.get('services'):
+            printed_something = True
+            log.info("List of active services:\n")
+            pwd = helpers.current_fullpath()
+            print("%-12s %-24s %s" % ("Name", "Image", "Path"))
 
-        log.info("List of configured variables:")
-        for var in sorted(self.current_args):
-            val = self.current_args.get(var)
-            print("%s: %s" % (var, val))
+            for service in self.services:
+                name = service.get('name')
+                if name in self.active_services:
+                    image = service.get("image")
+                    build = service.get("build")
+                    if build is None:
+                        print("%-12s %-24s" % (name, image))
+                    else:
+                        path = build.get('context')
+                        path = path.replace(pwd, "")
+                        if path.startswith("/"):
+                            path = path[1:]
+                        print("%-12s %-24s %s" % (name, image, path))
+
+                    # ports = service.get("ports")
+                    # if ports is not None:
+                    #     for port in ports:
+                    #         print("\t%s -> %s" % (port.target, port.published))
+
+                    # volumes = service.get("volumes")
+                    # if volumes is not None:
+                    #     for volume in volumes:
+                    #         vext = volume.external
+                    #         vext = vext.replace(pwd, "")
+                    #         if vext.startswith("/"):
+                    #             vext = vext[1:]
+                    #         vint = volume.internal
+                    #         print("\t%s -> %s" % (vext, vint))
+
+        if self.current_args.get('submodules'):
+            printed_something = True
+            log.info("List of submodules:\n")
+            pwd = helpers.current_fullpath()
+            print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
+            for name in self.gits:
+                repo = self.gits.get(name)
+                if repo is None:
+                    continue
+                branch = gitter.get_active_branch(repo)
+                path = repo.working_dir
+                path = path.replace(pwd, "")
+                if path.startswith("/"):
+                    path = path[1:]
+                print("%-18s %-18s %s" % (name, branch, path))
+
+        if not printed_something:
+            log.error(
+                "You have to specify what to list, " +
+                "please use rapydo list -h for available options"
+            )
 
     def _template(self):
         service_name = self.current_args.get('service')
@@ -1495,13 +1627,30 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Trying to install controller %s", self.rapydo_version)
             from utilities.packing import install, check_version
 
+            installed = False
             package = "rapydo-controller"
+            controller_repository = "do"
+            utils_repository = "utils"
 
-            if install("%s==%s" % (package, self.rapydo_version)):
+            status = self.releases.get(new_release).get('status')
+            if status == STATUS_RELEASED:
+                controller = "%s==%s" % (package, self.rapydo_version)
+                installed = install(controller)
+            else:
+                utils = "git+https://github.com/rapydo/%s.git@%s" % (
+                    utils_repository, self.rapydo_version
+                )
+                controller = "git+https://github.com/rapydo/%s.git@%s" % (
+                    controller_repository, self.rapydo_version
+                )
+
+                installed = install(utils)
+                if installed:
+                    installed = install(controller)
+
+            if installed:
                 installed_version = check_version(package)
                 installed = (installed_version != self.rapydo_version)
-            else:
-                installed = False
 
             if not installed:
                 log.error(
@@ -1544,6 +1693,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
         self.inspect_project_folder()
+        self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
@@ -1607,8 +1757,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Build or check template containers images
         self.build_dependencies()
 
-        # Install or check bower libraries (if frontend is enabled)
-        self.bower_libs()
+        # Install or check frontend libraries (if frontend is enabled)
+        self.frontend_libs()
 
         # Final step, launch the command
         func()

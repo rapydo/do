@@ -77,7 +77,7 @@ def find_templates_override(services, templates):
             elif dfp.baseimage.startswith('rapydo/'):
                 if dfp.baseimage not in templates:
                     log.critical_exit(
-                        """Unable to find the %s in this project
+                        """Unable to find %s in this project
 \nPlease inspect the FROM image in %s/Dockerfile
                         """ % (dfp.baseimage, dockerfile)
                     )
