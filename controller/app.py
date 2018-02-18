@@ -1027,7 +1027,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _status(self):
         dc = Compose(files=self.files)
-        dc.command('ps', {'-q': None})
+        dc.command('ps', {'-q': None, '--services': None})
 
     def _clean(self):
         dc = Compose(files=self.files)
