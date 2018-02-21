@@ -342,11 +342,16 @@ Verify that you are in the right folder, now you are in: %s%s
 
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
-        self.specs = configuration.read(
-            default_file_path,
-            project_path=project_file_path,
-            is_template=self.is_template
-        )
+        try:
+            self.specs = configuration.read(
+                default_file_path,
+                project_path=project_file_path,
+                is_template=self.is_template,
+                do_exit=False
+            )
+        except AttributeError as e:
+            log.error(e)
+            log.exit("Please init your project")
 
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
@@ -1687,10 +1692,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.get_args()
         self.check_installed_software()
         self.inspect_main_folder()
-        self.git_submodules(confs_only=True)
         self.check_projects()
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
+        self.git_submodules(confs_only=True)
         self.inspect_project_folder()
         self.inspect_permissions()
 
