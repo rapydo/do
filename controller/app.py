@@ -265,7 +265,7 @@ Verify that you are in the right folder, now you are in: %s%s
         ]
         obsolete_files = [
             'backend/__main__.py',
-            'frontend/bower.json',
+            # 'frontend/bower.json',
         ]
 
         if self.frontend:
