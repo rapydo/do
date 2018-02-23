@@ -312,7 +312,10 @@ Verify that you are in the right folder, now you are in: %s%s
             owner = basher.file_os_owner_raw(path)
 
         if owner != current_os_user:
-            log.warning("%s: wrong owner (%s)", path, owner)
+            if owner == 990:
+                log.debug("%s: wrong owner (%s)", path, owner)
+            else:
+                log.warning("%s: wrong owner (%s)", path, owner)
             return False
         return True
 
