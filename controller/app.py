@@ -328,6 +328,11 @@ Verify that you are in the right folder, now you are in: %s%s
             for folder in sub_folders:
                 if folder == '.git':
                     continue
+                if folder.endswith("__pycache__"):
+                    continue
+                if folder.endswith(".egg-info"):
+                    continue
+
                 path = os.path.join(root, folder)
                 if self.check_permissions(path, os_user):
                     self.inspect_permissions(root=path)
@@ -335,6 +340,7 @@ Verify that you are in the right folder, now you are in: %s%s
             for file in files:
                 if file.endswith(".pyc"):
                     continue
+
                 path = os.path.join(root, file)
                 self.check_permissions(path, os_user)
 
@@ -353,6 +359,9 @@ Verify that you are in the right folder, now you are in: %s%s
                 do_exit=False
             )
         except AttributeError as e:
+
+            if self.initialize:
+                log.warning("test")
             log.error(e)
             log.exit("Please init your project")
 
@@ -1697,9 +1706,9 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
+        self.git_submodules(confs_only=True)
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
-        self.git_submodules(confs_only=True)
         self.inspect_project_folder()
         self.inspect_permissions()
 
