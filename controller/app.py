@@ -74,6 +74,7 @@ class Application(object):
         self.version = None
         self.releases = {}
         self.gits = {}
+        self.enable_new_frontend = False
 
         if self.project is not None:
             if "_" in self.project:
@@ -570,6 +571,7 @@ Verify that you are in the right folder, now you are in: %s%s
             repos = self.vars.get('repos')
             branch = repos.get('frontend').get('branch')
             if branch != 'master':
+                self.enable_new_frontend = True
                 compose_files['frontend']['file'] = 'frontend-a2'
         # ################################################################# #
 
@@ -824,19 +826,76 @@ Verify that you are in the right folder, now you are in: %s%s
             log.warning(
                 "Frontend libs not found, will be installed at startup")
 
-            # if self.initialize:
-            #     bower_command = "bower install"
-            # else:
-            #     bower_command = "bower update"
+    def bower_libs(self):
 
-            # bower_command += \
-            #     " --config.directory=/libs/bower_components"
+        if self.check or self.initialize or self.update:
 
-            # dc = Compose(files=self.files)
-            # dc.create_volatile_container(
-            #     "bower", command=bower_command)
+            if self.frontend:
+                bower_dir = os.path.join(
+                    "data", self.project, "bower_components")
 
-            # log.info("Bower libs downloaded")
+                install_bower = False
+                if self.current_args.get('skip_bower'):
+                    install_bower = False
+                elif not os.path.isdir(bower_dir):
+                    install_bower = True
+                    os.makedirs(bower_dir)
+                elif self.update:
+                    install_bower = True
+                else:
+                    libs = helpers.list_path(bower_dir)
+                    if len(libs) <= 0:
+                        install_bower = True
+
+                if install_bower:
+
+                    if self.check:
+
+                        # TODO: remove this check
+                        # Added this check on 12th Sep 2017 just to help users
+                        old_bdir = os.path.join("data", "bower_components")
+                        if os.path.isdir(old_bdir):
+                            log.exit(
+                                """ The position of bower data dir changed!
+
+Old position: %s
+New position: %s
+
+You can do several things:
+- mkdir -p %s && mv %s %s
+- execute rapydo init
+- execute rapydo update
+""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
+                            )
+
+                        #############################################
+
+                        log.exit(
+                            """Missing bower libs in %s
+\nSuggestion: execute the init command"""
+                            % bower_dir
+                        )
+
+                    else:
+
+                        if self.initialize:
+                            bower_command = "bower install"
+                        else:
+                            bower_command = "bower update"
+
+                        bower_command += \
+                            " --config.directory=/libs/bower_components"
+
+                        dc = Compose(files=self.files)
+                        dc.create_volatile_container(
+                            "bower", command=bower_command)
+
+                        log.info("Bower libs downloaded")
+
+                elif self.current_args.get('skip_bower'):
+                    log.info("Skipping bower checks")
+                else:
+                    log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -1782,7 +1841,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
-        self.frontend_libs()
+        if self.enable_new_frontend:
+            self.frontend_libs()
+        else:
+            self.bower_libs()
 
         # Final step, launch the command
         func()
