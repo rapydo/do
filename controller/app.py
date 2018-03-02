@@ -70,6 +70,7 @@ class Application(object):
         self.tested_connection = False
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
+        self.project_title = None  # To be retrieved from projet_configuration
         self.version = None
         self.releases = {}
         self.gits = {}
@@ -274,6 +275,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend',
                     'frontend/package.json',
                     'frontend/custom.ts',
+                    'frontend/app',
+                    'frontend/app/app.routes.ts',
+                    'frontend/app/app.declarations.ts',
                     'frontend/js',
                     'frontend/js/app.js',
                     'frontend/js/routing.extra.js',
@@ -373,6 +377,8 @@ Verify that you are in the right folder, now you are in: %s%s
             .get('enable', False)
         log.very_verbose("Frontend is %s" % self.frontend)
 
+        self.project_title = \
+            self.specs.get('project', {}).get('title', "Unknown title")
         # Your project version
         self.version = self.specs.get('project', {}).get('version', None)
 
@@ -891,6 +897,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 env['VANILLA_DIR'] = "../../.."
 
                 env['RAPYDO_VERSION'] = __version__
+                env['PROJECT_TITLE'] = self.project_title
                 # FIXME: should be a parameter
                 if self.current_args.get('privileged'):
                     env['DOCKER_PRIVILEGED_MODE'] = "true"
