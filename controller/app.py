@@ -835,7 +835,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     "data", self.project, "bower_components")
 
                 install_bower = False
-                if self.current_args.get('skip_bower'):
+                if self.current_args.get('skip_npm'):
                     install_bower = False
                 elif not os.path.isdir(bower_dir):
                     install_bower = True
