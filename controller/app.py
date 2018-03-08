@@ -302,7 +302,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     self.project, fpath
                 )
 
-    def check_permissions(self, path, current_os_user):
+    def check_permissions(self, path):
 
         if not basher.path_is_readable(path):
             log.warning("%s: path is not read", path)
@@ -316,7 +316,7 @@ Verify that you are in the right folder, now you are in: %s%s
         except KeyError:
             owner = basher.file_os_owner_raw(path)
 
-        if owner != current_os_user:
+        if owner != self.current_os_user:
             if owner == 990:
                 log.debug("%s: wrong owner (%s)", path, owner)
             else:
@@ -325,8 +325,6 @@ Verify that you are in the right folder, now you are in: %s%s
         return True
 
     def inspect_permissions(self, root='.'):
-
-        os_user = basher.current_os_user()
 
         for root, sub_folders, files in os.walk(root):
 
@@ -339,7 +337,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     continue
 
                 path = os.path.join(root, folder)
-                if self.check_permissions(path, os_user):
+                if self.check_permissions(path):
                     self.inspect_permissions(root=path)
 
             for file in files:
@@ -347,7 +345,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     continue
 
                 path = os.path.join(root, file)
-                self.check_permissions(path, os_user)
+                self.check_permissions(path)
 
             break
 
@@ -679,7 +677,10 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.debug(message)
                     dc = Compose(files=self.base_files)
                     dc.build_images(
-                        builds={image_tag: build}, current_version=__version__)
+                        builds={image_tag: build},
+                        current_version=__version__,
+                        current_uid=self.current_uid
+                    )
 
                 continue
 
@@ -695,7 +696,10 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.info("%s, rebuilding", message)
                     dc = Compose(files=self.base_files)
                     dc.build_images(
-                        builds={image_tag: build}, current_version=__version__)
+                        builds={image_tag: build},
+                        current_version=__version__,
+                        current_uid=self.current_uid
+                    )
                 else:
                     message += "\nRebuild it with:\n"
                     message += "$ rapydo --services %s" % build.get('service')
@@ -763,7 +767,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     dc.build_images(
                         builds={image_tag: build},
                         force_pull=force_pull,
-                        current_version=__version__
+                        current_version=__version__,
+                        current_uid=self.current_uid
                     )
                 else:
                     message += "\nRebuild it with:\n"
@@ -851,25 +856,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
                     if self.check:
 
-                        # TODO: remove this check
-                        # Added this check on 12th Sep 2017 just to help users
-                        old_bdir = os.path.join("data", "bower_components")
-                        if os.path.isdir(old_bdir):
-                            log.exit(
-                                """ The position of bower data dir changed!
-
-Old position: %s
-New position: %s
-
-You can do several things:
-- mkdir -p %s && mv %s %s
-- execute rapydo init
-- execute rapydo update
-""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
-                            )
-
-                        #############################################
-
                         log.exit(
                             """Missing bower libs in %s
 \nSuggestion: execute the init command"""
@@ -956,6 +942,7 @@ You can do several things:
                 env['VANILLA_DIR'] = "../../.."
 
                 env['RAPYDO_VERSION'] = __version__
+                env['CURRENT_UID'] = self.current_uid
                 env['PROJECT_TITLE'] = self.project_title
                 # FIXME: should be a parameter
                 if self.current_args.get('privileged'):
@@ -1308,7 +1295,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         if self.current_args.get('rebuild_templates'):
             dc = Compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.build_images(self.template_builds, current_version=__version__)
+            dc.build_images(
+                self.template_builds,
+                current_version=__version__,
+                current_uid=self.current_uid
+            )
 
         dc = Compose(files=self.files)
         services = self.get_services(default=self.active_services)
@@ -1776,6 +1767,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
         self.inspect_project_folder()
+
+        self.current_uid = basher.current_os_uid()
+        self.current_os_user = basher.current_os_user()
+        log.info("Current user: %s (UID: %d)" % (
+            self.current_os_user, self.current_uid))
+
         self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command

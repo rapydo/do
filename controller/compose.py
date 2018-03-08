@@ -53,7 +53,8 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def build_images(self, builds, force_pull=True, current_version=None):
+    def build_images(self, builds, force_pull=True,
+                     current_version=None, current_uid=None):
 
         try:
             compose_handler = self.get_handle()
@@ -69,10 +70,17 @@ class Compose(object):
                     'SERVICE': [service]
                 }
 
+                build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
                 if current_version is not None:
-                    var = {"RAPYDO_VERSION": current_version}
-                    options['--build-arg'] = var
+                    build_args.append(
+                        "%s=%s" % ("RAPYDO_VERSION", current_version))
+                if current_uid is not None:
+                    build_args.append(
+                        "%s=%s" % ("CURRENT_UID", current_uid))
+
+                if len(build_args) > 0:
+                    options['--build-arg'] = build_args
 
                 compose_handler.build(options=options)
                 log.info("Built image: %s" % image)
