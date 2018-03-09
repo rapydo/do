@@ -72,6 +72,11 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
+  net:
+    type: str
+    default: bridge
+    help: change docker network
+
 subcommands:
   check:
     description: "only verify if currently compliant to RAPyDo specs

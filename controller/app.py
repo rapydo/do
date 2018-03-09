@@ -278,6 +278,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app',
                     'frontend/app/app.routes.ts',
                     'frontend/app/app.declarations.ts',
+                    'frontend/app/app.navbar.html',
+                    'frontend/app/app.home.ts',
+                    'frontend/app/app.home.html',
                     'frontend/js',
                     'frontend/js/app.js',
                     'frontend/js/routing.extra.js',
@@ -302,6 +305,10 @@ Verify that you are in the right folder, now you are in: %s%s
                 )
 
     def check_permissions(self, path):
+
+        # if os.path.islink(path):
+        #     log.warning("Skipping checks on %s (symbolic link)", path)
+        #     return True
 
         if not basher.path_is_readable(path):
             log.warning("%s: path is not read", path)
@@ -640,6 +647,10 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return obsolete, build_ts, last_commit
 
+    def get_compose(self, files):
+        net = self.current_args.get('net')
+        return Compose(files=files, net=net)
+
     def verify_template_builds(self, docker_images, builds):
 
         if len(builds) == 0:
@@ -660,7 +671,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.exit(message)
                 else:
                     log.debug(message)
-                    dc = Compose(files=self.base_files)
+                    dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
                         current_version=__version__,
@@ -679,7 +690,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 message += " but changed on %s)" % c
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
-                    dc = Compose(files=self.base_files)
+                    dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
                         current_version=__version__,
@@ -744,7 +755,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 found_obsolete += 1
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
-                    dc = Compose(files=self.files)
+                    dc = self.get_compose(files=self.files)
 
                     # Cannot force pull when building an image
                     # overriding a template build
@@ -857,7 +868,7 @@ Verify that you are in the right folder, now you are in: %s%s
                         bower_command += \
                             " --config.directory=/libs/bower_components"
 
-                        dc = Compose(files=self.files)
+                        dc = self.get_compose(files=self.files)
                         dc.create_volatile_container(
                             "bower", command=bower_command)
 
@@ -1070,7 +1081,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _check(self):
 
         # NOTE: Do we consider what we have here a SECURITY BUG?
-        # dc = Compose(files=self.files)
+        # dc = self.get_compose(files=self.files)
         # for container in dc.get_handle().project.containers():
         #     log.pp(container.client._auth_configs)
         #     exit(1)
@@ -1081,11 +1092,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("Project initialized")
 
     def _status(self):
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('ps', {'-q': None, '--services': None})
 
     def _clean(self):
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         rm_volumes = self.current_args.get('rm_volumes', False)
         options = {
             '--volumes': rm_volumes,
@@ -1121,7 +1132,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--scale': {},
         }
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('up', options)
 
         log.info("Stack started")
@@ -1131,7 +1142,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {'SERVICE': services}
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('stop', options)
 
         log.info("Stack stoped")
@@ -1141,7 +1152,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {'SERVICE': services}
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('restart', options)
 
         log.info("Stack restarted")
@@ -1149,7 +1160,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _remove(self):
         services = self.get_services(default=self.active_services)
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
 
         options = {
             'SERVICE': services,
@@ -1166,7 +1177,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         services = self.get_services(default=self.active_services)
 
         options = {'SERVICE': services}
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         command = 'pause'
         for container in dc.get_handle().project.containers():
 
@@ -1181,7 +1192,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stack unpaused")
 
     def _log(self):
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
@@ -1231,7 +1242,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             publish.append("%s:%s" % (port, current_ports.target))
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
 
         host = self.current_args.get('hostname')
         # FIXME: to be completed
@@ -1255,7 +1266,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _shell(self, user=None, command=None, service=None):
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         service = self.current_args.get('service')
         # service = self.manage_one_service(service)
 
@@ -1278,7 +1289,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _build(self):
 
         if self.current_args.get('rebuild_templates'):
-            dc = Compose(files=self.base_files)
+            dc = self.get_compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
             dc.build_images(
                 self.template_builds,
@@ -1286,7 +1297,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 current_uid=self.current_uid
             )
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
@@ -1307,7 +1318,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
@@ -1325,7 +1336,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
         # **meta ... explicit is not better than implicit???
         # return self._shell(**meta)
@@ -1344,7 +1355,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
     def _npm(self):
@@ -1363,7 +1374,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         service = meta.get('service')
         user = meta.get('user', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
 
         # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
         # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
@@ -1503,7 +1514,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--scale': [scaling],
         }
         # print("TEST", service, workers)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('up', compose_options)
 
     def _coverall(self):
@@ -1551,7 +1562,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--no-color': False,
             '--scale': ['%s=1' % service]
         }
-        dc = Compose(files=[compose_file])
+        dc = self.get_compose(files=[compose_file])
 
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
