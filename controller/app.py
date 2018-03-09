@@ -202,10 +202,9 @@ class Application(object):
 
     def inspect_main_folder(self):
         """
-        Since the rapydo command only works on rapydo-core or a rapydo fork
-        we want to ensure that the current folder have a structure rapydo-like
-        This check is only based on file existence.
-        Further checks are performed later in the following steps
+        Rapydo commands only works on rapydo projects, we want to ensure that
+        the current folder have a rapydo-like structure. These checks are based
+        on file existence. Further checks are performed in the following steps
         """
 
         if gitter.get_local(".") is None:
@@ -512,22 +511,8 @@ Verify that you are in the right folder, now you are in: %s%s
             }
         else:
             repos = self.vars.get('repos').copy()
-        # core_url = core.get('online_url')
 
         self.gits['main'] = gitter.get_repo(".")
-
-        # is_core = gitter.compare_repository(
-        #     local, None, core_url, check_only=True)
-
-        # if is_core:
-        #     log.info("You are working on rapydo-core, not a fork")
-        #     gits['main'] = local
-        # else:
-        #     core_path = core.get('path')
-        #     if core_path is None:
-        #         core_path = core_key
-        #     gits['main'] = gitter.upstream(
-        #         url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
             self.gits[name] = self.working_clone(
@@ -1760,6 +1745,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Initial inspection
         self.get_args()
+        log.info("You are using rapydo version %s", __version__)
         self.check_installed_software()
         self.inspect_main_folder()
         self.check_projects()
@@ -1810,22 +1796,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             self.git_checks()  # NOTE: this might be an heavy operation
         else:
             log.verbose("Skipping heavy operations")
-
-        # if self.check:
-
-        #     remote_branch = self.vars.get(
-        #         'repos', []).get(
-        #         'core', []).get(
-        #         'branch', 'master')
-
-        #     if self.current_args.get('verify_upstream', False):
-        #         # FIXME: connection verification should be made only once
-        #         self.verify_connected()
-        #         gitter.check_updates(
-        #             'upstream', self.gits['main'],
-        #             fetch_remote='upstream',
-        #             remote_branch=remote_branch
-        #         )
 
         # self.make_env(do=do_heavy_ops)
         self.make_env()

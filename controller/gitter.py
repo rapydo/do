@@ -35,45 +35,6 @@ def get_active_branch(gitobj):
         return None
 
 
-# def upstream(url, path=None, key='upstream', do=False):
-
-#     if path is None:
-#         path = helpers.current_dir()
-
-#     gitobj = Repo(path)
-#     try:
-#         upstream = gitobj.remote(key)
-#     except ValueError:
-#         if do:
-#             upstream = gitobj.create_remote(key, url)
-#             log.info("Added remote %s: %s" % (key, url))
-#         else:
-#             log.critical_exit(
-#                 """Missing upstream to rapydo/core
-# Suggestion: execute the init command
-#                 """
-#             )
-
-#     current_url = next(upstream.urls)
-#     if current_url != url:
-#         if do:
-#             upstream.set_url(new_url=url, old_url=current_url)
-#             log.info("Replaced %s to %s" % (key, url))
-#         else:
-#             log.critical_exit(
-#                 """Rapydo upstream misconfiguration
-# Found: %s
-# Expected: %s
-# Suggestion: execute the init command
-#                 """
-#                 % (current_url, url)
-#             )
-#     else:
-#         log.checked("Upstream is set correctly")
-
-#     return gitobj
-
-
 def switch_branch(gitobj, branch_name='master', remote=True):
 
     if branch_name is None:
@@ -134,11 +95,12 @@ def clone(online_url, path, branch='master', do=False):
         switch_branch(gitobj, branch)
 
     # switch
-    compare_repository(gitobj, branch, online_url=online_url)
+    compare_repository(gitobj, branch, online_url=online_url, path=path)
     return gitobj
 
 
-def compare_repository(gitobj, branch, online_url, check_only=False):
+def compare_repository(gitobj, branch, online_url,
+                       check_only=False, path=None):
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -190,9 +152,9 @@ Suggestion: remove %s and execute the init command
             if check_only:
                 return False
             log.critical_exit(
-                """Wrong branch %s, expected %s.
+                """%s: wrong branch %s, expected %s.
 Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
-                % (active_branch, branch, gitobj.working_dir, branch)
+                % (path, active_branch, branch, gitobj.working_dir, branch)
             )
     return True
 
