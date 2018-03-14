@@ -199,6 +199,7 @@ class Compose(object):
             '-T': False,
             '-d': False,
             '--env': None,
+            '--privileged': False,
         }
         if shell_command is not None:
             log.debug("Command: %s(%s+%s)"
