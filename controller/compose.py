@@ -27,14 +27,15 @@ compose_log = 'docker-compose command: '
 class Compose(object):
 
     # def __init__(self, files, options={}):
-    def __init__(self, files, net=None):
+    # def __init__(self, files, net=None):
+    def __init__(self, files):
         super(Compose, self).__init__()
 
         self.files = files
         # options.update({'--file': self.files})
         self.options = {'--file': self.files}
-        if net is not None:
-            self.options['--net'] = net
+        # if net is not None:
+        #     self.options['--net'] = net
 
         self.project_dir = helpers.current_dir()
         self.project_name = get_project_name(self.project_dir)
