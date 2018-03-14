@@ -195,7 +195,6 @@ class Compose(object):
             'ARGS': shell_args,
             '--index': '1',
             '--user': user,
-            '--privileged': True,
             '-T': False,
             '-d': False,
             '--env': None,
