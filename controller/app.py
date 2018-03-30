@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import time
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
@@ -12,7 +13,7 @@ from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities.globals import mem
-from utilities.time import date_from_string
+from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
 from controller import project
 from controller import gitter
@@ -278,7 +279,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app',
                     'frontend/app/app.routes.ts',
                     'frontend/app/app.declarations.ts',
-                    'frontend/app/app.navbar.html',
+                    'frontend/app/app.custom.navbar.ts',
+                    'frontend/app/app.custom.navbar.html',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
                     'frontend/js',
@@ -309,6 +311,9 @@ Verify that you are in the right folder, now you are in: %s%s
         # if os.path.islink(path):
         #     log.warning("Skipping checks on %s (symbolic link)", path)
         #     return True
+
+        if path.endswith("/node_modules"):
+            return False
 
         if not basher.path_is_readable(path):
             log.warning("%s: path is not read", path)
@@ -750,6 +755,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += " (built on %s" % b
                     message += " but changed on %s)" % c
 
+            # TODO: for backend build check for any commit on utils o backend
+            # TODO: for rapydo builds check for any commit on utils
             if build_is_obsolete:
                 found_obsolete += 1
                 if self.current_args.get('rebuild'):
@@ -1827,6 +1834,36 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             self.bower_libs()
 
         # Final step, launch the command
+
+        if self.tested_connection:
+            online_time = get_online_utc_time()
+            sec_diff = (datetime.utcnow() - online_time).total_seconds()
+
+            major_diff = (abs(sec_diff) >= 300)
+            if major_diff:
+                minor_diff = False
+            else:
+                minor_diff = (abs(sec_diff) >= 60)
+
+            if major_diff:
+                log.error("Date misconfiguration on the host.")
+            elif minor_diff:
+                log.warning("Date misconfiguration on the host.")
+
+            if major_diff or minor_diff:
+                current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                tz_offset = time.timezone / -3600
+                log.info("Current date: %s UTC", current_date)
+                log.info("Expected: %s UTC", online_time)
+                log.info(
+                    "Current timezone: %s (offset = %dh)",
+                    time.tzname, tz_offset)
+
+            if major_diff:
+                log.exit("Unable to continue, please fix the host date")
+
+        else:
+            log.warning("Unable to verify date - you are not connect to web")
         func()
 
     # issues/57
