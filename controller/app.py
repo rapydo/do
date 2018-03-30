@@ -652,7 +652,10 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return obsolete, build_ts, last_commit
 
+    # def get_compose(self, net=None):
     def get_compose(self, files):
+        # net = self.current_args.get('net')
+        # return Compose(files=files, net=net)
         return Compose(files=files)
 
     def verify_template_builds(self, docker_images, builds):
@@ -946,7 +949,6 @@ Verify that you are in the right folder, now you are in: %s%s
                 env['RAPYDO_VERSION'] = __version__
                 env['CURRENT_UID'] = self.current_uid
                 env['PROJECT_TITLE'] = self.project_title
-                # FIXME: should be a parameter
                 if self.current_args.get('privileged'):
                     env['DOCKER_PRIVILEGED_MODE'] = "true"
                 else:
@@ -955,6 +957,16 @@ Verify that you are in the right folder, now you are in: %s%s
                 net = self.current_args.get('net', 'bridge')
                 env['DOCKER_NETWORK_MODE'] = net
                 env.update({'PLACEHOLDER': PLACEHOLDER})
+
+                # # docker network mode
+                # # https://docs.docker.com/compose/compose-file/#network_mode
+                # nmode = self.current_args.get('net')
+                # nmodes = ['bridge', 'hosts']
+                # if nmode not in nmodes:
+                #     log.warning("Invalid network mode: %s", nmode)
+                #     nmode = nmodes[0]
+                # env['DOCKER_NETWORK_MODE'] = nmode
+                # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
 
                 for key, value in sorted(env.items()):
                     if value is None:
