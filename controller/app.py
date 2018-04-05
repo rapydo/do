@@ -280,7 +280,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/app.routes.ts',
                     'frontend/app/app.declarations.ts',
                     'frontend/app/app.custom.navbar.ts',
-                    'frontend/app/app.custom.navbar.html',
+                    'frontend/app/custom.navbar.links.html',
+                    'frontend/app/custom.navbar.brand.html',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
                     'frontend/js',
@@ -316,7 +317,10 @@ Verify that you are in the right folder, now you are in: %s%s
             return False
 
         if not basher.path_is_readable(path):
-            log.warning("%s: path is not read", path)
+            if os.path.islink(path):
+                log.warning("%s: path cannot be read [BROKEN LINK?]", path)
+            else:
+                log.warning("%s: path cannot be read", path)
             return False
 
         if not basher.path_is_writable(path):
@@ -1875,7 +1879,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 log.exit("Unable to continue, please fix the host date")
 
         else:
-            log.warning("Unable to verify date - you are not connect to web")
+            log.debug("Unable to verify date - you are not connected to web")
         func()
 
     # issues/57
