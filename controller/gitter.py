@@ -205,6 +205,8 @@ def update(path, gitobj):
                 branch = gitobj.active_branch
                 log.info("Updating %s %s (branch %s)" % (remote, path, branch))
                 remote.pull(branch)
+            except GitCommandError as e:
+                log.error("Unable to update %s repo\n%s", path, e)
             except TypeError as e:
                 if TESTING:
                     log.warning("Unable to update %s repo, %s" % (path, e))
