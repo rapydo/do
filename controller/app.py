@@ -971,36 +971,36 @@ Verify that you are in the right folder, now you are in: %s%s
 
         if not os.path.isfile(envfile):
 
+            env = self.vars.get('env')
+            env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+            env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+            # Relative paths from ./submodules/rapydo-confs/confs
+            env['SUBMODULE_DIR'] = "../.."
+            env['VANILLA_DIR'] = "../../.."
+
+            env['RAPYDO_VERSION'] = __version__
+            env['CURRENT_UID'] = self.current_uid
+            env['PROJECT_TITLE'] = self.project_title
+            if self.current_args.get('privileged'):
+                env['DOCKER_PRIVILEGED_MODE'] = "true"
+            else:
+                env['DOCKER_PRIVILEGED_MODE'] = "false"
+
+            net = self.current_args.get('net', 'bridge')
+            env['DOCKER_NETWORK_MODE'] = net
+            env.update({'PLACEHOLDER': PLACEHOLDER})
+
+            # # docker network mode
+            # # https://docs.docker.com/compose/compose-file/#network_mode
+            # nmode = self.current_args.get('net')
+            # nmodes = ['bridge', 'hosts']
+            # if nmode not in nmodes:
+            #     log.warning("Invalid network mode: %s", nmode)
+            #     nmode = nmodes[0]
+            # env['DOCKER_NETWORK_MODE'] = nmode
+            # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
+
             with open(envfile, 'w+') as whandle:
-                env = self.vars.get('env')
-                env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
-                env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
-                # Relative paths from ./submodules/rapydo-confs/confs
-                env['SUBMODULE_DIR'] = "../.."
-                env['VANILLA_DIR'] = "../../.."
-
-                env['RAPYDO_VERSION'] = __version__
-                env['CURRENT_UID'] = self.current_uid
-                env['PROJECT_TITLE'] = self.project_title
-                if self.current_args.get('privileged'):
-                    env['DOCKER_PRIVILEGED_MODE'] = "true"
-                else:
-                    env['DOCKER_PRIVILEGED_MODE'] = "false"
-
-                net = self.current_args.get('net', 'bridge')
-                env['DOCKER_NETWORK_MODE'] = net
-                env.update({'PLACEHOLDER': PLACEHOLDER})
-
-                # # docker network mode
-                # # https://docs.docker.com/compose/compose-file/#network_mode
-                # nmode = self.current_args.get('net')
-                # nmodes = ['bridge', 'hosts']
-                # if nmode not in nmodes:
-                #     log.warning("Invalid network mode: %s", nmode)
-                #     nmode = nmodes[0]
-                # env['DOCKER_NETWORK_MODE'] = nmode
-                # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
-
                 for key, value in sorted(env.items()):
                     if value is None:
                         value = ''
