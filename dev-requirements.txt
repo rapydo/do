@@ -1,5 +1,5 @@
 
-pytest
+pytest==3.5.0
 pytest-cov
 plumbum
 coveralls
