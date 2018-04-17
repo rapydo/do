@@ -1,6 +1,6 @@
 
-pytest
-pytest-cov
-plumbum
-coveralls
+pytest==3.5.0
+pytest-cov==2.5.1
+plumbum==1.6.6
+coveralls==1.3.0
 git+https://github.com/rapydo/utils.git@0.6.0
