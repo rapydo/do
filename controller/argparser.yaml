@@ -72,6 +72,11 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
+  # net:
+  #   type: str
+  #   default: bridge
+  #   help: change the docker network used
+
 subcommands:
   check:
     description: "only verify if currently compliant to RAPyDo specs
@@ -94,21 +99,21 @@ subcommands:
       #   metavalue: TRUE_OR_FALSE
       #   default: False
       #   help: include upstream repo (rapydo-core) to checked submodules
-      skip-bower:
+      skip-npm:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: skip update of bower libs
+        help: skip update of npm libs
   init:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
     suboptions:
-      skip-bower:
+      skip-npm:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: skip update of bower libs
+        help: skip update of npm libs
   update:
     description: update the current project
     suboptions:
@@ -118,11 +123,11 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip-bower:
+      skip-npm:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: skip update of bower libs
+        help: skip update of npm libs
       rebuild:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -154,7 +159,13 @@ subcommands:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: tail logs
+        help: follow logs
+      tail:
+        alias: t
+        type: str
+        metavalue: INTEGER_NUM_LINES
+        default: "100"
+        help: logs
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:
@@ -171,34 +182,25 @@ subcommands:
       command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
       service: proxy
       user: root
-  bower-install:
-    description: install a new front-end library with bower
+  npm:
+    description: install or update a frontend libraries with npm
     container_exec:
-      name: bower
-      # command: bower install
-      service: bower
-      user: develop
+      name: npm
+      service: frontend
+      user: root
     suboptions:
-      lib:
-        alias: l
-        type: str
-        metavalue: BOWER_LIB_TO_INSTALL
-        default: null
-        help: the bower library to be installed
-  bower-update:
-    description: update a front-end library with bower
-    container_exec:
-      name: bower
-      # command: bower update
-      service: bower
-      user: develop
-    suboptions:
-      lib:
-        alias: l
-        type: str
-        metavalue: BOWER_LIB_TO_INSTALL
-        default: null
-        help: the bower library to be installed
+      # lib:
+      #   alias: l
+      #   type: str
+      #   metavalue: LIB_TO_INSTALL
+      #   default: null
+      #   help: the library to be installed
+      update:
+        alias: u
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Enable update instead of install
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
@@ -261,8 +263,33 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: remove also containers persistent data
-  env:
-    description: print all configured variables
+  list:
+    description: print rapydo configurations
+    suboptions:
+      args:
+        alias: a
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List of configured rapydo arguments
+      env:
+        alias: e
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List environment variable (.env file)
+      services:
+        alias: s
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List running services
+      submodules:
+        alias: m
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: List submodules
   scale:
     description: scale the number of containers for one service
     suboptions:

@@ -27,12 +27,15 @@ compose_log = 'docker-compose command: '
 class Compose(object):
 
     # def __init__(self, files, options={}):
+    # def __init__(self, files, net=None):
     def __init__(self, files):
         super(Compose, self).__init__()
 
         self.files = files
         # options.update({'--file': self.files})
         self.options = {'--file': self.files}
+        # if net is not None:
+        #     self.options['--net'] = net
 
         self.project_dir = helpers.current_dir()
         self.project_name = get_project_name(self.project_dir)
@@ -53,7 +56,8 @@ class Compose(object):
         return TopLevelCommand(
             project_from_options(self.project_dir, self.options))
 
-    def build_images(self, builds, force_pull=True, current_version=None):
+    def build_images(self, builds, force_pull=True,
+                     current_version=None, current_uid=None):
 
         try:
             compose_handler = self.get_handle()
@@ -69,10 +73,17 @@ class Compose(object):
                     'SERVICE': [service]
                 }
 
+                build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
                 if current_version is not None:
-                    var = {"RAPYDO_VERSION": current_version}
-                    options['--build-arg'] = var
+                    build_args.append(
+                        "%s=%s" % ("RAPYDO_VERSION", current_version))
+                if current_uid is not None:
+                    build_args.append(
+                        "%s=%s" % ("CURRENT_UID", current_uid))
+
+                if len(build_args) > 0:
+                    options['--build-arg'] = build_args
 
                 compose_handler.build(options=options)
                 log.info("Built image: %s" % image)
@@ -82,6 +93,11 @@ class Compose(object):
             log.info("SystemExit during template building")
 
     def command(self, command, options=None):
+
+        # NOTE: debug defaults
+        # tmp = self.get_defaults(command)
+        # print("TEST", tmp, type(tmp))
+        # # exit(1)
 
         compose_handler = self.get_handle()
         method = getattr(compose_handler, command)
@@ -180,10 +196,10 @@ class Compose(object):
             'ARGS': shell_args,
             '--index': '1',
             '--user': user,
-            '--privileged': True,
             '-T': False,
             '-d': False,
             '--env': None,
+            '--privileged': False,
         }
         if shell_command is not None:
             log.debug("Command: %s(%s+%s)"
@@ -198,13 +214,28 @@ class Compose(object):
 
     def get_defaults(self, command='configure'):
         """
-        TODO: test this defaults for commands
+        FIXME: does not work equally for all commands (compose 1.19.0)
+
+        e.g.
+        - command 'up' (rapydo start), it works
+        - command 'exec_command' (rapydo shell backend), does not
+
+        In the second case it seems that 'docopt' python library
+        does not resolve the dictionary so it prints the usage and exit
         """
+
+        # NOTE: test this defaults for commands.
         from compose.cli.docopt_command import docopt_full_help
         from inspect import getdoc
 
         compose_options = {}
         docstring = getdoc(getattr(TopLevelCommand, command))
 
-        return docopt_full_help(
-            docstring, compose_options, options_first=True)
+        try:
+            obj = docopt_full_help(
+                docstring, compose_options, options_first=True)
+        except SystemExit:
+            print("UFF")
+            exit(1)
+        else:
+            return obj

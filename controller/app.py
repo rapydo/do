@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import time
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
 from utilities import path
 from utilities import checks
 from utilities import helpers
+from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities.globals import mem
-from utilities.time import date_from_string
+from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
 from controller import project
 from controller import gitter
@@ -69,9 +71,11 @@ class Application(object):
         self.tested_connection = False
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
+        self.project_title = None  # To be retrieved from projet_configuration
         self.version = None
         self.releases = {}
         self.gits = {}
+        self.enable_new_frontend = False
 
         if self.project is not None:
             if "_" in self.project:
@@ -107,9 +111,10 @@ class Application(object):
                     % PROJECT_DIR
                 )
             elif prj_num > 1:
+                hint = "Hint: create a .projectrc file to save default options"
                 log.exit(
                     "Please select the --project option on one " +
-                    "of the following:\n\n %s\n" % projects)
+                    "of the following:\n\n %s\n\n%s\n", projects, hint)
             else:
                 # make it the default
                 self.project = projects.pop()
@@ -144,11 +149,18 @@ class Application(object):
     def check_program(self, program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
-            log.exit(
-                "Missing requirement.\n" +
-                "Please make sure that '%s' is installed" % program
-            )
 
+            hints = ""
+
+            if program == "docker":
+                hints = "To install docker visit: https://get.docker.com"
+
+            if len(hints) > 0:
+                hints = "\n\n%s" % hints
+
+            log.exit(
+
+                "Missing requirement: '%s' not found.%s" % (program, hints))
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for %s is %s" \
@@ -191,10 +203,9 @@ class Application(object):
 
     def inspect_main_folder(self):
         """
-        Since the rapydo command only works on rapydo-core or a rapydo fork
-        we want to ensure that the current folder have a structure rapydo-like
-        This check is only based on file existence.
-        Further checks are performed later in the following steps
+        Rapydo commands only works on rapydo projects, we want to ensure that
+        the current folder have a rapydo-like structure. These checks are based
+        on file existence. Further checks are performed in the following steps
         """
 
         if gitter.get_local(".") is None:
@@ -205,7 +216,6 @@ Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
             )
 
-        # FIXME: move in a project_defaults.yaml?
         required_files = [
             PROJECT_DIR,
             'data',
@@ -216,7 +226,7 @@ Verify that you are in the right folder, now you are in: %s
         obsolete_files = [
             'confs',
             'confs/backend.yml',
-            'confs/frontend.yml',  # it is optional, but we expect to find it
+            'confs/frontend.yml',
         ]
 
         for fname in required_files:
@@ -256,16 +266,29 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/tests',
         ]
         obsolete_files = [
-            'backend/__main__.py'
+            'backend/__main__.py',
+            # 'frontend/bower.json',
         ]
 
         if self.frontend:
             required_files.extend(
                 [
                     'frontend',
+                    'frontend/package.json',
+                    'frontend/custom.ts',
+                    'frontend/app',
+                    'frontend/app/app.routes.ts',
+                    'frontend/app/app.declarations.ts',
+                    'frontend/app/app.custom.navbar.ts',
+                    'frontend/app/custom.navbar.links.html',
+                    'frontend/app/custom.navbar.brand.html',
+                    'frontend/app/app.home.ts',
+                    'frontend/app/app.home.html',
                     'frontend/js',
+                    'frontend/js/app.js',
+                    'frontend/js/routing.extra.js',
                     'frontend/templates',
-                    'frontend/bower.json',
+                    'frontend/css/style.css',
                 ]
             )
         for fname in required_files:
@@ -284,16 +307,129 @@ Verify that you are in the right folder, now you are in: %s%s
                     self.project, fpath
                 )
 
+    def check_permissions(self, path):
+
+        # if os.path.islink(path):
+        #     log.warning("Skipping checks on %s (symbolic link)", path)
+        #     return True
+
+        if path.endswith("/node_modules"):
+            return False
+
+        if not basher.path_is_readable(path):
+            if os.path.islink(path):
+                log.warning("%s: path cannot be read [BROKEN LINK?]", path)
+            else:
+                log.warning("%s: path cannot be read", path)
+            return False
+
+        if not basher.path_is_writable(path):
+            log.warning("%s: path cannot be written", path)
+            return False
+        try:
+            owner = basher.file_os_owner(path)
+        except KeyError:
+            owner = basher.file_os_owner_raw(path)
+
+        if owner != self.current_os_user:
+            if owner == 990:
+                log.debug("%s: wrong owner (%s)", path, owner)
+            else:
+                log.warning("%s: wrong owner (%s)", path, owner)
+            return False
+        return True
+
+    def inspect_permissions(self, root='.'):
+
+        for root, sub_folders, files in os.walk(root):
+
+            for folder in sub_folders:
+                if folder == '.git':
+                    continue
+                if folder.endswith("__pycache__"):
+                    continue
+                if folder.endswith(".egg-info"):
+                    continue
+
+                path = os.path.join(root, folder)
+                if self.check_permissions(path):
+                    self.inspect_permissions(root=path)
+
+            for file in files:
+                if file.endswith(".pyc"):
+                    continue
+
+                path = os.path.join(root, file)
+                self.check_permissions(path)
+
+            break
+
+    @staticmethod
+    def extract_rapydo_version(releases, project_block):
+
+        current_version = project_block.get('version', None)
+        old_style_rapydo_version = project_block.get('rapydo', None)
+
+        # This project does not support releases:
+        if len(releases) == 0:
+            # If your project does not support releases, you can specify
+            # rapydo version in the project block
+            if old_style_rapydo_version is None:
+                log.exit("No version specified for this project")
+            return old_style_rapydo_version
+
+        log.verbose("Your project supports releases")
+
+        # Check if the current version is listed in releases
+        if current_version not in releases:
+            log.exit(
+                "Releases misconfiguration: " +
+                "current version (%s) not found" % current_version
+            )
+
+        current_release = releases.get(current_version)
+        rapydo_version = current_release.get("rapydo")
+
+        # rapydo version is mandatory
+        if rapydo_version is None:
+            log.exit(
+                "Releases misconfiguration: " +
+                "missing rapydo version in release %s" % current_release
+            )
+
+        # You specified a rapydo version both in project and releases
+        if old_style_rapydo_version is not None:
+
+            if rapydo_version == rapydo_version:
+                log.warning(
+                    "You specified rapydo version in both project and release")
+            else:
+                err = "Rapydo version mismatch. "
+                err += "You specified %s in project" % old_style_rapydo_version
+                err += " and %s in current release." % rapydo_version
+                err += "\nYou should remove such information from project"
+                log.exit(err)
+
+        return rapydo_version
+
     def read_specs(self):
         """ Read project configuration """
 
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
-        self.specs = configuration.read(
-            default_file_path,
-            project_path=project_file_path,
-            is_template=self.is_template
-        )
+        try:
+            self.specs = configuration.read(
+                default_file_path,
+                project_path=project_file_path,
+                is_template=self.is_template,
+                do_exit=False
+            )
+        except AttributeError as e:
+
+            if self.initialize:
+                log.warning("test")
+            log.error(e)
+            log.exit("Please init your project")
 
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
@@ -303,58 +439,41 @@ Verify that you are in the right folder, now you are in: %s%s
             .get('enable', False)
         log.very_verbose("Frontend is %s" % self.frontend)
 
+        project_block = self.specs.get('project', {})
+        self.project_title = project_block.get('title', "Unknown title")
         # Your project version
-        self.version = self.specs.get('project', {}).get('version', None)
+        self.version = project_block.get('version', None)
 
         # Check if project supports releases
         self.releases = self.specs.get('releases', {})
-        if len(self.releases) > 0:
-            log.verbose("Your project supports releases")
 
-            # Check if the current version is listed in releases
-            if self.version not in self.releases:
-                log.exit(
-                    "Releases misconfiguration: "+
-                    "current version (%s) not found" % self.version
-                )
-            current_release = self.releases.get(self.version)
-            self.rapydo_version = current_release.get("rapydo")
+        self.rapydo_version = self.extract_rapydo_version(
+            self.releases, project_block)
 
-            # rapydo version is mandatory
-            if self.rapydo_version is None:
-                log.exit(
-                    "Releases misconfiguration: "+
-                    "missing rapydo version in release %s" % self.version
-                )
+    def preliminary_version_check(self):
 
-        # If your project does not support releases, you can specify
-        # rapydo version in the project block
-        rapydo_version = self.specs.get('project', {}).get('rapydo', None)
-        if self.rapydo_version is None:
-            self.rapydo = rapydo_version
+        project_file_path = helpers.project_dir(self.project)
+        specs = configuration.load_project_configuration(project_file_path)
+        project_block = specs.get('project', {})
+        releases = specs.get('releases', {})
 
-        # You specified a rapydo version both in project and releases
-        elif rapydo_version is not None:
+        v = self.extract_rapydo_version(releases, project_block)
 
-            if rapydo_version == self.rapydo_version:
-                log.warning(
-                    "You specified rapydo version in both project and release")
-            else:
-                err = "Rapydo version mismatch. "
-                err += "You specified %s in project" % rapydo_version
-                err += " and %s in current release." % self.rapydo_version
-                err += "\nYou should remove such information from project"
-                log.exit(err)
+        self.verify_rapydo_version(rapydo_version=v)
 
-    def verify_rapydo_version(self, do_exit=True):
+    def verify_rapydo_version(self, do_exit=True, rapydo_version=None):
         """
         If your project requires a specific rapydo version, check if you are
         the rapydo-controller matching that version
         """
-        if self.rapydo_version is None:
+
+        if rapydo_version is None:
+            rapydo_version = self.rapydo_version
+
+        if rapydo_version is None:
             return True
 
-        r = LooseVersion(self.rapydo_version)
+        r = LooseVersion(rapydo_version)
         c = LooseVersion(__version__)
         if r == c:
             return True
@@ -381,9 +500,9 @@ Verify that you are in the right folder, now you are in: %s%s
 
         connected = checks.internet_connection_available()
         if not connected:
-            log.exit('Internet connection unavailable')
+            log.exit('Internet connection is unavailable')
         else:
-            log.checked("Internet connection available")
+            log.checked("Internet connection is available")
             self.tested_connection = True
         return
 
@@ -437,22 +556,8 @@ Verify that you are in the right folder, now you are in: %s%s
             }
         else:
             repos = self.vars.get('repos').copy()
-        # core_url = core.get('online_url')
 
         self.gits['main'] = gitter.get_repo(".")
-
-        # is_core = gitter.compare_repository(
-        #     local, None, core_url, check_only=True)
-
-        # if is_core:
-        #     log.info("You are working on rapydo-core, not a fork")
-        #     gits['main'] = local
-        # else:
-        #     core_path = core.get('path')
-        #     if core_path is None:
-        #         core_path = core_key
-        #     gits['main'] = gitter.upstream(
-        #         url=core_url, path=core_path, do=self.initialize)
 
         for name, repo in repos.items():
             self.gits[name] = self.working_clone(
@@ -485,6 +590,19 @@ Verify that you are in the right folder, now you are in: %s%s
         compose_files = OrderedDict()
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
+
+        # TOFIX: temporary fix to let to use both angularjs and angular
+        # One completed the porting from angularjs to angular
+        # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
+        # and remove this piece of code
+        if 'frontend' in compose_files:
+            repos = self.vars.get('repos')
+            branch = repos.get('frontend').get('branch')
+            if branch != 'master':
+                self.enable_new_frontend = True
+                compose_files['frontend']['file'] = 'frontend-a2'
+        # ################################################################# #
+
         return compose_files
 
     def read_composers(self):
@@ -567,6 +685,12 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return obsolete, build_ts, last_commit
 
+    # def get_compose(self, net=None):
+    def get_compose(self, files):
+        # net = self.current_args.get('net')
+        # return Compose(files=files, net=net)
+        return Compose(files=files)
+
     def verify_template_builds(self, docker_images, builds):
 
         if len(builds) == 0:
@@ -587,9 +711,12 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.exit(message)
                 else:
                     log.debug(message)
-                    dc = Compose(files=self.base_files)
+                    dc = self.get_compose(files=self.base_files)
                     dc.build_images(
-                        builds={image_tag: build}, current_version=__version__)
+                        builds={image_tag: build},
+                        current_version=__version__,
+                        current_uid=self.current_uid
+                    )
 
                 continue
 
@@ -603,9 +730,12 @@ Verify that you are in the right folder, now you are in: %s%s
                 message += " but changed on %s)" % c
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
-                    dc = Compose(files=self.base_files)
+                    dc = self.get_compose(files=self.base_files)
                     dc.build_images(
-                        builds={image_tag: build}, current_version=__version__)
+                        builds={image_tag: build},
+                        current_version=__version__,
+                        current_uid=self.current_uid
+                    )
                 else:
                     message += "\nRebuild it with:\n"
                     message += "$ rapydo --services %s" % build.get('service')
@@ -661,11 +791,13 @@ Verify that you are in the right folder, now you are in: %s%s
                     message += " (built on %s" % b
                     message += " but changed on %s)" % c
 
+            # TODO: for backend build check for any commit on utils o backend
+            # TODO: for rapydo builds check for any commit on utils
             if build_is_obsolete:
                 found_obsolete += 1
                 if self.current_args.get('rebuild'):
                     log.info("%s, rebuilding", message)
-                    dc = Compose(files=self.files)
+                    dc = self.get_compose(files=self.files)
 
                     # Cannot force pull when building an image
                     # overriding a template build
@@ -673,7 +805,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     dc.build_images(
                         builds={image_tag: build},
                         force_pull=force_pull,
-                        current_version=__version__
+                        current_version=__version__,
+                        current_uid=self.current_uid
                     )
                 else:
                     message += "\nRebuild it with:\n"
@@ -684,6 +817,58 @@ Verify that you are in the right folder, now you are in: %s%s
         if found_obsolete == 0:
             log.debug("No build to be updated")
 
+    def frontend_libs(self):
+
+        if not any([self.check, self.initialize, self.update]):
+            return False
+
+        if not self.frontend:
+            return False
+
+        if self.current_args.get('skip_npm'):
+            log.info("Skipping npm checks")
+            return False
+
+        libs_dir = os.path.join("data", self.project, "frontend")
+        modules_dir = os.path.join(libs_dir, "node_modules")
+
+        install = False
+        if not os.path.isdir(libs_dir):
+            install = True
+            os.makedirs(libs_dir)
+            log.warning(
+                "Libs folder not found, creating %s" % libs_dir)
+        if not os.path.isdir(modules_dir):
+            install = True
+            os.makedirs(modules_dir)
+            log.warning(
+                "Modules folder not found, creating %s" % modules_dir)
+        if self.update:
+            install = True
+
+        if not install:
+
+            if not os.path.exists(os.path.join(libs_dir, "package.json")):
+                install = True
+                log.warning(
+                    "Package.json not found, will be created at startup")
+
+            libs = helpers.list_path(modules_dir)
+
+            if len(libs) <= 0:
+                install = True
+            else:
+                log.checked("Found %d frontend libs installed" % len(libs))
+
+        if not install:
+            log.checked("Frontend libs installed")
+        elif self.check:
+            log.warning(
+                "Frontend libs not found, will be installed at startup")
+        else:
+            log.warning(
+                "Frontend libs not found, will be installed at startup")
+
     def bower_libs(self):
 
         if self.check or self.initialize or self.update:
@@ -693,7 +878,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     "data", self.project, "bower_components")
 
                 install_bower = False
-                if self.current_args.get('skip_bower'):
+                if self.current_args.get('skip_npm'):
                     install_bower = False
                 elif not os.path.isdir(bower_dir):
                     install_bower = True
@@ -708,25 +893,6 @@ Verify that you are in the right folder, now you are in: %s%s
                 if install_bower:
 
                     if self.check:
-
-                        # TODO: remove this check
-                        # Added this check on 12th Sep 2017 just to help users
-                        old_bdir = os.path.join("data", "bower_components")
-                        if os.path.isdir(old_bdir):
-                            log.exit(
-                                """ The position of bower data dir changed!
-
-Old position: %s
-New position: %s
-
-You can do several things:
-- mkdir -p %s && mv %s %s
-- execute rapydo init
-- execute rapydo update
-""" % (old_bdir, bower_dir, os.path.dirname(bower_dir), old_bdir, bower_dir)
-                            )
-
-                        #############################################
 
                         log.exit(
                             """Missing bower libs in %s
@@ -744,7 +910,7 @@ You can do several things:
                         bower_command += \
                             " --config.directory=/libs/bower_components"
 
-                        dc = Compose(files=self.files)
+                        dc = self.get_compose(files=self.files)
                         dc.create_volatile_container(
                             "bower", command=bower_command)
 
@@ -776,7 +942,22 @@ You can do several things:
                     pass
         return value
 
-    # def make_env(self, do=False):
+    def read_env(self):
+        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        env = {}
+        if not os.path.isfile(envfile):
+            log.critical("Env file not found")
+            return env
+
+        with open(envfile, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.split("=")
+                k = line[0].strip()
+                v = line[1].strip()
+                env[k] = v
+        return env
+
     def make_env(self):
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
 
@@ -790,22 +971,36 @@ You can do several things:
 
         if not os.path.isfile(envfile):
 
+            env = self.vars.get('env')
+            env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+            env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+            # Relative paths from ./submodules/rapydo-confs/confs
+            env['SUBMODULE_DIR'] = "../.."
+            env['VANILLA_DIR'] = "../../.."
+
+            env['RAPYDO_VERSION'] = __version__
+            env['CURRENT_UID'] = self.current_uid
+            env['PROJECT_TITLE'] = self.project_title
+            if self.current_args.get('privileged'):
+                env['DOCKER_PRIVILEGED_MODE'] = "true"
+            else:
+                env['DOCKER_PRIVILEGED_MODE'] = "false"
+
+            net = self.current_args.get('net', 'bridge')
+            env['DOCKER_NETWORK_MODE'] = net
+            env.update({'PLACEHOLDER': PLACEHOLDER})
+
+            # # docker network mode
+            # # https://docs.docker.com/compose/compose-file/#network_mode
+            # nmode = self.current_args.get('net')
+            # nmodes = ['bridge', 'hosts']
+            # if nmode not in nmodes:
+            #     log.warning("Invalid network mode: %s", nmode)
+            #     nmode = nmodes[0]
+            # env['DOCKER_NETWORK_MODE'] = nmode
+            # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
+
             with open(envfile, 'w+') as whandle:
-                env = self.vars.get('env')
-                env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
-                env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
-                # Relative paths from ./submodules/rapydo-confs/confs
-                env['SUBMODULE_DIR'] = "../.."
-                env['VANILLA_DIR'] = "../../.."
-
-                env['RAPYDO_VERSION'] = __version__
-                # FIXME: should be a parameter
-                if self.current_args.get('privileged'):
-                    env['DOCKER_PRIVILEGED_MODE'] = "true"
-                else:
-                    env['DOCKER_PRIVILEGED_MODE'] = "false"
-                env.update({'PLACEHOLDER': PLACEHOLDER})
-
                 for key, value in sorted(env.items()):
                     if value is None:
                         value = ''
@@ -940,7 +1135,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _check(self):
 
         # NOTE: Do we consider what we have here a SECURITY BUG?
-        # dc = Compose(files=self.files)
+        # dc = self.get_compose(files=self.files)
         # for container in dc.get_handle().project.containers():
         #     log.pp(container.client._auth_configs)
         #     exit(1)
@@ -951,11 +1146,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("Project initialized")
 
     def _status(self):
-        dc = Compose(files=self.files)
-        dc.command('ps', {'-q': None})
+        dc = self.get_compose(files=self.files)
+        dc.command('ps', {'-q': None, '--services': None})
 
     def _clean(self):
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         rm_volumes = self.current_args.get('rm_volumes', False)
         options = {
             '--volumes': rm_volumes,
@@ -986,11 +1181,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--abort-on-container-exit': False,
             '--no-recreate': False,
             '--force-recreate': False,
+            '--always-recreate-deps': False,
             '--no-build': False,
             '--scale': {},
         }
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('up', options)
 
         log.info("Stack started")
@@ -1000,7 +1196,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {'SERVICE': services}
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('stop', options)
 
         log.info("Stack stoped")
@@ -1010,7 +1206,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         options = {'SERVICE': services}
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('restart', options)
 
         log.info("Stack restarted")
@@ -1018,7 +1214,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _remove(self):
         services = self.get_services(default=self.active_services)
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
 
         options = {
             'SERVICE': services,
@@ -1035,7 +1231,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         services = self.get_services(default=self.active_services)
 
         options = {'SERVICE': services}
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         command = 'pause'
         for container in dc.get_handle().project.containers():
 
@@ -1050,12 +1246,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stack unpaused")
 
     def _log(self):
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
             '--follow': self.current_args.get('follow', False),
-            '--tail': 'all',
+            '--tail': self.current_args.get('tail', "100"),
             '--no-color': False,
             '--timestamps': True,
             'SERVICE': services,
@@ -1100,7 +1296,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
             publish.append("%s:%s" % (port, current_ports.target))
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
 
         host = self.current_args.get('hostname')
         # FIXME: to be completed
@@ -1124,7 +1320,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _shell(self, user=None, command=None, service=None):
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         service = self.current_args.get('service')
         # service = self.manage_one_service(service)
 
@@ -1147,11 +1343,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def _build(self):
 
         if self.current_args.get('rebuild_templates'):
-            dc = Compose(files=self.base_files)
+            dc = self.get_compose(files=self.base_files)
             log.debug("Forcing rebuild for cached templates")
-            dc.build_images(self.template_builds, current_version=__version__)
+            dc.build_images(
+                self.template_builds,
+                current_version=__version__,
+                current_uid=self.current_uid
+            )
 
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
 
         options = {
@@ -1172,7 +1372,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
@@ -1190,7 +1390,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
         # **meta ... explicit is not better than implicit???
         # return self._shell(**meta)
@@ -1209,62 +1409,119 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         service = meta.get('service')
         user = meta.get('user', None)
         command = meta.get('command', None)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
-    def _bower_install(self):
+    def _npm(self):
 
-        lib = self.current_args.get("lib", None)
-        if lib is None:
-            log.exit("Missing bower lib, please add the --lib option")
-
-        current_method_name = "bower-install"
+        # lib = self.current_args.get("lib", None)
+        # if lib is None:
+        #     log.warning("Missing lib: installing all from package.json")
 
         meta = self.arguments.parse_conf \
             .get('subcommands') \
-            .get(current_method_name, {}) \
+            .get("npm", {}) \
             .get('container_exec', {})
 
         # Verify all is good
-        assert meta.pop('name') == 'bower'
+        assert meta.pop('name') == 'npm'
 
-        conf_dir = "--config.directory=/libs/bower_components"
-        bower_command = "bower install %s %s --save" % (conf_dir, lib)
+        service = meta.get('service')
+        user = meta.get('user', None)
+        dc = self.get_compose(files=self.files)
 
-        dc = Compose(files=self.files)
-        dc.create_volatile_container("bower", command=bower_command)
+        # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
+        # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
+        npm_command = "npm --prefix /modules "
 
-    def _bower_update(self):
+        if self.current_args.get("update", False):
+            npm_command += "update"
+        else:
+            npm_command += "install"
 
-        lib = self.current_args.get("lib", None)
-        if lib is None:
-            log.exit("Missing bower lib, please add the --lib option")
+        # if lib is not None:
+        #     npm_command += " --save-prod %s" % lib
 
-        # Use my method name in a meta programming style
-        # import inspect
-        # current_method_name = inspect.currentframe().f_code.co_name
-        current_method_name = "bower-install"
+        # Re-created merged package.json file
+        merge_command = "node /rapydo/nodejs/merge.js"
+        dc.exec_command(service, user=user, command=merge_command)
+        # Install or update libraries
+        return dc.exec_command(service, user=user, command=npm_command)
 
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+    def _list(self):
 
-        # Verify all is good
-        assert meta.pop('name') == 'bower'
+        printed_something = False
+        if self.current_args.get('args'):
+            printed_something = True
+            log.info("List of configured rapydo arguments:\n")
+            for var in sorted(self.current_args):
+                val = self.current_args.get(var)
+                print("%-20s\t%s" % (var, val))
 
-        conf_dir = "--config.directory=/libs/bower_components"
-        bower_command = "bower update %s %s" % (conf_dir, lib)
+        if self.current_args.get('env'):
+            printed_something = True
+            log.info("List env variables:\n")
+            env = self.read_env()
+            for var in sorted(env):
+                val = env.get(var)
+                print("%-36s\t%s" % (var, val))
 
-        dc = Compose(files=self.files)
-        dc.create_volatile_container("bower", command=bower_command)
+        if self.current_args.get('services'):
+            printed_something = True
+            log.info("List of active services:\n")
+            pwd = helpers.current_fullpath()
+            print("%-12s %-24s %s" % ("Name", "Image", "Path"))
 
-    def _env(self):
+            for service in self.services:
+                name = service.get('name')
+                if name in self.active_services:
+                    image = service.get("image")
+                    build = service.get("build")
+                    if build is None:
+                        print("%-12s %-24s" % (name, image))
+                    else:
+                        path = build.get('context')
+                        path = path.replace(pwd, "")
+                        if path.startswith("/"):
+                            path = path[1:]
+                        print("%-12s %-24s %s" % (name, image, path))
 
-        log.info("List of configured variables:")
-        for var in sorted(self.current_args):
-            val = self.current_args.get(var)
-            print("%s: %s" % (var, val))
+                    # ports = service.get("ports")
+                    # if ports is not None:
+                    #     for port in ports:
+                    #         print("\t%s -> %s" % (port.target, port.published))
+
+                    # volumes = service.get("volumes")
+                    # if volumes is not None:
+                    #     for volume in volumes:
+                    #         vext = volume.external
+                    #         vext = vext.replace(pwd, "")
+                    #         if vext.startswith("/"):
+                    #             vext = vext[1:]
+                    #         vint = volume.internal
+                    #         print("\t%s -> %s" % (vext, vint))
+
+        if self.current_args.get('submodules'):
+            printed_something = True
+            log.info("List of submodules:\n")
+            pwd = helpers.current_fullpath()
+            print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
+            for name in self.gits:
+                repo = self.gits.get(name)
+                if repo is None:
+                    continue
+                branch = gitter.get_active_branch(repo)
+                path = repo.working_dir
+                path = path.replace(pwd, "")
+                if path.startswith("/"):
+                    path = path[1:]
+                print("%-18s %-18s %s" % (name, branch, path))
+
+        if not printed_something:
+            log.error(
+                "You have to specify what to list, " +
+                "please use rapydo list -h for available options"
+            )
 
     def _template(self):
         service_name = self.current_args.get('service')
@@ -1311,7 +1568,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--scale': [scaling],
         }
         # print("TEST", service, workers)
-        dc = Compose(files=self.files)
+        dc = self.get_compose(files=self.files)
         dc.command('up', compose_options)
 
     def _coverall(self):
@@ -1359,7 +1616,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--no-color': False,
             '--scale': ['%s=1' % service]
         }
-        dc = Compose(files=[compose_file])
+        dc = self.get_compose(files=[compose_file])
 
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
@@ -1494,13 +1751,30 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Trying to install controller %s", self.rapydo_version)
             from utilities.packing import install, check_version
 
+            installed = False
             package = "rapydo-controller"
+            controller_repository = "do"
+            utils_repository = "utils"
 
-            if install("%s==%s" % (package, self.rapydo_version)):
+            status = self.releases.get(new_release).get('status')
+            if status == STATUS_RELEASED:
+                controller = "%s==%s" % (package, self.rapydo_version)
+                installed = install(controller)
+            else:
+                utils = "git+https://github.com/rapydo/%s.git@%s" % (
+                    utils_repository, self.rapydo_version
+                )
+                controller = "git+https://github.com/rapydo/%s.git@%s" % (
+                    controller_repository, self.rapydo_version
+                )
+
+                installed = install(utils)
+                if installed:
+                    installed = install(controller)
+
+            if installed:
                 installed_version = check_version(package)
                 installed = (installed_version != self.rapydo_version)
-            else:
-                installed = False
 
             if not installed:
                 log.error(
@@ -1536,13 +1810,22 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # Initial inspection
         self.get_args()
+        log.info("You are using rapydo version %s", __version__)
         self.check_installed_software()
         self.inspect_main_folder()
-        self.git_submodules(confs_only=True)
         self.check_projects()
+        self.preliminary_version_check()
+        self.git_submodules(confs_only=True)
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
         self.inspect_project_folder()
+
+        self.current_uid = basher.current_os_uid()
+        self.current_os_user = basher.current_os_user()
+        log.info("Current user: %s (UID: %d)" % (
+            self.current_os_user, self.current_uid))
+
+        self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
@@ -1580,22 +1863,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         else:
             log.verbose("Skipping heavy operations")
 
-        # if self.check:
-
-        #     remote_branch = self.vars.get(
-        #         'repos', []).get(
-        #         'core', []).get(
-        #         'branch', 'master')
-
-        #     if self.current_args.get('verify_upstream', False):
-        #         # FIXME: connection verification should be made only once
-        #         self.verify_connected()
-        #         gitter.check_updates(
-        #             'upstream', self.gits['main'],
-        #             fetch_remote='upstream',
-        #             remote_branch=remote_branch
-        #         )
-
         # self.make_env(do=do_heavy_ops)
         self.make_env()
 
@@ -1606,10 +1873,43 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Build or check template containers images
         self.build_dependencies()
 
-        # Install or check bower libraries (if frontend is enabled)
-        self.bower_libs()
+        # Install or check frontend libraries (if frontend is enabled)
+        if self.enable_new_frontend:
+            self.frontend_libs()
+        else:
+            self.bower_libs()
 
         # Final step, launch the command
+
+        if self.tested_connection:
+            online_time = get_online_utc_time()
+            sec_diff = (datetime.utcnow() - online_time).total_seconds()
+
+            major_diff = (abs(sec_diff) >= 300)
+            if major_diff:
+                minor_diff = False
+            else:
+                minor_diff = (abs(sec_diff) >= 60)
+
+            if major_diff:
+                log.error("Date misconfiguration on the host.")
+            elif minor_diff:
+                log.warning("Date misconfiguration on the host.")
+
+            if major_diff or minor_diff:
+                current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                tz_offset = time.timezone / -3600
+                log.info("Current date: %s UTC", current_date)
+                log.info("Expected: %s UTC", online_time)
+                log.info(
+                    "Current timezone: %s (offset = %dh)",
+                    time.tzname, tz_offset)
+
+            if major_diff:
+                log.exit("Unable to continue, please fix the host date")
+
+        else:
+            log.debug("Unable to verify date - you are not connected to web")
         func()
 
     # issues/57

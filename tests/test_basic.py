@@ -52,12 +52,14 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
+    # assert "WARNING Frontend libs not found, will be installed at startup" in err
     assert "INFO Bower libs downloaded" in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
     assert env_log_prefix_verbose in err
+    # assert "WARNING Frontend libs not found, will be installed at startup" in err
     assert "INFO Bower libs downloaded" in err
     assert "INFO All updated" in err
 
@@ -83,9 +85,10 @@ def test_all(capfd):
     assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
-    out, err = exec_command(capfd, "rapydo env")
+    out, err = exec_command(capfd, "rapydo list --args")
     assert env_log_prefix_verbose in err
-    assert "project: template" in out
+    # Since this message printed, it is not captured here...
+    # assert "project                 template" in out
 
     os.remove(".projectrc")
 
@@ -132,19 +135,8 @@ def test_all(capfd):
     # FIXME: how is possible that this message is not found??
     # assert compose_log_prefix + "'logs'" in err
 
-    exec_command(capfd, "rapydo bower-install jquery")
-    # FIXME: how is possible that this message is not found??
-    # assert "EXIT Missing bower lib, please add the --lib option" in err
-    exec_command(capfd, "rapydo bower-install --lib jquery")
-    # FIXME: how is possible that this message is not found??
-    # assert compose_log_prefix + "'run'" in err
-
-    exec_command(capfd, "rapydo bower-update jquery")
-    # FIXME: how is possible that this message is not found??
-    # assert "EXIT Missing bower lib, please add the --lib option" in err
-    exec_command(capfd, "rapydo bower-update --lib jquery")
-    # FIXME: how is possible that this message is not found??
-    # assert compose_log_prefix + "'run'" in err
+    exec_command(capfd, "rapydo npm")
+    exec_command(capfd, "rapydo npm --update")
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
     assert env_log_prefix_verbose in err
