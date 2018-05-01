@@ -459,7 +459,10 @@ Verify that you are in the right folder, now you are in: %s%s
                 do_exit=False
             )
 
-            new_specs = configuration.mix(self.specs, self.arguments.host_configuration)
+            self.specs = configuration.mix(
+                self.specs, self.arguments.host_configuration)
+
+            # print(glom(self.specs, "variables.frontend.enable"))
         except AttributeError as e:
 
             if self.initialize:
