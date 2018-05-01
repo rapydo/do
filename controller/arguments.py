@@ -22,6 +22,8 @@ class ArgParser(object):
         if args is None:
             args = sys.argv
 
+        self.current_args = {}
+        self.host_configuration = {}
         # This method can raise ValueErrors
         self.check_args(args)
 
@@ -163,6 +165,8 @@ class ArgParser(object):
             path=helpers.current_dir(),
             skip_error=True, logger=False, extension=None
         )
+
+        self.host_configuration = pinit_conf.pop('project_configuration', {})
 
         # Mix with parse_conf
         for key, value in pinit_conf.items():

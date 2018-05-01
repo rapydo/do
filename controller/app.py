@@ -458,6 +458,8 @@ Verify that you are in the right folder, now you are in: %s%s
                 is_template=self.is_template,
                 do_exit=False
             )
+
+            new_specs = configuration.mix(self.specs, self.arguments.host_configuration)
         except AttributeError as e:
 
             if self.initialize:
