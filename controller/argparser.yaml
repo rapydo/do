@@ -34,6 +34,21 @@ options:
     default: DEBUG
     help: level of verbosity
 
+  frontend:
+    type: bool
+    default: False
+    help: Include frontend configuration to rapydo stack
+
+  no-backend:
+    type: bool
+    default: False
+    help: Exclude backend configuration from rapydo stack
+
+  no-commons:
+    type: bool
+    default: False
+    help: Exclude project common configuration from rapydo stack
+
   collect-logs:
     type: bool
     default: False

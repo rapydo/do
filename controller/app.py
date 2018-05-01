@@ -609,9 +609,11 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # substitute values starting with '$$'
         myvars = {
-            'frontend': self.frontend,
+            'backend': not self.current_args.get('no_backend'),
+            'frontend': self.frontend or self.current_args.get('frontend'),
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
+            'commons': not self.current_args.get('no_commons'),
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(
                 SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
