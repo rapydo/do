@@ -1176,8 +1176,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--detach': True,
             # rebuild images changed with an upgrade
             '--build': self.current_args.get('from_upgrade'),
+            '--no-color': False,
             # switching in an easier way between modules
-            '--no-color': True,
             '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
             '--no-recreate': False,
