@@ -1173,10 +1173,11 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         options = {
             'SERVICE': services,
             '--no-deps': False,
-            '-d': True,
+            '--detach': True,
             # rebuild images changed with an upgrade
             '--build': self.current_args.get('from_upgrade'),
             # switching in an easier way between modules
+            '--no-color': True,
             '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
             '--no-recreate': False,
@@ -1557,7 +1558,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         compose_options = {
             'SERVICE': services,
             '--no-deps': False,
-            '-d': True,
+            # '-d': True,
+            '--detach': True,
             '--build': False,  # self.current_args.get('from_upgrade'),
             '--remove-orphans': True,
             '--abort-on-container-exit': False,
@@ -1606,7 +1608,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         options = {
             'SERVICE': [service],
             '--no-deps': False,
-            '-d': False,
+            # '-d': False,
+            '--detach': False,
             '--abort-on-container-exit': True,
             '--remove-orphans': False,
             '--no-recreate': True,

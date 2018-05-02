@@ -179,7 +179,9 @@ class Compose(object):
             '--rm': True, '--no-deps': True,
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
-            '-d': False, '-T': False,
+            # '-d': False,
+            '--detach': False,
+            '-T': False,
             '--label': None,
         }
 
@@ -197,8 +199,10 @@ class Compose(object):
             '--index': '1',
             '--user': user,
             '-T': False,
-            '-d': False,
             '--env': None,
+            '--workdir': None,
+            # '-d': False,
+            '--detach': False,
             '--privileged': False,
         }
         if shell_command is not None:
