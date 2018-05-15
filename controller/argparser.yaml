@@ -237,13 +237,13 @@ subcommands:
         help: UNIX command to be executed on selected running service
   start:
     description: Start containers for this configuration
-    suboptions:
-      from-upgrade:
-        alias: fu
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: rebuild images and use them to restart existing containers
+    # suboptions:
+    #   from-upgrade:
+    #     alias: fu
+    #     type: bool
+    #     metavalue: TRUE_OR_FALSE
+    #     default: False
+    #     help: rebuild images and use them to restart existing containers
   stop:
     description: stop running containers, but do not remove them
   restart:
@@ -330,26 +330,26 @@ subcommands:
         help: the first service that will be connected inside the code
   coverall:
     description: send coverage computed to coveralls.io website
-  upgrade:
-    description: upgrade your current project to new official releases
-    suboptions:
-      release:
-        alias: r
-        type: str
-        metavalue: RELEASE_VERSION
-        help: release version you want to upgrade to
-      downgrade:
-        alias: d
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: allow downgrade to previous versions
-      current:
-        alias: c
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: upgrade to current branch. Incompatible with release option
+  # upgrade:  # DEPRECATED, see issues/71
+  #   description: upgrade your current project to new official releases
+  #   suboptions:
+  #     release:
+  #       alias: r
+  #       type: str
+  #       metavalue: RELEASE_VERSION
+  #       help: release version you want to upgrade to
+  #     downgrade:
+  #       alias: d
+  #       type: bool
+  #       metavalue: TRUE_OR_FALSE
+  #       default: False
+  #       help: allow downgrade to previous versions
+  #     current:
+  #       alias: c
+  #       type: bool
+  #       metavalue: TRUE_OR_FALSE
+  #       default: False
+  #       help: upgrade to current branch. Incompatible with release option
 
   # tutorial:
   #   description: Step-by-step guide to make your project RAPyDo compliant

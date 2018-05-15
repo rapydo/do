@@ -1121,10 +1121,10 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
-    def rebuild_from_upgrade(self):
-        log.warning("Rebuilding images from an upgrade")
-        self.current_args['rebuild_templates'] = True
-        self._build()
+    # def rebuild_from_upgrade(self):
+    #     log.warning("Rebuilding images from an upgrade")
+    #     self.current_args['rebuild_templates'] = True
+    #     self._build()
 
     ################################
     # ##    COMMANDS    ##         #
@@ -1165,8 +1165,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
-        if self.current_args.get('from_upgrade'):
-            self.rebuild_from_upgrade()
+        # if self.current_args.get('from_upgrade'):
+        #     self.rebuild_from_upgrade()
 
         services = self.get_services(default=self.active_services)
 
@@ -1691,6 +1691,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         return True
 
+    """
     def _upgrade(self):
         if len(self.releases) < 1:
             log.exit('This project does not support releases yet')
@@ -1800,6 +1801,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
         # 5. safely restart?
         # docker-compose up --force-recreate
+    """
 
     ################################
     # ### RUN ONE COMMAND OFF
