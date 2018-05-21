@@ -1150,7 +1150,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _status(self):
         dc = self.get_compose(files=self.files)
-        dc.command('ps', {'-q': None, '--services': None})
+        dc.command('ps', {'-q': None, '--services': None, '--quiet': False})
 
     def _clean(self):
         dc = self.get_compose(files=self.files)
