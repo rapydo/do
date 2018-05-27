@@ -2,6 +2,7 @@
 
 import os.path
 import time
+from glom import glom
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
@@ -279,18 +280,31 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app',
                     'frontend/app/app.routes.ts',
                     'frontend/app/app.declarations.ts',
+                    'frontend/app/app.providers.ts',
+                    'frontend/app/app.imports.ts',
                     'frontend/app/app.custom.navbar.ts',
+                    'frontend/app/app.entryComponents.ts',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
-                    'frontend/js',
-                    'frontend/js/app.js',
-                    'frontend/js/routing.extra.js',
-                    'frontend/templates',
                     'frontend/css/style.css',
                 ]
             )
+
+            b = glom(self.specs,
+                     "variables.repos.frontend.branch",
+                     default='master')
+
+            if b == 'master':
+                required_files.extend(
+                    [
+                        'frontend/js',
+                        'frontend/js/app.js',
+                        'frontend/js/routing.extra.js',
+                        'frontend/templates',
+                    ]
+                )
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
@@ -596,8 +610,11 @@ Verify that you are in the right folder, now you are in: %s%s
         # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
         # and remove this piece of code
         if 'frontend' in compose_files:
-            repos = self.vars.get('repos')
-            branch = repos.get('frontend').get('branch')
+
+            branch = glom(self.specs,
+                          "variables.repos.frontend.branch",
+                          default='master')
+
             if branch != 'master':
                 self.enable_new_frontend = True
                 compose_files['frontend']['file'] = 'frontend-a2'
@@ -1147,7 +1164,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _status(self):
         dc = self.get_compose(files=self.files)
-        dc.command('ps', {'-q': None, '--services': None})
+        dc.command('ps', {'-q': None, '--services': None, '--quiet': False})
 
     def _clean(self):
         dc = self.get_compose(files=self.files)

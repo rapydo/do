@@ -181,6 +181,7 @@ class Compose(object):
             '--workdir': None, '--entrypoint': None,
             # '-d': False,
             '--detach': False,
+            '--use-aliases': False,  # introduced with compose 1.21
             '-T': False,
             '--label': None,
         }
