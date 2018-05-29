@@ -315,7 +315,7 @@ Verify that you are in the right folder, now you are in: %s%s
                         'frontend/templates',
                     ]
                 )
-            # else:
+            # elif b != '0.6.1':
             #     obsolete_files.extend(
             #         [
             #             'frontend/js',
