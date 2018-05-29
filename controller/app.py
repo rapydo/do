@@ -278,17 +278,27 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/package.json',
                     'frontend/custom.ts',
                     'frontend/app',
+                    'frontend/app/custom.routes.ts',
+                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.navbar.ts',
+                    'frontend/app/custom.navbar.links.html',
+                    'frontend/app/custom.navbar.brand.html',
+                    'frontend/app/custom.home.ts',
+                    'frontend/app/custom.home.html',
+                    'frontend/css/style.css',
+                ]
+            )
+
+            obsolete_files.extend(
+                [
                     'frontend/app/app.routes.ts',
                     'frontend/app/app.declarations.ts',
                     'frontend/app/app.providers.ts',
                     'frontend/app/app.imports.ts',
                     'frontend/app/app.custom.navbar.ts',
                     'frontend/app/app.entryComponents.ts',
-                    'frontend/app/custom.navbar.links.html',
-                    'frontend/app/custom.navbar.brand.html',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
-                    'frontend/css/style.css',
                 ]
             )
 
@@ -305,6 +315,16 @@ Verify that you are in the right folder, now you are in: %s%s
                         'frontend/templates',
                     ]
                 )
+            # else:
+            #     obsolete_files.extend(
+            #         [
+            #             'frontend/js',
+            #             'frontend/js/app.js',
+            #             'frontend/js/routing.extra.js',
+            #             'frontend/templates',
+            #         ]
+            #     )
+
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
