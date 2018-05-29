@@ -1602,6 +1602,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             '--abort-on-container-exit': False,
             '--no-recreate': False,
             '--force-recreate': False,
+            '--always-recreate-deps': False,
             '--no-build': False,
             # '--scale': {service: workers},
             '--scale': [scaling],
