@@ -74,7 +74,7 @@ class Application(object):
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.project_title = None  # To be retrieved from projet_configuration
         self.version = None
-        self.releases = {}
+        # self.releases = {}
         self.gits = {}
         self.enable_new_frontend = False
 
@@ -399,20 +399,23 @@ Verify that you are in the right folder, now you are in: %s%s
             break
 
     @staticmethod
-    def extract_rapydo_version(releases, project_block):
+    def extract_rapydo_version(specs):
+
+        project_block = specs.get('project', {})
+        releases = specs.get('releases', {})
 
         current_version = project_block.get('version', None)
-        old_style_rapydo_version = project_block.get('rapydo', None)
+        rapydo_version = project_block.get('rapydo', None)
 
         # This project does not support releases:
-        if len(releases) == 0:
-            # If your project does not support releases, you can specify
-            # rapydo version in the project block
-            if old_style_rapydo_version is None:
-                log.exit("No version specified for this project")
-            return old_style_rapydo_version
 
-        log.verbose("Your project supports releases")
+        if rapydo_version is not None:
+            return rapydo_version
+
+        log.warning("Rapydo version not specified, looking for releases")
+
+        if len(releases) == 0:
+            log.exit("No version specified for this project")
 
         # Check if the current version is listed in releases
         if current_version not in releases:
@@ -430,19 +433,6 @@ Verify that you are in the right folder, now you are in: %s%s
                 "Releases misconfiguration: " +
                 "missing rapydo version in release %s" % current_release
             )
-
-        # You specified a rapydo version both in project and releases
-        if old_style_rapydo_version is not None:
-
-            if rapydo_version == rapydo_version:
-                log.warning(
-                    "You specified rapydo version in both project and release")
-            else:
-                err = "Rapydo version mismatch. "
-                err += "You specified %s in project" % old_style_rapydo_version
-                err += " and %s in current release." % rapydo_version
-                err += "\nYou should remove such information from project"
-                log.exit(err)
 
         return rapydo_version
 
@@ -484,10 +474,11 @@ Verify that you are in the right folder, now you are in: %s%s
         self.version = project_block.get('version', None)
 
         # Check if project supports releases
-        self.releases = self.specs.get('releases', {})
+        # self.releases = self.specs.get('releases', {})
+        # self.rapydo_version = self.extract_rapydo_version(
+        #     self.releases, project_block)
 
-        self.rapydo_version = self.extract_rapydo_version(
-            self.releases, project_block)
+        self.rapydo_version = self.extract_rapydo_version(self.specs)
 
     def preliminary_version_check(self):
 
@@ -496,7 +487,7 @@ Verify that you are in the right folder, now you are in: %s%s
         project_block = specs.get('project', {})
         releases = specs.get('releases', {})
 
-        v = self.extract_rapydo_version(releases, project_block)
+        v = self.extract_rapydo_version(specs)
 
         self.verify_rapydo_version(rapydo_version=v)
 
@@ -1669,72 +1660,72 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
-    def available_releases(self, releases, current_release):
+    # def available_releases(self, releases, current_release):
 
-        log.warning('List of available releases:')
-        print('')
-        for release, info in releases.items():
+    #     log.warning('List of available releases:')
+    #     print('')
+    #     for release, info in releases.items():
 
-            r = info.get("rapydo")
-            t = info.get('type')
+    #         r = info.get("rapydo")
+    #         t = info.get('type')
 
-            if release == current_release:
-                extra = " *installed*"
-            else:
-                extra = ""
+    #         if release == current_release:
+    #             extra = " *installed*"
+    #         else:
+    #             extra = ""
 
-            print(' - %s %s (rapydo %s) [%s]%s' %
-                  (release, t, r, info.get('status'), extra))
-        print('')
+    #         print(' - %s %s (rapydo %s) [%s]%s' %
+    #               (release, t, r, info.get('status'), extra))
+    #     print('')
 
-    def preliminary_upgrade_checks(self, current_release, new_release):
-        if current_release == 'master':
-            log.exit("Cannot upgrade from master. Please work on a branch.")
+    # def preliminary_upgrade_checks(self, current_release, new_release):
+    #     if current_release == 'master':
+    #         log.exit("Cannot upgrade from master. Please work on a branch.")
 
-        if new_release is None:
-            self.available_releases(self.releases, current_release)
-            return False
+    #     if new_release is None:
+    #         self.available_releases(self.releases, current_release)
+    #         return False
 
-        if new_release == ".":
-            if current_release not in self.releases:
-                self.available_releases(self.releases, current_release)
-                log.exit('Release %s not found' % current_release)
+    #     if new_release == ".":
+    #         if current_release not in self.releases:
+    #             self.available_releases(self.releases, current_release)
+    #             log.exit('Release %s not found' % current_release)
 
-            return True
+    #         return True
 
-        if new_release not in self.releases:
-            self.available_releases(self.releases, current_release)
-            log.exit('Release %s not found' % new_release)
+    #     if new_release not in self.releases:
+    #         self.available_releases(self.releases, current_release)
+    #         log.exit('Release %s not found' % new_release)
 
-        if new_release == current_release:
-            log.error('You are already using release %s' % current_release)
-            return False
+    #     if new_release == current_release:
+    #         log.error('You are already using release %s' % current_release)
+    #         return False
 
-        log.info('Requested release: %s' % new_release)
+    #     log.info('Requested release: %s' % new_release)
 
-        if not self.current_args.get('downgrade'):
-            try:
-                if LooseVersion(new_release) < LooseVersion(current_release):
-                    log.exit('Cannot upgrade to previous version')
-            except TypeError as e:
-                log.exit("Unable to compare %s with %s (%s)" % (
-                    new_release, current_release, e)
-                )
+    #     if not self.current_args.get('downgrade'):
+    #         try:
+    #             if LooseVersion(new_release) < LooseVersion(current_release):
+    #                 log.exit('Cannot upgrade to previous version')
+    #         except TypeError as e:
+    #             log.exit("Unable to compare %s with %s (%s)" % (
+    #                 new_release, current_release, e)
+    #             )
 
-        status = self.releases.get(new_release).get('status')
-        if status == STATUS_DISCONTINUED:
-            log.exit("This version is discontinued")
-        elif status == STATUS_RELEASED:
-            pass
-        elif status == STATUS_DEVELOPING:
-            if self.development:
-                log.verbose("Switching to a developing version")
-            else:
-                log.exit("This version has yet to be released")
-        else:
-            log.exit("%s: unknown version status: %s", new_release, status)
+    #     status = self.releases.get(new_release).get('status')
+    #     if status == STATUS_DISCONTINUED:
+    #         log.exit("This version is discontinued")
+    #     elif status == STATUS_RELEASED:
+    #         pass
+    #     elif status == STATUS_DEVELOPING:
+    #         if self.development:
+    #             log.verbose("Switching to a developing version")
+    #         else:
+    #             log.exit("This version has yet to be released")
+    #     else:
+    #         log.exit("%s: unknown version status: %s", new_release, status)
 
-        return True
+    #     return True
 
     """
     def _upgrade(self):
