@@ -34,6 +34,10 @@ STATUS_RELEASED = "released"
 STATUS_DISCONTINUED = "discontinued"
 STATUS_DEVELOPING = "developing"
 
+ANGULARJS = 'angularjs'
+ANGULAR = 'angular'
+REACT = 'react'
+
 
 class Application(object):
 
@@ -64,7 +68,7 @@ class Application(object):
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
-        self.upgrade = self.action == 'upgrade'
+        # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
 
         # Others
@@ -76,7 +80,6 @@ class Application(object):
         self.version = None
         # self.releases = {}
         self.gits = {}
-        self.enable_new_frontend = False
 
         if self.project is not None:
             if "_" in self.project:
@@ -269,7 +272,7 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/__main__.py',
         ]
 
-        if self.frontend:
+        if self.frontend is not None:
             required_files.extend(
                 [
                     'frontend',
@@ -300,11 +303,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 ]
             )
 
-            b = glom(self.specs,
-                     "variables.repos.frontend.branch",
-                     default='master')
-
-            if b == 'master':
+            if self.frontend == ANGULAR:
                 required_files.extend(
                     [
                         'frontend/js',
@@ -313,15 +312,6 @@ Verify that you are in the right folder, now you are in: %s%s
                         'frontend/templates',
                     ]
                 )
-            # elif b != '0.6.1':
-            #     obsolete_files.extend(
-            #         [
-            #             'frontend/js',
-            #             'frontend/js/app.js',
-            #             'frontend/js/routing.extra.js',
-            #             'frontend/templates',
-            #         ]
-            #     )
 
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
@@ -461,10 +451,33 @@ Verify that you are in the right folder, now you are in: %s%s
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
 
-        self.frontend = self.vars \
-            .get('frontend', {}) \
-            .get('enable', False)
-        log.very_verbose("Frontend is %s" % self.frontend)
+        if self.current_args.get('frontend') is not None:
+            framework = self.current_args.get('frontend')
+        else:
+            framework = glom(self.specs,
+                             "variables.frontend.framework",
+                             default=None)
+
+        if framework == 'None':
+            framework = None
+
+        # REMOVE ME IN A NEAR FUTURE #
+        test = glom(
+            self.specs, "variables.frontend.enable",
+            default=None)
+
+        if test is not None:
+            log.warning(
+                "frontend.enable is deprecated, use frontend.framework"
+            )
+            if framework is None and test:
+                framework = ANGULAR
+        # ########################## #
+
+        self.frontend = framework
+
+        if self.frontend is not None:
+            log.very_verbose("Frontend framework: %s" % self.frontend)
 
         project_block = self.specs.get('project', {})
         self.project_title = project_block.get('title', "Unknown title")
@@ -541,7 +554,9 @@ Verify that you are in the right folder, now you are in: %s%s
             myvars = {}
         else:
             myvars = {
-                'frontend': self.frontend,
+                ANGULARJS: self.frontend == ANGULARJS,
+                ANGULAR: self.frontend == ANGULAR,
+                REACT: self.frontend == REACT,
                 'devel': self.development,
             }
         repo = project.apply_variables(repo, myvars)
@@ -551,10 +566,10 @@ Verify that you are in the right folder, now you are in: %s%s
         if not repo_enabled:
             return
 
-        if self.upgrade and self.current_args.get('current'):
-            repo['do'] = True
-        else:
-            repo['do'] = self.initialize
+        # if self.upgrade and self.current_args.get('current'):
+        #     repo['do'] = True
+        # else:
+        repo['do'] = self.initialize
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
@@ -599,12 +614,12 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def prepare_composers(self):
 
-        confs = self.vars.get('composers', {})
-
         # substitute values starting with '$$'
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            'frontend': self.frontend or self.current_args.get('frontend'),
+            ANGULARJS: self.frontend == ANGULARJS,
+            ANGULAR: self.frontend == ANGULAR,
+            REACT: self.frontend == REACT,
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
             'commons': not self.current_args.get('no_commons'),
@@ -618,6 +633,8 @@ Verify that you are in the right folder, now you are in: %s%s
             )
         }
         compose_files = OrderedDict()
+
+        confs = self.vars.get('composers', {})
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
 
@@ -632,7 +649,6 @@ Verify that you are in the right folder, now you are in: %s%s
                           default='master')
 
             if branch != 'master':
-                self.enable_new_frontend = True
                 compose_files['frontend']['file'] = 'frontend-a2'
         # ################################################################# #
 
@@ -852,10 +868,14 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def frontend_libs(self):
 
+        if self.frontend is None:
+            return False
+
         if not any([self.check, self.initialize, self.update]):
             return False
 
-        if not self.frontend:
+        # What to do with REACT?
+        if self.frontend != ANGULAR:
             return False
 
         libs_dir = os.path.join("data", self.project, "frontend")
@@ -1821,8 +1841,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
-        if self.enable_new_frontend:
-            self.frontend_libs()
+        self.frontend_libs()
 
         # Final step, launch the command
 

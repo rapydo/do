@@ -35,9 +35,9 @@ options:
     help: level of verbosity
 
   frontend:
-    type: bool
-    default: False
-    help: Include frontend configuration to rapydo stack
+    type: str
+    metavalue: FRAMEWORK_NAME
+    help: Include a frontend framework to the rapydo stack
 
   no-backend:
     type: bool
