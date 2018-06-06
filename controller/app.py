@@ -303,7 +303,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 ]
             )
 
-            if self.frontend == ANGULAR:
+            if self.frontend == ANGULARJS:
                 required_files.extend(
                     [
                         'frontend/js',
