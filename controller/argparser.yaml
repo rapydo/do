@@ -108,27 +108,10 @@ subcommands:
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      # verify-upstream:
-      #   alias: u
-      #   type: bool
-      #   metavalue: TRUE_OR_FALSE
-      #   default: False
-      #   help: include upstream repo (rapydo-core) to checked submodules
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
   init:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
-    suboptions:
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
   update:
     description: update the current project
     suboptions:
@@ -136,13 +119,7 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
       rebuild:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -197,25 +174,6 @@ subcommands:
       command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
       service: proxy
       user: root
-  npm:
-    description: install or update a frontend libraries with npm
-    container_exec:
-      name: npm
-      service: frontend
-      user: root
-    suboptions:
-      # lib:
-      #   alias: l
-      #   type: str
-      #   metavalue: LIB_TO_INSTALL
-      #   default: null
-      #   help: the library to be installed
-      update:
-        alias: u
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: Enable update instead of install
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:

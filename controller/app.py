@@ -257,7 +257,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def inspect_project_folder(self):
 
-        # FIXME: move in a project_defaults.yaml?
         required_files = [
             'confs',
             'backend',
@@ -268,7 +267,6 @@ Verify that you are in the right folder, now you are in: %s%s
         ]
         obsolete_files = [
             'backend/__main__.py',
-            # 'frontend/bower.json',
         ]
 
         if self.frontend:
@@ -860,10 +858,6 @@ Verify that you are in the right folder, now you are in: %s%s
         if not self.frontend:
             return False
 
-        if self.current_args.get('skip_npm'):
-            log.info("Skipping npm checks")
-            return False
-
         libs_dir = os.path.join("data", self.project, "frontend")
         modules_dir = os.path.join(libs_dir, "node_modules")
 
@@ -903,58 +897,6 @@ Verify that you are in the right folder, now you are in: %s%s
         else:
             log.warning(
                 "Frontend libs not found, will be installed at startup")
-
-    def bower_libs(self):
-
-        if self.check or self.initialize or self.update:
-
-            if self.frontend:
-                bower_dir = os.path.join(
-                    "data", self.project, "bower_components")
-
-                install_bower = False
-                if self.current_args.get('skip_npm'):
-                    install_bower = False
-                elif not os.path.isdir(bower_dir):
-                    install_bower = True
-                    os.makedirs(bower_dir)
-                elif self.update:
-                    install_bower = True
-                else:
-                    libs = helpers.list_path(bower_dir)
-                    if len(libs) <= 0:
-                        install_bower = True
-
-                if install_bower:
-
-                    if self.check:
-
-                        log.exit(
-                            """Missing bower libs in %s
-\nSuggestion: execute the init command"""
-                            % bower_dir
-                        )
-
-                    else:
-
-                        if self.initialize:
-                            bower_command = "bower install"
-                        else:
-                            bower_command = "bower update"
-
-                        bower_command += \
-                            " --config.directory=/libs/bower_components"
-
-                        dc = self.get_compose(files=self.files)
-                        dc.create_volatile_container(
-                            "bower", command=bower_command)
-
-                        log.info("Bower libs downloaded")
-
-                elif self.current_args.get('skip_bower'):
-                    log.info("Skipping bower checks")
-                else:
-                    log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -1448,42 +1390,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
-    def _npm(self):
-
-        # lib = self.current_args.get("lib", None)
-        # if lib is None:
-        #     log.warning("Missing lib: installing all from package.json")
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get("npm", {}) \
-            .get('container_exec', {})
-
-        # Verify all is good
-        assert meta.pop('name') == 'npm'
-
-        service = meta.get('service')
-        user = meta.get('user', None)
-        dc = self.get_compose(files=self.files)
-
-        # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
-        # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
-        npm_command = "npm --prefix /modules "
-
-        if self.current_args.get("update", False):
-            npm_command += "update"
-        else:
-            npm_command += "install"
-
-        # if lib is not None:
-        #     npm_command += " --save-prod %s" % lib
-
-        # Re-created merged package.json file
-        merge_command = "node /rapydo/nodejs/merge.js"
-        dc.exec_command(service, user=user, command=merge_command)
-        # Install or update libraries
-        return dc.exec_command(service, user=user, command=npm_command)
-
     def _list(self):
 
         printed_something = False
@@ -1917,8 +1823,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # Install or check frontend libraries (if frontend is enabled)
         if self.enable_new_frontend:
             self.frontend_libs()
-        else:
-            self.bower_libs()
 
         # Final step, launch the command
 
