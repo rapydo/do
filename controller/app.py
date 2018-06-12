@@ -284,8 +284,6 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/custom.navbar.ts',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
-                    'frontend/app/custom.home.ts',
-                    'frontend/app/custom.home.html',
                     'frontend/css/style.css',
                 ]
             )
