@@ -1790,7 +1790,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("Current user: %s (UID: %d)" % (
             self.current_os_user, self.current_uid))
 
-        self.inspect_permissions()
+        if not self.current_args.get('skip_check_permissions', False):
+            self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
