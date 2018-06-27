@@ -1018,8 +1018,8 @@ Verify that you are in the right folder, now you are in: %s%s
         if len(self.active_services) == 0:
             log.exit(
                 """You have no active service
-\nSuggestion: to activate a top-level service edit your compose yaml
-and add the variable "ACTIVATE: 1" in the service enviroment
+\nSuggestion: to activate a top-level service edit your project_configuration
+and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 """)
         else:
             log.checked("Active services: %s", self.active_services)

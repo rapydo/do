@@ -2,6 +2,7 @@
 
 from utilities import configuration
 from utilities.logs import get_logger
+from glom import glom
 
 log = get_logger(__name__)
 
@@ -40,7 +41,9 @@ def find_active(services):
         all_services[name] = service
         dependencies[name] = list(service.get('depends_on', {}).keys())
 
-        if service.get('environment', {}).get('ACTIVATE', False):
+        ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
+        is_active = (str(ACTIVATE) == "1")
+        if is_active:
             base_actives.append(name)
 
     active_services = walk_services(base_actives, dependencies)
