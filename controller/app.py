@@ -459,19 +459,6 @@ Verify that you are in the right folder, now you are in: %s%s
         if framework == 'None':
             framework = None
 
-        # REMOVE ME IN A NEAR FUTURE #
-        test = glom(
-            self.specs, "variables.frontend.enable",
-            default=None)
-
-        if test is not None:
-            log.warning(
-                "frontend.enable is deprecated, use frontend.framework"
-            )
-            if framework is None and test:
-                framework = ANGULAR
-        # ########################## #
-
         self.frontend = framework
 
         if self.frontend is not None:
