@@ -41,7 +41,7 @@ setup(
         "jinja2",
         "plumbum",
         "glom",
-        # "requests==2.18.4",  # current...
+        "requests==2.18.4",  # current is 2.19.1 instead, not good for docker-compose
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[
