@@ -1718,7 +1718,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.exit("%s path not found", do_path)
 
         utils_repo = self.gits.get('utils')
-        do_repo = gitter.get_repo(do_path)
+        do_repo = self.gits.get('do')
 
         utils_switched = False
         if gitter.get_active_branch(utils_repo) == version:
