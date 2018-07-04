@@ -25,6 +25,7 @@ from controller.dockerizing import Dock
 from controller.compose import Compose
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
+from utilities.packing import install, check_version
 from utilities.logs import get_logger, suppress_stdout
 
 log = get_logger(__name__)
@@ -1638,117 +1639,117 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     #     return True
 
-    """
-    def _upgrade(self):
-        if len(self.releases) < 1:
-            log.exit('This project does not support releases yet')
+    def _install(self):
+        version = self.current_args.get('version')
+        git = self.current_args.get('git')
+        editable = self.current_args.get('editable')
 
-        gitobj = self.gits.get('main')
-        current_release = gitter.get_active_branch(gitobj)
-        if self.current_args.get('current'):
-            new_release = "."
+        if git and editable:
+            log.exit("--git and --editable options are not compatible")
+
+        if git:
+            return self.install_controller_from_git(version)
+        elif editable:
+            return self.install_controller_from_folder(version)
         else:
-            new_release = self.current_args.get('release')
-        log.info('Current release: %s' % current_release)
+            return self.install_controller_from_pip(version)
 
-        # To reduce the function complexity, I moved all preliminary check in
-        # a dedicated function. Note: that function can stop with log.exit
-        if not self.preliminary_upgrade_checks(current_release, new_release):
-            return False
+    def install_controller_from_pip(self, version):
 
-        # # 0. if current main repo is being developed, stop this
-        # # NOTE: I am not checking for commits to be pushed
-        main_repo = self.gits.pop('main')
-        if gitter.check_unstaged('main', main_repo):
-            log.exit('Interrupting')
+        log.info(
+            "You asked to install rapydo-controller %s from pip",
+            version)
 
-        # 1. check submodules versions
-        # if different move current to `submodules/.backup/$VERSION/$TOOL`
-        for name, gitobj in sorted(self.gits.items()):
-
-            # Skip non existing submodules or missing
-            if gitobj is None:
-                continue
-
-            if gitter.check_unstaged(name, gitobj):
-                current_dir = gitobj.working_dir
-                msg = "Unable to upgrade"
-                msg += "\n\nYou have unstaged files in: %s" % current_dir
-                msg += "\n\nPlease commit or undo these changes,"
-                msg += " then retry the upgrade\n"
-                log.exit(msg)
-                # current_version = gitter.get_active_branch(gitobj)
-                # backup_dir = helpers.current_fullpath(
-                #     SUBMODULES_DIR, '.backup', current_version, name)
-                # import shutil
-                # try:
-                #     shutil.move(current_dir, backup_dir)
-                # except BaseException as e:
-                #     log.exit(
-                #         name, e.__class__.__name__, e)
-                # log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
-
-        # 2. git checkout new version
-        if new_release == ".":
-            log.debug("Switch branch not required")
-        elif gitter.switch_branch(main_repo, new_release):  # , remote=False):
-            log.info("Main active branch: %s", new_release)
+        package = "rapydo-controller"
+        controller = "%s==%s" % (package, version)
+        installed = install(controller)
+        if not installed:
+            log.error(
+                "Unable to install controller %s from pip", version)
         else:
-            log.exit("Failed switching main repository to %s", new_release)
+            log.info(
+                "Controller version %s installed from pip", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
-        # 3. reinit submodules
-        self.read_specs()  # read again project configuration!
-        if not self.verify_rapydo_version(do_exit=False):
-            log.info("Trying to install controller %s", self.rapydo_version)
-            from utilities.packing import install, check_version
+    def install_controller_from_git(self, version):
 
-            installed = False
-            package = "rapydo-controller"
-            controller_repository = "do"
-            utils_repository = "utils"
+        log.info(
+            "You asked to install rapydo-controller %s from git",
+            version)
 
-            status = self.releases.get(new_release).get('status')
-            if status == STATUS_RELEASED:
-                controller = "%s==%s" % (package, self.rapydo_version)
-                installed = install(controller)
-            else:
-                utils = "git+https://github.com/rapydo/%s.git@%s" % (
-                    utils_repository, self.rapydo_version
-                )
-                controller = "git+https://github.com/rapydo/%s.git@%s" % (
-                    controller_repository, self.rapydo_version
-                )
+        package = "rapydo-controller"
+        controller_repository = "do"
+        utils_repository = "utils"
+        rapydo_uri = "https://github.com/rapydo"
+        utils = "git+%s/%s.git@%s" % (
+            rapydo_uri, utils_repository, version
+        )
+        controller = "git+%s/%s.git@%s" % (
+            rapydo_uri, controller_repository, version
+        )
 
-                installed = install(utils)
-                if installed:
-                    installed = install(controller)
+        installed = install(utils)
+        if installed:
+            installed = install(controller)
 
-            if installed:
-                installed_version = check_version(package)
-                installed = (installed_version != self.rapydo_version)
+        if not installed:
+            log.error(
+                "Unable to install controller %s from git", version)
+        else:
+            log.info(
+                "Controller version %s installed from git", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
-            if not installed:
-                log.error(
-                    "Failed to install %s %s", package, self.rapydo_version)
-                log.warning(
-                    "Rolling back previous branch on main repository")
-                if gitter.switch_branch(main_repo, current_release):
-                    log.info("Main repository back to %s", current_release)
-                else:
-                    log.error(
-                        "Failed switching main repository to %s",
-                        current_release)
-                log.exit("Upgrade failed")
+    def install_controller_from_folder(self, version):
 
-        self.initialize = True
-        self.git_submodules()
+        log.info(
+            "You asked to install rapydo-controller %s from local folder",
+            version)
 
-        # 4. rebuild images
-        self.rebuild_from_upgrade()
+        package = "rapydo-controller"
+        utils_path = os.path.join(SUBMODULES_DIR, "utils")
+        do_path = os.path.join(SUBMODULES_DIR, "do")
 
-        # 5. safely restart?
-        # docker-compose up --force-recreate
-    """
+        if not os.path.exists(utils_path):
+            log.exit("%s path not found", utils_path)
+        if not os.path.exists(do_path):
+            log.exit("%s path not found", do_path)
+
+        utils_repo = self.gits.get('utils')
+        do_repo = gitter.get_repo(do_path)
+
+        utils_switched = False
+        if gitter.get_active_branch(utils_repo) == version:
+            log.info("Utilities repository already at %s", version)
+        elif gitter.switch_branch(utils_repo, version):
+            log.info("Utilities repository switched to %s", version)
+            utils_switched = True
+        else:
+            log.exit("Unable to switch utilities repository to %s", version)
+
+        if gitter.get_active_branch(do_repo) == version:
+            log.info("Controller repository already at %s", version)
+        elif gitter.switch_branch(do_repo, version):
+            log.info("Controller repository switched to %s", version)
+        else:
+            if utils_switched:
+                log.warning("Unable to switch back utilities repository")
+            log.exit("Unable to switch controller repository to %s", version)
+
+        installed = install(utils_path, editable=True)
+        if installed:
+            installed = install(do_path, editable=True)
+
+        if not installed:
+            log.error(
+                "Unable to install controller %s from local folder", version)
+        else:
+            log.info(
+                "Controller version %s installed from local folder", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
     ################################
     # ### RUN ONE COMMAND OFF

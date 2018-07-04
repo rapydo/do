@@ -131,6 +131,25 @@ subcommands:
         default: False
         help: rebuild templates if required
 
+  install:
+    description: Install a rapydo-controller version
+    suboptions:
+      version:
+        positional: true
+        type: str
+        metavalue: VERSION
+        default: null
+      git:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install from git
+      editable:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install in editable mode from submodules folder
+
   status:
     description: list current status of containers
   build:
