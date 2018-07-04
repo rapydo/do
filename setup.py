@@ -35,7 +35,7 @@ setup(
     install_requires=[
         "rapydo-utils==%s" % current_version,
         "docker-compose==1.21.2",
-        "docker==3.4.0",
+        "docker==3.3.0",
         "dockerfile-parse",
         "gitpython==2.1.9",
         "jinja2",
