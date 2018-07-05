@@ -25,7 +25,6 @@ from controller.dockerizing import Dock
 from controller.compose import Compose
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities.packing import install, check_version
 from utilities.logs import get_logger, suppress_stdout
 
 log = get_logger(__name__)
@@ -145,6 +144,7 @@ class Application(object):
         self.check_python_package('compose', min_version="1.18")
         # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
+        self.check_python_package('requests', min_version="2.6.1")
         self.check_python_package(
             'utilities', min_version=__version__, max_version=__version__)
 
@@ -1161,7 +1161,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             '--no-deps': False,
             '--detach': True,
             # rebuild images changed with an upgrade
-            '--build': self.current_args.get('from_upgrade'),
+            # '--build': self.current_args.get('from_upgrade'),
+            '--build': None,
             '--no-color': False,
             # switching in an easier way between modules
             '--remove-orphans': True,  # False,
@@ -1510,7 +1511,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             '--no-deps': False,
             # '-d': True,
             '--detach': True,
-            '--build': False,  # self.current_args.get('from_upgrade'),
+            # '--build': self.current_args.get('from_upgrade'),
+            '--build': False,
             '--remove-orphans': True,
             '--abort-on-container-exit': False,
             '--no-recreate': False,
@@ -1659,6 +1661,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def install_controller_from_pip(self, version):
 
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
+
         log.info(
             "You asked to install rapydo-controller %s from pip",
             version)
@@ -1676,6 +1683,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.info("Check on installed version: %s", installed_version)
 
     def install_controller_from_git(self, version):
+
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
 
         log.info(
             "You asked to install rapydo-controller %s from git",
@@ -1706,6 +1718,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.info("Check on installed version: %s", installed_version)
 
     def install_controller_from_folder(self, version):
+
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
 
         log.info(
             "You asked to install rapydo-controller %s from local folder",
