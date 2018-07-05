@@ -367,6 +367,9 @@ Verify that you are in the right folder, now you are in: %s%s
             for folder in sub_folders:
                 if folder == '.git':
                     continue
+                # produced by virtual-env?
+                if folder == 'lib':
+                    continue
                 if folder.endswith("__pycache__"):
                     continue
                 if folder.endswith(".egg-info"):
