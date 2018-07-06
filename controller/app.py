@@ -280,6 +280,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/package.json',
                     'frontend/custom.ts',
                     'frontend/app',
+                    'frontend/app/custom.project.options.ts',
                     'frontend/app/custom.routes.ts',
                     'frontend/app/custom.declarations.ts',
                     'frontend/app/custom.navbar.ts',
