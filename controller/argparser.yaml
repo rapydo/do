@@ -90,7 +90,7 @@ options:
   skip-check-permissions:
     type: bool
     default: False
-    help: skip permission checks on file system 
+    help: skip permission checks on file system
 
   # net:
   #   type: str
@@ -327,6 +327,22 @@ subcommands:
         help: the first service that will be connected inside the code
   coverall:
     description: send coverage computed to coveralls.io website
+  volatile:
+    description: one command container
+    suboptions:
+      service:
+        positional: yes
+        type: str
+        metavalue: SERVICE
+        default: null
+      command:
+        # positional: no
+        positional: yes
+        # alias: c
+        type: str
+        metavalue: TERMINAL_COMMAND_UNIX-LIKE
+        default: bash
+        help: UNIX command to be executed
   # upgrade:  # DEPRECATED, see issues/71
   #   description: upgrade your current project to new official releases
   #   suboptions:

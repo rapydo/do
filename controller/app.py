@@ -1572,6 +1572,13 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
+    def _volatile(self):
+        """ One command container (NOTE: not execution on a running one) """
+        service = self.current_args.get('service')
+        command = self.current_args.get('command')
+        dc = self.get_compose(files=self.files)
+        dc.create_volatile_container(service, command)
+
     # def available_releases(self, releases, current_release):
 
     #     log.warning('List of available releases:')
