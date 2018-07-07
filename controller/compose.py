@@ -9,7 +9,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 
 from controller.dockerizing import docker_errors
 from compose.service import BuildError
-from compose.project import NoSuchService
+from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -132,6 +132,8 @@ class Compose(object):
             log.critical_exit("Failed command execution:\n%s" % e)
         except docker_errors as e:
             log.critical_exit("Failed docker container:\n%s" % e)
+        except ProjectError as e:
+            log.exit(str(e))
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
 
