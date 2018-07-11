@@ -389,9 +389,9 @@ Verify that you are in the right folder, now you are in: %s%s
                 self.check_permissions(path)
 
                 counter += 1
-                if counter > 200:
+                if counter > 100:
                     log.warning(
-                        "Stopped checks in folder %s too many files", root
+                        "Too many files, stopped checks in %s", root
                     )
                     break
 
@@ -1092,8 +1092,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
     def custom_parse_args(self):
 
         # custom options from configuration file
-        self.custom_commands = self.specs \
-            .get('controller', {}).get('commands', {})
+        self.custom_commands = glom(
+            self.specs, "controller.commands", default={})
 
         if len(self.custom_commands) < 1:
             log.exit("No custom commands defined")
@@ -1115,11 +1115,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                     self.arguments.remaining_args
                 )
             ).get('custom')
-
-    # def rebuild_from_upgrade(self):
-    #     log.warning("Rebuilding images from an upgrade")
-    #     self.current_args['rebuild_templates'] = True
-    #     self._build()
 
     ################################
     # ##    COMMANDS    ##         #
@@ -1379,12 +1374,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _ssl_certificate(self):
 
-        current_method_name = "ssl-certificate"
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-certificate.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
@@ -1398,12 +1392,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # return self._shell(**meta)
 
     def _ssl_dhparam(self):
-        current_method_name = "ssl-dhparam"
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-dhparam.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'dhparam'
