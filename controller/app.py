@@ -365,6 +365,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         for root, sub_folders, files in os.walk(root):
 
+            counter = 0
             for folder in sub_folders:
                 if folder == '.git':
                     continue
@@ -380,12 +381,27 @@ Verify that you are in the right folder, now you are in: %s%s
                 if self.check_permissions(path):
                     self.inspect_permissions(root=path)
 
+                counter += 1
+                if counter > 20:
+                    log.warning(
+                        "Too many folders, stopped checks in %s", root
+                    )
+                    break
+
+            counter = 0
             for file in files:
                 if file.endswith(".pyc"):
                     continue
 
                 path = os.path.join(root, file)
                 self.check_permissions(path)
+
+                counter += 1
+                if counter > 100:
+                    log.warning(
+                        "Too many files, stopped checks in %s", root
+                    )
+                    break
 
             break
 
@@ -1084,8 +1100,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
     def custom_parse_args(self):
 
         # custom options from configuration file
-        self.custom_commands = self.specs \
-            .get('controller', {}).get('commands', {})
+        self.custom_commands = glom(
+            self.specs, "controller.commands", default={})
 
         if len(self.custom_commands) < 1:
             log.exit("No custom commands defined")
@@ -1107,11 +1123,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                     self.arguments.remaining_args
                 )
             ).get('custom')
-
-    # def rebuild_from_upgrade(self):
-    #     log.warning("Rebuilding images from an upgrade")
-    #     self.current_args['rebuild_templates'] = True
-    #     self._build()
 
     ################################
     # ##    COMMANDS    ##         #
@@ -1235,8 +1246,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.info("Stack unpaused")
 
     def _log(self):
-        dc = self.get_compose(files=self.files)
-        services = self.get_services(default=self.active_services)
+
+        service = self.current_args.get('service')
+        if service is None:
+            services = self.get_services(default=self.active_services)
+        else:
+            services = [service]
 
         options = {
             '--follow': self.current_args.get('follow', False),
@@ -1246,6 +1261,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             'SERVICE': services,
         }
 
+        dc = self.get_compose(files=self.files)
         try:
             dc.command('logs', options)
         except KeyboardInterrupt:
@@ -1366,12 +1382,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _ssl_certificate(self):
 
-        current_method_name = "ssl-certificate"
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-certificate.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
@@ -1385,12 +1400,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # return self._shell(**meta)
 
     def _ssl_dhparam(self):
-        current_method_name = "ssl-dhparam"
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-dhparam.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'dhparam'
