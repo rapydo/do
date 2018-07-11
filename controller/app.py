@@ -365,6 +365,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         for root, sub_folders, files in os.walk(root):
 
+            counter = 0
             for folder in sub_folders:
                 if folder == '.git':
                     continue
@@ -379,6 +380,13 @@ Verify that you are in the right folder, now you are in: %s%s
                 path = os.path.join(root, folder)
                 if self.check_permissions(path):
                     self.inspect_permissions(root=path)
+
+                counter += 1
+                if counter > 20:
+                    log.warning(
+                        "Too many folders, stopped checks in %s", root
+                    )
+                    break
 
             counter = 0
             for file in files:
