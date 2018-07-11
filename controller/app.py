@@ -380,12 +380,20 @@ Verify that you are in the right folder, now you are in: %s%s
                 if self.check_permissions(path):
                     self.inspect_permissions(root=path)
 
+            counter = 0
             for file in files:
                 if file.endswith(".pyc"):
                     continue
 
                 path = os.path.join(root, file)
                 self.check_permissions(path)
+
+                counter += 1
+                if counter > 200:
+                    log.warning(
+                        "Stopped checks in folder %s too many files", root
+                    )
+                    break
 
             break
 
@@ -1235,8 +1243,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.info("Stack unpaused")
 
     def _log(self):
-        dc = self.get_compose(files=self.files)
-        services = self.get_services(default=self.active_services)
+
+        service = self.current_args.get('service')
+        if service is None:
+            services = self.get_services(default=self.active_services)
+        else:
+            services = [service]
 
         options = {
             '--follow': self.current_args.get('follow', False),
@@ -1246,6 +1258,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             'SERVICE': services,
         }
 
+        dc = self.get_compose(files=self.files)
         try:
             dc.command('logs', options)
         except KeyboardInterrupt:
