@@ -182,6 +182,11 @@ subcommands:
         metavalue: INTEGER_NUM_LINES
         default: "100"
         help: logs
+      service:
+        alias: s
+        type: str
+        metavalue: SERVICE
+        default: null
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:
