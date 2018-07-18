@@ -328,7 +328,7 @@ subcommands:
         alias: s
         type: str
         metavalue: CONNECTED_SERVICE
-        default: sqlalchemy
+        # default: sqlalchemy
         help: the first service that will be connected inside the code
   coverall:
     description: send coverage computed to coveralls.io website

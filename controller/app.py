@@ -1491,7 +1491,15 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             )
 
     def _template(self):
+
         service_name = self.current_args.get('service')
+        if service_name is None:
+            # services = self.get_services(default=self.active_services)
+            # for service in services:
+            #     if service not in ['backend', 'frontend', 'proxy', 'celery']:
+            #         print(service)
+            service_name = self.vars.get('env', {}).get('AUTH_SERVICE')
+
         force = self.current_args.get('yes')
         endpoint_name = self.current_args.get('endpoint')
 
