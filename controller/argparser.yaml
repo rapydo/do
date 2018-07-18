@@ -332,6 +332,14 @@ subcommands:
         help: the first service that will be connected inside the code
   coverall:
     description: send coverage computed to coveralls.io website
+  verify:
+    description: check a service connection within the backend container
+    suboptions:
+      service:
+        positional: yes
+        type: str
+        metavalue: SERVICE
+        default: null
   volatile:
     description: one command container
     suboptions:

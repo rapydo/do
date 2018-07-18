@@ -1592,8 +1592,22 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
+    def _verify(self):
+        """ Verify one service connection (inside backend) """
+        service = self.current_args.get('service')
+        dc = self.get_compose(files=self.files)
+        command = 'restapi verify --services %s' % service
+
+        # super magic trick
+        try:
+            # test the normal container if already running
+            return dc.exec_command('backend', command=command, nofailure=True)
+        except AttributeError:
+            # otherwise shoot a one-time backend container for that
+            return dc.create_volatile_container('backend', command)
+
     def _volatile(self):
-        """ One command container (NOTE: not execution on a running one) """
+        """ One command container (NOT executing on a running one) """
         service = self.current_args.get('service')
         command = self.current_args.get('command')
         dc = self.get_compose(files=self.files)

@@ -92,7 +92,7 @@ class Compose(object):
         except SystemExit:
             log.info("SystemExit during template building")
 
-    def command(self, command, options=None):
+    def command(self, command, options=None, nofailure=False):
 
         # NOTE: debug defaults
         # tmp = self.get_defaults(command)
@@ -129,7 +129,11 @@ class Compose(object):
             cerrors.OperationFailedError,
             BuildError,
         ) as e:
-            log.critical_exit("Failed command execution:\n%s" % e)
+            msg = "Failed command execution:\n%s" % e
+            if nofailure:
+                raise AttributeError(msg)
+            else:
+                log.critical_exit(msg)
         except docker_errors as e:
             log.critical_exit("Failed docker container:\n%s" % e)
         except ProjectError as e:
@@ -190,7 +194,7 @@ class Compose(object):
 
         return self.command('run', options)
 
-    def exec_command(self, service, user=None, command=None):
+    def exec_command(self, service, user=None, command=None, nofailure=False):
         """
             Execute a command on a running container
         """
@@ -212,10 +216,12 @@ class Compose(object):
             log.debug("Command: %s(%s+%s)"
                       % (service.lower(), shell_command, shell_args))
         try:
-            out = self.command('exec_command', options)
+            out = self.command('exec_command', options, nofailure=nofailure)
         except NoSuchService:
-            log.exit(
-                "Cannot find a running container with this name: %s" % service)
+            if nofailure:
+                raise AttributeError("Cannot find service: %s", service)
+            else:
+                log.exit("Cannot find a running container called %s" % service)
         else:
             return out
 
