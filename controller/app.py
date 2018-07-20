@@ -1964,6 +1964,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             'neo4j',
             'neomodel',
             'os',
+            'platform',
             'pickle',
             'plumbum',
             'pymodm',
