@@ -5,14 +5,13 @@ group: deprecated-2017Q2
 
 services:
 - docker
-before_install:
+
+script:
 - sudo apt-get update
 - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-install:
 - pip install --upgrade setuptools # bug fix http://j.mp/2v9Hs98
 - pip install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
-script:
 - rapydo --version
 - rapydo --help
 - git clone https://github.com/rapydo/tests.git rapydo_tests
@@ -29,9 +28,6 @@ script:
 after_success:
 - coveralls
 - pwd
-before_deploy:
-# /home/travis/build/rapydo/do
-- cd .. && pwd
 
 jobs:
   include:
