@@ -1381,6 +1381,19 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
+        chain = self.current_args.get('chain_file')
+        key = self.current_args.get('key_file')
+
+        if chain is not None or key is not None:
+            if chain is None:
+                log.exit("Invalid chain file (your provided none)")
+            elif not os.path.exists(chain):
+                log.exit("Invalid chain file (your provided %s)", chain)
+
+            if key is None:
+                log.exit("Invalid key file (your provided none)")
+            elif not os.path.exists(key):
+                log.exit("Invalid key file (your provided %s)", key)
 
         meta = glom(
             self.arguments.parse_conf,
@@ -1393,11 +1406,16 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         service = meta.get('service')
         user = meta.get('user', None)
+
+        if chain is not None and key is not None:
+
+            log.error("Not implemented, copy %s on %s", chain, service)
+            log.error("Not implemented, copy %s on %s", key, service)
+            log.exit("Work in progress")
+
         command = meta.get('command', None)
         dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
-        # **meta ... explicit is not better than implicit???
-        # return self._shell(**meta)
 
     def _ssl_dhparam(self):
         meta = glom(

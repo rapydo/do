@@ -196,6 +196,17 @@ subcommands:
       command: /bin/bash updatecertificates
       service: proxy
       user: root
+    suboptions:
+      chain-file:
+        type: str
+        metavalue: PATH_TO_CHAIN_FILE
+        default: null
+        help: path to existing chain file (.pem format)
+      key-file:
+        type: str
+        metavalue: PATH_TO_KEY_FILE
+        default: null
+        help: path to existing key file (.pem format)
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
