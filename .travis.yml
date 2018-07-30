@@ -29,9 +29,6 @@ script:
 after_success:
 - coveralls
 - pwd
-before_deploy:
-# /home/travis/build/rapydo/do
-- cd .. && pwd
 
 jobs:
   include:
