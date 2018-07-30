@@ -34,6 +34,21 @@ options:
     default: DEBUG
     help: level of verbosity
 
+  frontend:
+    type: str
+    metavalue: FRAMEWORK_NAME
+    help: Include a frontend framework to the rapydo stack
+
+  no-backend:
+    type: bool
+    default: False
+    help: Exclude backend configuration from rapydo stack
+
+  no-commons:
+    type: bool
+    default: False
+    help: Exclude project common configuration from rapydo stack
+
   collect-logs:
     type: bool
     default: False
@@ -72,6 +87,11 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
+  skip-check-permissions:
+    type: bool
+    default: False
+    help: skip permission checks on file system
+
   # net:
   #   type: str
   #   default: bridge
@@ -93,27 +113,10 @@ subcommands:
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      # verify-upstream:
-      #   alias: u
-      #   type: bool
-      #   metavalue: TRUE_OR_FALSE
-      #   default: False
-      #   help: include upstream repo (rapydo-core) to checked submodules
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
   init:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
-    suboptions:
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
   update:
     description: update the current project
     suboptions:
@@ -121,18 +124,31 @@ subcommands:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
-        # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip-npm:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: skip update of npm libs
       rebuild:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
         help: rebuild templates if required
+
+  install:
+    description: Install a rapydo-controller version
+    suboptions:
+      version:
+        positional: true
+        type: str
+        metavalue: VERSION
+        default: null
+      git:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install from git
+      editable:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install in editable mode from submodules folder
 
   status:
     description: list current status of containers
@@ -166,6 +182,11 @@ subcommands:
         metavalue: INTEGER_NUM_LINES
         default: "100"
         help: logs
+      service:
+        alias: s
+        type: str
+        metavalue: SERVICE
+        default: null
   custom:
     description: execute predefined custom commands inside containers
   ssl-certificate:
@@ -175,6 +196,17 @@ subcommands:
       command: /bin/bash updatecertificates
       service: proxy
       user: root
+    suboptions:
+      chain-file:
+        type: str
+        metavalue: PATH_TO_CHAIN_FILE
+        default: null
+        help: path to existing chain file (.pem format)
+      key-file:
+        type: str
+        metavalue: PATH_TO_KEY_FILE
+        default: null
+        help: path to existing key file (.pem format)
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
@@ -182,25 +214,6 @@ subcommands:
       command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
       service: proxy
       user: root
-  npm:
-    description: install or update a frontend libraries with npm
-    container_exec:
-      name: npm
-      service: frontend
-      user: root
-    suboptions:
-      # lib:
-      #   alias: l
-      #   type: str
-      #   metavalue: LIB_TO_INSTALL
-      #   default: null
-      #   help: the library to be installed
-      update:
-        alias: u
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: Enable update instead of install
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:
@@ -237,13 +250,13 @@ subcommands:
         help: UNIX command to be executed on selected running service
   start:
     description: Start containers for this configuration
-    suboptions:
-      from-upgrade:
-        alias: fu
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: rebuild images and use them to restart existing containers
+    # suboptions:
+    #   from-upgrade:
+    #     alias: fu
+    #     type: bool
+    #     metavalue: TRUE_OR_FALSE
+    #     default: False
+    #     help: rebuild images and use them to restart existing containers
   stop:
     description: stop running containers, but do not remove them
   restart:
@@ -326,30 +339,54 @@ subcommands:
         alias: s
         type: str
         metavalue: CONNECTED_SERVICE
-        default: sqlalchemy
+        # default: sqlalchemy
         help: the first service that will be connected inside the code
   coverall:
     description: send coverage computed to coveralls.io website
-  upgrade:
-    description: upgrade your current project to new official releases
+  verify:
+    description: check a service connection within the backend container
     suboptions:
-      release:
-        alias: r
+      service:
+        positional: yes
         type: str
-        metavalue: RELEASE_VERSION
-        help: release version you want to upgrade to
-      downgrade:
-        alias: d
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: allow downgrade to previous versions
-      current:
-        alias: c
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: upgrade to current branch. Incompatible with release option
+        metavalue: SERVICE
+        default: null
+  volatile:
+    description: one command container
+    suboptions:
+      service:
+        positional: yes
+        type: str
+        metavalue: SERVICE
+        default: null
+      command:
+        # positional: no
+        positional: yes
+        # alias: c
+        type: str
+        metavalue: TERMINAL_COMMAND_UNIX-LIKE
+        default: bash
+        help: UNIX command to be executed
+  # upgrade:  # DEPRECATED, see issues/71
+  #   description: upgrade your current project to new official releases
+  #   suboptions:
+  #     release:
+  #       alias: r
+  #       type: str
+  #       metavalue: RELEASE_VERSION
+  #       help: release version you want to upgrade to
+  #     downgrade:
+  #       alias: d
+  #       type: bool
+  #       metavalue: TRUE_OR_FALSE
+  #       default: False
+  #       help: allow downgrade to previous versions
+  #     current:
+  #       alias: c
+  #       type: bool
+  #       metavalue: TRUE_OR_FALSE
+  #       default: False
+  #       help: upgrade to current branch. Incompatible with release option
 
   # tutorial:
   #   description: Step-by-step guide to make your project RAPyDo compliant

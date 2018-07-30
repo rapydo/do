@@ -25,7 +25,7 @@ setup(
             'templates/unittests.py',
         ],
     },
-    python_requires='>=3.4',
+    python_requires='>=3.4.3',
     entry_points={
         'console_scripts': [
             'rapydo=%s' % app,
@@ -34,13 +34,14 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.19.0",
-        "docker==2.7.0",
+        "docker-compose==1.21.2",
+        # "docker==3.3.0",
         "dockerfile-parse",
-        "gitpython==2.1.8",
+        "gitpython==2.1.9",
         "jinja2",
         "plumbum",
-        "requests==2.18.4",  # current...
+        "glom",
+        "requests==2.18.4",  # current is 2.19.1 instead, not good for docker-compose
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[

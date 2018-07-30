@@ -9,7 +9,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 
 from controller.dockerizing import docker_errors
 from compose.service import BuildError
-from compose.project import NoSuchService
+from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -92,7 +92,7 @@ class Compose(object):
         except SystemExit:
             log.info("SystemExit during template building")
 
-    def command(self, command, options=None):
+    def command(self, command, options=None, nofailure=False):
 
         # NOTE: debug defaults
         # tmp = self.get_defaults(command)
@@ -129,9 +129,15 @@ class Compose(object):
             cerrors.OperationFailedError,
             BuildError,
         ) as e:
-            log.critical_exit("Failed command execution:\n%s" % e)
+            msg = "Failed command execution:\n%s" % e
+            if nofailure:
+                raise AttributeError(msg)
+            else:
+                log.critical_exit(msg)
         except docker_errors as e:
             log.critical_exit("Failed docker container:\n%s" % e)
+        except ProjectError as e:
+            log.exit(str(e))
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
 
@@ -179,13 +185,16 @@ class Compose(object):
             '--rm': True, '--no-deps': True,
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
-            '-d': False, '-T': False,
+            # '-d': False,
+            '--detach': False,
+            '--use-aliases': False,  # introduced with compose 1.21
+            '-T': False,
             '--label': None,
         }
 
         return self.command('run', options)
 
-    def exec_command(self, service, user=None, command=None):
+    def exec_command(self, service, user=None, command=None, nofailure=False):
         """
             Execute a command on a running container
         """
@@ -197,18 +206,22 @@ class Compose(object):
             '--index': '1',
             '--user': user,
             '-T': False,
-            '-d': False,
             '--env': None,
+            '--workdir': None,
+            # '-d': False,
+            '--detach': False,
             '--privileged': False,
         }
         if shell_command is not None:
             log.debug("Command: %s(%s+%s)"
                       % (service.lower(), shell_command, shell_args))
         try:
-            out = self.command('exec_command', options)
+            out = self.command('exec_command', options, nofailure=nofailure)
         except NoSuchService:
-            log.exit(
-                "Cannot find a running container with this name: %s" % service)
+            if nofailure:
+                raise AttributeError("Cannot find service: %s", service)
+            else:
+                log.exit("Cannot find a running container called %s" % service)
         else:
             return out
 

@@ -37,7 +37,7 @@ class Test{{ class_name }}(BaseTests):
         # )
 
         # Assert what is right or wrong
-        self.assertEqual(r.status_code, hcodes.HTTP_OK_BASIC)
+        assert r.status_code == hcodes.HTTP_OK_BASIC
         output = self.get_content(r)
 
         # pretty print data obtained from API to check the content

@@ -2,6 +2,7 @@
 
 import os.path
 import time
+from glom import glom
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
@@ -33,6 +34,10 @@ STATUS_RELEASED = "released"
 STATUS_DISCONTINUED = "discontinued"
 STATUS_DEVELOPING = "developing"
 
+ANGULARJS = 'angularjs'
+ANGULAR = 'angular'
+REACT = 'react'
+
 
 class Application(object):
 
@@ -63,7 +68,7 @@ class Application(object):
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
-        self.upgrade = self.action == 'upgrade'
+        # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
 
         # Others
@@ -73,9 +78,8 @@ class Application(object):
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.project_title = None  # To be retrieved from projet_configuration
         self.version = None
-        self.releases = {}
+        # self.releases = {}
         self.gits = {}
-        self.enable_new_frontend = False
 
         if self.project is not None:
             if "_" in self.project:
@@ -140,6 +144,7 @@ class Application(object):
         self.check_python_package('compose', min_version="1.18")
         # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
+        self.check_python_package('requests', min_version="2.6.1")
         self.check_python_package(
             'utilities', min_version=__version__, max_version=__version__)
 
@@ -256,7 +261,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def inspect_project_folder(self):
 
-        # FIXME: move in a project_defaults.yaml?
         required_files = [
             'confs',
             'backend',
@@ -267,30 +271,48 @@ Verify that you are in the right folder, now you are in: %s%s
         ]
         obsolete_files = [
             'backend/__main__.py',
-            # 'frontend/bower.json',
         ]
 
-        if self.frontend:
+        if self.frontend is not None:
             required_files.extend(
                 [
                     'frontend',
                     'frontend/package.json',
                     'frontend/custom.ts',
                     'frontend/app',
-                    'frontend/app/app.routes.ts',
-                    'frontend/app/app.declarations.ts',
-                    'frontend/app/app.custom.navbar.ts',
+                    'frontend/app/custom.project.options.ts',
+                    'frontend/app/custom.routes.ts',
+                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.navbar.ts',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
-                    'frontend/app/app.home.ts',
-                    'frontend/app/app.home.html',
-                    'frontend/js',
-                    'frontend/js/app.js',
-                    'frontend/js/routing.extra.js',
-                    'frontend/templates',
                     'frontend/css/style.css',
                 ]
             )
+
+            obsolete_files.extend(
+                [
+                    'frontend/app/app.routes.ts',
+                    'frontend/app/app.declarations.ts',
+                    'frontend/app/app.providers.ts',
+                    'frontend/app/app.imports.ts',
+                    'frontend/app/app.custom.navbar.ts',
+                    'frontend/app/app.entryComponents.ts',
+                    'frontend/app/app.home.ts',
+                    'frontend/app/app.home.html',
+                ]
+            )
+
+            if self.frontend == ANGULARJS:
+                required_files.extend(
+                    [
+                        'frontend/js',
+                        'frontend/js/app.js',
+                        'frontend/js/routing.extra.js',
+                        'frontend/templates',
+                    ]
+                )
+
         for fname in required_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
@@ -343,8 +365,12 @@ Verify that you are in the right folder, now you are in: %s%s
 
         for root, sub_folders, files in os.walk(root):
 
+            counter = 0
             for folder in sub_folders:
                 if folder == '.git':
+                    continue
+                # produced by virtual-env?
+                if folder == 'lib':
                     continue
                 if folder.endswith("__pycache__"):
                     continue
@@ -355,6 +381,14 @@ Verify that you are in the right folder, now you are in: %s%s
                 if self.check_permissions(path):
                     self.inspect_permissions(root=path)
 
+                counter += 1
+                if counter > 20:
+                    log.warning(
+                        "Too many folders, stopped checks in %s", root
+                    )
+                    break
+
+            counter = 0
             for file in files:
                 if file.endswith(".pyc"):
                     continue
@@ -362,23 +396,33 @@ Verify that you are in the right folder, now you are in: %s%s
                 path = os.path.join(root, file)
                 self.check_permissions(path)
 
+                counter += 1
+                if counter > 100:
+                    log.warning(
+                        "Too many files, stopped checks in %s", root
+                    )
+                    break
+
             break
 
     @staticmethod
-    def extract_rapydo_version(releases, project_block):
+    def extract_rapydo_version(specs):
+
+        project_block = specs.get('project', {})
+        releases = specs.get('releases', {})
 
         current_version = project_block.get('version', None)
-        old_style_rapydo_version = project_block.get('rapydo', None)
+        rapydo_version = project_block.get('rapydo', None)
 
         # This project does not support releases:
-        if len(releases) == 0:
-            # If your project does not support releases, you can specify
-            # rapydo version in the project block
-            if old_style_rapydo_version is None:
-                log.exit("No version specified for this project")
-            return old_style_rapydo_version
 
-        log.verbose("Your project supports releases")
+        if rapydo_version is not None:
+            return rapydo_version
+
+        log.warning("Rapydo version not specified, looking for releases")
+
+        if len(releases) == 0:
+            log.exit("No version specified for this project")
 
         # Check if the current version is listed in releases
         if current_version not in releases:
@@ -397,19 +441,6 @@ Verify that you are in the right folder, now you are in: %s%s
                 "missing rapydo version in release %s" % current_release
             )
 
-        # You specified a rapydo version both in project and releases
-        if old_style_rapydo_version is not None:
-
-            if rapydo_version == rapydo_version:
-                log.warning(
-                    "You specified rapydo version in both project and release")
-            else:
-                err = "Rapydo version mismatch. "
-                err += "You specified %s in project" % old_style_rapydo_version
-                err += " and %s in current release." % rapydo_version
-                err += "\nYou should remove such information from project"
-                log.exit(err)
-
         return rapydo_version
 
     def read_specs(self):
@@ -424,6 +455,11 @@ Verify that you are in the right folder, now you are in: %s%s
                 is_template=self.is_template,
                 do_exit=False
             )
+
+            self.specs = configuration.mix(
+                self.specs, self.arguments.host_configuration)
+
+            # print(glom(self.specs, "variables.frontend.enable"))
         except AttributeError as e:
 
             if self.initialize:
@@ -434,10 +470,20 @@ Verify that you are in the right folder, now you are in: %s%s
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
 
-        self.frontend = self.vars \
-            .get('frontend', {}) \
-            .get('enable', False)
-        log.very_verbose("Frontend is %s" % self.frontend)
+        if self.current_args.get('frontend') is not None:
+            framework = self.current_args.get('frontend')
+        else:
+            framework = glom(self.specs,
+                             "variables.frontend.framework",
+                             default=None)
+
+        if framework == 'None':
+            framework = None
+
+        self.frontend = framework
+
+        if self.frontend is not None:
+            log.very_verbose("Frontend framework: %s" % self.frontend)
 
         project_block = self.specs.get('project', {})
         self.project_title = project_block.get('title', "Unknown title")
@@ -445,10 +491,11 @@ Verify that you are in the right folder, now you are in: %s%s
         self.version = project_block.get('version', None)
 
         # Check if project supports releases
-        self.releases = self.specs.get('releases', {})
+        # self.releases = self.specs.get('releases', {})
+        # self.rapydo_version = self.extract_rapydo_version(
+        #     self.releases, project_block)
 
-        self.rapydo_version = self.extract_rapydo_version(
-            self.releases, project_block)
+        self.rapydo_version = self.extract_rapydo_version(self.specs)
 
     def preliminary_version_check(self):
 
@@ -457,7 +504,7 @@ Verify that you are in the right folder, now you are in: %s%s
         project_block = specs.get('project', {})
         releases = specs.get('releases', {})
 
-        v = self.extract_rapydo_version(releases, project_block)
+        v = self.extract_rapydo_version(specs)
 
         self.verify_rapydo_version(rapydo_version=v)
 
@@ -513,7 +560,9 @@ Verify that you are in the right folder, now you are in: %s%s
             myvars = {}
         else:
             myvars = {
-                'frontend': self.frontend,
+                ANGULARJS: self.frontend == ANGULARJS,
+                ANGULAR: self.frontend == ANGULAR,
+                REACT: self.frontend == REACT,
                 'devel': self.development,
             }
         repo = project.apply_variables(repo, myvars)
@@ -523,10 +572,10 @@ Verify that you are in the right folder, now you are in: %s%s
         if not repo_enabled:
             return
 
-        if self.upgrade and self.current_args.get('current'):
-            repo['do'] = True
-        else:
-            repo['do'] = self.initialize
+        # if self.upgrade and self.current_args.get('current'):
+        #     repo['do'] = True
+        # else:
+        repo['do'] = self.initialize
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
@@ -571,13 +620,15 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def prepare_composers(self):
 
-        confs = self.vars.get('composers', {})
-
         # substitute values starting with '$$'
         myvars = {
-            'frontend': self.frontend,
+            'backend': not self.current_args.get('no_backend'),
+            ANGULARJS: self.frontend == ANGULARJS,
+            ANGULAR: self.frontend == ANGULAR,
+            REACT: self.frontend == REACT,
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
+            'commons': not self.current_args.get('no_commons'),
             'mode': self.current_args.get('mode'),
             'baseconf': helpers.current_dir(
                 SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
@@ -588,6 +639,8 @@ Verify that you are in the right folder, now you are in: %s%s
             )
         }
         compose_files = OrderedDict()
+
+        confs = self.vars.get('composers', {})
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
 
@@ -596,10 +649,12 @@ Verify that you are in the right folder, now you are in: %s%s
         # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
         # and remove this piece of code
         if 'frontend' in compose_files:
-            repos = self.vars.get('repos')
-            branch = repos.get('frontend').get('branch')
+
+            branch = glom(self.specs,
+                          "variables.repos.frontend.branch",
+                          default='master')
+
             if branch != 'master':
-                self.enable_new_frontend = True
                 compose_files['frontend']['file'] = 'frontend-a2'
         # ################################################################# #
 
@@ -819,14 +874,14 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def frontend_libs(self):
 
+        if self.frontend is None:
+            return False
+
         if not any([self.check, self.initialize, self.update]):
             return False
 
-        if not self.frontend:
-            return False
-
-        if self.current_args.get('skip_npm'):
-            log.info("Skipping npm checks")
+        # What to do with REACT?
+        if self.frontend != ANGULAR:
             return False
 
         libs_dir = os.path.join("data", self.project, "frontend")
@@ -868,58 +923,6 @@ Verify that you are in the right folder, now you are in: %s%s
         else:
             log.warning(
                 "Frontend libs not found, will be installed at startup")
-
-    def bower_libs(self):
-
-        if self.check or self.initialize or self.update:
-
-            if self.frontend:
-                bower_dir = os.path.join(
-                    "data", self.project, "bower_components")
-
-                install_bower = False
-                if self.current_args.get('skip_npm'):
-                    install_bower = False
-                elif not os.path.isdir(bower_dir):
-                    install_bower = True
-                    os.makedirs(bower_dir)
-                elif self.update:
-                    install_bower = True
-                else:
-                    libs = helpers.list_path(bower_dir)
-                    if len(libs) <= 0:
-                        install_bower = True
-
-                if install_bower:
-
-                    if self.check:
-
-                        log.exit(
-                            """Missing bower libs in %s
-\nSuggestion: execute the init command"""
-                            % bower_dir
-                        )
-
-                    else:
-
-                        if self.initialize:
-                            bower_command = "bower install"
-                        else:
-                            bower_command = "bower update"
-
-                        bower_command += \
-                            " --config.directory=/libs/bower_components"
-
-                        dc = self.get_compose(files=self.files)
-                        dc.create_volatile_container(
-                            "bower", command=bower_command)
-
-                        log.info("Bower libs downloaded")
-
-                elif self.current_args.get('skip_bower'):
-                    log.info("Skipping bower checks")
-                else:
-                    log.checked("Bower libs already installed")
 
     def get_services(self, key='services', sep=',',
                      default=None
@@ -1023,8 +1026,8 @@ Verify that you are in the right folder, now you are in: %s%s
         if len(self.active_services) == 0:
             log.exit(
                 """You have no active service
-\nSuggestion: to activate a top-level service edit your compose yaml
-and add the variable "ACTIVATE: 1" in the service enviroment
+\nSuggestion: to activate a top-level service edit your project_configuration
+and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 """)
         else:
             log.checked("Active services: %s", self.active_services)
@@ -1097,8 +1100,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
     def custom_parse_args(self):
 
         # custom options from configuration file
-        self.custom_commands = self.specs \
-            .get('controller', {}).get('commands', {})
+        self.custom_commands = glom(
+            self.specs, "controller.commands", default={})
 
         if len(self.custom_commands) < 1:
             log.exit("No custom commands defined")
@@ -1121,11 +1124,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
                 )
             ).get('custom')
 
-    def rebuild_from_upgrade(self):
-        log.warning("Rebuilding images from an upgrade")
-        self.current_args['rebuild_templates'] = True
-        self._build()
-
     ################################
     # ##    COMMANDS    ##         #
     ################################
@@ -1147,7 +1145,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
 
     def _status(self):
         dc = self.get_compose(files=self.files)
-        dc.command('ps', {'-q': None, '--services': None})
+        dc.command('ps', {'-q': None, '--services': None, '--quiet': False})
 
     def _clean(self):
         dc = self.get_compose(files=self.files)
@@ -1165,17 +1163,19 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("All updated")
 
     def _start(self):
-        if self.current_args.get('from_upgrade'):
-            self.rebuild_from_upgrade()
+        # if self.current_args.get('from_upgrade'):
+        #     self.rebuild_from_upgrade()
 
         services = self.get_services(default=self.active_services)
 
         options = {
             'SERVICE': services,
             '--no-deps': False,
-            '-d': True,
+            '--detach': True,
             # rebuild images changed with an upgrade
-            '--build': self.current_args.get('from_upgrade'),
+            # '--build': self.current_args.get('from_upgrade'),
+            '--build': None,
+            '--no-color': False,
             # switching in an easier way between modules
             '--remove-orphans': True,  # False,
             '--abort-on-container-exit': False,
@@ -1246,8 +1246,12 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             log.info("Stack unpaused")
 
     def _log(self):
-        dc = self.get_compose(files=self.files)
-        services = self.get_services(default=self.active_services)
+
+        service = self.current_args.get('service')
+        if service is None:
+            services = self.get_services(default=self.active_services)
+        else:
+            services = [service]
 
         options = {
             '--follow': self.current_args.get('follow', False),
@@ -1257,6 +1261,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             'SERVICE': services,
         }
 
+        dc = self.get_compose(files=self.files)
         try:
             dc.command('logs', options)
         except KeyboardInterrupt:
@@ -1376,32 +1381,48 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_certificate(self):
+        chain = self.current_args.get('chain_file')
+        key = self.current_args.get('key_file')
 
-        current_method_name = "ssl-certificate"
+        if chain is not None or key is not None:
+            if chain is None:
+                log.exit("Invalid chain file (your provided none)")
+            elif not os.path.exists(chain):
+                log.exit("Invalid chain file (your provided %s)", chain)
 
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+            if key is None:
+                log.exit("Invalid key file (your provided none)")
+            elif not os.path.exists(key):
+                log.exit("Invalid key file (your provided %s)", key)
+
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-certificate.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'letsencrypt'
 
         service = meta.get('service')
         user = meta.get('user', None)
+
+        if chain is not None and key is not None:
+
+            log.error("Not implemented, copy %s on %s", chain, service)
+            log.error("Not implemented, copy %s on %s", key, service)
+            log.exit("Work in progress")
+
         command = meta.get('command', None)
         dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
-        # **meta ... explicit is not better than implicit???
-        # return self._shell(**meta)
 
     def _ssl_dhparam(self):
-        current_method_name = "ssl-dhparam"
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get(current_method_name, {}) \
-            .get('container_exec', {})
+        meta = glom(
+            self.arguments.parse_conf,
+            "subcommands.ssl-dhparam.container_exec",
+            default={}
+        )
 
         # Verify all is good
         assert meta.pop('name') == 'dhparam'
@@ -1411,42 +1432,6 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         command = meta.get('command', None)
         dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
-
-    def _npm(self):
-
-        # lib = self.current_args.get("lib", None)
-        # if lib is None:
-        #     log.warning("Missing lib: installing all from package.json")
-
-        meta = self.arguments.parse_conf \
-            .get('subcommands') \
-            .get("npm", {}) \
-            .get('container_exec', {})
-
-        # Verify all is good
-        assert meta.pop('name') == 'npm'
-
-        service = meta.get('service')
-        user = meta.get('user', None)
-        dc = self.get_compose(files=self.files)
-
-        # command = "npm --prefix $MODULE_PATH install --save-prod %s" % lib
-        # TOFIX: /modules specified in frontnend.yml as $MODULE_PATH
-        npm_command = "npm --prefix /modules "
-
-        if self.current_args.get("update", False):
-            npm_command += "update"
-        else:
-            npm_command += "install"
-
-        # if lib is not None:
-        #     npm_command += " --save-prod %s" % lib
-
-        # Re-created merged package.json file
-        merge_command = "node /rapydo/nodejs/merge.js"
-        dc.exec_command(service, user=user, command=merge_command)
-        # Install or update libraries
-        return dc.exec_command(service, user=user, command=npm_command)
 
     def _list(self):
 
@@ -1524,7 +1509,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             )
 
     def _template(self):
+
         service_name = self.current_args.get('service')
+        if service_name is None:
+            # services = self.get_services(default=self.active_services)
+            # for service in services:
+            #     if service not in ['backend', 'frontend', 'proxy', 'celery']:
+            #         print(service)
+            service_name = self.vars.get('env', {}).get('AUTH_SERVICE')
+
         force = self.current_args.get('yes')
         endpoint_name = self.current_args.get('endpoint')
 
@@ -1557,12 +1550,15 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         compose_options = {
             'SERVICE': services,
             '--no-deps': False,
-            '-d': True,
-            '--build': False,  # self.current_args.get('from_upgrade'),
+            # '-d': True,
+            '--detach': True,
+            # '--build': self.current_args.get('from_upgrade'),
+            '--build': False,
             '--remove-orphans': True,
             '--abort-on-container-exit': False,
             '--no-recreate': False,
             '--force-recreate': False,
+            '--always-recreate-deps': False,
             '--no-build': False,
             # '--scale': {service: workers},
             '--scale': [scaling],
@@ -1606,7 +1602,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         options = {
             'SERVICE': [service],
             '--no-deps': False,
-            '-d': False,
+            # '-d': False,
+            '--detach': False,
             '--abort-on-container-exit': True,
             '--remove-orphans': False,
             '--no-recreate': True,
@@ -1621,182 +1618,220 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         # FIXME: check if this command could be 'run' instead of using 'up'
         dc.command('up', options)
 
-    def available_releases(self, releases, current_release):
+    def _verify(self):
+        """ Verify one service connection (inside backend) """
+        service = self.current_args.get('service')
+        dc = self.get_compose(files=self.files)
+        command = 'restapi verify --services %s' % service
 
-        log.warning('List of available releases:')
-        print('')
-        for release, info in releases.items():
+        # super magic trick
+        try:
+            # test the normal container if already running
+            return dc.exec_command('backend', command=command, nofailure=True)
+        except AttributeError:
+            # otherwise shoot a one-time backend container for that
+            return dc.create_volatile_container('backend', command)
 
-            r = info.get("rapydo")
-            t = info.get('type')
+    def _volatile(self):
+        """ One command container (NOT executing on a running one) """
+        service = self.current_args.get('service')
+        command = self.current_args.get('command')
+        dc = self.get_compose(files=self.files)
+        dc.create_volatile_container(service, command)
 
-            if release == current_release:
-                extra = " *installed*"
-            else:
-                extra = ""
+    # def available_releases(self, releases, current_release):
 
-            print(' - %s %s (rapydo %s) [%s]%s' %
-                  (release, t, r, info.get('status'), extra))
-        print('')
+    #     log.warning('List of available releases:')
+    #     print('')
+    #     for release, info in releases.items():
 
-    def preliminary_upgrade_checks(self, current_release, new_release):
-        if current_release == 'master':
-            log.exit("Cannot upgrade from master. Please work on a branch.")
+    #         r = info.get("rapydo")
+    #         t = info.get('type')
 
-        if new_release is None:
-            self.available_releases(self.releases, current_release)
-            return False
+    #         if release == current_release:
+    #             extra = " *installed*"
+    #         else:
+    #             extra = ""
 
-        if new_release == ".":
-            if current_release not in self.releases:
-                self.available_releases(self.releases, current_release)
-                log.exit('Release %s not found' % current_release)
+    #         print(' - %s %s (rapydo %s) [%s]%s' %
+    #               (release, t, r, info.get('status'), extra))
+    #     print('')
 
-            return True
+    # def preliminary_upgrade_checks(self, current_release, new_release):
+    #     if current_release == 'master':
+    #         log.exit("Cannot upgrade from master. Please work on a branch.")
 
-        if new_release not in self.releases:
-            self.available_releases(self.releases, current_release)
-            log.exit('Release %s not found' % new_release)
+    #     if new_release is None:
+    #         self.available_releases(self.releases, current_release)
+    #         return False
 
-        if new_release == current_release:
-            log.error('You are already using release %s' % current_release)
-            return False
+    #     if new_release == ".":
+    #         if current_release not in self.releases:
+    #             self.available_releases(self.releases, current_release)
+    #             log.exit('Release %s not found' % current_release)
 
-        log.info('Requested release: %s' % new_release)
+    #         return True
 
-        if not self.current_args.get('downgrade'):
-            try:
-                if LooseVersion(new_release) < LooseVersion(current_release):
-                    log.exit('Cannot upgrade to previous version')
-            except TypeError as e:
-                log.exit("Unable to compare %s with %s (%s)" % (
-                    new_release, current_release, e)
-                )
+    #     if new_release not in self.releases:
+    #         self.available_releases(self.releases, current_release)
+    #         log.exit('Release %s not found' % new_release)
 
-        status = self.releases.get(new_release).get('status')
-        if status == STATUS_DISCONTINUED:
-            log.exit("This version is discontinued")
-        elif status == STATUS_RELEASED:
-            pass
-        elif status == STATUS_DEVELOPING:
-            if self.development:
-                log.verbose("Switching to a developing version")
-            else:
-                log.exit("This version has yet to be released")
+    #     if new_release == current_release:
+    #         log.error('You are already using release %s' % current_release)
+    #         return False
+
+    #     log.info('Requested release: %s' % new_release)
+
+    #     if not self.current_args.get('downgrade'):
+    #         try:
+    #             if LooseVersion(new_release) < LooseVersion(current_release):
+    #                 log.exit('Cannot upgrade to previous version')
+    #         except TypeError as e:
+    #             log.exit("Unable to compare %s with %s (%s)" % (
+    #                 new_release, current_release, e)
+    #             )
+
+    #     status = self.releases.get(new_release).get('status')
+    #     if status == STATUS_DISCONTINUED:
+    #         log.exit("This version is discontinued")
+    #     elif status == STATUS_RELEASED:
+    #         pass
+    #     elif status == STATUS_DEVELOPING:
+    #         if self.development:
+    #             log.verbose("Switching to a developing version")
+    #         else:
+    #             log.exit("This version has yet to be released")
+    #     else:
+    #         log.exit("%s: unknown version status: %s", new_release, status)
+
+    #     return True
+
+    def _install(self):
+        version = self.current_args.get('version')
+        git = self.current_args.get('git')
+        editable = self.current_args.get('editable')
+
+        if git and editable:
+            log.exit("--git and --editable options are not compatible")
+
+        if git:
+            return self.install_controller_from_git(version)
+        elif editable:
+            return self.install_controller_from_folder(version)
         else:
-            log.exit("%s: unknown version status: %s", new_release, status)
+            return self.install_controller_from_pip(version)
 
-        return True
+    def install_controller_from_pip(self, version):
 
-    def _upgrade(self):
-        if len(self.releases) < 1:
-            log.exit('This project does not support releases yet')
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
 
-        gitobj = self.gits.get('main')
-        current_release = gitter.get_active_branch(gitobj)
-        if self.current_args.get('current'):
-            new_release = "."
+        log.info(
+            "You asked to install rapydo-controller %s from pip",
+            version)
+
+        package = "rapydo-controller"
+        controller = "%s==%s" % (package, version)
+        installed = install(controller)
+        if not installed:
+            log.error(
+                "Unable to install controller %s from pip", version)
         else:
-            new_release = self.current_args.get('release')
-        log.info('Current release: %s' % current_release)
+            log.info(
+                "Controller version %s installed from pip", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
-        # To reduce the function complexity, I moved all preliminary check in
-        # a dedicated function. Note: that function can stop with log.exit
-        if not self.preliminary_upgrade_checks(current_release, new_release):
-            return False
+    def install_controller_from_git(self, version):
 
-        # # 0. if current main repo is being developed, stop this
-        # # NOTE: I am not checking for commits to be pushed
-        main_repo = self.gits.pop('main')
-        if gitter.check_unstaged('main', main_repo):
-            log.exit('Interrupting')
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
 
-        # 1. check submodules versions
-        # if different move current to `submodules/.backup/$VERSION/$TOOL`
-        for name, gitobj in sorted(self.gits.items()):
+        log.info(
+            "You asked to install rapydo-controller %s from git",
+            version)
 
-            # Skip non existing submodules or missing
-            if gitobj is None:
-                continue
+        package = "rapydo-controller"
+        controller_repository = "do"
+        utils_repository = "utils"
+        rapydo_uri = "https://github.com/rapydo"
+        utils = "git+%s/%s.git@%s" % (
+            rapydo_uri, utils_repository, version
+        )
+        controller = "git+%s/%s.git@%s" % (
+            rapydo_uri, controller_repository, version
+        )
 
-            if gitter.check_unstaged(name, gitobj):
-                current_dir = gitobj.working_dir
-                msg = "Unable to upgrade"
-                msg += "\n\nYou have unstaged files in: %s" % current_dir
-                msg += "\n\nPlease commit or undo these changes,"
-                msg += " then retry the upgrade\n"
-                log.exit(msg)
-                # current_version = gitter.get_active_branch(gitobj)
-                # backup_dir = helpers.current_fullpath(
-                #     SUBMODULES_DIR, '.backup', current_version, name)
-                # import shutil
-                # try:
-                #     shutil.move(current_dir, backup_dir)
-                # except BaseException as e:
-                #     log.exit(
-                #         name, e.__class__.__name__, e)
-                # log.info("Safety backup:\n%s -> %s", current_dir, backup_dir)
+        installed = install(utils)
+        if installed:
+            installed = install(controller)
 
-        # 2. git checkout new version
-        if new_release == ".":
-            log.debug("Switch branch not required")
-        elif gitter.switch_branch(main_repo, new_release):  # , remote=False):
-            log.info("Main active branch: %s", new_release)
+        if not installed:
+            log.error(
+                "Unable to install controller %s from git", version)
         else:
-            log.exit("Failed switching main repository to %s", new_release)
+            log.info(
+                "Controller version %s installed from git", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
-        # 3. reinit submodules
-        self.read_specs()  # read again project configuration!
-        if not self.verify_rapydo_version(do_exit=False):
-            log.info("Trying to install controller %s", self.rapydo_version)
-            from utilities.packing import install, check_version
+    def install_controller_from_folder(self, version):
 
-            installed = False
-            package = "rapydo-controller"
-            controller_repository = "do"
-            utils_repository = "utils"
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from utilities.packing import install, check_version
 
-            status = self.releases.get(new_release).get('status')
-            if status == STATUS_RELEASED:
-                controller = "%s==%s" % (package, self.rapydo_version)
-                installed = install(controller)
-            else:
-                utils = "git+https://github.com/rapydo/%s.git@%s" % (
-                    utils_repository, self.rapydo_version
-                )
-                controller = "git+https://github.com/rapydo/%s.git@%s" % (
-                    controller_repository, self.rapydo_version
-                )
+        log.info(
+            "You asked to install rapydo-controller %s from local folder",
+            version)
 
-                installed = install(utils)
-                if installed:
-                    installed = install(controller)
+        package = "rapydo-controller"
+        utils_path = os.path.join(SUBMODULES_DIR, "utils")
+        do_path = os.path.join(SUBMODULES_DIR, "do")
 
-            if installed:
-                installed_version = check_version(package)
-                installed = (installed_version != self.rapydo_version)
+        if not os.path.exists(utils_path):
+            log.exit("%s path not found", utils_path)
+        if not os.path.exists(do_path):
+            log.exit("%s path not found", do_path)
 
-            if not installed:
-                log.error(
-                    "Failed to install %s %s", package, self.rapydo_version)
-                log.warning(
-                    "Rolling back previous branch on main repository")
-                if gitter.switch_branch(main_repo, current_release):
-                    log.info("Main repository back to %s", current_release)
-                else:
-                    log.error(
-                        "Failed switching main repository to %s",
-                        current_release)
-                log.exit("Upgrade failed")
+        utils_repo = self.gits.get('utils')
+        do_repo = self.gits.get('do')
 
-        self.initialize = True
-        self.git_submodules()
+        utils_switched = False
+        if gitter.get_active_branch(utils_repo) == version:
+            log.info("Utilities repository already at %s", version)
+        elif gitter.switch_branch(utils_repo, version):
+            log.info("Utilities repository switched to %s", version)
+            utils_switched = True
+        else:
+            log.exit("Unable to switch utilities repository to %s", version)
 
-        # 4. rebuild images
-        self.rebuild_from_upgrade()
+        if gitter.get_active_branch(do_repo) == version:
+            log.info("Controller repository already at %s", version)
+        elif gitter.switch_branch(do_repo, version):
+            log.info("Controller repository switched to %s", version)
+        else:
+            if utils_switched:
+                log.warning("Unable to switch back utilities repository")
+            log.exit("Unable to switch controller repository to %s", version)
 
-        # 5. safely restart?
-        # docker-compose up --force-recreate
+        installed = install(utils_path, editable=True)
+        if installed:
+            installed = install(do_path, editable=True)
+
+        if not installed:
+            log.error(
+                "Unable to install controller %s from local folder", version)
+        else:
+            log.info(
+                "Controller version %s installed from local folder", version)
+            installed_version = check_version(package)
+            log.info("Check on installed version: %s", installed_version)
 
     ################################
     # ### RUN ONE COMMAND OFF
@@ -1825,7 +1860,8 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         log.info("Current user: %s (UID: %d)" % (
             self.current_os_user, self.current_uid))
 
-        self.inspect_permissions()
+        if not self.current_args.get('skip_check_permissions', False):
+            self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
         if self.action == 'custom':
@@ -1874,10 +1910,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
         self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
-        if self.enable_new_frontend:
-            self.frontend_libs()
-        else:
-            self.bower_libs()
+        self.frontend_libs()
 
         # Final step, launch the command
 
@@ -1949,6 +1982,7 @@ and add the variable "ACTIVATE: 1" in the service enviroment
             'neo4j',
             'neomodel',
             'os',
+            'platform',
             'pickle',
             'plumbum',
             'pymodm',
