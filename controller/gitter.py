@@ -76,7 +76,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     return True
 
 
-def clone(online_url, path, branch='master', do=False):
+def clone(online_url, path, branch='master', do=False, check=True):
 
     local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
     local_path_exists = os.path.exists(local_path)
@@ -94,8 +94,10 @@ def clone(online_url, path, branch='master', do=False):
     if do:
         switch_branch(gitobj, branch)
 
-    # switch
-    compare_repository(gitobj, branch, online_url=online_url, path=path)
+    if check:
+        compare_repository(
+            gitobj, branch, online_url=online_url, path=path)
+
     return gitobj
 
 

@@ -70,6 +70,7 @@ class Application(object):
         self.update = self.action == 'update'
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
+        self.install = self.action == 'install'
 
         # Others
         self.is_template = False
@@ -501,8 +502,8 @@ Verify that you are in the right folder, now you are in: %s%s
 
         project_file_path = helpers.project_dir(self.project)
         specs = configuration.load_project_configuration(project_file_path)
-        project_block = specs.get('project', {})
-        releases = specs.get('releases', {})
+        # project_block = specs.get('project', {})
+        # releases = specs.get('releases', {})
 
         v = self.extract_rapydo_version(specs)
 
@@ -513,7 +514,9 @@ Verify that you are in the right folder, now you are in: %s%s
         If your project requires a specific rapydo version, check if you are
         the rapydo-controller matching that version
         """
-
+        if self.install:
+            log.debug("Skipping version check with install command")
+            return True
         if rapydo_version is None:
             rapydo_version = self.rapydo_version
 
@@ -576,6 +579,7 @@ Verify that you are in the right folder, now you are in: %s%s
         #     repo['do'] = True
         # else:
         repo['do'] = self.initialize
+        repo['check'] = not self.install
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
@@ -1853,14 +1857,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         self.git_submodules(confs_only=True)
         self.read_specs()  # read project configuration
         self.verify_rapydo_version()
-        self.inspect_project_folder()
+
+        if not self.install:
+            self.inspect_project_folder()
 
         self.current_uid = basher.current_os_uid()
         self.current_os_user = basher.current_os_user()
         log.info("Current user: %s (UID: %d)" % (
             self.current_os_user, self.current_uid))
 
-        if not self.current_args.get('skip_check_permissions', False):
+        skip_check_perm = self.current_args.get(
+            'skip_check_permissions', False)
+        if not self.install and not skip_check_perm:
             self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
@@ -1887,9 +1895,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # Detect if heavy ops are allowed
         do_heavy_ops = False
         do_heavy_ops = self.update or self.check
-        if self.check:
-            if self.current_args.get('skip_heavy_git_ops', False):
-                do_heavy_ops = False
+        if self.check and self.current_args.get('skip_heavy_git_ops', False):
+            do_heavy_ops = False
 
         self.git_submodules(confs_only=False)
 
@@ -1907,10 +1914,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         self.check_placeholders()
 
         # Build or check template containers images
-        self.build_dependencies()
+        if not self.install:
+            self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
-        self.frontend_libs()
+        if not self.install:
+            self.frontend_libs()
 
         # Final step, launch the command
 
