@@ -118,7 +118,7 @@ class Application(object):
                     % PROJECT_DIR
                 )
             elif prj_num > 1:
-                hint = "Hint: create a % file to save default options" % \
+                hint = "Hint: create a %s file to save default options" % \
                     PROJECTRC
                 log.exit(
                     "Please select the --project option on one " +
