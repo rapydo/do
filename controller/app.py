@@ -1413,13 +1413,28 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         if chain is not None and key is not None:
 
-            log.error("Not implemented, copy %s on %s", chain, service)
-            log.error("Not implemented, copy %s on %s", key, service)
-            log.exit("Work in progress")
+            log.info("Unable to automatically perform the requested operation")
+            log.info("You can execute the following commands by your-self:")
 
-        command = meta.get('command', None)
-        dc = self.get_compose(files=self.files)
-        return dc.exec_command(service, user=user, command=command)
+            print("")
+            print(
+                "docker cp %s %s_%s_1:/etc/letsencrypt/real/fullchain1.pem" %
+                (chain, self.project, service)
+            )
+            print(
+                "docker cp %s %s_%s_1:/etc/letsencrypt/real/privkey1.pem" %
+                (key, self.project, service)
+            )
+
+            print("rapydo shell %s --command \"nginx -s reload\"" % service)
+            print("")
+
+            return True
+
+        else:
+            command = meta.get('command', None)
+            dc = self.get_compose(files=self.files)
+            return dc.exec_command(service, user=user, command=command)
 
     def _ssl_dhparam(self):
         meta = glom(
