@@ -19,7 +19,8 @@ from controller import __version__
 from controller import project
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
-from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB
+from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
+from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
@@ -71,6 +72,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.create = self.action == 'create'
 
         # Others
         self.is_template = False
@@ -116,7 +118,8 @@ class Application(object):
                     % PROJECT_DIR
                 )
             elif prj_num > 1:
-                hint = "Hint: create a .projectrc file to save default options"
+                hint = "Hint: create a % file to save default options" % \
+                    PROJECTRC
                 log.exit(
                     "Please select the --project option on one " +
                     "of the following:\n\n %s\n\n%s\n", projects, hint)
@@ -1658,6 +1661,75 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
+    def _create(self, project_name, template_name=None):
+
+        if template_name is None:
+            template_name = "basic"
+
+        if gitter.get_local(".") is not None:
+            log.exit("You are on a git repo, unable to continue")
+
+        if os.path.exists(project_name):
+            log.exit(
+                "%s folder already exists, unable to continue", project_name)
+
+        os.mkdir(project_name)
+
+        if not os.path.exists(project_name):
+            log.exit("Errors creating %s folder")
+
+        template_tmp_dir = "__template"
+        template_tmp_path = os.path.join(project_name, template_tmp_dir)
+        online_url = "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_TEMPLATE)
+        gitter.clone(
+            online_url,
+            template_tmp_path,
+            branch=__version__,
+            do=True,
+            check=True,
+            expand_path=False
+        )
+
+        from distutils.dir_util import copy_tree
+        import shutil
+        copy_tree(template_tmp_path, project_name)
+
+        os.mkdir(os.path.join(project_name, 'data'))
+
+        shutil.rmtree(template_tmp_path)
+
+        if template_name is None:
+            log.info("Project %s successfully created", project_name)
+            print("")
+            print("You can run one of the following templates:")
+
+        vanilla_dir = os.path.join(project_name, PROJECT_DIR, project_name)
+        template_path = os.path.join(project_name, PROJECT_DIR, template_name)
+
+        if not os.path.exists(template_path):
+            log.exit("Invalid template name: %s", template_name)
+
+        if not os.path.exists(vanilla_dir):
+
+            os.mkdir(vanilla_dir)
+            copy_tree(template_path, vanilla_dir)
+            log.info("Copy from %s", template_path)
+
+        with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
+            f.write("project: %s" % project_name)
+        f.close()
+
+        log.info(
+            "Project %s successfully created from %s template",
+            project_name, template_name
+        )
+        print("")
+        print(
+            "Now you can enter the project (cd %s) and execute rapydo init" %
+            project_name
+        )
+        print("")
+
     # def available_releases(self, releases, current_release):
 
     #     log.warning('List of available releases:')
@@ -1866,6 +1938,14 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         self.get_args()
         log.info("You are using rapydo version %s", __version__)
         self.check_installed_software()
+
+        if self.create:
+
+            self._create(
+                self.current_args.get("name"),
+                self.current_args.get("template")
+            )
+            return True
         self.inspect_main_folder()
         self.check_projects()
         self.preliminary_version_check()

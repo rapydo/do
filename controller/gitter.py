@@ -76,9 +76,14 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     return True
 
 
-def clone(online_url, path, branch='master', do=False, check=True):
+def clone(online_url, path, branch='master',
+          do=False, check=True, expand_path=True):
 
-    local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
+    if expand_path:
+        local_path = os.path.join(
+            helpers.current_dir(), SUBMODULES_DIR, path)
+    else:
+        local_path = path
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:

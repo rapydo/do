@@ -11,7 +11,7 @@ before knowing the level of debug.
 import os
 import sys
 import argparse
-from controller import __version__
+from controller import __version__, PROJECTRC
 from utilities import helpers
 from utilities.myyaml import load_yaml_file
 
@@ -161,7 +161,7 @@ class ArgParser(object):
         # ##########################
         # READ PROJECT INIT FILE: .projectrc
         pinit_conf = load_yaml_file(
-            '.projectrc',
+            PROJECTRC,
             path=helpers.current_dir(),
             skip_error=True, logger=False, extension=None
         )
@@ -180,11 +180,15 @@ class ArgParser(object):
                 if key in self.parse_conf['options']:
                     self.parse_conf['options'][key]['default'] = value
                 else:
-                    print("\nUnknown parameter %s found in .projectrc\n" % key)
+                    print("\nUnknown parameter %s found in %s\n" % (
+                        key, PROJECTRC)
+                    )
             else:
                 # This is a second level parameter
                 if key not in self.parse_conf['subcommands']:
-                    print("\nUnknown command %s found in .projectrc\n" % key)
+                    print("\nUnknown command %s found in %s\n" % (
+                        key, PROJECTRC)
+                    )
                 else:
                     conf = self.parse_conf['subcommands'][key]['suboptions']
                     for subkey, subvalue in value.items():
@@ -192,8 +196,8 @@ class ArgParser(object):
                             conf[subkey]['default'] = subvalue
                         else:
                             print("""
-Unknown parameter %s/%s found in .projectrc\n
-""" % (key, subkey))
+Unknown parameter %s/%s found in %s\n
+""" % (key, subkey, PROJECTRC))
 
     def prepare_params(self, options):
 

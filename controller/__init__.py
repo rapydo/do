@@ -9,9 +9,11 @@ FRAMEWORK_NAME = 'RAPyDo'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 RAPYDO_CONFS = 'rapydo-confs'
+RAPYDO_TEMPLATE = 'tests'
 RAPYDO_GITHUB = "https://github.com/rapydo"
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
 TEMPLATE_DIR = 'templates'
+PROJECTRC = '.projectrc'
 
 ##################
 # NOTE: telling the app if testing or not

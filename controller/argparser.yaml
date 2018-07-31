@@ -367,6 +367,19 @@ subcommands:
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
         default: bash
         help: UNIX command to be executed
+  create:
+    description: create a new rapydo project
+    suboptions:
+      name:
+        positional: true
+        type: str
+        metavalue: NAME
+        default: null
+      template:
+        type: str
+        metavalue: TEMPLATE_NAME 
+        help: Name of the template used to initialize your project
+
   # upgrade:  # DEPRECATED, see issues/71
   #   description: upgrade your current project to new official releases
   #   suboptions:
