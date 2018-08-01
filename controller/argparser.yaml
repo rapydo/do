@@ -117,6 +117,11 @@ subcommands:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+    suboptions:
+      submodules:
+        type: str
+        metavalue: SUBMODULE_PATH
+        help: link all submodules in an existing folder instead of download them
   update:
     description: update the current project
     suboptions:

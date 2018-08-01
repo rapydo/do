@@ -2,6 +2,8 @@
 
 import os.path
 import time
+from distutils.dir_util import copy_tree
+import shutil
 from glom import glom
 from collections import OrderedDict
 from datetime import datetime
@@ -559,7 +561,8 @@ Verify that you are in the right folder, now you are in: %s%s
             self.tested_connection = True
         return
 
-    def working_clone(self, name, repo, confs_only=False):
+    def working_clone(self, name, repo,
+                      confs_only=False, from_path=None):
 
         # substitute values starting with '$$'
         if confs_only:
@@ -599,10 +602,36 @@ Verify that you are in the right folder, now you are in: %s%s
             else:
                 repo['branch'] = self.rapydo_version
 
+        if from_path is not None:
+
+            local_path = os.path.join(from_path, name)
+            if not os.path.exists(local_path):
+                log.exit(
+                    "Submodule %s not found in %s", repo['path'], from_path)
+
+            submodule_path = os.path.join(
+                helpers.current_dir(), SUBMODULES_DIR, repo['path'])
+
+            if os.path.exists(submodule_path):
+                log.warning("Path %s already exists, removing", submodule_path)
+                if os.path.isfile(submodule_path):
+                    os.remove(submodule_path)
+                elif os.path.islink(submodule_path):
+                    os.remove(submodule_path)
+                else:
+                    shutil.rmtree(submodule_path)
+
+            os.symlink(local_path, submodule_path)
+
         return gitter.clone(**repo)
 
     def git_submodules(self, confs_only=False):
         """ Check and/or clone git projects """
+
+        from_local_path = self.current_args.get('submodules')
+        if from_local_path is not None:
+            if not os.path.exists(from_local_path):
+                log.exit("Local path not found: %s", from_local_path)
 
         if confs_only:
             repos = {}
@@ -617,7 +646,10 @@ Verify that you are in the right folder, now you are in: %s%s
 
         for name, repo in repos.items():
             self.gits[name] = self.working_clone(
-                name, repo, confs_only=confs_only)
+                name, repo,
+                confs_only=confs_only,
+                from_path=from_local_path
+            )
 
     def git_update_repos(self):
 
@@ -1690,8 +1722,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             expand_path=False
         )
 
-        from distutils.dir_util import copy_tree
-        import shutil
         copy_tree(template_tmp_path, project_name)
 
         os.mkdir(os.path.join(project_name, 'data'))
