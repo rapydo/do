@@ -2045,8 +2045,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             if major_diff:
                 log.exit("Unable to continue, please fix the host date")
 
-        else:
-            log.debug("Unable to verify date - you are not connected to web")
         func()
 
     # issues/57
