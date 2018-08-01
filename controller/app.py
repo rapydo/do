@@ -628,7 +628,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def git_submodules(self, confs_only=False):
         """ Check and/or clone git projects """
 
-        from_local_path = self.current_args.get('submodules')
+        from_local_path = self.current_args.get('submodules_path')
         if from_local_path is not None:
             if not os.path.exists(from_local_path):
                 log.exit("Local path not found: %s", from_local_path)
