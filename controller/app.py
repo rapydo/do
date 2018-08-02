@@ -74,6 +74,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.pull = self.action == 'pull'
         self.create = self.action == 'create'
 
         # Others
@@ -2053,7 +2054,15 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         self.check_placeholders()
 
         # Build or check template containers images
-        if not self.install and not self.current_args.get('no_builds', False):
+
+        if self.install or self.pull:
+            build_dependencies = False
+        if self.current_args.get('no_builds', False):
+            build_dependencies = False
+        else:
+            build_dependencies = True
+
+        if build_dependencies:
             self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
