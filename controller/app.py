@@ -2053,7 +2053,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         self.check_placeholders()
 
         # Build or check template containers images
-        if not self.install:
+        if not self.install and not self.current_args.get('no_builds', False):
             self.build_dependencies()
 
         # Install or check frontend libraries (if frontend is enabled)
