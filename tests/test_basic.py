@@ -59,7 +59,7 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Base images pulled from docker hub" in err
 
-    _, err = exec_command(capfd, "rapydo init --no_build")
+    _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
