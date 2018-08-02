@@ -221,12 +221,10 @@ class Application(object):
         """
 
         if gitter.get_local(".") is None:
-            log.exit(
-                """You are not in a git repository
+            return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s
                 """ % (os.getcwd())
-            )
 
         required_files = [
             PROJECT_DIR,
@@ -235,36 +233,23 @@ Verify that you are in the right folder, now you are in: %s
             'submodules'
         ]
 
-        obsolete_files = [
-            'confs',
-            'confs/backend.yml',
-            'confs/frontend.yml',
-        ]
-
         for fname in required_files:
             if not os.path.exists(fname):
-
-                extra = ""
 
                 if fname == 'data':
                     extra = """
 \nPlease also note that the data dir is not automatically created,
 if you are in the right repository consider to create it by hand
 """
+                else:
+                    extra = ""
 
-                log.exit(
-                    """File or folder not found %s
+                return """File or folder not found %s
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: %s%s
                     """ % (fname, os.getcwd(), extra)
-                )
 
-        for fname in obsolete_files:
-            if os.path.exists(fname):
-                log.exit(
-                    "Project %s contains an obsolete file or folder: %s",
-                    self.project, fname
-                )
+        return None
 
     def inspect_project_folder(self):
 
@@ -1991,7 +1976,24 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 self.current_args.get("template")
             )
             return True
-        self.inspect_main_folder()
+
+        first_level_error = self.inspect_main_folder()
+        cwd = os.getcwd()
+        if first_level_error is not None:
+            num_iterations = 0
+            while cwd != '/' and num_iterations < 10:
+                num_iterations += 1
+                os.chdir("..")
+                cwd = os.getcwd()
+                if self.inspect_main_folder() is None:
+                    log.warning(
+                        "You are not in the rapydo main folder, " +
+                        "changing working dir to %s", cwd)
+                    first_level_error = None
+                    break
+        if first_level_error is not None:
+            log.exit(first_level_error)
+
         self.check_projects()
         self.preliminary_version_check()
         self.git_submodules(confs_only=True)
