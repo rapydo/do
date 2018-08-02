@@ -1408,6 +1408,20 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         log.info("Images built")
 
+    def _pull(self):
+        dc = self.get_compose(files=self.base_files)
+        services = self.get_services(default=self.active_services)
+
+        options = {
+            'SERVICE': services,
+            # TODO: user should be allowed to set the two below from cli
+            '--no-cache': False,
+            '--pull': False,
+        }
+        dc.command('pull', options)
+
+        log.info("Base images pulled from docker hub")
+
     def _custom(self):
         log.debug("Custom command: %s" % self.custom_command)
         meta = self.custom_commands.get(self.custom_command)

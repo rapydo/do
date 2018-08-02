@@ -172,6 +172,8 @@ subcommands:
         # metavalue: TRUE_OR_FALSE
         default: False
         help: remove caches of previous builds on this service
+  pull:
+    description: pull available images from docker hub
   log:
     description: watch log tails of all or specified containers
     suboptions:
