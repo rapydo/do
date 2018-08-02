@@ -2057,7 +2057,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         if self.install or self.pull:
             build_dependencies = False
-        if self.current_args.get('no_builds', False):
+        elif self.current_args.get('no_builds', False):
             build_dependencies = False
         else:
             build_dependencies = True
