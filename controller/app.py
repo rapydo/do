@@ -41,6 +41,9 @@ ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
 REACT = 'react'
 
+ROOT_UID = 0
+BASE_UID = 990
+
 
 class Application(object):
 
@@ -2003,13 +2006,20 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not self.install:
             self.inspect_project_folder()
 
+        # get user launching rapydo commands
         self.current_uid = basher.current_os_uid()
-        self.current_os_user = basher.current_os_user()
-        log.info("Current user: %s (UID: %d)" % (
-            self.current_os_user, self.current_uid))
+        if self.current_uid == ROOT_UID:
+            self.current_uid = BASE_UID
+            self.current_os_user = 'privileged'
+            skip_check_perm = True
+            log.warning("Current user is 'root'")
+        else:
+            self.current_os_user = basher.current_os_user()
+            skip_check_perm = self.current_args.get(
+                'skip_check_permissions', False)
+            log.info("Current user: %s (UID: %d)" % (
+                self.current_os_user, self.current_uid))
 
-        skip_check_perm = self.current_args.get(
-            'skip_check_permissions', False)
         if not self.install and not skip_check_perm:
             self.inspect_permissions()
 
