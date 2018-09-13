@@ -151,7 +151,7 @@ def test_all(capfd):
 
     _, err = exec_command(capfd, "rapydo stop")
     assert env_log_prefix_verbose in err
-    assert "INFO Stack stoped" in err
+    assert "INFO Stack stopped" in err
 
     _, err = exec_command(capfd, "rapydo restart")
     assert env_log_prefix_verbose in err

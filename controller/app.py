@@ -1224,7 +1224,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
         dc.command('stop', options)
 
-        log.info("Stack stoped")
+        log.info("Stack stopped")
 
     def _restart(self):
         services = self.get_services(default=self.active_services)
