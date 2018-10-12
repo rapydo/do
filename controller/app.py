@@ -1967,19 +1967,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         The heart of the app: it runs a single controller command.
         """
 
-        # Initial inspection
-        self.get_args()
-        log.info("You are using rapydo version %s", __version__)
-        self.check_installed_software()
-
-        if self.create:
-
-            self._create(
-                self.current_args.get("name"),
-                self.current_args.get("template")
-            )
-            return True
-
         first_level_error = self.inspect_main_folder()
         cwd = os.getcwd()
         if first_level_error is not None:
@@ -1996,6 +1983,19 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                     break
         if first_level_error is not None:
             log.exit(first_level_error)
+
+        # Initial inspection
+        self.get_args()
+        log.info("You are using rapydo version %s", __version__)
+        self.check_installed_software()
+
+        if self.create:
+
+            self._create(
+                self.current_args.get("name"),
+                self.current_args.get("template")
+            )
+            return True
 
         self.check_projects()
         self.preliminary_version_check()
