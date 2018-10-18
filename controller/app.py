@@ -1530,8 +1530,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
                     # ports = service.get("ports")
                     # if ports is not None:
-                    #     for port in ports:
-                    #         print("\t%s -> %s" % (port.target, port.published))
+                    #     for p in ports:
+                    #         print("\t%s -> %s" % (p.target, p.published))
 
                     # volumes = service.get("volumes")
                     # if volumes is not None:
