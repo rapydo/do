@@ -225,30 +225,29 @@ class Compose(object):
         else:
             return out
 
-    def get_defaults(self, command='configure'):
-        """
-        FIXME: does not work equally for all commands (compose 1.19.0)
+    # def build_options(self, nodash=None, onedash=None, twodashes=None):
+    #     options = []
+    #     if nodash is not None:
+    #         for option in nodash:
+    #             options.append(option)
+    #         for option in onedash:
+    #             options.append('-' + option)
+    #         for option in twodashes:
+    #             options.append('--' + option)
+    #     return options
 
-        e.g.
-        - command 'up' (rapydo start), it works
-        - command 'exec_command' (rapydo shell backend), does not
-
-        In the second case it seems that 'docopt' python library
-        does not resolve the dictionary so it prints the usage and exit
-        """
-
-        # NOTE: test this defaults for commands.
-        from compose.cli.docopt_command import docopt_full_help
-        from inspect import getdoc
-
-        compose_options = {}
-        docstring = getdoc(getattr(TopLevelCommand, command))
-
-        try:
-            obj = docopt_full_help(
-                docstring, compose_options, options_first=True)
-        except SystemExit:
-            print("UFF")
-            exit(1)
+    def set_defaults(self, variables, merge=None):
+        if merge is None:
+            options = {}
         else:
-            return obj
+            options = merge
+        for variable in variables:
+            if len(variable) == 1:
+                key = '-' + variable
+            elif variable.upper() == variable:
+                key = variable
+            else:
+                key = '--' + variable
+            options[key] = None
+        print(options)
+        return options
