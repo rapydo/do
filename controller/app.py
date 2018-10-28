@@ -1792,12 +1792,17 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         print("")
 
     def _formatter(self):
+
+        import inspect
+        name = inspect.currentframe().f_code.co_name.lstrip('_')
+        # NOTE: above gets 'formatter' from current method name :P
+
         command = 'run'
         dc = self.get_compose(
-            files=self.read_conf_files('formatter')
+            files=self.read_conf_files(name)
         )
         options = dc.command_defaults(command=command)
-        options['SERVICE'] = 'formatter'
+        options['SERVICE'] = name
         dc.command(command, options)
 
     def _dump(self):
