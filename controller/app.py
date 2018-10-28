@@ -1764,33 +1764,33 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _formatter(self):
 
-        ##########
-        # CONFIG
-        files = [
-            "./submodules/rapydo-confs/confs/formatter.yml",
-            # TODO: add custom
-        ]
-        service = 'formatter'
+        command = 'run'
+        filename_base = 'formatter'
+        files = []
 
-        ##########
+        basedir = helpers.current_dir(
+            SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+        )
+        customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
+
+        from controller.configuration import load_yaml_file, SHORT_YAML_EXT
+        main_yml = load_yaml_file(
+            file=filename_base, path=basedir, extension=SHORT_YAML_EXT,
+            return_path=True,
+        )
+        files.append(main_yml)
+        custom_yml = load_yaml_file(
+            file=filename_base, path=customdir, extension=SHORT_YAML_EXT,
+            return_path=True, skip_error=True, logger=False,
+        )
+        if isinstance(custom_yml, str):
+            log.debug("Found custom %s specs", filename_base)
+            files.append(custom_yml)
+
         dc = self.get_compose(files=files)
-        dc.command('run', {
-            'SERVICE': service,
-            '--rm': True,
-            '--entrypoint': None,
-            'COMMAND': None,
-            '--user': None,
-            '-T': None,
-            '-e': None,
-            '--label': None,
-            '--publish': None,
-            '--service-ports': None,
-            '--name': None,
-            '--workdir': None,
-            '--volume': None,
-            '--no-deps': None,
-            '--use-aliases': None,
-        })
+        options = dc.command_defaults(command=command)
+        options['SERVICE'] = 'formatter'
+        dc.command(command, options)
 
     def _dump(self):
         """
@@ -1997,7 +1997,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             self.current_os_user = basher.current_os_user()
             skip_check_perm = self.current_args.get(
                 'skip_check_permissions', False)
-            log.info("Current user: %s (UID: %d)" % (
+            log.debug("Current user: %s (UID: %d)" % (
                 self.current_os_user, self.current_uid))
 
         if not self.install and not skip_check_perm:
