@@ -225,16 +225,18 @@ class Compose(object):
         else:
             return out
 
-    # def build_options(self, nodash=None, onedash=None, twodashes=None):
-    #     options = []
-    #     if nodash is not None:
-    #         for option in nodash:
-    #             options.append(option)
-    #         for option in onedash:
-    #             options.append('-' + option)
-    #         for option in twodashes:
-    #             options.append('--' + option)
-    #     return options
+    def command_defaults(self, command):
+        if command in ['run']:
+            return self.set_defaults(
+                variables=[
+                    'COMMAND', 'T', 'e',
+                    'entrypoint', 'user', 'label', 'publish', 'service-ports',
+                    'name', 'workdir', 'volume', 'no-deps', 'use-aliases'
+                ],
+                merge={'--rm': True}
+            )
+        else:
+            log.exit("No default implemented for: %s", command)
 
     def set_defaults(self, variables, merge=None):
         if merge is None:
@@ -249,5 +251,5 @@ class Compose(object):
             else:
                 key = '--' + variable
             options[key] = None
-        print(options)
+        log.very_verbose('defaults: %s', options)
         return options
