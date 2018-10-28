@@ -11,7 +11,7 @@ before knowing the level of debug.
 import os
 import sys
 import argparse
-from controller import __version__, PROJECTRC
+from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
 from utilities import helpers
 from utilities.myyaml import load_yaml_file
 
@@ -158,13 +158,19 @@ class ArgParser(object):
             logger=False
         )
 
-        # ##########################
         # READ PROJECT INIT FILE: .projectrc
         pinit_conf = load_yaml_file(
             PROJECTRC,
             path=helpers.current_dir(),
             skip_error=True, logger=False, extension=None
         )
+        # Allow alternative for PROJECT INIT FILE: .project.yml
+        if len(pinit_conf) < 1:
+            pinit_conf = load_yaml_file(
+                PROJECTRC_ALTERNATIVE,
+                path=helpers.current_dir(),
+                skip_error=True, logger=False, extension=None
+            )
 
         self.host_configuration = pinit_conf.pop('project_configuration', {})
 

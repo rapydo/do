@@ -14,6 +14,7 @@ RAPYDO_GITHUB = "https://github.com/rapydo"
 PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
 TEMPLATE_DIR = 'templates'
 PROJECTRC = '.projectrc'
+PROJECTRC_ALTERNATIVE = '.project.yml'
 
 ##################
 # NOTE: telling the app if testing or not
