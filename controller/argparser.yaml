@@ -102,6 +102,9 @@ subcommands:
   dump:
     description: dump current config into docker compose YAML
 
+  formatter:
+    description: "run 'black' formatter on main project backend code"
+
   check:
     description: "only verify if currently compliant to RAPyDo specs
         (NOTE: this is done at every call)"

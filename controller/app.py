@@ -1762,6 +1762,36 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         )
         print("")
 
+    def _formatter(self):
+
+        ##########
+        # CONFIG
+        files = [
+            "./submodules/rapydo-confs/confs/formatter.yml",
+            # TODO: add custom
+        ]
+        service = 'formatter'
+
+        ##########
+        dc = self.get_compose(files=files)
+        dc.command('run', {
+            'SERVICE': service,
+            '--rm': True,
+            '--entrypoint': None,
+            'COMMAND': None,
+            '--user': None,
+            '-T': None,
+            '-e': None,
+            '--label': None,
+            '--publish': None,
+            '--service-ports': None,
+            '--name': None,
+            '--workdir': None,
+            '--volume': None,
+            '--no-deps': None,
+            '--use-aliases': None,
+        })
+
     def _dump(self):
         """
         NOTE: can't figure it out why, but dc on config can't use files
