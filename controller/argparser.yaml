@@ -98,6 +98,10 @@ options:
   #   help: change the docker network used
 
 subcommands:
+
+  dump:
+    description: dump current config into docker compose YAML
+
   check:
     description: "only verify if currently compliant to RAPyDo specs
         (NOTE: this is done at every call)"
@@ -388,7 +392,7 @@ subcommands:
         default: null
       template:
         type: str
-        metavalue: TEMPLATE_NAME 
+        metavalue: TEMPLATE_NAME
         help: Name of the template used to initialize your project
 
   # upgrade:  # DEPRECATED, see issues/71

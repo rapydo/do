@@ -1750,7 +1750,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
             f.write("project: %s" % project_name)
-        f.close()
 
         log.info(
             "Project %s successfully created from %s template",
@@ -1763,72 +1762,23 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         )
         print("")
 
-    # def available_releases(self, releases, current_release):
-
-    #     log.warning('List of available releases:')
-    #     print('')
-    #     for release, info in releases.items():
-
-    #         r = info.get("rapydo")
-    #         t = info.get('type')
-
-    #         if release == current_release:
-    #             extra = " *installed*"
-    #         else:
-    #             extra = ""
-
-    #         print(' - %s %s (rapydo %s) [%s]%s' %
-    #               (release, t, r, info.get('status'), extra))
-    #     print('')
-
-    # def preliminary_upgrade_checks(self, current_release, new_release):
-    #     if current_release == 'master':
-    #         log.exit("Cannot upgrade from master. Please work on a branch.")
-
-    #     if new_release is None:
-    #         self.available_releases(self.releases, current_release)
-    #         return False
-
-    #     if new_release == ".":
-    #         if current_release not in self.releases:
-    #             self.available_releases(self.releases, current_release)
-    #             log.exit('Release %s not found' % current_release)
-
-    #         return True
-
-    #     if new_release not in self.releases:
-    #         self.available_releases(self.releases, current_release)
-    #         log.exit('Release %s not found' % new_release)
-
-    #     if new_release == current_release:
-    #         log.error('You are already using release %s' % current_release)
-    #         return False
-
-    #     log.info('Requested release: %s' % new_release)
-
-    #     if not self.current_args.get('downgrade'):
-    #         try:
-    #             if LooseVersion(new_release) < LooseVersion(current_release):
-    #                 log.exit('Cannot upgrade to previous version')
-    #         except TypeError as e:
-    #             log.exit("Unable to compare %s with %s (%s)" % (
-    #                 new_release, current_release, e)
-    #             )
-
-    #     status = self.releases.get(new_release).get('status')
-    #     if status == STATUS_DISCONTINUED:
-    #         log.exit("This version is discontinued")
-    #     elif status == STATUS_RELEASED:
-    #         pass
-    #     elif status == STATUS_DEVELOPING:
-    #         if self.development:
-    #             log.verbose("Switching to a developing version")
-    #         else:
-    #             log.exit("This version has yet to be released")
-    #     else:
-    #         log.exit("%s: unknown version status: %s", new_release, status)
-
-    #     return True
+    def _dump(self):
+        """
+        NOTE: can't figure it out why, but dc on config can't use files
+        so I've used basher since it's already imported
+        """
+        mybin = 'docker-compose'
+        bash = basher.BashCommands()
+        params = []
+        for file in self.files:
+            params.append('-f')
+            params.append(file)
+        params.append('config')
+        out = bash.execute_command(mybin, parameters=params)
+        filename = '%s.yml' % mybin
+        with open(filename, 'w') as fh:
+            fh.write(out)
+        log.warning("Config dump: %s", filename)
 
     def _install(self):
         version = self.current_args.get('version')
