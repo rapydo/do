@@ -100,6 +100,7 @@ def test_all(capfd):
     assert "INFO List of active services:" in err
     assert "INFO List of submodules:" in err
 
+    exec_command(capfd, "rapydo scale backend=1")
     os.remove(".projectrc")
 
 # def test_two_projects(capfd):
