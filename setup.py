@@ -34,15 +34,13 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.22.0",
-        # "docker==3.5.1",
+        "docker-compose==1.23.1",
         "dockerfile-parse",
-        "gitpython==2.1.9",
         "jinja2",
         "plumbum",
         "glom",
-        "requests==2.18.4",
-        # current is 2.19.1 instead, not good for docker-compose
+        "gitpython==2.1.11",
+        "requests==2.20.0",
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[

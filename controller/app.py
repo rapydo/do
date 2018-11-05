@@ -26,6 +26,7 @@ from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
+from controller.configuration import load_yaml_file, SHORT_YAML_EXT
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from utilities.logs import get_logger, suppress_stdout
@@ -711,7 +712,6 @@ Verify that you are in the right folder, now you are in: %s%s
         )
         customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
 
-        from controller.configuration import load_yaml_file, SHORT_YAML_EXT
         main_yml = load_yaml_file(
             file=filename_base, path=basedir, extension=SHORT_YAML_EXT,
             return_path=True,
@@ -1806,10 +1806,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc.command(command, options)
 
     def _dump(self):
-        """
-        NOTE: can't figure it out why, but dc on config can't use files
-        so I've used basher since it's already imported
-        """
+
+        # 1. BASE DUMP
+        # NOTE: can't figure it out why,
+        # but dc on config can't use files
+        # so I've used basher since it's already imported
         mybin = 'docker-compose'
         bash = basher.BashCommands()
         params = []
@@ -1818,9 +1819,13 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             params.append(file)
         params.append('config')
         out = bash.execute_command(mybin, parameters=params)
+
+        # 2. WRITE FILE
         filename = '%s.yml' % mybin
+        # NOTE: replacing absolute paths with relative ones
+        main_dir = path.current_dir()
         with open(filename, 'w') as fh:
-            fh.write(out)
+            fh.write(out.replace(main_dir, '.'))
         log.warning("Config dump: %s", filename)
 
     def _install(self):
@@ -1966,6 +1971,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             num_iterations = 0
             while cwd != '/' and num_iterations < 10:
                 num_iterations += 1
+                # TODO: use utils.path here
                 os.chdir("..")
                 cwd = os.getcwd()
                 if self.inspect_main_folder() is None:

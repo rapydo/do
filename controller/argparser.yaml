@@ -378,8 +378,7 @@ subcommands:
         metavalue: SERVICE
         default: null
       command:
-        # positional: no
-        positional: yes
+        positional: no
         # alias: c
         type: str
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
