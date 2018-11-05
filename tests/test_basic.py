@@ -145,10 +145,12 @@ def test_all(capfd):
 
     # Template project is based on neo4j
     exec_command(capfd, "rapydo verify neo4j")
-    assert "INFO Service neo4j is reachable" in err
+    # This output is not capture, since it is produced by the backend
+    # assert "INFO Service neo4j is reachable" in err
 
-    exec_command(capfd, "rapydo verify postgres")
-    assert 'EXIT Service "postgres" was NOT detected' in err
+    # exec_command(capfd, "rapydo verify postgres")
+    # This output is not capture, since it is produced by the backend
+    # assert 'EXIT Service "postgres" was NOT detected' in err
 
     exec_command(capfd, "rapydo scale backend=1")
     os.remove(".projectrc")
