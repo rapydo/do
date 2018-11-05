@@ -92,7 +92,7 @@ def test_all(capfd):
     assert "INFO All checked" in err
 
     out, err = exec_command(capfd, "rapydo list --args")
-    assert "List of configured rapydo arguments:" in err
+    assert "INFO List of configured rapydo arguments:" in err
 
     out, err = exec_command(capfd, "rapydo list --env")
     assert "INFO List env variables:" in err
