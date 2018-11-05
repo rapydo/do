@@ -91,10 +91,14 @@ def test_all(capfd):
     assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
-    out, err = exec_command(capfd, "rapydo list --args")
+    out, err = exec_command(capfd, "rapydo list --args --env --services --submodules")
     assert env_log_prefix_verbose in err
     # Since this message printed, it is not captured here...
     # assert "project                 template" in out
+    assert "List of configured rapydo arguments:" in err
+    assert "INFO List env variables:" in err
+    assert "INFO List of active services:" in err
+    assert "INFO List of submodules:" in err
 
     os.remove(".projectrc")
 
