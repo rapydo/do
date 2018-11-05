@@ -103,25 +103,8 @@ def test_all(capfd):
     out, err = exec_command(capfd, "rapydo list --submodules")
     assert "INFO List of submodules:" in err
 
-    # Template project is based on neo4j
-    exec_command(capfd, "rapydo verify neo4j")
-    assert "INFO Service neo4j is reachable" in err
-
-    exec_command(capfd, "rapydo verify postgres")
-    assert 'EXIT Service "postgres" was NOT detected' in err
-
-    exec_command(capfd, "rapydo create test")
-    assert 'EXIT You are on a git repo, unable to continue' in err
-
     exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
-
-    os.chdir("/tmp")
-    exec_command(capfd, "rapydo create test")
-    assert "INFO Project test successfully created" in err
-
-    exec_command(capfd, "rapydo scale backend=1")
-    os.remove(".projectrc")
 
 # def test_two_projects(capfd):
     bash = BashCommands()
@@ -167,6 +150,16 @@ def test_all(capfd):
 
     _, err = exec_command(capfd, "rapydo status")
     assert compose_log_prefix + "'ps'" in err
+
+    # Template project is based on neo4j
+    exec_command(capfd, "rapydo verify neo4j")
+    assert "INFO Service neo4j is reachable" in err
+
+    exec_command(capfd, "rapydo verify postgres")
+    assert 'EXIT Service "postgres" was NOT detected' in err
+
+    exec_command(capfd, "rapydo scale backend=1")
+    os.remove(".projectrc")
 
     exec_command(capfd, "rapydo log")
     # FIXME: how is possible that this message is not found??
@@ -217,3 +210,10 @@ def test_all(capfd):
     assert "Endpoint path:\t/api/%s" % endpoint_name in err
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
+
+    exec_command(capfd, "rapydo create test")
+    assert 'EXIT You are on a git repo, unable to continue' in err
+
+    os.chdir("/tmp")
+    exec_command(capfd, "rapydo create test")
+    assert "INFO Project test successfully created" in err
