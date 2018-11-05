@@ -91,14 +91,24 @@ def test_all(capfd):
     assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
-    out, err = exec_command(capfd, "rapydo list --args --env --services --submodules")
-    assert env_log_prefix_verbose in err
-    # Since this message printed, it is not captured here...
-    # assert "project                 template" in out
+    out, err = exec_command(capfd, "rapydo list --args")
     assert "List of configured rapydo arguments:" in err
+
+    out, err = exec_command(capfd, "rapydo list --env")
     assert "INFO List env variables:" in err
+
+    out, err = exec_command(capfd, "rapydo list --services")
     assert "INFO List of active services:" in err
+
+    out, err = exec_command(capfd, "rapydo list --submodules")
     assert "INFO List of submodules:" in err
+
+    # Template project is based on neo4j
+    exec_command(capfd, "rapydo verify neo4j")
+    assert "INFO Service neo4j is reachable" in err
+
+    exec_command(capfd, "rapydo verify postgres")
+    assert 'EXIT Service "postgres" was NOT detected' in err
 
     exec_command(capfd, "rapydo scale backend=1")
     os.remove(".projectrc")
