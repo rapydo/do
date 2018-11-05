@@ -96,7 +96,7 @@ class Application(object):
                     self.project, self.project.replace("_", "")
                 )
                 log.exit(
-                    "Wrong project name, _ is not a valid character. %s" %
+                    "Wrong project name, _ is not a valid character.%s" %
                     suggest
                 )
 

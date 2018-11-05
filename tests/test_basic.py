@@ -112,6 +112,12 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
 
+    _, err = exec_command(capfd, "rapydo -env -p invalid_character check -s")
+    assert "EXIT Wrong project name, _ is not a valid character." in err
+
+    _, err = exec_command(capfd, "rapydo -env -p celery check -s")
+    assert "EXIT You selected a reserved name, invalid project name: celery" in err
+
     _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
