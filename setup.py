@@ -41,7 +41,8 @@ setup(
         "plumbum",
         "glom",
         "gitpython==2.1.11",
-        "requests==2.20.0",
+        "requests==2.18.4",
+        # "requests==2.20.0",
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[
