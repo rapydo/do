@@ -41,8 +41,8 @@ def exec_command(capfd, command):
     return out, err
 
 
-# def test_init_and_check(capfd):
-def test_all(capfd):
+def test_init_and_check(capfd):
+# def test_all(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
@@ -121,9 +121,6 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
-    # We can no longer test this, we have several projects and the number is
-    # dyanamic... we do not want to update this list every new project...
-    # assert " ['template', 'second']" in err
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
@@ -133,7 +130,7 @@ def test_all(capfd):
     assert "INFO All checked" in err
 
 
-# def test_from_start_to_clean(capfd):
+def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert env_log_prefix_verbose in err
