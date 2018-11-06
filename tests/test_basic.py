@@ -113,8 +113,8 @@ def test_all(capfd):
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
 
-    _, err = exec_command(capfd, "rapydo -env check -s")
-    assert "EXIT Please select the --project option on one of the following:" in err
+    # _, err = exec_command(capfd, "rapydo -env check -s")
+    # assert "EXIT Please select the --project option on one of the following:" in err
 
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
