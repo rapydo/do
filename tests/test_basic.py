@@ -42,38 +42,38 @@ def exec_command(capfd, command):
 
 
 # def test_all(capfd):
-def test_init(capfd):
+def test_init(capsys):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
         f.write("project: template")
 
     # INIT on rapydo-core
-    _, err = exec_command(capfd, "rapydo init --no-build")
+    _, err = exec_command(capsys, "rapydo init --no-build")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
-    _, err = exec_command(capfd, "rapydo pull")
+    _, err = exec_command(capsys, "rapydo pull")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Base images pulled from docker hub" in err
 
-    _, err = exec_command(capfd, "rapydo init")
+    _, err = exec_command(capsys, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
-    _, err = exec_command(capfd, "rapydo update")
+    _, err = exec_command(capsys, "rapydo update")
     assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
-    # _, err = exec_command(capfd, "rapydo build")
+    # _, err = exec_command(capsys, "rapydo build")
     # assert "INFO Image built" in err
 
     # CHECK on rapydo-core
-    _, err = exec_command(capfd, "rapydo check")
+    _, err = exec_command(capsys, "rapydo check")
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
 
@@ -81,7 +81,7 @@ def test_init(capfd):
     gitobj = Repo(".")
     gitobj.remotes.origin.set_url("just_a_non_url")
 
-    _, err = exec_command(capfd, "rapydo init")
+    _, err = exec_command(capsys, "rapydo init")
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
