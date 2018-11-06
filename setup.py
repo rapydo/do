@@ -34,7 +34,8 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.23.1",
+        # "docker-compose==1.23.1",
+        "docker-compose==1.22.0",
         "dockerfile-parse",
         "jinja2",
         "plumbum",
