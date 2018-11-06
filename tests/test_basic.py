@@ -41,8 +41,8 @@ def exec_command(capfd, command):
     return out, err
 
 
-def test_init_and_check(capfd):
 # def test_all(capfd):
+def test_init(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
@@ -85,6 +85,8 @@ def test_init_and_check(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
+
+def test_checks(capfd):
     # Check  .env cache
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
     log.pp(err)
@@ -106,8 +108,13 @@ def test_init_and_check(capfd):
     out, err = exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
 
+
+def test_two_projects(capfd):
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
+
+    _, err = exec_command(capfd, "rapydo -env check -s")
+    assert "EXIT Please select the --project option on one of the following:" in err
 
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
@@ -180,6 +187,9 @@ def test_from_start_to_clean(capfd):
     _, err = exec_command(capfd, "rapydo clean")
     assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
+
+
+def test_miscellanous(capfd):
 
     endpoint_name = 'justatest'
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
