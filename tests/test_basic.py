@@ -41,39 +41,39 @@ def exec_command(capfd, command):
     return out, err
 
 
-# def test_all(capfd):
-def test_init(capsys):
+def test_all(capfd):
+    # def test_init(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
         f.write("project: template")
 
     # INIT on rapydo-core
-    _, err = exec_command(capsys, "rapydo init --no-build")
+    _, err = exec_command(capfd, "rapydo init --no-build")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
-    _, err = exec_command(capsys, "rapydo pull")
+    _, err = exec_command(capfd, "rapydo pull")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Base images pulled from docker hub" in err
 
-    _, err = exec_command(capsys, "rapydo init")
+    _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     # UPDATE on rapydo-core
-    _, err = exec_command(capsys, "rapydo update")
+    _, err = exec_command(capfd, "rapydo update")
     assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
-    # _, err = exec_command(capsys, "rapydo build")
+    # _, err = exec_command(capfd, "rapydo build")
     # assert "INFO Image built" in err
 
     # CHECK on rapydo-core
-    _, err = exec_command(capsys, "rapydo check")
+    _, err = exec_command(capfd, "rapydo check")
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
 
@@ -81,35 +81,35 @@ def test_init(capsys):
     gitobj = Repo(".")
     gitobj.remotes.origin.set_url("just_a_non_url")
 
-    _, err = exec_command(capsys, "rapydo init")
+    _, err = exec_command(capfd, "rapydo init")
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
 
-def test_checks(capfd):
+# def test_checks(capfd):
     # Check  .env cache
     _, err = exec_command(capfd, "rapydo --cache-env check -s")
     log.pp(err)
     assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
-    out, err = exec_command(capfd, "rapydo list --args")
-    assert "INFO List of configured rapydo arguments:" in err
+    # out, err = exec_command(capfd, "rapydo list --args")
+    # assert "INFO List of configured rapydo arguments:" in err
 
-    out, err = exec_command(capfd, "rapydo list --env")
-    assert "INFO List env variables:" in err
+    # out, err = exec_command(capfd, "rapydo list --env")
+    # assert "INFO List env variables:" in err
 
-    out, err = exec_command(capfd, "rapydo list --services")
-    assert "INFO List of active services:" in err
+    # out, err = exec_command(capfd, "rapydo list --services")
+    # assert "INFO List of active services:" in err
 
-    out, err = exec_command(capfd, "rapydo list --submodules")
-    assert "INFO List of submodules:" in err
+    # out, err = exec_command(capfd, "rapydo list --submodules")
+    # assert "INFO List of submodules:" in err
 
     out, err = exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
 
 
-def test_two_projects(capfd):
+# def test_two_projects(capfd):
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
 
@@ -137,7 +137,7 @@ def test_two_projects(capfd):
     assert "INFO All checked" in err
 
 
-def test_from_start_to_clean(capfd):
+# def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert env_log_prefix_verbose in err
@@ -189,7 +189,7 @@ def test_from_start_to_clean(capfd):
     assert "INFO Stack cleaned" in err
 
 
-def test_miscellanous(capfd):
+# def test_miscellanous(capfd):
 
     endpoint_name = 'justatest'
     out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
