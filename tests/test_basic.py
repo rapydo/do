@@ -218,6 +218,6 @@ def test_all(capfd):
     # exec_command(capfd, "rapydo create test")
     # assert 'EXIT You are on a git repo, unable to continue' in err
 
-    os.chdir("/tmp")
-    exec_command(capfd, "rapydo create test")
-    assert "INFO Project test successfully created" in err
+    # os.chdir("/tmp")
+    # exec_command(capfd, "rapydo create test")
+    # assert "INFO Project test successfully created" in err
