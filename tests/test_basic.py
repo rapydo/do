@@ -110,11 +110,14 @@ def test_all(capfd):
 
 
 # def test_two_projects(capfd):
+
+    os.remove(".projectrc")
+
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
 
-    # _, err = exec_command(capfd, "rapydo -env check -s")
-    # assert "EXIT Please select the --project option on one of the following:" in err
+    _, err = exec_command(capfd, "rapydo -env check -s")
+    assert "EXIT Please select the --project option on one of the following:" in err
 
     _, err = exec_command(capfd, "rapydo -env -p template check -s")
     assert "INFO All checked" in err
@@ -157,7 +160,6 @@ def test_all(capfd):
     # assert 'EXIT Service "postgres" was NOT detected' in err
 
     exec_command(capfd, "rapydo scale backend=1")
-    os.remove(".projectrc")
 
     exec_command(capfd, "rapydo log")
     # FIXME: how is possible that this message is not found??
