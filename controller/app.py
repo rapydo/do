@@ -1409,6 +1409,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.debug("Forcing rebuild for cached templates")
             dc.build_images(
                 self.template_builds,
+                remove_cache=remove_cache,
                 current_version=__version__,
                 current_uid=self.current_uid
             )
@@ -1418,8 +1419,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         options = {
             'SERVICE': services,
-            # TODO: user should be allowed to set the two below from cli
-            '--no-cache': False,
+            '--no-cache': self.current_args.get('force'),
             '--pull': False,
         }
         dc.command('build', options)
