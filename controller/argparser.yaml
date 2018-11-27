@@ -225,6 +225,11 @@ subcommands:
         metavalue: PATH_TO_KEY_FILE
         default: null
         help: path to existing key file (.pem format)
+      volatile:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Create a volatile proxy service to request the certificate
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:

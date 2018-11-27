@@ -1497,10 +1497,14 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
             return True
 
-        else:
-            command = meta.get('command', None)
-            dc = self.get_compose(files=self.files)
-            return dc.exec_command(service, user=user, command=command)
+        command = meta.get('command', None)
+        dc = self.get_compose(files=self.files)
+
+        if self.current_args.get('volatile'):
+            service = "certificates-proxy"
+            return dc.create_volatile_container(service, command)
+
+        return dc.exec_command(service, user=user, command=command)
 
     def _ssl_dhparam(self):
         meta = glom(
