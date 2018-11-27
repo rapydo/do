@@ -1409,7 +1409,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.debug("Forcing rebuild for cached templates")
             dc.build_images(
                 self.template_builds,
-                remove_cache=remove_cache,
                 current_version=__version__,
                 current_uid=self.current_uid
             )
