@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os.path
-import re
 import time
 from distutils.dir_util import copy_tree
 import shutil
@@ -1626,16 +1625,21 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
     def _scale(self):
 
         scaling = self.current_args.get('value', '')
+        options = scaling.split('=')
+        if len(options) != 2:
+            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
+        else:
+            service, nreplicas = options
 
-        p = re.compile('^([a-zA-Z0-9_-]+=[1-9]+[0-9]*\s?)+$')
-        if p.match(scaling) is None:
-            log.error("Invalid scale format: %s", scaling)
-            log.exit("Expected format: SERVICE=NUM_REPLICA [SERVICE=NUM_REPLICA, ...]")
+        if not nreplicas.isnumeric():
+            log.exit("Invalid number of replicas: %s", nreplicas)
 
-        services = self.get_services(default=self.active_services)
+        # services = self.get_services(default=self.active_services)
+        services = [service]
         compose_options = {
             'SERVICE': services,
-            '--no-deps': False,
+            # '--no-deps': False,
+            '--no-deps': True,
             '--detach': True,
             '--build': False,
             '--remove-orphans': True,
