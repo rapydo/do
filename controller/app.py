@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os.path
+import re
 import time
 from distutils.dir_util import copy_tree
 import shutil
@@ -1625,20 +1626,17 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
     def _scale(self):
 
         scaling = self.current_args.get('value', '')
-        options = scaling.split('=')
-        if len(options) != 2:
-            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
-        else:
-            service, workers = options
+
+        p = re.compile('^([a-zA-Z0-9_-]+=[1-9]+[0-9]*\s?)+$')
+        if p.match(scaling) is None:
+            log.error("Invalid scale format: %s", scaling)
+            log.exit("Expected format: SERVICE=NUM_REPLICA [SERVICE=NUM_REPLICA, ...]")
 
         services = self.get_services(default=self.active_services)
-        # NOTE: scale has become an option of compose 'up'
         compose_options = {
             'SERVICE': services,
             '--no-deps': False,
-            # '-d': True,
             '--detach': True,
-            # '--build': self.current_args.get('from_upgrade'),
             '--build': False,
             '--remove-orphans': True,
             '--abort-on-container-exit': False,
@@ -1646,10 +1644,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             '--force-recreate': False,
             '--always-recreate-deps': False,
             '--no-build': False,
-            # '--scale': {service: workers},
             '--scale': [scaling],
         }
-        # print("TEST", service, workers)
         dc = self.get_compose(files=self.files)
         dc.command('up', compose_options)
 
