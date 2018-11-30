@@ -2001,16 +2001,17 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         self.check_projects()
         self.preliminary_version_check()
-        self.git_submodules(confs_only=True)
-        self.read_specs()  # read project configuration
-        self.verify_rapydo_version()
-
         if not self.install:
+            self.git_submodules(confs_only=True)
+            self.read_specs()  # read project configuration
+            self.verify_rapydo_version()
             self.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = basher.current_os_uid()
-        if self.current_uid == ROOT_UID:
+        if self.install:
+            skip_check_perm = True
+        elif self.current_uid == ROOT_UID:
             self.current_uid = BASE_UID
             self.current_os_user = 'privileged'
             skip_check_perm = True
@@ -2022,7 +2023,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.debug("Current user: %s (UID: %d)" % (
                 self.current_os_user, self.current_uid))
 
-        if not self.install and not skip_check_perm:
+        if not skip_check_perm:
             self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
@@ -2046,41 +2047,39 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 "Command not yet implemented: %s (expected function: %s)"
                 % (self.action, function))
 
-        # Detect if heavy ops are allowed
-        do_heavy_ops = False
-        do_heavy_ops = self.update or self.check
-        if self.check and self.current_args.get('skip_heavy_git_ops', False):
-            do_heavy_ops = False
-
-        self.git_submodules(confs_only=False)
-
-        # GIT related
-        if do_heavy_ops:
-            self.git_checks()  # NOTE: this might be an heavy operation
-        else:
-            log.verbose("Skipping heavy operations")
-
-        # self.make_env(do=do_heavy_ops)
-        self.make_env()
-
-        # Compose services and variables
-        self.read_composers()
-        self.check_placeholders()
-
-        # Build or check template containers images
-
-        if self.install or self.pull:
-            build_dependencies = False
-        elif self.current_args.get('no_builds', False):
-            build_dependencies = False
-        else:
-            build_dependencies = True
-
-        if build_dependencies:
-            self.build_dependencies()
-
-        # Install or check frontend libraries (if frontend is enabled)
         if not self.install:
+            self.git_submodules(confs_only=False)
+
+            # Detect if heavy ops are allowed
+            git_checks = False
+            git_checks = self.update or self.check
+            if self.check and self.current_args.get('skip_heavy_git_ops', False):
+                git_checks = False
+
+            if git_checks:
+                self.git_checks()  # NOTE: this might be an heavy operation
+            else:
+                log.verbose("Skipping heavy operations")
+
+            self.make_env()
+
+            # Compose services and variables
+            self.read_composers()
+            self.check_placeholders()
+
+            # Build or check template containers images
+
+            if self.pull:
+                build_dependencies = False
+            elif self.current_args.get('no_builds', False):
+                build_dependencies = False
+            else:
+                build_dependencies = True
+
+            if build_dependencies:
+                self.build_dependencies()
+
+            # Install or check frontend libraries (if frontend is enabled)
             self.frontend_libs()
 
         # Final step, launch the command
