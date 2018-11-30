@@ -158,19 +158,24 @@ class ArgParser(object):
             logger=False
         )
 
-        # READ PROJECT INIT FILE: .projectrc
-        pinit_conf = load_yaml_file(
-            PROJECTRC,
-            path=helpers.current_dir(),
-            skip_error=True, logger=False, extension=None
-        )
-        # Allow alternative for PROJECT INIT FILE: .project.yml
-        if len(pinit_conf) < 1:
+        try:
+            # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(
-                PROJECTRC_ALTERNATIVE,
+                PROJECTRC,
                 path=helpers.current_dir(),
                 skip_error=True, logger=False, extension=None
             )
+            # Allow alternative for PROJECT INIT FILE: .project.yml
+            if len(pinit_conf) < 1:
+                pinit_conf = load_yaml_file(
+                    PROJECTRC_ALTERNATIVE,
+                    path=helpers.current_dir(),
+                    skip_error=True, logger=False, extension=None
+                )
+        except AttributeError as e:
+            from utilities.logs import get_logger
+            log = get_logger(__name__)
+            log.exit(e)
 
         self.host_configuration = pinit_conf.pop('project_configuration', {})
 
