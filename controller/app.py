@@ -78,6 +78,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.local_install = self.install and self.current_args.get('editable')
         self.pull = self.action == 'pull'
         self.create = self.action == 'create'
 
@@ -1928,7 +1929,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         do_repo = self.gits.get('do')
 
         utils_switched = False
-        if gitter.get_active_branch(utils_repo) == version:
+        b = gitter.get_active_branch(utils_repo)
+
+        if b is None:
+            log.error("Unable to read local utils repository")
+        elif b == version:
             log.info("Utilities repository already at %s", version)
         elif gitter.switch_branch(utils_repo, version):
             log.info("Utilities repository switched to %s", version)
@@ -1936,7 +1941,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         else:
             log.exit("Unable to switch utilities repository to %s", version)
 
-        if gitter.get_active_branch(do_repo) == version:
+        b = gitter.get_active_branch(do_repo)
+
+        if b is None:
+            log.error("Unable to read local controller repository")
+        elif b == version:
             log.info("Controller repository already at %s", version)
         elif gitter.switch_branch(do_repo, version):
             log.info("Controller repository switched to %s", version)
@@ -2001,9 +2010,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         self.check_projects()
         self.preliminary_version_check()
-        if not self.install:
+        if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
+        if not self.install:
             self.verify_rapydo_version()
             self.inspect_project_folder()
 
@@ -2047,9 +2057,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 "Command not yet implemented: %s (expected function: %s)"
                 % (self.action, function))
 
-        if not self.install:
+        if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
 
+        if not self.install:
             # Detect if heavy ops are allowed
             git_checks = False
             git_checks = self.update or self.check
