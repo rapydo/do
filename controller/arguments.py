@@ -140,7 +140,8 @@ class ArgParser(object):
             log = get_logger(__name__)
             log.verbose("Parsed arguments: %s" % self.current_args)
 
-    def check_args(self, args):
+    @staticmethod
+    def check_args(args):
         # Check on format
         for element in args:
             if element.startswith('--') and '_' in element:
@@ -210,7 +211,8 @@ class ArgParser(object):
 Unknown parameter %s/%s found in %s\n
 """ % (key, subkey, PROJECTRC))
 
-    def prepare_params(self, options):
+    @staticmethod
+    def prepare_params(options):
 
         pconf = {}
         default = options.get('default')

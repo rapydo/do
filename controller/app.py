@@ -219,7 +219,8 @@ class Application(object):
 
         log.checked("%s version: %s" % (package, found_version))
 
-    def inspect_main_folder(self):
+    @staticmethod
+    def inspect_main_folder():
         """
         Rapydo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -1002,7 +1003,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     pass
         return value
 
-    def read_env(self):
+    @staticmethod
+    def read_env():
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         env = {}
         if not os.path.isfile(envfile):
@@ -1869,7 +1871,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             installed_version = check_version(package)
             log.info("Check on installed version: %s", installed_version)
 
-    def install_controller_from_git(self, version):
+    @staticmethod
+    def install_controller_from_git(version):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -2125,7 +2128,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     # issues/57
     # I'm temporary here... to be decided how to handle me
-    def get_reserved_project_names(self):
+    @staticmethod
+    def get_reserved_project_names():
         names = [
             'abc',
             'attr',

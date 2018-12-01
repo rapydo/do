@@ -105,7 +105,7 @@ def test_all(capfd):
     # out, err = exec_command(capfd, "rapydo list --submodules")
     # assert "INFO List of submodules:" in err
 
-    out, err = exec_command(capfd, "rapydo dump")
+    _, err = exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
 
 
