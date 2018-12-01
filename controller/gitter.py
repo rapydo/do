@@ -55,6 +55,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     else:
         branches = gitobj.branches
 
+    branch = None
     branch_found = False
     for branch in branches:
         if remote:
@@ -65,7 +66,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
         if branch_found:
             break
 
-    if not branch_found:
+    if not branch_found or branch is None:
         log.warning("Branch %s not found", branch_name)
         return False
 
