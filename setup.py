@@ -34,7 +34,7 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.23.1",
+        "docker-compose==1.23.2",
         # "docker-compose==1.22.0",
         "dockerfile-parse",
         "jinja2",
@@ -43,6 +43,8 @@ setup(
         "gitpython==2.1.11",
         # "requests==2.18.4",
         "requests==2.20.0",
+        # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
+        "PyYAML==3.13",
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
     classifiers=[

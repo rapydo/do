@@ -140,7 +140,8 @@ class ArgParser(object):
             log = get_logger(__name__)
             log.verbose("Parsed arguments: %s" % self.current_args)
 
-    def check_args(self, args):
+    @staticmethod
+    def check_args(args):
         # Check on format
         for element in args:
             if element.startswith('--') and '_' in element:
@@ -158,19 +159,24 @@ class ArgParser(object):
             logger=False
         )
 
-        # READ PROJECT INIT FILE: .projectrc
-        pinit_conf = load_yaml_file(
-            PROJECTRC,
-            path=helpers.current_dir(),
-            skip_error=True, logger=False, extension=None
-        )
-        # Allow alternative for PROJECT INIT FILE: .project.yml
-        if len(pinit_conf) < 1:
+        try:
+            # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(
-                PROJECTRC_ALTERNATIVE,
+                PROJECTRC,
                 path=helpers.current_dir(),
                 skip_error=True, logger=False, extension=None
             )
+            # Allow alternative for PROJECT INIT FILE: .project.yml
+            if len(pinit_conf) < 1:
+                pinit_conf = load_yaml_file(
+                    PROJECTRC_ALTERNATIVE,
+                    path=helpers.current_dir(),
+                    skip_error=True, logger=False, extension=None
+                )
+        except AttributeError as e:
+            from utilities.logs import get_logger
+            log = get_logger(__name__)
+            log.exit(e)
 
         self.host_configuration = pinit_conf.pop('project_configuration', {})
 
@@ -205,7 +211,8 @@ class ArgParser(object):
 Unknown parameter %s/%s found in %s\n
 """ % (key, subkey, PROJECTRC))
 
-    def prepare_params(self, options):
+    @staticmethod
+    def prepare_params(options):
 
         pconf = {}
         default = options.get('default')

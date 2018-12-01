@@ -78,6 +78,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.local_install = self.install and self.current_args.get('editable')
         self.pull = self.action == 'pull'
         self.create = self.action == 'create'
 
@@ -162,7 +163,8 @@ class Application(object):
         # Check if git is installed
         self.check_program('git')  # , max_version='2.14.3')
 
-    def check_program(self, program, min_version=None, max_version=None):
+    @staticmethod
+    def check_program(program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
 
@@ -193,8 +195,8 @@ class Application(object):
 
         log.checked("%s version: %s" % (program, found_version))
 
-    def check_python_package(
-            self, package, min_version=None, max_version=None):
+    @staticmethod
+    def check_python_package(package, min_version=None, max_version=None):
 
         found_version = checks.package(package)
         if found_version is None:
@@ -217,7 +219,8 @@ class Application(object):
 
         log.checked("%s version: %s" % (package, found_version))
 
-    def inspect_main_folder(self):
+    @staticmethod
+    def inspect_main_folder():
         """
         Rapydo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -797,10 +800,8 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return obsolete, build_ts, last_commit
 
-    # def get_compose(self, net=None):
-    def get_compose(self, files):
-        # net = self.current_args.get('net')
-        # return Compose(files=files, net=net)
+    @staticmethod
+    def get_compose(files):
         return Compose(files=files)
 
     def verify_template_builds(self, docker_images, builds):
@@ -1002,7 +1003,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     pass
         return value
 
-    def read_env(self):
+    @staticmethod
+    def read_env():
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
         env = {}
         if not os.path.isfile(envfile):
@@ -1418,8 +1420,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         options = {
             'SERVICE': services,
-            # TODO: user should be allowed to set the two below from cli
-            '--no-cache': False,
+            '--no-cache': self.current_args.get('force'),
             '--pull': False,
         }
         dc.command('build', options)
@@ -1498,10 +1499,14 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
             return True
 
-        else:
-            command = meta.get('command', None)
-            dc = self.get_compose(files=self.files)
-            return dc.exec_command(service, user=user, command=command)
+        command = meta.get('command', None)
+        dc = self.get_compose(files=self.files)
+
+        if self.current_args.get('volatile'):
+            service = "certificates-proxy"
+            return dc.create_volatile_container(service, command)
+
+        return dc.exec_command(service, user=user, command=command)
 
     def _ssl_dhparam(self):
         meta = glom(
@@ -1629,16 +1634,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if len(options) != 2:
             log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
         else:
-            service, workers = options
+            service, nreplicas = options
 
-        services = self.get_services(default=self.active_services)
-        # NOTE: scale has become an option of compose 'up'
+        if not nreplicas.isnumeric():
+            log.exit("Invalid number of replicas: %s", nreplicas)
+
+        # services = self.get_services(default=self.active_services)
+        services = [service]
         compose_options = {
             'SERVICE': services,
-            '--no-deps': False,
-            # '-d': True,
+            # '--no-deps': False,
+            '--no-deps': True,
             '--detach': True,
-            # '--build': self.current_args.get('from_upgrade'),
             '--build': False,
             '--remove-orphans': True,
             '--abort-on-container-exit': False,
@@ -1646,10 +1653,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             '--force-recreate': False,
             '--always-recreate-deps': False,
             '--no-build': False,
-            # '--scale': {service: workers},
             '--scale': [scaling],
         }
-        # print("TEST", service, workers)
         dc = self.get_compose(files=self.files)
         dc.command('up', compose_options)
 
@@ -1878,7 +1883,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             installed_version = check_version(package)
             log.info("Check on installed version: %s", installed_version)
 
-    def install_controller_from_git(self, version):
+    @staticmethod
+    def install_controller_from_git(version):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -1937,7 +1943,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         do_repo = self.gits.get('do')
 
         utils_switched = False
-        if gitter.get_active_branch(utils_repo) == version:
+        b = gitter.get_active_branch(utils_repo)
+
+        if b is None:
+            log.error("Unable to read local utils repository")
+        elif b == version:
             log.info("Utilities repository already at %s", version)
         elif gitter.switch_branch(utils_repo, version):
             log.info("Utilities repository switched to %s", version)
@@ -1945,7 +1955,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         else:
             log.exit("Unable to switch utilities repository to %s", version)
 
-        if gitter.get_active_branch(do_repo) == version:
+        b = gitter.get_active_branch(do_repo)
+
+        if b is None:
+            log.error("Unable to read local controller repository")
+        elif b == version:
             log.info("Controller repository already at %s", version)
         elif gitter.switch_branch(do_repo, version):
             log.info("Controller repository switched to %s", version)
@@ -2010,16 +2024,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         self.check_projects()
         self.preliminary_version_check()
-        self.git_submodules(confs_only=True)
-        self.read_specs()  # read project configuration
-        self.verify_rapydo_version()
-
+        if not self.install or self.local_install:
+            self.git_submodules(confs_only=True)
+            self.read_specs()  # read project configuration
         if not self.install:
+            self.verify_rapydo_version()
             self.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = basher.current_os_uid()
-        if self.current_uid == ROOT_UID:
+        if self.install:
+            skip_check_perm = True
+        elif self.current_uid == ROOT_UID:
             self.current_uid = BASE_UID
             self.current_os_user = 'privileged'
             skip_check_perm = True
@@ -2031,7 +2047,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.debug("Current user: %s (UID: %d)" % (
                 self.current_os_user, self.current_uid))
 
-        if not self.install and not skip_check_perm:
+        if not skip_check_perm:
             self.inspect_permissions()
 
         # Generate and get the extra arguments in case of a custom command
@@ -2055,41 +2071,40 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 "Command not yet implemented: %s (expected function: %s)"
                 % (self.action, function))
 
-        # Detect if heavy ops are allowed
-        do_heavy_ops = False
-        do_heavy_ops = self.update or self.check
-        if self.check and self.current_args.get('skip_heavy_git_ops', False):
-            do_heavy_ops = False
+        if not self.install or self.local_install:
+            self.git_submodules(confs_only=False)
 
-        self.git_submodules(confs_only=False)
-
-        # GIT related
-        if do_heavy_ops:
-            self.git_checks()  # NOTE: this might be an heavy operation
-        else:
-            log.verbose("Skipping heavy operations")
-
-        # self.make_env(do=do_heavy_ops)
-        self.make_env()
-
-        # Compose services and variables
-        self.read_composers()
-        self.check_placeholders()
-
-        # Build or check template containers images
-
-        if self.install or self.pull:
-            build_dependencies = False
-        elif self.current_args.get('no_builds', False):
-            build_dependencies = False
-        else:
-            build_dependencies = True
-
-        if build_dependencies:
-            self.build_dependencies()
-
-        # Install or check frontend libraries (if frontend is enabled)
         if not self.install:
+            # Detect if heavy ops are allowed
+            git_checks = False
+            git_checks = self.update or self.check
+            if self.check and self.current_args.get('skip_heavy_git_ops', False):
+                git_checks = False
+
+            if git_checks:
+                self.git_checks()  # NOTE: this might be an heavy operation
+            else:
+                log.verbose("Skipping heavy operations")
+
+            self.make_env()
+
+            # Compose services and variables
+            self.read_composers()
+            self.check_placeholders()
+
+            # Build or check template containers images
+
+            if self.pull:
+                build_dependencies = False
+            elif self.current_args.get('no_builds', False):
+                build_dependencies = False
+            else:
+                build_dependencies = True
+
+            if build_dependencies:
+                self.build_dependencies()
+
+            # Install or check frontend libraries (if frontend is enabled)
             self.frontend_libs()
 
         # Final step, launch the command
@@ -2125,7 +2140,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     # issues/57
     # I'm temporary here... to be decided how to handle me
-    def get_reserved_project_names(self):
+    @staticmethod
+    def get_reserved_project_names():
         names = [
             'abc',
             'attr',

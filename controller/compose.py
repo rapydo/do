@@ -143,7 +143,8 @@ class Compose(object):
 
         return out
 
-    def split_command(self, command):
+    @staticmethod
+    def split_command(command):
         """
             Split a command into command + args_array
         """
@@ -225,9 +226,10 @@ class Compose(object):
         else:
             return out
 
-    def command_defaults(self, command):
+    @staticmethod
+    def command_defaults(command):
         if command in ['run']:
-            return self.set_defaults(
+            return Compose.set_defaults(
                 variables=[
                     'COMMAND', 'T', 'e',
                     'entrypoint', 'user', 'label', 'publish', 'service-ports',
@@ -238,7 +240,8 @@ class Compose(object):
         else:
             log.exit("No default implemented for: %s", command)
 
-    def set_defaults(self, variables, merge=None):
+    @staticmethod
+    def set_defaults(variables, merge=None):
         if merge is None:
             options = {}
         else:
