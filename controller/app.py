@@ -799,10 +799,8 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return obsolete, build_ts, last_commit
 
-    # def get_compose(self, net=None):
-    def get_compose(self, files):
-        # net = self.current_args.get('net')
-        # return Compose(files=files, net=net)
+    @staticmethod
+    def get_compose(files):
         return Compose(files=files)
 
     def verify_template_builds(self, docker_images, builds):
