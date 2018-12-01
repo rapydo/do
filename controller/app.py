@@ -1807,25 +1807,37 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _dump(self):
 
-        # 1. BASE DUMP
-        # NOTE: can't figure it out why,
-        # but dc on config can't use files
-        # so I've used basher since it's already imported
+        #################
+        # 1. base dump
         mybin = 'docker-compose'
+        # NOTE: can't figure it out why, but 'dc' on config can't use files
+        # so I've used basher (since it's already imported)
         bash = basher.BashCommands()
         params = []
         for file in self.files:
             params.append('-f')
             params.append(file)
         params.append('config')
-        out = bash.execute_command(mybin, parameters=params)
+        yaml_string = bash.execute_command(mybin, parameters=params)
 
-        # 2. WRITE FILE
-        filename = '%s.yml' % mybin
-        # NOTE: replacing absolute paths with relative ones
+        #################
+        # 2. filter active services
+        from utilities.myyaml import yaml
+        # replacing absolute paths with relative ones
         main_dir = path.current_dir()
+        obj = yaml.load(yaml_string.replace(main_dir, '.'))
+
+        active_services = {}
+        for key, value in obj.get('services', {}).items():
+            if key in self.active_services:
+                active_services[key] = value
+        obj['services'] = active_services
+
+        #################
+        # 3. write file
+        filename = '%s.yml' % mybin
         with open(filename, 'w') as fh:
-            fh.write(out.replace(main_dir, '.'))
+            fh.write(yaml.dump(obj, default_flow_style=False))
         log.warning("Config dump: %s", filename)
 
     def _install(self):
