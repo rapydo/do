@@ -163,7 +163,8 @@ class Application(object):
         # Check if git is installed
         self.check_program('git')  # , max_version='2.14.3')
 
-    def check_program(self, program, min_version=None, max_version=None):
+    @staticmethod
+    def check_program(program, min_version=None, max_version=None):
         found_version = checks.executable(executable=program)
         if found_version is None:
 
