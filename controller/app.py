@@ -195,8 +195,8 @@ class Application(object):
 
         log.checked("%s version: %s" % (program, found_version))
 
-    def check_python_package(
-            self, package, min_version=None, max_version=None):
+    @staticmethod
+    def check_python_package(package, min_version=None, max_version=None):
 
         found_version = checks.package(package)
         if found_version is None:
