@@ -7,8 +7,8 @@ this repo is a quick `python` command line tool that allows you to
 
 This is the index for the current documentation:
 
-- [Quick start](docs/quickstart.md)
-- more to come
+-   [Quick start](docs/quickstart.md)
+-   more to come
 
 ---
 

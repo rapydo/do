@@ -93,16 +93,16 @@ def test_all(capfd):
     assert env_cached_log_verbose in err
     assert "INFO All checked" in err
 
-    # out, err = exec_command(capfd, "rapydo list --args")
+    # _, err = exec_command(capfd, "rapydo list --args")
     # assert "INFO List of configured rapydo arguments:" in err
 
-    # out, err = exec_command(capfd, "rapydo list --env")
+    # _, err = exec_command(capfd, "rapydo list --env")
     # assert "INFO List env variables:" in err
 
-    # out, err = exec_command(capfd, "rapydo list --services")
+    # _, err = exec_command(capfd, "rapydo list --services")
     # assert "INFO List of active services:" in err
 
-    # out, err = exec_command(capfd, "rapydo list --submodules")
+    # _, err = exec_command(capfd, "rapydo list --submodules")
     # assert "INFO List of submodules:" in err
 
     _, err = exec_command(capfd, "rapydo dump")
@@ -194,7 +194,7 @@ def test_all(capfd):
 # def test_miscellanous(capfd):
 
     endpoint_name = 'justatest'
-    out, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
+    _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
     # "rendered projects/template/backend/swagger/justatest/specs.yaml"
     base_response = 'INFO rendered %s/template/%s' % \
@@ -209,7 +209,7 @@ def test_all(capfd):
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
 
-    out, err = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
+    _, err = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
     assert "Endpoint path:\t/api/%s" % endpoint_name in err
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
