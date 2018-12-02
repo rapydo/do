@@ -1,4 +1,4 @@
-Hello user, 
+Hello user,
 
 this repo is a quick `python` command line tool that allows you to
 `do` things within the `RAPyDo framework`.
