@@ -1,7 +1,6 @@
 language: python
 sudo: required
-dist: trusty
-group: deprecated-2017Q2
+dist: xenial
 services:
 - docker
 script:
@@ -27,9 +26,10 @@ jobs:
   - stage: test
     python: 3.4
   - python: 3.5
-  - python: 3.6.2
+  - python: 3.6.5
+  - python: 3.7.1
   - stage: deploy
-    python: 3.6.2
+    python: 3.7.1
     script: skip
     deploy:
       provider: pypi
