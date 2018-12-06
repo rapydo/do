@@ -1506,7 +1506,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
             options = {
                 'SERVICE': ["certificates-proxy"],
-                '--no-deps': True,
+                '--no-deps': False,
                 '--detach': False,
                 '--build': None,
                 '--no-color': False,
@@ -1520,7 +1520,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 '--scale': {},
             }
 
-            dc.command('up', options)
+            return dc.command('up', options)
 
         return dc.exec_command(service, user=user, command=command)
 
