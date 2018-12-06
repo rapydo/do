@@ -1504,8 +1504,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         if self.current_args.get('volatile'):
             service = "certificates-proxy"
-            ports = ["80:80", "443:443"]
-            return dc.create_volatile_container(service, command, publish=ports)
+            return dc.create_volatile_container(service, command)
 
         return dc.exec_command(service, user=user, command=command)
 

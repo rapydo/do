@@ -182,7 +182,7 @@ class Compose(object):
             '--publish': publish, '--service-ports': service_post,
             'COMMAND': shell_command,
             'ARGS': shell_args,
-            '-e': [], '--volume': [],
+            '-e': None, '--volume': None,
             '--rm': True, '--no-deps': True,
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
