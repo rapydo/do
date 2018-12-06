@@ -4,8 +4,6 @@ dist: xenial
 services:
 - docker
 script:
-- sudo apt-get update
-- sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
 - pip install --upgrade setuptools
 - pip install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
