@@ -98,6 +98,13 @@ options:
   #   help: change the docker network used
 
 subcommands:
+
+  dump:
+    description: dump current config into docker compose YAML
+
+  formatter:
+    description: "run 'black' formatter on main project backend code"
+
   check:
     description: "only verify if currently compliant to RAPyDo specs
         (NOTE: this is done at every call)"
@@ -117,6 +124,15 @@ subcommands:
     description: "
       make current project compliant to RAPyDo requirements
       (if not yet being)"
+    suboptions:
+      submodules-path:
+        type: str
+        metavalue: SUBMODULE_PATH
+        help: link all submodules in an existing folder instead of download them
+      no-builds:
+        type: bool
+        default: False
+        help: Skip checks on build templates
   update:
     description: update the current project
     suboptions:
@@ -167,6 +183,8 @@ subcommands:
         # metavalue: TRUE_OR_FALSE
         default: False
         help: remove caches of previous builds on this service
+  pull:
+    description: pull available images from docker hub
   log:
     description: watch log tails of all or specified containers
     suboptions:
@@ -207,6 +225,11 @@ subcommands:
         metavalue: PATH_TO_KEY_FILE
         default: null
         help: path to existing key file (.pem format)
+      volatile:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Create a volatile proxy service to request the certificate
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
@@ -360,13 +383,25 @@ subcommands:
         metavalue: SERVICE
         default: null
       command:
-        # positional: no
-        positional: yes
+        positional: no
         # alias: c
         type: str
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
         default: bash
         help: UNIX command to be executed
+  create:
+    description: create a new rapydo project
+    suboptions:
+      name:
+        positional: true
+        type: str
+        metavalue: NAME
+        default: null
+      template:
+        type: str
+        metavalue: TEMPLATE_NAME
+        help: Name of the template used to initialize your project
+
   # upgrade:  # DEPRECATED, see issues/71
   #   description: upgrade your current project to new official releases
   #   suboptions:

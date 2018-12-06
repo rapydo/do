@@ -28,6 +28,10 @@ def get_local(path):
 
 
 def get_active_branch(gitobj):
+
+    if gitobj is None:
+        log.error("git object is None, cannot retrieve active branch")
+        return None
     try:
         return str(gitobj.active_branch)
     except TypeError as e:
@@ -51,6 +55,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     else:
         branches = gitobj.branches
 
+    branch = None
     branch_found = False
     for branch in branches:
         if remote:
@@ -61,7 +66,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
         if branch_found:
             break
 
-    if not branch_found:
+    if not branch_found or branch is None:
         log.warning("Branch %s not found", branch_name)
         return False
 
@@ -76,9 +81,14 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     return True
 
 
-def clone(online_url, path, branch='master', do=False):
+def clone(online_url, path, branch='master',
+          do=False, check=True, expand_path=True):
 
-    local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
+    if expand_path:
+        local_path = os.path.join(
+            helpers.current_dir(), SUBMODULES_DIR, path)
+    else:
+        local_path = path
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:
@@ -94,8 +104,10 @@ def clone(online_url, path, branch='master', do=False):
     if do:
         switch_branch(gitobj, branch)
 
-    # switch
-    compare_repository(gitobj, branch, online_url=online_url, path=path)
+    if check:
+        compare_repository(
+            gitobj, branch, online_url=online_url, path=path)
+
     return gitobj
 
 

@@ -143,7 +143,8 @@ class Compose(object):
 
         return out
 
-    def split_command(self, command):
+    @staticmethod
+    def split_command(command):
         """
             Split a command into command + args_array
         """
@@ -225,30 +226,33 @@ class Compose(object):
         else:
             return out
 
-    def get_defaults(self, command='configure'):
-        """
-        FIXME: does not work equally for all commands (compose 1.19.0)
-
-        e.g.
-        - command 'up' (rapydo start), it works
-        - command 'exec_command' (rapydo shell backend), does not
-
-        In the second case it seems that 'docopt' python library
-        does not resolve the dictionary so it prints the usage and exit
-        """
-
-        # NOTE: test this defaults for commands.
-        from compose.cli.docopt_command import docopt_full_help
-        from inspect import getdoc
-
-        compose_options = {}
-        docstring = getdoc(getattr(TopLevelCommand, command))
-
-        try:
-            obj = docopt_full_help(
-                docstring, compose_options, options_first=True)
-        except SystemExit:
-            print("UFF")
-            exit(1)
+    @staticmethod
+    def command_defaults(command):
+        if command in ['run']:
+            return Compose.set_defaults(
+                variables=[
+                    'COMMAND', 'T', 'e',
+                    'entrypoint', 'user', 'label', 'publish', 'service-ports',
+                    'name', 'workdir', 'volume', 'no-deps', 'use-aliases'
+                ],
+                merge={'--rm': True}
+            )
         else:
-            return obj
+            log.exit("No default implemented for: %s", command)
+
+    @staticmethod
+    def set_defaults(variables, merge=None):
+        if merge is None:
+            options = {}
+        else:
+            options = merge
+        for variable in variables:
+            if len(variable) == 1:
+                key = '-' + variable
+            elif variable.upper() == variable:
+                key = variable
+            else:
+                key = '--' + variable
+            options[key] = None
+        log.very_verbose('defaults: %s', options)
+        return options

@@ -1,8 +1,6 @@
+# Quick start #
 
-# Quick start
-
-
-## The project
+## The project ##
 
 Welcome to our new `RAPyDo` framework.
 
@@ -74,7 +72,7 @@ $ pip3 install -r dev-requirements.txt
 $ ./make
 ```
 
-Note! The last command expects you to 
+Note! The last command expects you to
 
 - being registered on PyPi
 - have a `~/.pypirc` file configured

@@ -85,7 +85,7 @@ class Dock(object):
             log.exit("Are docker containers running?")
 
         tar_content = self.get_tar_content(container, mitt)
-        real_content = self.recover_tar_stream(tar_content, mitt)
+        real_content = Dock.recover_tar_stream(tar_content, mitt)
 
         with open(dest, 'w') as handler:
             handler.write(real_content)
@@ -104,7 +104,8 @@ class Dock(object):
 
         return content
 
-    def recover_tar_stream(self, tarstream, filepath):
+    @staticmethod
+    def recover_tar_stream(tarstream, filepath):
 
         tar = tarfile.open(fileobj=io.BytesIO(tarstream.read()))
 
