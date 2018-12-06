@@ -1503,8 +1503,24 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
 
         if self.current_args.get('volatile'):
-            service = "certificates-proxy"
-            return dc.create_volatile_container(service, command)
+
+            options = {
+                'SERVICE': ["certificates-proxy"],
+                '--no-deps': True,
+                '--detach': False,
+                '--build': None,
+                '--no-color': False,
+                # switching in an easier way between modules
+                '--remove-orphans': True,  # False,
+                '--abort-on-container-exit': False,
+                '--no-recreate': False,
+                '--force-recreate': False,
+                '--always-recreate-deps': False,
+                '--no-build': False,
+                '--scale': {},
+            }
+
+            dc.command('up', options)
 
         return dc.exec_command(service, user=user, command=command)
 
