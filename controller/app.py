@@ -1222,31 +1222,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         log.info("All updated")
 
     def _start(self):
-        # if self.current_args.get('from_upgrade'):
-        #     self.rebuild_from_upgrade()
 
         services = self.get_services(default=self.active_services)
 
-        options = {
-            'SERVICE': services,
-            '--no-deps': False,
-            '--detach': True,
-            # rebuild images changed with an upgrade
-            # '--build': self.current_args.get('from_upgrade'),
-            '--build': None,
-            '--no-color': False,
-            # switching in an easier way between modules
-            '--remove-orphans': True,  # False,
-            '--abort-on-container-exit': False,
-            '--no-recreate': False,
-            '--force-recreate': False,
-            '--always-recreate-deps': False,
-            '--no-build': False,
-            '--scale': {},
-        }
-
         dc = self.get_compose(files=self.files)
-        dc.command('up', options)
+        # dc.command('up', options)
+        dc.start_containers(services)
 
         log.info("Stack started")
 
@@ -1503,23 +1484,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
 
         if self.current_args.get('volatile'):
-            options = {
-                'SERVICE': ["certificates-proxy"],
-                '--no-deps': False,
-                '--detach': False,
-                '--build': None,
-                '--no-color': False,
-                # switching in an easier way between modules
-                '--remove-orphans': True,  # False,
-                '--abort-on-container-exit': False,
-                '--no-recreate': False,
-                '--force-recreate': False,
-                '--always-recreate-deps': False,
-                '--no-build': False,
-                '--scale': {},
-            }
-
-            return dc.command('up', options)
+            # return dc.command('up', options)
+            return dc.start_containers(
+                ["certificates-proxy"], detach=False
+            )
 
         return dc.exec_command(service, user=user, command=command)
 
@@ -1654,24 +1622,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not nreplicas.isnumeric():
             log.exit("Invalid number of replicas: %s", nreplicas)
 
-        # services = self.get_services(default=self.active_services)
-        services = [service]
-        compose_options = {
-            'SERVICE': services,
-            # '--no-deps': False,
-            '--no-deps': True,
-            '--detach': True,
-            '--build': False,
-            '--remove-orphans': True,
-            '--abort-on-container-exit': False,
-            '--no-recreate': False,
-            '--force-recreate': False,
-            '--always-recreate-deps': False,
-            '--no-build': False,
-            '--scale': [scaling],
-        }
         dc = self.get_compose(files=self.files)
-        dc.command('up', compose_options)
+        # dc.command('up', compose_options)
+        dc.start_containers(
+            [service], scale=[scaling], skip_dependencies=True
+        )
 
     def _coverall(self):
 
@@ -1704,25 +1659,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         path.existing(['.', covfile], basemsg)
         # NOTE: should not be missing if the file above is from the template
 
-        # Execute
-        options = {
-            'SERVICE': [service],
-            '--no-deps': False,
-            # '-d': False,
-            '--detach': False,
-            '--abort-on-container-exit': True,
-            '--remove-orphans': False,
-            '--no-recreate': True,
-            '--force-recreate': False,
-            '--build': False,
-            '--no-build': False,
-            '--no-color': False,
-            '--scale': ['%s=1' % service]
-        }
         dc = self.get_compose(files=[compose_file])
 
-        # FIXME: check if this command could be 'run' instead of using 'up'
-        dc.command('up', options)
+        # dc.command('up', options)
+        dc.start_containers(
+            [service],
+            detach=False,
+            scale=['%s=1' % service],
+            abort_on_container_exit=True,
+            remove_orphans=False,
+            no_recreate=True
+
+        )
 
     def _verify(self):
         """ Verify one service connection (inside backend) """
