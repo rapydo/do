@@ -815,6 +815,18 @@ Verify that you are in the right folder, now you are in: %s%s
         fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
+            is_active = False
+            for service in build['service']:
+                if service in self.active_services:
+                    is_active = True
+                    break
+            if not is_active:
+                log.very_verbose(
+                    "Checks skipped: template %s not enabled (service list = %s)",
+                    image_tag, build['service']
+                )
+                continue
+
             if image_tag not in docker_images:
 
                 found_obsolete += 1
@@ -872,6 +884,18 @@ Verify that you are in the right folder, now you are in: %s%s
 
             if image_tag not in docker_images:
                 # Missing images will be created at startup
+                continue
+
+            is_active = False
+            for service in build['service']:
+                if service in self.active_services:
+                    is_active = True
+                    break
+            if not is_active:
+                log.very_verbose(
+                    "Checks skipped: template %s not enabled (service list = %s)",
+                    image_tag, build['service']
+                )
                 continue
 
             build_is_obsolete = False

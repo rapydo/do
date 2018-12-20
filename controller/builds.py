@@ -38,11 +38,15 @@ def find_templates_build(base_services):
                     % template_name
                 )
             else:
-                templates[template_image] = {
-                    'service': template_name,
-                    'path': template_build.get('context'),
-                    'timestamp': docker.image_attribute(template_image)
-                }
+
+                if template_image not in templates:
+                    templates[template_image] = {}
+                    templates[template_image]['service'] = []
+                    templates[template_image]['path'] = template_build.get('context')
+                    templates[template_image]['timestamp'] = docker.image_attribute(
+                        template_image)
+
+                templates[template_image]['service'].append(template_name)
 
     return templates
 
