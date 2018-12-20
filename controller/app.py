@@ -153,6 +153,7 @@ class Application(object):
         self.docker = Dock()
 
         # Check docker-compose version
+        # self.check_python_package('pip', max_version="10.0.1")
         self.check_python_package('compose', min_version="1.18")
         # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
