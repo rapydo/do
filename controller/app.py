@@ -1853,7 +1853,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from utilities.packing import install
+        # from utilities.packing import check_version
 
         log.info(
             "You asked to install rapydo-controller %s from pip",
@@ -1868,8 +1869,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         else:
             log.info(
                 "Controller version %s installed from pip", version)
-            installed_version = check_version(package)
-            log.info("Check on installed version: %s", installed_version)
+            # installed_version = check_version(package)
+            # log.info("Check on installed version: %s", installed_version)
 
     @staticmethod
     def install_controller_from_git(version):
