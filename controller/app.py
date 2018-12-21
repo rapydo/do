@@ -816,14 +816,14 @@ Verify that you are in the right folder, now you are in: %s%s
         for image_tag, build in builds.items():
 
             is_active = False
-            for service in build['service']:
+            for service in build['services']:
                 if service in self.active_services:
                     is_active = True
                     break
             if not is_active:
                 log.very_verbose(
                     "Checks skipped: template %s not enabled (service list = %s)",
-                    image_tag, build['service']
+                    image_tag, build['services']
                 )
                 continue
 
@@ -831,7 +831,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
                 found_obsolete += 1
                 message = "Missing template build for %s (%s)" % (
-                    build['service'], image_tag)
+                    build['services'], image_tag)
                 if self.action == 'check':
                     message += "\nSuggestion: execute the init command"
                     log.exit(message)
@@ -887,14 +887,14 @@ Verify that you are in the right folder, now you are in: %s%s
                 continue
 
             is_active = False
-            for service in build['service']:
+            for service in build['services']:
                 if service in self.active_services:
                     is_active = True
                     break
             if not is_active:
                 log.very_verbose(
                     "Checks skipped: template %s not enabled (service list = %s)",
-                    image_tag, build['service']
+                    image_tag, build['services']
                 )
                 continue
 
