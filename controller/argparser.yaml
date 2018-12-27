@@ -211,8 +211,7 @@ subcommands:
     description: issue a production certificate with service Letsencrypt
     container_exec:
       name: letsencrypt
-      # command: /bin/bash updatecertificates
-      command: updatecertificates
+      command: /bin/bash updatecertificates
       service: proxy
       user: root
     suboptions:
