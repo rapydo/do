@@ -657,6 +657,9 @@ Verify that you are in the right folder, now you are in: %s%s
     def prepare_composers(self):
 
         # substitute values starting with '$$'
+
+        load_commons = not self.current_args.get('no_commons')
+
         myvars = {
             'backend': not self.current_args.get('no_backend'),
             ANGULARJS: self.frontend == ANGULARJS,
@@ -664,15 +667,19 @@ Verify that you are in the right folder, now you are in: %s%s
             REACT: self.frontend == REACT,
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
-            'commons': not self.current_args.get('no_commons'),
+            'commons': load_commons,
+            'extended-commons': self.extended_project is not None and load_commons,
             'mode': self.current_args.get('mode'),
+            'extended-mode': self.extended_project is not None,
             'baseconf': helpers.current_dir(
                 SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
             'customconf': helpers.project_dir(
                 self.project,
                 CONTAINERS_YAML_DIRNAME
-            )
+            ),
+            'extendedproject': os.path.join(
+                self.extended_project_path, CONTAINERS_YAML_DIRNAME)
         }
         compose_files = OrderedDict()
 
