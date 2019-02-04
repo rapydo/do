@@ -15,6 +15,7 @@ from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
+from utilities import CONF_PATH, FROM_PROJECT_DISABLED
 from utilities.globals import mem
 from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
@@ -449,9 +450,11 @@ Verify that you are in the right folder, now you are in: %s%s
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
         try:
-            self.specs = configuration.read(
-                default_file_path,
-                project_path=project_file_path,
+            self.specs, self.from_project, self.from_path = configuration.read(
+                default_file_path=default_file_path,
+                base_project_path=project_file_path,
+                projects_path=PROJECT_DIR,
+                submodules_path=SUBMODULES_DIR,
                 is_template=self.is_template,
                 do_exit=False
             )
@@ -459,7 +462,6 @@ Verify that you are in the right folder, now you are in: %s%s
             self.specs = configuration.mix(
                 self.specs, self.arguments.host_configuration)
 
-            # print(glom(self.specs, "variables.frontend.enable"))
         except AttributeError as e:
 
             if self.initialize:
@@ -1060,10 +1062,23 @@ Verify that you are in the right folder, now you are in: %s%s
 
             env = self.vars.get('env')
             env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
-            env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+            env['COMPOSE_PROJECT_NAME'] = self.project
             # Relative paths from ./submodules/rapydo-confs/confs
             env['SUBMODULE_DIR'] = "../.."
             env['VANILLA_DIR'] = "../../.."
+            env['PROJECT_DIR'] = os.path.join(
+                env['VANILLA_DIR'], PROJECT_DIR, self.project)
+
+            if self.from_path is None:
+                env['PROJECT_FROM_PATH'] = env['PROJECT_DIR']
+            else:
+                env['PROJECT_FROM_PATH'] = os.path.join(
+                    env['VANILLA_DIR'], self.from_path)
+
+            if self.from_project is None:
+                env['FROM_PROJECT'] = FROM_PROJECT_DISABLED
+            else:
+                env['FROM_PROJECT'] = self.from_project
 
             env['RAPYDO_VERSION'] = __version__
             env['CURRENT_UID'] = self.current_uid
@@ -1663,7 +1678,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # TODO: if missing link instructions on the website
 
         # Compose file with service > coverage
-        from utilities import CONF_PATH
         compose_file = path.existing(['.', CONF_PATH, 'coverage.yml'], basemsg)
         service = project.check_coverage_service(compose_file)
         # TODO: if missing link a template
