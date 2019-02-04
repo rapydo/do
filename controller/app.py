@@ -677,10 +677,15 @@ Verify that you are in the right folder, now you are in: %s%s
             'customconf': helpers.project_dir(
                 self.project,
                 CONTAINERS_YAML_DIRNAME
-            ),
-            'extendedproject': os.path.join(
-                self.extended_project_path, CONTAINERS_YAML_DIRNAME)
+            )
         }
+
+        if self.extended_project_path is None:
+            myvars['extendedproject'] = None
+        else:
+            myvars['extendedproject'] = os.path.join(
+                self.extended_project_path, CONTAINERS_YAML_DIRNAME)
+
         compose_files = OrderedDict()
 
         confs = self.vars.get('composers', {})
