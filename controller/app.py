@@ -15,7 +15,7 @@ from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
-from utilities import CONF_PATH, FROM_PROJECT_DISABLED
+from utilities import CONF_PATH, EXTENDED_PROJECT_DISABLED
 from utilities.globals import mem
 from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
@@ -450,14 +450,15 @@ Verify that you are in the right folder, now you are in: %s%s
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
         try:
-            self.specs, self.from_project, self.from_path = configuration.read(
-                default_file_path=default_file_path,
-                base_project_path=project_file_path,
-                projects_path=PROJECT_DIR,
-                submodules_path=SUBMODULES_DIR,
-                is_template=self.is_template,
-                do_exit=False
-            )
+            self.specs, self.extended_project, self.extended_project_path = \
+                configuration.read(
+                    default_file_path=default_file_path,
+                    base_project_path=project_file_path,
+                    projects_path=PROJECT_DIR,
+                    submodules_path=SUBMODULES_DIR,
+                    is_template=self.is_template,
+                    do_exit=False
+                )
 
             self.specs = configuration.mix(
                 self.specs, self.arguments.host_configuration)
@@ -1069,16 +1070,16 @@ Verify that you are in the right folder, now you are in: %s%s
             env['PROJECT_DIR'] = os.path.join(
                 env['VANILLA_DIR'], PROJECT_DIR, self.project)
 
-            if self.from_path is None:
-                env['PROJECT_FROM_PATH'] = env['PROJECT_DIR']
+            if self.extended_project_path is None:
+                env['EXTENDED_PROJECT_PATH'] = env['PROJECT_DIR']
             else:
-                env['PROJECT_FROM_PATH'] = os.path.join(
-                    env['VANILLA_DIR'], self.from_path)
+                env['EXTENDED_PROJECT_PATH'] = os.path.join(
+                    env['VANILLA_DIR'], self.extended_project_path)
 
-            if self.from_project is None:
-                env['FROM_PROJECT'] = FROM_PROJECT_DISABLED
+            if self.extended_project is None:
+                env['EXTENDED_PROJECT'] = EXTENDED_PROJECT_DISABLED
             else:
-                env['FROM_PROJECT'] = self.from_project
+                env['EXTENDED_PROJECT'] = self.extended_project
 
             env['RAPYDO_VERSION'] = __version__
             env['CURRENT_UID'] = self.current_uid
