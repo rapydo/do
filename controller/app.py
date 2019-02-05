@@ -1465,8 +1465,15 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.base_files)
         services = self.get_services(default=self.active_services)
 
+        base_services_list = []
+        for s in self.base_services:
+            base_services_list.append(s.get('name'))
+
+        # List of BASE active services (i.e. remove services not in base)
+        services_intersection = list(set(services).intersection(base_services_list))
+
         options = {
-            'SERVICE': services,
+            'SERVICE': services_intersection,
             # TODO: user should be allowed to set the two below from cli
             '--no-cache': False,
             '--pull': False,
