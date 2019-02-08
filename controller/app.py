@@ -465,10 +465,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         except AttributeError as e:
 
-            if self.initialize:
-                log.warning("test")
-            log.error(e)
-            log.exit("Please init your project")
+            log.exit(e)
 
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
@@ -1074,7 +1071,9 @@ Verify that you are in the right folder, now you are in: %s%s
         if not os.path.isfile(envfile):
 
             env = self.vars.get('env')
-            env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
+            if env is None:
+                env = {}
+            env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
             env['COMPOSE_PROJECT_NAME'] = self.project
             # Relative paths from ./submodules/rapydo-confs/confs
             env['SUBMODULE_DIR'] = "../.."
