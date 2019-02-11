@@ -46,6 +46,8 @@ def find_active(services):
         if is_active:
             base_actives.append(name)
 
+    log.verbose("Base active services = %s", base_actives)
+    log.verbose("Services dependencies = %s", dependencies)
     active_services = walk_services(base_actives, dependencies)
     return all_services, active_services
 

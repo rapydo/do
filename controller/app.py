@@ -15,6 +15,7 @@ from utilities import basher
 from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
+from utilities import CONF_PATH, EXTENDED_PROJECT_DISABLED
 from utilities.globals import mem
 from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
@@ -153,6 +154,7 @@ class Application(object):
         self.docker = Dock()
 
         # Check docker-compose version
+        # self.check_python_package('pip', max_version="10.0.1")
         self.check_python_package('compose', min_version="1.18")
         # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
@@ -448,23 +450,22 @@ Verify that you are in the right folder, now you are in: %s%s
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
         try:
-            self.specs = configuration.read(
-                default_file_path,
-                project_path=project_file_path,
-                is_template=self.is_template,
-                do_exit=False
-            )
+            self.specs, self.extended_project, self.extended_project_path = \
+                configuration.read(
+                    default_file_path=default_file_path,
+                    base_project_path=project_file_path,
+                    projects_path=PROJECT_DIR,
+                    submodules_path=SUBMODULES_DIR,
+                    is_template=self.is_template,
+                    do_exit=False
+                )
 
             self.specs = configuration.mix(
                 self.specs, self.arguments.host_configuration)
 
-            # print(glom(self.specs, "variables.frontend.enable"))
         except AttributeError as e:
 
-            if self.initialize:
-                log.warning("test")
-            log.error(e)
-            log.exit("Please init your project")
+            log.exit(e)
 
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
@@ -653,6 +654,9 @@ Verify that you are in the right folder, now you are in: %s%s
     def prepare_composers(self):
 
         # substitute values starting with '$$'
+
+        load_commons = not self.current_args.get('no_commons')
+
         myvars = {
             'backend': not self.current_args.get('no_backend'),
             ANGULARJS: self.frontend == ANGULARJS,
@@ -660,8 +664,10 @@ Verify that you are in the right folder, now you are in: %s%s
             REACT: self.frontend == REACT,
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
-            'commons': not self.current_args.get('no_commons'),
+            'commons': load_commons,
+            'extended-commons': self.extended_project is not None and load_commons,
             'mode': self.current_args.get('mode'),
+            'extended-mode': self.extended_project is not None,
             'baseconf': helpers.current_dir(
                 SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
@@ -670,6 +676,13 @@ Verify that you are in the right folder, now you are in: %s%s
                 CONTAINERS_YAML_DIRNAME
             )
         }
+
+        if self.extended_project_path is None:
+            myvars['extendedproject'] = None
+        else:
+            myvars['extendedproject'] = os.path.join(
+                self.extended_project_path, CONTAINERS_YAML_DIRNAME)
+
         compose_files = OrderedDict()
 
         confs = self.vars.get('composers', {})
@@ -814,11 +827,23 @@ Verify that you are in the right folder, now you are in: %s%s
         fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
 
+            is_active = False
+            for service in build['services']:
+                if service in self.active_services:
+                    is_active = True
+                    break
+            if not is_active:
+                log.very_verbose(
+                    "Checks skipped: template %s not enabled (service list = %s)",
+                    image_tag, build['services']
+                )
+                continue
+
             if image_tag not in docker_images:
 
                 found_obsolete += 1
                 message = "Missing template build for %s (%s)" % (
-                    build['service'], image_tag)
+                    build['services'], image_tag)
                 if self.action == 'check':
                     message += "\nSuggestion: execute the init command"
                     log.exit(message)
@@ -871,6 +896,18 @@ Verify that you are in the right folder, now you are in: %s%s
 
             if image_tag not in docker_images:
                 # Missing images will be created at startup
+                continue
+
+            is_active = False
+            for service in build['services']:
+                if service in self.active_services:
+                    is_active = True
+                    break
+            if not is_active:
+                log.very_verbose(
+                    "Checks skipped: template %s not enabled (service list = %s)",
+                    image_tag, build['services']
+                )
                 continue
 
             build_is_obsolete = False
@@ -1034,11 +1071,26 @@ Verify that you are in the right folder, now you are in: %s%s
         if not os.path.isfile(envfile):
 
             env = self.vars.get('env')
-            env['PROJECT_DOMAIN'] = self.current_args.get('hostname')
-            env['COMPOSE_PROJECT_NAME'] = self.current_args.get('project')
+            if env is None:
+                env = {}
+            env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
+            env['COMPOSE_PROJECT_NAME'] = self.project
             # Relative paths from ./submodules/rapydo-confs/confs
             env['SUBMODULE_DIR'] = "../.."
             env['VANILLA_DIR'] = "../../.."
+            env['PROJECT_DIR'] = os.path.join(
+                env['VANILLA_DIR'], PROJECT_DIR, self.project)
+
+            if self.extended_project_path is None:
+                env['EXTENDED_PROJECT_PATH'] = env['PROJECT_DIR']
+            else:
+                env['EXTENDED_PROJECT_PATH'] = os.path.join(
+                    env['VANILLA_DIR'], self.extended_project_path)
+
+            if self.extended_project is None:
+                env['EXTENDED_PROJECT'] = EXTENDED_PROJECT_DISABLED
+            else:
+                env['EXTENDED_PROJECT'] = self.extended_project
 
             env['RAPYDO_VERSION'] = __version__
             env['CURRENT_UID'] = self.current_uid
@@ -1222,31 +1274,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         log.info("All updated")
 
     def _start(self):
-        # if self.current_args.get('from_upgrade'):
-        #     self.rebuild_from_upgrade()
 
         services = self.get_services(default=self.active_services)
 
-        options = {
-            'SERVICE': services,
-            '--no-deps': False,
-            '--detach': True,
-            # rebuild images changed with an upgrade
-            # '--build': self.current_args.get('from_upgrade'),
-            '--build': None,
-            '--no-color': False,
-            # switching in an easier way between modules
-            '--remove-orphans': True,  # False,
-            '--abort-on-container-exit': False,
-            '--no-recreate': False,
-            '--force-recreate': False,
-            '--always-recreate-deps': False,
-            '--no-build': False,
-            '--scale': {},
-        }
-
         dc = self.get_compose(files=self.files)
-        dc.command('up', options)
+        # dc.command('up', options)
+        dc.start_containers(services)
 
         log.info("Stack started")
 
@@ -1431,8 +1464,15 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.base_files)
         services = self.get_services(default=self.active_services)
 
+        base_services_list = []
+        for s in self.base_services:
+            base_services_list.append(s.get('name'))
+
+        # List of BASE active services (i.e. remove services not in base)
+        services_intersection = list(set(services).intersection(base_services_list))
+
         options = {
-            'SERVICE': services,
+            'SERVICE': services_intersection,
             # TODO: user should be allowed to set the two below from cli
             '--no-cache': False,
             '--pull': False,
@@ -1503,8 +1543,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
 
         if self.current_args.get('volatile'):
-            service = "certificates-proxy"
-            return dc.create_volatile_container(service, command)
+            # return dc.command('up', options)
+            return dc.start_containers(
+                ["certificates-proxy"], detach=False
+            )
 
         return dc.exec_command(service, user=user, command=command)
 
@@ -1639,24 +1681,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not nreplicas.isnumeric():
             log.exit("Invalid number of replicas: %s", nreplicas)
 
-        # services = self.get_services(default=self.active_services)
-        services = [service]
-        compose_options = {
-            'SERVICE': services,
-            # '--no-deps': False,
-            '--no-deps': True,
-            '--detach': True,
-            '--build': False,
-            '--remove-orphans': True,
-            '--abort-on-container-exit': False,
-            '--no-recreate': False,
-            '--force-recreate': False,
-            '--always-recreate-deps': False,
-            '--no-build': False,
-            '--scale': [scaling],
-        }
         dc = self.get_compose(files=self.files)
-        dc.command('up', compose_options)
+        # dc.command('up', compose_options)
+        dc.start_containers(
+            [service], scale=[scaling], skip_dependencies=True
+        )
 
     def _coverall(self):
 
@@ -1668,7 +1697,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # TODO: if missing link instructions on the website
 
         # Compose file with service > coverage
-        from utilities import CONF_PATH
         compose_file = path.existing(['.', CONF_PATH, 'coverage.yml'], basemsg)
         service = project.check_coverage_service(compose_file)
         # TODO: if missing link a template
@@ -1689,25 +1717,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         path.existing(['.', covfile], basemsg)
         # NOTE: should not be missing if the file above is from the template
 
-        # Execute
-        options = {
-            'SERVICE': [service],
-            '--no-deps': False,
-            # '-d': False,
-            '--detach': False,
-            '--abort-on-container-exit': True,
-            '--remove-orphans': False,
-            '--no-recreate': True,
-            '--force-recreate': False,
-            '--build': False,
-            '--no-build': False,
-            '--no-color': False,
-            '--scale': ['%s=1' % service]
-        }
         dc = self.get_compose(files=[compose_file])
 
-        # FIXME: check if this command could be 'run' instead of using 'up'
-        dc.command('up', options)
+        # dc.command('up', options)
+        dc.start_containers(
+            [service],
+            detach=False,
+            scale=['%s=1' % service],
+            abort_on_container_exit=True,
+            remove_orphans=False,
+            no_recreate=True
+
+        )
 
     def _verify(self):
         """ Verify one service connection (inside backend) """
@@ -1865,7 +1886,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from utilities.packing import install
+        # from utilities.packing import check_version
 
         log.info(
             "You asked to install rapydo-controller %s from pip",
@@ -1880,8 +1902,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         else:
             log.info(
                 "Controller version %s installed from pip", version)
-            installed_version = check_version(package)
-            log.info("Check on installed version: %s", installed_version)
+            # installed_version = check_version(package)
+            # log.info("Check on installed version: %s", installed_version)
 
     @staticmethod
     def install_controller_from_git(version):

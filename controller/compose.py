@@ -162,6 +162,39 @@ class Compose(object):
 
         return (shell_command, shell_args)
 
+    def start_containers(self, services,
+                         detach=True,
+                         scale=None,
+                         skip_dependencies=False,
+                         abort_on_container_exit=False,
+                         # switching in an easier way between modules
+                         remove_orphans=True,
+                         no_recreate=False
+                         ):
+        """
+            Start containers (docker-compose up)
+        """
+
+        if scale is None:
+            scale = {}
+
+        options = {
+            'SERVICE': services,
+            '--no-deps': skip_dependencies,
+            '--detach': detach,
+            '--build': None,
+            '--no-color': False,
+            '--remove-orphans': remove_orphans,
+            '--abort-on-container-exit': abort_on_container_exit,
+            '--no-recreate': no_recreate,
+            '--force-recreate': False,
+            '--always-recreate-deps': False,
+            '--no-build': False,
+            '--scale': scale,
+        }
+
+        return self.command('up', options)
+
     def create_volatile_container(self, service, command=None, publish=None):
         """
             Execute a command on a not container
