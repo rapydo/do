@@ -634,7 +634,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 "if": "true"
             }
         else:
-            repos = self.vars.get('submodules').copy()
+            repos = self.vars.get('repos').copy()
 
         self.gits['main'] = gitter.get_repo(".")
 
