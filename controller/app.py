@@ -150,6 +150,28 @@ class Application(object):
 
         # Check if docker is installed
         self.check_program('docker', min_version="1.13")
+
+        # Check for CVE-2019-5736 vulnerability
+        # Checking version of docker server, since docker client is not affected
+        # and the two versions can differ
+        v = checks.executable(
+            executable='docker',
+            option=["version", "--format", "'{{.Server.Version}}'"],
+            parse_ver=True
+        )
+
+        safe_version = "18.09.2"
+        if LooseVersion(safe_version) > LooseVersion(v):
+            log.critical("""Your docker version is vulnerable to CVE-2019-5736
+
+***************************************************************************************
+Your docker installation (version %s) is affected by a critical vulnerability
+that allows specially-crafted containers to gain administrative privileges on the host.
+For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
+***************************************************************************************
+To fix this issue, please update docker to version %s+
+            """, v, safe_version)
+
         # Use it
         self.docker = Dock()
 
