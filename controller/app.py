@@ -482,11 +482,14 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return specs
 
-    def read_specs(self):
+    def read_specs(self, read_only_project=False):
         """ Read project configuration """
 
-        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         project_file_path = helpers.project_dir(self.project)
+        if read_only_project:
+            default_file_path = None
+        else:
+            default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         try:
             self.specs, self.extended_project, self.extended_project_path = \
                 configuration.read(
@@ -551,11 +554,7 @@ Verify that you are in the right folder, now you are in: %s%s
         If your project requires a specific rapydo version, check if you are
         the rapydo-controller matching that version
         """
-        if self.install:
-            log.debug("Skipping version check with install command")
-            return True
-
-        if self.print_version:
+        if self.install or self.print_version:
             return True
 
         if rapydo_version is None:
@@ -1956,6 +1955,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         if git and editable:
             log.exit("--git and --editable options are not compatible")
+
+        if version == 'auto':
+            self.read_specs(read_only_project=True)
+            version = self.rapydo_version
+            log.info("Detected version %s to be installed", version)
 
         if git:
             return self.install_controller_from_git(version)

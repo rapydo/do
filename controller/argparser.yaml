@@ -151,10 +151,11 @@ subcommands:
     description: Install a rapydo-controller version
     suboptions:
       version:
+        help: version number or auto to automatically detect required version
         positional: true
         type: str
         metavalue: VERSION
-        default: null
+        default: auto
       git:
         type: bool
         metavalue: TRUE_OR_FALSE
