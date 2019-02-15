@@ -70,8 +70,6 @@ class Application(object):
         mem.action = self.action
         if self.action is None:
             log.exit("Internal misconfiguration")
-        else:
-            log.info("Do request: %s" % self.action)
 
         # Action aliases
         self.initialize = self.action == 'init'
@@ -79,6 +77,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.print_version = self.action == 'version'
         self.local_install = self.install and self.current_args.get('editable')
         self.pull = self.action == 'pull'
         self.create = self.action == 'create'
@@ -466,6 +465,23 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return rapydo_version
 
+    @staticmethod
+    def get_version_if_ready(project):
+
+        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+        project_file_path = helpers.project_dir(project)
+        specs, extended_project, extended_project_path = \
+            configuration.read(
+                default_file_path=default_file_path,
+                base_project_path=project_file_path,
+                projects_path=PROJECT_DIR,
+                submodules_path=SUBMODULES_DIR,
+                is_template=False,
+                do_exit=False
+            )
+
+        return specs
+
     def read_specs(self):
         """ Read project configuration """
 
@@ -538,6 +554,10 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.install:
             log.debug("Skipping version check with install command")
             return True
+
+        if self.print_version:
+            return True
+
         if rapydo_version is None:
             rapydo_version = self.rapydo_version
 
@@ -601,7 +621,7 @@ Verify that you are in the right folder, now you are in: %s%s
         #     repo['do'] = True
         # else:
         repo['do'] = self.initialize
-        repo['check'] = not self.install
+        repo['check'] = not self.install and not self.print_version
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
@@ -656,7 +676,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 "if": "true"
             }
         else:
-            repos = self.vars.get('submodules').copy()
+            repos = self.vars.get('submodules', {}).copy()
 
         self.gits['main'] = gitter.get_repo(".")
 
@@ -1839,6 +1859,45 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         )
         print("")
 
+    def _version(self):
+        # You are not inside a rapydo project, only printing rapydo version
+        if not hasattr(self, "version"):
+            print('\nrapydo version: %s' % __version__)
+            return
+
+        # Check if rapydo version is compatible with version required by the project
+        if __version__ == self.rapydo_version:
+            c = "\033[1;32m"  # Light Green
+        else:
+            c = "\033[1;31m"  # Light Red
+        d = "\033[0m"
+
+        cv = "%s%s%s" % (c, __version__, d)
+        pv = "%s%s%s" % (c, self.version, d)
+        rv = "%s%s%s" % (c, self.rapydo_version, d)
+        print('\nrapydo: %s\t%s: %s\trequired rapydo: %s' % (
+              cv, self.project, pv, rv))
+
+        if __version__ != self.rapydo_version:
+            c = LooseVersion(__version__)
+            v = LooseVersion(self.rapydo_version)
+            print(
+                '\nThis project is not compatible with the current rapydo version (%s)'
+                % __version__
+            )
+            if c < v:
+                print(
+                    "Please upgrade rapydo to version %s or modify this project"
+                    % self.rapydo_version
+                )
+            else:
+                print(
+                    "Please downgrade rapydo to version %s or modify this project"
+                    % self.rapydo_version
+                )
+
+            print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
+
     def _formatter(self):
 
         import inspect
@@ -2051,11 +2110,15 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                     first_level_error = None
                     break
         if first_level_error is not None:
-            log.exit(first_level_error)
+            if self.current_args.get('action') == 'version':
+                return self._version()
+            else:
+                log.exit(first_level_error)
 
         # Initial inspection
         self.get_args()
-        log.info("You are using rapydo version %s", __version__)
+        if not self.print_version:
+            log.info("You are using rapydo version %s", __version__)
         self.check_installed_software()
 
         if self.create:
@@ -2071,13 +2134,13 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
-        if not self.install:
+        if not self.install and not self.print_version:
             self.verify_rapydo_version()
             self.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = basher.current_os_uid()
-        if self.install:
+        if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
             self.current_uid = BASE_UID
@@ -2118,7 +2181,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
 
-        if not self.install:
+        if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
             git_checks = False
             git_checks = self.update or self.check
