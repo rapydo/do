@@ -575,14 +575,16 @@ Verify that you are in the right folder, now you are in: %s%s
             action = "Downgrade your controller to version %s" % r
             action += " or upgrade your project"
 
-        exit_message = "This project requires rapydo-controller %s" % r
-        exit_message += ", you are using %s" % c
-        exit_message += "\n\n%s\n" % action
+        action += "\n\nrapydo install --git %s" % r
+
+        msg = "Rapydo version is not compatible"
+        msg += "\n\nThis project requires rapydo %s but you are using %s" % (r, c)
+        msg += "\n\n%s\n" % action
 
         if do_exit:
-            log.exit(exit_message)
+            log.exit(msg)
         else:
-            log.warning(exit_message)
+            log.warning(msg)
 
         return False
 
