@@ -496,6 +496,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     default_file_path=default_file_path,
                     base_project_path=project_file_path,
                     projects_path=PROJECT_DIR,
+                    read_extended=(not self.initialize),
                     submodules_path=SUBMODULES_DIR,
                     is_template=self.is_template,
                     do_exit=False
