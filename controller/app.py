@@ -491,12 +491,19 @@ Verify that you are in the right folder, now you are in: %s%s
         else:
             default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         try:
+            if self.initialize:
+                read_extended = False
+            elif self.install:
+                read_extended = False
+            else:
+                read_extended = True
+
             self.specs, self.extended_project, self.extended_project_path = \
                 configuration.read(
                     default_file_path=default_file_path,
                     base_project_path=project_file_path,
                     projects_path=PROJECT_DIR,
-                    read_extended=(not self.initialize),
+                    read_extended=read_extended,
                     submodules_path=SUBMODULES_DIR,
                     is_template=self.is_template,
                     do_exit=False
