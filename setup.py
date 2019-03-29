@@ -34,7 +34,7 @@ setup(
     },
     install_requires=[
         "rapydo-utils==%s" % current_version,
-        "docker-compose==1.23.2",
+        "docker-compose==1.24.0",
         "dockerfile-parse",
         # "requests==2.18.4",
         "requests==2.20.0",
