@@ -1307,7 +1307,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _status(self):
         dc = self.get_compose(files=self.files)
-        dc.command('ps', {'-q': None, '--services': None, '--quiet': False})
+        dc.command(
+            'ps',
+            {'-q': None, '--services': None, '--quiet': False, '--all': False}
+        )
 
     def _clean(self):
         dc = self.get_compose(files=self.files)
