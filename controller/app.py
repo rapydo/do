@@ -2111,26 +2111,29 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         The heart of the app: it runs a single controller command.
         """
 
-        first_level_error = self.inspect_main_folder()
-        cwd = os.getcwd()
-        if first_level_error is not None:
-            num_iterations = 0
-            while cwd != '/' and num_iterations < 10:
-                num_iterations += 1
-                # TODO: use utils.path here
-                os.chdir("..")
-                cwd = os.getcwd()
-                if self.inspect_main_folder() is None:
-                    log.warning(
-                        "You are not in the rapydo main folder, " +
-                        "changing working dir to %s", cwd)
-                    first_level_error = None
-                    break
-        if first_level_error is not None:
-            if self.current_args.get('action') == 'version':
-                return self._version()
-            else:
-                log.exit(first_level_error)
+        create = self.current_args.get('action', 'unknown') == 'create'
+
+        if not create:
+            first_level_error = self.inspect_main_folder()
+            cwd = os.getcwd()
+            if first_level_error is not None:
+                num_iterations = 0
+                while cwd != '/' and num_iterations < 10:
+                    num_iterations += 1
+                    # TODO: use utils.path here
+                    os.chdir("..")
+                    cwd = os.getcwd()
+                    if self.inspect_main_folder() is None:
+                        log.warning(
+                            "You are not in the rapydo main folder, " +
+                            "changing working dir to %s", cwd)
+                        first_level_error = None
+                        break
+            if first_level_error is not None:
+                if self.current_args.get('action') == 'version':
+                    return self._version()
+                else:
+                    log.exit(first_level_error)
 
         # Initial inspection
         self.get_args()
