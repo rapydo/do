@@ -70,8 +70,6 @@ class Application(object):
         mem.action = self.action
         if self.action is None:
             log.exit("Internal misconfiguration")
-        else:
-            log.info("Do request: %s" % self.action)
 
         # Action aliases
         self.initialize = self.action == 'init'
@@ -79,6 +77,7 @@ class Application(object):
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
+        self.print_version = self.action == 'version'
         self.local_install = self.install and self.current_args.get('editable')
         self.pull = self.action == 'pull'
         self.create = self.action == 'create'
@@ -150,6 +149,28 @@ class Application(object):
 
         # Check if docker is installed
         self.check_program('docker', min_version="1.13")
+
+        # Check for CVE-2019-5736 vulnerability
+        # Checking version of docker server, since docker client is not affected
+        # and the two versions can differ
+        v = checks.executable(
+            executable='docker',
+            option=["version", "--format", "'{{.Server.Version}}'"],
+            parse_ver=True
+        )
+
+        safe_version = "18.09.2"
+        if LooseVersion(safe_version) > LooseVersion(v):
+            log.critical("""Your docker version is vulnerable to CVE-2019-5736
+
+***************************************************************************************
+Your docker installation (version %s) is affected by a critical vulnerability
+that allows specially-crafted containers to gain administrative privileges on the host.
+For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
+***************************************************************************************
+To fix this issue, please update docker to version %s+
+            """, v, safe_version)
+
         # Use it
         self.docker = Dock()
 
@@ -444,17 +465,45 @@ Verify that you are in the right folder, now you are in: %s%s
 
         return rapydo_version
 
-    def read_specs(self):
-        """ Read project configuration """
+    @staticmethod
+    def get_version_if_ready(project):
 
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+        project_file_path = helpers.project_dir(project)
+        specs, extended_project, extended_project_path = \
+            configuration.read(
+                default_file_path=default_file_path,
+                base_project_path=project_file_path,
+                projects_path=PROJECT_DIR,
+                submodules_path=SUBMODULES_DIR,
+                is_template=False,
+                do_exit=False
+            )
+
+        return specs
+
+    def read_specs(self, read_only_project=False):
+        """ Read project configuration """
+
         project_file_path = helpers.project_dir(self.project)
+        if read_only_project:
+            default_file_path = None
+        else:
+            default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         try:
+            if self.initialize:
+                read_extended = False
+            elif self.install:
+                read_extended = False
+            else:
+                read_extended = True
+
             self.specs, self.extended_project, self.extended_project_path = \
                 configuration.read(
                     default_file_path=default_file_path,
                     base_project_path=project_file_path,
                     projects_path=PROJECT_DIR,
+                    read_extended=read_extended,
                     submodules_path=SUBMODULES_DIR,
                     is_template=self.is_template,
                     do_exit=False
@@ -513,9 +562,9 @@ Verify that you are in the right folder, now you are in: %s%s
         If your project requires a specific rapydo version, check if you are
         the rapydo-controller matching that version
         """
-        if self.install:
-            log.debug("Skipping version check with install command")
+        if self.install or self.print_version:
             return True
+
         if rapydo_version is None:
             rapydo_version = self.rapydo_version
 
@@ -533,14 +582,16 @@ Verify that you are in the right folder, now you are in: %s%s
             action = "Downgrade your controller to version %s" % r
             action += " or upgrade your project"
 
-        exit_message = "This project requires rapydo-controller %s" % r
-        exit_message += ", you are using %s" % c
-        exit_message += "\n\n%s\n" % action
+        action += "\n\nrapydo install --git %s" % r
+
+        msg = "Rapydo version is not compatible"
+        msg += "\n\nThis project requires rapydo %s but you are using %s" % (r, c)
+        msg += "\n\n%s\n" % action
 
         if do_exit:
-            log.exit(exit_message)
+            log.exit(msg)
         else:
-            log.warning(exit_message)
+            log.warning(msg)
 
         return False
 
@@ -579,7 +630,7 @@ Verify that you are in the right folder, now you are in: %s%s
         #     repo['do'] = True
         # else:
         repo['do'] = self.initialize
-        repo['check'] = not self.install
+        repo['check'] = not self.install and not self.print_version
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
@@ -634,7 +685,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 "if": "true"
             }
         else:
-            repos = self.vars.get('repos').copy()
+            repos = self.vars.get('submodules', {}).copy()
 
         self.gits['main'] = gitter.get_repo(".")
 
@@ -1256,7 +1307,10 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _status(self):
         dc = self.get_compose(files=self.files)
-        dc.command('ps', {'-q': None, '--services': None, '--quiet': False})
+        dc.command(
+            'ps',
+            {'-q': None, '--services': None, '--quiet': False, '--all': False}
+        )
 
     def _clean(self):
         dc = self.get_compose(files=self.files)
@@ -1817,6 +1871,45 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         )
         print("")
 
+    def _version(self):
+        # You are not inside a rapydo project, only printing rapydo version
+        if not hasattr(self, "version"):
+            print('\nrapydo version: %s' % __version__)
+            return
+
+        # Check if rapydo version is compatible with version required by the project
+        if __version__ == self.rapydo_version:
+            c = "\033[1;32m"  # Light Green
+        else:
+            c = "\033[1;31m"  # Light Red
+        d = "\033[0m"
+
+        cv = "%s%s%s" % (c, __version__, d)
+        pv = "%s%s%s" % (c, self.version, d)
+        rv = "%s%s%s" % (c, self.rapydo_version, d)
+        print('\nrapydo: %s\t%s: %s\trequired rapydo: %s' % (
+              cv, self.project, pv, rv))
+
+        if __version__ != self.rapydo_version:
+            c = LooseVersion(__version__)
+            v = LooseVersion(self.rapydo_version)
+            print(
+                '\nThis project is not compatible with the current rapydo version (%s)'
+                % __version__
+            )
+            if c < v:
+                print(
+                    "Please upgrade rapydo to version %s or modify this project"
+                    % self.rapydo_version
+                )
+            else:
+                print(
+                    "Please downgrade rapydo to version %s or modify this project"
+                    % self.rapydo_version
+                )
+
+            print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
+
     def _formatter(self):
 
         import inspect
@@ -1873,6 +1966,11 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         if git and editable:
             log.exit("--git and --editable options are not compatible")
+
+        if version == 'auto':
+            self.read_specs(read_only_project=True)
+            version = self.rapydo_version
+            log.info("Detected version %s to be installed", version)
 
         if git:
             return self.install_controller_from_git(version)
@@ -2013,27 +2111,34 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         The heart of the app: it runs a single controller command.
         """
 
-        first_level_error = self.inspect_main_folder()
-        cwd = os.getcwd()
-        if first_level_error is not None:
-            num_iterations = 0
-            while cwd != '/' and num_iterations < 10:
-                num_iterations += 1
-                # TODO: use utils.path here
-                os.chdir("..")
-                cwd = os.getcwd()
-                if self.inspect_main_folder() is None:
-                    log.warning(
-                        "You are not in the rapydo main folder, " +
-                        "changing working dir to %s", cwd)
-                    first_level_error = None
-                    break
-        if first_level_error is not None:
-            log.exit(first_level_error)
+        create = self.current_args.get('action', 'unknown') == 'create'
+
+        if not create:
+            first_level_error = self.inspect_main_folder()
+            cwd = os.getcwd()
+            if first_level_error is not None:
+                num_iterations = 0
+                while cwd != '/' and num_iterations < 10:
+                    num_iterations += 1
+                    # TODO: use utils.path here
+                    os.chdir("..")
+                    cwd = os.getcwd()
+                    if self.inspect_main_folder() is None:
+                        log.warning(
+                            "You are not in the rapydo main folder, " +
+                            "changing working dir to %s", cwd)
+                        first_level_error = None
+                        break
+            if first_level_error is not None:
+                if self.current_args.get('action') == 'version':
+                    return self._version()
+                else:
+                    log.exit(first_level_error)
 
         # Initial inspection
         self.get_args()
-        log.info("You are using rapydo version %s", __version__)
+        if not self.print_version:
+            log.info("You are using rapydo version %s", __version__)
         self.check_installed_software()
 
         if self.create:
@@ -2049,13 +2154,13 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
-        if not self.install:
+        if not self.install and not self.print_version:
             self.verify_rapydo_version()
             self.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = basher.current_os_uid()
-        if self.install:
+        if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
             self.current_uid = BASE_UID
@@ -2096,7 +2201,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
 
-        if not self.install:
+        if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
             git_checks = False
             git_checks = self.update or self.check

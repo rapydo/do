@@ -151,10 +151,11 @@ subcommands:
     description: Install a rapydo-controller version
     suboptions:
       version:
+        help: version number or auto to automatically detect required version
         positional: true
         type: str
         metavalue: VERSION
-        default: null
+        default: auto
       git:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -401,6 +402,9 @@ subcommands:
         type: str
         metavalue: TEMPLATE_NAME
         help: Name of the template used to initialize your project
+
+  version:
+    description: Retrieve version details
 
   # upgrade:  # DEPRECATED, see issues/71
   #   description: upgrade your current project to new official releases
