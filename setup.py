@@ -37,7 +37,7 @@ setup(
         "docker-compose==1.24.0",
         "dockerfile-parse",
         # "requests==2.18.4",
-        "requests==2.20.0",
+        # "requests==2.20.0",
         # unable to update due to docker-compose
         # docker-compose 1.23.2 has requirement
         # requests!=2.11.0,!=2.12.2,!=2.18.0,<2.21,>=2.6.1
