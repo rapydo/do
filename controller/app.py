@@ -1860,16 +1860,20 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
             f.write("project: %s" % project_name)
 
+        git_dir = os.path.join(project_name, ".git")
+        shutil.rmtree(git_dir)
+
         log.info(
             "Project %s successfully created from %s template",
             project_name, template_name
         )
         print("")
-        print(
-            "Now you can enter the project (cd %s) and execute rapydo init" %
-            project_name
-        )
+        print("Now you can enter the project and execute rapydo init")
         print("")
+        print("cd %s" % project_name)
+        print("git init")
+        print("git remote add origin https://your_remote_git/your_project.git")
+        print("rapydo init")
 
     def _version(self):
         # You are not inside a rapydo project, only printing rapydo version
