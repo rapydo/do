@@ -303,8 +303,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/custom.ts',
                     'frontend/app',
                     'frontend/app/custom.project.options.ts',
-                    'frontend/app/custom.routes.ts',
-                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.module.ts',
                     'frontend/app/custom.navbar.ts',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
@@ -322,6 +321,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/app.entryComponents.ts',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
+                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.routes.ts',
                 ]
             )
 
