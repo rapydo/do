@@ -1604,7 +1604,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             )
 
         if self.current_args.get('force'):
-            command = [command, "--force"]
+            command = "%s --force" % command
 
         return dc.exec_command(service, user=user, command=command)
 
