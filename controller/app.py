@@ -1603,6 +1603,9 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 ["certificates-proxy"], detach=False
             )
 
+        if self.current_args.get('force'):
+            command = [command, "--force"]
+
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_dhparam(self):
