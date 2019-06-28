@@ -44,7 +44,7 @@ setup(
         # but you'll have requests 2.21.0 which is incompatible.
         # "requests==2.21.0",
         # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
-        "PyYAML==3.13",
+        # "PyYAML==3.13",
 
         "jinja2",
         "plumbum",

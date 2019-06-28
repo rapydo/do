@@ -231,6 +231,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Create a volatile proxy service to request the certificate
+      force:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force Let's Encrypt to renew the certificate
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:

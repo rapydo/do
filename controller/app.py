@@ -303,8 +303,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/custom.ts',
                     'frontend/app',
                     'frontend/app/custom.project.options.ts',
-                    'frontend/app/custom.routes.ts',
-                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.module.ts',
                     'frontend/app/custom.navbar.ts',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
@@ -322,6 +321,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/app.entryComponents.ts',
                     'frontend/app/app.home.ts',
                     'frontend/app/app.home.html',
+                    'frontend/app/custom.declarations.ts',
+                    'frontend/app/custom.routes.ts',
                 ]
             )
 
@@ -1602,6 +1603,9 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 ["certificates-proxy"], detach=False
             )
 
+        if self.current_args.get('force'):
+            command = "%s --force" % command
+
         return dc.exec_command(service, user=user, command=command)
 
     def _ssl_dhparam(self):
@@ -1860,16 +1864,20 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
             f.write("project: %s" % project_name)
 
+        git_dir = os.path.join(project_name, ".git")
+        shutil.rmtree(git_dir)
+
         log.info(
             "Project %s successfully created from %s template",
             project_name, template_name
         )
         print("")
-        print(
-            "Now you can enter the project (cd %s) and execute rapydo init" %
-            project_name
-        )
+        print("Now you can enter the project and execute rapydo init")
         print("")
+        print("cd %s" % project_name)
+        print("git init")
+        print("git remote add origin https://your_remote_git/your_project.git")
+        print("rapydo init")
 
     def _version(self):
         # You are not inside a rapydo project, only printing rapydo version
