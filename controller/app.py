@@ -583,7 +583,8 @@ Verify that you are in the right folder, now you are in: %s%s
             action = "Downgrade your controller to version %s" % r
             action += " or upgrade your project"
 
-        action += "\n\nrapydo install --git %s" % r
+        # action += "\n\nrapydo install --git %s" % r
+        action += "\n\nrapydo install --git auto"
 
         msg = "Rapydo version is not compatible"
         msg += "\n\nThis project requires rapydo %s but you are using %s" % (r, c)
