@@ -1551,6 +1551,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
     def _ssl_certificate(self):
         chain = self.current_args.get('chain_file')
         key = self.current_args.get('key_file')
+        no_tty = self.current_args.get('no_tty')
 
         if chain is not None or key is not None:
             if chain is None:
@@ -1607,7 +1608,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         if self.current_args.get('force'):
             command = "%s --force" % command
 
-        return dc.exec_command(service, user=user, command=command)
+        return dc.exec_command(
+            service, user=user, command=command, disable_tty=no_tty)
 
     def _ssl_dhparam(self):
         meta = glom(

@@ -228,7 +228,9 @@ class Compose(object):
 
         return self.command('run', options)
 
-    def exec_command(self, service, user=None, command=None, nofailure=False):
+    def exec_command(self,
+                     service, user=None, command=None,
+                     disable_tty=False, nofailure=False):
         """
             Execute a command on a running container
         """
@@ -239,7 +241,7 @@ class Compose(object):
             'ARGS': shell_args,
             '--index': '1',
             '--user': user,
-            '-T': False,
+            '-T': disable_tty,
             '--env': None,
             '--workdir': None,
             # '-d': False,

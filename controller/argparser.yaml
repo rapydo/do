@@ -236,6 +236,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Force Let's Encrypt to renew the certificate
+      no-tty:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
