@@ -1334,7 +1334,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         services = self.get_services(default=self.active_services)
 
         dc = self.get_compose(files=self.files)
-        # dc.command('up', options)
         dc.start_containers(services)
 
         log.info("Stack started")
@@ -1786,7 +1785,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             detach=False,
             scale=['%s=1' % service],
             abort_on_container_exit=True,
-            remove_orphans=False,
             no_recreate=True
 
         )

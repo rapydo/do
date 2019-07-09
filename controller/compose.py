@@ -167,8 +167,6 @@ class Compose(object):
                          scale=None,
                          skip_dependencies=False,
                          abort_on_container_exit=False,
-                         # switching in an easier way between modules
-                         remove_orphans=True,
                          no_recreate=False
                          ):
         """
@@ -184,7 +182,7 @@ class Compose(object):
             '--detach': detach,
             '--build': None,
             '--no-color': False,
-            '--remove-orphans': remove_orphans,
+            '--remove-orphans': False,
             '--abort-on-container-exit': abort_on_container_exit,
             '--no-recreate': no_recreate,
             '--force-recreate': False,
