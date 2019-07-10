@@ -135,8 +135,8 @@ class Compose(object):
             else:
                 log.critical_exit(msg)
         except docker_errors as e:
-            log.critical_exit("Failed docker container:\n%s" % e)
-        except ProjectError as e:
+            log.exit("Failed docker container:\n%s" % e)
+        except (ProjectError, NoSuchService) as e:
             log.exit(str(e))
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
