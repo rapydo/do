@@ -5,7 +5,6 @@
 """
 
 import better_exceptions as be
-from controller.arguments import ArgParser
 
 
 def activate_log():
@@ -16,6 +15,8 @@ def activate_log():
 def main():
     be  # pylint:disable=pointless-statement
     try:
+        # imported here to avoid uncatched Keyboard Interruptions
+        from controller.arguments import ArgParser
         arguments = ArgParser()
 
         from controller.app import Application
