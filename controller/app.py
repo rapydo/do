@@ -805,21 +805,18 @@ Verify that you are in the right folder, now you are in: %s%s
            or self.action == 'ssl-dhparam':
             return
 
-        # TODO: check all builds against their Dockefile latest commit
-        # log.pp(self.services)
-
         # Compare builds depending on templates
         # NOTE: slow operation!
-        self.builds, self.template_builds, overriding_imgs = locate_builds(
-            self.base_services, self.services)
-
-        dimages = self.docker.images()
-
-        if not self.current_args.get('rebuild_templates', False):
-            self.verify_template_builds(
-                dimages, self.template_builds)
+        if self.action in ['check', 'init', 'update', 'build']:
+            self.builds, self.template_builds, overriding_imgs = locate_builds(
+                self.base_services, self.services)
 
         if self.action in ['check', 'init', 'update']:
+            dimages = self.docker.images()
+            # if rebuild_templates => build is forced, these checks are not needed
+            if not self.current_args.get('rebuild_templates', False):
+                self.verify_template_builds(dimages, self.template_builds)
+
             self.verify_obsolete_builds(
                 dimages, self.builds, overriding_imgs, self.template_builds)
 
@@ -2178,8 +2175,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.warning("Current user is 'root'")
         else:
             self.current_os_user = basher.current_os_user()
-            skip_check_perm = self.current_args.get(
-                'skip_check_permissions', False)
+            skip_check_perm = not self.current_args.get(
+                'check_permissions', False)
             log.debug("Current user: %s (UID: %d)" % (
                 self.current_os_user, self.current_uid))
 

@@ -87,10 +87,10 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
-  skip-check-permissions:
+  check-permissions:
     type: bool
     default: False
-    help: skip permission checks on file system
+    help: Enabled permission checks on file system
 
   # net:
   #   type: str
