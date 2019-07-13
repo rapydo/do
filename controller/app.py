@@ -1032,42 +1032,26 @@ Verify that you are in the right folder, now you are in: %s%s
         libs_dir = os.path.join("data", self.project, "frontend")
         modules_dir = os.path.join(libs_dir, "node_modules")
 
-        install = False
         if not os.path.isdir(libs_dir):
-            install = True
             os.makedirs(libs_dir)
             log.warning(
                 "Libs folder not found, creating %s" % libs_dir)
         if not os.path.isdir(modules_dir):
-            install = True
             os.makedirs(modules_dir)
             log.warning(
                 "Modules folder not found, creating %s" % modules_dir)
-        if self.update:
+
+        if not os.path.exists(os.path.join(libs_dir, "package.json")):
             install = True
-
-        if not install:
-
-            if not os.path.exists(os.path.join(libs_dir, "package.json")):
-                install = True
-                log.warning(
-                    "Package.json not found, will be created at startup")
-
-            libs = helpers.list_path(modules_dir)
-
-            if len(libs) <= 0:
-                install = True
-            else:
-                log.checked("Found %d frontend libs installed" % len(libs))
-
-        if not install:
-            log.checked("Frontend libs installed")
-        elif self.check:
             log.warning(
-                "Frontend libs not found, will be installed at startup")
+                "Package.json not found, will be created at startup")
+
+        libs = helpers.list_path(modules_dir)
+
+        if len(libs) <= 0:
+            log.warning("Frontend libs not found, will be installed at startup")
         else:
-            log.warning(
-                "Frontend libs not found, will be installed at startup")
+            log.checked("Found %d frontend libs installed" % len(libs))
 
     def get_services(self, key='services', sep=',',
                      default=None
