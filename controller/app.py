@@ -1042,7 +1042,6 @@ Verify that you are in the right folder, now you are in: %s%s
                 "Modules folder not found, creating %s" % modules_dir)
 
         if not os.path.exists(os.path.join(libs_dir, "package.json")):
-            install = True
             log.warning(
                 "Package.json not found, will be created at startup")
 
