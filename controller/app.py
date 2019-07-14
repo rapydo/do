@@ -717,7 +717,7 @@ Verify that you are in the right folder, now you are in: %s%s
             read_yamls(compose_files)
         log.verbose("Configuration order:\n%s" % self.files)
 
-     def build_dependencies(self):
+    def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
         if self.action == 'shell' \
