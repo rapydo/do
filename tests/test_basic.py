@@ -42,7 +42,6 @@ def exec_command(capfd, command):
 
 
 def test_all(capfd):
-    # def test_init(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
@@ -105,9 +104,6 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
 
-
-# def test_two_projects(capfd):
-
     os.remove(".projectrc")
 
     bash = BashCommands()
@@ -135,9 +131,6 @@ def test_all(capfd):
 
     _, err = exec_command(capfd, "rapydo check -s")
     assert "INFO All checked" in err
-
-
-# def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert env_log_prefix_verbose in err
@@ -186,9 +179,6 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo clean")
     assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
-
-
-# def test_miscellanous(capfd):
 
     endpoint_name = 'justatest'
     _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)

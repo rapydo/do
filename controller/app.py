@@ -1787,7 +1787,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
             print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
 
-   def read_conf_files(self, filename_base):
+    def read_conf_files(self, filename_base):
         """
         Generic method to find and list:
         - submodules/rapydo-confs/conf/YOURBASE.yml     # required
