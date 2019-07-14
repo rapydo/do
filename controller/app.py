@@ -1052,25 +1052,17 @@ Verify that you are in the right folder, now you are in: %s%s
         else:
             log.checked("Found %d frontend libs installed" % len(libs))
 
-    def get_services(self, key='services', sep=',',
-                     default=None
-                     # , avoid_default=False
-                     ):
+    def get_services(self, key='services', sep=',', default=None):
 
         value = self.current_args.get(key).split(sep)
-        # if avoid_default or default is not None:
-        if default is not None:
-            config_default = \
-                self.arguments.parse_conf.get('options', {}) \
-                .get('services') \
-                .get('default')
-            if value == [config_default]:
-                # if avoid_default:
-                #     log.exit("You must set '--services' option")
-                if default is not None:
-                    value = default
-                else:
-                    pass
+        if default is None:
+            return value
+
+        # check if value is equal to the services default from the configuration
+        config_default = glom(self.arguments.parse_conf, "options.services.default")
+        if value == [config_default]:
+            return default
+
         return value
 
     @staticmethod
@@ -1191,20 +1183,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.checked("No PLACEHOLDER variable to be replaced")
 
         return missing
-
-    # def manage_one_service(self, service=None):
-
-    #     if service is None:
-    #         services = self.get_services(avoid_default=True)
-
-    #         if len(services) != 1:
-    #             log.exit(
-    #                 "Commands can be executed only on one service." +
-    #                 "\nCurrent request on: %s" % services)
-    #         else:
-    #             service = services.pop()
-
-    #     return service
 
     def container_info(self, service_name):
         return self.services_dict.get(service_name, None)
