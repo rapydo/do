@@ -428,22 +428,22 @@ Verify that you are in the right folder, now you are in: %s%s
 
             break
 
-    @staticmethod
-    def get_version_if_ready(project):
+    # @staticmethod
+    # def get_version_if_ready(project):
 
-        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
-        project_file_path = helpers.project_dir(project)
-        specs, extended_project, extended_project_path = \
-            configuration.read(
-                default_file_path=default_file_path,
-                base_project_path=project_file_path,
-                projects_path=PROJECT_DIR,
-                submodules_path=SUBMODULES_DIR,
-                is_template=False,
-                do_exit=False
-            )
+    #     default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+    #     project_file_path = helpers.project_dir(project)
+    #     specs, extended_project, extended_project_path = \
+    #         configuration.read(
+    #             default_file_path=default_file_path,
+    #             base_project_path=project_file_path,
+    #             projects_path=PROJECT_DIR,
+    #             submodules_path=SUBMODULES_DIR,
+    #             is_template=False,
+    #             do_exit=False
+    #         )
 
-        return specs
+    #     return specs
 
     def read_specs(self, read_only_project=False):
         """ Read project configuration """
@@ -504,7 +504,9 @@ Verify that you are in the right folder, now you are in: %s%s
         self.rapydo_version = project_block.get('rapydo', None)
 
         if self.rapydo_version:
-            log.exit("Rapydo version not found in your project_configuration file")
+            log.error("Rapydo version not found in your project_configuration file")
+            log.warning(project_block)
+            log.exit("Cannot continue")
 
     def preliminary_version_check(self):
 
