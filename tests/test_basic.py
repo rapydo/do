@@ -77,6 +77,11 @@ def test_all(capfd):
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
 
+    # CHECK on rapydo-core by enabling permissions checks
+    _, err = exec_command(capfd, "rapydo --check-permissions check")
+    assert env_log_prefix_info in err
+    assert "INFO All checked" in err
+
     # NOW we are on a fork of rapydo-core
     gitobj = Repo(".")
     gitobj.remotes.origin.set_url("just_a_non_url")

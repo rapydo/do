@@ -429,44 +429,6 @@ Verify that you are in the right folder, now you are in: %s%s
             break
 
     @staticmethod
-    def extract_rapydo_version(specs):
-
-        project_block = specs.get('project', {})
-        releases = specs.get('releases', {})
-
-        current_version = project_block.get('version', None)
-        rapydo_version = project_block.get('rapydo', None)
-
-        # This project does not support releases:
-
-        if rapydo_version is not None:
-            return rapydo_version
-
-        log.warning("Rapydo version not specified, looking for releases")
-
-        if len(releases) == 0:
-            log.exit("No version specified for this project")
-
-        # Check if the current version is listed in releases
-        if current_version not in releases:
-            log.exit(
-                "Releases misconfiguration: " +
-                "current version (%s) not found" % current_version
-            )
-
-        current_release = releases.get(current_version)
-        rapydo_version = current_release.get("rapydo")
-
-        # rapydo version is mandatory
-        if rapydo_version is None:
-            log.exit(
-                "Releases misconfiguration: " +
-                "missing rapydo version in release %s" % current_release
-            )
-
-        return rapydo_version
-
-    @staticmethod
     def get_version_if_ready(project):
 
         default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
@@ -539,22 +501,17 @@ Verify that you are in the right folder, now you are in: %s%s
         self.project_title = project_block.get('title', "Unknown title")
         # Your project version
         self.version = project_block.get('version', None)
+        self.rapydo_version = project_block.get('rapydo', None)
 
-        # Check if project supports releases
-        # self.releases = self.specs.get('releases', {})
-        # self.rapydo_version = self.extract_rapydo_version(
-        #     self.releases, project_block)
-
-        self.rapydo_version = self.extract_rapydo_version(self.specs)
+        if self.rapydo_version:
+            log.exit("Rapydo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
 
         project_file_path = helpers.project_dir(self.project)
         specs = configuration.load_project_configuration(project_file_path)
-        # project_block = specs.get('project', {})
-        # releases = specs.get('releases', {})
-
-        v = self.extract_rapydo_version(specs)
+        project_block = specs.get('project', {})
+        v = project_block.get('rapydo', None)
 
         self.verify_rapydo_version(rapydo_version=v)
 
