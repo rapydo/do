@@ -113,19 +113,19 @@ def test_all(capfd):
     bash = BashCommands()
     bash.copy_folder("projects/template", "projects/second")
 
-    _, err = exec_command(capfd, "rapydo -env check -s")
+    _, err = exec_command(capfd, "rapydo check -s")
     assert "EXIT Please select the --project option on one of the following:" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p template check -s")
+    _, err = exec_command(capfd, "rapydo -p template check -s")
     assert "INFO All checked" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p invalid_character check -s")
+    _, err = exec_command(capfd, "rapydo -p invalid_character check -s")
     assert "EXIT Wrong project name, _ is not a valid character." in err
 
-    _, err = exec_command(capfd, "rapydo -env -p celery check -s")
+    _, err = exec_command(capfd, "rapydo -p celery check -s")
     assert "EXIT You selected a reserved name, invalid project name: celery" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
+    _, err = exec_command(capfd, "rapydo -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
 
@@ -133,7 +133,7 @@ def test_all(capfd):
     with open('.projectrc', 'w') as f:
         f.write("project: template")
 
-    _, err = exec_command(capfd, "rapydo -env check -s")
+    _, err = exec_command(capfd, "rapydo check -s")
     assert "INFO All checked" in err
 
 
