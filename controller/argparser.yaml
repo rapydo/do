@@ -69,14 +69,6 @@ options:
     default: active services
     help: list of services referring to a command
 
-  # force-env:
-  cache-env:
-    alias: env
-    type: bool
-    default: False
-    # help: Force recreation of the docker compose .env file even if existing
-    help: cache the docker compose .env file instead of recreating it
-
   development:
     type: bool
     default: False

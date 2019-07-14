@@ -497,23 +497,18 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.frontend is not None:
             log.very_verbose("Frontend framework: %s" % self.frontend)
 
-        project_block = self.specs.get('project', {})
-        self.project_title = project_block.get('title', "Unknown title")
-        # Your project version
-        self.version = project_block.get('version', None)
-        self.rapydo_version = project_block.get('rapydo', None)
+        self.project_title = glom(self.specs, "project.title", default='Unknown title')
+        self.version = glom(self.specs, "project.version", default=None)
+        self.rapydo_version = glom(self.specs, "project.rapydo", default=None)
 
         if self.rapydo_version:
-            log.error("Rapydo version not found in your project_configuration file")
-            log.warning(project_block)
-            log.exit("Cannot continue")
+            log.exit("Rapydo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
 
         project_file_path = helpers.project_dir(self.project)
         specs = configuration.load_project_configuration(project_file_path)
-        project_block = specs.get('project', {})
-        v = project_block.get('rapydo', None)
+        v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
 
@@ -1044,74 +1039,67 @@ Verify that you are in the right folder, now you are in: %s%s
     def make_env(self):
         envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
 
-        # if self.current_args.get('force_env'):
-        if not self.current_args.get('cache_env'):
-            try:
-                os.unlink(envfile)
-                log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
-            except FileNotFoundError:
-                log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
+        try:
+            os.unlink(envfile)
+            log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+        except FileNotFoundError:
+            log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
 
-        if not os.path.isfile(envfile):
+        env = self.vars.get('env')
+        if env is None:
+            env = {}
+        env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
+        env['COMPOSE_PROJECT_NAME'] = self.project
+        # Relative paths from ./submodules/rapydo-confs/confs
+        env['SUBMODULE_DIR'] = "../.."
+        env['VANILLA_DIR'] = "../../.."
+        env['PROJECT_DIR'] = os.path.join(
+            env['VANILLA_DIR'], PROJECT_DIR, self.project)
 
-            env = self.vars.get('env')
-            if env is None:
-                env = {}
-            env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
-            env['COMPOSE_PROJECT_NAME'] = self.project
-            # Relative paths from ./submodules/rapydo-confs/confs
-            env['SUBMODULE_DIR'] = "../.."
-            env['VANILLA_DIR'] = "../../.."
-            env['PROJECT_DIR'] = os.path.join(
-                env['VANILLA_DIR'], PROJECT_DIR, self.project)
-
-            if self.extended_project_path is None:
-                env['EXTENDED_PROJECT_PATH'] = env['PROJECT_DIR']
-            else:
-                env['EXTENDED_PROJECT_PATH'] = os.path.join(
-                    env['VANILLA_DIR'], self.extended_project_path)
-
-            if self.extended_project is None:
-                env['EXTENDED_PROJECT'] = EXTENDED_PROJECT_DISABLED
-            else:
-                env['EXTENDED_PROJECT'] = self.extended_project
-
-            env['RAPYDO_VERSION'] = __version__
-            env['CURRENT_UID'] = self.current_uid
-            env['PROJECT_TITLE'] = self.project_title
-            if self.current_args.get('privileged'):
-                env['DOCKER_PRIVILEGED_MODE'] = "true"
-            else:
-                env['DOCKER_PRIVILEGED_MODE'] = "false"
-
-            net = self.current_args.get('net', 'bridge')
-            env['DOCKER_NETWORK_MODE'] = net
-            env.update({'PLACEHOLDER': PLACEHOLDER})
-
-            # # docker network mode
-            # # https://docs.docker.com/compose/compose-file/#network_mode
-            # nmode = self.current_args.get('net')
-            # nmodes = ['bridge', 'hosts']
-            # if nmode not in nmodes:
-            #     log.warning("Invalid network mode: %s", nmode)
-            #     nmode = nmodes[0]
-            # env['DOCKER_NETWORK_MODE'] = nmode
-            # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
-
-            with open(envfile, 'w+') as whandle:
-                for key, value in sorted(env.items()):
-                    if value is None:
-                        value = ''
-                    else:
-                        value = str(value)
-                    # log.print("ENV values. %s:*%s*" % (key, value))
-                    if ' ' in value:
-                        value = "'%s'" % value
-                    whandle.write("%s=%s\n" % (key, value))
-                log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
-
+        if self.extended_project_path is None:
+            env['EXTENDED_PROJECT_PATH'] = env['PROJECT_DIR']
         else:
-            log.very_verbose("Using cached %s" % COMPOSE_ENVIRONMENT_FILE)
+            env['EXTENDED_PROJECT_PATH'] = os.path.join(
+                env['VANILLA_DIR'], self.extended_project_path)
+
+        if self.extended_project is None:
+            env['EXTENDED_PROJECT'] = EXTENDED_PROJECT_DISABLED
+        else:
+            env['EXTENDED_PROJECT'] = self.extended_project
+
+        env['RAPYDO_VERSION'] = __version__
+        env['CURRENT_UID'] = self.current_uid
+        env['PROJECT_TITLE'] = self.project_title
+        if self.current_args.get('privileged'):
+            env['DOCKER_PRIVILEGED_MODE'] = "true"
+        else:
+            env['DOCKER_PRIVILEGED_MODE'] = "false"
+
+        net = self.current_args.get('net', 'bridge')
+        env['DOCKER_NETWORK_MODE'] = net
+        env.update({'PLACEHOLDER': PLACEHOLDER})
+
+        # # docker network mode
+        # # https://docs.docker.com/compose/compose-file/#network_mode
+        # nmode = self.current_args.get('net')
+        # nmodes = ['bridge', 'hosts']
+        # if nmode not in nmodes:
+        #     log.warning("Invalid network mode: %s", nmode)
+        #     nmode = nmodes[0]
+        # env['DOCKER_NETWORK_MODE'] = nmode
+        # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
+
+        with open(envfile, 'w+') as whandle:
+            for key, value in sorted(env.items()):
+                if value is None:
+                    value = ''
+                else:
+                    value = str(value)
+                # log.print("ENV values. %s:*%s*" % (key, value))
+                if ' ' in value:
+                    value = "'%s'" % value
+                whandle.write("%s=%s\n" % (key, value))
+            log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
 
