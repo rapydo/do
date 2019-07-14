@@ -90,14 +90,6 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
-
-# def test_checks(capfd):
-    # Check  .env cache
-    _, err = exec_command(capfd, "rapydo --cache-env check -s")
-    log.pp(err)
-    assert env_cached_log_verbose in err
-    assert "INFO All checked" in err
-
     # _, err = exec_command(capfd, "rapydo list --args")
     # assert "INFO List of configured rapydo arguments:" in err
 
