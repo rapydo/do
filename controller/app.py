@@ -717,35 +717,7 @@ Verify that you are in the right folder, now you are in: %s%s
             read_yamls(compose_files)
         log.verbose("Configuration order:\n%s" % self.files)
 
-    def read_conf_files(self, filename_base):
-        """
-        Generic method to find and list:
-        - submodules/rapydo-confs/conf/YOURBASE.yml     # required
-        - projects/CURRENT_PROJECT/conf/YOURBASE.yml    # optional
-        """
-        files = []
-
-        basedir = helpers.current_dir(
-            SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
-        )
-        customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
-
-        main_yml = load_yaml_file(
-            file=filename_base, path=basedir, extension=SHORT_YAML_EXT,
-            return_path=True,
-        )
-        files.append(main_yml)
-        custom_yml = load_yaml_file(
-            file=filename_base, path=customdir, extension=SHORT_YAML_EXT,
-            return_path=True, skip_error=True, logger=False,
-        )
-        if isinstance(custom_yml, str):
-            log.debug("Found custom %s specs", filename_base)
-            files.append(custom_yml)
-
-        return files
-
-    def build_dependencies(self):
+     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
         if self.action == 'shell' \
@@ -1814,6 +1786,34 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 )
 
             print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
+
+   def read_conf_files(self, filename_base):
+        """
+        Generic method to find and list:
+        - submodules/rapydo-confs/conf/YOURBASE.yml     # required
+        - projects/CURRENT_PROJECT/conf/YOURBASE.yml    # optional
+        """
+        files = []
+
+        basedir = helpers.current_dir(
+            SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+        )
+        customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
+
+        main_yml = load_yaml_file(
+            file=filename_base, path=basedir, extension=SHORT_YAML_EXT,
+            return_path=True,
+        )
+        files.append(main_yml)
+        custom_yml = load_yaml_file(
+            file=filename_base, path=customdir, extension=SHORT_YAML_EXT,
+            return_path=True, skip_error=True, logger=False,
+        )
+        if isinstance(custom_yml, str):
+            log.debug("Found custom %s specs", filename_base)
+            files.append(custom_yml)
+
+        return files
 
     def _formatter(self):
 
