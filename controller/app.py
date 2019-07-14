@@ -482,12 +482,7 @@ Verify that you are in the right folder, now you are in: %s%s
         self.vars = self.specs.get('variables', {})
         log.checked("Loaded containers configuration")
 
-        if self.current_args.get('frontend') is not None:
-            framework = self.current_args.get('frontend')
-        else:
-            framework = glom(self.specs,
-                             "variables.frontend.framework",
-                             default=None)
+        framework = glom(self.specs, "variables.frontend.framework", default=None)
 
         if framework == 'None':
             framework = None
@@ -501,7 +496,7 @@ Verify that you are in the right folder, now you are in: %s%s
         self.version = glom(self.specs, "project.version", default=None)
         self.rapydo_version = glom(self.specs, "project.rapydo", default=None)
 
-        if self.rapydo_version:
+        if self.rapydo_version is None:
             log.exit("Rapydo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
@@ -1610,10 +1605,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
         service_name = self.current_args.get('service')
         if service_name is None:
-            # services = self.get_services(default=self.active_services)
-            # for service in services:
-            #     if service not in ['backend', 'frontend', 'proxy', 'celery']:
-            #         print(service)
             service_name = self.vars.get('env', {}).get('AUTH_SERVICE')
 
         force = self.current_args.get('yes')
@@ -2145,7 +2136,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             if build_dependencies:
                 self.build_dependencies()
 
-            # Install or check frontend libraries (if frontend is enabled)
+            # Install or check frontend libraries (onlye if frontend is enabled)
             self.frontend_libs()
 
         # Final step, launch the command

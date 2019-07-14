@@ -34,11 +34,6 @@ options:
     default: DEBUG
     help: level of verbosity
 
-  frontend:
-    type: str
-    metavalue: FRAMEWORK_NAME
-    help: Include a frontend framework to the rapydo stack
-
   no-backend:
     type: bool
     default: False
