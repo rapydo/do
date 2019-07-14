@@ -12,7 +12,7 @@ from utilities import path
 from utilities import checks
 from utilities import helpers
 from utilities import basher
-from utilities import PROJECT_DIR, DEFAULT_TEMPLATE_PROJECT
+from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities import CONF_PATH, EXTENDED_PROJECT_DISABLED
@@ -83,7 +83,6 @@ class Application(object):
         self.create = self.action == 'create'
 
         # Others
-        self.is_template = False
         self.tested_connection = False
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
@@ -142,8 +141,6 @@ class Application(object):
                     "Select one of the following:\n\n %s\n" % projects)
 
         log.checked("Selected project: %s" % self.project)
-
-        self.is_template = self.project == DEFAULT_TEMPLATE_PROJECT
 
     def check_installed_software(self):
 
@@ -428,23 +425,6 @@ Verify that you are in the right folder, now you are in: %s%s
 
             break
 
-    # @staticmethod
-    # def get_version_if_ready(project):
-
-    #     default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
-    #     project_file_path = helpers.project_dir(project)
-    #     specs, extended_project, extended_project_path = \
-    #         configuration.read(
-    #             default_file_path=default_file_path,
-    #             base_project_path=project_file_path,
-    #             projects_path=PROJECT_DIR,
-    #             submodules_path=SUBMODULES_DIR,
-    #             is_template=False,
-    #             do_exit=False
-    #         )
-
-    #     return specs
-
     def read_specs(self, read_only_project=False):
         """ Read project configuration """
 
@@ -468,7 +448,6 @@ Verify that you are in the right folder, now you are in: %s%s
                     projects_path=PROJECT_DIR,
                     read_extended=read_extended,
                     submodules_path=SUBMODULES_DIR,
-                    is_template=self.is_template,
                     do_exit=False
                 )
 
