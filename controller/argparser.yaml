@@ -346,8 +346,6 @@ subcommands:
         metavalue: CONNECTED_SERVICE
         # default: sqlalchemy
         help: the first service that will be connected inside the code
-  coverall:
-    description: send coverage computed to coveralls.io website
   verify:
     description: check a service connection within the backend container
     suboptions:

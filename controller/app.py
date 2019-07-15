@@ -1754,48 +1754,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             [service], scale=[scaling], skip_dependencies=True
         )
 
-    def _coverall(self):
-
-        basemsg = "COVERAGE cannot be computed"
-
-        # Travis coverall.io token
-        file = path.existing(['.', '.coveralls.yml'], basemsg)
-        project.check_coveralls(file)
-        # TODO: if missing link instructions on the website
-
-        # Compose file with service > coverage
-        compose_file = path.existing(['.', CONF_PATH, 'coverage.yml'], basemsg)
-        service = project.check_coverage_service(compose_file)
-        # TODO: if missing link a template
-
-        # Copy coverage file from docker
-        self.vars.get('env')
-        covfile = '.coverage'
-        mittdir = '/code'
-        destdir = '.'
-        self.docker.copy_file(
-            service_name='backend',
-            containers_prefix=self.project,
-            mitt=str(path.join(mittdir, covfile)),
-            dest=str(path.join(destdir, covfile)),
-        )
-
-        # Coverage file where coverage percentage was saved
-        path.existing(['.', covfile], basemsg)
-        # NOTE: should not be missing if the file above is from the template
-
-        dc = self.get_compose(files=[compose_file])
-
-        # dc.command('up', options)
-        dc.start_containers(
-            [service],
-            detach=False,
-            scale=['%s=1' % service],
-            abort_on_container_exit=True,
-            no_recreate=True
-
-        )
-
     def _verify(self):
         """ Verify one service connection (inside backend) """
         service = self.current_args.get('service')
