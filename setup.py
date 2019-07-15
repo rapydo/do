@@ -46,6 +46,7 @@ setup(
         # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
         # "PyYAML==3.13",
 
+        # Still required?
         "jinja2",
         "plumbum",
         "glom",

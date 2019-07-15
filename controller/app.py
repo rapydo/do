@@ -61,7 +61,160 @@ class Application(object):
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
 
-        self.run()
+        create = self.current_args.get('action', 'unknown') == 'create'
+
+        if not create:
+            first_level_error = self.inspect_main_folder()
+            cwd = os.getcwd()
+            if first_level_error is not None:
+                num_iterations = 0
+                while cwd != '/' and num_iterations < 10:
+                    num_iterations += 1
+                    # TODO: use utils.path here
+                    os.chdir("..")
+                    cwd = os.getcwd()
+                    if self.inspect_main_folder() is None:
+                        log.warning(
+                            "You are not in the rapydo main folder, " +
+                            "changing working dir to %s", cwd)
+                        first_level_error = None
+                        break
+            if first_level_error is not None:
+                if self.current_args.get('action') == 'version':
+                    return self._version()
+                else:
+                    log.exit(first_level_error)
+
+        # Initial inspection
+        self.get_args()
+        if not self.print_version:
+            log.info("You are using rapydo version %s", __version__)
+        self.check_installed_software()
+
+        if self.create:
+
+            self._create(
+                self.current_args.get("name"),
+                self.current_args.get("template")
+            )
+            return True
+
+        self.check_projects()
+        self.preliminary_version_check()
+        if not self.install or self.local_install:
+            self.git_submodules(confs_only=True)
+            self.read_specs()  # read project configuration
+        if not self.install and not self.print_version:
+            self.verify_rapydo_version()
+            self.inspect_project_folder()
+
+        # get user launching rapydo commands
+        self.current_uid = basher.current_os_uid()
+        if self.install or self.print_version:
+            skip_check_perm = True
+        elif self.current_uid == ROOT_UID:
+            self.current_uid = BASE_UID
+            self.current_os_user = 'privileged'
+            skip_check_perm = True
+            log.warning("Current user is 'root'")
+        else:
+            self.current_os_user = basher.current_os_user()
+            skip_check_perm = not self.current_args.get(
+                'check_permissions', False)
+            log.debug("Current user: %s (UID: %d)" % (
+                self.current_os_user, self.current_uid))
+
+        if not skip_check_perm:
+            self.inspect_permissions()
+
+        # Generate and get the extra arguments in case of a custom command
+        if self.action == 'custom':
+            self.custom_parse_args()
+        else:
+            try:
+                argname = next(iter(self.arguments.remaining_args))
+            except StopIteration:
+                pass
+            else:
+                log.exit(
+                    "Unknown argument:'%s'.\nUse --help to list options",
+                    argname)
+
+        # Verify if we implemented the requested command
+        function = "_%s" % self.action.replace("-", "_")
+        func = getattr(self, function, None)
+        if func is None:
+            log.exit(
+                "Command not yet implemented: %s (expected function: %s)"
+                % (self.action, function))
+
+        if not self.install or self.local_install:
+            self.git_submodules(confs_only=False)
+
+        if not self.install and not self.print_version:
+            # Detect if heavy ops are allowed
+            git_checks = False
+            git_checks = self.update or self.check
+            if self.check and self.current_args.get('skip_heavy_git_ops', False):
+                git_checks = False
+
+            if git_checks:
+                self.git_checks()  # NOTE: this might be an heavy operation
+            else:
+                log.verbose("Skipping heavy operations")
+
+            self.make_env()
+
+            # Compose services and variables
+            self.read_composers()
+            self.check_placeholders()
+
+            # Build or check template containers images
+
+            if self.pull:
+                build_dependencies = False
+            elif self.current_args.get('no_builds', False):
+                build_dependencies = False
+            else:
+                build_dependencies = True
+
+            if build_dependencies:
+                self.build_dependencies()
+
+            # Install or check frontend libraries (onlye if frontend is enabled)
+            self.frontend_libs()
+
+        # Final step, launch the command
+
+        if self.tested_connection:
+            online_time = get_online_utc_time()
+            sec_diff = (datetime.utcnow() - online_time).total_seconds()
+
+            major_diff = (abs(sec_diff) >= 300)
+            if major_diff:
+                minor_diff = False
+            else:
+                minor_diff = (abs(sec_diff) >= 60)
+
+            if major_diff:
+                log.error("Date misconfiguration on the host.")
+            elif minor_diff:
+                log.warning("Date misconfiguration on the host.")
+
+            if major_diff or minor_diff:
+                current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                tz_offset = time.timezone / -3600
+                log.info("Current date: %s UTC", current_date)
+                log.info("Expected: %s UTC", online_time)
+                log.info(
+                    "Current timezone: %s (offset = %dh)",
+                    time.tzname, tz_offset)
+
+            if major_diff:
+                log.exit("Unable to continue, please fix the host date")
+
+        func()
+
 
     def get_args(self):
 
@@ -1984,170 +2137,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 "Controller version %s installed from local folder", version)
             installed_version = check_version(package)
             log.info("Check on installed version: %s", installed_version)
-
-    ################################
-    # ### RUN ONE COMMAND OFF
-    ################################
-
-    def run(self):
-        """
-        RUN THE APPLICATION!
-        The heart of the app: it runs a single controller command.
-        """
-
-        create = self.current_args.get('action', 'unknown') == 'create'
-
-        if not create:
-            first_level_error = self.inspect_main_folder()
-            cwd = os.getcwd()
-            if first_level_error is not None:
-                num_iterations = 0
-                while cwd != '/' and num_iterations < 10:
-                    num_iterations += 1
-                    # TODO: use utils.path here
-                    os.chdir("..")
-                    cwd = os.getcwd()
-                    if self.inspect_main_folder() is None:
-                        log.warning(
-                            "You are not in the rapydo main folder, " +
-                            "changing working dir to %s", cwd)
-                        first_level_error = None
-                        break
-            if first_level_error is not None:
-                if self.current_args.get('action') == 'version':
-                    return self._version()
-                else:
-                    log.exit(first_level_error)
-
-        # Initial inspection
-        self.get_args()
-        if not self.print_version:
-            log.info("You are using rapydo version %s", __version__)
-        self.check_installed_software()
-
-        if self.create:
-
-            self._create(
-                self.current_args.get("name"),
-                self.current_args.get("template")
-            )
-            return True
-
-        self.check_projects()
-        self.preliminary_version_check()
-        if not self.install or self.local_install:
-            self.git_submodules(confs_only=True)
-            self.read_specs()  # read project configuration
-        if not self.install and not self.print_version:
-            self.verify_rapydo_version()
-            self.inspect_project_folder()
-
-        # get user launching rapydo commands
-        self.current_uid = basher.current_os_uid()
-        if self.install or self.print_version:
-            skip_check_perm = True
-        elif self.current_uid == ROOT_UID:
-            self.current_uid = BASE_UID
-            self.current_os_user = 'privileged'
-            skip_check_perm = True
-            log.warning("Current user is 'root'")
-        else:
-            self.current_os_user = basher.current_os_user()
-            skip_check_perm = not self.current_args.get(
-                'check_permissions', False)
-            log.debug("Current user: %s (UID: %d)" % (
-                self.current_os_user, self.current_uid))
-
-        if not skip_check_perm:
-            self.inspect_permissions()
-
-        # Generate and get the extra arguments in case of a custom command
-        if self.action == 'custom':
-            self.custom_parse_args()
-        else:
-            try:
-                argname = next(iter(self.arguments.remaining_args))
-            except StopIteration:
-                pass
-            else:
-                log.exit(
-                    "Unknown argument:'%s'.\nUse --help to list options",
-                    argname)
-
-        # Verify if we implemented the requested command
-        function = "_%s" % self.action.replace("-", "_")
-        func = getattr(self, function, None)
-        if func is None:
-            log.exit(
-                "Command not yet implemented: %s (expected function: %s)"
-                % (self.action, function))
-
-        if not self.install or self.local_install:
-            self.git_submodules(confs_only=False)
-
-        if not self.install and not self.print_version:
-            # Detect if heavy ops are allowed
-            git_checks = False
-            git_checks = self.update or self.check
-            if self.check and self.current_args.get('skip_heavy_git_ops', False):
-                git_checks = False
-
-            if git_checks:
-                self.git_checks()  # NOTE: this might be an heavy operation
-            else:
-                log.verbose("Skipping heavy operations")
-
-            self.make_env()
-
-            # Compose services and variables
-            self.read_composers()
-            self.check_placeholders()
-
-            # Build or check template containers images
-
-            if self.pull:
-                build_dependencies = False
-            elif self.current_args.get('no_builds', False):
-                build_dependencies = False
-            else:
-                build_dependencies = True
-
-            if build_dependencies:
-                self.build_dependencies()
-
-            # Install or check frontend libraries (onlye if frontend is enabled)
-            self.frontend_libs()
-
-        # Final step, launch the command
-
-        if self.tested_connection:
-            online_time = get_online_utc_time()
-            sec_diff = (datetime.utcnow() - online_time).total_seconds()
-
-            major_diff = (abs(sec_diff) >= 300)
-            if major_diff:
-                minor_diff = False
-            else:
-                minor_diff = (abs(sec_diff) >= 60)
-
-            if major_diff:
-                log.error("Date misconfiguration on the host.")
-            elif minor_diff:
-                log.warning("Date misconfiguration on the host.")
-
-            if major_diff or minor_diff:
-                current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-                tz_offset = time.timezone / -3600
-                log.info("Current date: %s UTC", current_date)
-                log.info("Expected: %s UTC", online_time)
-                log.info(
-                    "Current timezone: %s (offset = %dh)",
-                    time.tzname, tz_offset)
-
-            if major_diff:
-                log.exit("Unable to continue, please fix the host date")
-
-        func()
 
     # issues/57
     # I'm temporary here... to be decided how to handle me
