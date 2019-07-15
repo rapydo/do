@@ -874,7 +874,7 @@ Verify that you are in the right folder, now you are in: %s%s
             timestamp = 0
         # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
         # i.e. were convertable to float
-        # From dockerpy 2.5.1 we are obtained strings like this:
+        # From dockerpy 2.5.1 we are obtaining strings like this:
         # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
         try:
             # verify if timestamp is already an epoch

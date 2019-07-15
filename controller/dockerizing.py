@@ -63,6 +63,29 @@ class Dock(object):
         # log.debug("Docker:%s" % images)
         return images
 
+    @staticmethod
+    def get_container_id(container):
+        return container.attrs.get('Id')[0:10]
+
+    def copy_file(self, service_name, containers_prefix, mitt, dest):
+
+        container = self.get_container(
+            '_%s_1' % service_name, only_prefix=containers_prefix)
+        if container is None:
+            log.exit(
+                "Unable to find a running container identified by name: %s",
+                service_name
+            )
+
+        container_id = self.get_container_id(container)
+        log.info("Found container %s with id = %s", service_name, container_id)
+
+        tar_content = self.get_tar_content(container, mitt)
+        real_content = Dock.recover_tar_stream(tar_content, mitt)
+
+        with open(dest, 'w') as handler:
+            handler.write(real_content)
+
     def get_container(self, substring, only_prefix=None):
 
         containers = self.client.containers.list()
@@ -77,19 +100,6 @@ class Dock(object):
 
         return None
 
-    def copy_file(self, service_name, containers_prefix, mitt, dest):
-
-        container = self.get_container(
-            '_%s_1' % service_name, only_prefix=containers_prefix)
-        if container is None:
-            log.exit("Are docker containers running?")
-
-        tar_content = self.get_tar_content(container, mitt)
-        real_content = Dock.recover_tar_stream(tar_content, mitt)
-
-        with open(dest, 'w') as handler:
-            handler.write(real_content)
-
     def get_tar_content(self, container, path):
         # http://docker-py.readthedocs.io/en/1.5.0/api/#get_archive
 
@@ -100,7 +110,8 @@ class Dock(object):
                 path=path,
             )
         except docker.errors.NotFound:
-            log.exit("Path %s not found in container %s" % (path, container))
+            container_id = self.get_container_id(container)
+            log.exit("Path %s not found in container %s", path, container_id)
 
         return content
 
