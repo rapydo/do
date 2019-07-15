@@ -48,7 +48,7 @@ def test_all(capfd):
         f.write("project: template")
 
     # INIT on rapydo-core
-    _, err = exec_command(capfd, "rapydo init --no-build")
+    _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err

@@ -170,16 +170,7 @@ class Application(object):
             self.check_placeholders()
 
             # Build or check template containers images
-
-            if self.pull:
-                build_dependencies = False
-            elif self.current_args.get('no_builds', False):
-                build_dependencies = False
-            else:
-                build_dependencies = True
-
-            if build_dependencies:
-                self.build_dependencies()
+            self.build_dependencies()
 
             # Install or check frontend libraries (onlye if frontend is enabled)
             self.frontend_libs()
@@ -215,7 +206,6 @@ class Application(object):
 
         func()
 
-
     def get_args(self):
 
         # Action
@@ -227,6 +217,7 @@ class Application(object):
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
+        self.start = self.action == 'start'
         # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
@@ -853,6 +844,7 @@ Verify that you are in the right folder, now you are in: %s%s
         """ Look up for builds which are depending on templates """
 
         if self.action == 'shell' \
+           or self.action == 'init' \
            or self.action == 'template' \
            or self.action == 'coveralls' \
            or self.action == 'ssl-dhparam':
@@ -860,11 +852,11 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # Compare builds depending on templates
         # NOTE: slow operation!
-        if self.action in ['check', 'init', 'update', 'build']:
+        if self.action in ['check', 'update', 'build']:
             self.builds, self.template_builds, overriding_imgs = locate_builds(
                 self.base_services, self.services)
 
-        if self.action in ['check', 'init', 'update']:
+        if self.action in ['check', 'update']:
             dimages = self.docker.images()
             # if rebuild_templates => build is forced, these checks are not needed
             if not self.current_args.get('rebuild_templates', False):

@@ -111,10 +111,6 @@ subcommands:
         type: str
         metavalue: SUBMODULE_PATH
         help: link all submodules in an existing folder instead of download them
-      no-builds:
-        type: bool
-        default: False
-        help: Skip checks on build templates
   update:
     description: update the current project
     suboptions:
