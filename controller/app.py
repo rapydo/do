@@ -603,7 +603,7 @@ Verify that you are in the right folder, now you are in: %s%s
             log.exit(e)
 
         self.vars = self.specs.get('variables', {})
-        log.checked("Loaded containers configuration")
+        log.verbose("Configuration loaded")
 
         framework = glom(self.specs, "variables.frontend.framework", default=None)
 
@@ -888,8 +888,6 @@ Verify that you are in the right folder, now you are in: %s%s
     def build_is_obsolete(self, build):
         # compare dates between git and docker
         path = build.get('path')
-        Dockerfile = os.path.join(path, 'Dockerfile')
-
         build_templates = self.gits.get('build-templates')
         vanilla = self.gits.get('main')
 
@@ -898,15 +896,25 @@ Verify that you are in the right folder, now you are in: %s%s
         elif path.startswith(vanilla.working_dir):
             git_repo = vanilla
         else:
-            log.exit("Unable to find git repo containing %s" % Dockerfile)
+            log.exit("Unable to find git repo %s" % path)
 
-        obsolete, build_ts, last_commit = gitter.check_file_younger_than(
-            gitobj=git_repo,
-            filename=Dockerfile,
-            timestamp=self.get_build_timestamp(build.get('timestamp'))
-        )
+        build_timestamp = self.get_build_timestamp(build.get('timestamp'))
 
-        return obsolete, build_ts, last_commit
+        files = helpers.list_path(path)
+        for f in files:
+            local_file = os.path.join(path, f)
+
+            obsolete, build_ts, last_commit = gitter.check_file_younger_than(
+                gitobj=git_repo,
+                filename=local_file,
+                timestamp=build_timestamp
+            )
+
+            if obsolete:
+                log.info("File changed: %s", f)
+                return obsolete, build_ts, last_commit
+
+        return False, 0, 0
 
     @staticmethod
     def get_compose(files):
@@ -1218,7 +1226,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.exit(
                 "Missing critical params for configuration:\n%s" % missing)
         else:
-            log.checked("No PLACEHOLDER variable to be replaced")
+            log.debug("No PLACEHOLDER variable to be replaced")
 
         return missing
 

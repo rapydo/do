@@ -92,7 +92,7 @@ def clone(online_url, path, branch='master',
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:
-        log.checked("Path %s already exists" % local_path)
+        log.debug("Path %s already exists" % local_path)
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
@@ -279,7 +279,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         if len(commits_behind_list) > 0:
             log.warning("%s repo should be updated!" % (path))
         else:
-            log.checked("%s repo is updated" % (path))
+            log.debug("%s repo is updated" % (path))
         for c in commits_behind_list:
             message = c.message.strip().replace('\n', "")
 
@@ -309,7 +309,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
                 log.warning(
                     "You have commits not pushed on %s repo" % (path))
             else:
-                log.checked("You pushed all commits on %s repo" % (path))
+                log.debug("You pushed all commits on %s repo" % (path))
             for c in commits_ahead_list:
                 message = c.message.strip().replace('\n', "")
 
