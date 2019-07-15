@@ -843,27 +843,29 @@ Verify that you are in the right folder, now you are in: %s%s
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
-        if self.action == 'shell' \
-           or self.action == 'init' \
-           or self.action == 'template' \
-           or self.action == 'coveralls' \
-           or self.action == 'ssl-dhparam':
+        if self.action not in ['check', 'update', 'build']:
             return
 
-        # Compare builds depending on templates
-        # NOTE: slow operation!
-        if self.action in ['check', 'update', 'build']:
-            self.builds, self.template_builds, overriding_imgs = locate_builds(
-                self.base_services, self.services)
+        # Compare builds depending on templates (slow operation!)
+        self.builds, self.template_builds, overriding_imgs = locate_builds(
+            self.base_services, self.services)
 
-        if self.action in ['check', 'update']:
-            dimages = self.docker.images()
-            # if rebuild_templates => build is forced, these checks are not needed
-            if not self.current_args.get('rebuild_templates', False):
-                self.verify_template_builds(dimages, self.template_builds)
+        if self.action == 'build':
+            # Nothing more to do now, builds will be performed later (in _build method)
+            return
 
-            self.verify_obsolete_builds(
-                dimages, self.builds, overriding_imgs, self.template_builds)
+        # we are in check or build case
+        dimages = self.docker.images()
+        # if rebuild templates is on build is forced, these checks are not needed
+        if not self.current_args.get('rebuild_templates', False):
+            rebuilt = self.verify_template_builds(dimages, self.template_builds)
+            if rebuilt:
+                # locate again builds
+                self.builds, self.template_builds, overriding_imgs = locate_builds(
+                    self.base_services, self.services)
+
+        self.verify_obsolete_builds(
+            dimages, self.builds, overriding_imgs, self.template_builds)
 
     def get_build_timestamp(self, timestamp, as_date=False):
 
@@ -924,8 +926,9 @@ Verify that you are in the right folder, now you are in: %s%s
 
         if len(builds) == 0:
             log.debug("No template build to be verified")
-            return
+            return False
 
+        rebuilt = False
         found_obsolete = 0
         fmt = "%Y-%m-%d %H:%M:%S"
         for image_tag, build in builds.items():
@@ -958,6 +961,7 @@ Verify that you are in the right folder, now you are in: %s%s
                         current_version=__version__,
                         current_uid=self.current_uid
                     )
+                    rebuilt = True
 
                 continue
 
@@ -977,6 +981,7 @@ Verify that you are in the right folder, now you are in: %s%s
                         current_version=__version__,
                         current_uid=self.current_uid
                     )
+                    rebuilt = True
                 else:
                     message += "\nRebuild it with:\n"
                     message += "$ rapydo --services %s" % build.get('service')
@@ -985,6 +990,8 @@ Verify that you are in the right folder, now you are in: %s%s
 
         if found_obsolete == 0:
             log.debug("No template build to be updated")
+
+        return rebuilt
 
     def verify_obsolete_builds(
             self, docker_images, builds, overriding_imgs, template_builds):
