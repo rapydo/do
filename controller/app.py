@@ -15,7 +15,7 @@ from utilities import basher
 from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
-from utilities import CONF_PATH, EXTENDED_PROJECT_DISABLED
+from utilities import EXTENDED_PROJECT_DISABLED
 from utilities.globals import mem
 from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
@@ -1430,14 +1430,12 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         db = self.current_args.get('service')
         service = db + 'ui'
 
-        # FIXME: this check should be moved inside create_volatile_container
         if not self.container_service_exists(service):
             log.exit("Container '%s' is not defined" % service)
 
         port = self.current_args.get('port')
         publish = []
 
-        # FIXME: these checks should be moved inside create_volatile_container
         if port is not None:
             try:
                 int(port)
@@ -1449,13 +1447,6 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 current_ports = info.get('ports', []).pop(0)
             except IndexError:
                 log.exit("No default port found?")
-
-                # TODO: inspect the image to get the default exposed
-                # $ docker inspect mongo-express:0.40.0 \
-                #    | jq ".[0].ContainerConfig.ExposedPorts"
-                # {
-                #   "8081/tcp": {}
-                # }
 
             publish.append("%s:%s" % (port, current_ports.target))
 
@@ -1479,7 +1470,8 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             log.info("Launching interface: %s", service)
         with suppress_stdout():
             # NOTE: this is suppressing also image build...
-            dc.create_volatile_container(service, publish=publish)
+            detach = self.current_args.get('detach')
+            dc.create_volatile_container(service, publish=publish, detach=detach)
 
     def _shell(self, user=None, command=None, service=None):
 

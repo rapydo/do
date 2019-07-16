@@ -193,7 +193,8 @@ class Compose(object):
 
         return self.command('up', options)
 
-    def create_volatile_container(self, service, command=None, publish=None):
+    def create_volatile_container(self, service,
+                                  command=None, publish=None, detach=False):
         """
             Execute a command on a not container
         """
@@ -217,8 +218,7 @@ class Compose(object):
             '--rm': True, '--no-deps': True,
             '--name': None, '--user': None,
             '--workdir': None, '--entrypoint': None,
-            # '-d': False,
-            '--detach': False,
+            '--detach': detach,
             '--use-aliases': False,  # introduced with compose 1.21
             '-T': False,
             '--label': None,

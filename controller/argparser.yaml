@@ -240,6 +240,12 @@ subcommands:
         metavalue: INTEGER_PORT_FOR_SERVICE
         default: null
         help: port to be associated to the current service interface
+      detach:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Detached mode to run the container in background
+
   shell:
     description: open a shell inside one available 'dockerized' service
     suboptions:

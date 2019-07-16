@@ -68,7 +68,7 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
-    _, err = exec_command(capfd, "rapydo build")
+    _, err = exec_command(capfd, "rapydo build --rebuild_templates")
     assert "INFO Images built" in err
 
     # CHECK on rapydo-core
@@ -201,7 +201,9 @@ def test_all(capfd):
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
 
-    exec_command(capfd, "rapydo install --git auto")
+    # exec_command(capfd, "rapydo install --git auto")
+
+    exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
