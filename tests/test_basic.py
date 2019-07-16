@@ -143,11 +143,11 @@ def test_all(capfd):
     # Template project is based on neo4j
     exec_command(capfd, "rapydo verify neo4j")
     # This output is not capture, since it is produced by the backend
-    # assert "INFO Service neo4j is reachable" in err
+    # assert 'EXIT Service "neo4j" was NOT detected' in err
 
-    # exec_command(capfd, "rapydo verify postgres")
+    exec_command(capfd, "rapydo verify postgres")
     # This output is not capture, since it is produced by the backend
-    # assert 'EXIT Service "postgres" was NOT detected' in err
+    # assert "INFO Service postgres is reachable" in err
 
     exec_command(capfd, "rapydo scale backend=1")
 
@@ -200,6 +200,8 @@ def test_all(capfd):
     assert "Endpoint path:\t/api/%s" % endpoint_name in err
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
+
+    exec_command(capfd, "rapydo install --git auto")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
