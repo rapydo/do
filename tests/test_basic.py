@@ -45,7 +45,7 @@ def test_all(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
-        f.write("project: template")
+        f.write("project: sql")
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
@@ -107,12 +107,12 @@ def test_all(capfd):
     os.remove(".projectrc")
 
     bash = BashCommands()
-    bash.copy_folder("projects/template", "projects/second")
+    bash.copy_folder("projects/sql", "projects/second")
 
     _, err = exec_command(capfd, "rapydo check -s")
     assert "EXIT Please select the --project option on one of the following:" in err
 
-    _, err = exec_command(capfd, "rapydo -p template check -s")
+    _, err = exec_command(capfd, "rapydo -p sql check -s")
     assert "INFO All checked" in err
 
     _, err = exec_command(capfd, "rapydo -p invalid_character check -s")
@@ -127,7 +127,7 @@ def test_all(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
-        f.write("project: template")
+        f.write("project: sql")
 
     _, err = exec_command(capfd, "rapydo check -s")
     assert "INFO All checked" in err
@@ -183,8 +183,8 @@ def test_all(capfd):
     endpoint_name = 'justatest'
     _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
-    # "rendered projects/template/backend/swagger/justatest/specs.yaml"
-    base_response = 'INFO rendered %s/template/%s' % \
+    # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
+    base_response = 'INFO rendered %s/sql/%s' % \
         (PROJECT_DIR, BACKEND_DIR)
 
     assert '%s/%s/%s/specs.yaml' % \
