@@ -68,8 +68,8 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
-    # _, err = exec_command(capfd, "rapydo build")
-    # assert "INFO Image built" in err
+    _, err = exec_command(capfd, "rapydo build")
+    assert "INFO Image built" in err
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
