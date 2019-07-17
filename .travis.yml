@@ -25,8 +25,7 @@ after_success:
 jobs:
   include:
   - stage: test
-    python: 3.4
-  - python: 3.5
+    python: 3.5
   - python: 3.6.2
   - stage: deploy
     python: 3.6.2
