@@ -97,7 +97,7 @@ class Application(object):
                 self.current_args.get("name"),
                 self.current_args.get("template")
             )
-            return True
+            return 
 
         self.check_projects()
         self.preliminary_version_check()
@@ -231,6 +231,7 @@ class Application(object):
         self.project = self.current_args.get('project')
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.project_title = None  # To be retrieved from projet_configuration
+        self.project_description = None  # To be retrieved from projet_configuration
         self.version = None
         # self.releases = {}
         self.gits = {}
@@ -615,9 +616,14 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.frontend is not None:
             log.very_verbose("Frontend framework: %s" % self.frontend)
 
-        self.project_title = glom(self.specs, "project.title", default='Unknown title')
-        self.version = glom(self.specs, "project.version", default=None)
-        self.rapydo_version = glom(self.specs, "project.rapydo", default=None)
+        self.project_title = glom(
+            self.specs, "project.title", default='Unknown title')
+        self.version = glom(
+            self.specs, "project.version", default=None)
+        self.rapydo_version = glom(
+            self.specs, "project.rapydo", default=None)
+        self.project_description = glom(
+            self.specs, "project.description", default='Unknown description')
 
         if self.rapydo_version is None:
             log.exit("Rapydo version not found in your project_configuration file")
@@ -1176,6 +1182,7 @@ Verify that you are in the right folder, now you are in: %s%s
         env['RAPYDO_VERSION'] = __version__
         env['CURRENT_UID'] = self.current_uid
         env['PROJECT_TITLE'] = self.project_title
+        env['PROJECT_DESCRIPTION'] = self.project_description
         if self.current_args.get('privileged'):
             env['DOCKER_PRIVILEGED_MODE'] = "true"
         else:
@@ -1767,10 +1774,7 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
-    def _create(self, project_name, template_name=None):
-
-        if template_name is None:
-            template_name = "basic"
+    def _create(self, project_name, template_name):
 
         if gitter.get_local(".") is not None:
             log.exit("You are on a git repo, unable to continue")
@@ -1807,8 +1811,9 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             print("")
             print("You can run one of the following templates:")
 
-        vanilla_dir = os.path.join(project_name, PROJECT_DIR, project_name)
-        template_path = os.path.join(project_name, PROJECT_DIR, template_name)
+        project_dir = os.path.join(project_name, PROJECT_DIR)
+        vanilla_dir = os.path.join(project_dir, project_name)
+        template_path = os.path.join(project_dir, template_name)
 
         if not os.path.exists(template_path):
             log.exit("Invalid template name: %s", template_name)
@@ -1829,6 +1834,13 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             "Project %s successfully created from %s template",
             project_name, template_name
         )
+        projects = helpers.list_path(project_dir)
+        for p in projects:
+            if p != project_name:
+                pdir = os.path.join(project_dir, p)
+                shutil.rmtree(pdir)
+                log.info("Unused template project deleted: %s ", p)
+
         print("")
         print("Now you can enter the project and execute rapydo init")
         print("")
