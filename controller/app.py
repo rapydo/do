@@ -202,7 +202,9 @@ class Application(object):
                     time.tzname, tz_offset)
 
             if major_diff:
-                log.exit("Unable to continue, please fix the host date")
+                tips = "To manually set the date: "
+                tips += "sudo date --set \"%s\"" % online_time.strftime('%d %b %Y %H:%M:%S')
+                log.exit("Unable to continue, please fix the host date\n%s", tips)
 
         func()
 
