@@ -86,6 +86,19 @@ subcommands:
 
   formatter:
     description: "run 'black' formatter on main project backend code"
+    suboptions:
+      folder:
+        alias: f
+        type: str
+        metavalue: FOLDER_NAME
+        default: apis
+        help: name of folder to be formatted
+      submodule:
+        alias: s
+        type: str
+        metavalue: SUBMODULE_NAME
+        default: vanilla
+        help: name of submodule to be formatted. Project folder is defined as vanilla submodule
 
   check:
     description: "only verify if currently compliant to RAPyDo specs

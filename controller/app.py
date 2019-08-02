@@ -1190,6 +1190,17 @@ Verify that you are in the right folder, now you are in: %s%s
         else:
             env['DOCKER_PRIVILEGED_MODE'] = "false"
 
+        if self.action == "formatter" and self.current_args.get('folder') is not None:
+            VANILLA_SUBMODULE = 'vanilla'
+            submodule = self.current_args.get('submodule', VANILLA_SUBMODULE)
+
+            if submodule == VANILLA_SUBMODULE:
+                env['BLACK_SUBMODULE'] = ""
+                env['BLACK_FOLDER'] = self.current_args.get('folder')
+            else:
+                env['BLACK_SUBMODULE'] = submodule
+                env['BLACK_FOLDER'] = self.current_args.get('folder')
+
         net = self.current_args.get('net', 'bridge')
         env['DOCKER_NETWORK_MODE'] = net
         env.update({'PLACEHOLDER': PLACEHOLDER})
@@ -1920,16 +1931,18 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
     def _formatter(self):
 
-        import inspect
-        name = inspect.currentframe().f_code.co_name.lstrip('_')
-        # NOTE: above gets 'formatter' from current method name :P
-
         command = 'run'
         dc = self.get_compose(
-            files=self.read_conf_files(name)
+            files=self.read_conf_files('formatter')
         )
         options = dc.command_defaults(command=command)
-        options['SERVICE'] = name
+
+        VANILLA_SUBMODULE = 'vanilla'
+        if self.current_args.get('submodule', VANILLA_SUBMODULE) == VANILLA_SUBMODULE:
+            options['SERVICE'] = 'vanilla-formatter'
+        else:
+            options['SERVICE'] = 'submodules-formatter'
+
         dc.command(command, options)
 
     def _dump(self):
