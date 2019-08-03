@@ -1551,7 +1551,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if self.current_args.get('rebuild_templates'):
             dc = self.get_compose(files=self.base_files)
-            log.debug("Forcing rebuild for cached templates")
+            log.debug("Forcing rebuild of cached templates")
             dc.build_images(
                 self.template_builds,
                 current_version=__version__,
