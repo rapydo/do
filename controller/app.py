@@ -1249,9 +1249,17 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
                 if PLACEHOLDER in str(value):
                     missing.append(key)
 
+        # Removed duplicates
+        missing = set(missing)
+
         if len(missing) > 0:
+            m = ", ".join(missing)
+            tips = "\n\nYou can fix this error by updating the "
+            tips += "project_configuration.yaml file or you local .projectrc file\n"
             log.exit(
-                "Missing critical params for configuration:\n%s" % missing)
+                "The following variables are missing in your configuration: %s%s",
+                m, tips
+            )
         else:
             log.debug("No PLACEHOLDER variable to be replaced")
 
