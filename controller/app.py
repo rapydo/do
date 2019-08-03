@@ -60,6 +60,7 @@ class Application(object):
         self.arguments = arguments
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
+        self.vars_to_services_mapping = self.get_vars_to_services_mapping()
 
         create = self.current_args.get('action', 'unknown') == 'create'
 
@@ -1203,7 +1204,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         net = self.current_args.get('net', 'bridge')
         env['DOCKER_NETWORK_MODE'] = net
-        env.update({'PLACEHOLDER': PLACEHOLDER})
+        # env.update({'PLACEHOLDER': PLACEHOLDER})
 
         # # docker network mode
         # # https://docs.docker.com/compose/compose-file/#network_mode
@@ -1226,7 +1227,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     value = "'%s'" % value
                 whandle.write("%s=%s\n" % (key, value))
             log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
-
+  
     def check_placeholders(self):
 
         self.services_dict, self.active_services = \
@@ -1236,7 +1237,7 @@ Verify that you are in the right folder, now you are in: %s%s
             log.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
-and add the variable "ACTIVATE_DESIREDPROJECT: 1"
+and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """)
         else:
             log.checked("Active services: %s", self.active_services)
@@ -1247,21 +1248,44 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
 
             for key, value in service.get('environment', {}).items():
                 if PLACEHOLDER in str(value):
+                    key = self.normalize_placeholder_variable(key)
                     missing.append(key)
 
         # Removed duplicates
         missing = set(missing)
 
-        if len(missing) > 0:
-            m = ", ".join(missing)
+        placeholders = []
+        for key in missing:
+
+            serv = self.vars_to_services_mapping.get(key)
+            if serv is None:
+                log.exit(
+                    "Unexpected error, cannot find a service mapping with %s", key
+                )
+            active_serv = []
+            for i in serv:
+                if i in self.active_services:
+                    active_serv.append(i)
+            if len(active_serv) > 0:
+                placeholders.append(
+                    "%-20s\trequired by\t%s" % (key, ', '.join(active_serv)))
+            else:
+                log.verbose(
+                    "Variable %s is missing, but %s service(s) not active",
+                    key, serv
+                )
+
+        if len(placeholders) > 0:
+            m = "\n".join(placeholders)
             tips = "\n\nYou can fix this error by updating the "
             tips += "project_configuration.yaml file or you local .projectrc file\n"
             log.exit(
-                "The following variables are missing in your configuration: %s%s",
+                "The following variables are missing in your configuration:\n\n%s%s",
                 m, tips
             )
+
         else:
-            log.debug("No PLACEHOLDER variable to be replaced")
+            log.verbose("No placeholder variable to be replaced")
 
         return missing
 
@@ -2189,3 +2213,31 @@ and add the variable "ACTIVATE_DESIREDPROJECT: 1"
             'werkzeug'
         ]
         return names
+
+    @staticmethod
+    def get_vars_to_services_mapping():
+        return {
+            'CELERYUI_USER': ['celeryui'],
+            'CELERYUI_PASSWORD': ['celeryui'],
+            'ALCHEMY_USER': ['postgres', 'mariadb'],
+            'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
+            'GRAPHDB_PASSWORD': ['neo4j'],
+            'IRODS_ANONYMOUS': ['icat'],
+        }
+
+    @staticmethod
+    def normalize_placeholder_variable(key):
+        if key == 'NEO4J_AUTH':
+            return 'GRAPHDB_PASSWORD'
+
+        if key == 'POSTGRES_USER':
+            return 'ALCHEMY_USER'
+        if key == 'POSTGRES_PASSWORD':
+            return 'ALCHEMY_PASSWORD'
+
+        if key == 'MYSQL_USER':
+            return 'ALCHEMY_USER'
+        if key == 'MYSQL_PASSWORD':
+            return 'ALCHEMY_PASSWORD'
+
+        return key
