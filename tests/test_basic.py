@@ -1,11 +1,9 @@
-
 import os
 from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
-from utilities import PROJECT_DIR, \
-    BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
+from utilities import PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
 from utilities.logs import get_logger
 from utilities.basher import BashCommands
 
@@ -184,15 +182,11 @@ def test_all(capfd):
     _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
     # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
-    base_response = 'INFO rendered %s/sql/%s' % \
-        (PROJECT_DIR, BACKEND_DIR)
+    base_response = 'INFO rendered %s/sql/%s' % (PROJECT_DIR, BACKEND_DIR)
 
-    assert '%s/%s/%s/specs.yaml' % \
-        (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s/get.yaml' % \
-        (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s.py' % \
-        (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
+    assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s.py' % (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
 
