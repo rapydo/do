@@ -41,7 +41,7 @@ def find_active(services):
         dependencies[name] = list(service.get('depends_on', {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
-        is_active = (str(ACTIVATE) == "1")
+        is_active = str(ACTIVATE) == "1"
         if is_active:
             base_actives.append(name)
 

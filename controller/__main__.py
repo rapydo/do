@@ -9,6 +9,7 @@ import better_exceptions as be
 
 def activate_log():
     from utilities.logs import get_logger
+
     return get_logger(__name__)
 
 
@@ -17,9 +18,11 @@ def main():
     try:
         # imported here to avoid uncatched Keyboard Interruptions
         from controller.arguments import ArgParser
+
         arguments = ArgParser()
 
         from controller.app import Application
+
         Application(arguments)
     except KeyboardInterrupt:
         log = activate_log()
