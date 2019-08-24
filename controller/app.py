@@ -1454,7 +1454,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         elif command == "unpause":
             log.info("Stack unpaused")
 
-    def _logs(self):
+    def _log(self):
 
         service = self.current_args.get('service')
         if service is None:
