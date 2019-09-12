@@ -149,7 +149,7 @@ def test_all(capfd):
 
     exec_command(capfd, "rapydo scale backend=1")
 
-    exec_command(capfd, "rapydo log")
+    exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
     # assert compose_log_prefix + "'logs'" in err
 
