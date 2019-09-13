@@ -793,9 +793,9 @@ Verify that you are in the right folder, now you are in: %s%s
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS,
-            ANGULAR: self.frontend == ANGULAR,
-            REACT: self.frontend == REACT,
+            ANGULARJS: self.frontend == ANGULARJS and not self.current_args.get('no_frontend'),
+            ANGULAR: self.frontend == ANGULAR and not self.current_args.get('no_frontend'),
+            REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
             'commons': load_commons,

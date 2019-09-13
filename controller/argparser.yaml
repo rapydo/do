@@ -34,6 +34,11 @@ options:
     default: False
     help: Exclude backend configuration from rapydo stack
 
+  no-frontend:
+    type: bool
+    default: False
+    help: Exclude frontend configuration from rapydo stack
+
   no-commons:
     type: bool
     default: False
@@ -168,13 +173,13 @@ subcommands:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: force building of templates docker images used in other builds
+        help: force rebuild of parent images (templates) used in local builds
       force:
         alias: f
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: remove caches of previous builds on this service
+        help: remove the build cache to force the complete rebuilding
   pull:
     description: pull available images from docker hub
   logs:
