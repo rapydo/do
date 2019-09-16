@@ -1527,6 +1527,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc = self.get_compose(files=self.files)
         service = self.current_args.get('service')
+        no_tty = self.current_args.get('no_tty')
         # service = self.manage_one_service(service)
 
         if user is None:
@@ -1543,7 +1544,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             default = 'echo hello world'
             command = self.current_args.get('command', default)
 
-        return dc.exec_command(service, user=user, command=command)
+        return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
 
     def _build(self):
 
