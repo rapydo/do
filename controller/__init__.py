@@ -2,7 +2,7 @@
 
 import sys
 
-__version__ = '0.6.6'
+__version__ = '0.6.7'
 
 FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
@@ -11,7 +11,8 @@ SUBMODULES_DIR = 'submodules'
 RAPYDO_CONFS = 'rapydo-confs'
 RAPYDO_TEMPLATE = 'tests'
 RAPYDO_GITHUB = "https://github.com/rapydo"
-PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
+# PLACEHOLDER = '#@$%-REPLACE-#@%$-ME-#@$%'
+PLACEHOLDER = '**PLACEHOLDER**'
 TEMPLATE_DIR = 'templates'
 PROJECTRC = '.projectrc'
 PROJECTRC_ALTERNATIVE = '.project.yml'

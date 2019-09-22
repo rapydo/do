@@ -81,38 +81,36 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     return True
 
 
-def clone(online_url, path, branch='master',
-          do=False, check=True, expand_path=True):
+def clone(online_url, path, branch='master', do=False, check=True, expand_path=True):
 
     if expand_path:
-        local_path = os.path.join(
-            helpers.current_dir(), SUBMODULES_DIR, path)
+        local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
     else:
         local_path = path
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:
-        log.checked("Path %s already exists" % local_path)
+        log.debug("Path %s already exists" % local_path)
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
         log.info("Cloned repo %s@%s as %s" % (online_url, branch, path))
     else:
-        log.exit("Repo %s missing as %s. You should init your project" % (
-            online_url, local_path))
+        log.exit(
+            "Repo %s missing as %s. You should init your project"
+            % (online_url, local_path)
+        )
 
     if do:
         switch_branch(gitobj, branch)
 
     if check:
-        compare_repository(
-            gitobj, branch, online_url=online_url, path=path)
+        compare_repository(gitobj, branch, online_url=online_url, path=path)
 
     return gitobj
 
 
-def compare_repository(gitobj, branch, online_url,
-                       check_only=False, path=None):
+def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -144,7 +142,9 @@ def compare_repository(gitobj, branch, online_url,
                 """Unmatched local remote
 Found: %s\nExpected: %s
 Suggestion: remove %s and execute the init command
-            """ % (url, online_url, gitobj.working_dir))
+            """
+                % (url, online_url, gitobj.working_dir)
+            )
         # TO FIX: before suggesting to delete verify if the repo is clean
         # i.e. verify if git status find out something is modified
         else:
@@ -185,6 +185,7 @@ def check_file_younger_than(gitobj, filename, timestamp):
     # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
 
     from utilities import time
+
     m = max(dates)
     return time.timestamp_from_string(timestamp) < m, timestamp, m
 
@@ -207,8 +208,7 @@ def update(path, gitobj):
     has_unstaged = len(get_unstaged_files(gitobj)) > 0
 
     if has_unstaged:
-        log.warning(
-            "Unable to update %s repo, you have unstaged files" % (path))
+        log.warning("Unable to update %s repo, you have unstaged files" % (path))
         return
 
     for remote in gitobj.remotes:
@@ -264,8 +264,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
     behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
-    commits_behind = gitobj.iter_commits(
-        behind_check, max_count=max_remote)
+    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
 
     try:
         commits_behind_list = list(commits_behind)
@@ -279,23 +278,20 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         if len(commits_behind_list) > 0:
             log.warning("%s repo should be updated!" % (path))
         else:
-            log.checked("%s repo is updated" % (path))
+            log.debug("%s repo is updated" % (path))
         for c in commits_behind_list:
             message = c.message.strip().replace('\n', "")
 
             sha = c.hexsha[0:7]
             if len(message) > 60:
                 message = message[0:57] + "..."
-            log.warning(
-                "Missing commit from %s: %s (%s)"
-                % (path, sha, message))
+            log.warning("Missing commit from %s: %s (%s)" % (path, sha, message))
 
     # CHECKING COMMITS AHEAD (TO BE PUSHED) #
     # if path != 'upstream' and remote_branch == branch:
     if remote_branch == branch:
         ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
-        commits_ahead = gitobj.iter_commits(
-            ahead_check, max_count=max_remote)
+        commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
         try:
             commits_ahead_list = list(commits_ahead)
         except GitCommandError:
@@ -306,18 +302,15 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         else:
 
             if len(commits_ahead_list) > 0:
-                log.warning(
-                    "You have commits not pushed on %s repo" % (path))
+                log.warning("You have commits not pushed on %s repo" % (path))
             else:
-                log.checked("You pushed all commits on %s repo" % (path))
+                log.debug("You pushed all commits on %s repo" % (path))
             for c in commits_ahead_list:
                 message = c.message.strip().replace('\n', "")
 
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
-                log.warning(
-                    "Unpushed commit in %s: %s (%s)"
-                    % (path, sha, message))
+                log.warning("Unpushed commit in %s: %s (%s)" % (path, sha, message))
 
     return True

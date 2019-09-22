@@ -6,11 +6,6 @@ action:
 
 options:
 
-  # TODO: add the --env option (or --print-env) for all commands
-  # env:
-  #   alias: e
-  #   help: print the variables to be used with the command and exit
-
   project:
     alias: p
     # NOTE: this is the equivalent of the old concept of `blueprint`
@@ -34,15 +29,15 @@ options:
     default: DEBUG
     help: level of verbosity
 
-  frontend:
-    type: str
-    metavalue: FRAMEWORK_NAME
-    help: Include a frontend framework to the rapydo stack
-
   no-backend:
     type: bool
     default: False
     help: Exclude backend configuration from rapydo stack
+
+  no-frontend:
+    type: bool
+    default: False
+    help: Exclude frontend configuration from rapydo stack
 
   no-commons:
     type: bool
@@ -69,14 +64,6 @@ options:
     default: active services
     help: list of services referring to a command
 
-  # force-env:
-  cache-env:
-    alias: env
-    type: bool
-    default: False
-    # help: Force recreation of the docker compose .env file even if existing
-    help: cache the docker compose .env file instead of recreating it
-
   development:
     type: bool
     default: False
@@ -87,10 +74,10 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
-  skip-check-permissions:
+  check-permissions:
     type: bool
     default: False
-    help: skip permission checks on file system
+    help: Enabled permission checks on file system
 
   # net:
   #   type: str
@@ -104,6 +91,19 @@ subcommands:
 
   formatter:
     description: "run 'black' formatter on main project backend code"
+    suboptions:
+      folder:
+        alias: f
+        type: str
+        metavalue: FOLDER_NAME
+        default: apis
+        help: name of folder to be formatted
+      submodule:
+        alias: s
+        type: str
+        metavalue: SUBMODULE_NAME
+        default: vanilla
+        help: name of submodule to be formatted. Project folder is defined as vanilla submodule
 
   check:
     description: "only verify if currently compliant to RAPyDo specs
@@ -129,10 +129,6 @@ subcommands:
         type: str
         metavalue: SUBMODULE_PATH
         help: link all submodules in an existing folder instead of download them
-      no-builds:
-        type: bool
-        default: False
-        help: Skip checks on build templates
   update:
     description: update the current project
     suboptions:
@@ -177,16 +173,16 @@ subcommands:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: force building of templates docker images used in other builds
+        help: force rebuild of parent images (templates) used in local builds
       force:
         alias: f
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: remove caches of previous builds on this service
+        help: remove the build cache to force the complete rebuilding
   pull:
     description: pull available images from docker hub
-  log:
+  logs:
     description: watch log tails of all or specified containers
     suboptions:
       follow:
@@ -236,6 +232,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Force Let's Encrypt to renew the certificate
+      no-tty:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
     container_exec:
@@ -257,6 +258,12 @@ subcommands:
         metavalue: INTEGER_PORT_FOR_SERVICE
         default: null
         help: port to be associated to the current service interface
+      detach:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Detached mode to run the container in background
+
   shell:
     description: open a shell inside one available 'dockerized' service
     suboptions:
@@ -277,15 +284,13 @@ subcommands:
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
         default: bash
         help: UNIX command to be executed on selected running service
+      no-tty:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable pseudo-tty allocation, useful to execute the command from non interactive script
   start:
     description: Start containers for this configuration
-    # suboptions:
-    #   from-upgrade:
-    #     alias: fu
-    #     type: bool
-    #     metavalue: TRUE_OR_FALSE
-    #     default: False
-    #     help: rebuild images and use them to restart existing containers
   stop:
     description: stop running containers, but do not remove them
   restart:
@@ -370,8 +375,6 @@ subcommands:
         metavalue: CONNECTED_SERVICE
         # default: sqlalchemy
         help: the first service that will be connected inside the code
-  coverall:
-    description: send coverage computed to coveralls.io website
   verify:
     description: check a service connection within the backend container
     suboptions:
@@ -398,15 +401,23 @@ subcommands:
   create:
     description: create a new rapydo project
     suboptions:
+      template:
+        positional: true
+        type: str
+        metavalue: TEMPLATE_NAME
+        default: null
+        help: Name of the template used to initialize your project. Allowed values are sql, neo, mongo, celerytest, irodstest, centos 
       name:
         positional: true
         type: str
         metavalue: NAME
         default: null
-      template:
-        type: str
-        metavalue: TEMPLATE_NAME
-        help: Name of the template used to initialize your project
+        help: Name of your new project
+      # continue:
+      #   type: bool
+      #   metavalue: TRUE_OR_FALSE
+      #   default: False
+      #   help: Restart from an interrupted configuration
 
   version:
     description: Retrieve version details

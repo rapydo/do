@@ -13,8 +13,11 @@ from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
-from compose.cli.command import \
-    get_project_name, get_config_from_options, project_from_options
+from compose.cli.command import (
+    get_project_name,
+    get_config_from_options,
+    project_from_options,
+)
 from compose.cli.main import TopLevelCommand
 from utilities import helpers
 from utilities.logs import get_logger
@@ -53,11 +56,11 @@ class Compose(object):
             return services_list
 
     def get_handle(self):
-        return TopLevelCommand(
-            project_from_options(self.project_dir, self.options))
+        return TopLevelCommand(project_from_options(self.project_dir, self.options))
 
-    def build_images(self, builds, force_pull=True,
-                     current_version=None, current_uid=None):
+    def build_images(
+        self, builds, force_pull=True, current_version=None, current_uid=None
+    ):
 
         try:
             compose_handler = self.get_handle()
@@ -70,17 +73,15 @@ class Compose(object):
                 options = {
                     '--no-cache': True,
                     '--pull': force_pull,
-                    'SERVICE': [service]
+                    'SERVICE': [service],
                 }
 
                 build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
                 if current_version is not None:
-                    build_args.append(
-                        "%s=%s" % ("RAPYDO_VERSION", current_version))
+                    build_args.append("%s=%s" % ("RAPYDO_VERSION", current_version))
                 if current_uid is not None:
-                    build_args.append(
-                        "%s=%s" % ("CURRENT_UID", current_uid))
+                    build_args.append("%s=%s" % ("CURRENT_UID", current_uid))
 
                 if len(build_args) > 0:
                     options['--build-arg'] = build_args
@@ -122,21 +123,16 @@ class Compose(object):
                 log.warning("Compose received: system.exit(%s)", e.code)
                 log.exit(error_code=e.code)
             else:
-                log.very_verbose(
-                    "Executed compose %s w/%s" % (command, options))
-        except (
-            clierrors.UserError,
-            cerrors.OperationFailedError,
-            BuildError,
-        ) as e:
+                log.very_verbose("Executed compose %s w/%s" % (command, options))
+        except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             msg = "Failed command execution:\n%s" % e
             if nofailure:
                 raise AttributeError(msg)
             else:
                 log.critical_exit(msg)
         except docker_errors as e:
-            log.critical_exit("Failed docker container:\n%s" % e)
-        except ProjectError as e:
+            log.exit("Failed docker container:\n%s" % e)
+        except (ProjectError, NoSuchService) as e:
             log.exit(str(e))
         else:
             log.very_verbose("Executed compose %s w/%s" % (command, options))
@@ -162,15 +158,15 @@ class Compose(object):
 
         return (shell_command, shell_args)
 
-    def start_containers(self, services,
-                         detach=True,
-                         scale=None,
-                         skip_dependencies=False,
-                         abort_on_container_exit=False,
-                         # switching in an easier way between modules
-                         remove_orphans=True,
-                         no_recreate=False
-                         ):
+    def start_containers(
+        self,
+        services,
+        detach=True,
+        scale=None,
+        skip_dependencies=False,
+        abort_on_container_exit=False,
+        no_recreate=False,
+    ):
         """
             Start containers (docker-compose up)
         """
@@ -184,7 +180,7 @@ class Compose(object):
             '--detach': detach,
             '--build': None,
             '--no-color': False,
-            '--remove-orphans': remove_orphans,
+            '--remove-orphans': False,
             '--abort-on-container-exit': abort_on_container_exit,
             '--no-recreate': no_recreate,
             '--force-recreate': False,
@@ -195,7 +191,9 @@ class Compose(object):
 
         return self.command('up', options)
 
-    def create_volatile_container(self, service, command=None, publish=None):
+    def create_volatile_container(
+        self, service, command=None, publish=None, detach=False
+    ):
         """
             Execute a command on a not container
         """
@@ -212,15 +210,19 @@ class Compose(object):
 
         options = {
             'SERVICE': service,
-            '--publish': publish, '--service-ports': service_post,
+            '--publish': publish,
+            '--service-ports': service_post,
             'COMMAND': shell_command,
             'ARGS': shell_args,
-            '-e': [], '--volume': [],
-            '--rm': True, '--no-deps': True,
-            '--name': None, '--user': None,
-            '--workdir': None, '--entrypoint': None,
-            # '-d': False,
-            '--detach': False,
+            '-e': [],
+            '--volume': [],
+            '--rm': True,
+            '--no-deps': True,
+            '--name': None,
+            '--user': None,
+            '--workdir': None,
+            '--entrypoint': None,
+            '--detach': detach,
             '--use-aliases': False,  # introduced with compose 1.21
             '-T': False,
             '--label': None,
@@ -228,7 +230,9 @@ class Compose(object):
 
         return self.command('run', options)
 
-    def exec_command(self, service, user=None, command=None, nofailure=False):
+    def exec_command(
+        self, service, user=None, command=None, disable_tty=False, nofailure=False
+    ):
         """
             Execute a command on a running container
         """
@@ -239,7 +243,7 @@ class Compose(object):
             'ARGS': shell_args,
             '--index': '1',
             '--user': user,
-            '-T': False,
+            '-T': disable_tty,
             '--env': None,
             '--workdir': None,
             # '-d': False,
@@ -247,8 +251,9 @@ class Compose(object):
             '--privileged': False,
         }
         if shell_command is not None:
-            log.debug("Command: %s(%s+%s)"
-                      % (service.lower(), shell_command, shell_args))
+            log.debug(
+                "Command: %s(%s+%s)" % (service.lower(), shell_command, shell_args)
+            )
         try:
             out = self.command('exec_command', options, nofailure=nofailure)
         except NoSuchService:
@@ -264,11 +269,21 @@ class Compose(object):
         if command in ['run']:
             return Compose.set_defaults(
                 variables=[
-                    'COMMAND', 'T', 'e',
-                    'entrypoint', 'user', 'label', 'publish', 'service-ports',
-                    'name', 'workdir', 'volume', 'no-deps', 'use-aliases'
+                    'COMMAND',
+                    'T',
+                    'e',
+                    'entrypoint',
+                    'user',
+                    'label',
+                    'publish',
+                    'service-ports',
+                    'name',
+                    'workdir',
+                    'volume',
+                    'no-deps',
+                    'use-aliases',
                 ],
-                merge={'--rm': True}
+                merge={'--rm': True},
             )
         else:
             log.exit("No default implemented for: %s", command)

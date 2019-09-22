@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from utilities import configuration
 from utilities.logs import get_logger
 from glom import glom
 
@@ -42,7 +41,7 @@ def find_active(services):
         dependencies[name] = list(service.get('depends_on', {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
-        is_active = (str(ACTIVATE) == "1")
+        is_active = str(ACTIVATE) == "1"
         if is_active:
             base_actives.append(name)
 
@@ -63,22 +62,3 @@ def apply_variables(dictionary, variables):
         new_dict[key] = value
 
     return new_dict
-
-
-def check_coveralls(path, key='repo_token'):
-    compose = configuration.load_yaml_file(path)
-    if len(compose.get(key, '').strip()) > 0:
-        log.very_verbose('Found the %s' % key)
-    else:
-        log.exit('Missing "%s": %s' % (key, path))
-
-
-def check_coverage_service(path, service='coverage'):
-    compose = configuration.load_yaml_file(path)
-    services = compose.get('services', {})
-    if services.get(service) is None:
-        log.exit('Missing "%s" service in compose: %s' % (service, path))
-    else:
-        log.very_verbose('Found %s service' % service)
-
-    return service

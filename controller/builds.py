@@ -34,8 +34,7 @@ def find_templates_build(base_services):
             if template_image is None:
                 log.critical_exit(
                     "Error with template build: %s\n"
-                    "Template builds must have a name!"
-                    % template_name
+                    "Template builds must have a name!" % template_name
                 )
             else:
 
@@ -44,7 +43,8 @@ def find_templates_build(base_services):
                     templates[template_image]['services'] = []
                     templates[template_image]['path'] = template_build.get('context')
                     templates[template_image]['timestamp'] = docker.image_attribute(
-                        template_image)
+                        template_image
+                    )
 
                 templates[template_image]['service'] = template_name
                 templates[template_image]['services'].append(template_name)
@@ -84,7 +84,8 @@ def find_templates_override(services, templates):
                     log.critical_exit(
                         """Unable to find %s in this project
 \nPlease inspect the FROM image in %s/Dockerfile
-                        """ % (dfp.baseimage, dockerfile)
+                        """
+                        % (dfp.baseimage, dockerfile)
                     )
                 else:
                     vanilla_img = service.get('image')

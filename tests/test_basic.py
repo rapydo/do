@@ -1,11 +1,9 @@
-
 import os
 from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
-from utilities import PROJECT_DIR, \
-    BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
+from utilities import PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
 from utilities.logs import get_logger
 from utilities.basher import BashCommands
 
@@ -42,14 +40,13 @@ def exec_command(capfd, command):
 
 
 def test_all(capfd):
-    # def test_init(capfd):
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
-        f.write("project: template")
+        f.write("project: sql")
 
     # INIT on rapydo-core
-    _, err = exec_command(capfd, "rapydo init --no-build")
+    _, err = exec_command(capfd, "rapydo init")
     log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
@@ -69,11 +66,16 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO All updated" in err
 
-    # _, err = exec_command(capfd, "rapydo build")
-    # assert "INFO Image built" in err
+    _, err = exec_command(capfd, "rapydo build --rebuild-templates")
+    assert "INFO Images built" in err
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
+    assert env_log_prefix_info in err
+    assert "INFO All checked" in err
+
+    # CHECK on rapydo-core by enabling permissions checks
+    _, err = exec_command(capfd, "rapydo --check-permissions check")
     assert env_log_prefix_info in err
     assert "INFO All checked" in err
 
@@ -85,62 +87,48 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
+    _, err = exec_command(capfd, "rapydo list --env")
+    assert "INFO List env variables:" in err
 
-# def test_checks(capfd):
-    # Check  .env cache
-    _, err = exec_command(capfd, "rapydo --cache-env check -s")
-    log.pp(err)
-    assert env_cached_log_verbose in err
-    assert "INFO All checked" in err
+    _, err = exec_command(capfd, "rapydo list --args")
+    assert "INFO List of configured rapydo arguments:" in err
 
-    # _, err = exec_command(capfd, "rapydo list --args")
-    # assert "INFO List of configured rapydo arguments:" in err
+    _, err = exec_command(capfd, "rapydo list --services")
+    assert "INFO List of active services:" in err
 
-    # _, err = exec_command(capfd, "rapydo list --env")
-    # assert "INFO List env variables:" in err
-
-    # _, err = exec_command(capfd, "rapydo list --services")
-    # assert "INFO List of active services:" in err
-
-    # _, err = exec_command(capfd, "rapydo list --submodules")
-    # assert "INFO List of submodules:" in err
+    _, err = exec_command(capfd, "rapydo list --submodules")
+    assert "INFO List of submodules:" in err
 
     _, err = exec_command(capfd, "rapydo dump")
     assert "WARNING Config dump: docker-compose.yml" in err
 
-
-# def test_two_projects(capfd):
-
     os.remove(".projectrc")
 
     bash = BashCommands()
-    bash.copy_folder("projects/template", "projects/second")
+    bash.copy_folder("projects/sql", "projects/second")
 
-    _, err = exec_command(capfd, "rapydo -env check -s")
+    _, err = exec_command(capfd, "rapydo check -s")
     assert "EXIT Please select the --project option on one of the following:" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p template check -s")
+    _, err = exec_command(capfd, "rapydo -p sql check -s")
     assert "INFO All checked" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p invalid_character check -s")
+    _, err = exec_command(capfd, "rapydo -p invalid_character check -s")
     assert "EXIT Wrong project name, _ is not a valid character." in err
 
-    _, err = exec_command(capfd, "rapydo -env -p celery check -s")
+    _, err = exec_command(capfd, "rapydo -p celery check -s")
     assert "EXIT You selected a reserved name, invalid project name: celery" in err
 
-    _, err = exec_command(capfd, "rapydo -env -p xyz check -s")
+    _, err = exec_command(capfd, "rapydo -p xyz check -s")
     assert "EXIT Wrong project 'xyz'." in err
     assert "Select one of the following:" in err
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
-        f.write("project: template")
+        f.write("project: sql")
 
-    _, err = exec_command(capfd, "rapydo -env check -s")
+    _, err = exec_command(capfd, "rapydo check -s")
     assert "INFO All checked" in err
-
-
-# def test_from_start_to_clean(capfd):
 
     _, err = exec_command(capfd, "rapydo start")
     assert env_log_prefix_verbose in err
@@ -153,15 +141,15 @@ def test_all(capfd):
     # Template project is based on neo4j
     exec_command(capfd, "rapydo verify neo4j")
     # This output is not capture, since it is produced by the backend
-    # assert "INFO Service neo4j is reachable" in err
+    # assert 'EXIT Service "neo4j" was NOT detected' in err
 
-    # exec_command(capfd, "rapydo verify postgres")
+    exec_command(capfd, "rapydo verify postgres")
     # This output is not capture, since it is produced by the backend
-    # assert 'EXIT Service "postgres" was NOT detected' in err
+    # assert "INFO Service postgres is reachable" in err
 
     exec_command(capfd, "rapydo scale backend=1")
 
-    exec_command(capfd, "rapydo log")
+    exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
     # assert compose_log_prefix + "'logs'" in err
 
@@ -190,22 +178,15 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
 
-
-# def test_miscellanous(capfd):
-
     endpoint_name = 'justatest'
     _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
-    # "rendered projects/template/backend/swagger/justatest/specs.yaml"
-    base_response = 'INFO rendered %s/template/%s' % \
-        (PROJECT_DIR, BACKEND_DIR)
+    # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
+    base_response = 'INFO rendered %s/sql/%s' % (PROJECT_DIR, BACKEND_DIR)
 
-    assert '%s/%s/%s/specs.yaml' % \
-        (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s/get.yaml' % \
-        (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s.py' % \
-        (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
+    assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
+    assert '%s/%s/%s.py' % (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
 
@@ -213,6 +194,10 @@ def test_all(capfd):
     assert "Endpoint path:\t/api/%s" % endpoint_name in err
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
+
+    # exec_command(capfd, "rapydo install --git auto")
+
+    exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
