@@ -458,6 +458,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/custom.module.ts',
                     'frontend/app/custom.navbar.ts',
                     'frontend/css/style.css',
+                    'frontend/app/custom.navbar.links.html',
+                    'frontend/app/custom.navbar.brand.html',
                 ]
             )
 
@@ -473,8 +475,6 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/app.home.html',
                     'frontend/app/custom.declarations.ts',
                     'frontend/app/custom.routes.ts',
-                    'frontend/app/custom.navbar.links.html',
-                    'frontend/app/custom.navbar.brand.html',
                 ]
             )
 
