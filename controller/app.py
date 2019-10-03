@@ -1431,7 +1431,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             '--force': True,
             '-v': False,  # dangerous?
         }
-        dc.command('stop')
+        dc.command('stop', options)
         dc.command('rm', options)
 
         log.info("Stack removed")
