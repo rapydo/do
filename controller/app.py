@@ -1105,25 +1105,39 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.frontend != ANGULAR:
             return False
 
-        libs_dir = os.path.join("data", self.project, "frontend")
-        modules_dir = os.path.join(libs_dir, "node_modules")
+        frontend_data_dir = os.path.join("data", self.project, "frontend")
+        if not os.path.isdir(frontend_data_dir):
+            os.makedirs(frontend_data_dir)
+            log.warning("Missing folder, creating %s" % frontend_data_dir)
 
-        if not os.path.isdir(libs_dir):
-            os.makedirs(libs_dir)
-            log.warning("Libs folder not found, creating %s" % libs_dir)
-        if not os.path.isdir(modules_dir):
-            os.makedirs(modules_dir)
-            log.warning("Modules folder not found, creating %s" % modules_dir)
+        expected_folders = [
+            "app",
+            "courtesy",
+            "e2e",
+            "node_modules"
+        ]
+        expected_files = [
+            "angular.json",
+            "browserslist",
+            "karma.conf.js",
+            "package.json",
+            "polyfills.ts",
+            "tsconfig.app.json",
+            "tsconfig.json",
+            "tsconfig.spec.json",
+            "tslint.json",
+            "typedarray.js",
+        ]
 
-        if not os.path.exists(os.path.join(libs_dir, "package.json")):
-            log.warning("Package.json not found, will be created at startup")
+        for f in expected_folders:
+            p = os.path.join(frontend_data_dir, f)
+            if not os.path.isdir(p):
+                os.makedirs(p)
 
-        libs = helpers.list_path(modules_dir)
-
-        if len(libs) <= 0:
-            log.warning("Frontend libs not found, will be installed at startup")
-        else:
-            log.checked("Found %d frontend libs installed" % len(libs))
+        for f in expected_files:
+            p = os.path.join(frontend_data_dir, f)
+            if not os.path.exists(p):
+                open(p, 'a').close()
 
     def get_services(self, key='services', sep=',', default=None):
 
