@@ -442,7 +442,6 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend',
             'backend/apis',
             'backend/models',
-            'backend/swagger',
             'backend/tests',
         ]
         # Deprecated on 0.7.0
