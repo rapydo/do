@@ -1769,6 +1769,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def _template(self):
 
+        log.critical("This command is obsolete, please do not use it")
+
         service_name = self.current_args.get('service')
         if service_name is None:
             service_name = self.vars.get('env', {}).get('AUTH_SERVICE')
