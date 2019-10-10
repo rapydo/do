@@ -445,7 +445,8 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/swagger',
             'backend/tests',
         ]
-        obsolete_files = ['backend/__main__.py']
+        # Deprecated on 0.7.0
+        obsolete_files = ['backend/swagger/models.yaml']
 
         if self.frontend is not None:
             required_files.extend(
