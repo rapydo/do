@@ -178,6 +178,7 @@ def test_all(capfd):
     assert env_log_prefix_verbose in err
     assert "INFO Stack cleaned" in err
 
+    """
     endpoint_name = 'justatest'
     _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
@@ -194,6 +195,7 @@ def test_all(capfd):
     assert "Endpoint path:\t/api/%s" % endpoint_name in err
     assert "Labels:\t\tcustom, %s" % endpoint_name in err
     assert "Python class:\t%s" % endpoint_name.capitalize() in err
+    """
 
     # exec_command(capfd, "rapydo install --git auto")
 
