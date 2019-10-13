@@ -1108,7 +1108,7 @@ Verify that you are in the right folder, now you are in: %s%s
         frontend_data_dir = os.path.join("data", self.project, "frontend")
         if not os.path.isdir(frontend_data_dir):
             os.makedirs(frontend_data_dir)
-            log.warning("Missing folder, creating %s" % frontend_data_dir)
+            log.info("%s folder not found, created with expected subtree", frontend_data_dir)
 
         expected_folders = [
             "app",
