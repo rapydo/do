@@ -445,14 +445,16 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/tests',
         ]
         # Deprecated on 0.7.0
-        obsolete_files = ['backend/swagger/models.yaml']
+        obsolete_files = [
+            'backend/swagger/models.yaml',
+            'frontend/custom.ts',
+        ]
 
         if self.frontend is not None:
             required_files.extend(
                 [
                     'frontend',
                     'frontend/package.json',
-                    'frontend/custom.ts',
                     'frontend/app',
                     'frontend/app/custom.project.options.ts',
                     'frontend/app/custom.module.ts',
