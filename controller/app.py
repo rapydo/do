@@ -445,10 +445,7 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend/tests',
         ]
         # Deprecated on 0.7.0
-        obsolete_files = [
-            'backend/swagger/models.yaml',
-            'frontend/custom.ts',
-        ]
+        obsolete_files = ['backend/swagger/models.yaml', 'frontend/custom.ts']
 
         if self.frontend is not None:
             required_files.extend(
@@ -795,8 +792,10 @@ Verify that you are in the right folder, now you are in: %s%s
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS and not self.current_args.get('no_frontend'),
-            ANGULAR: self.frontend == ANGULAR and not self.current_args.get('no_frontend'),
+            ANGULARJS: self.frontend == ANGULARJS
+            and not self.current_args.get('no_frontend'),
+            ANGULAR: self.frontend == ANGULAR
+            and not self.current_args.get('no_frontend'),
             REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
             'logging': self.current_args.get('collect_logs'),
             'devel': self.development,
@@ -1110,14 +1109,11 @@ Verify that you are in the right folder, now you are in: %s%s
         frontend_data_dir = os.path.join("data", self.project, "frontend")
         if not os.path.isdir(frontend_data_dir):
             os.makedirs(frontend_data_dir)
-            log.info("%s folder not found, created with expected subtree", frontend_data_dir)
+            log.info(
+                "%s folder not found, created with expected subtree", frontend_data_dir
+            )
 
-        expected_folders = [
-            "app",
-            "courtesy",
-            "e2e",
-            "node_modules"
-        ]
+        expected_folders = ["app", "courtesy", "e2e", "node_modules"]
         expected_files = [
             "angular.json",
             "browserslist",
