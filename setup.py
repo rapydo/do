@@ -46,11 +46,9 @@ setup(
         # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
         # "PyYAML==3.13",
 
-        # Still required?
-        "jinja2",
         "plumbum",
         "glom",
-        "gitpython==2.1.11",
+        "gitpython==3.0.2",
 
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
