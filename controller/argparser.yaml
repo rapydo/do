@@ -195,7 +195,7 @@ subcommands:
         alias: t
         type: str
         metavalue: INTEGER_NUM_LINES
-        default: "100"
+        default: "1000"
         help: logs
       service:
         alias: s
