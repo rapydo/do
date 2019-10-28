@@ -72,6 +72,7 @@ class Compose(object):
 
                 options = {
                     '--no-cache': True,
+                    '--parallel': True,
                     '--pull': force_pull,
                     'SERVICE': [service],
                 }

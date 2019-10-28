@@ -866,7 +866,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         # we are in check or build case
         dimages = self.docker.images()
-        # if rebuild templates is on build is forced, these checks are not needed
+        # if rebuild templates is forced, these checks are not needed
         if not self.current_args.get('rebuild_templates', False):
             rebuilt = self.verify_template_builds(dimages, self.template_builds)
             if rebuilt:
@@ -1576,6 +1576,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'SERVICE': services,
             '--no-cache': self.current_args.get('force'),
             '--pull': False,
+            '--parallel': True,
         }
         dc.command('build', options)
 
