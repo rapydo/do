@@ -1218,6 +1218,19 @@ Verify that you are in the right folder, now you are in: %s%s
                 env['BLACK_SUBMODULE'] = submodule
                 env['BLACK_FOLDER'] = self.current_args.get('folder')
 
+        if env.get('ACTIVATE_CELERY_BEAT', "0") == "0":
+            env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+        else:
+            celery_backend = env.get('CELERY_BACKEND')
+            if celery_backend is None:
+                env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+            elif celery_backend == 'MONGODB':
+                env['CELERY_BEAT_SCHEDULER'] = 'celerybeatmongo.schedulers.MongoScheduler'
+            elif celery_backend == 'REDIS':
+                env['CELERY_BEAT_SCHEDULER'] = 'redbeat.RedBeatScheduler'
+            else:
+                env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+
         net = self.current_args.get('net', 'bridge')
         env['DOCKER_NETWORK_MODE'] = net
         # env.update({'PLACEHOLDER': PLACEHOLDER})
