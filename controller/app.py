@@ -456,9 +456,11 @@ Verify that you are in the right folder, now you are in: %s%s
                     'frontend/app/custom.project.options.ts',
                     'frontend/app/custom.module.ts',
                     'frontend/app/custom.navbar.ts',
+                    'frontend/app/custom.profile.ts',
                     'frontend/css/style.css',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
+                    'frontend/app/custom.profile.html',
                 ]
             )
 
