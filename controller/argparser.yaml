@@ -413,37 +413,7 @@ subcommands:
         metavalue: NAME
         default: null
         help: Name of your new project
-      # continue:
-      #   type: bool
-      #   metavalue: TRUE_OR_FALSE
-      #   default: False
-      #   help: Restart from an interrupted configuration
 
   version:
     description: Retrieve version details
 
-  # upgrade:  # DEPRECATED, see issues/71
-  #   description: upgrade your current project to new official releases
-  #   suboptions:
-  #     release:
-  #       alias: r
-  #       type: str
-  #       metavalue: RELEASE_VERSION
-  #       help: release version you want to upgrade to
-  #     downgrade:
-  #       alias: d
-  #       type: bool
-  #       metavalue: TRUE_OR_FALSE
-  #       default: False
-  #       help: allow downgrade to previous versions
-  #     current:
-  #       alias: c
-  #       type: bool
-  #       metavalue: TRUE_OR_FALSE
-  #       default: False
-  #       help: upgrade to current branch. Incompatible with release option
-
-  # tutorial:
-  #   description: Step-by-step guide to make your project RAPyDo compliant
-  # TODO: a tutorial mode to improve the project step by step
-  # instead of all at once like init
