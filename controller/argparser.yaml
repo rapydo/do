@@ -169,7 +169,7 @@ subcommands:
     description: force building of one or more services docker images
     suboptions:
       rebuild-templates:
-        alias: r
+        alias: t
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
