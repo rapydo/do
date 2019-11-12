@@ -208,7 +208,7 @@ def update(path, gitobj):
     has_unstaged = len(get_unstaged_files(gitobj)) > 0
 
     if has_unstaged:
-        log.warning("Unable to update %s repo, you have unstaged files" % (path))
+        log.exit("Unable to update %s repo, you have unstaged files" % (path))
         return
 
     for remote in gitobj.remotes:
