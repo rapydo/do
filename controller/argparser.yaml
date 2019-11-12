@@ -120,6 +120,10 @@ subcommands:
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
+      skip-builds-checks:
+        type: bool
+        default: False
+        help: ignore the heaviest builds operations
   init:
     description: "
       make current project compliant to RAPyDo requirements

@@ -176,7 +176,7 @@ class Application(object):
             # Build or check template containers images
             self.build_dependencies()
 
-            # Install or check frontend libraries (onlye if frontend is enabled)
+            # Install or check frontend libraries (only if frontend is enabled)
             self.frontend_libs()
 
         # Final step, launch the command
@@ -858,6 +858,10 @@ Verify that you are in the right folder, now you are in: %s%s
         """ Look up for builds which are depending on templates """
 
         if self.action not in ['check', 'update', 'build']:
+            return
+
+        if self.current_args.get('skip_builds_checks', False):
+            log.warning("Skipping builds checks")
             return
 
         # Compare builds depending on templates (slow operation!)
