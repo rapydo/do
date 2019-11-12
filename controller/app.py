@@ -154,16 +154,19 @@ class Application(object):
 
         if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
-            git_checks = False
-            git_checks = self.update or self.check
             if self.check and self.current_args.get('skip_heavy_git_ops', False):
                 git_checks = False
+            else:
+                git_checks = self.update or self.check
 
             if git_checks:
                 self.git_checks()  # NOTE: this might be an heavy operation
             else:
-                log.verbose("Skipping heavy operations")
+                log.verbose("Skipping heavy get operations")
 
+            if self.update:
+                # Reading again the configuration, it may change with git updates
+                self.read_specs()
             self.make_env()
 
             # Compose services and variables
