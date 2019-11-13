@@ -4,6 +4,7 @@ import os
 import time
 from distutils.dir_util import copy_tree
 import shutil
+import urllib3
 import requests
 from glom import glom
 from collections import OrderedDict
@@ -15,7 +16,7 @@ from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities import EXTENDED_PROJECT_DISABLED
-from utilities.time import date_from_string, get_online_utc_time
+from utilities.time import date_from_string
 from controller import __version__
 from controller import project
 from controller import gitter
@@ -180,7 +181,14 @@ class Application(object):
         # Final step, launch the command
 
         if self.tested_connection:
-            online_time = get_online_utc_time()
+
+            # get online utc time
+            http = urllib3.PoolManager()
+            response = http.request('GET', "http://just-the-time.appspot.com/")
+
+            internet_time = response.data.decode('utf-8')
+            online_time = datetime.strptime(internet_time.strip(), "%Y-%m-%d %H:%M:%S")
+
             sec_diff = (datetime.utcnow() - online_time).total_seconds()
 
             major_diff = abs(sec_diff) >= 300
