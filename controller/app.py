@@ -381,21 +381,21 @@ To fix this issue, please update docker to version %s+
         log.checked("%s version: %s" % (program, found_version))
 
     @staticmethod
-    def check_python_package(package, min_version=None, max_version=None):
+    def check_python_package(package_name, min_version=None, max_version=None):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from controller.packages import package
+        from controller.packages import package_version
 
-        found_version = package(package)
+        found_version = package_version(package_name)
         if found_version is None:
-            log.exit("Could not find the following python package: %s" % package)
+            log.exit("Could not find the following python package: %s" % package_name)
 
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for %s is %s" % (
-                    package,
+                    package_name,
                     min_version,
                 )
                 version_error += ", found %s " % (found_version)
@@ -404,13 +404,13 @@ To fix this issue, please update docker to version %s+
         if max_version is not None:
             if LooseVersion(max_version) < LooseVersion(found_version):
                 version_error = "Maximum supported version for %s is %s" % (
-                    package,
+                    package_name,
                     max_version,
                 )
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        log.checked("%s version: %s" % (package, found_version))
+        log.checked("%s version: %s" % (package_name, found_version))
 
     @staticmethod
     def inspect_main_folder():

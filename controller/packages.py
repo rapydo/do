@@ -101,7 +101,7 @@ def import_package(package_name):
         return package
 
 
-def package(package_name):
+def package_version(package_name):
     package = import_package(package_name)
     if package is not None:
         return package.__version__
