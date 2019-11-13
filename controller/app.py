@@ -2071,9 +2071,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install
-
-        # from utilities.packing import check_version
+        from controller.python_packages import install
 
         log.info("You asked to install rapydo-controller %s from pip", version)
 
@@ -2084,8 +2082,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.error("Unable to install controller %s from pip", version)
         else:
             log.info("Controller version %s installed from pip", version)
-            # installed_version = check_version(package)
-            # log.info("Check on installed version: %s", installed_version)
 
     @staticmethod
     def install_controller_from_git(version):
@@ -2093,7 +2089,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from controller.python_packages import install, check_version
 
         log.info("You asked to install rapydo-controller %s from git", version)
 
@@ -2120,7 +2116,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from controller.python_packages import install, check_version
 
         log.info("You asked to install rapydo-controller %s from local folder", version)
 
