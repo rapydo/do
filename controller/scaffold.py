@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from jinja2 import FileSystemLoader, Environment
+from pathlib import Path
 from utilities.myyaml import YAML_EXT, load_yaml_file
-from utilities import path
 from utilities import helpers
 from utilities import (
     PROJECT_DIR,
@@ -46,9 +46,9 @@ class EndpointScaffold(object):
         self.specs_file = 'specs.%s' % YAML_EXT
 
         # setting the base dir for all scaffold things inside the project
-        self.backend_dir = path.build([PROJECT_DIR, self.custom_project, BACKEND_DIR])
+        self.backend_dir = Path(PROJECT_DIR, self.custom_project, BACKEND_DIR)
 
-        self.base_backend_dir = path.build([SUBMODULES_DIR, BACKEND_DIR, MAIN_PACKAGE])
+        self.base_backend_dir = Path(SUBMODULES_DIR, BACKEND_DIR, MAIN_PACKAGE)
 
     def create(self):
         self.swagger()
@@ -71,9 +71,9 @@ class EndpointScaffold(object):
             backend = self.base_backend_dir
             needle = self.find_swagger(endpoint, backend)
             base_endpoint = True
-            python_file_dir = path.join(backend, 'resources')
+            python_file_dir = Path(backend, 'resources')
         else:
-            python_file_dir = path.join(backend, ENDPOINTS_CODE_DIR)
+            python_file_dir = Path(backend, ENDPOINTS_CODE_DIR)
 
         if needle is None:
             log.exit('No endpoint "%s" found in current swagger definition' % endpoint)
@@ -81,19 +81,19 @@ class EndpointScaffold(object):
             pass
             # log.pp(needle)
 
-        current_dir = path.current()
+        current_dir = Path.cwd()
 
-        uri = path.join(needle.get('baseuri', '/api'), endpoint)
+        uri = Path(needle.get('baseuri', '/api'), endpoint)
         infos += 'Endpoint path:\t%s\n' % uri
 
-        swagger_dir = path.join(
+        swagger_dir = Path(
             current_dir, backend, SWAGGER_DIR, needle.get('swagger')
         )
         infos += 'Swagger path:\t%s/\n' % swagger_dir
 
         infos += 'Labels:\t\t%s\n' % ", ".join(needle.get('labels'))
 
-        python_file_path = path.join(
+        python_file_path = Path(
             current_dir, python_file_dir, needle.get('file') + '.py'
         )
         infos += 'Python file:\t%s\n' % python_file_path
@@ -118,7 +118,7 @@ class EndpointScaffold(object):
 
     def find_swagger(self, endpoint=None, backend_dir=None):
 
-        swagdir = path.join(backend_dir, SWAGGER_DIR)
+        swagdir = Path(backend_dir, SWAGGER_DIR)
         needle = None
 
         for current_specs_file in swagdir.glob('*/%s' % self.specs_file):
@@ -137,9 +137,23 @@ class EndpointScaffold(object):
 
         return needle
 
+    def create_folder(self, pathobj):
+        try:
+            pathobj.mkdir(parents=False)
+        except FileExistsError:
+            pass
+
+    def file_exists_and_nonzero(self, pathobj):
+
+        if not pathobj.exists():
+            return False
+
+        iostats = pathobj.stat()
+        return not iostats.st_size == 0
+
     def swagger_dir(self):
 
-        self.swagger_path = path.join(self.backend_dir, SWAGGER_DIR, self.endpoint_dir)
+        self.swagger_path = Path(self.backend_dir, SWAGGER_DIR, self.endpoint_dir)
 
         if self.swagger_path.exists():
             log.warning('Path %s already exists' % self.swagger_path)
@@ -149,7 +163,7 @@ class EndpointScaffold(object):
                     error='Cannot overwrite definition',
                 )
 
-        path.create(self.swagger_path, directory=True, force=True)
+        self.create_folder(self.swagger_path)
 
     @staticmethod
     def save_template(filename, content):
@@ -158,8 +172,8 @@ class EndpointScaffold(object):
 
     def render(self, filename, data, outdir='custom', template_filename=None):
 
-        mypath = path.join(outdir, filename)
-        if path.file_exists_and_nonzero(mypath):
+        mypath = Path(outdir, filename)
+        if self.file_exists_and_nonzero(mypath):
             # # if you do not want to overwrite
             # log.warning("%s already exists" % filename)
             # return False
@@ -209,8 +223,8 @@ class EndpointScaffold(object):
     def rest_class(self):
 
         filename = '%s.py' % self.endpoint_name
-        self.class_path = path.join(self.backend_dir, ENDPOINTS_CODE_DIR)
-        filepath = path.join(self.class_path, filename)
+        self.class_path = Path(self.backend_dir, ENDPOINTS_CODE_DIR)
+        filepath = Path(self.class_path, filename)
 
         if filepath.exists():
             log.warning('File %s already exists' % filepath)
@@ -234,8 +248,8 @@ class EndpointScaffold(object):
     def test_class(self):
 
         filename = 'test_%s.py' % self.endpoint_name
-        self.tests_path = path.join(self.backend_dir, 'tests')
-        filepath = path.join(self.tests_path, filename)
+        self.tests_path = Path(self.backend_dir, 'tests')
+        filepath = Path(self.tests_path, filename)
 
         if filepath.exists():
             log.warning('File %s already exists' % filepath)

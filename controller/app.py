@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os.path
+import os
 import time
 from distutils.dir_util import copy_tree
 import shutil
@@ -9,7 +9,6 @@ from glom import glom
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
-from utilities import path
 from utilities import helpers
 from utilities import basher
 from utilities import PROJECT_DIR
@@ -2044,7 +2043,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         from utilities.myyaml import yaml
 
         # replacing absolute paths with relative ones
-        main_dir = path.current_dir()
+        main_dir = os.getcwd()
         obj = yaml.load(yaml_string.replace(main_dir, '.'))
 
         active_services = {}
