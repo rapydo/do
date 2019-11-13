@@ -3,7 +3,6 @@ from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
-from utilities import PROJECT_DIR, BACKEND_DIR, SWAGGER_DIR, ENDPOINTS_CODE_DIR
 from utilities.logs import get_logger
 from utilities.basher import BashCommands
 
@@ -11,9 +10,9 @@ log = get_logger(__name__)
 
 compose_log_prefix = 'DEBUG %s' % compose_log
 symbol = '✓'
-env_log = '%s Created .env file' % symbol
+env_log = 'Created .env file'
 env_log_prefix_verbose = 'VERBOSE ' + env_log
-env_log_prefix_info = 'INFO ' + env_log
+env_log_prefix_info = 'INFO %s %s' % (symbol, env_log)
 env_cached_log = 'Using cached .env'
 env_cached_log_verbose = 'VERY_VERBOSE ' + env_cached_log
 
