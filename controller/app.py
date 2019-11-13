@@ -4,12 +4,12 @@ import os.path
 import time
 from distutils.dir_util import copy_tree
 import shutil
+import requests
 from glom import glom
 from collections import OrderedDict
 from datetime import datetime
 from distutils.version import LooseVersion
 from utilities import path
-from utilities import checks
 from utilities import helpers
 from utilities import basher
 from utilities import PROJECT_DIR
@@ -273,8 +273,8 @@ class Application(object):
             elif prj_num > 1:
                 hint = "Hint: create a %s file to save default options" % PROJECTRC
                 log.exit(
-                    "Please select the --project option on one "
-                    + "of the following:\n\n %s\n\n%s\n",
+                    "Please select the --project option on one " +
+                    "of the following:\n\n %s\n\n%s\n",
                     projects,
                     hint,
                 )
@@ -296,10 +296,15 @@ class Application(object):
         # Check if docker is installed
         self.check_program('docker', min_version="1.13")
 
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import executable
+
         # Check for CVE-2019-5736 vulnerability
         # Checking version of docker server, since docker client is not affected
         # and the two versions can differ
-        v = checks.executable(
+        v = executable(
             executable='docker',
             option=["version", "--format", "'{{.Server.Version}}'"],
             parse_ver=True,
@@ -339,7 +344,11 @@ To fix this issue, please update docker to version %s+
 
     @staticmethod
     def check_program(program, min_version=None, max_version=None):
-        found_version = checks.executable(executable=program)
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import executable
+        found_version = executable(executable=program)
         if found_version is None:
 
             hints = ""
@@ -374,7 +383,12 @@ To fix this issue, please update docker to version %s+
     @staticmethod
     def check_python_package(package, min_version=None, max_version=None):
 
-        found_version = checks.package(package)
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import package
+
+        found_version = package(package)
         if found_version is None:
             log.exit("Could not find the following python package: %s" % package)
 
@@ -688,13 +702,13 @@ Verify that you are in the right folder, now you are in: %s%s
     def verify_connected(self):
         """ Check if connected to internet """
 
-        connected = checks.internet_connection_available()
-        if not connected:
+        try:
+            requests.get('https://www.google.com')
+        except requests.ConnectionError:
             log.exit('Internet connection is unavailable')
         else:
             log.checked("Internet connection is available")
             self.tested_connection = True
-        return
 
     def working_clone(self, name, repo, confs_only=False, from_path=None):
 
@@ -2071,7 +2085,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from controller.python_packages import install
+        from controller.packages import install
 
         log.info("You asked to install rapydo-controller %s from pip", version)
 
@@ -2089,7 +2103,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from controller.python_packages import install, check_version
+        from controller.packages import install, check_version
 
         log.info("You asked to install rapydo-controller %s from git", version)
 
@@ -2116,7 +2130,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from controller.python_packages import install, check_version
+        from controller.packages import install, check_version
 
         log.info("You asked to install rapydo-controller %s from local folder", version)
 
