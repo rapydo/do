@@ -15,7 +15,6 @@ from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities import EXTENDED_PROJECT_DISABLED
-from utilities.globals import mem
 from utilities.time import date_from_string, get_online_utc_time
 from controller import __version__
 from controller import project
@@ -211,11 +210,16 @@ class Application(object):
 
         func()
 
+    def checked(self, message, *args, **kws):
+        if self.action == "check":
+            log.checked(message, *args, **kws)
+        else:
+            log.verbose(message, *args, **kws)
+
     def get_args(self):
 
         # Action
         self.action = self.current_args.get('action')
-        mem.action = self.action
         if self.action is None:
             log.exit("Internal misconfiguration")
 
@@ -288,7 +292,7 @@ class Application(object):
                     + "Select one of the following:\n\n %s\n" % projects
                 )
 
-        log.checked("Selected project: %s" % self.project)
+        self.checked("Selected project: %s", self.project)
 
     def check_installed_software(self):
 
@@ -329,9 +333,7 @@ To fix this issue, please update docker to version %s+
         self.docker = Dock()
 
         # Check docker-compose version
-        # self.check_python_package('pip', max_version="10.0.1")
         self.check_python_package('compose', min_version="1.18")
-        # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
         self.check_python_package('requests', min_version="2.6.1")
         self.check_python_package(
@@ -341,8 +343,7 @@ To fix this issue, please update docker to version %s+
         # Check if git is installed
         self.check_program('git')  # , max_version='2.14.3')
 
-    @staticmethod
-    def check_program(program, min_version=None, max_version=None):
+    def check_program(self, program, min_version=None, max_version=None):
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
@@ -377,10 +378,9 @@ To fix this issue, please update docker to version %s+
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        log.checked("%s version: %s" % (program, found_version))
+        self.checked("%s version: %s", program, found_version)
 
-    @staticmethod
-    def check_python_package(package_name, min_version=None, max_version=None):
+    def check_python_package(self, package_name, min_version=None, max_version=None):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -409,7 +409,7 @@ To fix this issue, please update docker to version %s+
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        log.checked("%s version: %s" % (package_name, found_version))
+        self.checked("%s version: %s", package_name, found_version)
 
     @staticmethod
     def inspect_main_folder():
@@ -706,7 +706,7 @@ Verify that you are in the right folder, now you are in: %s%s
         except requests.ConnectionError:
             log.exit('Internet connection is unavailable')
         else:
-            log.checked("Internet connection is available")
+            self.checked("Internet connection is available")
             self.tested_connection = True
 
     def working_clone(self, name, repo, confs_only=False, from_path=None):
@@ -1277,7 +1277,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 if ' ' in value:
                     value = "'%s'" % value
                 whandle.write("%s=%s\n" % (key, value))
-            log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+            self.checked("Created %s file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
 
@@ -1291,7 +1291,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         else:
-            log.checked("Active services: %s", self.active_services)
+            self.checked("Active services: %s", self.active_services)
 
         missing = []
         for service_name in self.active_services:
