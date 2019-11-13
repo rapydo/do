@@ -9,6 +9,8 @@ import requests
 from glom import glom
 from collections import OrderedDict
 from datetime import datetime
+import dateutil.parser
+import pytz
 from distutils.version import LooseVersion
 from utilities import helpers
 from utilities import basher
@@ -16,7 +18,6 @@ from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
 from utilities import EXTENDED_PROJECT_DISABLED
-from utilities.time import date_from_string
 from controller import __version__
 from controller import project
 from controller import gitter
@@ -909,6 +910,22 @@ Verify that you are in the right folder, now you are in: %s%s
             dimages, self.builds, overriding_imgs, self.template_builds
         )
 
+    @staticmethod
+    def date_from_string(date, fmt="%d/%m/%Y"):
+
+        if date == "":
+            return ""
+        try:
+            return_date = datetime.strptime(date, fmt)
+        except BaseException:
+            return_date = dateutil.parser.parse(date)
+
+        # TODO: test me with: 2017-09-22T07:10:35.822772835Z
+        if return_date.tzinfo is None:
+            return pytz.utc.localize(return_date)
+
+        return return_date
+
     def get_build_timestamp(self, timestamp, as_date=False):
 
         if timestamp is None:
@@ -923,7 +940,7 @@ Verify that you are in the right folder, now you are in: %s%s
             float(timestamp)
         except ValueError:
             # otherwise, convert it
-            timestamp = date_from_string(timestamp).timestamp()
+            timestamp = self.date_from_string(timestamp).timestamp()
 
         if as_date:
             return datetime.fromtimestamp(timestamp)
