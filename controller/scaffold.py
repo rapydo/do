@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from jinja2 import FileSystemLoader, Environment
 from utilities.myyaml import YAML_EXT, load_yaml_file
-from utilities import template
 from utilities import path
 from utilities import helpers
 from utilities import (
@@ -169,7 +169,13 @@ class EndpointScaffold(object):
         template_dir = helpers.script_abspath(__file__, TEMPLATE_DIR)
         if template_filename is None:
             template_filename = filename
-        templated_content = template.render(template_filename, template_dir, **data)
+
+        # Simplify the usage of jinja2 templating.
+        # https://www.pydanny.com/jinja2-quick-load-function.html
+        loader = FileSystemLoader(template_dir)
+        env = Environment(loader=loader)
+        template = env.get_template(template_filename)
+        templated_content = template.render(**data)
 
         self.save_template(filepath, templated_content)
         # NOTE: this below has to be INFO,
