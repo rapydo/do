@@ -3,7 +3,7 @@
 """ Reading yaml files for this project """
 
 from controller.compose import Compose
-from utilities.myyaml import load_yaml_file, SHORT_YAML_EXT
+from utilities.myyaml import load_yaml_file
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -24,7 +24,7 @@ def read_yamls(composers):
 
         mandatory = composer.pop('mandatory', False)
         base = composer.pop('base', False)
-        composer['extension'] = SHORT_YAML_EXT
+        composer['extension'] = 'yml'
 
         try:
             compose = load_yaml_file(**composer)
