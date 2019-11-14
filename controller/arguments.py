@@ -12,7 +12,6 @@ import os
 import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
-from utilities import helpers
 from utilities.configuration import load_yaml_file
 
 
@@ -155,15 +154,16 @@ class ArgParser(object):
 
     def read_configuration(self):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
+
         self.parse_conf = load_yaml_file(
-            'argparser', path=helpers.script_abspath(__file__), logger=False
+            'argparser', path=os.path.dirname(os.path.realpath(__file__)), logger=False
         )
 
         try:
             # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(
                 PROJECTRC,
-                path=helpers.current_dir(),
+                path=os.curdir,
                 skip_error=True,
                 logger=False,
                 extension=None,
@@ -172,7 +172,7 @@ class ArgParser(object):
             if len(pinit_conf) < 1:
                 pinit_conf = load_yaml_file(
                     PROJECTRC_ALTERNATIVE,
-                    path=helpers.current_dir(),
+                    path=os.curdir,
                     skip_error=True,
                     logger=False,
                     extension=None,

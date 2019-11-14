@@ -5,7 +5,6 @@ from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
-from utilities import helpers
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -84,7 +83,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
 def clone(online_url, path, branch='master', do=False, check=True, expand_path=True):
 
     if expand_path:
-        local_path = os.path.join(helpers.current_dir(), SUBMODULES_DIR, path)
+        local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
     else:
         local_path = path
     local_path_exists = os.path.exists(local_path)

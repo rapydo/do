@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 from jinja2 import FileSystemLoader, Environment
 from pathlib import Path
 from utilities.configuration import load_yaml_file
-from utilities import helpers
 from utilities import (
     PROJECT_DIR,
     BACKEND_DIR,
@@ -49,6 +50,34 @@ class EndpointScaffold(object):
         self.backend_dir = Path(PROJECT_DIR, self.custom_project, BACKEND_DIR)
 
         self.base_backend_dir = Path(SUBMODULES_DIR, BACKEND_DIR, MAIN_PACKAGE)
+
+    def ask_yes_or_no(self, question, error='Unknown', print_function=None):
+
+        if print_function is None:
+            print_function = print
+
+        answer = 'unknown'
+        possible_answers = ['yes', 'y', 'no', 'n']
+
+        while True:
+            print_function(question)
+            try:
+                answer = input('(y/n) ')
+            except BaseException as e:
+                raise e
+            finally:
+                if answer == 'unknown' or answer.strip() == '':
+                    print("\nInterrupted!!\n")
+                    # log.warning("Interrupted by the user")
+
+            if answer not in possible_answers:
+                print("Please answer one of the following: %s" % possible_answers)
+            else:
+                if answer.strip().startswith('y'):
+                    break
+                else:
+                    print('USER INTERRUPT:\t' + error)
+                    sys.exit(1)
 
     def create(self):
         self.swagger()
@@ -129,7 +158,10 @@ class EndpointScaffold(object):
                 if value == tmp or value.startswith(tmp + '/'):
                     needle = content
                     mypath = str(current_specs_file).replace('/' + self.specs_file, '')
-                    needle['swagger'] = helpers.last_dir(mypath)
+                    # get last item of the path
+                    # normapath is required to strip final / is any
+                    needle['swagger'] = os.path.basename(os.path.normpath(mypath))
+
                     break
 
             if needle is not None:
@@ -158,7 +190,7 @@ class EndpointScaffold(object):
         if self.swagger_path.exists():
             log.warning('Path %s already exists' % self.swagger_path)
             if not self.force_yes:
-                helpers.ask_yes_or_no(
+                self.ask_yes_or_no(
                     'Would you like to proceed and overwrite definition?',
                     error='Cannot overwrite definition',
                 )
@@ -180,7 +212,8 @@ class EndpointScaffold(object):
             log.info("%s already exists. Overwriting." % filename)
 
         filepath = str(mypath)
-        template_dir = helpers.script_abspath(__file__, TEMPLATE_DIR)
+        abs_path = os.path.dirname(os.path.realpath(__file__))
+        template_dir = os.path.join(abs_path, TEMPLATE_DIR)
         if template_filename is None:
             template_filename = filename
 
@@ -229,7 +262,7 @@ class EndpointScaffold(object):
         if filepath.exists():
             log.warning('File %s already exists' % filepath)
             if not self.force_yes:
-                helpers.ask_yes_or_no(
+                self.ask_yes_or_no(
                     'Would you like to proceed and overwrite that code?',
                     error='Cannot overwrite the original file',
                 )
@@ -254,7 +287,7 @@ class EndpointScaffold(object):
         if filepath.exists():
             log.warning('File %s already exists' % filepath)
             if not self.force_yes:
-                helpers.ask_yes_or_no(
+                self.ask_yes_or_no(
                     'Would you like to proceed and overwrite that code?',
                     error='Cannot overwrite the original file',
                 )

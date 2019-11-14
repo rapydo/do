@@ -6,7 +6,7 @@ Integration with Docker compose
 # NOTE: A way to possibly silence compose output:
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
-
+import os
 from controller.dockerizing import docker_errors
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
@@ -19,7 +19,6 @@ from compose.cli.command import (
     project_from_options,
 )
 from compose.cli.main import TopLevelCommand
-from utilities import helpers
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -40,7 +39,7 @@ class Compose(object):
         # if net is not None:
         #     self.options['--net'] = net
 
-        self.project_dir = helpers.current_dir()
+        self.project_dir = os.curdir
         self.project_name = get_project_name(self.project_dir)
         log.very_verbose("Client compose %s: %s" % (self.project_name, files))
 

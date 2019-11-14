@@ -13,7 +13,6 @@ from datetime import datetime
 import dateutil.parser
 import pytz
 from distutils.version import LooseVersion
-from utilities import helpers
 from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
@@ -273,7 +272,7 @@ class Application(object):
     def check_projects(self):
 
         try:
-            projects = helpers.list_path(PROJECT_DIR)
+            projects = os.listdir(PROJECT_DIR)
         except FileNotFoundError:
             log.exit("Could not access the dir '%s'" % PROJECT_DIR)
 
@@ -619,7 +618,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def read_specs(self, read_only_project=False):
         """ Read project configuration """
 
-        project_file_path = helpers.project_dir(self.project)
+        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
         if read_only_project:
             default_file_path = None
         else:
@@ -674,7 +673,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def preliminary_version_check(self):
 
-        project_file_path = helpers.project_dir(self.project)
+        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
         specs = configuration.load_project_configuration(project_file_path)
         v = glom(specs, "project.rapydo", default=None)
 
@@ -777,7 +776,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 log.exit("Submodule %s not found in %s", repo['path'], from_path)
 
             submodule_path = os.path.join(
-                helpers.current_dir(), SUBMODULES_DIR, repo['path']
+                os.curdir, SUBMODULES_DIR, repo['path']
             )
 
             if os.path.exists(submodule_path):
@@ -842,10 +841,10 @@ Verify that you are in the right folder, now you are in: %s%s
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': self.current_args.get('mode'),
             'extended-mode': self.extended_project is not None,
-            'baseconf': helpers.current_dir(
-                SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+            'baseconf': os.path.join(
+                os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
-            'customconf': helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME),
+            'customconf': os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME),
         }
 
         if self.extended_project_path is None:
@@ -973,7 +972,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         build_timestamp = self.get_build_timestamp(build.get('timestamp'))
 
-        files = helpers.list_path(path)
+        files = os.listdir(path)
         for f in files:
             local_file = os.path.join(path, f)
 
@@ -1211,7 +1210,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
     @staticmethod
     def read_env():
-        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
         env = {}
         if not os.path.isfile(envfile):
             log.critical("Env file not found")
@@ -1227,7 +1226,7 @@ Verify that you are in the right folder, now you are in: %s%s
         return env
 
     def make_env(self):
-        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
 
         try:
             os.unlink(envfile)
@@ -1783,7 +1782,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if self.current_args.get('services'):
             printed_something = True
             log.info("List of active services:\n")
-            pwd = helpers.current_fullpath()
             print("%-12s %-24s %s" % ("Name", "Image", "Path"))
 
             for service in self.services:
@@ -1795,30 +1793,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         print("%-12s %-24s" % (name, image))
                     else:
                         path = build.get('context')
-                        path = path.replace(pwd, "")
+                        path = path.replace(os.getcwd(), "")
                         if path.startswith("/"):
                             path = path[1:]
                         print("%-12s %-24s %s" % (name, image, path))
 
-                    # ports = service.get("ports")
-                    # if ports is not None:
-                    #     for p in ports:
-                    #         print("\t%s -> %s" % (p.target, p.published))
-
-                    # volumes = service.get("volumes")
-                    # if volumes is not None:
-                    #     for volume in volumes:
-                    #         vext = volume.external
-                    #         vext = vext.replace(pwd, "")
-                    #         if vext.startswith("/"):
-                    #             vext = vext[1:]
-                    #         vint = volume.internal
-                    #         print("\t%s -> %s" % (vext, vint))
-
         if self.current_args.get('submodules'):
             printed_something = True
             log.info("List of submodules:\n")
-            pwd = helpers.current_fullpath()
             print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
             for name in self.gits:
                 repo = self.gits.get(name)
@@ -1826,7 +1808,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     continue
                 branch = gitter.get_active_branch(repo)
                 path = repo.working_dir
-                path = path.replace(pwd, "")
+                path = path.replace(os.getcwd(), "")
                 if path.startswith("/"):
                     path = path[1:]
                 print("%-18s %-18s %s" % (name, branch, path))
@@ -1962,7 +1944,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             project_name,
             template_name,
         )
-        projects = helpers.list_path(project_dir)
+        projects = os.listdir(project_dir)
         for p in projects:
             if p != project_name:
                 pdir = os.path.join(project_dir, p)
@@ -2023,10 +2005,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         """
         files = []
 
-        basedir = helpers.current_dir(
-            SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+        basedir = os.path.join(
+            os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
         )
-        customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
+        customdir = os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
 
         main_yml = load_yaml_file(
             file=filename_base, path=basedir, extension='yml', return_path=True

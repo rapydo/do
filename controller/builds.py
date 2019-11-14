@@ -6,11 +6,10 @@ Parse dockerfiles and check for builds
 # https://github.com/DBuildService/dockerfile-parse
 # https://docker-py.readthedocs.io/en/stable/
 """
-
+import os
 from dockerfile_parse import DockerfileParser
 from utilities import CONTAINERS_YAML_DIRNAME
 from controller.dockerizing import Dock
-from utilities import helpers
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -64,7 +63,7 @@ def find_templates_override(services, templates):
         if builder is not None:
 
             dpath = builder.get('context')
-            dockerfile = helpers.current_dir(CONTAINERS_YAML_DIRNAME, dpath)
+            dockerfile = os.path.join(os.curdir, CONTAINERS_YAML_DIRNAME, dpath)
             dfp = DockerfileParser(dockerfile)
 
             try:
