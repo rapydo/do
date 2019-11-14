@@ -8,7 +8,7 @@ Parse dockerfiles and check for builds
 """
 import os
 from dockerfile_parse import DockerfileParser
-from utilities import CONTAINERS_YAML_DIRNAME
+from controller import CONTAINERS_YAML_DIRNAME
 from controller.dockerizing import Dock
 from utilities.logs import get_logger
 

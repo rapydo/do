@@ -13,10 +13,8 @@ from datetime import datetime
 import dateutil.parser
 import pytz
 from distutils.version import LooseVersion
-from utilities import PROJECT_DIR
-from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
-from utilities import EXTENDED_PROJECT_DISABLED
+from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller import project
 from controller import gitter

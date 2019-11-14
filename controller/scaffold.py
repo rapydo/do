@@ -4,15 +4,16 @@ import os
 import sys
 from jinja2 import FileSystemLoader, Environment
 from pathlib import Path
-from utilities.configuration import load_yaml_file
-from utilities import (
-    PROJECT_DIR,
-    BACKEND_DIR,
-    MAIN_PACKAGE,
+from controller import (
+    TEMPLATE_DIR,
+    SUBMODULES_DIR,
     SWAGGER_DIR,
+    BACKEND_DIR,
+    PROJECT_DIR,
+    BACKEND_PACKAGE,
     ENDPOINTS_CODE_DIR,
 )
-from controller import TEMPLATE_DIR, SUBMODULES_DIR
+from utilities.configuration import load_yaml_file
 from utilities.logs import get_logger
 
 log = get_logger(__name__)
@@ -49,7 +50,7 @@ class EndpointScaffold(object):
         # setting the base dir for all scaffold things inside the project
         self.backend_dir = Path(PROJECT_DIR, self.custom_project, BACKEND_DIR)
 
-        self.base_backend_dir = Path(SUBMODULES_DIR, BACKEND_DIR, MAIN_PACKAGE)
+        self.base_backend_dir = Path(SUBMODULES_DIR, BACKEND_DIR, BACKEND_PACKAGE)
 
     def ask_yes_or_no(self, question, error='Unknown', print_function=None):
 

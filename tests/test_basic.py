@@ -184,9 +184,10 @@ def test_all(capfd):
     # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
     base_response = 'INFO rendered %s/sql/%s' % (PROJECT_DIR, BACKEND_DIR)
 
+    SWAGGER_DIR = 'swagger'
     assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
     assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s.py' % (base_response, ENDPOINTS_CODE_DIR, endpoint_name) in err
+    assert '%s/apis/%s.py' % (base_response, endpoint_name) in err
     assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
     assert 'INFO Scaffold completed' in err
 
