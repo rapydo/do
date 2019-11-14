@@ -2,7 +2,7 @@
 
 from jinja2 import FileSystemLoader, Environment
 from pathlib import Path
-from utilities.myyaml import YAML_EXT, load_yaml_file
+from utilities.myyaml import load_yaml_file
 from utilities import helpers
 from utilities import (
     PROJECT_DIR,
@@ -43,7 +43,7 @@ class EndpointScaffold(object):
 
         self.endpoint_dir = '_'.join(names)
         self.endpoint_name = self.endpoint_dir.replace('_', '')
-        self.specs_file = 'specs.%s' % YAML_EXT
+        self.specs_file = 'specs.yaml'
 
         # setting the base dir for all scaffold things inside the project
         self.backend_dir = Path(PROJECT_DIR, self.custom_project, BACKEND_DIR)
@@ -210,7 +210,7 @@ class EndpointScaffold(object):
 
     def swagger_first_operation(self):
         self.render(
-            'get.%s' % YAML_EXT,
+            'get.yaml',
             data={'endpoint_name': self.endpoint_name},
             outdir=self.swagger_path,
         )

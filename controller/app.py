@@ -27,7 +27,7 @@ from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 from controller.compose import Compose
-from controller.configuration import load_yaml_file, SHORT_YAML_EXT
+from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from utilities.logs import get_logger, suppress_stdout
@@ -2017,13 +2017,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
 
         main_yml = load_yaml_file(
-            file=filename_base, path=basedir, extension=SHORT_YAML_EXT, return_path=True
+            file=filename_base, path=basedir, extension='yml', return_path=True
         )
         files.append(main_yml)
         custom_yml = load_yaml_file(
             file=filename_base,
             path=customdir,
-            extension=SHORT_YAML_EXT,
+            extension='yml',
             return_path=True,
             skip_error=True,
             logger=False,
