@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pytz
+from datetime import datetime
 from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
@@ -170,6 +172,15 @@ Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
     return True
 
 
+def timestamp_from_string(timestamp_string):
+    precision = float(timestamp_string)
+
+    utc_dt = datetime.utcfromtimestamp(precision)
+    aware_utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+
+    return aware_utc_dt
+
+
 def check_file_younger_than(gitobj, filename, timestamp):
 
     try:
@@ -181,12 +192,8 @@ def check_file_younger_than(gitobj, filename, timestamp):
         current_blame = gitobj.commit(rev=str(commit[0]))
         dates.append(current_blame.committed_datetime)
 
-    # tmp = obj.commit(rev='177e454ea10713975888b638faab2593e2e393b2')
-
-    from utilities import time
-
     m = max(dates)
-    return time.timestamp_from_string(timestamp) < m, timestamp, m
+    return timestamp_from_string(timestamp) < m, timestamp, m
 
 
 def get_unstaged_files(gitobj):
