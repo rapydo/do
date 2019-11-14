@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pwd
 import time
 from distutils.dir_util import copy_tree
 import shutil
@@ -13,7 +14,6 @@ import dateutil.parser
 import pytz
 from distutils.version import LooseVersion
 from utilities import helpers
-from utilities import basher
 from utilities import PROJECT_DIR
 from utilities import CONTAINERS_YAML_DIRNAME
 from utilities import configuration
@@ -111,7 +111,7 @@ class Application(object):
             self.inspect_project_folder()
 
         # get user launching rapydo commands
-        self.current_uid = basher.current_os_uid()
+        self.current_uid = os.getuid()
         if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
@@ -120,7 +120,7 @@ class Application(object):
             skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = basher.current_os_user()
+            self.current_os_user = pwd.getpwuid(os.getuid()).pw_name
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
                 "Current user: %s (UID: %d)" % (self.current_os_user, self.current_uid)
@@ -532,6 +532,18 @@ Verify that you are in the right folder, now you are in: %s%s
                     fpath,
                 )
 
+    @staticmethod
+    def path_is_readable(filepath):
+        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
+            filepath, os.R_OK
+        )
+
+    @staticmethod
+    def path_is_writable(filepath):
+        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
+            filepath, os.W_OK
+        )
+
     def check_permissions(self, path):
 
         # if os.path.islink(path):
@@ -541,20 +553,20 @@ Verify that you are in the right folder, now you are in: %s%s
         if path.endswith("/node_modules"):
             return False
 
-        if not basher.path_is_readable(path):
+        if not self.path_is_readable(path):
             if os.path.islink(path):
                 log.warning("%s: path cannot be read [BROKEN LINK?]", path)
             else:
                 log.warning("%s: path cannot be read", path)
             return False
 
-        if not basher.path_is_writable(path):
+        if not self.path_is_writable(path):
             log.warning("%s: path cannot be written", path)
             return False
         try:
-            owner = basher.file_os_owner(path)
+            owner = pwd.getpwuid(os.stat(path).st_uid).pw_name
         except KeyError:
-            owner = basher.file_os_owner_raw(path)
+            owner = os.stat(path).st_uid
 
         if owner != self.current_os_user:
             if owner == 990:
@@ -2048,20 +2060,33 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc.command(command, options)
 
+    @staticmethod
+    def execute_command(command, parameters):
+        from plumbum import local
+        from plumbum.commands.processes import ProcessExecutionError
+        try:
+
+            # Pattern in plumbum library for executing a shell command
+            command = local[command]
+            log.verbose("Executing command %s %s" % (command, parameters))
+            return command(parameters)
+
+        except ProcessExecutionError as e:
+            raise e
+
     def _dump(self):
 
         #################
         # 1. base dump
         mybin = 'docker-compose'
         # NOTE: can't figure it out why, but 'dc' on config can't use files
-        # so I've used basher (since it's already imported)
-        bash = basher.BashCommands()
+        # so I've used plumbum
         params = []
         for file in self.files:
             params.append('-f')
             params.append(file)
         params.append('config')
-        yaml_string = bash.execute_command(mybin, parameters=params)
+        yaml_string = self.execute_command(mybin, parameters=params)
 
         #################
         # 2. filter active services

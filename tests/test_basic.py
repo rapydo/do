@@ -4,7 +4,6 @@ from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
 from utilities.logs import get_logger
-from utilities.basher import BashCommands
 
 log = get_logger(__name__)
 
@@ -103,8 +102,9 @@ def test_all(capfd):
 
     os.remove(".projectrc")
 
-    bash = BashCommands()
-    bash.copy_folder("projects/sql", "projects/second")
+    from plumbum import local
+    command = local["cp"]
+    command(["-r", "projects/sql", "projects/second"])
 
     _, err = exec_command(capfd, "rapydo check -s")
     assert "EXIT Please select the --project option on one of the following:" in err
