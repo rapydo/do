@@ -13,7 +13,7 @@ import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
 from utilities import helpers
-from utilities.myyaml import load_yaml_file
+from utilities.configuration import load_yaml_file
 
 
 class ArgParser(object):

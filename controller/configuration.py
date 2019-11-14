@@ -3,7 +3,7 @@
 """ Reading yaml files for this project """
 
 from controller.compose import Compose
-from utilities.myyaml import load_yaml_file
+from utilities.configuration import load_yaml_file
 from utilities.logs import get_logger
 
 log = get_logger(__name__)

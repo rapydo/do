@@ -2065,10 +2065,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         #################
         # 2. filter active services
-        from utilities.myyaml import yaml
 
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
+        import yaml
         obj = yaml.load(yaml_string.replace(main_dir, '.'))
 
         active_services = {}

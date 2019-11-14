@@ -2,7 +2,7 @@
 
 from jinja2 import FileSystemLoader, Environment
 from pathlib import Path
-from utilities.myyaml import load_yaml_file
+from utilities.configuration import load_yaml_file
 from utilities import helpers
 from utilities import (
     PROJECT_DIR,
