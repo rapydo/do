@@ -22,6 +22,7 @@ EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = 'confs'
 BACKEND_DIR = 'backend'  # directory outside docker
 BACKEND_PACKAGE = 'restapi'  # package inside rapydo-http
+ENDPOINTS_CODE_DIR = 'apis'
 
 # NOTE: telling the app if testing or not
 # http://j.mp/2uifoza
