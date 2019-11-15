@@ -37,6 +37,7 @@ setup(
         # "rapydo-utils==%s" % current_version,
         "docker-compose==1.24.0",
         "dockerfile-parse",
+        "python-dateutil",
         "loguru",
         "parse_it==3.3.2",
         # "requests==2.18.4",
