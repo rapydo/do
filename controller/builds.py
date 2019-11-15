@@ -10,9 +10,10 @@ import os
 from dockerfile_parse import DockerfileParser
 from controller import CONTAINERS_YAML_DIRNAME
 from controller.dockerizing import Dock
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 
 def find_templates_build(base_services):
@@ -22,7 +23,6 @@ def find_templates_build(base_services):
 
     for base_service in base_services:
 
-        # log.pp(base_service)
         template_build = base_service.get('build')
 
         if template_build is not None:
@@ -31,7 +31,7 @@ def find_templates_build(base_services):
             template_image = base_service.get('image')
 
             if template_image is None:
-                log.critical_exit(
+                log.exit(
                     "Error with template build: %s\n"
                     "Template builds must have a name!" % template_name
                 )
@@ -71,16 +71,16 @@ def find_templates_override(services, templates):
                 if cont is None:
                     log.warning("Dockerfile is empty?")
                 else:
-                    log.very_verbose("Parsed dockerfile %s" % dpath)
+                    log.verbose("Parsed dockerfile {}", dpath)
             except FileNotFoundError as e:
-                log.critical_exit(e)
+                log.exit(e)
 
             if dfp.baseimage is None:
                 dfp.baseimage = 'unknown_build'
             # elif dfp.baseimage.endswith(':template'):
             elif dfp.baseimage.startswith('rapydo/'):
                 if dfp.baseimage not in templates:
-                    log.critical_exit(
+                    log.exit(
                         """Unable to find %s in this project
 \nPlease inspect the FROM image in %s/Dockerfile
                         """
@@ -89,7 +89,7 @@ def find_templates_override(services, templates):
                 else:
                     vanilla_img = service.get('image')
                     template_img = dfp.baseimage
-                    log.verbose("%s overrides %s", vanilla_img, template_img)
+                    log.verbose("{} overrides {}", vanilla_img, template_img)
                     tbuilds[template_img] = templates.get(template_img)
                     vbuilds[vanilla_img] = template_img
 

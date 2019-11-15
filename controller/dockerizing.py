@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import io
-import tarfile
 import requests
 import docker
 from docker.errors import APIError as docker_errors
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 
 class Dock(object):
@@ -18,7 +17,7 @@ class Dock(object):
         super(Dock, self).__init__()
 
         if not self.is_daemon_alive():
-            log.critical_exit("Docker daemon not reachable")
+            log.exit("Docker daemon not reachable")
 
     def is_daemon_alive(self):
 
@@ -60,5 +59,4 @@ class Dock(object):
             tags = obj.attrs.get('RepoTags')
             if tags is not None:
                 images.extend(tags)
-        # log.debug("Docker:%s" % images)
         return images

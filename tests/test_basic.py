@@ -3,9 +3,10 @@ from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 compose_log_prefix = 'DEBUG %s' % compose_log
 symbol = '✓'
@@ -45,17 +46,14 @@ def test_all(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
-    log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 
     _, err = exec_command(capfd, "rapydo pull")
-    log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Base images pulled from docker hub" in err
 
     _, err = exec_command(capfd, "rapydo init")
-    log.pp(err)
     assert env_log_prefix_verbose in err
     assert "INFO Project initialized" in err
 

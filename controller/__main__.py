@@ -6,11 +6,12 @@
 
 import better_exceptions as be
 
+from controller import log
 
-def activate_log():
-    from utilities.logs import get_logger
+# def activate_log():
+#     from utilities.logs import get_logger
 
-    return get_logger(__name__)
+#     return get_logger(__name__)
 
 
 def main():
@@ -25,12 +26,12 @@ def main():
 
         Application(arguments)
     except KeyboardInterrupt:
-        log = activate_log()
+        # log = activate_log()
         log.critical("Interrupted by the user")
     except NotImplementedError as e:
         print('NOT IMPLEMENTED (yet): %s' % e)
     else:
-        log = activate_log()
+        # log = activate_log()
         log.verbose("Application completed")
 
 

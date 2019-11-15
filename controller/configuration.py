@@ -4,9 +4,10 @@
 
 from controller.compose import Compose
 from utilities.configuration import load_yaml_file
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 
 def read_yamls(composers):
@@ -19,8 +20,8 @@ def read_yamls(composers):
 
         if not composer.pop('if', False):
             continue
-        else:
-            log.very_verbose("Composer %s" % name)
+
+        log.verbose("Composer {}", name)
 
         mandatory = composer.pop('mandatory', False)
         base = composer.pop('base', False)
@@ -31,7 +32,7 @@ def read_yamls(composers):
 
             if len(compose.get('services', {})) < 1:
                 if mandatory:
-                    log.critical_exit("No service defined in file %s" % name)
+                    log.exit("No service defined in file {}", name)
                 else:
                     log.verbose("Skipping")
             else:
@@ -45,11 +46,11 @@ def read_yamls(composers):
         except KeyError as e:
 
             if mandatory:
-                log.critical_exit(
+                log.exit(
                     "Composer %s(%s) is mandatory.\n%s" % (name, filepath, e)
                 )
             else:
-                log.debug("Missing '%s' composer" % name)
+                log.debug("Missing '{}' composer", name)
 
     # to build the config with files and variables
     dc = Compose(files=base_files)

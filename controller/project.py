@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from utilities.logs import get_logger
 from glom import glom
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 
 def walk_services(actives, dependecies, index=0):
@@ -45,8 +46,8 @@ def find_active(services):
         if is_active:
             base_actives.append(name)
 
-    log.verbose("Base active services = %s", base_actives)
-    log.verbose("Services dependencies = %s", dependencies)
+    log.verbose("Base active services = {}", base_actives)
+    log.verbose("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
     return all_services, active_services
 

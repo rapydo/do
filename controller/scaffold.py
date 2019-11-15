@@ -14,9 +14,10 @@ from controller import (
     ENDPOINTS_CODE_DIR,
 )
 from utilities.configuration import load_yaml_file
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+from controller import log
 
 
 class EndpointScaffold(object):
@@ -38,7 +39,7 @@ class EndpointScaffold(object):
         endpoint_name = endpoint_name.lstrip('/')
         for piece in endpoint_name.lower().replace(' ', '-').split('-'):
             if not piece.isalnum():
-                log.exit("Only alpha-numeric chars are allowed: %s" % piece)
+                log.exit("Only alpha-numeric chars are allowed: {}", piece)
             else:
                 names.append(piece)
                 self.class_name += piece.capitalize()
@@ -106,10 +107,7 @@ class EndpointScaffold(object):
             python_file_dir = Path(backend, ENDPOINTS_CODE_DIR)
 
         if needle is None:
-            log.exit('No endpoint "%s" found in current swagger definition' % endpoint)
-        else:
-            pass
-            # log.pp(needle)
+            log.exit('No endpoint "{}" found in current swagger definition', endpoint)
 
         current_dir = Path.cwd()
 
@@ -131,7 +129,7 @@ class EndpointScaffold(object):
         python_class = needle.get('class')
         infos += 'Python class:\t%s\n' % python_class
 
-        log.info("Informations about '%s':\n%s", endpoint, infos)
+        log.info("Informations about '{}':\n{}", endpoint, infos)
 
         if base_endpoint:
             log.warning(
@@ -189,7 +187,7 @@ class EndpointScaffold(object):
         self.swagger_path = Path(self.backend_dir, SWAGGER_DIR, self.endpoint_dir)
 
         if self.swagger_path.exists():
-            log.warning('Path %s already exists' % self.swagger_path)
+            log.warning('Path {} already exists', self.swagger_path)
             if not self.force_yes:
                 self.ask_yes_or_no(
                     'Would you like to proceed and overwrite definition?',
@@ -208,9 +206,9 @@ class EndpointScaffold(object):
         mypath = Path(outdir, filename)
         if self.file_exists_and_nonzero(mypath):
             # # if you do not want to overwrite
-            # log.warning("%s already exists" % filename)
+            # log.warning("{} already exists", filename)
             # return False
-            log.info("%s already exists. Overwriting." % filename)
+            log.info("{} already exists. Overwriting.", filename)
 
         filepath = str(mypath)
         abs_path = os.path.dirname(os.path.realpath(__file__))
@@ -228,7 +226,7 @@ class EndpointScaffold(object):
         self.save_template(filepath, templated_content)
         # NOTE: this below has to be INFO,
         # otherwise the user doesn't get info on what paths were created
-        log.info("rendered %s" % filepath)
+        log.info("rendered {}", filepath)
         return True
 
     def swagger_specs(self):
@@ -261,7 +259,7 @@ class EndpointScaffold(object):
         filepath = Path(self.class_path, filename)
 
         if filepath.exists():
-            log.warning('File %s already exists' % filepath)
+            log.warning('File {} already exists', filepath)
             if not self.force_yes:
                 self.ask_yes_or_no(
                     'Would you like to proceed and overwrite that code?',
@@ -286,7 +284,7 @@ class EndpointScaffold(object):
         filepath = Path(self.tests_path, filename)
 
         if filepath.exists():
-            log.warning('File %s already exists' % filepath)
+            log.warning('File {} already exists', filepath)
             if not self.force_yes:
                 self.ask_yes_or_no(
                     'Would you like to proceed and overwrite that code?',

@@ -13,6 +13,7 @@ import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
 from utilities.configuration import load_yaml_file
+from controller import log
 
 
 class ArgParser(object):
@@ -114,7 +115,13 @@ class ArgParser(object):
         self.extra_command_parser.required = True
 
         # ##########################
-        self.enable_logs()
+        # self.enable_logs()
+        # log.add(sys.stdout, level=self.current_args.get("log_level", "DEBUG"))
+        if self.current_args.get("log_level", "DEPRECATED") != "DEPRECATED":
+            log.warning(
+                "--log-level parameter is deprecated, set env variable LOGURU_LEVEL")
+
+        log.verbose("Parsed arguments: {}", self.current_args)
 
     def add_parser_argument(self, parser, option_name, options):
         params = self.prepare_params(options)
@@ -128,16 +135,16 @@ class ArgParser(object):
         else:
             parser.add_argument(param_name, '-%s' % alias, **params)
 
-    def enable_logs(self):
-        # Log level
-        key = 'DEBUG_LEVEL'
-        os.environ[key] = self.current_args.get('log_level')
+    # def enable_logs(self):
+    #     # Log level
+    #     key = 'DEBUG_LEVEL'
+    #     os.environ[key] = self.current_args.get('log_level')
 
-        if os.environ.get(key) is not None:
-            from utilities.logs import get_logger
+    #     if os.environ.get(key) is not None:
+    #         from utilities.logs import get_logger
 
-            log = get_logger(__name__)
-            log.verbose("Parsed arguments: %s" % self.current_args)
+    #         log = get_logger(__name__)
+    #         log.verbose("Parsed arguments: {}", self.current_args)
 
     @staticmethod
     def check_args(args):
@@ -159,6 +166,11 @@ class ArgParser(object):
             'argparser', path=os.path.dirname(os.path.realpath(__file__)), logger=False
         )
 
+        # from parse_it import ParseIt
+        # parser = ParseIt(config_location=os.path.dirname(os.path.realpath(__file__)))
+        # print(parser.read_all_configuration_variables())
+        # sys.exit(1)
+
         try:
             # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(
@@ -178,10 +190,12 @@ class ArgParser(object):
                     extension=None,
                 )
         except AttributeError as e:
-            from utilities.logs import get_logger
+            # from utilities.logs import get_logger
 
-            log = get_logger(__name__)
-            log.exit(e)
+            log.critical(e)
+            sys.exit(1)
+            # log = get_logger(__name__)
+            # log.exit(e)
 
         self.host_configuration = pinit_conf.pop('project_configuration', {})
 

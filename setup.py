@@ -36,6 +36,8 @@ setup(
         "rapydo-utils==%s" % current_version,
         "docker-compose==1.24.0",
         "dockerfile-parse",
+        "loguru==0.3.2",
+        "parse_it==3.3.2",
         # "requests==2.18.4",
         # "requests==2.20.0",
         # unable to update due to docker-compose

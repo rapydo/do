@@ -7,9 +7,11 @@ from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
-from utilities.logs import get_logger
+# from utilities.logs import get_logger
 
-log = get_logger(__name__)
+# log = get_logger(__name__)
+
+from controller import log
 
 
 def get_repo(path):
@@ -21,7 +23,7 @@ def get_local(path):
         gitobj = get_repo(path)
 
         if len(gitobj.remotes) == 0:
-            log.warning("Unable to fetch remotes from %s" % path)
+            log.warning("Unable to fetch remotes from {}", path)
             return None
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
@@ -48,7 +50,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
 
     if gitobj.active_branch.name == branch_name:
         path = os.path.basename(gitobj.working_dir)
-        log.info("You are already on branch %s on %s", branch_name, path)
+        log.info("You are already on branch {} on {}", branch_name, path)
         return False
 
     if remote:
@@ -68,7 +70,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
             break
 
     if not branch_found or branch is None:
-        log.warning("Branch %s not found", branch_name)
+        log.warning("Branch {} not found", branch_name)
         return False
 
     try:
@@ -78,7 +80,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
         return False
 
     path = os.path.basename(gitobj.working_dir)
-    log.info("Switched branch to %s on %s", branch, path)
+    log.info("Switched branch to {} on {}", branch, path)
     return True
 
 
@@ -91,11 +93,11 @@ def clone(online_url, path, branch='master', do=False, check=True, expand_path=T
     local_path_exists = os.path.exists(local_path)
 
     if local_path_exists:
-        log.debug("Path %s already exists" % local_path)
+        log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        log.info("Cloned repo %s@%s as %s" % (online_url, branch, path))
+        log.info("Cloned repo {}@{} as {}", online_url, branch, path)
     else:
         log.exit(
             "Repo %s missing as %s. You should init your project"
@@ -139,19 +141,12 @@ def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
         if not url_match:
             if check_only:
                 return False
-            log.critical_exit(
+            log.exit(
                 """Unmatched local remote
 Found: %s\nExpected: %s
 Suggestion: remove %s and execute the init command
             """
                 % (url, online_url, gitobj.working_dir)
-            )
-        # TO FIX: before suggesting to delete verify if the repo is clean
-        # i.e. verify if git status find out something is modified
-        else:
-            log.verbose(
-                "Local remote differs but is accepted, found %s, expected: %s)"
-                % (url, online_url)
             )
 
     if branch is None:
@@ -164,7 +159,7 @@ Suggestion: remove %s and execute the init command
         if branch != active_branch:
             if check_only:
                 return False
-            log.critical_exit(
+            log.exit(
                 """%s: wrong branch %s, expected %s.
 Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
                 % (path, active_branch, branch, gitobj.working_dir, branch)
@@ -186,7 +181,7 @@ def check_file_younger_than(gitobj, filename, timestamp):
     try:
         commits = gitobj.blame(rev='HEAD', file=filename)
     except GitCommandError as e:
-        log.exit("Failed 'blame' operation on %s.\n%s" % (filename, e))
+        log.exit("Failed 'blame' operation on {}.\n{}", filename, e)
     dates = []
     for commit in commits:
         current_blame = gitobj.commit(rev=str(commit[0]))
@@ -214,29 +209,29 @@ def update(path, gitobj):
     has_unstaged = len(get_unstaged_files(gitobj)) > 0
 
     if has_unstaged:
-        log.exit("Unable to update %s repo, you have unstaged files" % (path))
+        log.exit("Unable to update {} repo, you have unstaged files", path)
         return
 
     for remote in gitobj.remotes:
         if remote.name == 'origin':
             try:
                 branch = gitobj.active_branch
-                log.info("Updating %s %s (branch %s)" % (remote, path, branch))
+                log.info("Updating {} {} (branch {})", remote, path, branch)
                 remote.pull(branch)
             except GitCommandError as e:
-                log.error("Unable to update %s repo\n%s", path, e)
+                log.error("Unable to update {} repo\n{}", path, e)
             except TypeError as e:
                 if TESTING:
-                    log.warning("Unable to update %s repo, %s" % (path, e))
+                    log.warning("Unable to update {} repo, {}", path, e)
                 else:
-                    log.exit("Unable to update %s repo, %s" % (path, e))
+                    log.exit("Unable to update {} repo, {}", path, e)
 
 
 def check_unstaged(path, gitobj, logme=True):
 
     unstaged = len(get_unstaged_files(gitobj)) > 0
     if unstaged and logme:
-        log.warning("You have unstaged files on %s" % path)
+        log.warning("You have unstaged files on {}", path)
     return unstaged
 
 
@@ -244,9 +239,9 @@ def fetch(path, gitobj, fetch_remote='origin'):
 
     for remote in gitobj.remotes:
         if remote.name != fetch_remote:
-            log.verbose("Skipping fetch of remote %s on %s" % (remote, path))
+            log.verbose("Skipping fetch of remote {} on {}", remote, path)
             continue
-        log.verbose("Fetching %s on %s" % (remote, path))
+        log.verbose("Fetching {} on {}", remote, path)
         try:
             remote.fetch()
         except GitCommandError as e:
@@ -259,14 +254,14 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
 
     branch = get_active_branch(gitobj)
     if branch is None:
-        log.warning("%s repo is detached? Unable to verify updates!" % (path))
+        log.warning("{} repo is detached? Unable to verify updates!", path)
         return False
 
     if remote_branch is None:
         remote_branch = branch
 
     max_remote = 20
-    log.verbose("Inspecting %s/%s" % (path, branch))
+    log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
     behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
@@ -282,16 +277,16 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
     else:
 
         if len(commits_behind_list) > 0:
-            log.warning("%s repo should be updated!" % (path))
+            log.warning("{} repo should be updated!", path)
         else:
-            log.debug("%s repo is updated" % (path))
+            log.debug("{} repo is updated", path)
         for c in commits_behind_list:
             message = c.message.strip().replace('\n', "")
 
             sha = c.hexsha[0:7]
             if len(message) > 60:
                 message = message[0:57] + "..."
-            log.warning("Missing commit from %s: %s (%s)" % (path, sha, message))
+            log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
     # CHECKING COMMITS AHEAD (TO BE PUSHED) #
     # if path != 'upstream' and remote_branch == branch:
@@ -308,15 +303,15 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         else:
 
             if len(commits_ahead_list) > 0:
-                log.warning("You have commits not pushed on %s repo" % (path))
+                log.warning("You have commits not pushed on {} repo", path)
             else:
-                log.debug("You pushed all commits on %s repo" % (path))
+                log.debug("You pushed all commits on {} repo", path)
             for c in commits_ahead_list:
                 message = c.message.strip().replace('\n', "")
 
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
-                log.warning("Unpushed commit in %s: %s (%s)" % (path, sha, message))
+                log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
 
     return True

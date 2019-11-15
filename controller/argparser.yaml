@@ -26,7 +26,7 @@ options:
     alias: l
     type: str
     metavalue: LEVEL_OF_DEBUGGER
-    default: DEBUG
+    default: DEPRECATED
     help: level of verbosity
 
   no-backend:
