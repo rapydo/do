@@ -343,9 +343,9 @@ To fix this issue, please update docker to version %s+
         self.check_python_package('compose', min_version="1.18")
         self.check_python_package('docker', min_version="2.6.1")
         self.check_python_package('requests', min_version="2.6.1")
-        self.check_python_package(
-            'utilities', min_version=__version__, max_version=__version__
-        )
+        # self.check_python_package(
+        #     'utilities', min_version=__version__, max_version=__version__
+        # )
 
         # Check if git is installed
         self.check_program('git')  # , max_version='2.14.3')
@@ -2148,14 +2148,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         package = "rapydo-controller"
         controller_repository = "do"
-        utils_repository = "utils"
+        # utils_repository = "utils"
         rapydo_uri = "https://github.com/rapydo"
-        utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
+        # utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
         controller = "git+%s/%s.git@%s" % (rapydo_uri, controller_repository, version)
 
-        installed = install(utils)
-        if installed:
-            installed = install(controller)
+        # installed = install(utils)
+        # if installed:
+        installed = install(controller)
 
         if not installed:
             log.error("Unable to install controller {} from git", version)
@@ -2174,29 +2174,29 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         log.info("You asked to install rapydo-controller {} from local folder", version)
 
         package = "rapydo-controller"
-        utils_path = os.path.join(SUBMODULES_DIR, "utils")
+        # utils_path = os.path.join(SUBMODULES_DIR, "utils")
         do_path = os.path.join(SUBMODULES_DIR, "do")
 
-        if not os.path.exists(utils_path):
-            log.exit("{} path not found", utils_path)
+        # if not os.path.exists(utils_path):
+        #     log.exit("{} path not found", utils_path)
         if not os.path.exists(do_path):
             log.exit("{} path not found", do_path)
 
-        utils_repo = self.gits.get('utils')
+        # utils_repo = self.gits.get('utils')
         do_repo = self.gits.get('do')
 
-        utils_switched = False
-        b = gitter.get_active_branch(utils_repo)
+        # utils_switched = False
+        # b = gitter.get_active_branch(utils_repo)
 
-        if b is None:
-            log.error("Unable to read local utils repository")
-        elif b == version:
-            log.info("Utilities repository already at {}", version)
-        elif gitter.switch_branch(utils_repo, version):
-            log.info("Utilities repository switched to {}", version)
-            utils_switched = True
-        else:
-            log.exit("Unable to switch utilities repository to {}", version)
+        # if b is None:
+        #     log.error("Unable to read local utils repository")
+        # elif b == version:
+        #     log.info("Utilities repository already at {}", version)
+        # elif gitter.switch_branch(utils_repo, version):
+        #     log.info("Utilities repository switched to {}", version)
+        #     utils_switched = True
+        # else:
+        #     log.exit("Unable to switch utilities repository to {}", version)
 
         b = gitter.get_active_branch(do_repo)
 
@@ -2206,14 +2206,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Controller repository already at {}", version)
         elif gitter.switch_branch(do_repo, version):
             log.info("Controller repository switched to {}", version)
-        else:
-            if utils_switched:
-                log.warning("Unable to switch back utilities repository")
-            log.exit("Unable to switch controller repository to {}", version)
+        # else:
+        #     if utils_switched:
+        #         log.warning("Unable to switch back utilities repository")
+        #     log.exit("Unable to switch controller repository to {}", version)
 
-        installed = install(utils_path, editable=True)
-        if installed:
-            installed = install(do_path, editable=True)
+        # installed = install(utils_path, editable=True)
+        # if installed:
+        installed = install(do_path, editable=True)
 
         if not installed:
             log.error("Unable to install controller {} from local folder", version)
