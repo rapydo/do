@@ -12,7 +12,7 @@ import os
 import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
-from controller.utilities.configuration import load_yaml_file
+from controller.conf_utilities import load_yaml_file
 from controller import log
 
 

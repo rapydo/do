@@ -29,9 +29,9 @@ from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from controller import log
 
-from controller.utilities.configuration import load_project_configuration
-from controller.utilities.configuration import read as read_configuration
-from controller.utilities.configuration import mix as mix_configuration
+from controller.conf_utilities import load_project_configuration
+from controller.conf_utilities import read as read_configuration
+from controller.conf_utilities import mix as mix_configuration
 
 # STATUS_RELEASED = "released"
 # STATUS_DISCONTINUED = "discontinued"
