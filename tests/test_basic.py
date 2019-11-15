@@ -1,10 +1,10 @@
 import os
 from git import Repo
+from controller import log
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
 
-from controller import log
 
 env_log = 'Created .env file'
 
