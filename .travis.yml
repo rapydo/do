@@ -4,8 +4,8 @@ dist: xenial
 services:
 - docker
 script:
-- pip install --upgrade setuptools
-- pip install --upgrade -r dev-requirements.txt
+- pip3 install --upgrade setuptools
+- pip3 install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
 - rapydo --version
 - rapydo --help
