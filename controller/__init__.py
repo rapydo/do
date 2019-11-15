@@ -3,6 +3,8 @@
 import sys
 from loguru import logger as log
 
+__version__ = '0.7.0'
+
 log.remove()
 log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
 log.add(sys.stdout, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
@@ -22,7 +24,6 @@ def exit(*args, **kwargs):
 log.verbose = verbose
 log.exit = exit
 
-__version__ = '0.7.0'
 
 # FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'

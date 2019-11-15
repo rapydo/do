@@ -3,7 +3,7 @@
 """ Reading yaml files for this project """
 
 from controller.compose import Compose
-from utilities.configuration import load_yaml_file
+from controller.utilities.configuration import load_yaml_file
 from controller import log
 
 

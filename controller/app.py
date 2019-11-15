@@ -29,13 +29,13 @@ from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
 from controller import log
 
-from utilities import configuration
+from controller.utilities.configuration import load_project_configuration
+from controller.utilities.configuration import read as read_configuration
+from controller.utilities.configuration import mix as mix_configuration
 
-
-# FIXME: move somewhere
-STATUS_RELEASED = "released"
-STATUS_DISCONTINUED = "discontinued"
-STATUS_DEVELOPING = "developing"
+# STATUS_RELEASED = "released"
+# STATUS_DISCONTINUED = "discontinued"
+# STATUS_DEVELOPING = "developing"
 
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
@@ -299,7 +299,7 @@ class Application(object):
                     + "Select one of the following:\n\n %s\n" % projects
                 )
 
-        self.checked("Selected project: %s", self.project)
+        self.checked("Selected project: {}", self.project)
 
     def check_installed_software(self):
 
@@ -385,7 +385,7 @@ To fix this issue, please update docker to version %s+
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        self.checked("%s version: %s", program, found_version)
+        self.checked("{} version: {}", program, found_version)
 
     def check_python_package(self, package_name, min_version=None, max_version=None):
 
@@ -416,7 +416,7 @@ To fix this issue, please update docker to version %s+
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        self.checked("%s version: %s", package_name, found_version)
+        self.checked("{} version: {}", package_name, found_version)
 
     @staticmethod
     def inspect_main_folder():
@@ -630,7 +630,7 @@ Verify that you are in the right folder, now you are in: %s%s
             else:
                 read_extended = True
 
-            self.specs, self.extended_project, self.extended_project_path = configuration.read(
+            self.specs, self.extended_project, self.extended_project_path = read_configuration(
                 default_file_path=default_file_path,
                 base_project_path=project_file_path,
                 projects_path=PROJECT_DIR,
@@ -639,7 +639,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 do_exit=False,
             )
 
-            self.specs = configuration.mix(
+            self.specs = mix_configuration(
                 self.specs, self.arguments.host_configuration
             )
 
@@ -673,7 +673,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def preliminary_version_check(self):
 
         project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        specs = configuration.load_project_configuration(project_file_path)
+        specs = load_project_configuration(project_file_path)
         v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
@@ -1311,7 +1311,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 if ' ' in value:
                     value = "'%s'" % value
                 whandle.write("%s=%s\n" % (key, value))
-            self.checked("Created %s file", COMPOSE_ENVIRONMENT_FILE)
+            self.checked("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
 
@@ -1325,7 +1325,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         else:
-            self.checked("Active services: %s", self.active_services)
+            self.checked("Active services: {}", self.active_services)
 
         missing = []
         for service_name in self.active_services:
@@ -2028,8 +2028,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             path=customdir,
             extension='yml',
             return_path=True,
-            skip_error=True,
-            logger=False,
+            skip_error=True
         )
         if isinstance(custom_yml, str):
             log.debug("Found custom {} specs", filename_base)

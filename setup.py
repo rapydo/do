@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
-from controller import \
-    __package__ as main_package, \
-    __version__ as current_version
+# from controller import __version__ as current_version
 
+current_version = "0.7.0"
+
+main_package = "controller"
 app = '%s.__main__:main' % main_package
 
 setup(

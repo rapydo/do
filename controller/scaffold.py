@@ -13,7 +13,7 @@ from controller import (
     BACKEND_PACKAGE,
     ENDPOINTS_CODE_DIR,
 )
-from utilities.configuration import load_yaml_file
+from controller.utilities.configuration import load_yaml_file
 
 from controller import log
 

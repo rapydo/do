@@ -12,7 +12,7 @@ import os
 import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
-from utilities.configuration import load_yaml_file
+from controller.utilities.configuration import load_yaml_file
 from controller import log
 
 
@@ -150,7 +150,7 @@ class ArgParser(object):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
 
         self.parse_conf = load_yaml_file(
-            'argparser', path=os.path.dirname(os.path.realpath(__file__)), logger=False
+            'argparser', path=os.path.dirname(os.path.realpath(__file__))
         )
 
         # from parse_it import ParseIt
@@ -164,7 +164,6 @@ class ArgParser(object):
                 PROJECTRC,
                 path=os.curdir,
                 skip_error=True,
-                logger=False,
                 extension=None,
             )
             # Allow alternative for PROJECT INIT FILE: .project.yml
@@ -173,7 +172,6 @@ class ArgParser(object):
                     PROJECTRC_ALTERNATIVE,
                     path=os.curdir,
                     skip_error=True,
-                    logger=False,
                     extension=None,
                 )
         except AttributeError as e:
