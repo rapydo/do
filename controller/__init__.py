@@ -7,7 +7,7 @@ __version__ = '0.7.0'
 
 log.remove()
 log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
-log.add(sys.stdout, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
+log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 new_level = log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
 
