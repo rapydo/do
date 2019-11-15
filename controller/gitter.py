@@ -7,10 +7,6 @@ from urllib.parse import urlparse
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
-
 from controller import log
 
 

@@ -14,9 +14,7 @@ from controller import (
     ENDPOINTS_CODE_DIR,
 )
 from utilities.configuration import load_yaml_file
-# from utilities.logs import get_logger
 
-# log = get_logger(__name__)
 from controller import log
 
 

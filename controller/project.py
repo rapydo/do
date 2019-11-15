@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from glom import glom
-# from utilities.logs import get_logger
 
-# log = get_logger(__name__)
 from controller import log
 
 

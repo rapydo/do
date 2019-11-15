@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import pwd
 import time
 from distutils.dir_util import copy_tree
@@ -26,13 +27,10 @@ from controller.compose import Compose
 from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities import configuration
-from utilities.logs import suppress_stdout
-
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
 from controller import log
+
+from utilities import configuration
+
 
 # FIXME: move somewhere
 STATUS_RELEASED = "released"
@@ -1595,6 +1593,23 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("You can access {} web page here:\n{}", service, uri)
         else:
             log.info("Launching interface: {}", service)
+
+        from contextlib import contextmanager
+
+        @contextmanager
+        def suppress_stdout():
+            """
+            http://thesmithfam.org/blog/2012/10/25/
+            temporarily-suppress-console-output-in-python/
+            """
+            with open(os.devnull, "w") as devnull:
+                old_stdout = sys.stdout
+                sys.stdout = devnull
+                try:
+                    yield
+                finally:
+                    sys.stdout = old_stdout
+
         with suppress_stdout():
             # NOTE: this is suppressing also image build...
             detach = self.current_args.get('detach')

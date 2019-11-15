@@ -115,8 +115,6 @@ class ArgParser(object):
         self.extra_command_parser.required = True
 
         # ##########################
-        # self.enable_logs()
-        # log.add(sys.stdout, level=self.current_args.get("log_level", "DEBUG"))
         if self.current_args.get("log_level", "DEPRECATED") != "DEPRECATED":
             log.warning(
                 "--log-level parameter is deprecated, set env variable LOGURU_LEVEL")
@@ -134,17 +132,6 @@ class ArgParser(object):
             parser.add_argument(param_name, **params)
         else:
             parser.add_argument(param_name, '-%s' % alias, **params)
-
-    # def enable_logs(self):
-    #     # Log level
-    #     key = 'DEBUG_LEVEL'
-    #     os.environ[key] = self.current_args.get('log_level')
-
-    #     if os.environ.get(key) is not None:
-    #         from utilities.logs import get_logger
-
-    #         log = get_logger(__name__)
-    #         log.verbose("Parsed arguments: {}", self.current_args)
 
     @staticmethod
     def check_args(args):
@@ -190,12 +177,7 @@ class ArgParser(object):
                     extension=None,
                 )
         except AttributeError as e:
-            # from utilities.logs import get_logger
-
-            log.critical(e)
-            sys.exit(1)
-            # log = get_logger(__name__)
-            # log.exit(e)
+            log.exit(e)
 
         self.host_configuration = pinit_conf.pop('project_configuration', {})
 

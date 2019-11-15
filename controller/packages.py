@@ -17,10 +17,6 @@ except import_exceptions:
     # from pip 10
     from pip._internal.utils.misc import get_installed_distributions
 from sultan.api import Sultan
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
-# from controller import log
 
 DEFAULT_BIN_OPTION = '--version'
 

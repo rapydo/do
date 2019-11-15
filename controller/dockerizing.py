@@ -3,9 +3,6 @@
 import requests
 import docker
 from docker.errors import APIError as docker_errors
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
 from controller import log
 
 

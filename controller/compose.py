@@ -19,9 +19,6 @@ from compose.cli.command import (
     project_from_options,
 )
 from compose.cli.main import TopLevelCommand
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
 from controller import log
 
 compose_log = 'docker-compose command: '

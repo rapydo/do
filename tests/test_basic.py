@@ -3,9 +3,7 @@ from git import Repo
 from controller.arguments import ArgParser
 from controller.compose import compose_log
 from controller.app import Application
-# from utilities.logs import get_logger
 
-# log = get_logger(__name__)
 from controller import log
 
 compose_log_prefix = 'DEBUG %s' % compose_log

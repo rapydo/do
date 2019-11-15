@@ -7,13 +7,10 @@ Endpoint example for the RAPyDo framework
 #################
 # IMPORTS
 from restapi.rest.definition import EndpointResource
-# from restapi.services.detect import detector
-# from utilities.logs import get_logger
 from controller import log
 
 #################
 # INIT VARIABLES
-# log = get_logger(__name__)
 service_name = "{{ service_name }}"
 # NOTE: if you need to operate based on service availability
 # SERVICE_AVAILABLE = detector.check_availability(service_name)

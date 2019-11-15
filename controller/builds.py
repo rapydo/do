@@ -10,9 +10,6 @@ import os
 from dockerfile_parse import DockerfileParser
 from controller import CONTAINERS_YAML_DIRNAME
 from controller.dockerizing import Dock
-# from utilities.logs import get_logger
-
-# log = get_logger(__name__)
 from controller import log
 
 
