@@ -40,6 +40,7 @@ setup(
         "python-dateutil",
         "pytz",
         "loguru",
+        "better_exceptions",
         "parse_it==3.3.2",
         # "requests==2.18.4",
         # "requests==2.20.0",
