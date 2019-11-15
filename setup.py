@@ -43,6 +43,7 @@ setup(
         "better_exceptions",
         "jinja2",
         "parse_it==3.3.2",
+        "sultan==0.9.1",
         # "requests==2.18.4",
         # "requests==2.20.0",
         # unable to update due to docker-compose
