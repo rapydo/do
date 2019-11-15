@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 from loguru import logger as log
 
 __version__ = '0.7.0'
 
+TESTING = os.environ.get("TESTING") == '1'
 log.remove()
 log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
-log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
+log.add(sys.stderr, colorize=not TESTING, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 new_level = log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
 
@@ -16,9 +18,15 @@ def verbose(*args, **kwargs):
     log.log("VERBOSE", *args, **kwargs)
 
 
-def exit(*args, **kwargs):
-    log.critical(*args, **kwargs)
-    sys.exit(1)
+def exit(message="", *args, **kwargs):
+    error_code = kwargs.pop('error_code', 1)
+    if not isinstance(error_code, int):
+        raise ValueError("Error code must be an integer")
+    if error_code < 1:
+        raise ValueError("Cannot exit with value below 1")
+
+    log.critical(message, *args, **kwargs)
+    sys.exit(error_code)
 
 
 log.verbose = verbose

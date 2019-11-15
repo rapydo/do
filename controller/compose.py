@@ -118,8 +118,7 @@ class Compose(object):
             if e.code < 0:
                 log.warning("Invalid code returned: {}", e.code)
             elif e.code > 0:
-                log.warning("Compose received: system.exit({})", e.code)
-                log.exit(error_code=e.code)
+                log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
             else:
                 log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
