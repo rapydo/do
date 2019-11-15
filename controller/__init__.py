@@ -7,10 +7,8 @@ from loguru import logger as log
 __version__ = '0.7.0'
 
 TESTING = os.environ.get("TESTING") == '1'
-log.remove()
-log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
-log.add(sys.stderr, colorize=not TESTING, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
-new_level = log.level("VERBOSE", no=1, color="<fg #666>")
+
+log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
 
 
@@ -32,6 +30,9 @@ def exit(message="", *args, **kwargs):
 log.verbose = verbose
 log.exit = exit
 
+log.remove()
+log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
+log.add(sys.stderr, colorize=not TESTING, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 
 # FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
