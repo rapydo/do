@@ -15,7 +15,7 @@ script:
 - cd rapydo_tests
 - git checkout $BRANCH
 - mkdir data
-- EXPORT LOGURU_LEVEL=VERBOSE
+- export LOGURU_LEVEL=VERBOSE
 - TESTING=1 py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
