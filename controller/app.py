@@ -1626,8 +1626,18 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             user = self.current_args.get('user')
             # if 'user' is empty, put None to get the docker-compose default
             if user is not None and user.strip() == '':
-                if service in ['backend', 'restclient']:
+                developer_services = [
+                    'backend',
+                    'celery',
+                    'celeryui',
+                    'celery-beat',
+                    'restclient'
+                ]
+
+                if service in developer_services:
                     user = 'developer'
+                elif service in ['angular']:
+                    user = 'node'
                 else:
                     user = None
         log.verbose("Command as user '{}'", user)
