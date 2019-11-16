@@ -6,9 +6,6 @@ from controller.compose import compose_log
 from controller.app import Application
 
 
-env_log = 'Created .env file'
-
-
 def exec_command(capfd, command):
     command = command.split(" ")
 
@@ -38,20 +35,16 @@ def test_all(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
-    assert env_log in err
     assert "Project initialized" in err
 
     _, err = exec_command(capfd, "rapydo pull")
-    assert env_log in err
     assert "Base images pulled from docker hub" in err
 
     _, err = exec_command(capfd, "rapydo init")
-    assert env_log in err
     assert "Project initialized" in err
 
     # UPDATE on rapydo-core
     _, err = exec_command(capfd, "rapydo update")
-    assert env_log in err
     assert "All updated" in err
 
     _, err = exec_command(capfd, "rapydo build --rebuild-templates")
@@ -59,12 +52,12 @@ def test_all(capfd):
 
     # CHECK on rapydo-core
     _, err = exec_command(capfd, "rapydo check")
-    assert env_log in err
+    assert 'Created .env file' in err
     assert "All checked" in err
 
     # CHECK on rapydo-core by enabling permissions checks
     _, err = exec_command(capfd, "rapydo --check-permissions check")
-    assert env_log in err
+    assert 'Created .env file' in err
     assert "All checked" in err
 
     # NOW we are on a fork of rapydo-core
@@ -72,7 +65,6 @@ def test_all(capfd):
     gitobj.remotes.origin.set_url("just_a_non_url")
 
     _, err = exec_command(capfd, "rapydo init")
-    assert env_log in err
     assert "Project initialized" in err
 
     _, err = exec_command(capfd, "rapydo list --env")
@@ -120,7 +112,6 @@ def test_all(capfd):
     assert "All checked" in err
 
     _, err = exec_command(capfd, "rapydo start")
-    assert env_log in err
     assert compose_log + "'up'" in err
     assert "Stack started" in err
 
@@ -143,28 +134,22 @@ def test_all(capfd):
     # assert compose_log + "'logs'" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert env_log in err
     assert "Stack paused" in err
 
     _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert env_log in err
     assert "Stack unpaused" in err
 
     _, err = exec_command(capfd, "rapydo stop")
-    assert env_log in err
     assert "Stack stopped" in err
 
     _, err = exec_command(capfd, "rapydo restart")
-    assert env_log in err
     assert "Stack restarted" in err
 
     _, err = exec_command(capfd, "rapydo remove")
-    assert env_log in err
     assert compose_log + "'stop'" in err
     assert "Stack removed" in err
 
     _, err = exec_command(capfd, "rapydo clean")
-    assert env_log in err
     assert "Stack cleaned" in err
 
     """
