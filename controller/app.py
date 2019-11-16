@@ -1904,7 +1904,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         os.mkdir(project_name)
 
         if not os.path.exists(project_name):
-            log.exit("Errors creating {} folder", project_nae)
+            log.exit("Errors creating {} folder", project_name)
 
         template_tmp_dir = "__template"
         template_tmp_path = os.path.join(project_name, template_tmp_dir)
