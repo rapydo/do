@@ -22,7 +22,7 @@ DEFAULT_BIN_OPTION = '--version'
 
 
 def install(package, editable=False, user=False, use_pip3=True):
-    with Sultan.load(sudo=True) as sultan:
+    with Sultan.load(sudo=not user) as sultan:
         command = 'install --upgrade'
         if editable:
             command += " --editable"

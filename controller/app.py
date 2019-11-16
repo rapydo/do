@@ -2112,25 +2112,28 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def _install(self):
         version = self.current_args.get('version')
-        git = self.current_args.get('git')
+        pip = self.current_args.get('pip')
         editable = self.current_args.get('editable')
+        user = self.current_args.get('user')
 
-        if git and editable:
-            log.exit("--git and --editable options are not compatible")
+        if pip and editable:
+            log.exit("--pip and --editable options are not compatible")
+        if user and editable:
+            log.exit("--user and --editable options are not compatible")
 
         if version == 'auto':
             self.read_specs(read_only_project=True)
             version = self.rapydo_version
             log.info("Detected version {} to be installed", version)
 
-        if git:
-            return self.install_controller_from_git(version)
-        elif editable:
-            return self.install_controller_from_folder(version)
+        if editable:
+            return self.install_controller_from_folder(version, user)
+        elif pip:
+            return self.install_controller_from_pip(version, user)
         else:
-            return self.install_controller_from_pip(version)
+            return self.install_controller_from_git(version, user)
 
-    def install_controller_from_pip(self, version):
+    def install_controller_from_pip(self, version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -2141,14 +2144,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         package = "rapydo-controller"
         controller = "%s==%s" % (package, version)
-        installed = install(controller)
+        installed = install(controller, user=user)
         if not installed:
             log.error("Unable to install controller {} from pip", version)
         else:
             log.info("Controller version {} installed from pip", version)
 
     @staticmethod
-    def install_controller_from_git(version):
+    def install_controller_from_git(version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -2166,7 +2169,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         # installed = install(utils)
         # if installed:
-        installed = install(controller)
+        installed = install(controller, user=user)
 
         if not installed:
             log.error("Unable to install controller {} from git", version)
@@ -2175,7 +2178,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             installed_version = check_version(package)
             log.info("Check on installed version: {}", installed_version)
 
-    def install_controller_from_folder(self, version):
+    def install_controller_from_folder(self, version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -2224,7 +2227,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         # installed = install(utils_path, editable=True)
         # if installed:
-        installed = install(do_path, editable=True)
+        installed = install(do_path, editable=True, user=user)
 
         if not installed:
             log.error("Unable to install controller {} from local folder", version)

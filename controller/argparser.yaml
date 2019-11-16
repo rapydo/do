@@ -156,16 +156,21 @@ subcommands:
         type: str
         metavalue: VERSION
         default: auto
-      git:
+      pip:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: install from git
+        help: install from pypi
       editable:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
         help: install in editable mode from submodules folder
+      user:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install at user level (sudo not required)
 
   status:
     description: list current status of containers
