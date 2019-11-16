@@ -35,8 +35,6 @@ def test_all(capfd):
 
     # INIT on rapydo-core
     _, err = exec_command(capfd, "rapydo init")
-    print(err)
-    assert "x" == err[-1]
     assert "Project initialized" in err
 
     _, err = exec_command(capfd, "rapydo pull")
