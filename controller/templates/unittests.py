@@ -26,7 +26,7 @@ class Test{{ class_name }}(BaseTests):
         """
 
         endpoint = API_URI + self._main_endpoint
-        log.info('*** Testing GET call on {}' % endpoint)
+        log.info('*** Testing GET call on {}', endpoint)
 
         r = client.get(endpoint)  # If NO authorization required
         # headers, _ = self.do_login(client, None, None)

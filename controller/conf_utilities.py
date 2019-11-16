@@ -21,7 +21,7 @@ def load_project_configuration(path, file=None, do_exit=True):
         'keep_order': True,
     }
     try:
-        log.verbose("Found '%s/%s' configuration", path, file)
+        log.verbose("Found '{}/{}' configuration", path, file)
         return load_yaml_file(**args)
     except AttributeError as e:
         if do_exit:
@@ -94,7 +94,7 @@ def read(
             extend_path = os.path.join(submodules_path, repository_name, projects_path)
     else:
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
-        log.exit("Invalid extends-from parameter: %s.\n%s", extends_from, suggest)
+        log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
     # in container the file is mounted in the confs folder
     # otherwise will be in projects/projectname or submodules/projectname
@@ -102,7 +102,7 @@ def read(
         extend_path = os.path.join(extend_path, extended_project)
 
     if not os.path.exists(extend_path):
-        log.critical_exit("From project not found: %s", extend_path)
+        log.exit("From project not found: {}", extend_path)
 
     # on backend is mounted with `extended_` prefix
     if from_container:
@@ -124,13 +124,12 @@ def mix(base, custom):
     for key, elements in custom.items():
 
         if key not in base:
-            # log.info("Adding %s to configuration" % key)
             base[key] = custom[key]
             continue
 
         if elements is None:
             if isinstance(base[key], dict):
-                log.warning("Cannot replace %s with empty list", key)
+                log.warning("Cannot replace {} with empty list", key)
                 continue
 
         if isinstance(elements, dict):
@@ -140,7 +139,6 @@ def mix(base, custom):
             for e in elements:
                 base[key].append(e)
         else:
-            # log.info("Replacing default %s in configuration" % key)
             base[key] = elements
 
     return base
@@ -213,7 +211,7 @@ def load_yaml_file(
 
     filepath = get_yaml_path(path, file, extension)
 
-    log.verbose("Reading file %s" % filepath)
+    log.verbose("Reading file {}", filepath)
 
     # load from this file
     error = None

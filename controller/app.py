@@ -330,7 +330,7 @@ Your docker installation (version %s) is affected by a critical vulnerability
 that allows specially-crafted containers to gain administrative privileges on the host.
 For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
 ***************************************************************************************
-To fix this issue, please update docker to version %s+
+To fix this issue, please update docker to version {}+
             """,
                 v,
                 safe_version,
@@ -1167,7 +1167,7 @@ Verify that you are in the right folder, now you are in: %s%s
         if not os.path.isdir(frontend_data_dir):
             os.makedirs(frontend_data_dir)
             log.info(
-                "%s folder not found, created with expected subtree", frontend_data_dir
+                "{} folder not found, created with expected subtree", frontend_data_dir
             )
 
         expected_folders = ["app", "courtesy", "e2e", "node_modules"]
@@ -1355,7 +1355,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
             else:
                 log.verbose(
-                    "Variable %s is missing, but %s service(s) not active", key, serv
+                    "Variable {} is missing, but {} service(s) not active", key, serv
                 )
 
         if len(placeholders) > 0:
