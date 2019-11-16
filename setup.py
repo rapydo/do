@@ -41,6 +41,7 @@ setup(
         "pytz",
         "loguru",
         "better_exceptions",
+        "prettyprinter",
         "jinja2",
         "parse_it==3.3.2",
         "sultan==0.9.1",
