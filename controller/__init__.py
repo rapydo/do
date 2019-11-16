@@ -32,7 +32,11 @@ log.exit = exit
 
 log.remove()
 log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
-log.add(sys.stderr, colorize=not TESTING, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
+
+if TESTING:
+    log.add(sys.stderr, colorize=False, format="{message}")
+else:
+    log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 
 # FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
