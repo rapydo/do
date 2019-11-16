@@ -34,7 +34,7 @@ log.remove()
 log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
 
 if TESTING:
-    log.add(sys.stderr, colorize=False, format="{message}")
+    log.add(sys.stdout, colorize=False, format="{message}")
 else:
     log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 

@@ -7,7 +7,7 @@ from controller.compose import compose_log
 from controller.app import Application
 
 
-def exec_command(capfd, command):
+def exec_command(capfd, command, get_out=True, get_err=False):
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -22,9 +22,22 @@ def exec_command(capfd, command):
     out = out.split("\n")
     err = err.split("\n")
 
-    pp(err)
+    if get_out:
+        pp(out)
 
-    return out, err
+    if get_err:
+        pp(err)
+
+    if get_out and get_err:
+        return out, err
+
+    if get_out:
+        return out
+
+    if get_err:
+        return err
+
+    return None
 
 
 def test_all(capfd):
@@ -34,54 +47,53 @@ def test_all(capfd):
         f.write("project: sql")
 
     # INIT on rapydo-core
-    _, err = exec_command(capfd, "rapydo init")
-    assert "Project initialized" in err
+    out = exec_command(capfd, "rapydo init")
+    assert "Project initialized" in out
 
-    _, err = exec_command(capfd, "rapydo pull")
-    print(err)
-    assert "Base images pulled from docker hub" in err
+    out = exec_command(capfd, "rapydo pull")
+    assert "Base images pulled from docker hub" in out
 
-    _, err = exec_command(capfd, "rapydo init")
-    assert "Project initialized" in err
+    out = exec_command(capfd, "rapydo init")
+    assert "Project initialized" in out
 
     # UPDATE on rapydo-core
-    _, err = exec_command(capfd, "rapydo update")
-    assert "All updated" in err
+    out = exec_command(capfd, "rapydo update")
+    assert "All updated" in out
 
-    _, err = exec_command(capfd, "rapydo build --rebuild-templates")
-    assert "Images built" in err
+    out = exec_command(capfd, "rapydo build --rebuild-templates")
+    assert "Images built" in out
 
     # CHECK on rapydo-core
-    _, err = exec_command(capfd, "rapydo check")
-    assert 'Created .env file' in err
-    assert "All checked" in err
+    out = exec_command(capfd, "rapydo check")
+    assert 'Created .env file' in out
+    assert "All checked" in out
 
     # CHECK on rapydo-core by enabling permissions checks
-    _, err = exec_command(capfd, "rapydo --check-permissions check")
-    assert 'Created .env file' in err
-    assert "All checked" in err
+    out = exec_command(capfd, "rapydo --check-permissions check")
+    assert 'Created .env file' in out
+    assert "All checked" in out
 
     # NOW we are on a fork of rapydo-core
     gitobj = Repo(".")
     gitobj.remotes.origin.set_url("just_a_non_url")
 
-    _, err = exec_command(capfd, "rapydo init")
-    assert "Project initialized" in err
+    out = exec_command(capfd, "rapydo init")
+    assert "Project initialized" in out
 
-    _, err = exec_command(capfd, "rapydo list --env")
-    assert "List env variables:" in err
+    out = exec_command(capfd, "rapydo list --env")
+    assert "List env variables:" in out
 
-    _, err = exec_command(capfd, "rapydo list --args")
-    assert "List of configured rapydo arguments:" in err
+    out = exec_command(capfd, "rapydo list --args")
+    assert "List of configured rapydo arguments:" in out
 
-    _, err = exec_command(capfd, "rapydo list --services")
-    assert "List of active services:" in err
+    out = exec_command(capfd, "rapydo list --services")
+    assert "List of active services:" in out
 
-    _, err = exec_command(capfd, "rapydo list --submodules")
-    assert "List of submodules:" in err
+    out = exec_command(capfd, "rapydo list --submodules")
+    assert "List of submodules:" in out
 
-    _, err = exec_command(capfd, "rapydo dump")
-    assert "Config dump: docker-compose.yml" in err
+    out = exec_command(capfd, "rapydo dump")
+    assert "Config dump: docker-compose.yml" in out
 
     os.remove(".projectrc")
 
@@ -89,88 +101,88 @@ def test_all(capfd):
     command = local["cp"]
     command(["-r", "projects/sql", "projects/second"])
 
-    _, err = exec_command(capfd, "rapydo check -s")
-    assert "Please select the --project option on one of the following:" in err
+    out = exec_command(capfd, "rapydo check -s")
+    assert "Please select the --project option on one of the following:" in out
 
-    _, err = exec_command(capfd, "rapydo -p sql check -s")
-    assert "All checked" in err
+    out = exec_command(capfd, "rapydo -p sql check -s")
+    assert "All checked" in out
 
-    _, err = exec_command(capfd, "rapydo -p invalid_character check -s")
-    assert "Wrong project name, _ is not a valid character." in err
+    out = exec_command(capfd, "rapydo -p invalid_character check -s")
+    assert "Wrong project name, _ is not a valid character." in out
 
-    _, err = exec_command(capfd, "rapydo -p celery check -s")
-    assert "You selected a reserved name, invalid project name: celery" in err
+    out = exec_command(capfd, "rapydo -p celery check -s")
+    assert "You selected a reserved name, invalid project name: celery" in out
 
-    _, err = exec_command(capfd, "rapydo -p xyz check -s")
-    assert "Wrong project 'xyz'." in err
-    assert "Select one of the following:" in err
+    out = exec_command(capfd, "rapydo -p xyz check -s")
+    assert "Wrong project 'xyz'." in out
+    assert "Select one of the following:" in out
 
     # create .projectrc
     with open('.projectrc', 'w') as f:
         f.write("project: sql")
 
-    _, err = exec_command(capfd, "rapydo check -s")
-    assert "All checked" in err
+    out = exec_command(capfd, "rapydo check -s")
+    assert "All checked" in out
 
-    _, err = exec_command(capfd, "rapydo start")
-    assert compose_log + "'up'" in err
-    assert "Stack started" in err
+    out = exec_command(capfd, "rapydo start")
+    assert compose_log + "'up'" in out
+    assert "Stack started" in out
 
-    _, err = exec_command(capfd, "rapydo status")
-    assert compose_log + "'ps'" in err
+    out = exec_command(capfd, "rapydo status")
+    assert compose_log + "'ps'" in out
 
     # Template project is based on neo4j
     exec_command(capfd, "rapydo verify neo4j")
     # This output is not capture, since it is produced by the backend
-    # assert 'Service "neo4j" was NOT detected' in err
+    # assert 'Service "neo4j" was NOT detected' in out
 
     exec_command(capfd, "rapydo verify postgres")
     # This output is not capture, since it is produced by the backend
-    # assert "Service postgres is reachable" in err
+    # assert "Service postgres is reachable" in out
 
     exec_command(capfd, "rapydo scale backend=1")
 
     exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
-    # assert compose_log + "'logs'" in err
+    # assert compose_log + "'logs'" in out
 
-    _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert "Stack paused" in err
+    out = exec_command(capfd, "rapydo toggle-freeze")
+    assert "Stack paused" in out
 
-    _, err = exec_command(capfd, "rapydo toggle-freeze")
-    assert "Stack unpaused" in err
+    out = exec_command(capfd, "rapydo toggle-freeze")
+    assert "Stack unpaused" in out
 
-    _, err = exec_command(capfd, "rapydo stop")
-    assert "Stack stopped" in err
+    out = exec_command(capfd, "rapydo stop")
+    assert "Stack stopped" in out
 
-    _, err = exec_command(capfd, "rapydo restart")
-    assert "Stack restarted" in err
+    out = exec_command(capfd, "rapydo restart")
+    assert "Stack restarted" in out
 
-    _, err = exec_command(capfd, "rapydo remove")
-    assert compose_log + "'stop'" in err
-    assert "Stack removed" in err
+    out = exec_command(capfd, "rapydo remove")
+    assert compose_log + "'stop'" in out
+    assert "Stack removed" in out
 
-    _, err = exec_command(capfd, "rapydo clean")
-    assert "Stack cleaned" in err
+    out = exec_command(capfd, "rapydo clean")
+    assert "Stack cleaned" in out
 
     """
     endpoint_name = 'justatest'
-    _, err = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
+    out = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
     # parsing responses like:
     # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
     base_response = 'rendered %s/sql/%s' % (PROJECT_DIR, BACKEND_DIR)
 
     SWAGGER_DIR = 'swagger'
-    assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in err
-    assert '%s/apis/%s.py' % (base_response, endpoint_name) in err
-    assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in err
-    assert 'Scaffold completed' in err
+    assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in out
+    assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in out
+    assert '%s/apis/%s.py' % (base_response, endpoint_name) in out
+    assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in out
+    assert 'Scaffold completed' in out
 
-    _, err = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
-    assert "Endpoint path:\t/api/%s" % endpoint_name in err
-    assert "Labels:\t\tcustom, %s" % endpoint_name in err
-    assert "Python class:\t%s" % endpoint_name.capitalize() in err
+    out = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
+    assert "Endpoint path:\t/api/%s" % endpoint_name in out
+    assert "Labels:\t\tcustom, %s" % endpoint_name in out
+    assert "Python class:\t%s" % endpoint_name.capitalize() in out
     """
 
     # exec_command(capfd, "rapydo install --git auto")
@@ -179,8 +191,8 @@ def test_all(capfd):
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
-    # assert 'You are on a git repo, unable to continue' in err
+    # assert 'You are on a git repo, unable to continue' in out
 
     # os.chdir("/tmp")
     # exec_command(capfd, "rapydo create test")
-    # assert "Project test successfully created" in err
+    # assert "Project test successfully created" in out
