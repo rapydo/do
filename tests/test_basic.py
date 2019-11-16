@@ -1,5 +1,6 @@
 import os
 from git import Repo
+from prettyprinter import pprint as pp
 from controller import log
 from controller.arguments import ArgParser
 from controller.compose import compose_log
@@ -21,8 +22,7 @@ def exec_command(capfd, command):
     out = out.split("\n")
     err = err.split("\n")
 
-    for e in err:
-        print(e)
+    pp(err)
 
     return out, err
 
@@ -38,6 +38,7 @@ def test_all(capfd):
     assert "Project initialized" in err
 
     _, err = exec_command(capfd, "rapydo pull")
+    print(err)
     assert "Base images pulled from docker hub" in err
 
     _, err = exec_command(capfd, "rapydo init")
