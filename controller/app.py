@@ -266,7 +266,10 @@ class Application(object):
                     % self.project
                 )
 
-        self.development = self.current_args.get('development')
+        if self.current_args.get('development'):
+            # Deprecated since version 0.7.0
+            log.warning(
+                "--development parameter is deprecated, you can stop using it")
 
     def check_projects(self):
 
@@ -737,8 +740,7 @@ Verify that you are in the right folder, now you are in: %s%s
             myvars = {
                 ANGULARJS: self.frontend == ANGULARJS,
                 ANGULAR: self.frontend == ANGULAR,
-                REACT: self.frontend == REACT,
-                'devel': self.development,
+                REACT: self.frontend == REACT
             }
         repo = project.apply_variables(repo, myvars)
 
@@ -835,7 +837,6 @@ Verify that you are in the right folder, now you are in: %s%s
             and not self.current_args.get('no_frontend'),
             REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
             'logging': self.current_args.get('collect_logs'),
-            'devel': self.development,
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': self.current_args.get('mode'),

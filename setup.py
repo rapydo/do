@@ -13,7 +13,7 @@ setup(
     version=current_version,
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
-    description='Do development and deploy with the RAPyDo framework',
+    description='Manage and deploy projects based on RAPyDo framework',
     url='https://rapydo.github.io/do',
     license='MIT',
     packages=[main_package],

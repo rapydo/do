@@ -27,7 +27,7 @@ options:
     type: str
     metavalue: LEVEL_OF_DEBUGGER
     default: DEPRECATED
-    help: level of verbosity
+    help: level of verbosity - DEPRECATED! export LOGURU_LEVEL env variable instead
 
   no-backend:
     type: bool
@@ -47,7 +47,7 @@ options:
   collect-logs:
     type: bool
     default: False
-    help: Collect logs from containers on ELK pipeline
+    help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
 
   hostname:
     alias: H
@@ -67,7 +67,7 @@ options:
   development:
     type: bool
     default: False
-    help: switch to development mode
+    help: switch to development mode - DEPRECATED!
 
   privileged:
     type: bool
