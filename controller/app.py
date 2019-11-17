@@ -121,7 +121,8 @@ class Application(object):
             self.current_os_user = pwd.getpwuid(os.getuid()).pw_name
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
-                "Current user: %s (UID: %d)" % (self.current_os_user, self.current_uid)
+                "Current user: {} (UID: {})",
+                self.current_os_user, self.current_uid
             )
 
         if not skip_check_perm:
@@ -519,16 +520,15 @@ Verify that you are in the right folder, now you are in: %s%s
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
                 log.exit(
-                    """Project %s is invalid: file or folder not found %s
-                    """
-                    % (self.project, fpath)
+                    "Project {} is invalid: file or folder not found {}",
+                    self.project, fpath
                 )
 
         for fname in obsolete_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if os.path.exists(fpath):
                 log.exit(
-                    "Project %s contains an obsolete file or folder: %s",
+                    "Project {} contains an obsolete file or folder: {}",
                     self.project,
                     fpath,
                 )
@@ -1008,7 +1008,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     break
             if not is_active:
                 log.verbose(
-                    "Checks skipped: template %s not enabled (service list = %s)",
+                    "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
                     build['services'],
                 )
@@ -1087,7 +1087,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     break
             if not is_active:
                 log.verbose(
-                    "Checks skipped: template %s not enabled (service list = %s)",
+                    "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
                     build['services'],
                 )

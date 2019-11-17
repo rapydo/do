@@ -44,7 +44,7 @@ def read_yamls(composers):
 
             if mandatory:
                 log.exit(
-                    "Composer %s(%s) is mandatory.\n%s" % (name, filepath, e)
+                    "Composer {}({}) is mandatory.\n{}", name, filepath, e
                 )
             else:
                 log.debug("Missing '{}' composer", name)

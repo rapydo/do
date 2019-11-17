@@ -249,7 +249,7 @@ class Compose(object):
         }
         if shell_command is not None:
             log.debug(
-                "Command: %s(%s+%s)" % (service.lower(), shell_command, shell_args)
+                "Command: {}({}+{})", service.lower(), shell_command, shell_args
             )
         try:
             out = self.command('exec_command', options, nofailure=nofailure)
