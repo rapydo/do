@@ -100,7 +100,15 @@ def import_package(package_name):
 
 def package_version(package_name):
     package = import_package(package_name)
-    if package is not None:
-        return package.__version__
-    else:
+    if package is None:
+        return None
+    try:
+        version = package.__version__
+        if isinstance(version, str):
+            return version
+
+        # Fix required for requests
+        return version.__version__
+    except BaseException as e:
+        print(str(e))
         return None
