@@ -400,26 +400,28 @@ To fix this issue, please update docker to version {}+
         found_version = package_version(package_name)
         if found_version is None:
             log.exit("Could not find the following python package: {}", package_name)
+        try:
+            if min_version is not None:
+                if LooseVersion(min_version) > LooseVersion(found_version):
+                    version_error = "Minimum supported version for %s is %s" % (
+                        package_name,
+                        min_version,
+                    )
+                    version_error += ", found %s " % (found_version)
+                    log.exit(version_error)
 
-        if min_version is not None:
-            if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for %s is %s" % (
-                    package_name,
-                    min_version,
-                )
-                version_error += ", found %s " % (found_version)
-                log.exit(version_error)
+            if max_version is not None:
+                if LooseVersion(max_version) < LooseVersion(found_version):
+                    version_error = "Maximum supported version for %s is %s" % (
+                        package_name,
+                        max_version,
+                    )
+                    version_error += ", found %s " % (found_version)
+                    log.exit(version_error)
 
-        if max_version is not None:
-            if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for %s is %s" % (
-                    package_name,
-                    max_version,
-                )
-                version_error += ", found %s " % (found_version)
-                log.exit(version_error)
-
-        self.checked("{} version: {}", package_name, found_version)
+            self.checked("{} version: {}", package_name, found_version)
+        except TypeError as e:
+            log.error("{}: {}", e, found_version)
 
     @staticmethod
     def inspect_main_folder():

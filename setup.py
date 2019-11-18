@@ -45,16 +45,9 @@ setup(
         "jinja2",
         "parse_it==3.3.2",
         "sultan==0.9.1",
-        # "requests==2.18.4",
-        # "requests==2.20.0",
-        # unable to update due to docker-compose
-        # docker-compose 1.23.2 has requirement
-        # requests!=2.11.0,!=2.12.2,!=2.18.0,<2.21,>=2.6.1
-        # but you'll have requests 2.21.0 which is incompatible.
         # "requests==2.21.0",
         # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
         # "PyYAML==3.13",
-
         "plumbum",
         "glom",
         "gitpython==3.0.2",
