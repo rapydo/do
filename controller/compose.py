@@ -56,7 +56,7 @@ class Compose(object):
         return TopLevelCommand(project_from_options(self.project_dir, self.options))
 
     def build_images(
-        self, builds, force_pull=True, current_version=None, current_uid=None
+        self, builds, force_pull=True, no_cache=False, current_version=None, current_uid=None
     ):
 
         try:
@@ -68,9 +68,10 @@ class Compose(object):
                 log.verbose("Building image: {}", image)
 
                 options = {
-                    '--no-cache': True,
+                    '--no-cache': no_cache,
                     '--parallel': True,
                     '--pull': force_pull,
+                    '--force-rm': True,
                     'SERVICE': [service],
                 }
 

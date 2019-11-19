@@ -21,7 +21,7 @@ from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
-from controller.builds import locate_builds
+from controller.builds import locate_builds, remove_redundant_services
 from controller.dockerizing import Dock
 from controller.compose import Compose
 from controller.configuration import load_yaml_file
@@ -1050,6 +1050,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
+                        no_cache=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
                     )
@@ -1135,12 +1136,12 @@ Verify that you are in the right folder, now you are in: %s%s
                     log.info("{}, rebuilding", message)
                     dc = self.get_compose(files=self.files)
 
-                    # Cannot force pull when building an image
-                    # overriding a template build
-                    force_pull = image_tag not in overriding_imgs
+                    # Don't force pull when building an image FROM a template build
+                    # force_pull = image_tag not in overriding_imgs
                     dc.build_images(
                         builds={image_tag: build},
-                        force_pull=force_pull,
+                        # force_pull=force_pull,
+                        force_pull=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
                     )
@@ -1657,17 +1658,23 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.debug("Forcing rebuild of cached templates")
             dc.build_images(
                 self.template_builds,
+                no_cache=self.current_args.get('force'),
                 current_version=__version__,
                 current_uid=self.current_uid,
             )
+            pull_templates = False
+        else:
+            pull_templates = True
 
         dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
+        services = remove_redundant_services(services, self.builds)
 
         options = {
             'SERVICE': services,
             '--no-cache': self.current_args.get('force'),
-            '--pull': False,
+            '--force-rm': True,
+            '--pull': pull_templates,
             '--parallel': True,
         }
         dc.command('build', options)
@@ -1687,9 +1694,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         options = {
             'SERVICE': services_intersection,
-            # TODO: user should be allowed to set the two below from cli
-            '--no-cache': False,
-            '--pull': False,
         }
         dc.command('pull', options)
 
