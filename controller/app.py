@@ -307,7 +307,8 @@ class Application(object):
     def check_installed_software(self):
 
         # Check if docker is installed
-        self.check_program('docker', min_version="1.13")
+        # 17.05 added support for multi-stage builds
+        self.check_program('docker', min_version="17.05")
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
@@ -1639,8 +1640,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
                 if service in developer_services:
                     user = 'developer'
-                elif service in ['angular']:
-                    user = 'node'
+                elif service in ['frontend']:
+                    if self.frontend == ANGULAR:
+                        user = 'node'
                 else:
                     user = None
         log.verbose("Command as user '{}'", user)
