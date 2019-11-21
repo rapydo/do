@@ -1182,7 +1182,7 @@ Verify that you are in the right folder, now you are in: %s%s
             "package.json",
             "polyfills.ts",
             "tsconfig.app.json",
-            # "tsconfig.json",
+            "tsconfig.json",
             "tsconfig.spec.json",
             "tslint.json",
             "typedarray.js",
