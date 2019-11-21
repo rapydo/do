@@ -200,6 +200,35 @@ def get_unstaged_files(gitobj):
     return {"changed": diff, "untracked": gitobj.untracked_files}
 
 
+def print_diff(gitobj, unstaged):
+
+    changed = len(unstaged['changed']) > 0
+    untracked = len(unstaged['untracked']) > 0
+    if not changed and not untracked:
+        return False
+
+    repo_folder = gitobj.working_dir.replace(os.getcwd(), '')
+    if repo_folder.startswith('/'):
+        repo_folder = repo_folder[1:]
+    if not repo_folder.endswith('/'):
+        repo_folder += '/'
+    if repo_folder == "/":
+        repo_folder = ''
+
+    if changed:
+        print("\nChanges not staged for commit:")
+        for f in unstaged['changed']:
+            print("\t{}{}".format(repo_folder, f.a_path))
+        print("")
+    if untracked:
+        print("\nUntracked files:")
+        for f in unstaged['untracked']:
+            print("\t{}{}".format(repo_folder, f))
+        print("")
+
+    return True
+
+
 def update(path, gitobj):
 
     unstaged = get_unstaged_files(gitobj)
@@ -208,23 +237,7 @@ def update(path, gitobj):
 
     if changed or untracked:
         log.critical("Unable to update {} repo, you have unstaged files", path)
-
-        repo_folder = gitobj.working_dir.replace(os.getcwd(), '')
-        if repo_folder.startswith('/'):
-            repo_folder = repo_folder[1:]
-        if not repo_folder.endswith('/'):
-            repo_folder += '/'
-        if repo_folder == "/":
-            repo_folder = ''
-
-        if changed:
-            print("\nChanges not staged for commit:")
-            for f in unstaged['changed']:
-                print("\t{}{}".format(repo_folder, f.a_path))
-        if untracked:
-            print("\nUntracked files:")
-            for f in unstaged['untracked']:
-                print("\t{}{}".format(repo_folder, f))
+        print_diff(gitobj, unstaged)
         sys.exit(1)
 
     for remote in gitobj.remotes:
@@ -245,10 +258,9 @@ def update(path, gitobj):
 def check_unstaged(path, gitobj):
 
     unstaged = get_unstaged_files(gitobj)
-    if len(unstaged['changed']) > 0:
-        log.warning("You have uncommitted changes on {}", path)
-    if len(unstaged['untracked']) > 0:
-        log.warning("You have untracked files on {}", path)
+    if len(unstaged['changed']) > 0 or len(unstaged['untracked']) > 0:
+        log.warning("You have unstaged files on {}", path)
+    print_diff(gitobj, unstaged)
     return unstaged
 
 
