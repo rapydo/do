@@ -1182,7 +1182,7 @@ Verify that you are in the right folder, now you are in: %s%s
             "package.json",
             "polyfills.ts",
             "tsconfig.app.json",
-            "tsconfig.json",
+            # "tsconfig.json",
             "tsconfig.spec.json",
             "tslint.json",
             "typedarray.js",
@@ -1197,6 +1197,11 @@ Verify that you are in the right folder, now you are in: %s%s
             p = os.path.join(frontend_data_dir, f)
             if not os.path.exists(p):
                 open(p, 'a').close()
+
+        karma_coverage_dir = os.path.join("data", self.project, "karma")
+        if not os.path.isdir(karma_coverage_dir):
+            os.makedirs(karma_coverage_dir)
+            log.verbose("{} folder not found, created", karma_coverage_dir)
 
     def get_services(self, key='services', sep=',', default=None):
 
@@ -1315,7 +1320,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 if ' ' in value:
                     value = "'%s'" % value
                 whandle.write("%s=%s\n" % (key, value))
-            self.checked("Created {} file", COMPOSE_ENVIRONMENT_FILE)
+            log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
 
@@ -1444,7 +1449,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def _check(self):
 
-        log.info("All checked")
+        log.info("Checks completed")
 
     def _init(self):
         log.info("Project initialized")

@@ -65,13 +65,11 @@ def test_all(capfd):
 
     # CHECK on rapydo-core
     out = exec_command(capfd, "rapydo check")
-    assert 'Created .env file' in out
-    assert "All checked" in out
+    assert "Checks completed" in out
 
     # CHECK on rapydo-core by enabling permissions checks
     out = exec_command(capfd, "rapydo --check-permissions check")
-    assert 'Created .env file' in out
-    assert "All checked" in out
+    assert "Checks completed" in out
 
     # NOW we are on a fork of rapydo-core
     gitobj = Repo(".")
@@ -105,7 +103,7 @@ def test_all(capfd):
     assert "Please select the --project option on one of the following:" in out
 
     out = exec_command(capfd, "rapydo -p sql check -s")
-    assert "All checked" in out
+    assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo -p invalid_character check -s")
     assert "Wrong project name, _ is not a valid character." in out
@@ -122,7 +120,7 @@ def test_all(capfd):
         f.write("project: sql")
 
     out = exec_command(capfd, "rapydo check -s")
-    assert "All checked" in out
+    assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo start")
     assert compose_log + "'up'" in out
