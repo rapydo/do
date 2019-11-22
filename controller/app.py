@@ -22,7 +22,6 @@ from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
-from controller.dockerizing import Dock
 from controller.compose import Compose
 from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
@@ -339,9 +338,6 @@ To fix this issue, please update docker to version {}+
                 v,
                 safe_version,
             )
-
-        # Use it
-        self.docker = Dock()
 
         # Check docker-compose version
         self.check_python_package('compose', min_version="1.18")
@@ -909,7 +905,8 @@ Verify that you are in the right folder, now you are in: %s%s
             return
 
         # we are in check or build case
-        dimages = self.docker.images()
+        from controller.dockerizing import Dock
+        dimages = Dock().images()
         # if rebuild templates is forced, these checks are not needed
         if not self.current_args.get('rebuild_templates', False):
             rebuilt = self.verify_template_builds(dimages, self.template_builds)
