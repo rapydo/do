@@ -7,7 +7,6 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 import os
-from controller.dockerizing import docker_errors
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
@@ -111,6 +110,8 @@ class Compose(object):
         log.debug("{}'{}'", compose_log, command)
 
         out = None
+        # sometimes this import stucks... importing here to avoid unnecessary waits
+        from docker.errors import APIError
         try:
             out = method(options=options)
         except SystemExit as e:
@@ -128,7 +129,7 @@ class Compose(object):
                 raise AttributeError(msg)
             else:
                 log.exit(msg)
-        except docker_errors as e:
+        except APIError as e:
             log.exit("Failed docker container:\n{}", e)
         except (ProjectError, NoSuchService) as e:
             log.exit(str(e))

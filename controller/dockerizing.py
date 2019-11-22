@@ -2,7 +2,7 @@
 
 import requests
 import docker
-from docker.errors import APIError as docker_errors
+from docker.errors import APIError
 from controller import log
 
 
@@ -37,7 +37,7 @@ class Dock(object):
         except requests.exceptions.ConnectionError:
             return False
         # this is the case of docker daemon starting or not working properly
-        except docker_errors:
+        except APIError:
             return False
 
     def image_info(self, tag):
