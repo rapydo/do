@@ -330,7 +330,7 @@ class Application(object):
                 """Your docker version is vulnerable to CVE-2019-5736
 
 ***************************************************************************************
-Your docker installation (version %s) is affected by a critical vulnerability
+Your docker installation (version {}) is affected by a critical vulnerability
 that allows specially-crafted containers to gain administrative privileges on the host.
 For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
 ***************************************************************************************
