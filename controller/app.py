@@ -343,7 +343,7 @@ To fix this issue, please update docker to version {}+
         self.check_python_package('compose', min_version="1.18")
         self.check_python_package('docker', min_version="2.6.1")
         self.check_python_package('requests', min_version="2.6.1")
-        self.check_python_package('pip', min_version="10")
+        self.check_python_package('pip', min_version="10.0.0")
         # self.check_python_package(
         #     'utilities', min_version=__version__, max_version=__version__
         # )
