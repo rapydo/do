@@ -9,7 +9,6 @@ Parse dockerfiles and check for builds
 import os
 from dockerfile_parse import DockerfileParser
 from controller import CONTAINERS_YAML_DIRNAME
-from controller.dockerizing import Dock
 from controller import log
 
 
@@ -40,6 +39,7 @@ def name_priority(name1, name2):
 def find_templates_build(base_services):
 
     templates = {}
+    from controller.dockerizing import Dock
     docker = Dock()
 
     for base_service in base_services:
