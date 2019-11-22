@@ -287,7 +287,7 @@ class Application(object):
                 hint = "Hint: create a %s file to save default options" % PROJECTRC
                 log.exit(
                     "Please select the --project option on one " +
-                    "of the following:\n\n %s\n\n%s\n",
+                    "of the following:\n\n {}\n\n{}\n",
                     projects,
                     hint,
                 )
