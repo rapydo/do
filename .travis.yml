@@ -4,8 +4,8 @@ dist: xenial
 services:
 - docker
 script:
-- pip install --upgrade setuptools
-- pip install --upgrade -r dev-requirements.txt
+- pip3 install --upgrade setuptools
+- pip3 install --upgrade -r dev-requirements.txt
 - pip3 install --upgrade --no-cache-dir --editable .
 - rapydo --version
 - rapydo --help
@@ -15,6 +15,7 @@ script:
 - cd rapydo_tests
 - git checkout $BRANCH
 - mkdir data
+- export LOGURU_LEVEL=DEBUG
 - TESTING=1 py.test -s -x --cov=controller ../tests
 after_success:
 - coveralls
@@ -22,8 +23,7 @@ after_success:
 jobs:
   include:
   - stage: test
-    python: 3.4
-  - python: 3.5
+    python: 3.5
   - python: 3.6.5
   - python: 3.7.1
   - stage: deploy

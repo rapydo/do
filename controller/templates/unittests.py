@@ -5,10 +5,9 @@ Run unittests inside the RAPyDo framework
 """
 
 from restapi.tests import BaseTests, API_URI, AUTH_URI
-from utilities import htmlcodes as hcodes
-from utilities.logs import get_logger
+from restapi.utilities.htmlcodes import hcodes
 
-log = get_logger(__name__)
+from controller import log
 
 
 class Test{{ class_name }}(BaseTests):
@@ -27,7 +26,7 @@ class Test{{ class_name }}(BaseTests):
         """
 
         endpoint = API_URI + self._main_endpoint
-        log.info('*** Testing GET call on %s' % endpoint)
+        log.info('*** Testing GET call on {}', endpoint)
 
         r = client.get(endpoint)  # If NO authorization required
         # headers, _ = self.do_login(client, None, None)
@@ -40,6 +39,4 @@ class Test{{ class_name }}(BaseTests):
         assert r.status_code == hcodes.HTTP_OK_BASIC
         output = self.get_content(r)
 
-        # pretty print data obtained from API to check the content
-        # log.pp(output)
         assert output == 'Hello world!'

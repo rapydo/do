@@ -3,10 +3,8 @@
 """ Reading yaml files for this project """
 
 from controller.compose import Compose
-from utilities.myyaml import load_yaml_file, SHORT_YAML_EXT
-from utilities.logs import get_logger
-
-log = get_logger(__name__)
+from controller.conf_utilities import load_yaml_file
+from controller import log
 
 
 def read_yamls(composers):
@@ -19,19 +17,19 @@ def read_yamls(composers):
 
         if not composer.pop('if', False):
             continue
-        else:
-            log.very_verbose("Composer %s" % name)
+
+        log.verbose("Composer {}", name)
 
         mandatory = composer.pop('mandatory', False)
         base = composer.pop('base', False)
-        composer['extension'] = SHORT_YAML_EXT
+        composer['extension'] = 'yml'
 
         try:
             compose = load_yaml_file(**composer)
 
             if len(compose.get('services', {})) < 1:
                 if mandatory:
-                    log.critical_exit("No service defined in file %s" % name)
+                    log.exit("No service defined in file {}", name)
                 else:
                     log.verbose("Skipping")
             else:
@@ -45,11 +43,11 @@ def read_yamls(composers):
         except KeyError as e:
 
             if mandatory:
-                log.critical_exit(
-                    "Composer %s(%s) is mandatory.\n%s" % (name, filepath, e)
+                log.exit(
+                    "Composer {}({}) is mandatory.\n{}", name, filepath, e
                 )
             else:
-                log.debug("Missing '%s' composer" % name)
+                log.debug("Missing '{}' composer", name)
 
     # to build the config with files and variables
     dc = Compose(files=base_files)

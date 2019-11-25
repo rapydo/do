@@ -1,43 +1,40 @@
 # -*- coding: utf-8 -*-
 
-import os.path
+import os
+import sys
+import pwd
 import time
 from distutils.dir_util import copy_tree
 import shutil
+import urllib3
+import requests
 from glom import glom
 from collections import OrderedDict
 from datetime import datetime
+import dateutil.parser
+import pytz
 from distutils.version import LooseVersion
-from utilities import path
-from utilities import checks
-from utilities import helpers
-from utilities import basher
-from utilities import PROJECT_DIR
-from utilities import CONTAINERS_YAML_DIRNAME
-from utilities import configuration
-from utilities import EXTENDED_PROJECT_DISABLED
-from utilities.globals import mem
-from utilities.time import date_from_string, get_online_utc_time
+from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller import project
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
-from controller.builds import locate_builds
-from controller.dockerizing import Dock
+from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
-from controller.configuration import load_yaml_file, SHORT_YAML_EXT
+from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
 from controller.configuration import read_yamls
-from utilities.logs import get_logger, suppress_stdout
+from controller import log
 
-log = get_logger(__name__)
+from controller.conf_utilities import load_project_configuration
+from controller.conf_utilities import read as read_configuration
+from controller.conf_utilities import mix as mix_configuration
 
-# FIXME: move somewhere
-STATUS_RELEASED = "released"
-STATUS_DISCONTINUED = "discontinued"
-STATUS_DEVELOPING = "developing"
+# STATUS_RELEASED = "released"
+# STATUS_DISCONTINUED = "discontinued"
+# STATUS_DEVELOPING = "developing"
 
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
@@ -91,7 +88,7 @@ class Application(object):
         # Initial inspection
         self.get_args()
         if not self.print_version:
-            log.info("You are using rapydo version %s", __version__)
+            log.info("You are using rapydo version {}", __version__)
         self.check_installed_software()
 
         if self.create:
@@ -111,7 +108,7 @@ class Application(object):
             self.inspect_project_folder()
 
         # get user launching rapydo commands
-        self.current_uid = basher.current_os_uid()
+        self.current_uid = os.getuid()
         if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
@@ -120,10 +117,10 @@ class Application(object):
             skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = basher.current_os_user()
+            self.current_os_user = pwd.getpwuid(os.getuid()).pw_name
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
-                "Current user: %s (UID: %d)" % (self.current_os_user, self.current_uid)
+                "Current user: {} (UID: {})", self.current_os_user, self.current_uid
             )
 
         if not skip_check_perm:
@@ -138,15 +135,15 @@ class Application(object):
             except StopIteration:
                 pass
             else:
-                log.exit("Unknown argument:'%s'.\nUse --help to list options", argname)
+                log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
 
         # Verify if we implemented the requested command
         function = "_%s" % self.action.replace("-", "_")
         func = getattr(self, function, None)
         if func is None:
             log.exit(
-                "Command not yet implemented: %s (expected function: %s)"
-                % (self.action, function)
+                "Command not yet implemented: {} (expected function: {})",
+                self.action, function
             )
 
         if not self.install or self.local_install:
@@ -154,16 +151,19 @@ class Application(object):
 
         if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
-            git_checks = False
-            git_checks = self.update or self.check
             if self.check and self.current_args.get('skip_heavy_git_ops', False):
                 git_checks = False
+            else:
+                git_checks = self.update or self.check
 
             if git_checks:
                 self.git_checks()  # NOTE: this might be an heavy operation
             else:
-                log.verbose("Skipping heavy operations")
+                log.verbose("Skipping heavy get operations")
 
+            if self.update:
+                # Reading again the configuration, it may change with git updates
+                self.read_specs()
             self.make_env()
 
             # Compose services and variables
@@ -173,13 +173,20 @@ class Application(object):
             # Build or check template containers images
             self.build_dependencies()
 
-            # Install or check frontend libraries (onlye if frontend is enabled)
+            # Install or check frontend libraries (only if frontend is enabled)
             self.frontend_libs()
 
         # Final step, launch the command
 
         if self.tested_connection:
-            online_time = get_online_utc_time()
+
+            # get online utc time
+            http = urllib3.PoolManager()
+            response = http.request('GET', "http://just-the-time.appspot.com/")
+
+            internet_time = response.data.decode('utf-8')
+            online_time = datetime.strptime(internet_time.strip(), "%Y-%m-%d %H:%M:%S")
+
             sec_diff = (datetime.utcnow() - online_time).total_seconds()
 
             major_diff = abs(sec_diff) >= 300
@@ -196,24 +203,29 @@ class Application(object):
             if major_diff or minor_diff:
                 current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                 tz_offset = time.timezone / -3600
-                log.info("Current date: %s UTC", current_date)
-                log.info("Expected: %s UTC", online_time)
-                log.info("Current timezone: %s (offset = %dh)", time.tzname, tz_offset)
+                log.info("Current date: {} UTC", current_date)
+                log.info("Expected: {} UTC", online_time)
+                log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
 
             if major_diff:
                 tips = "To manually set the date: "
-                tips += "sudo date --set \"%s\"" % online_time.strftime(
+                tips += "sudo date --set \"{}\"", online_time.strftime(
                     '%d %b %Y %H:%M:%S'
                 )
-                log.exit("Unable to continue, please fix the host date\n%s", tips)
+                log.exit("Unable to continue, please fix the host date\n{}", tips)
 
         func()
+
+    def checked(self, message, *args, **kws):
+        if self.action == "check":
+            log.info(message, *args, **kws)
+        else:
+            log.verbose(message, *args, **kws)
 
     def get_args(self):
 
         # Action
         self.action = self.current_args.get('action')
-        mem.action = self.action
         if self.action is None:
             log.exit("Internal misconfiguration")
 
@@ -245,7 +257,7 @@ class Application(object):
                     self.project,
                     self.project.replace("_", ""),
                 )
-                log.exit("Wrong project name, _ is not a valid character.%s" % suggest)
+                log.exit("Wrong project name, _ is not a valid character.{}", suggest)
 
             if self.project in self.reserved_project_names:
                 log.exit(
@@ -253,25 +265,28 @@ class Application(object):
                     % self.project
                 )
 
-        self.development = self.current_args.get('development')
+        if self.current_args.get('development'):
+            # Deprecated since version 0.7.0
+            log.warning(
+                "--development parameter is deprecated, you can stop using it")
 
     def check_projects(self):
 
         try:
-            projects = helpers.list_path(PROJECT_DIR)
+            projects = os.listdir(PROJECT_DIR)
         except FileNotFoundError:
-            log.exit("Could not access the dir '%s'" % PROJECT_DIR)
+            log.exit("Could not access the dir '{}'", PROJECT_DIR)
 
         if self.project is None:
             prj_num = len(projects)
 
             if prj_num == 0:
-                log.exit("No project found (%s folder is empty?)" % PROJECT_DIR)
+                log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
             elif prj_num > 1:
                 hint = "Hint: create a %s file to save default options" % PROJECTRC
                 log.exit(
-                    "Please select the --project option on one "
-                    + "of the following:\n\n %s\n\n%s\n",
+                    "Please select the --project option on one " +
+                    "of the following:\n\n {}\n\n{}\n",
                     projects,
                     hint,
                 )
@@ -286,17 +301,23 @@ class Application(object):
                     + "Select one of the following:\n\n %s\n" % projects
                 )
 
-        log.checked("Selected project: %s" % self.project)
+        self.checked("Selected project: {}", self.project)
 
     def check_installed_software(self):
 
         # Check if docker is installed
-        self.check_program('docker', min_version="1.13")
+        # 17.05 added support for multi-stage builds
+        self.check_program('docker', min_version="17.05")
+
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import executable
 
         # Check for CVE-2019-5736 vulnerability
         # Checking version of docker server, since docker client is not affected
         # and the two versions can differ
-        v = checks.executable(
+        v = executable(
             executable='docker',
             option=["version", "--format", "'{{.Server.Version}}'"],
             parse_ver=True,
@@ -308,35 +329,34 @@ class Application(object):
                 """Your docker version is vulnerable to CVE-2019-5736
 
 ***************************************************************************************
-Your docker installation (version %s) is affected by a critical vulnerability
+Your docker installation (version {}) is affected by a critical vulnerability
 that allows specially-crafted containers to gain administrative privileges on the host.
 For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
 ***************************************************************************************
-To fix this issue, please update docker to version %s+
+To fix this issue, please update docker to version {}+
             """,
                 v,
                 safe_version,
             )
 
-        # Use it
-        self.docker = Dock()
-
         # Check docker-compose version
-        # self.check_python_package('pip', max_version="10.0.1")
         self.check_python_package('compose', min_version="1.18")
-        # self.check_python_package('docker', min_version="2.4.2")
         self.check_python_package('docker', min_version="2.6.1")
         self.check_python_package('requests', min_version="2.6.1")
-        self.check_python_package(
-            'utilities', min_version=__version__, max_version=__version__
-        )
+        self.check_python_package('pip', min_version="10.0.0")
+        # self.check_python_package(
+        #     'utilities', min_version=__version__, max_version=__version__
+        # )
 
         # Check if git is installed
         self.check_program('git')  # , max_version='2.14.3')
 
-    @staticmethod
-    def check_program(program, min_version=None, max_version=None):
-        found_version = checks.executable(executable=program)
+    def check_program(self, program, min_version=None, max_version=None):
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import executable
+        found_version = executable(executable=program)
         if found_version is None:
 
             hints = ""
@@ -347,7 +367,7 @@ To fix this issue, please update docker to version %s+
             if len(hints) > 0:
                 hints = "\n\n%s" % hints
 
-            log.exit("Missing requirement: '%s' not found.%s" % (program, hints))
+            log.exit("Missing requirement: '{}' not found.{}", program, hints)
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for %s is %s" % (
@@ -366,34 +386,40 @@ To fix this issue, please update docker to version %s+
                 version_error += ", found %s " % (found_version)
                 log.exit(version_error)
 
-        log.checked("%s version: %s" % (program, found_version))
+        self.checked("{} version: {}", program, found_version)
 
-    @staticmethod
-    def check_python_package(package, min_version=None, max_version=None):
+    def check_python_package(self, package_name, min_version=None, max_version=None):
 
-        found_version = checks.package(package)
+        # BEWARE: to not import this package outside the function
+        # Otherwise pip will go crazy
+        # (we cannot understand why, but it does!)
+        from controller.packages import package_version
+
+        found_version = package_version(package_name)
         if found_version is None:
-            log.exit("Could not find the following python package: %s" % package)
+            log.exit("Could not find the following python package: {}", package_name)
+        try:
+            if min_version is not None:
+                if LooseVersion(min_version) > LooseVersion(found_version):
+                    version_error = "Minimum supported version for %s is %s" % (
+                        package_name,
+                        min_version,
+                    )
+                    version_error += ", found %s " % (found_version)
+                    log.exit(version_error)
 
-        if min_version is not None:
-            if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for %s is %s" % (
-                    package,
-                    min_version,
-                )
-                version_error += ", found %s " % (found_version)
-                log.exit(version_error)
+            if max_version is not None:
+                if LooseVersion(max_version) < LooseVersion(found_version):
+                    version_error = "Maximum supported version for %s is %s" % (
+                        package_name,
+                        max_version,
+                    )
+                    version_error += ", found %s " % (found_version)
+                    log.exit(version_error)
 
-        if max_version is not None:
-            if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for %s is %s" % (
-                    package,
-                    max_version,
-                )
-                version_error += ", found %s " % (found_version)
-                log.exit(version_error)
-
-        log.checked("%s version: %s" % (package, found_version))
+            self.checked("{} version: {}", package_name, found_version)
+        except TypeError as e:
+            log.error("{}: {}", e, found_version)
 
     @staticmethod
     def inspect_main_folder():
@@ -442,24 +468,25 @@ Verify that you are in the right folder, now you are in: %s%s
             'backend',
             'backend/apis',
             'backend/models',
-            'backend/swagger',
             'backend/tests',
         ]
-        obsolete_files = ['backend/__main__.py']
+        # Deprecated on 0.7.0
+        obsolete_files = ['backend/swagger/models.yaml', 'frontend/custom.ts']
 
         if self.frontend is not None:
             required_files.extend(
                 [
                     'frontend',
                     'frontend/package.json',
-                    'frontend/custom.ts',
                     'frontend/app',
                     'frontend/app/custom.project.options.ts',
                     'frontend/app/custom.module.ts',
                     'frontend/app/custom.navbar.ts',
+                    'frontend/app/custom.profile.ts',
+                    'frontend/css/style.css',
                     'frontend/app/custom.navbar.links.html',
                     'frontend/app/custom.navbar.brand.html',
-                    'frontend/css/style.css',
+                    'frontend/app/custom.profile.html',
                 ]
             )
 
@@ -492,49 +519,60 @@ Verify that you are in the right folder, now you are in: %s%s
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if not os.path.exists(fpath):
                 log.exit(
-                    """Project %s is invalid: file or folder not found %s
-                    """
-                    % (self.project, fpath)
+                    "Project {} is invalid: file or folder not found {}",
+                    self.project, fpath
                 )
 
         for fname in obsolete_files:
             fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if os.path.exists(fpath):
                 log.exit(
-                    "Project %s contains an obsolete file or folder: %s",
+                    "Project {} contains an obsolete file or folder: {}",
                     self.project,
                     fpath,
                 )
 
+    @staticmethod
+    def path_is_readable(filepath):
+        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
+            filepath, os.R_OK
+        )
+
+    @staticmethod
+    def path_is_writable(filepath):
+        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
+            filepath, os.W_OK
+        )
+
     def check_permissions(self, path):
 
         # if os.path.islink(path):
-        #     log.warning("Skipping checks on %s (symbolic link)", path)
+        #     log.warning("Skipping checks on {} (symbolic link)", path)
         #     return True
 
         if path.endswith("/node_modules"):
             return False
 
-        if not basher.path_is_readable(path):
+        if not self.path_is_readable(path):
             if os.path.islink(path):
-                log.warning("%s: path cannot be read [BROKEN LINK?]", path)
+                log.warning("{}: path cannot be read [BROKEN LINK?]", path)
             else:
-                log.warning("%s: path cannot be read", path)
+                log.warning("{}: path cannot be read", path)
             return False
 
-        if not basher.path_is_writable(path):
-            log.warning("%s: path cannot be written", path)
+        if not self.path_is_writable(path):
+            log.warning("{}: path cannot be written", path)
             return False
         try:
-            owner = basher.file_os_owner(path)
+            owner = pwd.getpwuid(os.stat(path).st_uid).pw_name
         except KeyError:
-            owner = basher.file_os_owner_raw(path)
+            owner = os.stat(path).st_uid
 
         if owner != self.current_os_user:
             if owner == 990:
-                log.debug("%s: wrong owner (%s)", path, owner)
+                log.debug("{}: wrong owner ({})", path, owner)
             else:
-                log.warning("%s: wrong owner (%s)", path, owner)
+                log.warning("{}: wrong owner ({})", path, owner)
             return False
         return True
 
@@ -560,7 +598,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
                 counter += 1
                 if counter > 20:
-                    log.warning("Too many folders, stopped checks in %s", root)
+                    log.warning("Too many folders, stopped checks in {}", root)
                     break
 
             counter = 0
@@ -573,7 +611,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
                 counter += 1
                 if counter > 100:
-                    log.warning("Too many files, stopped checks in %s", root)
+                    log.warning("Too many files, stopped checks in {}", root)
                     break
 
             break
@@ -581,7 +619,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def read_specs(self, read_only_project=False):
         """ Read project configuration """
 
-        project_file_path = helpers.project_dir(self.project)
+        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
         if read_only_project:
             default_file_path = None
         else:
@@ -594,7 +632,7 @@ Verify that you are in the right folder, now you are in: %s%s
             else:
                 read_extended = True
 
-            self.specs, self.extended_project, self.extended_project_path = configuration.read(
+            self.specs, self.extended_project, self.extended_project_path = read_configuration(
                 default_file_path=default_file_path,
                 base_project_path=project_file_path,
                 projects_path=PROJECT_DIR,
@@ -603,7 +641,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 do_exit=False,
             )
 
-            self.specs = configuration.mix(
+            self.specs = mix_configuration(
                 self.specs, self.arguments.host_configuration
             )
 
@@ -622,7 +660,7 @@ Verify that you are in the right folder, now you are in: %s%s
         self.frontend = framework
 
         if self.frontend is not None:
-            log.very_verbose("Frontend framework: %s" % self.frontend)
+            log.verbose("Frontend framework: {}", self.frontend)
 
         self.project_title = glom(self.specs, "project.title", default='Unknown title')
         self.version = glom(self.specs, "project.version", default=None)
@@ -636,8 +674,8 @@ Verify that you are in the right folder, now you are in: %s%s
 
     def preliminary_version_check(self):
 
-        project_file_path = helpers.project_dir(self.project)
-        specs = configuration.load_project_configuration(project_file_path)
+        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
+        specs = load_project_configuration(project_file_path)
         v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
@@ -684,13 +722,13 @@ Verify that you are in the right folder, now you are in: %s%s
     def verify_connected(self):
         """ Check if connected to internet """
 
-        connected = checks.internet_connection_available()
-        if not connected:
+        try:
+            requests.get('https://www.google.com')
+        except requests.ConnectionError:
             log.exit('Internet connection is unavailable')
         else:
-            log.checked("Internet connection is available")
+            self.checked("Internet connection is available")
             self.tested_connection = True
-        return
 
     def working_clone(self, name, repo, confs_only=False, from_path=None):
 
@@ -701,8 +739,7 @@ Verify that you are in the right folder, now you are in: %s%s
             myvars = {
                 ANGULARJS: self.frontend == ANGULARJS,
                 ANGULAR: self.frontend == ANGULAR,
-                REACT: self.frontend == REACT,
-                'devel': self.development,
+                REACT: self.frontend == REACT
             }
         repo = project.apply_variables(repo, myvars)
 
@@ -736,14 +773,14 @@ Verify that you are in the right folder, now you are in: %s%s
 
             local_path = os.path.join(from_path, name)
             if not os.path.exists(local_path):
-                log.exit("Submodule %s not found in %s", repo['path'], from_path)
+                log.exit("Submodule {} not found in {}", repo['path'], from_path)
 
             submodule_path = os.path.join(
-                helpers.current_dir(), SUBMODULES_DIR, repo['path']
+                os.curdir, SUBMODULES_DIR, repo['path']
             )
 
             if os.path.exists(submodule_path):
-                log.warning("Path %s already exists, removing", submodule_path)
+                log.warning("Path {} already exists, removing", submodule_path)
                 if os.path.isfile(submodule_path):
                     os.remove(submodule_path)
                 elif os.path.islink(submodule_path):
@@ -761,7 +798,7 @@ Verify that you are in the right folder, now you are in: %s%s
         from_local_path = self.current_args.get('submodules_path')
         if from_local_path is not None:
             if not os.path.exists(from_local_path):
-                log.exit("Local path not found: %s", from_local_path)
+                log.exit("Local path not found: {}", from_local_path)
 
         if confs_only:
             repos = {}
@@ -793,19 +830,20 @@ Verify that you are in the right folder, now you are in: %s%s
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS and not self.current_args.get('no_frontend'),
-            ANGULAR: self.frontend == ANGULAR and not self.current_args.get('no_frontend'),
+            ANGULARJS: self.frontend == ANGULARJS
+            and not self.current_args.get('no_frontend'),
+            ANGULAR: self.frontend == ANGULAR
+            and not self.current_args.get('no_frontend'),
             REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
             'logging': self.current_args.get('collect_logs'),
-            'devel': self.development,
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': self.current_args.get('mode'),
             'extended-mode': self.extended_project is not None,
-            'baseconf': helpers.current_dir(
-                SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+            'baseconf': os.path.join(
+                os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
-            'customconf': helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME),
+            'customconf': os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME),
         }
 
         if self.extended_project_path is None:
@@ -846,12 +884,16 @@ Verify that you are in the right folder, now you are in: %s%s
         self.services, self.files, self.base_services, self.base_files = read_yamls(
             compose_files
         )
-        log.verbose("Configuration order:\n%s" % self.files)
+        log.verbose("Configuration order:\n{}", self.files)
 
     def build_dependencies(self):
         """ Look up for builds which are depending on templates """
 
         if self.action not in ['check', 'update', 'build']:
+            return
+
+        if self.current_args.get('skip_builds_checks', False):
+            log.warning("Skipping builds checks")
             return
 
         # Compare builds depending on templates (slow operation!)
@@ -864,8 +906,9 @@ Verify that you are in the right folder, now you are in: %s%s
             return
 
         # we are in check or build case
-        dimages = self.docker.images()
-        # if rebuild templates is on build is forced, these checks are not needed
+        from controller.dockerizing import Dock
+        dimages = Dock().images()
+        # if rebuild templates is forced, these checks are not needed
         if not self.current_args.get('rebuild_templates', False):
             rebuilt = self.verify_template_builds(dimages, self.template_builds)
             if rebuilt:
@@ -877,6 +920,22 @@ Verify that you are in the right folder, now you are in: %s%s
         self.verify_obsolete_builds(
             dimages, self.builds, overriding_imgs, self.template_builds
         )
+
+    @staticmethod
+    def date_from_string(date, fmt="%d/%m/%Y"):
+
+        if date == "":
+            return ""
+        try:
+            return_date = datetime.strptime(date, fmt)
+        except BaseException:
+            return_date = dateutil.parser.parse(date)
+
+        # TODO: test me with: 2017-09-22T07:10:35.822772835Z
+        if return_date.tzinfo is None:
+            return pytz.utc.localize(return_date)
+
+        return return_date
 
     def get_build_timestamp(self, timestamp, as_date=False):
 
@@ -892,7 +951,7 @@ Verify that you are in the right folder, now you are in: %s%s
             float(timestamp)
         except ValueError:
             # otherwise, convert it
-            timestamp = date_from_string(timestamp).timestamp()
+            timestamp = self.date_from_string(timestamp).timestamp()
 
         if as_date:
             return datetime.fromtimestamp(timestamp)
@@ -909,11 +968,11 @@ Verify that you are in the right folder, now you are in: %s%s
         elif path.startswith(vanilla.working_dir):
             git_repo = vanilla
         else:
-            log.exit("Unable to find git repo %s" % path)
+            log.exit("Unable to find git repo {}", path)
 
         build_timestamp = self.get_build_timestamp(build.get('timestamp'))
 
-        files = helpers.list_path(path)
+        files = os.listdir(path)
         for f in files:
             local_file = os.path.join(path, f)
 
@@ -922,7 +981,7 @@ Verify that you are in the right folder, now you are in: %s%s
             )
 
             if obsolete:
-                log.info("File changed: %s", f)
+                log.info("File changed: {}", f)
                 return obsolete, build_ts, last_commit
 
         return False, 0, 0
@@ -948,8 +1007,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     is_active = True
                     break
             if not is_active:
-                log.very_verbose(
-                    "Checks skipped: template %s not enabled (service list = %s)",
+                log.verbose(
+                    "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
                     build['services'],
                 )
@@ -986,10 +1045,11 @@ Verify that you are in the right folder, now you are in: %s%s
                 message += " (built on %s" % b
                 message += " but changed on %s)" % c
                 if self.current_args.get('rebuild'):
-                    log.info("%s, rebuilding", message)
+                    log.info("{}, rebuilding", message)
                     dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
+                        no_cache=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
                     )
@@ -1027,8 +1087,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     is_active = True
                     break
             if not is_active:
-                log.very_verbose(
-                    "Checks skipped: template %s not enabled (service list = %s)",
+                log.verbose(
+                    "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
                     build['services'],
                 )
@@ -1072,15 +1132,15 @@ Verify that you are in the right folder, now you are in: %s%s
             if build_is_obsolete:
                 found_obsolete += 1
                 if self.current_args.get('rebuild'):
-                    log.info("%s, rebuilding", message)
+                    log.info("{}, rebuilding", message)
                     dc = self.get_compose(files=self.files)
 
-                    # Cannot force pull when building an image
-                    # overriding a template build
-                    force_pull = image_tag not in overriding_imgs
+                    # Don't force pull when building an image FROM a template build
+                    # force_pull = image_tag not in overriding_imgs
                     dc.build_images(
                         builds={image_tag: build},
-                        force_pull=force_pull,
+                        # force_pull=force_pull,
+                        force_pull=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
                     )
@@ -1105,25 +1165,41 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.frontend != ANGULAR:
             return False
 
-        libs_dir = os.path.join("data", self.project, "frontend")
-        modules_dir = os.path.join(libs_dir, "node_modules")
+        frontend_data_dir = os.path.join("data", self.project, "frontend")
+        if not os.path.isdir(frontend_data_dir):
+            os.makedirs(frontend_data_dir)
+            log.info(
+                "{} folder not found, created with expected subtree", frontend_data_dir
+            )
 
-        if not os.path.isdir(libs_dir):
-            os.makedirs(libs_dir)
-            log.warning("Libs folder not found, creating %s" % libs_dir)
-        if not os.path.isdir(modules_dir):
-            os.makedirs(modules_dir)
-            log.warning("Modules folder not found, creating %s" % modules_dir)
+        expected_folders = ["app", "courtesy", "e2e", "node_modules"]
+        expected_files = [
+            "angular.json",
+            "browserslist",
+            "karma.conf.js",
+            "package.json",
+            "polyfills.ts",
+            "tsconfig.app.json",
+            "tsconfig.json",
+            "tsconfig.spec.json",
+            "tslint.json",
+            "typedarray.js",
+        ]
 
-        if not os.path.exists(os.path.join(libs_dir, "package.json")):
-            log.warning("Package.json not found, will be created at startup")
+        for f in expected_folders:
+            p = os.path.join(frontend_data_dir, f)
+            if not os.path.isdir(p):
+                os.makedirs(p)
 
-        libs = helpers.list_path(modules_dir)
+        for f in expected_files:
+            p = os.path.join(frontend_data_dir, f)
+            if not os.path.exists(p):
+                open(p, 'a').close()
 
-        if len(libs) <= 0:
-            log.warning("Frontend libs not found, will be installed at startup")
-        else:
-            log.checked("Found %d frontend libs installed" % len(libs))
+        karma_coverage_dir = os.path.join("data", self.project, "karma")
+        if not os.path.isdir(karma_coverage_dir):
+            os.makedirs(karma_coverage_dir)
+            log.verbose("{} folder not found, created", karma_coverage_dir)
 
     def get_services(self, key='services', sep=',', default=None):
 
@@ -1140,7 +1216,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
     @staticmethod
     def read_env():
-        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
         env = {}
         if not os.path.isfile(envfile):
             log.critical("Env file not found")
@@ -1156,13 +1232,13 @@ Verify that you are in the right folder, now you are in: %s%s
         return env
 
     def make_env(self):
-        envfile = os.path.join(helpers.current_dir(), COMPOSE_ENVIRONMENT_FILE)
+        envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
 
         try:
             os.unlink(envfile)
-            log.verbose("Removed cache of %s" % COMPOSE_ENVIRONMENT_FILE)
+            log.verbose("Removed cache of {}", COMPOSE_ENVIRONMENT_FILE)
         except FileNotFoundError:
-            log.very_verbose("No %s to remove" % COMPOSE_ENVIRONMENT_FILE)
+            pass
 
         env = self.vars.get('env')
         if env is None:
@@ -1206,6 +1282,19 @@ Verify that you are in the right folder, now you are in: %s%s
                 env['BLACK_SUBMODULE'] = submodule
                 env['BLACK_FOLDER'] = self.current_args.get('folder')
 
+        if env.get('ACTIVATE_CELERY_BEAT', "0") == "0":
+            env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+        else:
+            celery_backend = env.get('CELERY_BACKEND')
+            if celery_backend is None:
+                env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+            elif celery_backend == 'MONGODB':
+                env['CELERY_BEAT_SCHEDULER'] = 'celerybeatmongo.schedulers.MongoScheduler'
+            elif celery_backend == 'REDIS':
+                env['CELERY_BEAT_SCHEDULER'] = 'redbeat.RedBeatScheduler'
+            else:
+                env['CELERY_BEAT_SCHEDULER'] = 'Unknown'
+
         net = self.current_args.get('net', 'bridge')
         env['DOCKER_NETWORK_MODE'] = net
         # env.update({'PLACEHOLDER': PLACEHOLDER})
@@ -1215,7 +1304,7 @@ Verify that you are in the right folder, now you are in: %s%s
         # nmode = self.current_args.get('net')
         # nmodes = ['bridge', 'hosts']
         # if nmode not in nmodes:
-        #     log.warning("Invalid network mode: %s", nmode)
+        #     log.warning("Invalid network mode: {}", nmode)
         #     nmode = nmodes[0]
         # env['DOCKER_NETWORK_MODE'] = nmode
         # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
@@ -1226,11 +1315,10 @@ Verify that you are in the right folder, now you are in: %s%s
                     value = ''
                 else:
                     value = str(value)
-                # log.print("ENV values. %s:*%s*" % (key, value))
                 if ' ' in value:
                     value = "'%s'" % value
                 whandle.write("%s=%s\n" % (key, value))
-            log.checked("Created %s file" % COMPOSE_ENVIRONMENT_FILE)
+            log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
 
@@ -1244,7 +1332,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         else:
-            log.checked("Active services: %s", self.active_services)
+            self.checked("Active services: {}", self.active_services)
 
         missing = []
         for service_name in self.active_services:
@@ -1263,7 +1351,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             serv = self.vars_to_services_mapping.get(key)
             if serv is None:
-                log.exit("Unexpected error, cannot find a service mapping with %s", key)
+                log.exit("Unexpected error, cannot find a service mapping with {}", key)
             active_serv = []
             for i in serv:
                 if i in self.active_services:
@@ -1274,7 +1362,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
             else:
                 log.verbose(
-                    "Variable %s is missing, but %s service(s) not active", key, serv
+                    "Variable {} is missing, but {} service(s) not active", key, serv
                 )
 
         if len(placeholders) > 0:
@@ -1282,7 +1370,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             tips = "\n\nYou can fix this error by updating the "
             tips += "project_configuration.yaml file or you local .projectrc file\n"
             log.exit(
-                "The following variables are missing in your configuration:\n\n%s%s",
+                "The following variables are missing in your configuration:\n\n{}{}",
                 m,
                 tips,
             )
@@ -1318,7 +1406,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         for name, gitobj in sorted(self.gits.items()):
             if name in ignore_submodule_list:
-                log.debug("Skipping %s on %s" % (self.action, name))
+                log.debug("Skipping {} on {}", self.action, name)
                 continue
             if gitobj is not None:
                 if self.update:
@@ -1359,13 +1447,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def _check(self):
 
-        # NOTE: Do we consider what we have here a SECURITY BUG?
-        # dc = self.get_compose(files=self.files)
-        # for container in dc.get_handle().project.containers():
-        #     log.pp(container.client._auth_configs)
-        #     exit(1)
-
-        log.info("All checked")
+        log.info("Checks completed")
 
     def _init(self):
         log.info("Project initialized")
@@ -1431,7 +1513,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             '--force': True,
             '-v': False,  # dangerous?
         }
-        dc.command('stop')
+        dc.command('stop', options)
         dc.command('rm', options)
 
         log.info("Stack removed")
@@ -1482,7 +1564,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         service = db + 'ui'
 
         if not self.container_service_exists(service):
-            log.exit("Container '%s' is not defined" % service)
+            log.exit("Container '{}' is not defined", service)
 
         port = self.current_args.get('port')
         publish = []
@@ -1515,9 +1597,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         uri = uris.get(service)
         if uri is not None:
-            log.info("You can access %s web page here:\n%s", service, uri)
+            log.info("You can access {} web page here:\n{}", service, uri)
         else:
-            log.info("Launching interface: %s", service)
+            log.info("Launching interface: {}", service)
+
+        from contextlib import contextmanager
+
+        @contextmanager
+        def suppress_stdout():
+            """
+            http://thesmithfam.org/blog/2012/10/25/
+            temporarily-suppress-console-output-in-python/
+            """
+            with open(os.devnull, "w") as devnull:
+                old_stdout = sys.stdout
+                sys.stdout = devnull
+                try:
+                    yield
+                finally:
+                    sys.stdout = old_stdout
+
         with suppress_stdout():
             # NOTE: this is suppressing also image build...
             detach = self.current_args.get('detach')
@@ -1534,11 +1633,22 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             user = self.current_args.get('user')
             # if 'user' is empty, put None to get the docker-compose default
             if user is not None and user.strip() == '':
-                if service in ['backend', 'restclient']:
+                developer_services = [
+                    'backend',
+                    'celery',
+                    'celeryui',
+                    'celery-beat',
+                    'restclient'
+                ]
+
+                if service in developer_services:
                     user = 'developer'
+                elif service in ['frontend']:
+                    if self.frontend == ANGULAR:
+                        user = 'node'
                 else:
                     user = None
-        log.verbose("Command as user '%s'" % user)
+        log.verbose("Command as user '{}'", user)
 
         if command is None:
             default = 'echo hello world'
@@ -1553,17 +1663,24 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.debug("Forcing rebuild of cached templates")
             dc.build_images(
                 self.template_builds,
+                no_cache=self.current_args.get('force'),
                 current_version=__version__,
                 current_uid=self.current_uid,
             )
+            pull_templates = False
+        else:
+            pull_templates = True
 
         dc = self.get_compose(files=self.files)
         services = self.get_services(default=self.active_services)
+        services = remove_redundant_services(services, self.builds)
 
         options = {
             'SERVICE': services,
             '--no-cache': self.current_args.get('force'),
-            '--pull': False,
+            '--force-rm': True,
+            '--pull': pull_templates,
+            '--parallel': True,
         }
         dc.command('build', options)
 
@@ -1582,16 +1699,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         options = {
             'SERVICE': services_intersection,
-            # TODO: user should be allowed to set the two below from cli
-            '--no-cache': False,
-            '--pull': False,
         }
         dc.command('pull', options)
 
         log.info("Base images pulled from docker hub")
 
     def _custom(self):
-        log.debug("Custom command: %s" % self.custom_command)
+        log.debug("Custom command: {}", self.custom_command)
         meta = self.custom_commands.get(self.custom_command)
         meta.pop('description', None)
 
@@ -1610,12 +1724,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if chain is None:
                 log.exit("Invalid chain file (your provided none)")
             elif not os.path.exists(chain):
-                log.exit("Invalid chain file (your provided %s)", chain)
+                log.exit("Invalid chain file (your provided {})", chain)
 
             if key is None:
                 log.exit("Invalid key file (your provided none)")
             elif not os.path.exists(key):
-                log.exit("Invalid key file (your provided %s)", key)
+                log.exit("Invalid key file (your provided {})", key)
 
         meta = glom(
             self.arguments.parse_conf,
@@ -1698,7 +1812,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if self.current_args.get('services'):
             printed_something = True
             log.info("List of active services:\n")
-            pwd = helpers.current_fullpath()
             print("%-12s %-24s %s" % ("Name", "Image", "Path"))
 
             for service in self.services:
@@ -1710,30 +1823,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         print("%-12s %-24s" % (name, image))
                     else:
                         path = build.get('context')
-                        path = path.replace(pwd, "")
+                        path = path.replace(os.getcwd(), "")
                         if path.startswith("/"):
                             path = path[1:]
                         print("%-12s %-24s %s" % (name, image, path))
 
-                    # ports = service.get("ports")
-                    # if ports is not None:
-                    #     for p in ports:
-                    #         print("\t%s -> %s" % (p.target, p.published))
-
-                    # volumes = service.get("volumes")
-                    # if volumes is not None:
-                    #     for volume in volumes:
-                    #         vext = volume.external
-                    #         vext = vext.replace(pwd, "")
-                    #         if vext.startswith("/"):
-                    #             vext = vext[1:]
-                    #         vint = volume.internal
-                    #         print("\t%s -> %s" % (vext, vint))
-
         if self.current_args.get('submodules'):
             printed_something = True
             log.info("List of submodules:\n")
-            pwd = helpers.current_fullpath()
             print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
             for name in self.gits:
                 repo = self.gits.get(name)
@@ -1741,7 +1838,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     continue
                 branch = gitter.get_active_branch(repo)
                 path = repo.working_dir
-                path = path.replace(pwd, "")
+                path = path.replace(os.getcwd(), "")
                 if path.startswith("/"):
                     path = path[1:]
                 print("%-18s %-18s %s" % (name, branch, path))
@@ -1753,6 +1850,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             )
 
     def _template(self):
+
+        log.critical("This command is obsolete, please do not use it")
 
         service_name = self.current_args.get('service')
         if service_name is None:
@@ -1788,7 +1887,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             service, nreplicas = options
 
         if not nreplicas.isnumeric():
-            log.exit("Invalid number of replicas: %s", nreplicas)
+            log.exit("Invalid number of replicas: {}", nreplicas)
 
         dc = self.get_compose(files=self.files)
         # dc.command('up', compose_options)
@@ -1821,12 +1920,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.exit("You are on a git repo, unable to continue")
 
         if os.path.exists(project_name):
-            log.exit("%s folder already exists, unable to continue", project_name)
+            log.exit("{} folder already exists, unable to continue", project_name)
 
         os.mkdir(project_name)
 
         if not os.path.exists(project_name):
-            log.exit("Errors creating %s folder")
+            log.exit("Errors creating {} folder", project_name)
 
         template_tmp_dir = "__template"
         template_tmp_path = os.path.join(project_name, template_tmp_dir)
@@ -1847,7 +1946,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         shutil.rmtree(template_tmp_path)
 
         if template_name is None:
-            log.info("Project %s successfully created", project_name)
+            log.info("Project {} successfully created", project_name)
             print("")
             print("You can run one of the following templates:")
 
@@ -1856,13 +1955,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         template_path = os.path.join(project_dir, template_name)
 
         if not os.path.exists(template_path):
-            log.exit("Invalid template name: %s", template_name)
+            log.exit("Invalid template name: {}", template_name)
 
         if not os.path.exists(vanilla_dir):
 
             os.mkdir(vanilla_dir)
             copy_tree(template_path, vanilla_dir)
-            log.info("Copy from %s", template_path)
+            log.info("Copy from {}", template_path)
 
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
             f.write("project: %s" % project_name)
@@ -1875,12 +1974,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             project_name,
             template_name,
         )
-        projects = helpers.list_path(project_dir)
+        projects = os.listdir(project_dir)
         for p in projects:
             if p != project_name:
                 pdir = os.path.join(project_dir, p)
                 shutil.rmtree(pdir)
-                log.info("Unused template project deleted: %s ", p)
+                log.info("Unused template project deleted: {}", p)
 
         print("")
         print("Now you can enter the project and execute rapydo init")
@@ -1936,25 +2035,24 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         """
         files = []
 
-        basedir = helpers.current_dir(
-            SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
+        basedir = os.path.join(
+            os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
         )
-        customdir = helpers.project_dir(self.project, CONTAINERS_YAML_DIRNAME)
+        customdir = os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
 
         main_yml = load_yaml_file(
-            file=filename_base, path=basedir, extension=SHORT_YAML_EXT, return_path=True
+            file=filename_base, path=basedir, extension='yml', return_path=True
         )
         files.append(main_yml)
         custom_yml = load_yaml_file(
             file=filename_base,
             path=customdir,
-            extension=SHORT_YAML_EXT,
+            extension='yml',
             return_path=True,
-            skip_error=True,
-            logger=False,
+            skip_error=True
         )
         if isinstance(custom_yml, str):
-            log.debug("Found custom %s specs", filename_base)
+            log.debug("Found custom {} specs", filename_base)
             files.append(custom_yml)
 
         return files
@@ -1973,27 +2071,40 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc.command(command, options)
 
+    @staticmethod
+    def execute_command(command, parameters):
+        from plumbum import local
+        from plumbum.commands.processes import ProcessExecutionError
+        try:
+
+            # Pattern in plumbum library for executing a shell command
+            command = local[command]
+            log.verbose("Executing command {} {}", command, parameters)
+            return command(parameters)
+
+        except ProcessExecutionError as e:
+            raise e
+
     def _dump(self):
 
         #################
         # 1. base dump
         mybin = 'docker-compose'
         # NOTE: can't figure it out why, but 'dc' on config can't use files
-        # so I've used basher (since it's already imported)
-        bash = basher.BashCommands()
+        # so I've used plumbum
         params = []
         for file in self.files:
             params.append('-f')
             params.append(file)
         params.append('config')
-        yaml_string = bash.execute_command(mybin, parameters=params)
+        yaml_string = self.execute_command(mybin, parameters=params)
 
         #################
         # 2. filter active services
-        from utilities.myyaml import yaml
 
         # replacing absolute paths with relative ones
-        main_dir = path.current_dir()
+        main_dir = os.getcwd()
+        import yaml
         obj = yaml.load(yaml_string.replace(main_dir, '.'))
 
         active_services = {}
@@ -2007,134 +2118,133 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         filename = '%s.yml' % mybin
         with open(filename, 'w') as fh:
             fh.write(yaml.dump(obj, default_flow_style=False))
-        log.warning("Config dump: %s", filename)
+        log.warning("Config dump: {}", filename)
 
     def _install(self):
         version = self.current_args.get('version')
-        git = self.current_args.get('git')
+        pip = self.current_args.get('pip')
         editable = self.current_args.get('editable')
+        user = self.current_args.get('user')
 
-        if git and editable:
-            log.exit("--git and --editable options are not compatible")
+        if pip and editable:
+            log.exit("--pip and --editable options are not compatible")
+        if user and editable:
+            log.exit("--user and --editable options are not compatible")
 
         if version == 'auto':
             self.read_specs(read_only_project=True)
             version = self.rapydo_version
-            log.info("Detected version %s to be installed", version)
+            log.info("Detected version {} to be installed", version)
 
-        if git:
-            return self.install_controller_from_git(version)
-        elif editable:
-            return self.install_controller_from_folder(version)
+        if editable:
+            return self.install_controller_from_folder(version, user)
+        elif pip:
+            return self.install_controller_from_pip(version, user)
         else:
-            return self.install_controller_from_pip(version)
+            return self.install_controller_from_git(version, user)
 
-    def install_controller_from_pip(self, version):
+    def install_controller_from_pip(self, version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install
+        from controller.packages import install
 
-        # from utilities.packing import check_version
-
-        log.info("You asked to install rapydo-controller %s from pip", version)
+        log.info("You asked to install rapydo-controller {} from pip", version)
 
         package = "rapydo-controller"
         controller = "%s==%s" % (package, version)
-        installed = install(controller)
+        installed = install(controller, user=user)
         if not installed:
-            log.error("Unable to install controller %s from pip", version)
+            log.error("Unable to install controller {} from pip", version)
         else:
-            log.info("Controller version %s installed from pip", version)
-            # installed_version = check_version(package)
-            # log.info("Check on installed version: %s", installed_version)
+            log.info("Controller version {} installed from pip", version)
 
     @staticmethod
-    def install_controller_from_git(version):
+    def install_controller_from_git(version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from controller.packages import install, check_version
 
-        log.info("You asked to install rapydo-controller %s from git", version)
+        log.info("You asked to install rapydo-controller {} from git", version)
 
         package = "rapydo-controller"
         controller_repository = "do"
-        utils_repository = "utils"
+        # utils_repository = "utils"
         rapydo_uri = "https://github.com/rapydo"
-        utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
+        # utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
         controller = "git+%s/%s.git@%s" % (rapydo_uri, controller_repository, version)
 
-        installed = install(utils)
-        if installed:
-            installed = install(controller)
+        # installed = install(utils)
+        # if installed:
+        installed = install(controller, user=user)
 
         if not installed:
-            log.error("Unable to install controller %s from git", version)
+            log.error("Unable to install controller {} from git", version)
         else:
-            log.info("Controller version %s installed from git", version)
+            log.info("Controller version {} installed from git", version)
             installed_version = check_version(package)
-            log.info("Check on installed version: %s", installed_version)
+            log.info("Check on installed version: {}", installed_version)
 
-    def install_controller_from_folder(self, version):
+    def install_controller_from_folder(self, version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
-        from utilities.packing import install, check_version
+        from controller.packages import install, check_version
 
-        log.info("You asked to install rapydo-controller %s from local folder", version)
+        log.info("You asked to install rapydo-controller {} from local folder", version)
 
         package = "rapydo-controller"
-        utils_path = os.path.join(SUBMODULES_DIR, "utils")
+        # utils_path = os.path.join(SUBMODULES_DIR, "utils")
         do_path = os.path.join(SUBMODULES_DIR, "do")
 
-        if not os.path.exists(utils_path):
-            log.exit("%s path not found", utils_path)
+        # if not os.path.exists(utils_path):
+        #     log.exit("{} path not found", utils_path)
         if not os.path.exists(do_path):
-            log.exit("%s path not found", do_path)
+            log.exit("{} path not found", do_path)
 
-        utils_repo = self.gits.get('utils')
+        # utils_repo = self.gits.get('utils')
         do_repo = self.gits.get('do')
 
-        utils_switched = False
-        b = gitter.get_active_branch(utils_repo)
+        # utils_switched = False
+        # b = gitter.get_active_branch(utils_repo)
 
-        if b is None:
-            log.error("Unable to read local utils repository")
-        elif b == version:
-            log.info("Utilities repository already at %s", version)
-        elif gitter.switch_branch(utils_repo, version):
-            log.info("Utilities repository switched to %s", version)
-            utils_switched = True
-        else:
-            log.exit("Unable to switch utilities repository to %s", version)
+        # if b is None:
+        #     log.error("Unable to read local utils repository")
+        # elif b == version:
+        #     log.info("Utilities repository already at {}", version)
+        # elif gitter.switch_branch(utils_repo, version):
+        #     log.info("Utilities repository switched to {}", version)
+        #     utils_switched = True
+        # else:
+        #     log.exit("Unable to switch utilities repository to {}", version)
 
         b = gitter.get_active_branch(do_repo)
 
         if b is None:
             log.error("Unable to read local controller repository")
         elif b == version:
-            log.info("Controller repository already at %s", version)
+            log.info("Controller repository already at {}", version)
         elif gitter.switch_branch(do_repo, version):
-            log.info("Controller repository switched to %s", version)
-        else:
-            if utils_switched:
-                log.warning("Unable to switch back utilities repository")
-            log.exit("Unable to switch controller repository to %s", version)
+            log.info("Controller repository switched to {}", version)
+        # else:
+        #     if utils_switched:
+        #         log.warning("Unable to switch back utilities repository")
+        #     log.exit("Unable to switch controller repository to {}", version)
 
-        installed = install(utils_path, editable=True)
-        if installed:
-            installed = install(do_path, editable=True)
+        # installed = install(utils_path, editable=True)
+        # if installed:
+        installed = install(do_path, editable=True, user=user)
 
         if not installed:
-            log.error("Unable to install controller %s from local folder", version)
+            log.error("Unable to install controller {} from local folder", version)
         else:
-            log.info("Controller version %s installed from local folder", version)
+            log.info("Controller version {} installed from local folder", version)
             installed_version = check_version(package)
-            log.info("Check on installed version: %s", installed_version)
+            log.info("Check on installed version: {}", installed_version)
 
     # issues/57
     # I'm temporary here... to be decided how to handle me

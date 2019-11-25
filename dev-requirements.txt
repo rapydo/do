@@ -1,5 +1,3 @@
 pytest
 pytest-cov
-plumbum
 coveralls
-git+https://github.com/rapydo/utils.git@0.6.7

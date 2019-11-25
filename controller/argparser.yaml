@@ -26,8 +26,8 @@ options:
     alias: l
     type: str
     metavalue: LEVEL_OF_DEBUGGER
-    default: DEBUG
-    help: level of verbosity
+    default: DEPRECATED
+    help: level of verbosity - DEPRECATED! export LOGURU_LEVEL env variable instead
 
   no-backend:
     type: bool
@@ -47,7 +47,7 @@ options:
   collect-logs:
     type: bool
     default: False
-    help: Collect logs from containers on ELK pipeline
+    help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
 
   hostname:
     alias: H
@@ -67,7 +67,7 @@ options:
   development:
     type: bool
     default: False
-    help: switch to development mode
+    help: switch to development mode - DEPRECATED!
 
   privileged:
     type: bool
@@ -120,6 +120,10 @@ subcommands:
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
+      skip-builds-checks:
+        type: bool
+        default: False
+        help: ignore the heaviest builds operations
   init:
     description: "
       make current project compliant to RAPyDo requirements
@@ -152,16 +156,21 @@ subcommands:
         type: str
         metavalue: VERSION
         default: auto
-      git:
+      pip:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: install from git
+        help: install from pypi
       editable:
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
         help: install in editable mode from submodules folder
+      user:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install at user level (sudo not required)
 
   status:
     description: list current status of containers
@@ -169,7 +178,7 @@ subcommands:
     description: force building of one or more services docker images
     suboptions:
       rebuild-templates:
-        alias: r
+        alias: t
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
@@ -195,7 +204,7 @@ subcommands:
         alias: t
         type: str
         metavalue: INTEGER_NUM_LINES
-        default: "100"
+        default: "1000"
         help: logs
       service:
         alias: s
@@ -413,37 +422,7 @@ subcommands:
         metavalue: NAME
         default: null
         help: Name of your new project
-      # continue:
-      #   type: bool
-      #   metavalue: TRUE_OR_FALSE
-      #   default: False
-      #   help: Restart from an interrupted configuration
 
   version:
     description: Retrieve version details
 
-  # upgrade:  # DEPRECATED, see issues/71
-  #   description: upgrade your current project to new official releases
-  #   suboptions:
-  #     release:
-  #       alias: r
-  #       type: str
-  #       metavalue: RELEASE_VERSION
-  #       help: release version you want to upgrade to
-  #     downgrade:
-  #       alias: d
-  #       type: bool
-  #       metavalue: TRUE_OR_FALSE
-  #       default: False
-  #       help: allow downgrade to previous versions
-  #     current:
-  #       alias: c
-  #       type: bool
-  #       metavalue: TRUE_OR_FALSE
-  #       default: False
-  #       help: upgrade to current branch. Incompatible with release option
-
-  # tutorial:
-  #   description: Step-by-step guide to make your project RAPyDo compliant
-  # TODO: a tutorial mode to improve the project step by step
-  # instead of all at once like init

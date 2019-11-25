@@ -6,8 +6,7 @@ Integration with Docker compose
 # NOTE: A way to possibly silence compose output:
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
-
-from controller.dockerizing import docker_errors
+import os
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
@@ -19,10 +18,7 @@ from compose.cli.command import (
     project_from_options,
 )
 from compose.cli.main import TopLevelCommand
-from utilities import helpers
-from utilities.logs import get_logger
-
-log = get_logger(__name__)
+from controller import log
 
 compose_log = 'docker-compose command: '
 
@@ -40,9 +36,9 @@ class Compose(object):
         # if net is not None:
         #     self.options['--net'] = net
 
-        self.project_dir = helpers.current_dir()
+        self.project_dir = os.curdir
         self.project_name = get_project_name(self.project_dir)
-        log.very_verbose("Client compose %s: %s" % (self.project_name, files))
+        log.verbose("Client compose {}: {}", self.project_name, files)
 
     def config(self):
         try:
@@ -51,7 +47,7 @@ class Compose(object):
             # services is always the second element
             services_list = compose_output_tuple[1]
         except conferrors.ConfigurationError as e:
-            log.critical_exit("Wrong compose configuration:\n%s" % e)
+            log.exit("Wrong compose configuration:\n{}", e)
         else:
             return services_list
 
@@ -59,7 +55,7 @@ class Compose(object):
         return TopLevelCommand(project_from_options(self.project_dir, self.options))
 
     def build_images(
-        self, builds, force_pull=True, current_version=None, current_uid=None
+        self, builds, force_pull=True, no_cache=False, current_version=None, current_uid=None
     ):
 
         try:
@@ -68,11 +64,13 @@ class Compose(object):
             for image, build in builds.items():
 
                 service = build.get('service')
-                log.verbose("Building image: %s" % image)
+                log.verbose("Building image: {}", image)
 
                 options = {
-                    '--no-cache': True,
+                    '--no-cache': no_cache,
+                    '--parallel': True,
                     '--pull': force_pull,
+                    '--force-rm': True,
                     'SERVICE': [service],
                 }
 
@@ -87,7 +85,7 @@ class Compose(object):
                     options['--build-arg'] = build_args
 
                 compose_handler.build(options=options)
-                log.info("Built image: %s" % image)
+                log.info("Built image: {}", image)
 
             return
         except SystemExit:
@@ -109,33 +107,34 @@ class Compose(object):
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.debug("%s'%s'" % (compose_log, command))
+        log.debug("{}'{}'", compose_log, command)
 
         out = None
+        # sometimes this import stucks... importing here to avoid unnecessary waits
+        from docker.errors import APIError
         try:
             out = method(options=options)
         except SystemExit as e:
             # NOTE: we check the status here.
             # System exit is received also when a normal command finished.
             if e.code < 0:
-                log.warning("Invalid code returned: %s", e.code)
+                log.warning("Invalid code returned: {}", e.code)
             elif e.code > 0:
-                log.warning("Compose received: system.exit(%s)", e.code)
-                log.exit(error_code=e.code)
+                log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
             else:
-                log.very_verbose("Executed compose %s w/%s" % (command, options))
+                log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             msg = "Failed command execution:\n%s" % e
             if nofailure:
                 raise AttributeError(msg)
             else:
-                log.critical_exit(msg)
-        except docker_errors as e:
-            log.exit("Failed docker container:\n%s" % e)
+                log.exit(msg)
+        except APIError as e:
+            log.exit("Failed docker container:\n{}", e)
         except (ProjectError, NoSuchService) as e:
             log.exit(str(e))
         else:
-            log.very_verbose("Executed compose %s w/%s" % (command, options))
+            log.verbose("Executed compose {} w/{}", command, options)
 
         return out
 
@@ -252,7 +251,7 @@ class Compose(object):
         }
         if shell_command is not None:
             log.debug(
-                "Command: %s(%s+%s)" % (service.lower(), shell_command, shell_args)
+                "Command: {}({}+{})", service.lower(), shell_command, shell_args
             )
         try:
             out = self.command('exec_command', options, nofailure=nofailure)
@@ -260,7 +259,7 @@ class Compose(object):
             if nofailure:
                 raise AttributeError("Cannot find service: %s", service)
             else:
-                log.exit("Cannot find a running container called %s" % service)
+                log.exit("Cannot find a running container called {}", service)
         else:
             return out
 
@@ -286,7 +285,7 @@ class Compose(object):
                 merge={'--rm': True},
             )
         else:
-            log.exit("No default implemented for: %s", command)
+            log.exit("No default implemented for: {}", command)
 
     @staticmethod
     def set_defaults(variables, merge=None):
@@ -302,5 +301,5 @@ class Compose(object):
             else:
                 key = '--' + variable
             options[key] = None
-        log.very_verbose('defaults: %s', options)
+        log.verbose('defaults: {}', options)
         return options
