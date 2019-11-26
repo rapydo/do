@@ -3,7 +3,7 @@
 from setuptools import setup
 # from controller import __version__ as current_version
 
-current_version = "0.7.0"
+current_version = "0.7.1"
 
 main_package = "controller"
 app = '%s.__main__:main' % main_package
