@@ -1,6 +1,5 @@
 language: python
 sudo: required
-dist: xenial
 services:
 - docker
 script:
@@ -22,12 +21,19 @@ after_success:
 - pwd
 jobs:
   include:
+
   - stage: test
     python: 3.5
-  - python: 3.6.5
-  - python: 3.7.1
+    dist: xenial
+  - python: 3.6
+    dist: xenial
+  - python: 3.7
+    dist: xenial
+  - python: 3.8
+    dist: xenial
   - stage: deploy
-    python: 3.7.1
+    python: 3.7
+    dist: xenial
     script: skip
     deploy:
       provider: pypi
