@@ -24,16 +24,75 @@ jobs:
 
   - stage: test
     python: 3.5
+    dist: bionic
+
+  - python: 3.6
+    dist: bionic
+
+  - python: 3.7
+    dist: bionic
+
+  - python: 3.8
+    dist: bionic
+
+  - python: 3.5
     dist: xenial
+
   - python: 3.6
     dist: xenial
+
   - python: 3.7
     dist: xenial
+
   - python: 3.8
     dist: xenial
+
+  - python: 3.5
+    dist: trusty
+
+  - python: 3.6
+    dist: trusty
+
+  - python: 3.7
+    dist: trusty
+
+  - python: 3.5
+    dist: precise
+
+  - python: 3.6
+    dist: precise
+
+  - python: 3.7
+    dist: precise
+
+  - python: 3.5
+    os: osx
+
+  - python: 3.6
+    os: osx
+
+  - python: 3.7
+    os: osx
+
+  - python: 3.8
+    os: osx
+
+  - python: 3.5
+    os: windows
+
+  - python: 3.6
+    os: windows
+
+  - python: 3.7
+    os: windows
+
+  - python: 3.8
+    os: windows
+
   - stage: deploy
     python: 3.7
     dist: xenial
+    os: linux
     script: skip
     deploy:
       provider: pypi
