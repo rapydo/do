@@ -19,8 +19,8 @@ def exec_command(capfd, command, get_out=True, get_err=False):
         log.info('completed')
 
     out, err = capfd.readouterr()
-    out = out.split("\n")
-    err = err.split("\n")
+    out = out.replace('\r', '').split("\n")
+    err = err.replace('\r', '').split("\n")
 
     if get_out:
         pp(out)
