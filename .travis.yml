@@ -72,7 +72,7 @@ jobs:
     env:
     - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
 
-   - python: 3.5
+  - python: 3.5
     os: osx
     language: sh  # 'language: python' is an error on Travis CI macOS
     before_install:
