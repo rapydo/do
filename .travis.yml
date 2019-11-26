@@ -22,57 +22,87 @@ after_success:
 jobs:
   include:
 
-  - stage: test
-    python: 3.5
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - stage: test
+  #   python: 3.5
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.6
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.6
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.7
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.7
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.8
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.5
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.6
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.7
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.8
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.5
+  #   dist: trusty
+  #   env:
+  #   - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.6
+  #   dist: trusty
+  #   env:
+  #   - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.5
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+
+  # - python: 3.6
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+
+  # - python: 3.7
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
 
   - python: 3.8
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-  - python: 3.5
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.7
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.8
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.5
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.5
     os: osx
     language: sh  # 'language: python' is an error on Travis CI macOS
     before_install:
@@ -81,36 +111,8 @@ jobs:
       - python3 -m pip install virtualenv
       - virtualenv .venv -p python3
       - source .venv/bin/activate
-
-  - python: 3.6
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-
-  - python: 3.7
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-
-  - python: 3.8
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
+      - curl -fsSL https://get.docker.com -o get-docker.sh
+      - sh test-docker.sh
 
   - os: windows
     language: sh # The language 'python' is currently unsupported on the Windows Build Environment.
