@@ -52,6 +52,14 @@ def get_username(uid):
         return str(uid)
 
 
+def get_current_uid():
+    try:
+        os.getuid()
+    except AttributeError as e:
+        log.warning(e)
+        return 0
+
+
 class Application(object):
 
     """
@@ -116,7 +124,7 @@ class Application(object):
             self.inspect_project_folder()
 
         # get user launching rapydo commands
-        self.current_uid = os.getuid()
+        self.current_uid = get_current_uid()
         if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
@@ -125,7 +133,7 @@ class Application(object):
             skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = get_username(os.getuid())
+            self.current_os_user = get_username(self.current_uid)
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
                 "Current user: {} (UID: {})", self.current_os_user, self.current_uid
