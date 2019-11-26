@@ -2,7 +2,6 @@
 
 import os
 import sys
-import pwd
 import time
 from distutils.dir_util import copy_tree
 import shutil
@@ -42,6 +41,15 @@ REACT = 'react'
 
 ROOT_UID = 0
 BASE_UID = 990
+
+
+def get_username(uid):
+    try:
+        import pwd
+        return pwd.getpwuid(uid).pw_name
+    except ImportError as e:
+        log.warning(e)
+        return str(uid)
 
 
 class Application(object):
@@ -117,7 +125,7 @@ class Application(object):
             skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = pwd.getpwuid(os.getuid()).pw_name
+            self.current_os_user = get_username(os.getuid())
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
                 "Current user: {} (UID: {})", self.current_os_user, self.current_uid
@@ -564,7 +572,7 @@ Verify that you are in the right folder, now you are in: %s%s
             log.warning("{}: path cannot be written", path)
             return False
         try:
-            owner = pwd.getpwuid(os.stat(path).st_uid).pw_name
+            owner = get_username(os.stat(path).st_uid)
         except KeyError:
             owner = os.stat(path).st_uid
 
