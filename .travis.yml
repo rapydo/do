@@ -94,15 +94,19 @@ jobs:
 
   - python: 3.5
     os: osx
+    language: shell  # 'language: python' is an error on Travis CI macOS
 
   - python: 3.6
     os: osx
+    language: shell  # 'language: python' is an error on Travis CI macOS
 
   - python: 3.7
     os: osx
+    language: shell  # 'language: python' is an error on Travis CI macOS
 
   - python: 3.8
     os: osx
+    language: shell  # 'language: python' is an error on Travis CI macOS
 
   - python: 3.5
     os: windows
