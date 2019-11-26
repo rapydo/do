@@ -46,11 +46,12 @@ setup(
         "parse_it==3.3.2",
         "sultan==0.9.1",
         # "requests==2.21.0",
-        # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
+        # Forced because PyYAML 3.13 is required but requests 2.20 installs 3.12
         # "PyYAML==3.13",
         "plumbum",
         "glom",
         "gitpython==3.0.2",
+        "pip>=10.0.0"
 
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
