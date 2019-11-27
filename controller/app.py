@@ -22,18 +22,14 @@ from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
-from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
-from controller.configuration import read_yamls
 from controller import log
 
-from controller.conf_utilities import load_project_configuration
-from controller.conf_utilities import read as read_configuration
-from controller.conf_utilities import mix as mix_configuration
-
-# STATUS_RELEASED = "released"
-# STATUS_DISCONTINUED = "discontinued"
-# STATUS_DEVELOPING = "developing"
+from controller.conf_utilities import read_configuration
+from controller.conf_utilities import mix_configuration
+from controller.conf_utilities import read_composer_yamls
+from controller.conf_utilities import load_yaml_file, get_yaml_path
+from controller.conf_utilities import PROJECT_CONF_FILENAME
 
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
@@ -653,8 +649,7 @@ Verify that you are in the right folder, now you are in: %s%s
                 base_project_path=project_file_path,
                 projects_path=PROJECT_DIR,
                 read_extended=read_extended,
-                submodules_path=SUBMODULES_DIR,
-                do_exit=False,
+                submodules_path=SUBMODULES_DIR
             )
 
             self.specs = mix_configuration(
@@ -691,7 +686,7 @@ Verify that you are in the right folder, now you are in: %s%s
     def preliminary_version_check(self):
 
         project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        specs = load_project_configuration(project_file_path)
+        specs = load_yaml_file(file=PROJECT_CONF_FILENAME, path=project_file_path, keep_order=True)
         v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
@@ -838,28 +833,31 @@ Verify that you are in the right folder, now you are in: %s%s
             if gitobj is not None:
                 gitter.update(name, gitobj)
 
-    def prepare_composers(self):
+    def read_composers(self):
+
+        # Find configuration that tells us which files have to be read
 
         # substitute values starting with '$$'
 
         load_commons = not self.current_args.get('no_commons')
+        load_frontend = not self.current_args.get('no_frontend')
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS
-            and not self.current_args.get('no_frontend'),
-            ANGULAR: self.frontend == ANGULAR
-            and not self.current_args.get('no_frontend'),
-            REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
+            ANGULARJS: self.frontend == ANGULARJS and load_frontend,
+            ANGULAR: self.frontend == ANGULAR and load_frontend,
+            REACT: self.frontend == REACT and load_frontend,
             'logging': self.current_args.get('collect_logs'),
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
-            'mode': self.current_args.get('mode'),
+            'mode': self.current_args.get('mode') + '.yml',
             'extended-mode': self.extended_project is not None,
             'baseconf': os.path.join(
                 os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
-            'customconf': os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME),
+            'customconf': os.path.join(
+                os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME
+            ),
         }
 
         if self.extended_project_path is None:
@@ -875,31 +873,16 @@ Verify that you are in the right folder, now you are in: %s%s
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
 
-        # TOFIX: temporary fix to let to use both angularjs and angular
-        # One completed the porting from angularjs to angular
-        # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
-        # and remove this piece of code
-        if 'frontend' in compose_files:
-
-            branch = glom(
-                self.specs, "variables.repos.frontend.branch", default='master'
-            )
-
-            if branch != 'master':
-                compose_files['frontend']['file'] = 'frontend-a2'
-        # ################################################################# #
-
-        return compose_files
-
-    def read_composers(self):
-
-        # Find configuration that tells us which files have to be read
-        compose_files = self.prepare_composers()
-
         # Read necessary files
-        self.services, self.files, self.base_services, self.base_files = read_yamls(
-            compose_files
-        )
+        self.files, self.base_files = read_composer_yamls(compose_files)
+
+        # to build the config with files and variables
+        dc = Compose(files=self.base_files)
+        self.base_services = dc.config()
+
+        dc = Compose(files=self.files)
+        self.services = dc.config()
+
         log.verbose("Configuration order:\n{}", self.files)
 
     def build_dependencies(self):
@@ -2043,32 +2026,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
 
-    def read_conf_files(self, filename_base):
+    def read_conf_files(self, filename):
         """
         Generic method to find and list:
-        - submodules/rapydo-confs/conf/YOURBASE.yml     # required
-        - projects/CURRENT_PROJECT/conf/YOURBASE.yml    # optional
+        - submodules/rapydo-confs/conf/ymlfilename     # required
+        - projects/CURRENT_PROJECT/conf/ymlfilename    # optional
         """
         files = []
 
         basedir = os.path.join(
             os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
         )
-        customdir = os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
+        customdir = os.path.join(
+            os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
 
-        main_yml = load_yaml_file(
-            file=filename_base, path=basedir, extension='yml', return_path=True
-        )
+        main_yml = get_yaml_path(file=filename, path=basedir)
         files.append(main_yml)
-        custom_yml = load_yaml_file(
-            file=filename_base,
-            path=customdir,
-            extension='yml',
-            return_path=True,
-            skip_error=True
-        )
+
+        custom_yml = get_yaml_path(file=filename, path=customdir)
         if isinstance(custom_yml, str):
-            log.debug("Found custom {} specs", filename_base)
+            log.debug("Found custom {} specs", filename)
             files.append(custom_yml)
 
         return files
@@ -2076,7 +2053,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     def _formatter(self):
 
         command = 'run'
-        dc = self.get_compose(files=self.read_conf_files('formatter'))
+        dc = self.get_compose(files=self.read_conf_files('formatter.yml'))
         options = dc.command_defaults(command=command)
 
         VANILLA_SUBMODULE = 'vanilla'

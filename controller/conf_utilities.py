@@ -5,46 +5,23 @@ import yaml
 from collections import OrderedDict
 from controller import log
 
-PROJECTS_DEFAULTS_FILE = 'projects_defaults'
-PROJECT_CONF_FILENAME = 'project_configuration'
+PROJECTS_DEFAULTS_FILE = 'projects_defaults.yaml'
+PROJECT_CONF_FILENAME = 'project_configuration.yaml'
 
 
-def load_project_configuration(path, file=None, do_exit=True):
-
-    if file is None:
-        file = PROJECT_CONF_FILENAME
-
-    args = {
-        'path': path,
-        'skip_error': False,
-        'file': file,
-        'keep_order': True,
-    }
-    try:
-        log.verbose("Found '{}/{}' configuration", path, file)
-        return load_yaml_file(**args)
-    except AttributeError as e:
-        if do_exit:
-            log.exit(e)
-        else:
-            raise AttributeError(e)
-
-
-def read(
+def read_configuration(
     default_file_path,
     base_project_path,
     projects_path,
     submodules_path,
-    from_container=False,
-    read_extended=True,
-    do_exit=True,
+    read_extended=True
 ):
     """
     Read default configuration
     """
 
-    custom_configuration = load_project_configuration(
-        base_project_path, file=PROJECT_CONF_FILENAME, do_exit=do_exit
+    custom_configuration = load_yaml_file(
+        file=PROJECT_CONF_FILENAME, path=base_project_path, keep_order=True
     )
 
     # Verify custom project configuration
@@ -57,8 +34,8 @@ def read(
     for key in variables:
         if project.get(key) is None:
 
-            log.critical_exit(
-                "Project not configured, missing key '%s' in file %s/%s.yaml",
+            log.exit(
+                "Project not configured, missing key '{}' in file {}/{}",
                 key,
                 base_project_path,
                 PROJECT_CONF_FILENAME,
@@ -67,8 +44,8 @@ def read(
     if default_file_path is None:
         base_configuration = {}
     else:
-        base_configuration = load_project_configuration(
-            default_file_path, file=PROJECTS_DEFAULTS_FILE, do_exit=do_exit
+        base_configuration = load_yaml_file(
+            file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
         )
 
     if read_extended:
@@ -77,7 +54,7 @@ def read(
         extended_project = None
     if extended_project is None:
         # Mix default and custom configuration
-        return mix(base_configuration, custom_configuration), None, None
+        return mix_configuration(base_configuration, custom_configuration), None, None
 
     extends_from = project.get('extends-from', 'projects')
 
@@ -88,36 +65,25 @@ def read(
         if repository_name == '':
             log.exit('Invalid repository name in extends-from, name is empty')
 
-        if from_container:
-            extend_path = submodules_path
-        else:
-            extend_path = os.path.join(submodules_path, repository_name, projects_path)
+        extend_path = os.path.join(submodules_path, repository_name, projects_path)
     else:
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
         log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
-    # in container the file is mounted in the confs folder
-    # otherwise will be in projects/projectname or submodules/projectname
-    if not from_container:
-        extend_path = os.path.join(extend_path, extended_project)
+    extend_path = os.path.join(extend_path, extended_project)
 
     if not os.path.exists(extend_path):
         log.exit("From project not found: {}", extend_path)
 
-    # on backend is mounted with `extended_` prefix
-    if from_container:
-        extend_file = "extended_%s" % (PROJECT_CONF_FILENAME)
-    else:
-        extend_file = PROJECT_CONF_FILENAME
-    extended_configuration = load_project_configuration(
-        extend_path, file=extend_file, do_exit=do_exit
+    extended_configuration = load_yaml_file(
+        file=PROJECT_CONF_FILENAME, path=extend_path, keep_order=True
     )
 
-    m1 = mix(base_configuration, extended_configuration)
-    return mix(m1, custom_configuration), extended_project, extend_path
+    m1 = mix_configuration(base_configuration, extended_configuration)
+    return mix_configuration(m1, custom_configuration), extended_project, extend_path
 
 
-def mix(base, custom):
+def mix_configuration(base, custom):
     if base is None:
         base = {}
 
@@ -133,7 +99,7 @@ def mix(base, custom):
                 continue
 
         if isinstance(elements, dict):
-            mix(base[key], custom[key])
+            mix_configuration(base[key], custom[key])
 
         elif isinstance(elements, list):
             for e in elements:
@@ -146,26 +112,6 @@ def mix(base, custom):
 # ################################
 # ######## FROM myyaml.py ########
 # ################################
-
-
-def get_yaml_path(path, filename, extension):
-    if path is None:
-        filepath = filename
-    else:
-        if extension is not None:
-            filename += '.' + extension
-        filepath = os.path.join(path, filename)
-
-    return filepath
-
-
-def regular_load(stream, loader=yaml.loader.Loader):
-    # LOAD fails if more than one document is there
-    # return yaml.load(fh)
-
-    # LOAD ALL gets more than one document inside the file
-    # gen = yaml.load_all(fh)
-    return yaml.load_all(stream, loader)
 
 
 class OrderedLoader(yaml.SafeLoader):
@@ -187,63 +133,95 @@ def construct_mapping(loader, node):
     return OrderedDict(loader.construct_pairs(node))
 
 
-def ordered_load(stream):
+def get_yaml_path(file, path):
 
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
-    )
-    # return yaml.load(stream, OrderedLoader)
-    return regular_load(stream, OrderedLoader)
+    filepath = os.path.join(path, file)
+
+    log.verbose("Reading file {}", filepath)
+
+    if not os.path.exists(filepath):
+        None
+    return filepath
 
 
-def load_yaml_file(
-    file,
-    path=None,
-    get_all=False,
-    skip_error=False,
-    extension='yaml',
-    return_path=False,
-    keep_order=False,
-):
+def load_yaml_file(file, path, keep_order=False):
     """
     Import any data from a YAML file.
     """
 
-    filepath = get_yaml_path(path, file, extension)
+    filepath = get_yaml_path(file, path=path)
 
-    log.verbose("Reading file {}", filepath)
+    if filepath is None:
+        log.warning("Failed to read YAML file {}: File does not exist", filepath)
+        return {}
 
-    # load from this file
-    error = None
-    if not os.path.exists(filepath):
-        error = 'File does not exist'
-    else:
-        if return_path:
-            return filepath
+    with open(filepath) as fh:
+        try:
+            if keep_order:
 
-        with open(filepath) as fh:
-            try:
-                if keep_order:
-                    loader = ordered_load(fh)
-                else:
-                    loader = regular_load(fh)
-            except Exception as e:
-                error = e
+                OrderedLoader.add_constructor(
+                    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
+                )
+                loader = yaml.load_all(fh, OrderedLoader)
             else:
-                docs = list(loader)
-                if get_all:
-                    return docs
+                loader = yaml.load_all(fh, yaml.loader.Loader)
 
-                if len(docs) > 0:
-                    return docs[0]
+            docs = list(loader)
 
-                message = "YAML file is empty: %s" % filepath
-                log.exit(message)
+            if len(docs) == 0:
+                log.exit("YAML file is empty: {}", filepath)
 
-    # # IF dealing with a strange exception string (escaped)
-    # import codecs
-    # error, _ = codecs.getdecoder("unicode_escape")(str(error))
+            return docs[0]
 
-    message = "Failed to read YAML file [%s]: %s" % (filepath, error)
-    log.warning(message)
-    return {}
+        except Exception as e:
+            # # IF dealing with a strange exception string (escaped)
+            # import codecs
+            # error, _ = codecs.getdecoder("unicode_escape")(str(error))
+
+            log.warning("Failed to read YAML file [{}]: {}", filepath, e)
+            return {}
+
+
+def read_composer_yamls(composers):
+
+    base_files = []
+    all_files = []
+
+    # YAML CHECK UP
+    for name, composer in composers.items():
+
+        if not composer.pop('if', False):
+            continue
+
+        log.verbose("Composer {}", name)
+
+        mandatory = composer.pop('mandatory', False)
+        base = composer.pop('base', False)
+
+        try:
+            f = composer.get('file')
+            p = composer.get('path')
+            compose = load_yaml_file(file=f, path=p)
+
+            if len(compose.get('services', {})) < 1:
+                if mandatory:
+                    log.exit("No service defined in file {}", name)
+                else:
+                    log.verbose("Skipping")
+            else:
+                filepath = get_yaml_path(file=f, path=p)
+                all_files.append(filepath)
+
+                if base:
+                    base_files.append(filepath)
+
+        except KeyError as e:
+
+            if mandatory:
+                log.exit(
+                    "Composer {}({}) is mandatory.\n{}", name, filepath, e
+                )
+            else:
+                log.debug("Missing '{}' composer", name)
+
+    return all_files, base_files

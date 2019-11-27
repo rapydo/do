@@ -148,7 +148,7 @@ class EndpointScaffold(object):
         needle = None
 
         for current_specs_file in swagdir.glob('*/%s' % self.specs_file):
-            content = load_yaml_file(str(current_specs_file))
+            content = load_yaml_file(str(current_specs_file), path="")
 
             for _, value in content.get('mapping', {}).items():
                 tmp = '/' + endpoint

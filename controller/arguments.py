@@ -151,7 +151,7 @@ class ArgParser(object):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
 
         self.parse_conf = load_yaml_file(
-            'argparser', path=os.path.dirname(os.path.realpath(__file__))
+            'argparser.yaml', path=os.path.dirname(os.path.realpath(__file__))
         )
 
         # from parse_it import ParseIt
@@ -161,20 +161,10 @@ class ArgParser(object):
 
         try:
             # READ PROJECT INIT FILE: .projectrc
-            pinit_conf = load_yaml_file(
-                PROJECTRC,
-                path=os.curdir,
-                skip_error=True,
-                extension=None,
-            )
+            pinit_conf = load_yaml_file(PROJECTRC, path=os.curdir)
             # Allow alternative for PROJECT INIT FILE: .project.yml
             if len(pinit_conf) < 1:
-                pinit_conf = load_yaml_file(
-                    PROJECTRC_ALTERNATIVE,
-                    path=os.curdir,
-                    skip_error=True,
-                    extension=None,
-                )
+                pinit_conf = load_yaml_file(PROJECTRC_ALTERNATIVE, path=os.curdir)
         except AttributeError as e:
             log.exit(e)
 
