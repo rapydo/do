@@ -54,7 +54,7 @@ def get_username(uid):
 
 def get_current_uid():
     try:
-        os.getuid()
+        return os.getuid()
     except AttributeError as e:
         log.warning(e)
         return 0
