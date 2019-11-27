@@ -72,53 +72,53 @@ jobs:
     env:
     - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.5
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-      - curl -fsSL https://get.docker.com -o get-docker.sh
-      - sh get-docker.sh
+  # - python: 3.5
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+  #     - curl -fsSL https://get.docker.com -o get-docker.sh
+  #     - sh get-docker.sh
 
-  - python: 3.6
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-      - curl -fsSL https://get.docker.com -o get-docker.sh
-      - sh get-docker.sh
+  # - python: 3.6
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+  #     - curl -fsSL https://get.docker.com -o get-docker.sh
+  #     - sh get-docker.sh
 
-  - python: 3.7
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-      - curl -fsSL https://get.docker.com -o get-docker.sh
-      - sh get-docker.sh
+  # - python: 3.7
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+  #     - curl -fsSL https://get.docker.com -o get-docker.sh
+  #     - sh get-docker.sh
 
-  - python: 3.8
-    os: osx
-    language: sh  # 'language: python' is an error on Travis CI macOS
-    before_install:
-      - brew update
-      - brew upgrade python3
-      - python3 -m pip install virtualenv
-      - virtualenv .venv -p python3
-      - source .venv/bin/activate
-      - curl -fsSL https://get.docker.com -o get-docker.sh
-      - sh get-docker.sh
+  # - python: 3.8
+  #   os: osx
+  #   language: sh  # 'language: python' is an error on Travis CI macOS
+  #   before_install:
+  #     - brew update
+  #     - brew upgrade python3
+  #     - python3 -m pip install virtualenv
+  #     - virtualenv .venv -p python3
+  #     - source .venv/bin/activate
+  #     - curl -fsSL https://get.docker.com -o get-docker.sh
+  #     - sh get-docker.sh
 
   # Travis error:
   # ERROR: for XYZ image operating system "linux" cannot be used on this platform
