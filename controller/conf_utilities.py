@@ -140,7 +140,7 @@ def get_yaml_path(file, path):
     log.verbose("Reading file {}", filepath)
 
     if not os.path.exists(filepath):
-        None
+        return None
     return filepath
 
 
