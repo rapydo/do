@@ -43,7 +43,6 @@ setup(
         "better_exceptions",
         "prettyprinter",
         "jinja2",
-        "parse_it==3.3.2",
         "sultan==0.9.1",
         # "requests==2.21.0",
         # Forced because PyYAML 3.13 is required but requests 2.20 installs 3.12

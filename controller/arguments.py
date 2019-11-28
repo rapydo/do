@@ -154,11 +154,6 @@ class ArgParser(object):
             'argparser.yaml', path=os.path.dirname(os.path.realpath(__file__))
         )
 
-        # from parse_it import ParseIt
-        # parser = ParseIt(config_location=os.path.dirname(os.path.realpath(__file__)))
-        # print(parser.read_all_configuration_variables())
-        # sys.exit(1)
-
         try:
             # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(PROJECTRC, path=os.curdir)
