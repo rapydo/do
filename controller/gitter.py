@@ -97,8 +97,8 @@ def clone(online_url, path, branch='master', do=False, check=True, expand_path=T
         log.info("Cloned repo {}@{} as {}", online_url, branch, path)
     else:
         log.exit(
-            "Repo %s missing as %s. You should init your project"
-            % (online_url, local_path)
+            "Repo {} missing as {}. You should init your project".format(
+                online_url, local_path)
         )
 
     if do:
@@ -140,10 +140,9 @@ def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
                 return False
             log.exit(
                 """Unmatched local remote
-Found: %s\nExpected: %s
-Suggestion: remove %s and execute the init command
-            """
-                % (url, online_url, gitobj.working_dir)
+Found: {}\nExpected: {}
+Suggestion: remove {} and execute the init command
+            """.format(url, online_url, gitobj.working_dir)
             )
 
     if branch is None:
@@ -157,9 +156,9 @@ Suggestion: remove %s and execute the init command
             if check_only:
                 return False
             log.exit(
-                """%s: wrong branch %s, expected %s.
-Suggestion:\n\ncd %s; git fetch; git checkout %s; cd -;\n"""
-                % (path, active_branch, branch, gitobj.working_dir, branch)
+                """{}: wrong branch {}, expected {}.
+Suggestion:\n\ncd {}; git fetch; git checkout {}; cd -;\n""".format(
+                    path, active_branch, branch, gitobj.working_dir, branch)
             )
     return True
 
@@ -293,15 +292,15 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
     log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = "%s..%s/%s" % (branch, fetch_remote, remote_branch)
+    behind_check = "{}..{}/{}".format(branch, fetch_remote, remote_branch)
     commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
 
     try:
         commits_behind_list = list(commits_behind)
     except GitCommandError:
         log.info(
-            "Remote branch %s not found for %s repo. Is it a local branch?"
-            % (branch, path)
+            "Remote branch {} not found for {} repo. Is it a local branch?".format(
+                branch, path)
         )
     else:
 
@@ -320,14 +319,14 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
     # CHECKING COMMITS AHEAD (TO BE PUSHED) #
     # if path != 'upstream' and remote_branch == branch:
     if remote_branch == branch:
-        ahead_check = "%s/%s..%s" % (fetch_remote, remote_branch, branch)
+        ahead_check = "{}/{}..{}".format(fetch_remote, remote_branch, branch)
         commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
         try:
             commits_ahead_list = list(commits_ahead)
         except GitCommandError:
             log.info(
-                "Remote branch %s not found for %s. Is it a local branch?"
-                % (branch, path)
+                "Remote branch {} not found for {}. Is it a local branch?".format(
+                    branch, path)
             )
         else:
 

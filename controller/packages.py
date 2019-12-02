@@ -23,7 +23,7 @@ def install(package, editable=False, user=False, use_pip3=True):
             command += " --editable"
         if user:
             command += " --user"
-        command += ' %s' % package
+        command += ' {}'.format(package)
 
         if use_pip3:
             result = sultan.pip3(command).run()

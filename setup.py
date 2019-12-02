@@ -6,7 +6,7 @@ from setuptools import setup
 current_version = "0.7.1"
 
 main_package = "controller"
-app = '%s.__main__:main' % main_package
+app = '{}.__main__:main'.format(main_package)
 
 setup(
     name='rapydo_controller',
@@ -29,12 +29,11 @@ setup(
     python_requires='>=3.4.3',
     entry_points={
         'console_scripts': [
-            'rapydo=%s' % app,
-            'do=%s' % app,
+            'rapydo={}'.format(app),
+            'do={}'.format(app),
         ],
     },
     install_requires=[
-        # "rapydo-utils==%s" % current_version,
         "docker-compose==1.24.0",
         "dockerfile-parse",
         "python-dateutil",

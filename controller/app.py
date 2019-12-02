@@ -86,7 +86,7 @@ class Application(object):
                     if self.inspect_main_folder() is None:
                         log.warning(
                             "You are not in the rapydo main folder, "
-                            + "changing working dir to %s",
+                            + "changing working dir to {}",
                             cwd,
                         )
                         first_level_error = None
@@ -150,7 +150,7 @@ class Application(object):
                 log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
 
         # Verify if we implemented the requested command
-        function = "_%s" % self.action.replace("-", "_")
+        function = "_{}".format(self.action.replace("-", "_"))
         func = getattr(self, function, None)
         if func is None:
             log.exit(
@@ -265,7 +265,7 @@ class Application(object):
 
         if self.project is not None:
             if "_" in self.project:
-                suggest = "\nPlease consider to rename %s into %s" % (
+                suggest = "\nPlease consider to rename {} into {}".format(
                     self.project,
                     self.project.replace("_", ""),
                 )
@@ -273,8 +273,8 @@ class Application(object):
 
             if self.project in self.reserved_project_names:
                 log.exit(
-                    "You selected a reserved name, invalid project name: %s"
-                    % self.project
+                    "You selected a reserved name, invalid project name: {}".format(
+                        self.project)
                 )
 
         if self.current_args.get('development'):
@@ -295,7 +295,8 @@ class Application(object):
             if prj_num == 0:
                 log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
             elif prj_num > 1:
-                hint = "Hint: create a %s file to save default options" % PROJECTRC
+                hint = "Hint: create a {} file to save default options".format(
+                    PROJECTRC)
                 log.exit(
                     "Please select the --project option on one " +
                     "of the following:\n\n {}\n\n{}\n",
@@ -309,8 +310,8 @@ class Application(object):
         else:
             if self.project not in projects:
                 log.exit(
-                    "Wrong project '%s'.\n" % self.project
-                    + "Select one of the following:\n\n %s\n" % projects
+                    "Wrong project {}\nSelect one of the following:\n\n {}\n".format(
+                        self.project, projects)
                 )
 
         self.checked("Selected project: {}", self.project)
@@ -377,25 +378,25 @@ To fix this issue, please update docker to version {}+
                 hints = "To install docker visit: https://get.docker.com"
 
             if len(hints) > 0:
-                hints = "\n\n%s" % hints
+                hints = "\n\n{}".format(hints)
 
             log.exit("Missing requirement: '{}' not found.{}", program, hints)
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for %s is %s" % (
+                version_error = "Minimum supported version for {} is {}".format(
                     program,
                     min_version,
                 )
-                version_error += ", found %s " % (found_version)
+                version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
         if max_version is not None:
             if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for %s is %s" % (
+                version_error = "Maximum supported version for {} is {}".format(
                     program,
                     max_version,
                 )
-                version_error += ", found %s " % (found_version)
+                version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
         self.checked("{} version: {}", program, found_version)
@@ -413,20 +414,16 @@ To fix this issue, please update docker to version {}+
         try:
             if min_version is not None:
                 if LooseVersion(min_version) > LooseVersion(found_version):
-                    version_error = "Minimum supported version for %s is %s" % (
-                        package_name,
-                        min_version,
-                    )
-                    version_error += ", found %s " % (found_version)
+                    version_error = "Minimum supported version for {} is {}".format(
+                        package_name, min_version)
+                    version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
             if max_version is not None:
                 if LooseVersion(max_version) < LooseVersion(found_version):
-                    version_error = "Maximum supported version for %s is %s" % (
-                        package_name,
-                        max_version,
-                    )
-                    version_error += ", found %s " % (found_version)
+                    version_error = "Maximum supported version for {} is {}".format(
+                        package_name, max_version)
+                    version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
             self.checked("{} version: {}", package_name, found_version)
@@ -444,10 +441,8 @@ To fix this issue, please update docker to version {}+
         if gitter.get_local(".") is None:
             return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s
-                """ % (
-                os.getcwd()
-            )
+Verify that you are in the right folder, now you are in: {}
+                """.format(os.getcwd())
 
         required_files = [PROJECT_DIR, 'data', 'projects', 'submodules']
 
@@ -462,14 +457,10 @@ if you are in the right repository consider to create it by hand
                 else:
                     extra = ""
 
-                return """File or folder not found %s
+                return """File or folder not found {}
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s%s
-                    """ % (
-                    fname,
-                    os.getcwd(),
-                    extra,
-                )
+Verify that you are in the right folder, now you are in: {}{}
+                    """.format(fname, os.getcwd(), extra)
 
         return None
 
@@ -711,17 +702,16 @@ Verify that you are in the right folder, now you are in: %s%s
             return True
 
         if r > c:
-            action = "Upgrade your controller to version %s" % r
+            action = "Upgrade your controller to version {}".format(r)
         else:
-            action = "Downgrade your controller to version %s" % r
+            action = "Downgrade your controller to version {}".format(r)
             action += " or upgrade your project"
 
-        # action += "\n\nrapydo install --git %s" % r
         action += "\n\nrapydo install --git auto"
 
         msg = "Rapydo version is not compatible"
-        msg += "\n\nThis project requires rapydo %s but you are using %s" % (r, c)
-        msg += "\n\n%s\n" % action
+        msg += "\n\nThis project requires rapydo {}, you are using {}\n\n{}\n".format(
+            r, c, action)
 
         if do_exit:
             log.exit(msg)
@@ -814,7 +804,7 @@ Verify that you are in the right folder, now you are in: %s%s
         if confs_only:
             repos = {}
             repos[RAPYDO_CONFS] = {
-                "online_url": "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_CONFS),
+                "online_url": "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_CONFS),
                 "if": "true",
             }
         else:
@@ -1016,7 +1006,7 @@ Verify that you are in the right folder, now you are in: %s%s
             if image_tag not in docker_images:
 
                 found_obsolete += 1
-                message = "Missing template build for %s (%s)" % (
+                message = "Missing template build for {} ({})".format(
                     build['services'],
                     image_tag,
                 )
@@ -1040,9 +1030,9 @@ Verify that you are in the right folder, now you are in: %s%s
                 found_obsolete += 1
                 b = datetime.fromtimestamp(build_ts).strftime(fmt)
                 c = last_commit.strftime(fmt)
-                message = "Template image %s is obsolete" % image_tag
-                message += " (built on %s" % b
-                message += " but changed on %s)" % c
+                message = \
+                    "Obsolete image {} obsolete (built on {} but changed on {})".format(
+                        image_tag, b, c)
                 if self.current_args.get('rebuild'):
                     log.info("{}, rebuilding", message)
                     dc = self.get_compose(files=self.base_files)
@@ -1055,7 +1045,7 @@ Verify that you are in the right folder, now you are in: %s%s
                     rebuilt = True
                 else:
                     message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services %s" % build.get('service')
+                    message += "$ rapydo --services {}".format(build.get('service'))
                     message += " build --rebuild-templates"
                     log.warning(message)
 
@@ -1111,9 +1101,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     build_is_obsolete = True
                     b = build_timestamp.strftime(fmt)
                     c = from_timestamp.strftime(fmt)
-                    message = "Image %s is obsolete" % image_tag
-                    message += " (built on %s FROM %s" % (b, from_img)
-                    message += " that changed on %s)" % c
+                    message = "Image {} is obsolete".format(image_tag)
+                    message += " (built on {} FROM {} that changed on {})".format(
+                        b, from_img, c)
 
             if not build_is_obsolete:
                 # Check if some recent commit modified the Dockerfile
@@ -1122,9 +1112,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     build_is_obsolete = True
                     b = datetime.fromtimestamp(build_ts).strftime(fmt)
                     c = last_commit.strftime(fmt)
-                    message = "Image %s is obsolete" % image_tag
-                    message += " (built on %s" % b
-                    message += " but changed on %s)" % c
+                    message = "Image {} is obsolete".format(image_tag)
+                    message += " (built on {} but changed on {})".format(b, c)
 
             # TODO: for backend build check for any commit on utils o backend
             # TODO: for rapydo builds check for any commit on utils
@@ -1145,8 +1134,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     )
                 else:
                     message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services %s" % build.get('service')
-                    message += " build"
+                    message += "$ rapydo --services {} build".format(
+                        build.get('service'))
                     log.warning(message)
 
         if found_obsolete == 0:
@@ -1315,8 +1304,8 @@ Verify that you are in the right folder, now you are in: %s%s
                 else:
                     value = str(value)
                 if ' ' in value:
-                    value = "'%s'" % value
-                whandle.write("%s=%s\n" % (key, value))
+                    value = "'{}'".format(value)
+                whandle.write("{}={}\n".format(key, value))
             log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
@@ -1357,7 +1346,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     active_serv.append(i)
             if len(active_serv) > 0:
                 placeholders.append(
-                    "%-20s\trequired by\t%s" % (key, ', '.join(active_serv))
+                    "%-20s\trequired by\t{}".format(key, ', '.join(active_serv))
                 )
             else:
                 log.verbose(
@@ -1586,18 +1575,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             except IndexError:
                 log.exit("No default port found?")
 
-            publish.append("%s:%s" % (port, current_ports.target))
+            publish.append("{}:{}".format(port, current_ports.target))
 
         dc = self.get_compose(files=self.files)
 
         host = self.current_args.get('hostname')
-        # FIXME: to be completed
         uris = {
             'swaggerui':
-            # 'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
-            # (host, host, '8080'),
-            'http://%s?docExpansion=none'
-            % host
+            'http://{}?docExpansion=none'.format(host)
         }
 
         uri = uris.get(service)
@@ -1755,15 +1740,15 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             print("")
             print(
-                "docker cp %s %s_%s_1:/etc/letsencrypt/real/fullchain1.pem"
-                % (chain, self.project, service)
+                "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
+                    chain, self.project, service)
             )
             print(
-                "docker cp %s %s_%s_1:/etc/letsencrypt/real/privkey1.pem"
-                % (key, self.project, service)
+                "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
+                    key, self.project, service)
             )
 
-            print("rapydo shell %s --command \"nginx -s reload\"" % service)
+            print("rapydo shell {} --command \"nginx -s reload\"".format(service))
             print("")
 
             return True
@@ -1776,7 +1761,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return dc.start_containers(["certificates-proxy"], detach=False)
 
         if self.current_args.get('force'):
-            command = "%s --force" % command
+            command = "{} --force".format(command)
 
         return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
 
@@ -1902,7 +1887,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         """ Verify one service connection (inside backend) """
         service = self.current_args.get('service')
         dc = self.get_compose(files=self.files)
-        command = 'restapi verify --services %s' % service
+        command = 'restapi verify --services {}'.format(service)
 
         # super magic trick
         try:
@@ -1934,7 +1919,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         template_tmp_dir = "__template"
         template_tmp_path = os.path.join(project_name, template_tmp_dir)
-        online_url = "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_TEMPLATE)
+        online_url = "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_TEMPLATE)
         gitter.clone(
             online_url,
             template_tmp_path,
@@ -1969,13 +1954,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Copy from {}", template_path)
 
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
-            f.write("project: %s" % project_name)
+            f.write("project: {}".format(project_name))
 
         git_dir = os.path.join(project_name, ".git")
         shutil.rmtree(git_dir)
 
         log.info(
-            "Project %s successfully created from %s template",
+            "Project {} successfully created from {} template",
             project_name,
             template_name,
         )
@@ -1989,7 +1974,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         print("")
         print("Now you can enter the project and execute rapydo init")
         print("")
-        print("cd %s" % project_name)
+        print("cd {}".format(project_name))
         print("git init")
         print("git remote add origin https://your_remote_git/your_project.git")
         print("rapydo init")
@@ -1997,7 +1982,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     def _version(self):
         # You are not inside a rapydo project, only printing rapydo version
         if not hasattr(self, "version"):
-            print('\nrapydo version: %s' % __version__)
+            print('\nrapydo version: {}'.format(__version__))
             return
 
         # Check if rapydo version is compatible with version required by the project
@@ -2007,30 +1992,29 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             c = "\033[1;31m"  # Light Red
         d = "\033[0m"
 
-        cv = "%s%s%s" % (c, __version__, d)
-        pv = "%s%s%s" % (c, self.version, d)
-        rv = "%s%s%s" % (c, self.rapydo_version, d)
-        print('\nrapydo: %s\t%s: %s\trequired rapydo: %s' % (cv, self.project, pv, rv))
+        cv = "{}".format(c, __version__, d)
+        pv = "{}".format(c, self.version, d)
+        rv = "{}".format(c, self.rapydo_version, d)
+        print('\nrapydo: {}\t{}: {}\trequired rapydo: {}'.format(
+            cv, self.project, pv, rv))
 
         if __version__ != self.rapydo_version:
             c = LooseVersion(__version__)
             v = LooseVersion(self.rapydo_version)
             print(
-                '\nThis project is not compatible with the current rapydo version (%s)'
-                % __version__
+                '\nThis project is not compatible with the current rapydo version ({})'.format(__version__)
             )
             if c < v:
                 print(
-                    "Please upgrade rapydo to version %s or modify this project"
-                    % self.rapydo_version
+                    "Please upgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
             else:
                 print(
-                    "Please downgrade rapydo to version %s or modify this project"
-                    % self.rapydo_version
+                    "Please downgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
 
-            print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
+            print("\n\033[1;31mrapydo install --git {}\033[0m".format(
+                self.rapydo_version))
 
     def read_conf_files(self, filename):
         """
@@ -2088,7 +2072,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         #################
         # 1. base dump
-        mybin = 'docker-compose'
         # NOTE: can't figure it out why, but 'dc' on config can't use files
         # so I've used plumbum
         params = []
@@ -2096,7 +2079,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             params.append('-f')
             params.append(file)
         params.append('config')
-        yaml_string = self.execute_command(mybin, parameters=params)
+        yaml_string = self.execute_command('docker-compose', parameters=params)
 
         #################
         # 2. filter active services
@@ -2114,7 +2097,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         #################
         # 3. write file
-        filename = '%s.yml' % mybin
+        filename = 'docker-compose.yml'
         with open(filename, 'w') as fh:
             fh.write(yaml.dump(obj, default_flow_style=False))
         log.warning("Config dump: {}", filename)
@@ -2152,7 +2135,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         log.info("You asked to install rapydo-controller {} from pip", version)
 
         package = "rapydo-controller"
-        controller = "%s==%s" % (package, version)
+        controller = "{}=={}".format(package, version)
         installed = install(controller, user=user)
         if not installed:
             log.error("Unable to install controller {} from pip", version)
@@ -2171,10 +2154,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         package = "rapydo-controller"
         controller_repository = "do"
-        # utils_repository = "utils"
         rapydo_uri = "https://github.com/rapydo"
-        # utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
-        controller = "git+%s/%s.git@%s" % (rapydo_uri, controller_repository, version)
+        controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
 
         # installed = install(utils)
         # if installed:

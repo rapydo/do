@@ -77,9 +77,9 @@ class Compose(object):
                 build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
                 if current_version is not None:
-                    build_args.append("%s=%s" % ("RAPYDO_VERSION", current_version))
+                    build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
                 if current_uid is not None:
-                    build_args.append("%s=%s" % ("CURRENT_UID", current_uid))
+                    build_args.append("{}={}".format("CURRENT_UID", current_uid))
 
                 if len(build_args) > 0:
                     options['--build-arg'] = build_args
@@ -124,7 +124,7 @@ class Compose(object):
             else:
                 log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
-            msg = "Failed command execution:\n%s" % e
+            msg = "Failed command execution:\n{}".format(e)
             if nofailure:
                 raise AttributeError(msg)
             else:
@@ -257,7 +257,7 @@ class Compose(object):
             out = self.command('exec_command', options, nofailure=nofailure)
         except NoSuchService:
             if nofailure:
-                raise AttributeError("Cannot find service: %s", service)
+                raise AttributeError("Cannot find service: {}".format(service))
             else:
                 log.exit("Cannot find a running container called {}", service)
         else:

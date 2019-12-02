@@ -53,8 +53,8 @@ def find_templates_build(base_services):
 
             if template_image is None:
                 log.exit(
-                    "Error with template build: %s\n"
-                    "Template builds must have a name!" % template_name
+                    "Template builds must have a name, missing for {}".format(
+                        template_name)
                 )
             else:
 
@@ -108,10 +108,9 @@ def find_templates_override(services, templates):
             elif dfp.baseimage.startswith('rapydo/'):
                 if dfp.baseimage not in templates:
                     log.exit(
-                        """Unable to find %s in this project
-\nPlease inspect the FROM image in %s/Dockerfile
-                        """
-                        % (dfp.baseimage, dockerfile)
+                        """Unable to find {} in this project
+\nPlease inspect the FROM image in {}/Dockerfile
+                        """.format(dfp.baseimage, dockerfile)
                     )
                 else:
                     vanilla_img = service.get('image')

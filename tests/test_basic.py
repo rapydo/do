@@ -163,28 +163,6 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo clean")
     assert "Stack cleaned" in out
 
-    """
-    endpoint_name = 'justatest'
-    out = exec_command(capfd, "rapydo template --yes %s" % endpoint_name)
-    # parsing responses like:
-    # "rendered projects/sql/backend/swagger/justatest/specs.yaml"
-    base_response = 'rendered %s/sql/%s' % (PROJECT_DIR, BACKEND_DIR)
-
-    SWAGGER_DIR = 'swagger'
-    assert '%s/%s/%s/specs.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in out
-    assert '%s/%s/%s/get.yaml' % (base_response, SWAGGER_DIR, endpoint_name) in out
-    assert '%s/apis/%s.py' % (base_response, endpoint_name) in out
-    assert '%s/tests/test_%s.py' % (base_response, endpoint_name) in out
-    assert 'Scaffold completed' in out
-
-    out = exec_command(capfd, "rapydo find --endpoint %s" % endpoint_name)
-    assert "Endpoint path:\t/api/%s" % endpoint_name in out
-    assert "Labels:\t\tcustom, %s" % endpoint_name in out
-    assert "Python class:\t%s" % endpoint_name.capitalize() in out
-    """
-
-    # exec_command(capfd, "rapydo install --git auto")
-
     exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
 
     # Output is too long? Removed last tests...
