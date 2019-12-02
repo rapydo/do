@@ -7,15 +7,16 @@ from loguru import logger as log
 __version__ = '0.7.1'
 
 
+TESTING = os.environ.get("TESTING") == '1'
 LOGS_FOLDER = "data/logs"
 
-if not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
+if TESTING:
+    LOGS_FILE = None
+elif not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
     log.error("Logs folder not found ({}), execute rapydo init please", LOGS_FOLDER)
     LOGS_FILE = None
 else:
     LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
-
-TESTING = os.environ.get("TESTING") == '1'
 
 log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
