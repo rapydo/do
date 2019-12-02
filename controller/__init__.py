@@ -6,6 +6,15 @@ from loguru import logger as log
 
 __version__ = '0.7.1'
 
+
+LOGS_FOLDER = "data/logs"
+
+if not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
+    os.makedirs(LOGS_FOLDER)
+    log.warning("Logs folder not found ({}), created it", LOGS_FOLDER)
+
+LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
+
 TESTING = os.environ.get("TESTING") == '1'
 
 log.level("VERBOSE", no=1, color="<fg #666>")
@@ -31,7 +40,7 @@ log.verbose = verbose
 log.exit = exit
 
 log.remove()
-log.add("rapydo-controller.log", level="WARNING", rotation="1 week", retention="4 weeks")
+log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
