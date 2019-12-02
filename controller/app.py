@@ -1449,6 +1449,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         log.info("Checks completed")
 
     def _init(self):
+
+        from controller import LOGS_FOLDER
+        if not os.path.exists(LOGS_FOLDER):
+            log.warning("Logs folder ({}) not found, created it", LOGS_FOLDER)
+            os.makedirs(LOGS_FOLDER)
+
         log.info("Project initialized")
 
     def _status(self):

@@ -10,10 +10,10 @@ __version__ = '0.7.1'
 LOGS_FOLDER = "data/logs"
 
 if not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
-    os.makedirs(LOGS_FOLDER)
-    log.warning("Logs folder not found ({}), created it", LOGS_FOLDER)
-
-LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
+    log.error("Logs folder not found ({}), execute rapydo init please", LOGS_FOLDER)
+    LOGS_FILE = None
+else:
+    LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
 
 TESTING = os.environ.get("TESTING") == '1'
 
@@ -40,7 +40,8 @@ log.verbose = verbose
 log.exit = exit
 
 log.remove()
-log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
+if LOGS_FILE is not None:
+    log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
