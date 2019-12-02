@@ -55,7 +55,8 @@ class Compose(object):
         return TopLevelCommand(project_from_options(self.project_dir, self.options))
 
     def build_images(
-        self, builds, force_pull=True, no_cache=False, current_version=None, current_uid=None
+        self, builds, current_version, current_uid, current_gid,
+        force_pull=True, no_cache=False,
     ):
 
         try:
@@ -76,10 +77,9 @@ class Compose(object):
 
                 build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
-                if current_version is not None:
-                    build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
-                if current_uid is not None:
-                    build_args.append("{}={}".format("CURRENT_UID", current_uid))
+                build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
+                build_args.append("{}={}".format("CURRENT_UID", current_uid))
+                build_args.append("{}={}".format("CURRENT_GID", current_gid))
 
                 if len(build_args) > 0:
                     options['--build-arg'] = build_args

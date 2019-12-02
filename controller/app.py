@@ -56,6 +56,13 @@ def get_current_uid():
         return 0
 
 
+def get_current_gid():
+    try:
+        return os.getgid()
+    except AttributeError as e:
+        log.warning(e)
+        return 0
+
 class Application(object):
 
     """
@@ -121,6 +128,7 @@ class Application(object):
 
         # get user launching rapydo commands
         self.current_uid = get_current_uid()
+        self.current_gid = get_current_gid()
         if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
@@ -134,6 +142,10 @@ class Application(object):
             log.debug(
                 "Current user: {} (UID: {})", self.current_os_user, self.current_uid
             )
+            log.debug(
+                "Current group ID: {}", self.current_gid
+            )
+
 
         if not skip_check_perm:
             self.inspect_permissions()
@@ -1020,6 +1032,7 @@ Verify that you are in the right folder, now you are in: {}{}
                         builds={image_tag: build},
                         current_version=__version__,
                         current_uid=self.current_uid,
+                        current_gid=self.current_gid,
                     )
                     rebuilt = True
 
@@ -1038,9 +1051,10 @@ Verify that you are in the right folder, now you are in: {}{}
                     dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
-                        no_cache=True,
                         current_version=__version__,
-                        current_uid=self.current_uid,
+                        current_uid=self.currert_uid,
+                        current_gid=self.currert_gid,
+                        no_cache=True
                     )
                     rebuilt = True
                 else:
@@ -1127,10 +1141,11 @@ Verify that you are in the right folder, now you are in: {}{}
                     # force_pull = image_tag not in overriding_imgs
                     dc.build_images(
                         builds={image_tag: build},
-                        # force_pull=force_pull,
-                        force_pull=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
+                        current_gid=self.current_gid,
+                        # force_pull=force_pull,
+                        force_pull=True
                     )
                 else:
                     message += "\nRebuild it with:\n"
@@ -1252,6 +1267,7 @@ Verify that you are in the right folder, now you are in: {}{}
 
         env['RAPYDO_VERSION'] = __version__
         env['CURRENT_UID'] = self.current_uid
+        env['CURRENT_GID'] = self.current_gid
         env['PROJECT_TITLE'] = self.project_title
         env['PROJECT_DESCRIPTION'] = self.project_description
         if self.current_args.get('privileged'):
@@ -1653,9 +1669,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.debug("Forcing rebuild of cached templates")
             dc.build_images(
                 self.template_builds,
-                no_cache=self.current_args.get('force'),
                 current_version=__version__,
                 current_uid=self.current_uid,
+                current_gid=self.current_gid,
+                no_cache=self.current_args.get('force')
             )
             pull_templates = False
         else:
