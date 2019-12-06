@@ -663,9 +663,10 @@ Verify that you are in the right folder, now you are in: {}{}
             log.exit(e)
 
         self.vars = self.specs.get('variables', {})
+
         log.verbose("Configuration loaded")
 
-        framework = glom(self.specs, "variables.frontend.framework", default=None)
+        framework = self.vars['env']['FRONTEND_FRAMEWORK']
 
         if framework == 'None':
             framework = None
