@@ -232,9 +232,8 @@ class Application(object):
                 log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
 
             if major_diff:
-                tips = "To manually set the date: "
-                tips += "sudo date --set \"{}\"", online_time.strftime(
-                    '%d %b %Y %H:%M:%S'
+                tips = "To manually set the date: sudo date --set \"{}\"".format(
+                    online_time.strftime('%d %b %Y %H:%M:%S')
                 )
                 log.exit("Unable to continue, please fix the host date\n{}", tips)
 
