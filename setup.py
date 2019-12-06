@@ -34,7 +34,7 @@ setup(
         ],
     },
     install_requires=[
-        "docker-compose==1.24.0",
+        "docker-compose==1.25.1-rc1",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
@@ -44,7 +44,6 @@ setup(
         "jinja2",
         "sultan==0.9.1",
         # "requests==2.21.0",
-        # Forced because PyYAML 3.13 is required but requests 2.20 installs 3.12
         # "PyYAML==3.13",
         "plumbum",
         "glom",
