@@ -255,6 +255,7 @@ def check_versions(skip_angular):
     log.info("injector: cannot upgrade since from 0.13+ passing keyword arguments to inject is no longer supported")
     log.info("flask_injector: compatibility issues with version 1.0.12, to be retried")
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
+    log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 
 
 if __name__ == '__main__':
