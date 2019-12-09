@@ -1948,7 +1948,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         copy_tree(template_tmp_path, project_name)
 
-        os.mkdir(os.path.join(project_name, 'data'))
+        data_dir = os.path.join(project_name, 'data')
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
 
         shutil.rmtree(template_tmp_path)
 
