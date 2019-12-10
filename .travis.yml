@@ -13,7 +13,7 @@ script:
 - echo "BRANCH = ${BRANCH}"
 - cd rapydo_tests
 - git checkout $BRANCH
-- mkdir data
+- mkdir -p data
 - export LOGURU_LEVEL=DEBUG
 - TESTING=1 py.test -s -x --cov=controller ../tests
 after_success:
