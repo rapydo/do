@@ -291,8 +291,12 @@ subcommands:
         alias: c
         type: str
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
-        default: bash
         help: UNIX command to be executed on selected running service
+      default-command:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Execute the default command configured for the container. Not compatible with --command and not implemented for all containers
       no-tty:
         type: bool
         metavalue: TRUE_OR_FALSE

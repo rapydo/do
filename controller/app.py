@@ -1628,37 +1628,43 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             detach = self.current_args.get('detach')
             dc.create_volatile_container(service, publish=publish, detach=detach)
 
-    def _shell(self, user=None, command=None, service=None):
+    def _shell(self):
 
         dc = self.get_compose(files=self.files)
         service = self.current_args.get('service')
         no_tty = self.current_args.get('no_tty')
-        # service = self.manage_one_service(service)
+        default_command = self.current_args.get('default_command')
 
-        if user is None:
-            user = self.current_args.get('user')
-            # if 'user' is empty, put None to get the docker-compose default
-            if user is not None and user.strip() == '':
-                developer_services = [
-                    'backend',
-                    'celery',
-                    'celeryui',
-                    'celery-beat',
-                    'restclient'
-                ]
+        user = self.current_args.get('user')
+        if user is not None and user.strip() == '':
+            developer_services = [
+                'backend',
+                'celery',
+                'celeryui',
+                'celery-beat',
+                'restclient'
+            ]
 
-                if service in developer_services:
-                    user = 'developer'
-                elif service in ['frontend']:
-                    if self.frontend == ANGULAR:
-                        user = 'node'
-                else:
-                    user = None
+            if service in developer_services:
+                user = 'developer'
+            elif service in ['frontend']:
+                if self.frontend == ANGULAR:
+                    user = 'node'
+            else:
+                # None == get the docker-compose default
+                user = None
         log.verbose("Command as user '{}'", user)
 
+        command = self.current_args.get('command')
         if command is None:
-            default = 'echo hello world'
-            command = self.current_args.get('command', default)
+            if not default_command:
+                command = "bash"
+            elif service == 'backend':
+                command = "restapi launch"
+            elif service == 'neo4j':
+                command = "bin/cypher-shell"
+            else:
+                command = "bash"
 
         return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
 
