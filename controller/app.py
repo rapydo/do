@@ -2011,9 +2011,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             c = "\033[1;31m"  # Light Red
         d = "\033[0m"
 
-        cv = "{}".format(c, __version__, d)
-        pv = "{}".format(c, self.version, d)
-        rv = "{}".format(c, self.rapydo_version, d)
+        cv = "{}{}{}".format(c, __version__, d)
+        pv = "{}{}{}".format(c, self.version, d)
+        rv = "{}{}{}".format(c, self.rapydo_version, d)
         print('\nrapydo: {}\t{}: {}\trequired rapydo: {}'.format(
             cv, self.project, pv, rv))
 
