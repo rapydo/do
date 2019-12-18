@@ -7,6 +7,7 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 import os
+import shlex
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
@@ -146,7 +147,8 @@ class Compose(object):
         if command is None:
             return (None, [])
 
-        pieces = command.split()
+        # pieces = command.split()
+        pieces = shlex.split(command)
         try:
             shell_command = pieces[0]
             shell_args = pieces[1:]
