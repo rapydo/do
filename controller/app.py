@@ -2112,7 +2112,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
         import yaml
-        obj = yaml.load(yaml_string.replace(main_dir, '.'))
+        obj = yaml.load(
+            yaml_string.replace(main_dir, '.'),
+            Loader=yaml.FullLoader
+        )
 
         active_services = {}
         for key, value in obj.get('services', {}).items():
@@ -2125,7 +2128,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         filename = 'docker-compose.yml'
         with open(filename, 'w') as fh:
             fh.write(yaml.dump(obj, default_flow_style=False))
-        log.warning("Config dump: {}", filename)
+        log.info("Config dump: {}", filename)
 
     def _install(self):
         version = self.current_args.get('version')
