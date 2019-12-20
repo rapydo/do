@@ -2112,11 +2112,16 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
         import yaml
-        obj = yaml.load(
-            yaml_string.replace(main_dir, '.'),
-            Loader=yaml.FullLoader
-        )
 
+        yaml.FullLoader will be available from pyyaml 5.1+
+        # obj = yaml.load(
+        #     yaml_string.replace(main_dir, '.'),
+        #     Loader=yaml.FullLoader
+        # )
+
+        # this raises a deprecation warning,
+        # starting from 5.1 replace with the above version
+        obj = yaml.load(yaml_string.replace(main_dir, '.'))
         active_services = {}
         for key, value in obj.get('services', {}).items():
             if key in self.active_services:
