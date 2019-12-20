@@ -2113,7 +2113,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         main_dir = os.getcwd()
         import yaml
 
-        yaml.FullLoader will be available from pyyaml 5.1+
+        # yaml.FullLoader will be available from pyyaml 5.1+
         # obj = yaml.load(
         #     yaml_string.replace(main_dir, '.'),
         #     Loader=yaml.FullLoader
