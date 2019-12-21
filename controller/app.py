@@ -107,7 +107,7 @@ class Application(object):
         # Initial inspection
         self.get_args()
         if not self.print_version:
-            log.info("You are using rapydo version {}", __version__)
+            log.debug("You are using rapydo version {}", __version__)
         self.check_installed_software()
 
         if self.create:
