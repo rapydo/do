@@ -1185,8 +1185,7 @@ Verify that you are in the right folder, now you are in: {}{}
             "tsconfig.app.json",
             "tsconfig.json",
             "tsconfig.spec.json",
-            "tslint.json",
-            "typedarray.js",
+            "tslint.json"
         ]
 
         for f in expected_folders:
