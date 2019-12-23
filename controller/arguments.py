@@ -156,10 +156,12 @@ class ArgParser(object):
 
         try:
             # READ PROJECT INIT FILE: .projectrc
-            pinit_conf = load_yaml_file(PROJECTRC, path=os.curdir)
+            pinit_conf = load_yaml_file(
+                PROJECTRC, path=os.curdir, is_optional=True)
             # Allow alternative for PROJECT INIT FILE: .project.yml
             if len(pinit_conf) < 1:
-                pinit_conf = load_yaml_file(PROJECTRC_ALTERNATIVE, path=os.curdir)
+                pinit_conf = load_yaml_file(
+                    PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True)
         except AttributeError as e:
             log.exit(e)
 

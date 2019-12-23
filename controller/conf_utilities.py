@@ -144,7 +144,7 @@ def get_yaml_path(file, path):
     return filepath
 
 
-def load_yaml_file(file, path, keep_order=False):
+def load_yaml_file(file, path, keep_order=False, is_optional=False):
     """
     Import any data from a YAML file.
     """
@@ -152,7 +152,11 @@ def load_yaml_file(file, path, keep_order=False):
     filepath = get_yaml_path(file, path=path)
 
     if filepath is None:
-        log.warning("Failed to read YAML file {}: File does not exist", filepath)
+        if not is_optional:
+            log.warning(
+                "Failed to read YAML file {} from path {}: File does not exist",
+                file, path
+            )
         return {}
 
     with open(filepath) as fh:
