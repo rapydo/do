@@ -666,7 +666,7 @@ Verify that you are in the right folder, now you are in: {}{}
 
         log.verbose("Configuration loaded")
 
-        framework = self.vars['env']['FRONTEND_FRAMEWORK']
+        framework = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=None)
 
         if framework == 'None':
             framework = None
@@ -689,7 +689,11 @@ Verify that you are in the right folder, now you are in: {}{}
     def preliminary_version_check(self):
 
         project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        specs = load_yaml_file(file=PROJECT_CONF_FILENAME, path=project_file_path, keep_order=True)
+        specs = load_yaml_file(
+            file=PROJECT_CONF_FILENAME,
+            path=project_file_path,
+            keep_order=True
+        )
         v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
