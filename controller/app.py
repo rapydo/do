@@ -63,6 +63,7 @@ def get_current_gid():
         log.warning(e)
         return 0
 
+
 class Application(object):
 
     """
@@ -2327,6 +2328,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         return {
             'CELERYUI_USER': ['celeryui'],
             'CELERYUI_PASSWORD': ['celeryui'],
+            'RABBITMQ_USER': ['rabbit'],
+            'RABBITMQ_PASSWORD': ['rabbit'],
             'ALCHEMY_USER': ['postgres', 'mariadb'],
             'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
             'GRAPHDB_PASSWORD': ['neo4j'],
@@ -2347,5 +2350,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return 'ALCHEMY_USER'
         if key == 'MYSQL_PASSWORD':
             return 'ALCHEMY_PASSWORD'
+
+        if key == 'RABBITMQ_DEFAULT_USER':
+            return 'RABBITMQ_USER'
+        if key == 'RABBITMQ_DEFAULT_PASS':
+            return 'RABBITMQ_PASSWORD'
 
         return key
