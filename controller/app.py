@@ -1376,7 +1376,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if len(placeholders) > 0:
             m = "\n".join(placeholders)
             tips = "\n\nYou can fix this error by updating the "
-            tips += "project_configuration.yaml file or you local .projectrc file\n"
+            tips += "project_configuration.yaml file or your local .projectrc file\n"
             log.exit(
                 "The following variables are missing in your configuration:\n\n{}{}",
                 m,
