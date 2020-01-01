@@ -164,6 +164,7 @@ def test_all(capfd):
     assert "Stack cleaned" in out
 
     exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
+    exec_command(capfd, "rapydo ancestors XYZ")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")

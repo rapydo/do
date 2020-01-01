@@ -426,6 +426,15 @@ subcommands:
         metavalue: NAME
         default: null
         help: Name of your new project
+  ancestors:
+    description: find all ancestors of a docker image
+    suboptions:
+      imagetag:
+        positional: true
+        type: str
+        metavalue: IMAGE_TAG_ID
+        default: null
+        help: Image tag ID to be inspected
 
   version:
     description: Retrieve version details

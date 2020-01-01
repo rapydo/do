@@ -3,6 +3,7 @@
 import os
 import sys
 import time
+import re
 from distutils.dir_util import copy_tree
 import shutil
 import urllib3
@@ -2138,6 +2139,57 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         with open(filename, 'w') as fh:
             fh.write(yaml.dump(obj, default_flow_style=False))
         log.info("Config dump: {}", filename)
+
+    def _ancestors(self):
+
+        IMAGE = self.current_args.get("imagetag")
+
+        parameters = ["images", "--all"]
+        # log.info("Executing command {} {}", command, parameters)
+        img = self.execute_command("docker", parameters).split("\n")
+        img = [re.split("\s+", i) for i in img[1:]]
+        images = {}
+        for i in img:
+            if len(i) != 7:
+                continue
+            images[i[2]] = i
+
+        child = IMAGE
+        print(f"Finding all parents and (grand)+ parents of {child}")
+        while True:
+            parents = self.get_parent(child, images)
+            if len(parents) == 0:
+                break
+            child = parents[0]
+            print("\t".join(images.get(child)))
+            parents = self.get_parent(child, images)
+
+    def get_parent(self, IMAGE, images):
+
+        parameters = [
+            "inspect",
+            "--format='{{.Id}} {{.Parent}}'",
+        ]
+        for tag in images:
+            image = images.get(tag)
+            tag = image[2].strip()
+            if tag == '':
+                continue
+            parameters.append(tag)
+
+        out = self.execute_command("docker", parameters).split("\n")
+        final_output = []
+        for result in out:
+            if IMAGE not in result:
+                continue
+            tokens = re.findall(r"'sha256:(.*) sha256:(.*)'", result)
+            if len(tokens) == 0:
+                continue
+            for t in tokens:
+                tag = t[0][0:12]
+                if tag != IMAGE:
+                    final_output.append(tag)
+        return final_output
 
     def _install(self):
         version = self.current_args.get('version')
