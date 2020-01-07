@@ -164,10 +164,15 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     filepath = get_yaml_path(file, path=path)
 
     if filepath is None:
-        if not is_optional:
-            log.warning(
-                "Failed to read YAML file {} from path {}: File does not exist",
-                file, path
+        if is_optional:
+            log.info(
+                "Failed to read YAML file {}/{}: File does not exist",
+                path, file,
+            )
+        else:
+            log.exit(
+                "Failed to read YAML file {}/{}: File does not exist",
+                path, file,
             )
         return {}
 
@@ -211,15 +216,13 @@ def read_composer_yamls(composers):
 
         log.verbose("Composer {}", name)
 
-        # mandatory = composer.pop('mandatory', False)
+        mandatory = composer.pop('mandatory', False)
         base = composer.pop('base', False)
 
         try:
             f = composer.get('file')
             p = composer.get('path')
-            compose = load_yaml_file(file=f, path=p)
-            if compose is None or len(compose) == 0:
-                log.exit("Unable to load a valid stack from {}", f)
+            compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
 
             if compose.get('services') is None or len(compose.get('services', {})) < 1:
                 # if mandatory:
