@@ -178,7 +178,7 @@ class Application(object):
 
         if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
-            if self.check and self.current_args.get('skip_heavy_git_ops', False):
+            if self.check and self.current_args.get('no_git', False):
                 git_checks = False
             else:
                 git_checks = self.update or self.check
@@ -913,7 +913,7 @@ Verify that you are in the right folder, now you are in: {}{}
         if self.action not in ['check', 'update', 'build']:
             return
 
-        if self.current_args.get('skip_builds_checks', False):
+        if self.current_args.get('no_builds', False):
             log.warning("Skipping builds checks")
             return
 

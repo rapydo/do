@@ -129,12 +129,12 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip-heavy-git-ops:
+      no-git:
         alias: s
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      skip-builds-checks:
+      no-builds:
         type: bool
         default: False
         help: ignore the heaviest builds operations
