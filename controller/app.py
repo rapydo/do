@@ -79,6 +79,7 @@ class Application(object):
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
+        self.production = self.current_args.get('production', False)
 
         create = self.current_args.get('action', 'unknown') == 'create'
 
@@ -652,8 +653,9 @@ Verify that you are in the right folder, now you are in: {}{}
                 default_file_path=default_file_path,
                 base_project_path=project_file_path,
                 projects_path=PROJECT_DIR,
+                submodules_path=SUBMODULES_DIR,
                 read_extended=read_extended,
-                submodules_path=SUBMODULES_DIR
+                production=self.production
             )
 
             self.specs = mix_configuration(
@@ -850,6 +852,18 @@ Verify that you are in the right folder, now you are in: {}{}
         load_commons = not self.current_args.get('no_commons')
         load_frontend = not self.current_args.get('no_frontend')
 
+        stack = self.current_args.get('stack')
+
+        # deprecated since 0.7.1
+        if stack is None:
+            stack = self.current_args.get('mode')
+            if stack is not None:
+                log.warning(
+                    "'--mode' option is deprecated, please use the new '--stack' option instead. Please also note that '--stack debug' and '--stack production' are automatically defaulted by the '--production' flag.")
+
+        if stack is None:
+            stack = "production" if self.production else "debug"
+
         myvars = {
             'backend': not self.current_args.get('no_backend'),
             ANGULARJS: self.frontend == ANGULARJS and load_frontend,
@@ -858,7 +872,7 @@ Verify that you are in the right folder, now you are in: {}{}
             'logging': self.current_args.get('collect_logs'),
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
-            'mode': self.current_args.get('mode') + '.yml',
+            'mode': "{}.yml".format(stack),
             'extended-mode': self.extended_project is not None,
             'baseconf': os.path.join(
                 os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME

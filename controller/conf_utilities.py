@@ -6,6 +6,7 @@ from collections import OrderedDict
 from controller import log
 
 PROJECTS_DEFAULTS_FILE = 'projects_defaults.yaml'
+PROJECTS_PROD_DEFAULTS_FILE = 'projects_prod_defaults.yaml'
 PROJECT_CONF_FILENAME = 'project_configuration.yaml'
 
 
@@ -14,7 +15,8 @@ def read_configuration(
     base_project_path,
     projects_path,
     submodules_path,
-    read_extended=True
+    read_extended=True,
+    production=False
 ):
     """
     Read default configuration
@@ -45,8 +47,18 @@ def read_configuration(
         base_configuration = {}
     else:
         base_configuration = load_yaml_file(
-            file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
+            file=PROJECTS_DEFAULTS_FILE,
+            path=default_file_path,
+            keep_order=True
         )
+
+        if production:
+            base_prod_conf = load_yaml_file(
+                file=PROJECTS_PROD_DEFAULTS_FILE,
+                path=default_file_path,
+                keep_order=True
+            )
+            base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
     if read_extended:
         extended_project = project.get('extends')
