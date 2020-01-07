@@ -211,33 +211,38 @@ def read_composer_yamls(composers):
 
         log.verbose("Composer {}", name)
 
-        mandatory = composer.pop('mandatory', False)
+        # mandatory = composer.pop('mandatory', False)
         base = composer.pop('base', False)
 
         try:
             f = composer.get('file')
             p = composer.get('path')
             compose = load_yaml_file(file=f, path=p)
+            if compose is None or len(compose) == 0:
+                log.exit("Unable to load a valid stack from {}", f)
 
-            if len(compose.get('services', {})) < 1:
-                if mandatory:
-                    log.exit("No service defined in file {}", name)
-                else:
-                    log.verbose("Skipping")
-            else:
-                filepath = get_yaml_path(file=f, path=p)
-                all_files.append(filepath)
+            if compose.get('services') is None or len(compose.get('services', {})) < 1:
+                # if mandatory:
+                #     log.exit("No service defined in file {}", name)
+                # else:
+                #     log.verbose("No service defined in {}, skipping", name)
+                log.verbose("No service defined in {}, skipping", name)
+                continue
 
-                if base:
-                    base_files.append(filepath)
+            filepath = get_yaml_path(file=f, path=p)
+            all_files.append(filepath)
+
+            if base:
+                base_files.append(filepath)
 
         except KeyError as e:
 
-            if mandatory:
-                log.exit(
-                    "Composer {}({}) is mandatory.\n{}", name, filepath, e
-                )
-            else:
-                log.debug("Missing '{}' composer", name)
+            # if mandatory:
+            #     log.exit(
+            #         "Composer {}({}) is mandatory.\n{}", name, filepath, e
+            #     )
+            # else:
+            #     log.debug("Missing '{}' composer", name)
+            log.exit("Error loading {}: {}", filepath, e)
 
     return all_files, base_files
