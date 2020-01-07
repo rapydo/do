@@ -2169,7 +2169,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             images[i[2]] = i
 
         child = IMAGE
-        print(f"Finding all parents and (grand)+ parents of {child}")
+        print("Finding all parents and (grand)+ parents of {}".format(child))
         while True:
             parents = self.get_parent(child, images)
             if len(parents) == 0:
