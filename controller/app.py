@@ -2170,13 +2170,17 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         child = IMAGE
         print("Finding all parents and (grand)+ parents of {}".format(child))
+        found = 0
         while True:
             parents = self.get_parent(child, images)
             if len(parents) == 0:
                 break
             child = parents[0]
             print("\t".join(images.get(child)))
+            found += 1
             parents = self.get_parent(child, images)
+        if found == 0:
+            print("No parent found for {}".format(child))
 
     def get_parent(self, IMAGE, images):
 
