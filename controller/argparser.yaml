@@ -318,6 +318,12 @@ subcommands:
         help: Disable pseudo-tty allocation, useful to execute the command from non interactive script
   start:
     description: Start containers for this configuration
+    suboptions:
+      no-detach:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable detach mode and attach to container execution
   stop:
     description: stop running containers, but do not remove them
   restart:

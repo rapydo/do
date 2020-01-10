@@ -1507,7 +1507,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         services = self.get_services(default=self.active_services)
 
         dc = self.get_compose(files=self.files)
-        dc.start_containers(services)
+        if self.current_args.get('no_detach', False):
+            detach = False
+        else:
+            detach = True
+
+        dc.start_containers(services, detach=detach)
 
         log.info("Stack started")
 
@@ -1588,12 +1593,24 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Stopped by keyboard")
 
     def _interfaces(self):
-        # db = self.manage_one_service()
+
         db = self.current_args.get('service')
+        if db == 'list':
+            print("List of available interfaces:")
+            for s in self.services:
+                name = s.get('name', '')
+                if name.endswith("ui"):
+                    print(" - {}".format(name[0:-2]))
+            return True
+
         service = db + 'ui'
 
         if not self.container_service_exists(service):
-            log.exit("Container '{}' is not defined", service)
+            suggest = "You can use rapydo interfaces list to get available interfaces"
+            log.exit(
+                "Container '{}' is not defined\n{}",
+                service, suggest
+            )
 
         port = self.current_args.get('port')
         publish = []
@@ -1647,6 +1664,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             detach = self.current_args.get('detach')
             dc.create_volatile_container(service, publish=publish, detach=detach)
 
+        return True
+
     def _shell(self):
 
         dc = self.get_compose(files=self.files)
@@ -1669,6 +1688,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             elif service in ['frontend']:
                 if self.frontend == ANGULAR:
                     user = 'node'
+            elif service == 'postgres':
+                user = 'postgres'
             else:
                 # None == get the docker-compose default
                 user = None
