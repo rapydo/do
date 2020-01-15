@@ -1935,11 +1935,20 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         scaling = self.current_args.get('value', '')
         options = scaling.split('=')
         if len(options) != 2:
-            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
+            scale_var = "DEFAULT_SCALE_{}".format(scaling.upper())
+            nreplicas = glom(self.vars, "env.{}".format(scale_var), default=None)
+            if nreplicas is None:
+                hints = "You can also set a {} variable in your .projectrc file".format(
+                    scale_var
+                )
+                log.exit(
+                    "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints)
+            service = scaling
+            scaling = "{}={}".format(service, nreplicas)
         else:
             service, nreplicas = options
 
-        if not nreplicas.isnumeric():
+        if isinstance(nreplicas, str) and not nreplicas.isnumeric():
             log.exit("Invalid number of replicas: {}", nreplicas)
 
         dc = self.get_compose(files=self.files)

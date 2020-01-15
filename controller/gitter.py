@@ -35,7 +35,7 @@ def get_active_branch(gitobj):
     try:
         return str(gitobj.active_branch)
     except TypeError as e:
-        log.warning(str(e))
+        log.warning(e)
         return None
 
 
@@ -73,7 +73,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     try:
         gitobj.git.checkout(branch_name)
     except GitCommandError as e:
-        log.warning(str(e))
+        log.warning(e)
         return False
 
     path = os.path.basename(gitobj.working_dir)
