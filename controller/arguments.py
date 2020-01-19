@@ -39,7 +39,7 @@ class ArgParser(object):
         for option_name, options in sorted_options:
             self.add_parser_argument(parser, option_name, options)
 
-        version_string = 'rapydo version %s' % __version__
+        version_string = 'rapydo version {}'.format(__version__)
         parser.add_argument('--version', action='version', version=version_string)
         # Sub-parser of commands [check, init, etc]
         main_command = self.parse_conf.get('action')
@@ -126,13 +126,13 @@ class ArgParser(object):
         params = self.prepare_params(options)
         alias = params.pop('alias', None)
         positional = params.pop('positional', False)
-        param_name = '--%s' % option_name
+        param_name = '--{}'.format(option_name)
         if positional:
             parser.add_argument(option_name, **params)
         elif alias is None:
             parser.add_argument(param_name, **params)
         else:
-            parser.add_argument(param_name, '-%s' % alias, **params)
+            parser.add_argument(param_name, '-{}'.format(alias), **params)
 
     @staticmethod
     def check_args(args):
@@ -140,7 +140,7 @@ class ArgParser(object):
         for element in args:
             if element.startswith('--') and '_' in element:
                 raise ValueError(
-                    "Wrong \"%s\" option provided.\n" % element
+                    "Wrong \"{}\" option provided.\n".format(element)
                     + "Arguments containing '_' are not allowed.\n"
                     + "Use '-' instead\n"
                 )
@@ -151,30 +151,17 @@ class ArgParser(object):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
 
         self.parse_conf = load_yaml_file(
-            'argparser', path=os.path.dirname(os.path.realpath(__file__))
+            'argparser.yaml', path=os.path.dirname(os.path.realpath(__file__))
         )
-
-        # from parse_it import ParseIt
-        # parser = ParseIt(config_location=os.path.dirname(os.path.realpath(__file__)))
-        # print(parser.read_all_configuration_variables())
-        # sys.exit(1)
 
         try:
             # READ PROJECT INIT FILE: .projectrc
             pinit_conf = load_yaml_file(
-                PROJECTRC,
-                path=os.curdir,
-                skip_error=True,
-                extension=None,
-            )
+                PROJECTRC, path=os.curdir, is_optional=True)
             # Allow alternative for PROJECT INIT FILE: .project.yml
             if len(pinit_conf) < 1:
                 pinit_conf = load_yaml_file(
-                    PROJECTRC_ALTERNATIVE,
-                    path=os.curdir,
-                    skip_error=True,
-                    extension=None,
-                )
+                    PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True)
         except AttributeError as e:
             log.exit(e)
 
@@ -192,23 +179,19 @@ class ArgParser(object):
                 if key in self.parse_conf['options']:
                     self.parse_conf['options'][key]['default'] = value
                 else:
-                    print("\nUnknown parameter %s found in %s\n" % (key, PROJECTRC))
+                    print("\nUnknown parameter {} found in {}\n".format(key, PROJECTRC))
             else:
                 # This is a second level parameter
                 if key not in self.parse_conf['subcommands']:
-                    print("\nUnknown command %s found in %s\n" % (key, PROJECTRC))
+                    print("\nUnknown command {} found in {}\n".format(key, PROJECTRC))
                 else:
                     conf = self.parse_conf['subcommands'][key]['suboptions']
                     for subkey, subvalue in value.items():
                         if subkey in conf:
                             conf[subkey]['default'] = subvalue
                         else:
-                            print(
-                                """
-Unknown parameter %s/%s found in %s\n
-"""
-                                % (key, subkey, PROJECTRC)
-                            )
+                            print("Unknown parameter {}/{} found in {}\n".format(
+                                key, subkey, PROJECTRC))
 
     @staticmethod
     def prepare_params(options):
@@ -217,7 +200,7 @@ Unknown parameter %s/%s found in %s\n
         default = options.get('default')
         pconf['default'] = default
 
-        myhelp = "%s [default: %s]" % (options.get('help'), default)
+        myhelp = "{} [default: {}]".format(options.get('help'), default)
         pconf['help'] = myhelp
 
         if options.get('type') == 'bool':

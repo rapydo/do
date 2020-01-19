@@ -7,7 +7,8 @@ Endpoint example for the RAPyDo framework
 #################
 # IMPORTS
 from restapi.rest.definition import EndpointResource
-from controller import log
+from restapi.exceptions import RestApiException
+from restapi.utilities.logs import log
 
 #################
 # INIT VARIABLES
@@ -35,11 +36,7 @@ class {{ class_name }}(EndpointResource):
 
         # Handle errors
         if service_handle is None:
-            log.error('Service {} unavailable', service_name)
-            return self.send_errors(
-                message='Server internal error. Please contact adminers.',
-                # code=hcodes.HTTP_BAD_NOTFOUND
-            )
+            raise RestApiException('Server internal error')
 
         # Output any python structure (int, string, list, dictionary, etc.)
         response = 'Hello world!'

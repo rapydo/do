@@ -7,6 +7,7 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 import os
+import shlex
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
 import compose.errors as cerrors
@@ -55,7 +56,8 @@ class Compose(object):
         return TopLevelCommand(project_from_options(self.project_dir, self.options))
 
     def build_images(
-        self, builds, force_pull=True, no_cache=False, current_version=None, current_uid=None
+        self, builds, current_version, current_uid, current_gid,
+        force_pull=True, no_cache=False,
     ):
 
         try:
@@ -76,10 +78,9 @@ class Compose(object):
 
                 build_args = []
                 # NOTE: we can set only 1 variable since options is a dict
-                if current_version is not None:
-                    build_args.append("%s=%s" % ("RAPYDO_VERSION", current_version))
-                if current_uid is not None:
-                    build_args.append("%s=%s" % ("CURRENT_UID", current_uid))
+                build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
+                build_args.append("{}={}".format("CURRENT_UID", current_uid))
+                build_args.append("{}={}".format("CURRENT_GID", current_gid))
 
                 if len(build_args) > 0:
                     options['--build-arg'] = build_args
@@ -124,7 +125,7 @@ class Compose(object):
             else:
                 log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
-            msg = "Failed command execution:\n%s" % e
+            msg = "Failed command execution:\n{}".format(e)
             if nofailure:
                 raise AttributeError(msg)
             else:
@@ -146,7 +147,8 @@ class Compose(object):
         if command is None:
             return (None, [])
 
-        pieces = command.split()
+        # pieces = command.split()
+        pieces = shlex.split(command)
         try:
             shell_command = pieces[0]
             shell_args = pieces[1:]
@@ -257,7 +259,7 @@ class Compose(object):
             out = self.command('exec_command', options, nofailure=nofailure)
         except NoSuchService:
             if nofailure:
-                raise AttributeError("Cannot find service: %s", service)
+                raise AttributeError("Cannot find service: {}".format(service))
             else:
                 log.exit("Cannot find a running container called {}", service)
         else:

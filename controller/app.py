@@ -2,8 +2,8 @@
 
 import os
 import sys
-import pwd
 import time
+import re
 from distutils.dir_util import copy_tree
 import shutil
 import urllib3
@@ -23,18 +23,14 @@ from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
-from controller.configuration import load_yaml_file
 from controller.scaffold import EndpointScaffold
-from controller.configuration import read_yamls
 from controller import log
 
-from controller.conf_utilities import load_project_configuration
-from controller.conf_utilities import read as read_configuration
-from controller.conf_utilities import mix as mix_configuration
-
-# STATUS_RELEASED = "released"
-# STATUS_DISCONTINUED = "discontinued"
-# STATUS_DEVELOPING = "developing"
+from controller.conf_utilities import read_configuration
+from controller.conf_utilities import mix_configuration
+from controller.conf_utilities import read_composer_yamls
+from controller.conf_utilities import load_yaml_file, get_yaml_path
+from controller.conf_utilities import PROJECT_CONF_FILENAME
 
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
@@ -42,6 +38,31 @@ REACT = 'react'
 
 ROOT_UID = 0
 BASE_UID = 990
+
+
+def get_username(uid):
+    try:
+        import pwd
+        return pwd.getpwuid(uid).pw_name
+    except ImportError as e:
+        log.warning(e)
+        return str(uid)
+
+
+def get_current_uid():
+    try:
+        return os.getuid()
+    except AttributeError as e:
+        log.warning(e)
+        return 0
+
+
+def get_current_gid():
+    try:
+        return os.getgid()
+    except AttributeError as e:
+        log.warning(e)
+        return 0
 
 
 class Application(object):
@@ -58,6 +79,7 @@ class Application(object):
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
+        self.production = self.current_args.get('production', False)
 
         create = self.current_args.get('action', 'unknown') == 'create'
 
@@ -74,7 +96,7 @@ class Application(object):
                     if self.inspect_main_folder() is None:
                         log.warning(
                             "You are not in the rapydo main folder, "
-                            + "changing working dir to %s",
+                            + "changing working dir to {}",
                             cwd,
                         )
                         first_level_error = None
@@ -88,7 +110,7 @@ class Application(object):
         # Initial inspection
         self.get_args()
         if not self.print_version:
-            log.info("You are using rapydo version {}", __version__)
+            log.debug("You are using rapydo version {}", __version__)
         self.check_installed_software()
 
         if self.create:
@@ -108,7 +130,8 @@ class Application(object):
             self.inspect_project_folder()
 
         # get user launching rapydo commands
-        self.current_uid = os.getuid()
+        self.current_uid = get_current_uid()
+        self.current_gid = get_current_gid()
         if self.install or self.print_version:
             skip_check_perm = True
         elif self.current_uid == ROOT_UID:
@@ -117,11 +140,15 @@ class Application(object):
             skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = pwd.getpwuid(os.getuid()).pw_name
+            self.current_os_user = get_username(self.current_uid)
             skip_check_perm = not self.current_args.get('check_permissions', False)
             log.debug(
                 "Current user: {} (UID: {})", self.current_os_user, self.current_uid
             )
+            log.debug(
+                "Current group ID: {}", self.current_gid
+            )
+
 
         if not skip_check_perm:
             self.inspect_permissions()
@@ -138,7 +165,7 @@ class Application(object):
                 log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
 
         # Verify if we implemented the requested command
-        function = "_%s" % self.action.replace("-", "_")
+        function = "_{}".format(self.action.replace("-", "_"))
         func = getattr(self, function, None)
         if func is None:
             log.exit(
@@ -151,7 +178,7 @@ class Application(object):
 
         if not self.install and not self.print_version:
             # Detect if heavy ops are allowed
-            if self.check and self.current_args.get('skip_heavy_git_ops', False):
+            if self.check and self.current_args.get('no_git', False):
                 git_checks = False
             else:
                 git_checks = self.update or self.check
@@ -208,9 +235,8 @@ class Application(object):
                 log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
 
             if major_diff:
-                tips = "To manually set the date: "
-                tips += "sudo date --set \"{}\"", online_time.strftime(
-                    '%d %b %Y %H:%M:%S'
+                tips = "To manually set the date: sudo date --set \"{}\"".format(
+                    online_time.strftime('%d %b %Y %H:%M:%S')
                 )
                 log.exit("Unable to continue, please fix the host date\n{}", tips)
 
@@ -253,7 +279,7 @@ class Application(object):
 
         if self.project is not None:
             if "_" in self.project:
-                suggest = "\nPlease consider to rename %s into %s" % (
+                suggest = "\nPlease consider to rename {} into {}".format(
                     self.project,
                     self.project.replace("_", ""),
                 )
@@ -261,8 +287,8 @@ class Application(object):
 
             if self.project in self.reserved_project_names:
                 log.exit(
-                    "You selected a reserved name, invalid project name: %s"
-                    % self.project
+                    "You selected a reserved name, invalid project name: {}".format(
+                        self.project)
                 )
 
         if self.current_args.get('development'):
@@ -283,7 +309,8 @@ class Application(object):
             if prj_num == 0:
                 log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
             elif prj_num > 1:
-                hint = "Hint: create a %s file to save default options" % PROJECTRC
+                hint = "Hint: create a {} file to save default options".format(
+                    PROJECTRC)
                 log.exit(
                     "Please select the --project option on one " +
                     "of the following:\n\n {}\n\n{}\n",
@@ -297,8 +324,8 @@ class Application(object):
         else:
             if self.project not in projects:
                 log.exit(
-                    "Wrong project '%s'.\n" % self.project
-                    + "Select one of the following:\n\n %s\n" % projects
+                    "Wrong project {}\nSelect one of the following:\n\n {}\n".format(
+                        self.project, projects)
                 )
 
         self.checked("Selected project: {}", self.project)
@@ -365,25 +392,25 @@ To fix this issue, please update docker to version {}+
                 hints = "To install docker visit: https://get.docker.com"
 
             if len(hints) > 0:
-                hints = "\n\n%s" % hints
+                hints = "\n\n{}".format(hints)
 
             log.exit("Missing requirement: '{}' not found.{}", program, hints)
         if min_version is not None:
             if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for %s is %s" % (
+                version_error = "Minimum supported version for {} is {}".format(
                     program,
                     min_version,
                 )
-                version_error += ", found %s " % (found_version)
+                version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
         if max_version is not None:
             if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for %s is %s" % (
+                version_error = "Maximum supported version for {} is {}".format(
                     program,
                     max_version,
                 )
-                version_error += ", found %s " % (found_version)
+                version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
         self.checked("{} version: {}", program, found_version)
@@ -401,20 +428,16 @@ To fix this issue, please update docker to version {}+
         try:
             if min_version is not None:
                 if LooseVersion(min_version) > LooseVersion(found_version):
-                    version_error = "Minimum supported version for %s is %s" % (
-                        package_name,
-                        min_version,
-                    )
-                    version_error += ", found %s " % (found_version)
+                    version_error = "Minimum supported version for {} is {}".format(
+                        package_name, min_version)
+                    version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
             if max_version is not None:
                 if LooseVersion(max_version) < LooseVersion(found_version):
-                    version_error = "Maximum supported version for %s is %s" % (
-                        package_name,
-                        max_version,
-                    )
-                    version_error += ", found %s " % (found_version)
+                    version_error = "Maximum supported version for {} is {}".format(
+                        package_name, max_version)
+                    version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
             self.checked("{} version: {}", package_name, found_version)
@@ -432,10 +455,8 @@ To fix this issue, please update docker to version {}+
         if gitter.get_local(".") is None:
             return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s
-                """ % (
-                os.getcwd()
-            )
+Verify that you are in the right folder, now you are in: {}
+                """.format(os.getcwd())
 
         required_files = [PROJECT_DIR, 'data', 'projects', 'submodules']
 
@@ -450,14 +471,10 @@ if you are in the right repository consider to create it by hand
                 else:
                     extra = ""
 
-                return """File or folder not found %s
+                return """File or folder not found {}
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: %s%s
-                    """ % (
-                    fname,
-                    os.getcwd(),
-                    extra,
-                )
+Verify that you are in the right folder, now you are in: {}{}
+                    """.format(fname, os.getcwd(), extra)
 
         return None
 
@@ -564,7 +581,7 @@ Verify that you are in the right folder, now you are in: %s%s
             log.warning("{}: path cannot be written", path)
             return False
         try:
-            owner = pwd.getpwuid(os.stat(path).st_uid).pw_name
+            owner = get_username(os.stat(path).st_uid)
         except KeyError:
             owner = os.stat(path).st_uid
 
@@ -636,9 +653,9 @@ Verify that you are in the right folder, now you are in: %s%s
                 default_file_path=default_file_path,
                 base_project_path=project_file_path,
                 projects_path=PROJECT_DIR,
-                read_extended=read_extended,
                 submodules_path=SUBMODULES_DIR,
-                do_exit=False,
+                read_extended=read_extended,
+                production=self.production
             )
 
             self.specs = mix_configuration(
@@ -650,9 +667,10 @@ Verify that you are in the right folder, now you are in: %s%s
             log.exit(e)
 
         self.vars = self.specs.get('variables', {})
+
         log.verbose("Configuration loaded")
 
-        framework = glom(self.specs, "variables.frontend.framework", default=None)
+        framework = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=None)
 
         if framework == 'None':
             framework = None
@@ -675,7 +693,11 @@ Verify that you are in the right folder, now you are in: %s%s
     def preliminary_version_check(self):
 
         project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        specs = load_project_configuration(project_file_path)
+        specs = load_yaml_file(
+            file=PROJECT_CONF_FILENAME,
+            path=project_file_path,
+            keep_order=True
+        )
         v = glom(specs, "project.rapydo", default=None)
 
         self.verify_rapydo_version(rapydo_version=v)
@@ -700,17 +722,16 @@ Verify that you are in the right folder, now you are in: %s%s
             return True
 
         if r > c:
-            action = "Upgrade your controller to version %s" % r
+            action = "Upgrade your controller to version {}".format(r)
         else:
-            action = "Downgrade your controller to version %s" % r
+            action = "Downgrade your controller to version {}".format(r)
             action += " or upgrade your project"
 
-        # action += "\n\nrapydo install --git %s" % r
-        action += "\n\nrapydo install --git auto"
+        action += "\n\nrapydo install auto"
 
         msg = "Rapydo version is not compatible"
-        msg += "\n\nThis project requires rapydo %s but you are using %s" % (r, c)
-        msg += "\n\n%s\n" % action
+        msg += "\n\nThis project requires rapydo {}, you are using {}\n\n{}\n".format(
+            r, c, action)
 
         if do_exit:
             log.exit(msg)
@@ -803,7 +824,7 @@ Verify that you are in the right folder, now you are in: %s%s
         if confs_only:
             repos = {}
             repos[RAPYDO_CONFS] = {
-                "online_url": "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_CONFS),
+                "online_url": "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_CONFS),
                 "if": "true",
             }
         else:
@@ -822,28 +843,43 @@ Verify that you are in the right folder, now you are in: %s%s
             if gitobj is not None:
                 gitter.update(name, gitobj)
 
-    def prepare_composers(self):
+    def read_composers(self):
+
+        # Find configuration that tells us which files have to be read
 
         # substitute values starting with '$$'
 
         load_commons = not self.current_args.get('no_commons')
+        load_frontend = not self.current_args.get('no_frontend')
+
+        stack = self.current_args.get('stack')
+
+        # deprecated since 0.7.1
+        if stack is None:
+            stack = self.current_args.get('mode')
+            if stack is not None:
+                log.warning(
+                    "'--mode' option is deprecated, please use the new '--stack' option instead. Please also note that '--stack debug' and '--stack production' are automatically defaulted by the '--production' flag.")
+
+        if stack is None:
+            stack = "production" if self.production else "debug"
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS
-            and not self.current_args.get('no_frontend'),
-            ANGULAR: self.frontend == ANGULAR
-            and not self.current_args.get('no_frontend'),
-            REACT: self.frontend == REACT and not self.current_args.get('no_frontend'),
+            ANGULARJS: self.frontend == ANGULARJS and load_frontend,
+            ANGULAR: self.frontend == ANGULAR and load_frontend,
+            REACT: self.frontend == REACT and load_frontend,
             'logging': self.current_args.get('collect_logs'),
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
-            'mode': self.current_args.get('mode'),
+            'mode': "{}.yml".format(stack),
             'extended-mode': self.extended_project is not None,
             'baseconf': os.path.join(
                 os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
             ),
-            'customconf': os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME),
+            'customconf': os.path.join(
+                os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME
+            ),
         }
 
         if self.extended_project_path is None:
@@ -859,31 +895,16 @@ Verify that you are in the right folder, now you are in: %s%s
         for name, conf in confs.items():
             compose_files[name] = project.apply_variables(conf, myvars)
 
-        # TOFIX: temporary fix to let to use both angularjs and angular
-        # One completed the porting from angularjs to angular
-        # rename rapydo-confs/frontend-a2.yml into rapydo-confs/frontend.yml
-        # and remove this piece of code
-        if 'frontend' in compose_files:
-
-            branch = glom(
-                self.specs, "variables.repos.frontend.branch", default='master'
-            )
-
-            if branch != 'master':
-                compose_files['frontend']['file'] = 'frontend-a2'
-        # ################################################################# #
-
-        return compose_files
-
-    def read_composers(self):
-
-        # Find configuration that tells us which files have to be read
-        compose_files = self.prepare_composers()
-
         # Read necessary files
-        self.services, self.files, self.base_services, self.base_files = read_yamls(
-            compose_files
-        )
+        self.files, self.base_files = read_composer_yamls(compose_files)
+
+        # to build the config with files and variables
+        dc = Compose(files=self.base_files)
+        self.base_services = dc.config()
+
+        dc = Compose(files=self.files)
+        self.services = dc.config()
+
         log.verbose("Configuration order:\n{}", self.files)
 
     def build_dependencies(self):
@@ -892,7 +913,7 @@ Verify that you are in the right folder, now you are in: %s%s
         if self.action not in ['check', 'update', 'build']:
             return
 
-        if self.current_args.get('skip_builds_checks', False):
+        if self.current_args.get('no_builds', False):
             log.warning("Skipping builds checks")
             return
 
@@ -1017,7 +1038,7 @@ Verify that you are in the right folder, now you are in: %s%s
             if image_tag not in docker_images:
 
                 found_obsolete += 1
-                message = "Missing template build for %s (%s)" % (
+                message = "Missing template build for {} ({})".format(
                     build['services'],
                     image_tag,
                 )
@@ -1031,6 +1052,7 @@ Verify that you are in the right folder, now you are in: %s%s
                         builds={image_tag: build},
                         current_version=__version__,
                         current_uid=self.current_uid,
+                        current_gid=self.current_gid,
                     )
                     rebuilt = True
 
@@ -1041,22 +1063,23 @@ Verify that you are in the right folder, now you are in: %s%s
                 found_obsolete += 1
                 b = datetime.fromtimestamp(build_ts).strftime(fmt)
                 c = last_commit.strftime(fmt)
-                message = "Template image %s is obsolete" % image_tag
-                message += " (built on %s" % b
-                message += " but changed on %s)" % c
+                message = \
+                    "Obsolete image {} obsolete (built on {} but changed on {})".format(
+                        image_tag, b, c)
                 if self.current_args.get('rebuild'):
                     log.info("{}, rebuilding", message)
                     dc = self.get_compose(files=self.base_files)
                     dc.build_images(
                         builds={image_tag: build},
-                        no_cache=True,
                         current_version=__version__,
-                        current_uid=self.current_uid,
+                        current_uid=self.currert_uid,
+                        current_gid=self.currert_gid,
+                        no_cache=True
                     )
                     rebuilt = True
                 else:
                     message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services %s" % build.get('service')
+                    message += "$ rapydo --services {}".format(build.get('service'))
                     message += " build --rebuild-templates"
                     log.warning(message)
 
@@ -1112,9 +1135,9 @@ Verify that you are in the right folder, now you are in: %s%s
                     build_is_obsolete = True
                     b = build_timestamp.strftime(fmt)
                     c = from_timestamp.strftime(fmt)
-                    message = "Image %s is obsolete" % image_tag
-                    message += " (built on %s FROM %s" % (b, from_img)
-                    message += " that changed on %s)" % c
+                    message = "Image {} is obsolete".format(image_tag)
+                    message += " (built on {} FROM {} that changed on {})".format(
+                        b, from_img, c)
 
             if not build_is_obsolete:
                 # Check if some recent commit modified the Dockerfile
@@ -1123,9 +1146,8 @@ Verify that you are in the right folder, now you are in: %s%s
                     build_is_obsolete = True
                     b = datetime.fromtimestamp(build_ts).strftime(fmt)
                     c = last_commit.strftime(fmt)
-                    message = "Image %s is obsolete" % image_tag
-                    message += " (built on %s" % b
-                    message += " but changed on %s)" % c
+                    message = "Image {} is obsolete".format(image_tag)
+                    message += " (built on {} but changed on {})".format(b, c)
 
             # TODO: for backend build check for any commit on utils o backend
             # TODO: for rapydo builds check for any commit on utils
@@ -1139,15 +1161,16 @@ Verify that you are in the right folder, now you are in: %s%s
                     # force_pull = image_tag not in overriding_imgs
                     dc.build_images(
                         builds={image_tag: build},
-                        # force_pull=force_pull,
-                        force_pull=True,
                         current_version=__version__,
                         current_uid=self.current_uid,
+                        current_gid=self.current_gid,
+                        # force_pull=force_pull,
+                        force_pull=True
                     )
                 else:
                     message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services %s" % build.get('service')
-                    message += " build"
+                    message += "$ rapydo --services {} build".format(
+                        build.get('service'))
                     log.warning(message)
 
         if found_obsolete == 0:
@@ -1182,8 +1205,7 @@ Verify that you are in the right folder, now you are in: %s%s
             "tsconfig.app.json",
             "tsconfig.json",
             "tsconfig.spec.json",
-            "tslint.json",
-            "typedarray.js",
+            "tslint.json"
         ]
 
         for f in expected_folders:
@@ -1264,6 +1286,7 @@ Verify that you are in the right folder, now you are in: %s%s
 
         env['RAPYDO_VERSION'] = __version__
         env['CURRENT_UID'] = self.current_uid
+        env['CURRENT_GID'] = self.current_gid
         env['PROJECT_TITLE'] = self.project_title
         env['PROJECT_DESCRIPTION'] = self.project_description
         if self.current_args.get('privileged'):
@@ -1316,8 +1339,8 @@ Verify that you are in the right folder, now you are in: %s%s
                 else:
                     value = str(value)
                 if ' ' in value:
-                    value = "'%s'" % value
-                whandle.write("%s=%s\n" % (key, value))
+                    value = "'{}'".format(value)
+                whandle.write("{}={}\n".format(key, value))
             log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):
@@ -1368,7 +1391,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if len(placeholders) > 0:
             m = "\n".join(placeholders)
             tips = "\n\nYou can fix this error by updating the "
-            tips += "project_configuration.yaml file or you local .projectrc file\n"
+            tips += "project_configuration.yaml file or your local .projectrc file\n"
             log.exit(
                 "The following variables are missing in your configuration:\n\n{}{}",
                 m,
@@ -1450,6 +1473,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         log.info("Checks completed")
 
     def _init(self):
+
+        from controller import LOGS_FOLDER
+        if not os.path.exists(LOGS_FOLDER):
+            log.warning("Logs folder ({}) not found, created it", LOGS_FOLDER)
+            os.makedirs(LOGS_FOLDER)
+
         log.info("Project initialized")
 
     def _status(self):
@@ -1478,7 +1507,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         services = self.get_services(default=self.active_services)
 
         dc = self.get_compose(files=self.files)
-        dc.start_containers(services)
+        if self.current_args.get('no_detach', False):
+            detach = False
+        else:
+            detach = True
+
+        dc.start_containers(services, detach=detach)
 
         log.info("Stack started")
 
@@ -1559,12 +1593,24 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Stopped by keyboard")
 
     def _interfaces(self):
-        # db = self.manage_one_service()
+
         db = self.current_args.get('service')
+        if db == 'list':
+            print("List of available interfaces:")
+            for s in self.services:
+                name = s.get('name', '')
+                if name.endswith("ui"):
+                    print(" - {}".format(name[0:-2]))
+            return True
+
         service = db + 'ui'
 
         if not self.container_service_exists(service):
-            log.exit("Container '{}' is not defined", service)
+            suggest = "You can use rapydo interfaces list to get available interfaces"
+            log.exit(
+                "Container '{}' is not defined\n{}",
+                service, suggest
+            )
 
         port = self.current_args.get('port')
         publish = []
@@ -1581,18 +1627,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             except IndexError:
                 log.exit("No default port found?")
 
-            publish.append("%s:%s" % (port, current_ports.target))
+            publish.append("{}:{}".format(port, current_ports.target))
 
         dc = self.get_compose(files=self.files)
 
         host = self.current_args.get('hostname')
-        # FIXME: to be completed
         uris = {
             'swaggerui':
-            # 'http://%s/swagger-ui/?url=http://%s:%s/api/specs' %
-            # (host, host, '8080'),
-            'http://%s?docExpansion=none'
-            % host
+            'http://{}?docExpansion=none'.format(host)
         }
 
         uri = uris.get(service)
@@ -1622,37 +1664,47 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             detach = self.current_args.get('detach')
             dc.create_volatile_container(service, publish=publish, detach=detach)
 
-    def _shell(self, user=None, command=None, service=None):
+        return True
+
+    def _shell(self):
 
         dc = self.get_compose(files=self.files)
         service = self.current_args.get('service')
         no_tty = self.current_args.get('no_tty')
-        # service = self.manage_one_service(service)
+        default_command = self.current_args.get('default_command')
 
-        if user is None:
-            user = self.current_args.get('user')
-            # if 'user' is empty, put None to get the docker-compose default
-            if user is not None and user.strip() == '':
-                developer_services = [
-                    'backend',
-                    'celery',
-                    'celeryui',
-                    'celery-beat',
-                    'restclient'
-                ]
+        user = self.current_args.get('user')
+        if user is not None and user.strip() == '':
+            developer_services = [
+                'backend',
+                'celery',
+                'celeryui',
+                'celery-beat',
+                'restclient'
+            ]
 
-                if service in developer_services:
-                    user = 'developer'
-                elif service in ['frontend']:
-                    if self.frontend == ANGULAR:
-                        user = 'node'
-                else:
-                    user = None
+            if service in developer_services:
+                user = 'developer'
+            elif service in ['frontend']:
+                if self.frontend == ANGULAR:
+                    user = 'node'
+            elif service == 'postgres':
+                user = 'postgres'
+            else:
+                # None == get the docker-compose default
+                user = None
         log.verbose("Command as user '{}'", user)
 
+        command = self.current_args.get('command')
         if command is None:
-            default = 'echo hello world'
-            command = self.current_args.get('command', default)
+            if not default_command:
+                command = "bash"
+            elif service == 'backend':
+                command = "restapi launch"
+            elif service == 'neo4j':
+                command = "bin/cypher-shell"
+            else:
+                command = "bash"
 
         return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
 
@@ -1663,9 +1715,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.debug("Forcing rebuild of cached templates")
             dc.build_images(
                 self.template_builds,
-                no_cache=self.current_args.get('force'),
                 current_version=__version__,
                 current_uid=self.current_uid,
+                current_gid=self.current_gid,
+                no_cache=self.current_args.get('force')
             )
             pull_templates = False
         else:
@@ -1750,15 +1803,15 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             print("")
             print(
-                "docker cp %s %s_%s_1:/etc/letsencrypt/real/fullchain1.pem"
-                % (chain, self.project, service)
+                "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
+                    chain, self.project, service)
             )
             print(
-                "docker cp %s %s_%s_1:/etc/letsencrypt/real/privkey1.pem"
-                % (key, self.project, service)
+                "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
+                    key, self.project, service)
             )
 
-            print("rapydo shell %s --command \"nginx -s reload\"" % service)
+            print("rapydo shell {} --command \"nginx -s reload\"".format(service))
             print("")
 
             return True
@@ -1771,7 +1824,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return dc.start_containers(["certificates-proxy"], detach=False)
 
         if self.current_args.get('force'):
-            command = "%s --force" % command
+            command = "{} --force".format(command)
 
         return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
 
@@ -1882,11 +1935,20 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         scaling = self.current_args.get('value', '')
         options = scaling.split('=')
         if len(options) != 2:
-            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA")
+            scale_var = "DEFAULT_SCALE_{}".format(scaling.upper())
+            nreplicas = glom(self.vars, "env.{}".format(scale_var), default=None)
+            if nreplicas is None:
+                hints = "You can also set a {} variable in your .projectrc file".format(
+                    scale_var
+                )
+                log.exit(
+                    "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints)
+            service = scaling
+            scaling = "{}={}".format(service, nreplicas)
         else:
             service, nreplicas = options
 
-        if not nreplicas.isnumeric():
+        if isinstance(nreplicas, str) and not nreplicas.isnumeric():
             log.exit("Invalid number of replicas: {}", nreplicas)
 
         dc = self.get_compose(files=self.files)
@@ -1897,7 +1959,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         """ Verify one service connection (inside backend) """
         service = self.current_args.get('service')
         dc = self.get_compose(files=self.files)
-        command = 'restapi verify --services %s' % service
+        command = 'restapi verify --services {}'.format(service)
 
         # super magic trick
         try:
@@ -1929,7 +1991,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         template_tmp_dir = "__template"
         template_tmp_path = os.path.join(project_name, template_tmp_dir)
-        online_url = "%s/%s.git" % (RAPYDO_GITHUB, RAPYDO_TEMPLATE)
+        online_url = "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_TEMPLATE)
         gitter.clone(
             online_url,
             template_tmp_path,
@@ -1941,7 +2003,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         copy_tree(template_tmp_path, project_name)
 
-        os.mkdir(os.path.join(project_name, 'data'))
+        data_dir = os.path.join(project_name, 'data')
+        if not os.path.exists(data_dir):
+            os.mkdir(data_dir)
 
         shutil.rmtree(template_tmp_path)
 
@@ -1964,13 +2028,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Copy from {}", template_path)
 
         with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
-            f.write("project: %s" % project_name)
+            f.write("project: {}".format(project_name))
 
         git_dir = os.path.join(project_name, ".git")
         shutil.rmtree(git_dir)
 
         log.info(
-            "Project %s successfully created from %s template",
+            "Project {} successfully created from {} template",
             project_name,
             template_name,
         )
@@ -1984,7 +2048,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         print("")
         print("Now you can enter the project and execute rapydo init")
         print("")
-        print("cd %s" % project_name)
+        print("cd {}".format(project_name))
         print("git init")
         print("git remote add origin https://your_remote_git/your_project.git")
         print("rapydo init")
@@ -1992,7 +2056,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     def _version(self):
         # You are not inside a rapydo project, only printing rapydo version
         if not hasattr(self, "version"):
-            print('\nrapydo version: %s' % __version__)
+            print('\nrapydo version: {}'.format(__version__))
             return
 
         # Check if rapydo version is compatible with version required by the project
@@ -2002,57 +2066,50 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             c = "\033[1;31m"  # Light Red
         d = "\033[0m"
 
-        cv = "%s%s%s" % (c, __version__, d)
-        pv = "%s%s%s" % (c, self.version, d)
-        rv = "%s%s%s" % (c, self.rapydo_version, d)
-        print('\nrapydo: %s\t%s: %s\trequired rapydo: %s' % (cv, self.project, pv, rv))
+        cv = "{}{}{}".format(c, __version__, d)
+        pv = "{}{}{}".format(c, self.version, d)
+        rv = "{}{}{}".format(c, self.rapydo_version, d)
+        print('\nrapydo: {}\t{}: {}\trequired rapydo: {}'.format(
+            cv, self.project, pv, rv))
 
         if __version__ != self.rapydo_version:
             c = LooseVersion(__version__)
             v = LooseVersion(self.rapydo_version)
             print(
-                '\nThis project is not compatible with the current rapydo version (%s)'
-                % __version__
+                '\nThis project is not compatible with the current rapydo version ({})'.format(__version__)
             )
             if c < v:
                 print(
-                    "Please upgrade rapydo to version %s or modify this project"
-                    % self.rapydo_version
+                    "Please upgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
             else:
                 print(
-                    "Please downgrade rapydo to version %s or modify this project"
-                    % self.rapydo_version
+                    "Please downgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
 
-            print("\n\033[1;31mrapydo install --git %s\033[0m" % self.rapydo_version)
+            print("\n\033[1;31mrapydo install --git {}\033[0m".format(
+                self.rapydo_version))
 
-    def read_conf_files(self, filename_base):
+    def read_conf_files(self, filename):
         """
         Generic method to find and list:
-        - submodules/rapydo-confs/conf/YOURBASE.yml     # required
-        - projects/CURRENT_PROJECT/conf/YOURBASE.yml    # optional
+        - submodules/rapydo-confs/conf/ymlfilename     # required
+        - projects/CURRENT_PROJECT/conf/ymlfilename    # optional
         """
         files = []
 
         basedir = os.path.join(
             os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
         )
-        customdir = os.path.join(os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
+        customdir = os.path.join(
+            os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME)
 
-        main_yml = load_yaml_file(
-            file=filename_base, path=basedir, extension='yml', return_path=True
-        )
+        main_yml = get_yaml_path(file=filename, path=basedir)
         files.append(main_yml)
-        custom_yml = load_yaml_file(
-            file=filename_base,
-            path=customdir,
-            extension='yml',
-            return_path=True,
-            skip_error=True
-        )
+
+        custom_yml = get_yaml_path(file=filename, path=customdir)
         if isinstance(custom_yml, str):
-            log.debug("Found custom {} specs", filename_base)
+            log.debug("Found custom {} specs", filename)
             files.append(custom_yml)
 
         return files
@@ -2060,7 +2117,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     def _formatter(self):
 
         command = 'run'
-        dc = self.get_compose(files=self.read_conf_files('formatter'))
+        dc = self.get_compose(files=self.read_conf_files('formatter.yml'))
         options = dc.command_defaults(command=command)
 
         VANILLA_SUBMODULE = 'vanilla'
@@ -2089,7 +2146,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         #################
         # 1. base dump
-        mybin = 'docker-compose'
         # NOTE: can't figure it out why, but 'dc' on config can't use files
         # so I've used plumbum
         params = []
@@ -2097,7 +2153,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             params.append('-f')
             params.append(file)
         params.append('config')
-        yaml_string = self.execute_command(mybin, parameters=params)
+        yaml_string = self.execute_command('docker-compose', parameters=params)
 
         #################
         # 2. filter active services
@@ -2105,8 +2161,16 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
         import yaml
-        obj = yaml.load(yaml_string.replace(main_dir, '.'))
 
+        # yaml.FullLoader will be available from pyyaml 5.1+
+        # obj = yaml.load(
+        #     yaml_string.replace(main_dir, '.'),
+        #     Loader=yaml.FullLoader
+        # )
+
+        # this raises a deprecation warning,
+        # starting from 5.1 replace with the above version
+        obj = yaml.load(yaml_string.replace(main_dir, '.'))
         active_services = {}
         for key, value in obj.get('services', {}).items():
             if key in self.active_services:
@@ -2115,10 +2179,65 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         #################
         # 3. write file
-        filename = '%s.yml' % mybin
+        filename = 'docker-compose.yml'
         with open(filename, 'w') as fh:
             fh.write(yaml.dump(obj, default_flow_style=False))
-        log.warning("Config dump: {}", filename)
+        log.info("Config dump: {}", filename)
+
+    def _ancestors(self):
+
+        IMAGE = self.current_args.get("imagetag")
+
+        parameters = ["images", "--all"]
+        # log.info("Executing command {} {}", command, parameters)
+        img = self.execute_command("docker", parameters).split("\n")
+        img = [re.split("\s+", i) for i in img[1:]]
+        images = {}
+        for i in img:
+            if len(i) != 7:
+                continue
+            images[i[2]] = i
+
+        child = IMAGE
+        print("Finding all parents and (grand)+ parents of {}".format(child))
+        found = 0
+        while True:
+            parents = self.get_parent(child, images)
+            if len(parents) == 0:
+                break
+            child = parents[0]
+            print("\t".join(images.get(child)))
+            found += 1
+            parents = self.get_parent(child, images)
+        if found == 0:
+            print("No parent found for {}".format(child))
+
+    def get_parent(self, IMAGE, images):
+
+        parameters = [
+            "inspect",
+            "--format='{{.Id}} {{.Parent}}'",
+        ]
+        for tag in images:
+            image = images.get(tag)
+            tag = image[2].strip()
+            if tag == '':
+                continue
+            parameters.append(tag)
+
+        out = self.execute_command("docker", parameters).split("\n")
+        final_output = []
+        for result in out:
+            if IMAGE not in result:
+                continue
+            tokens = re.findall(r"'sha256:(.*) sha256:(.*)'", result)
+            if len(tokens) == 0:
+                continue
+            for t in tokens:
+                tag = t[0][0:12]
+                if tag != IMAGE:
+                    final_output.append(tag)
+        return final_output
 
     def _install(self):
         version = self.current_args.get('version')
@@ -2153,7 +2272,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         log.info("You asked to install rapydo-controller {} from pip", version)
 
         package = "rapydo-controller"
-        controller = "%s==%s" % (package, version)
+        controller = "{}=={}".format(package, version)
         installed = install(controller, user=user)
         if not installed:
             log.error("Unable to install controller {} from pip", version)
@@ -2172,10 +2291,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         package = "rapydo-controller"
         controller_repository = "do"
-        # utils_repository = "utils"
         rapydo_uri = "https://github.com/rapydo"
-        # utils = "git+%s/%s.git@%s" % (rapydo_uri, utils_repository, version)
-        controller = "git+%s/%s.git@%s" % (rapydo_uri, controller_repository, version)
+        controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
 
         # installed = install(utils)
         # if installed:
@@ -2311,6 +2428,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         return {
             'CELERYUI_USER': ['celeryui'],
             'CELERYUI_PASSWORD': ['celeryui'],
+            'RABBITMQ_USER': ['rabbit'],
+            'RABBITMQ_PASSWORD': ['rabbit'],
             'ALCHEMY_USER': ['postgres', 'mariadb'],
             'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
             'GRAPHDB_PASSWORD': ['neo4j'],
@@ -2331,5 +2450,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return 'ALCHEMY_USER'
         if key == 'MYSQL_PASSWORD':
             return 'ALCHEMY_PASSWORD'
+
+        if key == 'RABBITMQ_DEFAULT_USER':
+            return 'RABBITMQ_USER'
+        if key == 'RABBITMQ_DEFAULT_PASS':
+            return 'RABBITMQ_PASSWORD'
 
         return key

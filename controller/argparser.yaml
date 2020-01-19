@@ -15,13 +15,21 @@ options:
     # The only one if exists otherwise list the projects.
     default: null
 
+  # deprecated since 0.7.1
   mode:
     alias: m
     type: str
     metavalue: CONTAINERS_YAML_SELECTED_MODE
-    default: debug
-    help: mode is like a 'blueprint' marker of the configuration to launch
+    default: null
+    help: mode is like a 'blueprint' marker of the configuration to launch - DEPRECATED! user --stack instead
 
+  stack:
+    type: str
+    metavalue: CONTAINERS_YAML_STACK
+    default: null
+    help: the docker-compose stack to be loaded (from the projects conf folder)
+
+  # deprecated since 0.7.0
   log-level:
     alias: l
     type: str
@@ -44,18 +52,17 @@ options:
     default: False
     help: Exclude project common configuration from rapydo stack
 
-  collect-logs:
-    type: bool
-    default: False
-    help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
+  # collect-logs:
+  #   type: bool
+  #   default: False
+  #   help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
 
   hostname:
     alias: H
     type: str
     metavalue: MACHINE_HOST_NAME
     default: localhost
-    help: "host name of the current machine where the server is running
-        (NOTE: only used in production mode)"
+    help: "host name of the current machine where the server is running"
 
   services:
     alias: s
@@ -64,6 +71,7 @@ options:
     default: active services
     help: list of services referring to a command
 
+  # deprecated since 0.7.0
   development:
     type: bool
     default: False
@@ -78,6 +86,12 @@ options:
     type: bool
     default: False
     help: Enabled permission checks on file system
+
+  production:
+    alias: -prod
+    type: bool
+    default: False
+    help: enable production mode
 
   # net:
   #   type: str
@@ -115,12 +129,12 @@ subcommands:
         metavalue: IGNORE_SUBMODULE
         # default: 'upstream'
         help: ignore a given list of submodules (command delimited)
-      skip-heavy-git-ops:
+      no-git:
         alias: s
         type: bool
         default: False
         help: ignore the heaviest check operations on git commits
-      skip-builds-checks:
+      no-builds:
         type: bool
         default: False
         help: ignore the heaviest builds operations
@@ -291,8 +305,12 @@ subcommands:
         alias: c
         type: str
         metavalue: TERMINAL_COMMAND_UNIX-LIKE
-        default: bash
         help: UNIX command to be executed on selected running service
+      default-command:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Execute the default command configured for the container. Not compatible with --command and not implemented for all containers
       no-tty:
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -300,6 +318,12 @@ subcommands:
         help: Disable pseudo-tty allocation, useful to execute the command from non interactive script
   start:
     description: Start containers for this configuration
+    suboptions:
+      no-detach:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable detach mode and attach to container execution
   stop:
     description: stop running containers, but do not remove them
   restart:
@@ -422,6 +446,15 @@ subcommands:
         metavalue: NAME
         default: null
         help: Name of your new project
+  ancestors:
+    description: find all ancestors of a docker image
+    suboptions:
+      imagetag:
+        positional: true
+        type: str
+        metavalue: IMAGE_TAG_ID
+        default: null
+        help: Image tag ID to be inspected
 
   version:
     description: Retrieve version details

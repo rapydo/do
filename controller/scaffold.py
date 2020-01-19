@@ -71,7 +71,7 @@ class EndpointScaffold(object):
                     # log.warning("Interrupted by the user")
 
             if answer not in possible_answers:
-                print("Please answer one of the following: %s" % possible_answers)
+                print("Please answer one of the following: {}".format(possible_answers))
             else:
                 if answer.strip().startswith('y'):
                     break
@@ -110,22 +110,22 @@ class EndpointScaffold(object):
         current_dir = Path.cwd()
 
         uri = Path(needle.get('baseuri', '/api'), endpoint)
-        infos += 'Endpoint path:\t%s\n' % uri
+        infos += 'Endpoint path:\t{}\n'.format(uri)
 
         swagger_dir = Path(
             current_dir, backend, SWAGGER_DIR, needle.get('swagger')
         )
-        infos += 'Swagger path:\t%s/\n' % swagger_dir
+        infos += 'Swagger path:\t{}/\n'.format(swagger_dir)
 
-        infos += 'Labels:\t\t%s\n' % ", ".join(needle.get('labels'))
+        infos += 'Labels:\t\t{}\n'.format(", ".join(needle.get('labels')))
 
         python_file_path = Path(
             current_dir, python_file_dir, needle.get('file') + '.py'
         )
-        infos += 'Python file:\t%s\n' % python_file_path
+        infos += 'Python file:\t{}\n'.format(python_file_path)
 
         python_class = needle.get('class')
-        infos += 'Python class:\t%s\n' % python_class
+        infos += 'Python class:\t{}\n'.format(python_class)
 
         log.info("Informations about '{}':\n{}", endpoint, infos)
 
@@ -137,9 +137,10 @@ class EndpointScaffold(object):
 
         with open(str(python_file_path)) as fh:
             content = fh.read()
-            if 'class %s(' % python_class not in content:
+            clstest = 'class {}('.format(python_class)
+            if clstest not in content:
                 log.critical(
-                    "Class '%s' definition not found in python file" % python_class
+                    "Class '{}' definition not found in python file", python_class
                 )
 
     def find_swagger(self, endpoint=None, backend_dir=None):
@@ -147,8 +148,8 @@ class EndpointScaffold(object):
         swagdir = Path(backend_dir, SWAGGER_DIR)
         needle = None
 
-        for current_specs_file in swagdir.glob('*/%s' % self.specs_file):
-            content = load_yaml_file(str(current_specs_file))
+        for current_specs_file in swagdir.glob('*/{}'.format(self.specs_file)):
+            content = load_yaml_file(str(current_specs_file), path="")
 
             for _, value in content.get('mapping', {}).items():
                 tmp = '/' + endpoint
@@ -252,7 +253,7 @@ class EndpointScaffold(object):
 
     def rest_class(self):
 
-        filename = '%s.py' % self.endpoint_name
+        filename = '{}.py'.format(self.endpoint_name)
         self.class_path = Path(self.backend_dir, ENDPOINTS_CODE_DIR)
         filepath = Path(self.class_path, filename)
 
@@ -277,7 +278,7 @@ class EndpointScaffold(object):
 
     def test_class(self):
 
-        filename = 'test_%s.py' % self.endpoint_name
+        filename = 'test_{}.py'.format(self.endpoint_name)
         self.tests_path = Path(self.backend_dir, 'tests')
         filepath = Path(self.tests_path, filename)
 

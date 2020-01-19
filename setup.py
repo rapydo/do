@@ -3,10 +3,10 @@
 from setuptools import setup
 # from controller import __version__ as current_version
 
-current_version = "0.7.0"
+current_version = "0.7.1"
 
 main_package = "controller"
-app = '%s.__main__:main' % main_package
+app = '{}.__main__:main'.format(main_package)
 
 setup(
     name='rapydo_controller',
@@ -29,13 +29,12 @@ setup(
     python_requires='>=3.4.3',
     entry_points={
         'console_scripts': [
-            'rapydo=%s' % app,
-            'do=%s' % app,
+            'rapydo={}'.format(app),
+            'do={}'.format(app),
         ],
     },
     install_requires=[
-        # "rapydo-utils==%s" % current_version,
-        "docker-compose==1.24.0",
+        "docker-compose==1.25.1-rc1",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
@@ -43,14 +42,13 @@ setup(
         "better_exceptions",
         "prettyprinter",
         "jinja2",
-        "parse_it==3.3.2",
         "sultan==0.9.1",
         # "requests==2.21.0",
-        # Forced because utils requires PyYAML 3.13 but requests 2.20 installs 3.12
         # "PyYAML==3.13",
         "plumbum",
         "glom",
-        "gitpython==3.0.2",
+        "gitpython==3.0.5",
+        "pip>=10.0.0"
 
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
