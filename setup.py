@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
-# from controller import __version__ as current_version
 
-current_version = "0.7.1"
+current_version = "0.7.2"
 
 main_package = "controller"
 app = '{}.__main__:main'.format(main_package)

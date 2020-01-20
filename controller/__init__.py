@@ -4,7 +4,7 @@ import os
 import sys
 from loguru import logger as log
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 
 
 TESTING = os.environ.get("TESTING") == '1'
