@@ -1679,8 +1679,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 'backend',
                 'celery',
                 'celeryui',
-                'celery-beat',
-                'restclient'
+                'celery-beat'
             ]
 
             if service in developer_services:

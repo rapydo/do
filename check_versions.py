@@ -170,7 +170,7 @@ def check_versions(skip_angular):
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ['talib', 'restclient', 'jq', 'react', 'icat']:
+        if service in ['talib', 'react', 'icat']:
             continue
 
         service_dependencies = dependencies[service]
