@@ -252,8 +252,6 @@ def check_versions(skip_angular):
 
     log.info("Note: very hard to upgrade ubuntu:16.04 from backendirods and icat")
     log.info("requests-oauthlib: cannot upgrade since ver 1.2.0 requires OAuthlib >= 3.0.0 but Flask-OAuthlib 0.9.5 requires OAuthlib < 3.0.0")
-    log.info("injector: cannot upgrade since from 0.13+ passing keyword arguments to inject is no longer supported")
-    log.info("flask_injector: cannot upgarde since from 0.12.0 dropped compatibiliy with injector < 0.13.2")
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
     log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 
