@@ -38,7 +38,7 @@ setup(
         "python-dateutil",
         "pytz",
         "loguru",
-        "better_exceptions",
+        "pretty_errors",
         "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
