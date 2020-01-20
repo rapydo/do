@@ -49,7 +49,7 @@ def check_updates(category, lib):
         print('https://pypi.org/project/{}/{}'.format(token[0], token[1]))
     elif category in ['compose', 'Dockerfile']:
         token = lib.split(":")
-        print("https://hub.docker.com/_/{}".format(token[0]))
+        print("https://hub.docker.com/_/{}?tab=tags".format(token[0]))
     elif category in ['package.json', 'npm']:
         token = lib.split(":")
         print("https://www.npmjs.com/package/{}".format(token[0]))

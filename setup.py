@@ -33,7 +33,7 @@ setup(
         ],
     },
     install_requires=[
-        "docker-compose==1.25.1-rc1",
+        "docker-compose==1.25.1",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
@@ -42,8 +42,6 @@ setup(
         "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
-        # "requests==2.21.0",
-        # "PyYAML==3.13",
         "plumbum",
         "glom",
         "gitpython==3.0.5",
