@@ -149,7 +149,6 @@ class Application(object):
                 "Current group ID: {}", self.current_gid
             )
 
-
         if not skip_check_perm:
             self.inspect_permissions()
 
@@ -482,13 +481,20 @@ Verify that you are in the right folder, now you are in: {}{}
 
         required_files = [
             'confs',
+            'confs/commons.yml',
+            'confs/development.yml',
+            'confs/production.yml',
             'backend',
             'backend/apis',
             'backend/models',
             'backend/tests',
         ]
         # Deprecated on 0.7.0
-        obsolete_files = ['backend/swagger/models.yaml', 'frontend/custom.ts']
+        obsolete_files = [
+            'backend/swagger/models.yaml',
+            'confs/debug.yml',
+            'frontend/custom.ts'
+        ]
 
         if self.frontend is not None:
             required_files.extend(
@@ -862,7 +868,7 @@ Verify that you are in the right folder, now you are in: {}{}
                     "'--mode' option is deprecated, please use the new '--stack' option instead. Please also note that '--stack debug' and '--stack production' are automatically defaulted by the '--production' flag.")
 
         if stack is None:
-            stack = "production" if self.production else "debug"
+            stack = "production" if self.production else "development"
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
