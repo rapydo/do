@@ -2437,6 +2437,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
             'GRAPHDB_PASSWORD': ['neo4j'],
             'IRODS_ANONYMOUS': ['icat'],
+            'AUTH_DEFAULT_PASSWORD': ['backend'],
+            'AUTH_DEFAULT_USERNAME': ['backend'],
         }
 
     @staticmethod
