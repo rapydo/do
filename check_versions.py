@@ -110,6 +110,18 @@ def check_versions(skip_angular):
                             if "npm" not in dependencies[service]:
                                 dependencies[service]["npm"] = []
                             dependencies[service]["npm"].append(t)
+                elif 'RUN pip install' in line or 'RUN pip3 install' in line:
+                    if line.startswith("#"):
+                        continue
+                    tokens = line.split(" ")
+                    for t in tokens:
+                        t = t.strip()
+                        if '==' in t:
+                            if service not in dependencies:
+                                dependencies[service] = {}
+                            if "pip" not in dependencies[service]:
+                                dependencies[service]["pip"] = []
+                            dependencies[service]["pip"].append(t)
                 elif 'ENV ACMEV' in line:
                     line = line.replace("ENV ACMEV", "").strip()
                     line = line.replace("\"", "").strip()
