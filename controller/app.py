@@ -2435,7 +2435,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'RABBITMQ_PASSWORD': ['rabbit'],
             'ALCHEMY_USER': ['postgres', 'mariadb'],
             'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
-            'GRAPHDB_PASSWORD': ['neo4j'],
+            'NEO4J_PASSWORD': ['neo4j'],
             'IRODS_ANONYMOUS': ['icat'],
             'AUTH_DEFAULT_PASSWORD': ['backend'],
             'AUTH_DEFAULT_USERNAME': ['backend'],
@@ -2444,7 +2444,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     @staticmethod
     def normalize_placeholder_variable(key):
         if key == 'NEO4J_AUTH':
-            return 'GRAPHDB_PASSWORD'
+            return 'NEO4J_PASSWORD'
 
         if key == 'POSTGRES_USER':
             return 'ALCHEMY_USER'
