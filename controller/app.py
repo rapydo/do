@@ -1084,9 +1084,9 @@ Verify that you are in the right folder, now you are in: {}{}
                     )
                     rebuilt = True
                 else:
-                    message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services {}".format(build.get('service'))
-                    message += " build --rebuild-templates"
+                    message += "\nUpdate it with:\n$ rapydo --services {} pull".format(
+                        build.get('service')
+                    )
                     log.warning(message)
 
         if found_obsolete == 0:
@@ -1174,9 +1174,9 @@ Verify that you are in the right folder, now you are in: {}{}
                         force_pull=True
                     )
                 else:
-                    message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services {} build".format(
-                        build.get('service'))
+                    message += "\nUpdate it with:\n$ rapydo --services {} pull".format(
+                        build.get('service')
+                    )
                     log.warning(message)
 
         if found_obsolete == 0:
