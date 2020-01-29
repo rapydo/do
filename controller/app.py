@@ -1084,7 +1084,7 @@ Verify that you are in the right folder, now you are in: {}{}
                     )
                     rebuilt = True
                 else:
-                    message += "\nUpdate it with:\n$ rapydo --services {} pull".format(
+                    message += "\nUpdate it with: rapydo --services {} pull".format(
                         build.get('service')
                     )
                     log.warning(message)
@@ -1174,7 +1174,7 @@ Verify that you are in the right folder, now you are in: {}{}
                         force_pull=True
                     )
                 else:
-                    message += "\nUpdate it with:\n$ rapydo --services {} pull".format(
+                    message += "\nUpdate it with: rapydo --services {} pull".format(
                         build.get('service')
                     )
                     log.warning(message)
