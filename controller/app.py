@@ -2092,7 +2092,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     "Please downgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
 
-            print("\n\033[1;31mrapydo install --git {}\033[0m".format(
+            print("\n\033[1;31mrapydo install {}\033[0m".format(
                 self.rapydo_version))
 
     def read_conf_files(self, filename):
