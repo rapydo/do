@@ -1229,18 +1229,14 @@ Verify that you are in the right folder, now you are in: {}{}
             os.makedirs(karma_coverage_dir)
             log.verbose("{} folder not found, created", karma_coverage_dir)
 
-    def get_services(self, key='services', sep=',', default=None):
+    def get_services(self, default):
 
-        value = self.current_args.get(key).split(sep)
-        if default is None:
-            return value
+        value = self.current_args.get('services')
 
-        # check if value is equal to the services default from the configuration
-        config_default = glom(self.arguments.parse_conf, "options.services.default")
-        if value == [config_default]:
+        if value is None:
             return default
 
-        return value
+        return value.split(',')
 
     @staticmethod
     def read_env():

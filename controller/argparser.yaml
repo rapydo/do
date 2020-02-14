@@ -68,7 +68,6 @@ options:
     alias: s
     type: str
     metavalue: SERVICES_COMMA_SEPARATED
-    default: active services
     help: list of services referring to a command
 
   # deprecated since 0.7.0

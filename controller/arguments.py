@@ -169,7 +169,7 @@ class ArgParser(object):
 
         # Mix with parse_conf
         for key, value in pinit_conf.items():
-            value = pinit_conf.get(key, None)
+            # value = pinit_conf.get(key, None)
 
             if value is None:
                 continue
