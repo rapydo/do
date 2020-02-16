@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import yaml
 from collections import OrderedDict
+import yaml
 from controller import log
 
 PROJECTS_DEFAULTS_FILE = 'projects_defaults.yaml'

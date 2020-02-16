@@ -4,16 +4,17 @@ import os
 import sys
 import time
 import re
-from distutils.dir_util import copy_tree
 import shutil
 import urllib3
 import requests
-from glom import glom
+import pytz
+from distutils.dir_util import copy_tree
+from distutils.version import LooseVersion
 from collections import OrderedDict
 from datetime import datetime
 import dateutil.parser
-import pytz
-from distutils.version import LooseVersion
+from glom import glom
+
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller import project
