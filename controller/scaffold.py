@@ -197,7 +197,7 @@ class EndpointScaffold(object):
 
     @staticmethod
     def save_template(filename, content):
-        with open(filename, "w") as fh:
+        with open(filename, "wb") as fh:
             fh.write(content)
 
     def render(self, filename, data, outdir='custom', template_filename=None):
