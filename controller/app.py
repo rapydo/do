@@ -345,7 +345,7 @@ class Application:
         # Checking version of docker server, since docker client is not affected
         # and the two versions can differ
         v = executable(
-            executable='docker',
+           'docker',
             option=["version", "--format", "'{{.Server.Version}}'"],
             parse_ver=True,
         )
@@ -383,7 +383,7 @@ To fix this issue, please update docker to version {}+
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
         from controller.packages import executable
-        found_version = executable(executable=program)
+        found_version = executable(program)
         if found_version is None:
 
             hints = ""

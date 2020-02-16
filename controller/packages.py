@@ -55,16 +55,16 @@ def check_version(package_name):
     return None
 
 
-def executable(executable, option=DEFAULT_BIN_OPTION, parse_ver=False):
+def executable(exec_cmd, option=DEFAULT_BIN_OPTION, parse_ver=False):
 
     from subprocess import check_output
 
     try:
         if isinstance(option, list):
-            cmd = [executable]
+            cmd = [exec_cmd]
             cmd.extend(option)
         else:
-            cmd = [executable, option]
+            cmd = [exec_cmd, option]
         stdout = check_output(cmd)
         output = stdout.decode()
     except OSError:
