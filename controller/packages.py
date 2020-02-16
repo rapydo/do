@@ -6,12 +6,11 @@
 
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
+from sultan.api import Sultan
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
-
-from sultan.api import Sultan
 
 DEFAULT_BIN_OPTION = '--version'
 
