@@ -1985,7 +1985,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if os.path.exists(project_name):
             log.exit("{} folder already exists, unable to continue", project_name)
 
-        os.mkdir(project_name)
+        os.makedirs(project_name)
 
         if not os.path.exists(project_name):
             log.exit("Errors creating {} folder", project_name)
@@ -2006,7 +2006,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         data_dir = os.path.join(project_name, 'data')
         if not os.path.exists(data_dir):
-            os.mkdir(data_dir)
+            os.makedirs(data_dir)
 
         shutil.rmtree(template_tmp_path)
 
@@ -2024,7 +2024,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if not os.path.exists(vanilla_dir):
 
-            os.mkdir(vanilla_dir)
+            os.makedirs(vanilla_dir)
             copy_tree(template_path, vanilla_dir)
             log.info("Copy from {}", template_path)
 
