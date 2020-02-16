@@ -248,13 +248,13 @@ def check_versions(skip_angular=False):
 
                     if skipped:
                         log.debug("Filtering out {}", d)
-            if category in filtered_dependencies[service]:
-                if len(filtered_dependencies[service][category]) == 0:
-                    log.debug("Removing empty list: {}.{}", service, category)
-                    del filtered_dependencies[service][category]
-            if len(filtered_dependencies[service]) == 0:
-                log.debug("Removing empty list: {}", service)
-                del filtered_dependencies[service]
+                if category in filtered_dependencies[service]:
+                    if len(filtered_dependencies[service][category]) == 0:
+                        log.debug("Removing empty list: {}.{}", service, category)
+                        del filtered_dependencies[service][category]
+                if len(filtered_dependencies[service]) == 0:
+                    log.debug("Removing empty list: {}", service)
+                    del filtered_dependencies[service]
         else:
             log.warning("Unknown dependencies type: {}", type(service_dependencies))
 
