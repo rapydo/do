@@ -18,7 +18,7 @@ from controller.conf_utilities import load_yaml_file
 from controller import log
 
 
-class EndpointScaffold(object):
+class EndpointScaffold:
     """
     Scaffold necessary directories and file to create
     a new endpoint within the RAPyDo framework

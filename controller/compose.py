@@ -24,7 +24,7 @@ from controller import log
 compose_log = 'docker-compose command: '
 
 
-class Compose(object):
+class Compose:
 
     # def __init__(self, files, options={}):
     # def __init__(self, files, net=None):

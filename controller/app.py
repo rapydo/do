@@ -65,7 +65,7 @@ def get_current_gid():
         return 0
 
 
-class Application(object):
+class Application:
 
     """
     ## Main application class

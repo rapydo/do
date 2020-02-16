@@ -16,7 +16,7 @@ from controller.conf_utilities import load_yaml_file
 from controller import log
 
 
-class ArgParser(object):
+class ArgParser:
     def __init__(self, args=None):
         if args is None:
             args = sys.argv
