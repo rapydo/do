@@ -2,9 +2,10 @@
 
 import os
 import sys
-import pytz
 from datetime import datetime
 from urllib.parse import urlparse
+
+import pytz
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
