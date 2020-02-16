@@ -62,7 +62,7 @@ def check_updates(category, lib):
 
 @click.command()
 @click.option('--skip-angular', is_flag=True, default=False)
-def check_versions(skip_angular):
+def check_versions(skip_angular=False):
 
     dependencies = {}
 
