@@ -50,7 +50,7 @@ setup(
         # "PyYAML==3.13",
         "plumbum",
         "glom",
-        "gitpython==3.0.2",
+        "gitpython==3.0.8",
 
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
