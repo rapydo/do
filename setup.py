@@ -25,7 +25,8 @@ setup(
             'templates/unittests.py',
         ],
     },
-    python_requires='>=3.4.3',
+    # End-of-life: 2020-09-13
+    python_requires='>=3.5.0',
     entry_points={
         'console_scripts': [
             'rapydo={}'.format(app),
