@@ -2436,6 +2436,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'IRODS_ANONYMOUS': ['icat'],
             'AUTH_DEFAULT_PASSWORD': ['backend'],
             'AUTH_DEFAULT_USERNAME': ['backend'],
+            'SMTP_PORT': ['backend'],
+            'SMTP_ADMIN': ['backend'],
+            'SMTP_NOREPLY': ['backend'],
+            'SMTP_HOST': ['backend'],
+            'SMTP_USERNAME': ['backend'],
+            'SMTP_PASSWORD': ['backend'],
         }
 
     @staticmethod
