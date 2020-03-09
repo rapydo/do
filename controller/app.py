@@ -1377,7 +1377,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             serv = self.vars_to_services_mapping.get(key)
             if serv is None:
-                log.exit("Unexpected error, cannot find a service mapping with {}", key)
+                log.exit(
+                    "Missing variable: {}. Cannot find a service mapping this variable",
+                    key
+                )
+
             active_serv = []
             for i in serv:
                 if i in self.active_services:
