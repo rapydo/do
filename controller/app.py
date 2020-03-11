@@ -191,6 +191,9 @@ class Application:
             if self.update:
                 # Reading again the configuration, it may change with git updates
                 self.read_specs()
+
+            self.hostname = self.current_args.get('hostname', 'localhost')
+
             self.make_env()
 
             # Compose services and variables
@@ -1268,7 +1271,7 @@ Verify that you are in the right folder, now you are in: {}{}
         env = self.vars.get('env')
         if env is None:
             env = {}
-        env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
+        env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
         # Relative paths from ./submodules/rapydo-confs/confs
         env['SUBMODULE_DIR'] = "../.."
@@ -1638,10 +1641,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc = self.get_compose(files=self.files)
 
-        host = self.current_args.get('hostname')
         uris = {
             'swaggerui':
-            'http://{}?docExpansion=none'.format(host)
+            'http://{}?docExpansion=none'.format(self.hostname)
         }
 
         uri = uris.get(service)
@@ -1790,17 +1792,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             elif not os.path.exists(key):
                 log.exit("Invalid key file (your provided {})", key)
 
-        meta = glom(
-            self.arguments.parse_conf,
-            "subcommands.ssl-certificate.container_exec",
-            default={},
-        )
-
-        # Verify all is good
-        assert meta.pop('name') == 'letsencrypt'
-
-        service = meta.get('service')
-        user = meta.get('user', None)
+        service = "proxy"
 
         if chain is not None and key is not None:
 
@@ -1822,33 +1814,29 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             return True
 
-        command = meta.get('command', None)
+        command = "/bin/bash updatecertificates"
         dc = self.get_compose(files=self.files)
 
         if self.current_args.get('volatile'):
-            # return dc.command('up', options)
             return dc.start_containers(["certificates-proxy"], detach=False)
 
         if self.current_args.get('force'):
             command = "{} --force".format(command)
 
-        return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
+        command = "{} {}".format(command, self.hostname)
 
-    def _ssl_dhparam(self):
-        meta = glom(
-            self.arguments.parse_conf,
-            "subcommands.ssl-dhparam.container_exec",
-            default={},
+        return dc.exec_command(
+            service,
+            user="root",
+            command=command,
+            disable_tty=no_tty
         )
 
-        # Verify all is good
-        assert meta.pop('name') == 'dhparam'
+    def _ssl_dhparam(self):
 
-        service = meta.get('service')
-        user = meta.get('user', None)
-        command = meta.get('command', None)
+        command = "openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096"
         dc = self.get_compose(files=self.files)
-        return dc.exec_command(service, user=user, command=command)
+        return dc.exec_command("proxy", user="root", command=command)
 
     def _list(self):
 
