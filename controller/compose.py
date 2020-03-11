@@ -10,7 +10,7 @@ import os
 import shlex
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
-from import NetworkConfigChangedError
+from compose.network import NetworkConfigChangedError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
