@@ -194,7 +194,12 @@ class Compose:
         try:
             return self.command('up', options)
         except NetworkConfigChangedError as e:
-            log.exit("{}.\nRemove previously created network and try again", e)
+            log.exit(
+                "{}.\n{} ({})",
+                e,
+                "Remove previously created networks and try again",
+                "you can use rapydo clean or docker system prune"
+            )
 
     def create_volatile_container(
         self, service, command=None, publish=None, detach=False
