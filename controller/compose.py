@@ -194,9 +194,7 @@ class Compose:
         try:
             return self.command('up', options)
         except NetworkConfigChangedError as e:
-            log.exit(
-                "{}: {}. Remove previously created network and try again", type(e), e
-            )
+            log.exit("{}.\nRemove previously created network and try again", e)
 
     def create_volatile_container(
         self, service, command=None, publish=None, detach=False
