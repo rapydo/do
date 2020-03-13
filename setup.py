@@ -46,6 +46,8 @@ setup(
         "plumbum",
         "glom",
         "gitpython==3.0.8",
+        # Ubuntu 18 has 4.0 installed, not compatible with gitpython
+        "gitdb2==3.0.1",
         "pip>=10.0.0"
 
     ],
