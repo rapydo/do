@@ -40,17 +40,10 @@ def install(package, editable=False, user=False, use_pip3=True):
 def check_version(package_name):
 
     # Don't import before or pip will mess up everything! Really crazy
-    # requires pip 10+
     from pip._internal.utils.misc import get_installed_distributions
     for pkg in get_installed_distributions(local_only=True, user_only=False):
-        # if pkg.get('_key') == package_name:
         if pkg._key == package_name:  # pylint:disable=protected-access
-            # return pkg.get('_version')
-            try:
-                return pkg._version  # pylint:disable=protected-access
-            except AttributeError:
-                # fix for python 3.4
-                return pkg.__dict__
+            return pkg._version  # pylint:disable=protected-access
 
     return None
 

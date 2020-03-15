@@ -2372,7 +2372,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'collections',
             'datetime',
             'dateutil',
-            'elasticsearch_dsl',
             'email',
             'errno',
             'flask',
