@@ -18,6 +18,7 @@ script:
 - TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests
 - echo 'fixes:' > codecov.yml
 - echo '  - "/home/travis/build/rapydo/do/::"' >> codecov.yml
+- cat coverage.xml
 - bash <(curl -s https://codecov.io/bash) -y codecov.yml
 after_success:
 # - coveralls
