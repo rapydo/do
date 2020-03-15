@@ -15,9 +15,10 @@ script:
 - git checkout $BRANCH
 - mkdir -p data
 - export LOGURU_LEVEL=DEBUG
-- TESTING=1 py.test -s -x --cov=controller ../tests
+- TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests
 after_success:
-- coveralls
+# - coveralls
+- bash <(curl -s https://codecov.io/bash)
 - pwd
 jobs:
   include:
