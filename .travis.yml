@@ -18,60 +18,62 @@ script:
 - TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests
 after_success:
 # - coveralls
+- echo 'fixes:' > codecov.yml
+- echo '  - "/home/travis/build/rapydo/do/::controller/"' >> codecov.yml
 - bash <(curl -s https://codecov.io/bash)
 - pwd
 jobs:
   include:
 
-  - stage: test
-    python: 3.5
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - stage: test
+  #   python: 3.5
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.6
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.7
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.8
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-  - python: 3.5
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.6
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
 
   - python: 3.7
-    dist: xenial
+    dist: bionic
     env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.8
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.8
+  #   dist: bionic
+  #   env:
+  #   - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.5
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.5
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.6
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
 
-  - python: 3.6
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
+  # - python: 3.7
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.8
+  #   dist: xenial
+  #   env:
+  #   - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.5
+  #   dist: trusty
+  #   env:
+  #   - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
+
+  # - python: 3.6
+  #   dist: trusty
+  #   env:
+  #   - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
 
   # - python: 3.5
   #   os: osx
