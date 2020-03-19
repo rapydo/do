@@ -1053,7 +1053,7 @@ Verify that you are in the right folder, now you are in: {}{}
                     image_tag,
                 )
                 if self.action == 'check':
-                    message += "\nSuggestion: execute the init command"
+                    message += "\nSuggestion: execute the pull command"
                     log.exit(message)
                 else:
                     log.debug(message)
