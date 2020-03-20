@@ -52,11 +52,6 @@ options:
     default: False
     help: Exclude project common configuration from rapydo stack
 
-  # collect-logs:
-  #   type: bool
-  #   default: False
-  #   help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
-
   hostname:
     alias: H
     type: str

@@ -879,7 +879,6 @@ Verify that you are in the right folder, now you are in: {}{}
             ANGULARJS: self.frontend == ANGULARJS and load_frontend,
             ANGULAR: self.frontend == ANGULAR and load_frontend,
             REACT: self.frontend == REACT and load_frontend,
-            'logging': self.current_args.get('collect_logs'),
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': "{}.yml".format(stack),
