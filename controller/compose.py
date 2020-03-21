@@ -10,6 +10,7 @@ import os
 import shlex
 from compose.service import BuildError
 from compose.project import NoSuchService, ProjectError
+from compose.network import NetworkConfigChangedError
 import compose.errors as cerrors
 import compose.cli.errors as clierrors
 import compose.config.errors as conferrors
@@ -24,7 +25,7 @@ from controller import log
 compose_log = 'docker-compose command: '
 
 
-class Compose(object):
+class Compose:
 
     # def __init__(self, files, options={}):
     # def __init__(self, files, net=None):
@@ -190,7 +191,15 @@ class Compose(object):
             '--scale': scale,
         }
 
-        return self.command('up', options)
+        try:
+            return self.command('up', options)
+        except NetworkConfigChangedError as e:
+            log.exit(
+                "{}.\n{} ({})",
+                e,
+                "Remove previously created networks and try again",
+                "you can use rapydo clean or docker system prune"
+            )
 
     def create_volatile_container(
         self, service, command=None, publish=None, detach=False

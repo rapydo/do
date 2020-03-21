@@ -6,7 +6,7 @@ from docker.errors import APIError
 from controller import log
 
 
-class Dock(object):
+class Dock:
 
     client = None
 

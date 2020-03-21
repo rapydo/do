@@ -16,7 +16,7 @@ from controller.conf_utilities import load_yaml_file
 from controller import log
 
 
-class ArgParser(object):
+class ArgParser:
     def __init__(self, args=None):
         if args is None:
             args = sys.argv
@@ -169,7 +169,7 @@ class ArgParser(object):
 
         # Mix with parse_conf
         for key, value in pinit_conf.items():
-            value = pinit_conf.get(key, None)
+            # value = pinit_conf.get(key, None)
 
             if value is None:
                 continue

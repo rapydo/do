@@ -2,9 +2,10 @@
 
 import os
 import sys
-import pytz
 from datetime import datetime
 from urllib.parse import urlparse
+
+import pytz
 from git import Repo
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
@@ -156,9 +157,10 @@ Suggestion: remove {} and execute the init command
             if check_only:
                 return False
             log.exit(
-                """{}: wrong branch {}, expected {}.
-Suggestion:\n\ncd {}; git fetch; git checkout {}; cd -;\n""".format(
-                    path, active_branch, branch, gitobj.working_dir, branch)
+                """{p}: wrong branch {ab}, expected {b}.
+Suggestion:\n\ncd {wdir}; git fetch; git checkout {b}; cd -;\n""".format(
+                    p=path, ab=active_branch, b=branch, wdir=gitobj.working_dir
+                )
             )
     return True
 

@@ -52,11 +52,6 @@ options:
     default: False
     help: Exclude project common configuration from rapydo stack
 
-  # collect-logs:
-  #   type: bool
-  #   default: False
-  #   help: Collect logs from containers on ELK pipeline - NO LONGER WORKING
-
   hostname:
     alias: H
     type: str
@@ -68,7 +63,6 @@ options:
     alias: s
     type: str
     metavalue: SERVICES_COMMA_SEPARATED
-    default: active services
     help: list of services referring to a command
 
   # deprecated since 0.7.0
@@ -229,11 +223,6 @@ subcommands:
     description: execute predefined custom commands inside containers
   ssl-certificate:
     description: issue a production certificate with service Letsencrypt
-    container_exec:
-      name: letsencrypt
-      command: /bin/bash updatecertificates
-      service: proxy
-      user: root
     suboptions:
       chain-file:
         type: str
@@ -262,11 +251,6 @@ subcommands:
         help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
   ssl-dhparam:
     description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
-    container_exec:
-      name: dhparam
-      command: openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096
-      service: proxy
-      user: root
   interfaces:
     description: run off some predefined interfaces to services
     suboptions:

@@ -6,12 +6,11 @@
 
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
+from sultan.api import Sultan
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
-
-from sultan.api import Sultan
 
 DEFAULT_BIN_OPTION = '--version'
 
@@ -41,31 +40,24 @@ def install(package, editable=False, user=False, use_pip3=True):
 def check_version(package_name):
 
     # Don't import before or pip will mess up everything! Really crazy
-    # requires pip 10+
     from pip._internal.utils.misc import get_installed_distributions
     for pkg in get_installed_distributions(local_only=True, user_only=False):
-        # if pkg.get('_key') == package_name:
         if pkg._key == package_name:  # pylint:disable=protected-access
-            # return pkg.get('_version')
-            try:
-                return pkg._version  # pylint:disable=protected-access
-            except AttributeError:
-                # fix for python 3.4
-                return pkg.__dict__
+            return pkg._version  # pylint:disable=protected-access
 
     return None
 
 
-def executable(executable, option=DEFAULT_BIN_OPTION, parse_ver=False):
+def executable(exec_cmd, option=DEFAULT_BIN_OPTION, parse_ver=False):
 
     from subprocess import check_output
 
     try:
         if isinstance(option, list):
-            cmd = [executable]
+            cmd = [exec_cmd]
             cmd.extend(option)
         else:
-            cmd = [executable, option]
+            cmd = [exec_cmd, option]
         stdout = check_output(cmd)
         output = stdout.decode()
     except OSError:

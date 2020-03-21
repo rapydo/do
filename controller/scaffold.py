@@ -18,7 +18,7 @@ from controller.conf_utilities import load_yaml_file
 from controller import log
 
 
-class EndpointScaffold(object):
+class EndpointScaffold:
     """
     Scaffold necessary directories and file to create
     a new endpoint within the RAPyDo framework
@@ -197,7 +197,7 @@ class EndpointScaffold(object):
 
     @staticmethod
     def save_template(filename, content):
-        with open(filename, "w") as fh:
+        with open(filename, "wb") as fh:
             fh.write(content)
 
     def render(self, filename, data, outdir='custom', template_filename=None):

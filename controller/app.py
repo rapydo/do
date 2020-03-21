@@ -4,16 +4,17 @@ import os
 import sys
 import time
 import re
-from distutils.dir_util import copy_tree
 import shutil
 import urllib3
 import requests
-from glom import glom
+import pytz
+from distutils.dir_util import copy_tree
+from distutils.version import LooseVersion
 from collections import OrderedDict
 from datetime import datetime
 import dateutil.parser
-import pytz
-from distutils.version import LooseVersion
+from glom import glom
+
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller import project
@@ -65,7 +66,7 @@ def get_current_gid():
         return 0
 
 
-class Application(object):
+class Application:
 
     """
     ## Main application class
@@ -149,7 +150,6 @@ class Application(object):
                 "Current group ID: {}", self.current_gid
             )
 
-
         if not skip_check_perm:
             self.inspect_permissions()
 
@@ -191,6 +191,9 @@ class Application(object):
             if self.update:
                 # Reading again the configuration, it may change with git updates
                 self.read_specs()
+
+            self.hostname = self.current_args.get('hostname', 'localhost')
+
             self.make_env()
 
             # Compose services and variables
@@ -345,7 +348,7 @@ class Application(object):
         # Checking version of docker server, since docker client is not affected
         # and the two versions can differ
         v = executable(
-            executable='docker',
+           'docker',
             option=["version", "--format", "'{{.Server.Version}}'"],
             parse_ver=True,
         )
@@ -383,7 +386,7 @@ To fix this issue, please update docker to version {}+
         # Otherwise pip will go crazy
         # (we cannot understand why, but it does!)
         from controller.packages import executable
-        found_version = executable(executable=program)
+        found_version = executable(program)
         if found_version is None:
 
             hints = ""
@@ -482,13 +485,20 @@ Verify that you are in the right folder, now you are in: {}{}
 
         required_files = [
             'confs',
+            'confs/commons.yml',
+            'confs/development.yml',
+            'confs/production.yml',
             'backend',
             'backend/apis',
             'backend/models',
             'backend/tests',
         ]
         # Deprecated on 0.7.0
-        obsolete_files = ['backend/swagger/models.yaml', 'frontend/custom.ts']
+        obsolete_files = [
+            'backend/swagger/models.yaml',
+            'confs/debug.yml',
+            'frontend/custom.ts'
+        ]
 
         if self.frontend is not None:
             required_files.extend(
@@ -862,14 +872,13 @@ Verify that you are in the right folder, now you are in: {}{}
                     "'--mode' option is deprecated, please use the new '--stack' option instead. Please also note that '--stack debug' and '--stack production' are automatically defaulted by the '--production' flag.")
 
         if stack is None:
-            stack = "production" if self.production else "debug"
+            stack = "production" if self.production else "development"
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
             ANGULARJS: self.frontend == ANGULARJS and load_frontend,
             ANGULAR: self.frontend == ANGULAR and load_frontend,
             REACT: self.frontend == REACT and load_frontend,
-            'logging': self.current_args.get('collect_logs'),
             'commons': load_commons,
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': "{}.yml".format(stack),
@@ -1043,7 +1052,7 @@ Verify that you are in the right folder, now you are in: {}{}
                     image_tag,
                 )
                 if self.action == 'check':
-                    message += "\nSuggestion: execute the init command"
+                    message += "\nSuggestion: execute the pull command"
                     log.exit(message)
                 else:
                     log.debug(message)
@@ -1078,9 +1087,9 @@ Verify that you are in the right folder, now you are in: {}{}
                     )
                     rebuilt = True
                 else:
-                    message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services {}".format(build.get('service'))
-                    message += " build --rebuild-templates"
+                    message += "\nUpdate it with: rapydo --services {} pull".format(
+                        build.get('service')
+                    )
                     log.warning(message)
 
         if found_obsolete == 0:
@@ -1168,9 +1177,9 @@ Verify that you are in the right folder, now you are in: {}{}
                         force_pull=True
                     )
                 else:
-                    message += "\nRebuild it with:\n"
-                    message += "$ rapydo --services {} build".format(
-                        build.get('service'))
+                    message += "\nUpdate it with: rapydo --services {} pull".format(
+                        build.get('service')
+                    )
                     log.warning(message)
 
         if found_obsolete == 0:
@@ -1223,18 +1232,14 @@ Verify that you are in the right folder, now you are in: {}{}
             os.makedirs(karma_coverage_dir)
             log.verbose("{} folder not found, created", karma_coverage_dir)
 
-    def get_services(self, key='services', sep=',', default=None):
+    def get_services(self, default):
 
-        value = self.current_args.get(key).split(sep)
-        if default is None:
-            return value
+        value = self.current_args.get('services')
 
-        # check if value is equal to the services default from the configuration
-        config_default = glom(self.arguments.parse_conf, "options.services.default")
-        if value == [config_default]:
+        if value is None:
             return default
 
-        return value
+        return value.split(',')
 
     @staticmethod
     def read_env():
@@ -1265,7 +1270,7 @@ Verify that you are in the right folder, now you are in: {}{}
         env = self.vars.get('env')
         if env is None:
             env = {}
-        env['PROJECT_DOMAIN'] = self.current_args.get('hostname', 'localhost')
+        env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
         # Relative paths from ./submodules/rapydo-confs/confs
         env['SUBMODULE_DIR'] = "../.."
@@ -1374,7 +1379,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             serv = self.vars_to_services_mapping.get(key)
             if serv is None:
-                log.exit("Unexpected error, cannot find a service mapping with {}", key)
+                log.exit(
+                    "Missing variable: {}. Cannot find a service mapping this variable",
+                    key
+                )
+
             active_serv = []
             for i in serv:
                 if i in self.active_services:
@@ -1631,10 +1640,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc = self.get_compose(files=self.files)
 
-        host = self.current_args.get('hostname')
         uris = {
             'swaggerui':
-            'http://{}?docExpansion=none'.format(host)
+            'http://{}?docExpansion=none'.format(self.hostname)
         }
 
         uri = uris.get(service)
@@ -1679,8 +1687,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 'backend',
                 'celery',
                 'celeryui',
-                'celery-beat',
-                'restclient'
+                'celery-beat'
             ]
 
             if service in developer_services:
@@ -1784,17 +1791,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             elif not os.path.exists(key):
                 log.exit("Invalid key file (your provided {})", key)
 
-        meta = glom(
-            self.arguments.parse_conf,
-            "subcommands.ssl-certificate.container_exec",
-            default={},
-        )
-
-        # Verify all is good
-        assert meta.pop('name') == 'letsencrypt'
-
-        service = meta.get('service')
-        user = meta.get('user', None)
+        service = "proxy"
 
         if chain is not None and key is not None:
 
@@ -1816,33 +1813,29 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             return True
 
-        command = meta.get('command', None)
+        command = "/bin/bash updatecertificates"
         dc = self.get_compose(files=self.files)
 
         if self.current_args.get('volatile'):
-            # return dc.command('up', options)
             return dc.start_containers(["certificates-proxy"], detach=False)
 
         if self.current_args.get('force'):
             command = "{} --force".format(command)
 
-        return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
+        command = "{} {}".format(command, self.hostname)
 
-    def _ssl_dhparam(self):
-        meta = glom(
-            self.arguments.parse_conf,
-            "subcommands.ssl-dhparam.container_exec",
-            default={},
+        return dc.exec_command(
+            service,
+            user="root",
+            command=command,
+            disable_tty=no_tty
         )
 
-        # Verify all is good
-        assert meta.pop('name') == 'dhparam'
+    def _ssl_dhparam(self):
 
-        service = meta.get('service')
-        user = meta.get('user', None)
-        command = meta.get('command', None)
+        command = "openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096"
         dc = self.get_compose(files=self.files)
-        return dc.exec_command(service, user=user, command=command)
+        return dc.exec_command("proxy", user="root", command=command)
 
     def _list(self):
 
@@ -1984,7 +1977,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if os.path.exists(project_name):
             log.exit("{} folder already exists, unable to continue", project_name)
 
-        os.mkdir(project_name)
+        os.makedirs(project_name)
 
         if not os.path.exists(project_name):
             log.exit("Errors creating {} folder", project_name)
@@ -2005,7 +1998,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         data_dir = os.path.join(project_name, 'data')
         if not os.path.exists(data_dir):
-            os.mkdir(data_dir)
+            os.makedirs(data_dir)
 
         shutil.rmtree(template_tmp_path)
 
@@ -2023,7 +2016,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if not os.path.exists(vanilla_dir):
 
-            os.mkdir(vanilla_dir)
+            os.makedirs(vanilla_dir)
             copy_tree(template_path, vanilla_dir)
             log.info("Copy from {}", template_path)
 
@@ -2087,7 +2080,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     "Please downgrade rapydo to version {} or modify this project".format(self.rapydo_version)
                 )
 
-            print("\n\033[1;31mrapydo install --git {}\033[0m".format(
+            print("\n\033[1;31mrapydo install {}\033[0m".format(
                 self.rapydo_version))
 
     def read_conf_files(self, filename):
@@ -2371,26 +2364,23 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'abc',
             'attr',
             'base64',
-            'better_exceptions',
+            'pretty_errors',
             'bravado_core',
             'celery',
             'click',
             'collections',
             'datetime',
             'dateutil',
-            'elasticsearch_dsl',
             'email',
             'errno',
             'flask',
-            'flask_injector',
-            'flask_oauthlib',
             'flask_restful',
             'flask_sqlalchemy',
+            'authlib',
             'functools',
             'glob',
             'hashlib',
             'hmac',
-            'injector',
             'inspect',
             'io',
             'irods',
@@ -2432,14 +2422,22 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'RABBITMQ_PASSWORD': ['rabbit'],
             'ALCHEMY_USER': ['postgres', 'mariadb'],
             'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
-            'GRAPHDB_PASSWORD': ['neo4j'],
+            'NEO4J_PASSWORD': ['neo4j'],
             'IRODS_ANONYMOUS': ['icat'],
+            'AUTH_DEFAULT_PASSWORD': ['backend'],
+            'AUTH_DEFAULT_USERNAME': ['backend'],
+            'SMTP_PORT': ['backend'],
+            'SMTP_ADMIN': ['backend'],
+            'SMTP_NOREPLY': ['backend'],
+            'SMTP_HOST': ['backend'],
+            'SMTP_USERNAME': ['backend'],
+            'SMTP_PASSWORD': ['backend'],
         }
 
     @staticmethod
     def normalize_placeholder_variable(key):
         if key == 'NEO4J_AUTH':
-            return 'GRAPHDB_PASSWORD'
+            return 'NEO4J_PASSWORD'
 
         if key == 'POSTGRES_USER':
             return 'ALCHEMY_USER'

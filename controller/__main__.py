@@ -4,13 +4,13 @@
     Command line script: main function
 """
 
-import better_exceptions as be
+import pretty_errors
 
 from controller import log
 
 
 def main():
-    be  # pylint:disable=pointless-statement
+    pretty_errors  # pylint:disable=pointless-statement
     try:
         # imported here to avoid uncatched Keyboard Interruptions
         from controller.arguments import ArgParser
@@ -21,7 +21,7 @@ def main():
 
         Application(arguments)
     except KeyboardInterrupt:
-        log.critical("Interrupted by the user")
+        log.info("Interrupted by the user")
     except NotImplementedError as e:
         print('NOT IMPLEMENTED (yet): {}'.format(e))
     else:

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
-# from controller import __version__ as current_version
 
-current_version = "0.7.1"
+current_version = "0.7.2"
 
 main_package = "controller"
 app = '{}.__main__:main'.format(main_package)
@@ -26,7 +25,8 @@ setup(
             'templates/unittests.py',
         ],
     },
-    python_requires='>=3.4.3',
+    # End-of-life: 2020-09-13
+    python_requires='>=3.5.0',
     entry_points={
         'console_scripts': [
             'rapydo={}'.format(app),
@@ -34,20 +34,20 @@ setup(
         ],
     },
     install_requires=[
-        "docker-compose==1.25.1-rc1",
+        "docker-compose==1.25.1",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
         "loguru",
-        "better_exceptions",
+        "pretty_errors",
         "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
-        # "requests==2.21.0",
-        # "PyYAML==3.13",
         "plumbum",
         "glom",
-        "gitpython==3.0.5",
+        "gitpython==3.0.8",
+        # Ubuntu 18 has 4.0 installed, not compatible with gitpython
+        "gitdb2==3.0.1",
         "pip>=10.0.0"
 
     ],
@@ -57,8 +57,13 @@ setup(
         'Intended Audience :: Developers',
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
+        # End-of-life: 2020-09-13
         'Programming Language :: Python :: 3.5',
+        # End-of-life: 2021-12-23
         'Programming Language :: Python :: 3.6',
+        # End-of-life: 2023-06-27
         'Programming Language :: Python :: 3.7',
+        # End-of-life: 2024-10
+        'Programming Language :: Python :: 3.8',
     ]
 )

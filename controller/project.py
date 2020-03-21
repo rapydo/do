@@ -19,8 +19,7 @@ def walk_services(actives, dependecies, index=0):
     index += 1
     if index >= len(actives):
         return actives
-    else:
-        return walk_services(actives, dependecies, index)
+    return walk_services(actives, dependecies, index)
 
 
 def find_active(services):

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import click
 import json
 import os
 import re
-import yaml
 import distutils.core
 from glob import glob
+
+import click
+import yaml
 from prettyprinter import pprint as pp
 from loguru import logger as log
 
@@ -30,7 +31,7 @@ def load_yaml_file(filepath):
 
             return docs[0]
 
-        except Exception as e:
+        except BaseException as e:
 
             log.warning("Failed to read YAML file [{}]: {}", filepath, e)
             return {}
@@ -49,7 +50,7 @@ def check_updates(category, lib):
         print('https://pypi.org/project/{}/{}'.format(token[0], token[1]))
     elif category in ['compose', 'Dockerfile']:
         token = lib.split(":")
-        print("https://hub.docker.com/_/{}".format(token[0]))
+        print("https://hub.docker.com/_/{}?tab=tags".format(token[0]))
     elif category in ['package.json', 'npm']:
         token = lib.split(":")
         print("https://www.npmjs.com/package/{}".format(token[0]))
@@ -62,7 +63,7 @@ def check_updates(category, lib):
 
 @click.command()
 @click.option('--skip-angular', is_flag=True, default=False)
-def check_versions(skip_angular):
+def check_versions(skip_angular=False):
 
     dependencies = {}
 
@@ -110,6 +111,18 @@ def check_versions(skip_angular):
                             if "npm" not in dependencies[service]:
                                 dependencies[service]["npm"] = []
                             dependencies[service]["npm"].append(t)
+                elif 'RUN pip install' in line or 'RUN pip3 install' in line:
+                    if line.startswith("#"):
+                        continue
+                    tokens = line.split(" ")
+                    for t in tokens:
+                        t = t.strip()
+                        if '==' in t:
+                            if service not in dependencies:
+                                dependencies[service] = {}
+                            if "pip" not in dependencies[service]:
+                                dependencies[service]["pip"] = []
+                            dependencies[service]["pip"].append(t)
                 elif 'ENV ACMEV' in line:
                     line = line.replace("ENV ACMEV", "").strip()
                     line = line.replace("\"", "").strip()
@@ -170,7 +183,7 @@ def check_versions(skip_angular):
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ['talib', 'restclient', 'jq', 'react', 'icat']:
+        if service in ['talib', 'react', 'icat']:
             continue
 
         service_dependencies = dependencies[service]
@@ -236,13 +249,13 @@ def check_versions(skip_angular):
 
                     if skipped:
                         log.debug("Filtering out {}", d)
-            if category in filtered_dependencies[service]:
-                if len(filtered_dependencies[service][category]) == 0:
-                    log.debug("Removing empty list: {}.{}", service, category)
-                    del filtered_dependencies[service][category]
-            if len(filtered_dependencies[service]) == 0:
-                log.debug("Removing empty list: {}", service)
-                del filtered_dependencies[service]
+                if category in filtered_dependencies[service]:
+                    if len(filtered_dependencies[service][category]) == 0:
+                        log.debug("Removing empty list: {}.{}", service, category)
+                        del filtered_dependencies[service][category]
+                if len(filtered_dependencies[service]) == 0:
+                    log.debug("Removing empty list: {}", service)
+                    del filtered_dependencies[service]
         else:
             log.warning("Unknown dependencies type: {}", type(service_dependencies))
 
@@ -251,9 +264,6 @@ def check_versions(skip_angular):
     pp(filtered_dependencies)
 
     log.info("Note: very hard to upgrade ubuntu:16.04 from backendirods and icat")
-    log.info("requests-oauthlib: cannot upgrade since ver 1.2.0 requires OAuthlib >= 3.0.0 but Flask-OAuthlib 0.9.5 requires OAuthlib < 3.0.0")
-    log.info("injector: cannot upgrade since from 0.13+ passing keyword arguments to inject is no longer supported")
-    log.info("flask_injector: cannot upgarde since from 0.12.0 dropped compatibiliy with injector < 0.13.2")
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
     log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 
