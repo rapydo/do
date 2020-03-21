@@ -116,7 +116,7 @@ class ArgParser:
 
         # ##########################
         if self.current_args.get("log_level", "DEPRECATED") != "DEPRECATED":
-            # Deprecated since version 0.7.0
+            # Deprecated since 0.7.0
             log.warning(
                 "--log-level parameter is deprecated, set env variable LOGURU_LEVEL")
 

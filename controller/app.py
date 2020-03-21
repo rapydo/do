@@ -295,7 +295,7 @@ class Application:
                 )
 
         if self.current_args.get('development'):
-            # Deprecated since version 0.7.0
+            # Deprecated since 0.7.0
             log.warning(
                 "--development parameter is deprecated, you can stop using it")
 

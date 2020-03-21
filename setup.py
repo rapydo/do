@@ -2,7 +2,7 @@
 
 from setuptools import setup
 
-current_version = "0.7.2"
+current_version = "0.7.3"
 
 main_package = "controller"
 app = '{}.__main__:main'.format(main_package)
