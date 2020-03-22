@@ -111,7 +111,7 @@ class Application:
         # Initial inspection
         self.get_args()
         if not self.print_version:
-            log.debug("You are using rapydo version {}", __version__)
+            log.debug("You are using RAPyDo version {}", __version__)
         self.check_installed_software()
 
         if self.create:
@@ -335,6 +335,24 @@ class Application:
 
     def check_installed_software(self):
 
+        # Python 3.5 deprecated since 0.7.3
+        # EOL expected 2020-09-13 (~ rapydo 0.7.6?)
+        # https://devguide.python.org/#status-of-python-branches
+        if sys.version_info < (3, 6):
+            log.warning(
+                "You are using pyton {}.{}.{}, please consider to upgrade " +
+                "before reaching End Of Life (expected in September 2020)",
+                sys.version_info.major,
+                sys.version_info.minor,
+                sys.version_info.micro
+            )
+        else:
+            self.checked(
+                "python version: {}.{}.{}",
+                sys.version_info.major,
+                sys.version_info.minor,
+                sys.version_info.micro
+            )
         # Check if docker is installed
         # 17.05 added support for multi-stage builds
         self.check_program('docker', min_version="17.05")
@@ -450,7 +468,7 @@ To fix this issue, please update docker to version {}+
     @staticmethod
     def inspect_main_folder():
         """
-        Rapydo commands only works on rapydo projects, we want to ensure that
+        RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
         on file existence. Further checks are performed in the following steps
         """
@@ -698,7 +716,7 @@ Verify that you are in the right folder, now you are in: {}{}
         )
 
         if self.rapydo_version is None:
-            log.exit("Rapydo version not found in your project_configuration file")
+            log.exit("RAPyDo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
 
@@ -739,7 +757,7 @@ Verify that you are in the right folder, now you are in: {}{}
 
         action += "\n\nrapydo install auto"
 
-        msg = "Rapydo version is not compatible"
+        msg = "RAPyDo version is not compatible"
         msg += "\n\nThis project requires rapydo {}, you are using {}\n\n{}\n".format(
             r, c, action)
 
