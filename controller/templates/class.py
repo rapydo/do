@@ -40,4 +40,4 @@ class {{ class_name }}(EndpointResource):
 
         # Output any python structure (int, string, list, dictionary, etc.)
         response = 'Hello world!'
-        return self.force_response(response)
+        return self.response(response)

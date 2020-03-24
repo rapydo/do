@@ -313,20 +313,22 @@ subcommands:
   restart:
     description: restart running containers
   remove:
-    description: stop containers (if running) and also remove them
-  toggle-freeze:
-    description: toggle a temporary block/pause on running containers
-  clean:
-    description: "remove all:
-      containers, networks and OPTIONALLY data volumes"
+    description: stop and remove containers
     suboptions:
-      rm-volumes:
-      # remove-all-volumes:
-        alias: rm
+      networks:
+        alias: -net
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: remove also containers persistent data
+        help: also remove containers networks
+      all:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: also remove networks and persistent data stored in docker volumes
+  toggle-freeze:
+    description: toggle a temporary block/pause on running containers
+
   list:
     description: print rapydo configurations
     suboptions:

@@ -160,8 +160,11 @@ def test_all(capfd):
     assert compose_log + "'stop'" in out
     assert "Stack removed" in out
 
-    out = exec_command(capfd, "rapydo clean")
-    assert "Stack cleaned" in out
+    out = exec_command(capfd, "rapydo remove --networks")
+    assert "Stack removed" in out
+
+    out = exec_command(capfd, "rapydo remove --all")
+    assert "Stack removed" in out
 
     exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
     exec_command(capfd, "rapydo ancestors XYZ")

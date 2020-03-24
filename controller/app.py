@@ -1514,18 +1514,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'ps', {'-q': None, '--services': None, '--quiet': False, '--all': False}
         )
 
-    def _clean(self):
-        dc = self.get_compose(files=self.files)
-        rm_volumes = self.current_args.get('rm_volumes', False)
-        options = {
-            '--volumes': rm_volumes,
-            '--remove-orphans': True,
-            '--rmi': 'local',  # 'all'
-        }
-        dc.command('down', options)
-
-        log.info("Stack cleaned")
-
     def _update(self):
         log.info("All updated")
 
@@ -1568,14 +1556,27 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         dc = self.get_compose(files=self.files)
 
-        options = {
-            'SERVICE': services,
-            # '--stop': True,  # BUG? not working
-            '--force': True,
-            '-v': False,  # dangerous?
-        }
-        dc.command('stop', options)
-        dc.command('rm', options)
+        rm_all = self.current_args.get('all', False)
+        rm_networks = self.current_args.get('networks', False)
+
+        if rm_networks or rm_all:
+
+            options = {
+                '--volumes': rm_all,
+                '--remove-orphans': False,
+                '--rmi': 'local',  # 'all'
+            }
+            dc.command('down', options)
+        else:
+
+            options = {
+                'SERVICE': services,
+                # '--stop': True,  # BUG? not working
+                '--force': True,
+                '-v': False,  # dangerous?
+            }
+            dc.command('stop', options)
+            dc.command('rm', options)
 
         log.info("Stack removed")
 
