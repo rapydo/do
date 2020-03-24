@@ -4,14 +4,14 @@
     Command line script: main function
 """
 
-import pretty_errors
+import stackprinter
 
 from controller import log
 
 
 def main():
-    pretty_errors  # pylint:disable=pointless-statement
     try:
+        stackprinter.set_excepthook(style='darkbg2')
         # imported here to avoid uncatched Keyboard Interruptions
         from controller.arguments import ArgParser
 

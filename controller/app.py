@@ -2383,7 +2383,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'abc',
             'attr',
             'base64',
-            'pretty_errors',
+            'stackprinter',
             'bravado_core',
             'celery',
             'click',

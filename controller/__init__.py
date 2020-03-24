@@ -2,6 +2,7 @@
 
 import os
 import sys
+import stackprinter
 from loguru import logger as log
 
 __version__ = '0.7.3'
@@ -37,8 +38,13 @@ def exit_msg(message="", *args, **kwargs):
     sys.exit(error_code)
 
 
+def stack():
+    stackprinter.show()
+
+
 log.verbose = verbose
 log.exit = exit_msg
+log.stack = stack
 
 log.remove()
 
