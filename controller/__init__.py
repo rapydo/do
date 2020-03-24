@@ -41,13 +41,18 @@ log.verbose = verbose
 log.exit = exit_msg
 
 log.remove()
-if LOGS_FILE is not None:
-    log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
 else:
     log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
+
+if LOGS_FILE is not None:
+    try:
+        log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
+    except PermissionError as e:
+        log.error(e)
+        LOGS_FILE = None
 
 # FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
