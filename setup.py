@@ -34,7 +34,7 @@ setup(
         ],
     },
     install_requires=[
-        "docker-compose==1.25.1",
+        "docker-compose==1.25.4",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
