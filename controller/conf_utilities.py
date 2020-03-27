@@ -5,9 +5,9 @@ from collections import OrderedDict
 import yaml
 from controller import log
 
-PROJECTS_DEFAULTS_FILE = 'projects_defaults.yaml'
-PROJECTS_PROD_DEFAULTS_FILE = 'projects_prod_defaults.yaml'
-PROJECT_CONF_FILENAME = 'project_configuration.yaml'
+PROJECTS_DEFAULTS_FILE = "projects_defaults.yaml"
+PROJECTS_PROD_DEFAULTS_FILE = "projects_prod_defaults.yaml"
+PROJECT_CONF_FILENAME = "project_configuration.yaml"
 
 
 def read_configuration(
@@ -16,7 +16,7 @@ def read_configuration(
     projects_path,
     submodules_path,
     read_extended=True,
-    production=False
+    production=False,
 ):
     """
     Read default configuration
@@ -27,11 +27,11 @@ def read_configuration(
     )
 
     # Verify custom project configuration
-    project = custom_configuration.get('project')
+    project = custom_configuration.get("project")
     if project is None:
         raise AttributeError("Missing project configuration")
 
-    variables = ['title', 'description', 'version', 'rapydo']
+    variables = ["title", "description", "version", "rapydo"]
 
     for key in variables:
         if project.get(key) is None:
@@ -47,35 +47,33 @@ def read_configuration(
         base_configuration = {}
     else:
         base_configuration = load_yaml_file(
-            file=PROJECTS_DEFAULTS_FILE,
-            path=default_file_path,
-            keep_order=True
+            file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
         )
 
         if production:
             base_prod_conf = load_yaml_file(
                 file=PROJECTS_PROD_DEFAULTS_FILE,
                 path=default_file_path,
-                keep_order=True
+                keep_order=True,
             )
             base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
     if read_extended:
-        extended_project = project.get('extends')
+        extended_project = project.get("extends")
     else:
         extended_project = None
     if extended_project is None:
         # Mix default and custom configuration
         return mix_configuration(base_configuration, custom_configuration), None, None
 
-    extends_from = project.get('extends-from', 'projects')
+    extends_from = project.get("extends-from", "projects")
 
     if extends_from == "projects":
         extend_path = projects_path
     elif extends_from.startswith("submodules/"):
         repository_name = (extends_from.split("/")[1]).strip()
-        if repository_name == '':
-            log.exit('Invalid repository name in extends-from, name is empty')
+        if repository_name == "":
+            log.exit("Invalid repository name in extends-from, name is empty")
 
         extend_path = os.path.join(submodules_path, repository_name, projects_path)
     else:
@@ -121,6 +119,7 @@ def mix_configuration(base, custom):
 
     return base
 
+
 # ################################
 # ######## FROM myyaml.py ########
 # ################################
@@ -128,13 +127,8 @@ def mix_configuration(base, custom):
 
 class OrderedLoader(yaml.SafeLoader):
     """
-    A 'workaround' good enough for ordered loading of dictionaries
-
+    A workaround good enough to load ordered dictionaries
     https://stackoverflow.com/a/21912744
-
-    NOTE: This was created to skip dependencies.
-    Otherwise this option could be considered:
-    https://pypi.python.org/pypi/ruamel.yaml
     """
 
     pass
@@ -166,13 +160,11 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     if filepath is None:
         if is_optional:
             log.info(
-                "Failed to read YAML file {}/{}: File does not exist",
-                path, file,
+                "Failed to read YAML file {}/{}: File does not exist", path, file,
             )
         else:
             log.exit(
-                "Failed to read YAML file {}/{}: File does not exist",
-                path, file,
+                "Failed to read YAML file {}/{}: File does not exist", path, file,
             )
         return {}
 
@@ -211,20 +203,20 @@ def read_composer_yamls(composers):
     # YAML CHECK UP
     for name, composer in composers.items():
 
-        if not composer.pop('if', False):
+        if not composer.pop("if", False):
             continue
 
         log.verbose("Composer {}", name)
 
-        mandatory = composer.pop('mandatory', False)
-        base = composer.pop('base', False)
+        mandatory = composer.pop("mandatory", False)
+        base = composer.pop("base", False)
 
         try:
-            f = composer.get('file')
-            p = composer.get('path')
+            f = composer.get("file")
+            p = composer.get("path")
             compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
 
-            if compose.get('services') is None or len(compose.get('services', {})) < 1:
+            if compose.get("services") is None or len(compose.get("services", {})) < 1:
                 # if mandatory:
                 #     log.exit("No service defined in file {}", name)
                 # else:
@@ -240,12 +232,6 @@ def read_composer_yamls(composers):
 
         except KeyError as e:
 
-            # if mandatory:
-            #     log.exit(
-            #         "Composer {}({}) is mandatory.\n{}", name, filepath, e
-            #     )
-            # else:
-            #     log.debug("Missing '{}' composer", name)
-            log.exit("Error loading {}: {}", filepath, e)
+            log.exit("Error reading {}: {}", filepath, e)
 
     return all_files, base_files
