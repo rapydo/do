@@ -1561,12 +1561,25 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if rm_networks or rm_all:
 
-            options = {
-                '--volumes': rm_all,
-                '--remove-orphans': False,
-                '--rmi': 'local',  # 'all'
-            }
-            dc.command('down', options)
+            services_specified = self.current_args.get('services')
+            if services_specified is not None:
+
+                opt = "--networks" if rm_networks else "--all"
+
+                log.exit(
+                    "Incompatibile options {opt} and --services\n" +
+                    "rapydo remove {opt} is ALWAYS applied to EVERY container of the " +
+                    "stack due to the underlying docker-compose implementation. " +
+                    "If you want to continue remove --services option", opt=opt
+                )
+            else:
+
+                options = {
+                    '--volumes': rm_all,
+                    '--remove-orphans': False,
+                    '--rmi': 'local',  # 'all'
+                }
+                dc.command('down', options)
         else:
 
             options = {
