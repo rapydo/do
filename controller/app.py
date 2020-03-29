@@ -1807,7 +1807,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         dc = self.get_compose(files=self.files)
         return dc.exec_command(service, user=user, command=command)
 
+    # Deprecated since 0.7.3
     def _ssl_certificate(self):
+        log.warning("Deprecated command, use rapydo ssl instead")
+
+        time.sleep(1)
+        self._ssl()
+
+    def _ssl(self):
         chain = self.current_args.get('chain_file')
         key = self.current_args.get('key_file')
         no_tty = self.current_args.get('no_tty')

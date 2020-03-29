@@ -221,8 +221,37 @@ subcommands:
         default: null
   custom:
     description: execute predefined custom commands inside containers
-  ssl-certificate:
+  ssl:
     description: issue a production certificate with service Letsencrypt
+    suboptions:
+      chain-file:
+        type: str
+        metavalue: PATH_TO_CHAIN_FILE
+        default: null
+        help: path to existing chain file (.pem format)
+      key-file:
+        type: str
+        metavalue: PATH_TO_KEY_FILE
+        default: null
+        help: path to existing key file (.pem format)
+      volatile:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Create a volatile proxy service to request the certificate
+      force:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force Let's Encrypt to renew the certificate
+      no-tty:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
+  # Deprecated since 0.7.3
+  ssl-certificate:
+    description: Deprecated command, use rapydo ssl instead 
     suboptions:
       chain-file:
         type: str
