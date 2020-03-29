@@ -44,7 +44,6 @@ class EndpointScaffold:
 
         self.endpoint_dir = '_'.join(names)
         self.endpoint_name = self.endpoint_dir.replace('_', '')
-        self.specs_file = 'specs.yaml'
 
         # setting the base dir for all scaffold things inside the project
         self.backend_dir = Path(PROJECT_DIR, self.custom_project, BACKEND_DIR)
@@ -80,7 +79,6 @@ class EndpointScaffold:
                     sys.exit(1)
 
     def create(self):
-        self.swagger()
         self.rest_class()
         self.test_class()
         log.info('Scaffold completed')
@@ -143,36 +141,6 @@ class EndpointScaffold:
                     "Class '{}' definition not found in python file", python_class
                 )
 
-    def find_swagger(self, endpoint=None, backend_dir=None):
-
-        swagdir = Path(backend_dir, SWAGGER_DIR)
-        needle = None
-
-        for current_specs_file in swagdir.glob('*/{}'.format(self.specs_file)):
-            content = load_yaml_file(str(current_specs_file), path="")
-
-            for _, value in content.get('mapping', {}).items():
-                tmp = '/' + endpoint
-                if value == tmp or value.startswith(tmp + '/'):
-                    needle = content
-                    mypath = str(current_specs_file).replace('/' + self.specs_file, '')
-                    # get last item of the path
-                    # normapath is required to strip final / is any
-                    needle['swagger'] = os.path.basename(os.path.normpath(mypath))
-
-                    break
-
-            if needle is not None:
-                break
-
-        return needle
-
-    def create_folder(self, pathobj):
-        try:
-            pathobj.mkdir(parents=False)
-        except FileExistsError:
-            pass
-
     def file_exists_and_nonzero(self, pathobj):
 
         if not pathobj.exists():
@@ -180,20 +148,6 @@ class EndpointScaffold:
 
         iostats = pathobj.stat()
         return not iostats.st_size == 0
-
-    def swagger_dir(self):
-
-        self.swagger_path = Path(self.backend_dir, SWAGGER_DIR, self.endpoint_dir)
-
-        if self.swagger_path.exists():
-            log.warning('Path {} already exists', self.swagger_path)
-            if not self.force_yes:
-                self.ask_yes_or_no(
-                    'Would you like to proceed and overwrite definition?',
-                    error='Cannot overwrite definition',
-                )
-
-        self.create_folder(self.swagger_path)
 
     @staticmethod
     def save_template(filename, content):
@@ -227,29 +181,6 @@ class EndpointScaffold:
         # otherwise the user doesn't get info on what paths were created
         log.info("rendered {}", filepath)
         return True
-
-    def swagger_specs(self):
-        self.render(
-            self.specs_file,
-            data={
-                'endpoint_name': self.endpoint_name,
-                'endpoint_label': self.endpoint_dir,
-                'class_name': self.class_name,
-            },
-            outdir=self.swagger_path,
-        )
-
-    def swagger_first_operation(self):
-        self.render(
-            'get.yaml',
-            data={'endpoint_name': self.endpoint_name},
-            outdir=self.swagger_path,
-        )
-
-    def swagger(self):
-        self.swagger_dir()
-        self.swagger_specs()
-        self.swagger_first_operation()
 
     def rest_class(self):
 

@@ -20,8 +20,6 @@ setup(
         main_package: [
             'argparser.yaml',
             'templates/class.py',
-            'templates/get.yaml',
-            'templates/specs.yaml',
             'templates/unittests.py',
         ],
     },
