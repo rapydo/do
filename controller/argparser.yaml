@@ -274,7 +274,7 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
-  ssl-dhparam:
+  dhparam:
     description: Generate DH DSA parameters, 4096 bit long prime.
   interfaces:
     description: Run off some predefined interfaces to services

@@ -169,7 +169,7 @@ def test_all(capfd):
     exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
     exec_command(capfd, "rapydo ancestors XYZ")
     exec_command(capfd, "rapydo ssl")
-    exec_command(capfd, "rapydo ssl-dhparam")
+    exec_command(capfd, "rapydo dhparam")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")

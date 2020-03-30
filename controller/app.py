@@ -1869,7 +1869,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             disable_tty=no_tty
         )
 
-    def _ssl_dhparam(self):
+    def _dhparam(self):
 
         command = "openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096"
         dc = self.get_compose(files=self.files)
