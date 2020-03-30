@@ -175,8 +175,10 @@ def test_all(capfd):
     # exec_command(capfd, "rapydo create test")
     # assert 'You are on a git repo, unable to continue' in out
 
+    prev_folder = os.getcwd()
     # testing a command from outside project dir
     os.chdir("/tmp")
     exec_command(capfd, "rapydo check --no-git --no-builds")
     # exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
+    os.chdir(prev_folder)
