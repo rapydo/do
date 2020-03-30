@@ -748,8 +748,6 @@ Verify that you are in the right folder, now you are in: {}
             action = "Downgrade your controller to version {}".format(r)
             action += " or upgrade your project"
 
-        action += "\n\nrapydo install auto"
-
         msg = "RAPyDo version is not compatible"
         msg += "\n\nThis project requires rapydo {}, you are using {}\n\n{}\n".format(
             r, c, action)
