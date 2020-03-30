@@ -168,11 +168,15 @@ def test_all(capfd):
 
     exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
     exec_command(capfd, "rapydo ancestors XYZ")
+    exec_command(capfd, "rapydo ancestors ssl")
+    exec_command(capfd, "rapydo ancestors ssl-dhparam")
 
     # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
     # assert 'You are on a git repo, unable to continue' in out
 
-    # os.chdir("/tmp")
+    # testing a command from outside project dir
+    os.chdir("/tmp")
+    exec_command(capfd, "rapydo check --no-git --no-builds")
     # exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out

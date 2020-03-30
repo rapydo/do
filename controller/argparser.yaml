@@ -76,11 +76,6 @@ options:
     default: False
     help: allow containers to start in privileged mode
 
-  check-permissions:
-    type: bool
-    default: False
-    help: Enabled permission checks on file system
-
   production:
     alias: -prod
     type: bool
@@ -95,10 +90,10 @@ options:
 subcommands:
 
   dump:
-    description: dump current config into docker compose YAML
+    description: Dump current config into docker compose YAML
 
   formatter:
-    description: "run 'black' formatter on main project backend code"
+    description: Run 'black' formatter on python code
     suboptions:
       folder:
         alias: f
@@ -114,8 +109,7 @@ subcommands:
         help: name of submodule to be formatted. Project folder is defined as vanilla submodule
 
   check:
-    description: "only verify if currently compliant to RAPyDo specs
-        (NOTE: this is done at every call)"
+    description: Verify if current project is compliant to RAPyDo specs
     suboptions:
       ignore-submodule:
         alias: i
@@ -132,17 +126,19 @@ subcommands:
         type: bool
         default: False
         help: ignore the heaviest builds operations
+      check-permissions:
+        type: bool
+        default: False
+        help: Enabled permission checks on file system
   init:
-    description: "
-      make current project compliant to RAPyDo requirements
-      (if not yet being)"
+    description: Make current project compliant to RAPyDo requirements
     suboptions:
       submodules-path:
         type: str
         metavalue: SUBMODULE_PATH
         help: link all submodules in an existing folder instead of download them
   update:
-    description: update the current project
+    description: Update the current project
     suboptions:
       ignore-submodule:
         alias: i
@@ -181,9 +177,9 @@ subcommands:
         help: install at user level (sudo not required)
 
   status:
-    description: list current status of containers
+    description: List current status of containers
   build:
-    description: force building of one or more services docker images
+    description: Force building of one or more services docker images
     suboptions:
       rebuild-templates:
         alias: t
@@ -198,9 +194,9 @@ subcommands:
         default: False
         help: remove the build cache to force the complete rebuilding
   pull:
-    description: pull available images from docker hub
+    description: Pull available images from docker hub
   logs:
-    description: watch log tails of all or specified containers
+    description: Watch log tails of all or specified containers
     suboptions:
       follow:
         alias: f
@@ -220,9 +216,9 @@ subcommands:
         metavalue: SERVICE
         default: null
   custom:
-    description: execute predefined custom commands inside containers
+    description: Execute predefined custom commands inside containers
   ssl:
-    description: issue a production certificate with service Letsencrypt
+    description: Issue a SSL certificate with Let's Encrypt
     suboptions:
       chain-file:
         type: str
@@ -279,9 +275,9 @@ subcommands:
         default: False
         help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
   ssl-dhparam:
-    description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
+    description: Generate DH DSA parameters, 4096 bit long prime.
   interfaces:
-    description: run off some predefined interfaces to services
+    description: Run off some predefined interfaces to services
     suboptions:
       service:
         positional: true
@@ -301,7 +297,7 @@ subcommands:
         help: Detached mode to run the container in background
 
   shell:
-    description: open a shell inside one available 'dockerized' service
+    description: Open a shell or execute a command onto a container
     suboptions:
       service:
         positional: true
@@ -338,11 +334,11 @@ subcommands:
         default: False
         help: Disable detach mode and attach to container execution
   stop:
-    description: stop running containers, but do not remove them
+    description: Stop running containers, but do not remove them
   restart:
-    description: restart running containers
+    description: Restart running containers
   remove:
-    description: stop and remove containers
+    description: Stop and remove containers
     suboptions:
       networks:
         alias: -net
@@ -356,10 +352,10 @@ subcommands:
         default: False
         help: also remove networks and persistent data stored in docker volumes
   toggle-freeze:
-    description: toggle a temporary block/pause on running containers
+    description: Toggle a temporary block/pause on running containers
 
   list:
-    description: print rapydo configurations
+    description: Print rapydo configurations
     suboptions:
       args:
         alias: a
@@ -386,7 +382,7 @@ subcommands:
         default: False
         help: List submodules
   scale:
-    description: scale the number of containers for one service
+    description: Scale the number of containers for one service
     suboptions:
       value:
         positional: yes
@@ -395,7 +391,7 @@ subcommands:
         default:
         help: scale SERVICE to NUM_REPLICA
   find:
-    description: show information about an existing endpoint
+    description: Show information about an existing endpoint
     suboptions:
       endpoint:
         positional: no
@@ -403,7 +399,7 @@ subcommands:
         metavalue: ENDPOINT_NAME
         help: an existing endpoint name to search inside the swagger definition
   template:
-    description: create a new endpoint based on a template
+    description: Create a new endpoint based on a template
     suboptions:
       endpoint:
         positional: yes  # note: yes is equivalent to True in YAML
@@ -424,7 +420,7 @@ subcommands:
         # default: sqlalchemy
         help: the first service that will be connected inside the code
   verify:
-    description: check a service connection within the backend container
+    description: Test if service is reachable from the backend
     suboptions:
       service:
         positional: yes
@@ -432,7 +428,7 @@ subcommands:
         metavalue: SERVICE
         default: null
   volatile:
-    description: one command container
+    description: Create a single-command container
     suboptions:
       service:
         positional: yes
@@ -447,7 +443,7 @@ subcommands:
         default: bash
         help: UNIX command to be executed
   create:
-    description: create a new rapydo project
+    description: Create a new rapydo project
     suboptions:
       template:
         positional: true
@@ -462,7 +458,7 @@ subcommands:
         default: null
         help: Name of your new project
   ancestors:
-    description: find all ancestors of a docker image
+    description: Find all ancestors of a docker image
     suboptions:
       imagetag:
         positional: true

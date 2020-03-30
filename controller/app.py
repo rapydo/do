@@ -220,10 +220,7 @@ class Application:
             sec_diff = (datetime.utcnow() - online_time).total_seconds()
 
             major_diff = abs(sec_diff) >= 300
-            if major_diff:
-                minor_diff = False
-            else:
-                minor_diff = abs(sec_diff) >= 60
+            minor_diff = abs(sec_diff) >= 60 if not major_diff else False
 
             if major_diff:
                 log.error("Date misconfiguration on the host.")
@@ -465,8 +462,7 @@ To fix this issue, please update docker to version {}+
         except TypeError as e:
             log.error("{}: {}", e, found_version)
 
-    @staticmethod
-    def inspect_main_folder():
+    def inspect_main_folder(self):
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -485,17 +481,14 @@ Verify that you are in the right folder, now you are in: {}
             if not os.path.exists(fname):
 
                 if fname == 'data':
-                    extra = """
-\nPlease also note that the data dir is not automatically created,
-if you are in the right repository consider to create it by hand
-"""
-                else:
-                    extra = ""
+                    log.warning(
+                        "Data folder is missing, execute rapydo init to create it")
+                    continue
 
                 return """File or folder not found {}
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}{}
-                    """.format(fname, os.getcwd(), extra)
+Verify that you are in the right folder, now you are in: {}
+                    """.format(fname, os.getcwd())
 
         return None
 
@@ -1208,7 +1201,7 @@ Verify that you are in the right folder, now you are in: {}{}
         if self.frontend is None:
             return False
 
-        if not any([self.check, self.initialize, self.update]):
+        if not self.initialize:
             return False
 
         # What to do with REACT?
@@ -1501,9 +1494,15 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def _init(self):
 
-        from controller import LOGS_FOLDER
-        if not os.path.exists(LOGS_FOLDER):
-            log.warning("Logs folder ({}) not found, created it", LOGS_FOLDER)
+        from controller import DATA_FOLDER, LOGS_FOLDER
+
+        if not os.path.exists(DATA_FOLDER):
+            log.info("Data folder not found, created it", LOGS_FOLDER)
+            # this will create both data and data/logs
+            os.makedirs(LOGS_FOLDER)
+
+        elif not os.path.exists(LOGS_FOLDER):
+            log.info("Logs folder ({}) not found, created it", LOGS_FOLDER)
             os.makedirs(LOGS_FOLDER)
 
         log.info("Project initialized")
