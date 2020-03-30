@@ -68,7 +68,7 @@ def test_all(capfd):
     assert "Checks completed" in out
 
     # CHECK on rapydo-core by enabling permissions checks
-    out = exec_command(capfd, "rapydo --check-permissions check")
+    out = exec_command(capfd, "rapydo check --check-permissions")
     assert "Checks completed" in out
 
     # NOW we are on a fork of rapydo-core
