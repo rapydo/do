@@ -157,10 +157,8 @@ Suggestion: remove {} and execute the init command
             if check_only:
                 return False
             log.exit(
-                """{p}: wrong branch {ab}, expected {b}.
-Suggestion:\n\ncd {wdir}; git fetch; git checkout {b}; cd -;\n""".format(
-                    p=path, ab=active_branch, b=branch, wdir=gitobj.working_dir
-                )
+                "{}: wrong branch {}, expected {}. Suggestion: execute rapydo init",
+                path, active_branch, branch
             )
     return True
 
