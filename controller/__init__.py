@@ -42,7 +42,8 @@ def exit_msg(message="", *args, **kwargs):
     sys.exit(error_code)
 
 
-def stack():
+def stack(param=None):
+    log.warning("log.stack does not require any parameters")
     stackprinter.show()
 
 
