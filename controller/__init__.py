@@ -63,7 +63,6 @@ if LOGS_FILE is not None:
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 PROJECT_DIR = 'projects'
-SWAGGER_DIR = 'swagger'
 RAPYDO_CONFS = 'rapydo-confs'
 RAPYDO_TEMPLATE = 'tests'
 RAPYDO_GITHUB = "https://github.com/rapydo"

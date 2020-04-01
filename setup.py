@@ -17,11 +17,7 @@ setup(
     license='MIT',
     packages=[main_package],
     package_data={
-        main_package: [
-            'argparser.yaml',
-            'templates/class.py',
-            'templates/unittests.py',
-        ],
+        main_package: ['argparser.yaml']
     },
     # End-of-life: 2020-09-13
     python_requires='>=3.5.0',

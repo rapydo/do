@@ -24,7 +24,6 @@ from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
-from controller.scaffold import EndpointScaffold
 from controller import log
 
 from controller.conf_utilities import read_configuration
@@ -1939,34 +1938,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.error(
                 "You have to specify what to list, "
                 + "please use rapydo list -h for available options"
-            )
-
-    def _template(self):
-
-        log.critical("This command is obsolete, please do not use it")
-
-        service_name = self.current_args.get('service')
-        if service_name is None:
-            service_name = self.vars.get('env', {}).get('AUTH_SERVICE')
-
-        force = self.current_args.get('yes')
-        endpoint_name = self.current_args.get('endpoint')
-
-        new_endpoint = EndpointScaffold(
-            self.project, force, endpoint_name, service_name
-        )
-        new_endpoint.create()
-
-    def _find(self):
-        endpoint_name = self.current_args.get('endpoint')
-
-        if endpoint_name is not None:
-            lookup = EndpointScaffold(self.project, endpoint_name=endpoint_name)
-            lookup.info()
-        else:
-            log.exit(
-                "Please, specify something to look for.\n"
-                + "Add --help to list available options."
             )
 
     def _scale(self):

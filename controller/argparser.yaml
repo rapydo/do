@@ -390,35 +390,6 @@ subcommands:
         metavalue: "SERVICE=NUM_REPLICA"
         default:
         help: scale SERVICE to NUM_REPLICA
-  find:
-    description: Show information about an existing endpoint
-    suboptions:
-      endpoint:
-        positional: no
-        type: str
-        metavalue: ENDPOINT_NAME
-        help: an existing endpoint name to search inside the swagger definition
-  template:
-    description: Create a new endpoint based on a template
-    suboptions:
-      endpoint:
-        positional: yes  # note: yes is equivalent to True in YAML
-        type: str
-        metavalue: ENDPOINT_NAME
-        default: foo
-        help: the endpoint name to be created
-      'yes':
-        alias: y
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: say yes to all questions
-      service:
-        alias: s
-        type: str
-        metavalue: CONNECTED_SERVICE
-        # default: sqlalchemy
-        help: the first service that will be connected inside the code
   verify:
     description: Test if service is reachable from the backend
     suboptions:
