@@ -37,7 +37,6 @@ setup(
         "python-dateutil",
         "pytz",
         "loguru",
-        "stackprinter",
         "prettyprinter",
         "jinja2",
         "sultan==0.9.1",

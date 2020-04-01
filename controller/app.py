@@ -76,6 +76,7 @@ class Application:
     """
 
     def __init__(self, arguments):
+
         self.arguments = arguments
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
@@ -2409,7 +2410,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'abc',
             'attr',
             'base64',
-            'stackprinter',
             'bravado_core',
             'celery',
             'click',
