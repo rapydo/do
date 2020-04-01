@@ -1,9 +1,3 @@
-
-description: Do actions with your RAPyDo project
-action:
-  name: action
-  help: all possible commands
-
 options:
 
   project:
@@ -14,27 +8,11 @@ options:
     help: Name of the project
     default: null
 
-  # deprecated since 0.7.1
-  mode:
-    alias: m
-    type: str
-    metavalue: S 
-    default: null
-    help: Deprecated
-
   stack:
     type: str
     metavalue: STACK
     default: null
     help: Docker-compose stack to be loaded
-
-  # deprecated since 0.7.0
-  log-level:
-    alias: l
-    type: str
-    metavalue: LEVEL_OF_DEBUGGER
-    default: DEPRECATED
-    help: Deprecated
 
   no-backend:
     type: bool
@@ -63,12 +41,6 @@ options:
     type: str
     metavalue: SERVICES
     help: Comma separated list of services
-
-  # deprecated since 0.7.0
-  development:
-    type: bool
-    default: False
-    help: Deprecated
 
   privileged:
     type: bool

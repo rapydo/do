@@ -29,75 +29,37 @@ class ArgParser:
         # This method saves configuration objects in self
         self.read_configuration()
 
-        # Arguments definition
-        parser = argparse.ArgumentParser(
-            prog=args[0], description=self.parse_conf.get('description')
-        )
+        options = sorted(self.parse_conf.get('options', {}).items())
+        commands = sorted(self.parse_conf.get('subcommands', {}).items())
 
-        # PARAMETERS
-        sorted_options = sorted(self.parse_conf.get('options', {}).items())
-        for option_name, options in sorted_options:
+        # Arguments definition
+        parser = argparse.ArgumentParser(prog=args[0])
+
+        for option_name, options in options:
             self.add_parser_argument(parser, option_name, options)
 
         version_string = 'rapydo version {}'.format(__version__)
         parser.add_argument('--version', action='version', version=version_string)
+
         # Sub-parser of commands [check, init, etc]
-        main_command = self.parse_conf.get('action')
-
-        subparsers = parser.add_subparsers(
-            title='Available commands',
-            dest=main_command.get('name'),
-            help=main_command.get('help'),
-        )
-
+        subparsers = parser.add_subparsers(dest='action')
         subparsers.required = True
 
-        # ##########################
-        # COMMANDS
-
-        # BASE normal commands
-        mycommands = self.parse_conf.get('subcommands', {})
-
-        for command_name, options in sorted(mycommands.items()):
+        for command_name, options in commands:
 
             # Creating a parser for each sub-command [check, init, etc]
             subparse = subparsers.add_parser(
                 command_name, help=options.get('description')
             )
 
-            # controlcommands = options.get('controlcommands', {})
-            # # Some subcommands can have further subcommands
-            # [control start, stop, etc]
-            # if len(controlcommands) > 0:
-            #     innerparser = subparse.add_subparsers(
-            #         dest='controlcommand'
-            #     )
-            #     innerparser.required = options.get('controlrequired', False)
-            #     for subcommand, suboptions in controlcommands.items():
-            #         subcommand_help = suboptions.pop(0)
-            #         # Creating a parser for each sub-sub-command
-            #         # [control start/stop]
-            #         innerparser.add_parser(subcommand, help=subcommand_help)
-
             suboptions = options.get('suboptions', {}).items()
             for option_name, suboptions in suboptions:
                 self.add_parser_argument(subparse, option_name, suboptions)
 
-        # ##########################
-        # Print usage if no arguments provided
         if len(args) == 1:
             parser.print_help()
             sys.exit(1)
 
-        # ##########################
-        # Reading input parameters
-
-        # Partial parsing
-        # https://docs.python.org/3.4/library/argparse.html#partial-parsing
-        # Example
-        # https://gist.github.com/von/949337/
-
-        # self.current_args = parser.parse_args()
         current_args_namespace, self.remaining_args = parser.parse_known_args(args[1:])
         self.current_args = vars(current_args_namespace)
 
@@ -113,12 +75,6 @@ class ArgParser:
             help='list of custom commands',
         )
         self.extra_command_parser.required = True
-
-        # ##########################
-        if self.current_args.get("log_level", "DEPRECATED") != "DEPRECATED":
-            # Deprecated since 0.7.0
-            log.warning(
-                "--log-level parameter is deprecated, set env variable LOGURU_LEVEL")
 
         log.verbose("Parsed arguments: {}", self.current_args)
 

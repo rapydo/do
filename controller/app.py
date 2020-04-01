@@ -291,11 +291,6 @@ class Application:
                         self.project)
                 )
 
-        if self.current_args.get('development'):
-            # Deprecated since 0.7.0
-            log.warning(
-                "--development parameter is deprecated, you can stop using it")
-
     def check_projects(self):
 
         try:
@@ -872,13 +867,6 @@ Verify that you are in the right folder, now you are in: {}
         load_frontend = not self.current_args.get('no_frontend')
 
         stack = self.current_args.get('stack')
-
-        # deprecated since 0.7.1
-        if stack is None:
-            stack = self.current_args.get('mode')
-            if stack is not None:
-                log.warning(
-                    "'--mode' option is deprecated, please use the new '--stack' option instead. Please also note that '--stack debug' and '--stack production' are automatically defaulted by the '--production' flag.")
 
         if stack is None:
             stack = "production" if self.production else "development"
