@@ -10,24 +10,23 @@ options:
     alias: p
     # NOTE: this is the equivalent of the old concept of `blueprint`
     type: str
-    metavalue: PROJECT_NAME
-    help: name of the project to be found inside the './projects' directory
-    # The only one if exists otherwise list the projects.
+    metavalue: NAME
+    help: Name of the project
     default: null
 
   # deprecated since 0.7.1
   mode:
     alias: m
     type: str
-    metavalue: CONTAINERS_YAML_SELECTED_MODE
+    metavalue: S 
     default: null
-    help: mode is like a 'blueprint' marker of the configuration to launch - DEPRECATED! user --stack instead
+    help: Deprecated
 
   stack:
     type: str
-    metavalue: CONTAINERS_YAML_STACK
+    metavalue: STACK
     default: null
-    help: the docker-compose stack to be loaded (from the projects conf folder)
+    help: Docker-compose stack to be loaded
 
   # deprecated since 0.7.0
   log-level:
@@ -35,52 +34,52 @@ options:
     type: str
     metavalue: LEVEL_OF_DEBUGGER
     default: DEPRECATED
-    help: level of verbosity - DEPRECATED! export LOGURU_LEVEL env variable instead
+    help: Deprecated
 
   no-backend:
     type: bool
     default: False
-    help: Exclude backend configuration from rapydo stack
+    help: Exclude backend configuration
 
   no-frontend:
     type: bool
     default: False
-    help: Exclude frontend configuration from rapydo stack
+    help: Exclude frontend configuration
 
   no-commons:
     type: bool
     default: False
-    help: Exclude project common configuration from rapydo stack
+    help: Exclude project common configuration
 
   hostname:
     alias: H
     type: str
-    metavalue: MACHINE_HOST_NAME
+    metavalue: HOSTNAME
     default: localhost
-    help: "host name of the current machine where the server is running"
+    help: Hostname of the current machine
 
   services:
     alias: s
     type: str
-    metavalue: SERVICES_COMMA_SEPARATED
-    help: list of services referring to a command
+    metavalue: SERVICES
+    help: Comma separated list of services
 
   # deprecated since 0.7.0
   development:
     type: bool
     default: False
-    help: switch to development mode - DEPRECATED!
+    help: Deprecated
 
   privileged:
     type: bool
     default: False
-    help: allow containers to start in privileged mode
+    help: Allow containers privileged mode
 
   production:
     alias: -prod
     type: bool
     default: False
-    help: enable production mode
+    help: Enable production mode
 
   # net:
   #   type: str
