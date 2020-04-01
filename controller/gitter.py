@@ -157,7 +157,7 @@ Suggestion: remove {} and execute the init command
             if check_only:
                 return False
             log.exit(
-                "{}: wrong branch {}, expected {}. Suggestion: execute rapydo init",
+                "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
                 path, active_branch, branch
             )
     return True

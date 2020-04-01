@@ -1653,30 +1653,37 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         port = self.current_args.get('port')
         publish = []
 
-        if port is not None:
+        info = self.container_info(service)
+        try:
+            current_ports = info.get('ports', []).pop(0)
+        except IndexError:
+            log.exit("No default port found?")
+
+        if port is None:
+            port = current_ports.published
+        else:
             try:
                 int(port)
             except TypeError:
                 log.exit("Port must be a valid integer")
 
-            info = self.container_info(service)
-            try:
-                current_ports = info.get('ports', []).pop(0)
-            except IndexError:
-                log.exit("No default port found?")
-
             publish.append("{}:{}".format(port, current_ports.target))
 
-        dc = self.get_compose(files=self.files)
+        url = None
+        if service == 'swaggerui':
+            BACKEND_PORT = glom(self.vars, "env.BACKEND_PORT")
+            if self.production:
+                spec = "https://{}/api/specs".format(self.hostname)
+            else:
+                spec = "http://{}:{}/api/specs".format(self.hostname, BACKEND_PORT)
+            url = 'http://{}:{}?docExpansion=list&url={}'.format(
+                self.hostname,
+                port,
+                spec
+            )
 
-        uris = {
-            'swaggerui':
-            'http://{}?docExpansion=none'.format(self.hostname)
-        }
-
-        uri = uris.get(service)
-        if uri is not None:
-            log.info("You can access {} web page here:\n{}", service, uri)
+        if url is not None:
+            log.info("You can access {} web page here:\n\n{}\n", service, url)
         else:
             log.info("Launching interface: {}", service)
 
@@ -1695,6 +1702,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     yield
                 finally:
                     sys.stdout = old_stdout
+
+        dc = self.get_compose(files=self.files)
 
         with suppress_stdout():
             # NOTE: this is suppressing also image build...
