@@ -32,14 +32,14 @@ options:
   hostname:
     alias: H
     type: str
-    metavalue: HOSTNAME
+    metavalue: NAME
     default: localhost
     help: Hostname of the current machine
 
   services:
     alias: s
     type: str
-    metavalue: SERVICES
+    metavalue: S1,S2
     help: Comma separated list of services
 
   privileged:
@@ -322,8 +322,6 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: also remove networks and persistent data stored in docker volumes
-  toggle-freeze:
-    description: Toggle a temporary block/pause on running containers
 
   list:
     description: Print rapydo configurations

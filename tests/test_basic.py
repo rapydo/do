@@ -3,7 +3,6 @@ from git import Repo
 from prettyprinter import pprint as pp
 from controller import log
 from controller.arguments import ArgParser
-from controller.compose import compose_log
 from controller.app import Application
 
 
@@ -123,11 +122,11 @@ def test_all(capfd):
     assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo start")
-    assert compose_log + "'up'" in out
+    assert "docker-compose command: 'up'" in out
     assert "Stack started" in out
 
     out = exec_command(capfd, "rapydo status")
-    assert compose_log + "'ps'" in out
+    assert "docker-compose command: 'ps'" in out
 
     # Template project is based on neo4j
     exec_command(capfd, "rapydo verify neo4j")
@@ -142,13 +141,7 @@ def test_all(capfd):
 
     exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
-    # assert compose_log + "'logs'" in out
-
-    out = exec_command(capfd, "rapydo toggle-freeze")
-    assert "Stack paused" in out
-
-    out = exec_command(capfd, "rapydo toggle-freeze")
-    assert "Stack unpaused" in out
+    # assert "docker-compose command: 'logs'" in out
 
     out = exec_command(capfd, "rapydo stop")
     assert "Stack stopped" in out
@@ -157,7 +150,7 @@ def test_all(capfd):
     assert "Stack restarted" in out
 
     out = exec_command(capfd, "rapydo remove")
-    assert compose_log + "'stop'" in out
+    assert "docker-compose command: 'stop'" in out
     assert "Stack removed" in out
 
     out = exec_command(capfd, "rapydo remove --networks")

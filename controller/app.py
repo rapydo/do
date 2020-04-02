@@ -1578,24 +1578,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         log.info("Stack removed")
 
-    def _toggle_freeze(self):
-        services = self.get_services(default=self.active_services)
-
-        options = {'SERVICE': services}
-        dc = self.get_compose(files=self.files)
-        command = 'pause'
-        for container in dc.get_handle().project.containers():
-
-            if container.dictionary.get('State').get('Status') == 'paused':
-                command = 'unpause'
-                break
-        dc.command(command, options)
-
-        if command == "pause":
-            log.info("Stack paused")
-        elif command == "unpause":
-            log.info("Stack unpaused")
-
     def _logs(self):
 
         service = self.current_args.get('service')

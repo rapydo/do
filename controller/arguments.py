@@ -33,7 +33,13 @@ class ArgParser:
         commands = sorted(self.parse_conf.get('subcommands', {}).items())
 
         # Arguments definition
-        parser = argparse.ArgumentParser(prog=args[0])
+        parser = argparse.ArgumentParser(
+            prog=args[0],
+            formatter_class=lambda prog: argparse.HelpFormatter(
+                prog, width=90, max_help_position=30
+            )
+        )
+        parser._optionals.title = "Options"
 
         for option_name, options in options:
             self.add_parser_argument(parser, option_name, options)
@@ -42,7 +48,7 @@ class ArgParser:
         parser.add_argument('--version', action='version', version=version_string)
 
         # Sub-parser of commands [check, init, etc]
-        subparsers = parser.add_subparsers(dest='action')
+        subparsers = parser.add_subparsers(dest='action', title='Commands')
         subparsers.required = True
 
         for command_name, options in commands:

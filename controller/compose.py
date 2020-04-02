@@ -22,7 +22,9 @@ from compose.cli.command import (
 from compose.cli.main import TopLevelCommand
 from controller import log
 
-compose_log = 'docker-compose command: '
+# # inspect containers:
+# for container in self.get_handle().project.containers():
+#     log.info(container.dictionary.get('State').get('Status'))
 
 
 class Compose:
@@ -109,7 +111,7 @@ class Compose:
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.debug("{}'{}'", compose_log, command)
+        log.debug("docker-compose command: '{}'", command)
 
         out = None
         # sometimes this import stucks... importing here to avoid unnecessary waits
