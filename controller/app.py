@@ -2141,7 +2141,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
 
-        obj = yaml.load(
+        obj = yaml.safe_load(
             yaml_string.replace(main_dir, '.'),
             Loader=yaml.FullLoader
         )
