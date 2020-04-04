@@ -2143,7 +2143,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         obj = yaml.safe_load(
             yaml_string.replace(main_dir, '.'),
-            Loader=yaml.FullLoader
+            # Loader=yaml.FullLoader
         )
 
         active_services = {}
