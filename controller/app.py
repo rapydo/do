@@ -8,6 +8,7 @@ import shutil
 import urllib3
 import requests
 import pytz
+import yaml
 from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
 from collections import OrderedDict
@@ -68,10 +69,9 @@ def get_current_gid():
 class Application:
 
     """
-    ## Main application class
+    Main application class
 
-    It handles all implemented commands,
-    which were defined in `argparser.yaml`
+    It handles all implemented commands defined in `argparser.yaml`
     """
 
     def __init__(self, arguments):
@@ -2140,17 +2140,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
-        import yaml
 
-        # yaml.FullLoader will be available from pyyaml 5.1+
-        # obj = yaml.load(
-        #     yaml_string.replace(main_dir, '.'),
-        #     Loader=yaml.FullLoader
-        # )
+        obj = yaml.load(
+            yaml_string.replace(main_dir, '.'),
+            Loader=yaml.FullLoader
+        )
 
-        # this raises a deprecation warning,
-        # starting from 5.1 replace with the above version
-        obj = yaml.load(yaml_string.replace(main_dir, '.'))
         active_services = {}
         for key, value in obj.get('services', {}).items():
             if key in self.active_services:
