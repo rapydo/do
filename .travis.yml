@@ -1,5 +1,6 @@
+os: linux
+dist: bionic
 language: python
-sudo: required
 services:
 - docker
 script:
