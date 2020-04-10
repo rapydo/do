@@ -1,4 +1,5 @@
 import os
+import tempfile
 from git import Repo
 from prettyprinter import pprint as pp
 from controller import log
@@ -175,7 +176,7 @@ def test_all(capfd):
     exec_command(capfd, "rapydo check --no-git --no-builds")
 
     # testing a command from outside project dir
-    os.chdir("/tmp")
+    os.chdir(tempfile.gettempdir())
     exec_command(capfd, "rapydo check --no-git --no-builds")
 
     # exec_command(capfd, "rapydo create test")

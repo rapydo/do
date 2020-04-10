@@ -80,28 +80,26 @@ class Application:
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
-        self.production = self.current_args.get('production', False)
 
-        create = self.current_args.get('action', 'unknown') == 'create'
-
-        if not create:
+        if self.current_args.get('action', 'unknown') != 'create':
             first_level_error = self.inspect_main_folder()
-            cwd = os.getcwd()
             if first_level_error is not None:
+                cwd = os.getcwd()
                 num_iterations = 0
                 while cwd != '/' and num_iterations < 10:
                     num_iterations += 1
                     # TODO: use utils.path here
                     os.chdir("..")
                     cwd = os.getcwd()
-                    if self.inspect_main_folder() is None:
-                        log.warning(
-                            "You are not in the rapydo main folder, "
-                            + "changing working dir to {}",
-                            cwd,
-                        )
-                        first_level_error = None
-                        break
+                    if self.inspect_main_folder() is not None:
+                        continue
+                    # You found a rapydo folder among your parents!
+                    log.warning(
+                        "You are not in the main folder,  working dir changed to {}",
+                        cwd,
+                    )
+                    first_level_error = None
+                    break
             if first_level_error is not None:
                 if self.current_args.get('action') == 'version':
                     return self._version()
@@ -223,6 +221,7 @@ class Application:
         if self.action is None:
             log.exit("Internal misconfiguration")
 
+        self.production = self.current_args.get('production', False)
         # Action aliases
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
@@ -424,7 +423,8 @@ To fix this issue, please update docker to version {}+
         except TypeError as e:
             log.error("{}: {}", e, found_version)
 
-    def inspect_main_folder(self):
+    @staticmethod
+    def inspect_main_folder():
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -732,7 +732,8 @@ Verify that you are in the right folder, now you are in: {}
             self.checked("Internet connection is available")
             self.tested_connection = True
 
-    def check_time(self):
+    @staticmethod
+    def check_time():
         # get online utc time
         http = urllib3.PoolManager()
         response = http.request('GET', "http://just-the-time.appspot.com/")
@@ -1473,11 +1474,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     # TODO: make the commands availabe in this file in alphabetical order
 
-    def _check(self):
+    @staticmethod
+    def _check():
 
         log.info("Checks completed")
 
-    def _init(self):
+    @staticmethod
+    def _init():
 
         from controller import DATA_FOLDER, LOGS_FOLDER
 
@@ -1498,7 +1501,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             'ps', {'-q': None, '--services': None, '--quiet': False, '--all': False}
         )
 
-    def _update(self):
+    @staticmethod
+    def _update():
         log.info("All updated")
 
     def _start(self):
@@ -1955,7 +1959,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
-    def _create(self, project_name, template_name):
+    @staticmethod
+    def _create(project_name, template_name):
 
         if gitter.get_local(".") is not None:
             log.exit("You are on a git repo, unable to continue")
@@ -2033,7 +2038,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         print("rapydo init")
 
     def _version(self):
-        # You are not inside a rapydo project, only printing rapydo version
+        # You are not inside a rapydo project print only rapydo version
         if not hasattr(self, "version"):
             print('\nrapydo version: {}'.format(__version__))
             return
@@ -2229,11 +2234,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if editable:
             return self.install_controller_from_folder(version, user)
         elif pip:
-            return self.install_controller_from_pip(version, user)
+            return Application.install_controller_from_pip(version, user)
         else:
             return self.install_controller_from_git(version, user)
 
-    def install_controller_from_pip(self, version, user):
+    @staticmethod
+    def install_controller_from_pip(version, user):
 
         # BEWARE: to not import this package outside the function
         # Otherwise pip will go crazy
