@@ -176,21 +176,17 @@ class Application:
         if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
 
-        if not self.install and not self.print_version:
-            # Detect if heavy ops are allowed
-            if self.check and self.current_args.get('no_git', False):
-                git_checks = False
-            else:
-                git_checks = self.update or self.check
-
-            if git_checks:
-                self.git_checks()  # NOTE: this might be an heavy operation
-            else:
+        if self.update or self.check:
+            if self.current_args.get('no_git', False):
                 log.verbose("Skipping heavy get operations")
+            else:
+                self.git_checks()
 
-            if self.update:
-                # Reading again the configuration, it may change with git updates
-                self.read_specs()
+        if self.update:
+            # Reading again the configuration, it may change with git updates
+            self.read_specs()
+
+        if not self.install and not self.print_version:
 
             self.hostname = self.current_args.get('hostname', 'localhost')
 
@@ -210,35 +206,7 @@ class Application:
 
         if self.tested_connection:
 
-            # get online utc time
-            http = urllib3.PoolManager()
-            response = http.request('GET', "http://just-the-time.appspot.com/")
-
-            internet_time = response.data.decode('utf-8')
-            online_time = datetime.strptime(internet_time.strip(), "%Y-%m-%d %H:%M:%S")
-
-            sec_diff = (datetime.utcnow() - online_time).total_seconds()
-
-            major_diff = abs(sec_diff) >= 300
-            minor_diff = abs(sec_diff) >= 60 if not major_diff else False
-
-            if major_diff:
-                log.error("Date misconfiguration on the host.")
-            elif minor_diff:
-                log.warning("Date misconfiguration on the host.")
-
-            if major_diff or minor_diff:
-                current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-                tz_offset = time.timezone / -3600
-                log.info("Current date: {} UTC", current_date)
-                log.info("Expected: {} UTC", online_time)
-                log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
-
-            if major_diff:
-                tips = "To manually set the date: sudo date --set \"{}\"".format(
-                    online_time.strftime('%d %b %Y %H:%M:%S')
-                )
-                log.exit("Unable to continue, please fix the host date\n{}", tips)
+            self.check_time()
 
         func()
 
@@ -274,8 +242,7 @@ class Application:
         self.project_title = None  # To be retrieved from projet_configuration
         self.project_description = None  # To be retrieved from projet_configuration
         self.version = None
-        # self.releases = {}
-        self.gits = {}
+        self.gits = OrderedDict()
 
         if self.project is not None:
             if "_" in self.project:
@@ -754,7 +721,7 @@ Verify that you are in the right folder, now you are in: {}
 
         return False
 
-    def verify_connected(self):
+    def check_connection(self):
         """ Check if connected to internet """
 
         try:
@@ -764,6 +731,37 @@ Verify that you are in the right folder, now you are in: {}
         else:
             self.checked("Internet connection is available")
             self.tested_connection = True
+
+    def check_time(self):
+        # get online utc time
+        http = urllib3.PoolManager()
+        response = http.request('GET', "http://just-the-time.appspot.com/")
+
+        internet_time = response.data.decode('utf-8')
+        online_time = datetime.strptime(internet_time.strip(), "%Y-%m-%d %H:%M:%S")
+
+        sec_diff = (datetime.utcnow() - online_time).total_seconds()
+
+        major_diff = abs(sec_diff) >= 300
+        minor_diff = abs(sec_diff) >= 60 if not major_diff else False
+
+        if major_diff:
+            log.error("Date misconfiguration on the host.")
+        elif minor_diff:
+            log.warning("Date misconfiguration on the host.")
+
+        if major_diff or minor_diff:
+            current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            tz_offset = time.timezone / -3600
+            log.info("Current date: {} UTC", current_date)
+            log.info("Expected: {} UTC", online_time)
+            log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
+
+        if major_diff:
+            tips = "To manually set the date: sudo date --set \"{}\"".format(
+                online_time.strftime('%d %b %Y %H:%M:%S')
+            )
+            log.exit("Unable to continue, please fix the host date\n{}", tips)
 
     def working_clone(self, name, repo, confs_only=False, from_path=None):
 
@@ -781,7 +779,7 @@ Verify that you are in the right folder, now you are in: {}
         # Is this single repo enabled?
         repo_enabled = repo.pop('if', False)
         if not repo_enabled:
-            return
+            return None
 
         # if self.upgrade and self.current_args.get('current'):
         #     repo['do'] = True
@@ -791,7 +789,7 @@ Verify that you are in the right folder, now you are in: {}
 
         # This step may require an internet connection in case of 'init'
         if not self.tested_connection and self.initialize:
-            self.verify_connected()
+            self.check_connection()
 
         ################
         # - repo path to the repo name
@@ -836,10 +834,11 @@ Verify that you are in the right folder, now you are in: {}
                 log.exit("Local path not found: {}", from_local_path)
 
         if confs_only:
-            repos = {}
-            repos[RAPYDO_CONFS] = {
-                "online_url": "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_CONFS),
-                "if": "true",
+            repos = {
+                RAPYDO_CONFS: {
+                    "online_url": "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_CONFS),
+                    "if": "true",
+                }
             }
         else:
             repos = self.vars.get('submodules', {}).copy()
@@ -920,7 +919,7 @@ Verify that you are in the right folder, now you are in: {}
             return
 
         if self.current_args.get('no_builds', False):
-            log.warning("Skipping builds checks")
+            log.info("Skipping builds checks")
             return
 
         # Compare builds depending on templates (slow operation!)
@@ -1425,7 +1424,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         # TODO: give an option to skip things when you are not connected
         if not self.tested_connection:
-            self.verify_connected()
+            self.check_connection()
 
         # FIXME: give the user an option to skip this
         # or eventually print it in a clearer way
@@ -1433,7 +1432,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         ignore_submodule_list = self.get_ignore_submodules()
 
-        for name, gitobj in sorted(self.gits.items()):
+        for name, gitobj in self.gits.items():
             if name in ignore_submodule_list:
                 log.debug("Skipping {} on {}", self.action, name)
                 continue
@@ -2141,10 +2140,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         # replacing absolute paths with relative ones
         main_dir = os.getcwd()
 
-        obj = yaml.safe_load(
-            yaml_string.replace(main_dir, '.'),
-            # Loader=yaml.FullLoader
-        )
+        obj = yaml.safe_load(yaml_string.replace(main_dir, '.'))
 
         active_services = {}
         for key, value in obj.get('services', {}).items():
@@ -2289,30 +2285,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         log.info("You asked to install rapydo-controller {} from local folder", version)
 
-        package = "rapydo-controller"
-        # utils_path = os.path.join(SUBMODULES_DIR, "utils")
         do_path = os.path.join(SUBMODULES_DIR, "do")
-
-        # if not os.path.exists(utils_path):
-        #     log.exit("{} path not found", utils_path)
         if not os.path.exists(do_path):
             log.exit("{} path not found", do_path)
 
-        # utils_repo = self.gits.get('utils')
         do_repo = self.gits.get('do')
-
-        # utils_switched = False
-        # b = gitter.get_active_branch(utils_repo)
-
-        # if b is None:
-        #     log.error("Unable to read local utils repository")
-        # elif b == version:
-        #     log.info("Utilities repository already at {}", version)
-        # elif gitter.switch_branch(utils_repo, version):
-        #     log.info("Utilities repository switched to {}", version)
-        #     utils_switched = True
-        # else:
-        #     log.exit("Unable to switch utilities repository to {}", version)
 
         b = gitter.get_active_branch(do_repo)
 
@@ -2322,20 +2299,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Controller repository already at {}", version)
         elif gitter.switch_branch(do_repo, version):
             log.info("Controller repository switched to {}", version)
-        # else:
-        #     if utils_switched:
-        #         log.warning("Unable to switch back utilities repository")
-        #     log.exit("Unable to switch controller repository to {}", version)
 
-        # installed = install(utils_path, editable=True)
-        # if installed:
         installed = install(do_path, editable=True, user=user)
 
         if not installed:
             log.error("Unable to install controller {} from local folder", version)
         else:
             log.info("Controller version {} installed from local folder", version)
-            installed_version = check_version(package)
+            installed_version = check_version("rapydo-controller")
             log.info("Check on installed version: {}", installed_version)
 
     # issues/57
