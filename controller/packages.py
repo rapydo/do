@@ -12,8 +12,6 @@ try:
 except NameError:
     import_exceptions = ImportError
 
-DEFAULT_BIN_OPTION = '--version'
-
 
 def install(package, editable=False, user=False, use_pip3=True):
     with Sultan.load(sudo=not user) as sultan:
@@ -46,35 +44,6 @@ def check_version(package_name):
             return pkg._version  # pylint:disable=protected-access
 
     return None
-
-
-def executable(exec_cmd, option=DEFAULT_BIN_OPTION, parse_ver=False):
-
-    from subprocess import check_output
-
-    try:
-        if isinstance(option, list):
-            cmd = [exec_cmd]
-            cmd.extend(option)
-        else:
-            cmd = [exec_cmd, option]
-        stdout = check_output(cmd)
-        output = stdout.decode()
-    except OSError:
-        return None
-    else:
-        if option == DEFAULT_BIN_OPTION:
-            parse_ver = True
-        if parse_ver:
-            try:
-                # try splitting on comma and/or parenthesis
-                # then last element on spaces
-                output = output.split('(')[0].split(',')[0].split()[::-1][0]
-                output = output.strip()
-                output = output.replace("'", "")
-            except BaseException:
-                pass
-        return output
 
 
 def import_package(package_name):

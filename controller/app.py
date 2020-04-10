@@ -15,6 +15,7 @@ from collections import OrderedDict
 from datetime import datetime
 import dateutil.parser
 from glom import glom
+from plumbum.commands.processes import ProcessExecutionError
 
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
@@ -315,19 +316,14 @@ class Application:
         # 17.05 added support for multi-stage builds
         self.check_program('docker', min_version="17.05")
 
-        # BEWARE: to not import this package outside the function
-        # Otherwise pip will go crazy
-        # (we cannot understand why, but it does!)
-        from controller.packages import executable
-
         # Check for CVE-2019-5736 vulnerability
         # Checking version of docker server, since docker client is not affected
         # and the two versions can differ
-        v = executable(
-           'docker',
-            option=["version", "--format", "'{{.Server.Version}}'"],
-            parse_ver=True,
-        )
+        v = Application.get_bin_version(
+            'docker', option=["version", "--format", "'{{.Server.Version}}'"])
+
+        if v is None:
+            log.exit("No docker installation found, cannot continue")
 
         safe_version = "18.09.2"
         if LooseVersion(safe_version) > LooseVersion(v):
@@ -358,11 +354,8 @@ To fix this issue, please update docker to version {}+
         self.check_program('git')  # , max_version='2.14.3')
 
     def check_program(self, program, min_version=None, max_version=None):
-        # BEWARE: to not import this package outside the function
-        # Otherwise pip will go crazy
-        # (we cannot understand why, but it does!)
-        from controller.packages import executable
-        found_version = executable(program)
+
+        found_version = Application.get_bin_version(program)
         if found_version is None:
 
             hints = ""
@@ -2114,7 +2107,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     @staticmethod
     def execute_command(command, parameters):
         from plumbum import local
-        from plumbum.commands.processes import ProcessExecutionError
         try:
 
             # Pattern in plumbum library for executing a shell command
@@ -2124,6 +2116,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         except ProcessExecutionError as e:
             raise e
+
+    def get_bin_version(exec_cmd, option='--version'):
+
+        output = None
+        try:
+            output = Application.execute_command(exec_cmd, option)
+
+            # try splitting on comma and/or parenthesis
+            # then last element on spaces
+            output = output.split('(')[0].split(',')[0].split()[::-1][0]
+            output = output.strip()
+            output = output.replace("'", "")
+
+            return output
+        except ProcessExecutionError as e:
+            log.error("{} not found: {}", exec_cmd, e)
+            return None
+        except BaseException:
+            log.critical("Cannot parse command output: {}", output)
+            return output
 
     def _dump(self):
 
