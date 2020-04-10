@@ -1459,9 +1459,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if len(self.arguments.remaining_args) != 1:
             self.arguments.extra_parser.print_help()
-            import sys
 
-            sys.exit(1)
+            log.exit("Errors with parser configuration")
 
         # parse it
         self.custom_command = vars(
