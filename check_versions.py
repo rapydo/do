@@ -99,8 +99,6 @@ def check_versions(skip_angular=False):
 
                     dependencies[service]['Dockerfile'] = line
                 elif not skip_angular and 'RUN npm install' in line:
-                    if line.startswith("#"):
-                        continue
 
                     tokens = line.split(" ")
                     for t in tokens:
@@ -112,8 +110,7 @@ def check_versions(skip_angular=False):
                                 dependencies[service]["npm"] = []
                             dependencies[service]["npm"].append(t)
                 elif 'RUN pip install' in line or 'RUN pip3 install' in line:
-                    if line.startswith("#"):
-                        continue
+
                     tokens = line.split(" ")
                     for t in tokens:
                         t = t.strip()

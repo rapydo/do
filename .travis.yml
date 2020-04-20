@@ -130,18 +130,18 @@ jobs:
   #     - export PATH="/c/Python:/c/Python/Scripts:$PATH"
   #     - python -m pip install --upgrade pip wheel
 
-  - stage: deploy
-    python: 3.7
-    dist: xenial
-    os: linux
-    script: skip
-    deploy:
-      provider: pypi
-      user: pdonorio
-      password:
-        secure: t5rXTrlqnR1De/rsfO4eDTyRz6e+osTnwLqkphwJ1JQzWh3n5lA2ZYYO6Vmil2oj3X+fFOuhMMnu/QGFwdYP+Hp1EPxecj2WnBKxkW8PtC20w0oAmxFg09teRq/RBbtHs+z/NGGYmWr7V0Ic5iQt53iTX4eBb6LhQ9aLHg05+SsJDAgniKQzpOtt72m+ZYECv86xIr3q5SIl+k0os1VwJtbAqJRMRigvPP05X0ufrTq/uCyHF9EEKOtvVdgYGfiFdOFh5URSfHaV4ASNNGEsU+l3Twfhk6wqQQkvSHeZy0onY90KnCLj7sl3bTyeo6wBPG5jGV/zYhHhZgWyLJI5hZk426oIvkZ0Tj6TxsZNUDNSHNhPgKuR6tEnEt0BGd4oL3YpAKzQmFWMfwzn0UF/CPhpF5gNxWbhfO/+yfxvPfw1QvrVHb9O5hXji8U1q2a+W9dqIAAxKnH0hZZLSQcCihSBTU4oh1lJXqG+Rzo3hLb8XtMEQjMIcx5f4zPf+unRqPWe6ViMZ0eikqmA6lniKMPnqk457fyxzLoda4iaSvSqMxByGx0DSqURIcU87ejKzI+TrZh+I3hqU2SK1yN79kTJ9wFnjKL+2OMjBhIIjUDa5tNf0RauNbCNyuTv2z947PMsJGEZRX4pGR29lwMLnQH3gVcrQ2eJTlxl5x4iEKo=
-      on:
-        tags: true
+  # - stage: deploy
+  #   python: 3.7
+  #   dist: xenial
+  #   os: linux
+  #   script: skip
+  #   deploy:
+  #     provider: pypi
+  #     user: pdonorio
+  #     password:
+  #       secure: t5rXTrlqnR1De/rsfO4eDTyRz6e+osTnwLqkphwJ1JQzWh3n5lA2ZYYO6Vmil2oj3X+fFOuhMMnu/QGFwdYP+Hp1EPxecj2WnBKxkW8PtC20w0oAmxFg09teRq/RBbtHs+z/NGGYmWr7V0Ic5iQt53iTX4eBb6LhQ9aLHg05+SsJDAgniKQzpOtt72m+ZYECv86xIr3q5SIl+k0os1VwJtbAqJRMRigvPP05X0ufrTq/uCyHF9EEKOtvVdgYGfiFdOFh5URSfHaV4ASNNGEsU+l3Twfhk6wqQQkvSHeZy0onY90KnCLj7sl3bTyeo6wBPG5jGV/zYhHhZgWyLJI5hZk426oIvkZ0Tj6TxsZNUDNSHNhPgKuR6tEnEt0BGd4oL3YpAKzQmFWMfwzn0UF/CPhpF5gNxWbhfO/+yfxvPfw1QvrVHb9O5hXji8U1q2a+W9dqIAAxKnH0hZZLSQcCihSBTU4oh1lJXqG+Rzo3hLb8XtMEQjMIcx5f4zPf+unRqPWe6ViMZ0eikqmA6lniKMPnqk457fyxzLoda4iaSvSqMxByGx0DSqURIcU87ejKzI+TrZh+I3hqU2SK1yN79kTJ9wFnjKL+2OMjBhIIjUDa5tNf0RauNbCNyuTv2z947PMsJGEZRX4pGR29lwMLnQH3gVcrQ2eJTlxl5x4iEKo=
+  #     on:
+  #       tags: true
 notifications:
   email: false
   slack:
