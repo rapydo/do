@@ -19,7 +19,7 @@ class Templating:
             log.exit("Template folder not found: {}", self.template_dir)
 
         log.debug("Template folder: {}", self.template_dir)
-        loader = FileSystemLoader(self.template_dir)
+        loader = FileSystemLoader([TEMPLATE_DIR, self.template_dir])
 
         self.env = Environment(
             loader=loader,
