@@ -8,6 +8,7 @@ project_configuration:
     env:
       LOG_LEVEL: INFO
       APP_MODE: test
+      DEFAULT_DHLEN: 256
       # SMTP_ADMIN: your@email.org
 
       # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
