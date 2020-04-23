@@ -22,14 +22,11 @@ def username(param_not_used, length=8):
 
 def password(param_not_used, length=12):
         rand = random.SystemRandom()
-        charset = \
-            string.ascii_lowercase + \
-            string.ascii_uppercase + \
-            string.digits + \
-            '%_-$&@'
+        charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
-        random_string = ""
-        for _ in range(length):
+        random_string = rand.choice(charset)
+        charset += string.digits
+        for _ in range(length - 1):
             random_string += rand.choice(charset)
 
         return random_string
