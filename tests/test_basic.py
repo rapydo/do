@@ -100,7 +100,7 @@ def test_all(capfd):
     command(["-r", "projects/sql", "projects/second"])
 
     out = exec_command(capfd, "rapydo check -s")
-    assert "Please select the --project option on one of the following:" in out
+    assert "Please add the --project option with one of the following:" in out
 
     out = exec_command(capfd, "rapydo -p sql check -s")
     assert "Checks completed" in out
