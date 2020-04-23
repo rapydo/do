@@ -26,6 +26,7 @@ from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
 from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
+from controller.templating import Templating
 from controller import log
 
 from controller.conf_utilities import read_configuration
@@ -125,6 +126,7 @@ class Application:
         if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
+            self.hostname = self.current_args.get('hostname', 'localhost')
         if not self.install and not self.print_version:
             self.verify_rapydo_version()
             self.inspect_project_folder()
@@ -172,6 +174,10 @@ class Application:
                 self.action, function
             )
 
+        if self.initialize:
+            if not self.arguments.projectrc or self.current_args.get('force', False):
+                self.create_projectrc()
+
         if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
 
@@ -186,8 +192,6 @@ class Application:
             self.read_specs()
 
         if not self.install and not self.print_version:
-
-            self.hostname = self.current_args.get('hostname', 'localhost')
 
             self.make_env()
 
@@ -271,13 +275,9 @@ class Application:
             if prj_num == 0:
                 log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
             elif prj_num > 1:
-                hint = "Hint: create a {} file to save default options".format(
-                    PROJECTRC)
                 log.exit(
-                    "Please select the --project option on one " +
-                    "of the following:\n\n {}\n\n{}\n",
-                    projects,
-                    hint,
+                    "Please add the --project option with one of the following:\n\n {}",
+                    projects
                 )
             else:
                 # make it the default
@@ -1247,6 +1247,19 @@ Verify that you are in the right folder, now you are in: {}
                 v = line[1].strip()
                 env[k] = v
         return env
+
+    def create_projectrc(self):
+        templating = Templating()
+        t = templating.get_template(
+            'projectrc',
+            {
+                'project': self.project,
+                'hostname': self.hostname,
+            }
+        )
+        templating.save_template(PROJECTRC, t, force=True)
+
+        log.info("Created default {} file", PROJECTRC)
 
     def make_env(self):
         envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)

@@ -108,6 +108,12 @@ subcommands:
         type: str
         metavalue: SUBMODULE_PATH
         help: link all submodules in an existing folder instead of download them
+      force:
+        alias: f
+        type: bool
+        # metavalue: TRUE_OR_FALSE
+        default: False
+        help: overwrite initialization files if already exist
   update:
     description: Update the current project
     suboptions:

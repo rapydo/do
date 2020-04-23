@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from controller.templating import TEMPLATE_DIR
 
 current_version = "0.7.3"
 
@@ -17,7 +18,7 @@ setup(
     license='MIT',
     packages=[main_package],
     package_data={
-        main_package: ['argparser.yaml']
+        main_package: ['argparser.yaml', '{}/*'.format(TEMPLATE_DIR)]
     },
     # End-of-life: 2020-09-13
     python_requires='>=3.5.0',

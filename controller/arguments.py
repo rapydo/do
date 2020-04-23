@@ -118,20 +118,19 @@ class ArgParser:
 
         try:
             # READ PROJECT INIT FILE: .projectrc
-            pinit_conf = load_yaml_file(
+            self.projectrc = load_yaml_file(
                 PROJECTRC, path=os.curdir, is_optional=True)
             # Allow alternative for PROJECT INIT FILE: .project.yml
-            if len(pinit_conf) < 1:
-                pinit_conf = load_yaml_file(
+            if len(self.projectrc) < 1:
+                self.projectrc = load_yaml_file(
                     PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True)
         except AttributeError as e:
             log.exit(e)
 
-        self.host_configuration = pinit_conf.pop('project_configuration', {})
+        self.host_configuration = self.projectrc.pop('project_configuration', {})
 
         # Mix with parse_conf
-        for key, value in pinit_conf.items():
-            # value = pinit_conf.get(key, None)
+        for key, value in self.projectrc.items():
 
             if value is None:
                 continue

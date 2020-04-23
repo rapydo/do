@@ -1,0 +1,12 @@
+project: {{ project }}
+# stack: your_custom_stack 
+# production: True
+hostname: {{ hostname }}
+
+project_configuration:
+  variables:
+    env:
+      LOG_LEVEL: INFO
+      # SMTP_ADMIN: your@email.org
+      # other variables
+
