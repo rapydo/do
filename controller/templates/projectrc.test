@@ -1,0 +1,15 @@
+project: {{ project }}
+# stack: your_custom_stack 
+# production: True
+hostname: {{ hostname }}
+
+project_configuration:
+  variables:
+    env:
+      LOG_LEVEL: INFO
+      APP_MODE: test
+      # SMTP_ADMIN: your@email.org
+
+      # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+

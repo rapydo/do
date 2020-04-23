@@ -1261,6 +1261,8 @@ Verify that you are in the right folder, now you are in: {}
         templating = Templating()
         if self.production:
             pfile = 'projectrc.prod'
+        elif os.environ.get('APP_MODE', '') == 'test':
+            pfile = 'projectrc.test'
         else:
             pfile = 'projectrc'
         t = templating.get_template(
