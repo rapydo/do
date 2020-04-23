@@ -1,6 +1,7 @@
 import os
 import tempfile
 from git import Repo
+from plumbum import local
 from prettyprinter import pprint as pp
 from controller import log
 from controller.arguments import ArgParser
@@ -46,6 +47,9 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo --project sql init")
     assert "Project initialized" in out
 
+    command = local["cat"]
+    command([".projectrc"])
+
     out = exec_command(capfd, "rapydo pull")
     assert "Base images pulled from docker hub" in out
 
@@ -88,7 +92,6 @@ def test_all(capfd):
 
     os.remove(".projectrc")
 
-    from plumbum import local
     command = local["cp"]
     command(["-r", "projects/sql", "projects/second"])
 
