@@ -42,19 +42,12 @@ def exec_command(capfd, command, get_out=True, get_err=False):
 
 def test_all(capfd):
 
-    # create .projectrc
-    with open('.projectrc', 'w') as f:
-        f.write("project: sql")
-
     # INIT on rapydo-core
-    out = exec_command(capfd, "rapydo init")
+    out = exec_command(capfd, "rapydo --project sql init")
     assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo pull")
     assert "Base images pulled from docker hub" in out
-
-    out = exec_command(capfd, "rapydo init")
-    assert "Project initialized" in out
 
     # UPDATE on rapydo-core
     out = exec_command(capfd, "rapydo update")
@@ -111,13 +104,8 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo -p celery check -s")
     assert "You selected a reserved name, invalid project name: celery" in out
 
-    # out = exec_command(capfd, "rapydo -p xyz check -s")
-    # assert "Wrong project 'xyz'." in out
-    # assert "Select one of the following:" in out
-
-    # create .projectrc
-    with open('.projectrc', 'w') as f:
-        f.write("project: sql")
+    out = exec_command(capfd, "rapydo --project sql init")
+    assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo check -s")
     assert "Checks completed" in out
@@ -129,7 +117,7 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo status")
     assert "docker-compose command: 'ps'" in out
 
-    # Template project is based on neo4j
+    # Template project is based on sql
     exec_command(capfd, "rapydo verify neo4j")
     # This output is not capture, since it is produced by the backend
     # assert 'Service "neo4j" was NOT detected' in out
