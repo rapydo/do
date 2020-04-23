@@ -47,9 +47,6 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo --project sql init")
     assert "Project initialized" in out
 
-    command = local["cat"]
-    command([".projectrc"])
-
     out = exec_command(capfd, "rapydo pull")
     assert "Base images pulled from docker hub" in out
 
