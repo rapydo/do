@@ -1,11 +1,38 @@
 # -*- coding: utf-8 -*-
 import os
+import random
+import string
 from jinja2 import FileSystemLoader, Environment, DebugUndefined
 from jinja2.meta import find_undeclared_variables
 from jinja2.exceptions import TemplateNotFound, UndefinedError
 from controller import log
 
 TEMPLATE_DIR = 'templates'
+
+
+def username(param_not_used, length=8):
+    rand = random.SystemRandom()
+    charset = string.ascii_lowercase
+    random_string = rand.choice(charset)
+    charset += string.digits
+    for _ in range(length - 1):
+        random_string += rand.choice(charset)
+    return random_string
+
+
+def password(param_not_used, length=12):
+        rand = random.SystemRandom()
+        charset = \
+            string.ascii_lowercase + \
+            string.ascii_uppercase + \
+            string.digits + \
+            '%_-$&@'
+
+        random_string = ""
+        for _ in range(length):
+            random_string += rand.choice(charset)
+
+        return random_string
 
 
 class Templating:
@@ -23,8 +50,10 @@ class Templating:
 
         self.env = Environment(
             loader=loader,
-            undefined=DebugUndefined
+            undefined=DebugUndefined,
         )
+        self.env.filters['password'] = password
+        self.env.filters['username'] = username
 
     def get_template(self, filename, data):
         try:

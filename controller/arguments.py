@@ -22,6 +22,7 @@ class ArgParser:
             args = sys.argv
 
         self.current_args = {}
+        self.projectrc = {}
         self.host_configuration = {}
         # This method can raise ValueErrors
         self.check_args(args)

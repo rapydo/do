@@ -176,7 +176,14 @@ class Application:
 
         if self.initialize:
             if not self.arguments.projectrc or self.current_args.get('force', False):
-                self.create_projectrc()
+                f = self.create_projectrc()
+                self.arguments.projectrc = load_yaml_file(
+                    f, path=os.curdir, is_optional=True
+                )
+                self.arguments.host_configuration = self.arguments.projectrc.pop(
+                    'project_configuration', {}
+                )
+                self.read_specs()
 
         if not self.install or self.local_install:
             self.git_submodules(confs_only=False)
@@ -635,7 +642,9 @@ Verify that you are in the right folder, now you are in: {}
             )
 
             self.specs = mix_configuration(
-                self.specs, self.arguments.host_configuration
+                self.specs,
+                self.arguments.host_configuration
+
             )
 
         except AttributeError as e:
@@ -1250,8 +1259,12 @@ Verify that you are in the right folder, now you are in: {}
 
     def create_projectrc(self):
         templating = Templating()
+        if self.production:
+            pfile = 'projectrc.prod'
+        else:
+            pfile = 'projectrc'
         t = templating.get_template(
-            'projectrc',
+            pfile,
             {
                 'project': self.project,
                 'hostname': self.hostname,
@@ -1260,6 +1273,8 @@ Verify that you are in the right folder, now you are in: {}
         templating.save_template(PROJECTRC, t, force=True)
 
         log.info("Created default {} file", PROJECTRC)
+
+        return PROJECTRC
 
     def make_env(self):
         envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)

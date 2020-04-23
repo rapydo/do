@@ -1,6 +1,6 @@
 project: {{ project }}
 # stack: your_custom_stack 
-# production: True
+production: True
 hostname: {{ hostname }}
 
 project_configuration:
@@ -9,6 +9,6 @@ project_configuration:
       LOG_LEVEL: INFO
       # SMTP_ADMIN: your@email.org
 
-      # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
-      # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
 
