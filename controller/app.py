@@ -265,8 +265,8 @@ class Application:
 
             if self.project in self.reserved_project_names:
                 log.exit(
-                    "You selected a reserved name, invalid project name: {}".format(
-                        self.project)
+                    "You selected a reserved name, invalid project name: {}",
+                    self.project
                 )
 
     def check_projects(self):
@@ -1980,6 +1980,88 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         command = self.current_args.get('command')
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
+
+    # def _create(self, project_name, template_name, auto=False, force=True):
+
+    #     if "_" in project_name:
+    #         log.exit("Wrong project name, _ is not a valid character")
+
+    #     if project_name in self.reserved_project_names:
+    #         log.exit(
+    #             "You selected a reserved name, invalid project name: {}",
+    #             project_name
+    #         )
+
+    #     from controller.conf_utilities import PROJECT_CONF_FILENAME
+    #     templating = Templating()
+
+    #     # 1 - create project folder
+    #     # if os.path.exists(project_name):
+    #     #      log.exit("{} folder already exists, unable to continue", project_name)
+    #     #  os.makedirs(project_name)
+    #     # if not os.path.exists(project_name):
+    #     #     log.exit("Errors creating {} folder", project_name)
+
+    #     # 2 - cd project_name
+
+    #     # 3 - git init
+
+    #     # 4 - create folders
+    #     folders = [
+    #         'data',
+    #         'submodules',
+    #         os.path.join(PROJECT_DIR, project_name, 'confs'),
+    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'apis'),
+    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'models'),
+    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'tests'),
+    #         os.path.join(PROJECT_DIR, project_name, 'frontend', 'app'),
+    #         os.path.join(PROJECT_DIR, project_name, 'frontend', 'css'),
+    #         # 'frontend/package.json',
+    #         # 'frontend/app/custom.project.options.ts',
+    #         # 'frontend/app/custom.module.ts',
+    #         # 'frontend/app/custom.navbar.ts',
+    #         # 'frontend/app/custom.profile.ts',
+    #         # 'frontend/css/style.css',
+    #         # 'frontend/app/custom.navbar.links.html',
+    #         # 'frontend/app/custom.navbar.brand.html',
+    #         # 'frontend/app/custom.profile.html',
+    #     ]
+    #     for f in folders:
+    #         if os.path.exists(f):
+    #             log.debug("{} already exists")
+    #             continue
+    #         if not auto:
+    #             log.exit("\nmkdir -p {}", f)
+    #         else:
+    #             os.makedirs(f)
+
+    #     # 5 - crete project_configuration.yml
+
+    #     template = templating.get_template(
+    #         PROJECT_CONF_FILENAME,
+    #         {
+    #             'version': __version__
+    #         }
+    #     )
+    #     out_path = os.path.join(PROJECT_DIR, project_name, PROJECT_CONF_FILENAME)
+
+    #     if not auto:
+    #         if not os.path.exists(out_path):
+    #             print("\n{}".format(template))
+    #             log.exit(out_path)
+    #     else:
+    #         templating.save_template(out_path, template, force=force)
+
+    #     # 6 - create confs ymls
+    #     for f in ['commons.yml', 'development.yml', 'production.yml']:
+    #         template = templating.get_template(f, data={})
+    #         out_path = os.path.join(PROJECT_DIR, project_name, 'confs', f)
+    #         if not auto:
+    #             if not os.path.exists(out_path):
+    #                 print("\n{}".format(template))
+    #                 log.exit(out_path)
+    #         else:
+    #             templating.save_template(out_path, template, force=force)
 
     @staticmethod
     def _create(project_name, template_name):
