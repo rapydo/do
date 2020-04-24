@@ -437,7 +437,7 @@ To fix this issue, please update docker to version {}+
 Verify that you are in the right folder, now you are in: {}
                 """.format(os.getcwd())
 
-        required_files = [PROJECT_DIR, 'data', 'projects', 'submodules']
+        required_files = [PROJECT_DIR, 'data', 'submodules']
 
         for fname in required_files:
             if not os.path.exists(fname):
