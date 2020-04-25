@@ -60,3 +60,8 @@ def apply_variables(dictionary, variables):
         new_dict[key] = value
 
     return new_dict
+
+
+# move here all checks on project (required files, creation functions, templating, etc)
+class Project:
+    pass

@@ -1,0 +1,19 @@
+---
+project:
+  title: YourProject
+  description: "Your projected"
+  version: {{ version }}
+  rapydo: {{ version }}
+
+variables:
+  env:
+
+    FRONTEND_FRAMEWORK: angular
+
+  backend:
+    credentials:
+      roles:
+        user: normal_user
+        internal: staff_user
+        admin: admin_root
+        default: normal_user
