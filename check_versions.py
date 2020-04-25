@@ -98,7 +98,7 @@ def check_versions(skip_angular=False):
                     line = line.replace("FROM", "").strip()
 
                     dependencies[service]['Dockerfile'] = line
-                elif not skip_angular and 'RUN npm install' in line:
+                elif not skip_angular and ('RUN npm install' in line or 'RUN yarn add' in line or 'RUN yarn global add' in line):
 
                     tokens = line.split(" ")
                     for t in tokens:
