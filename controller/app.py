@@ -293,8 +293,8 @@ class Application:
         else:
             if self.project not in projects:
                 log.exit(
-                    "Wrong project {}\nSelect one of the following:\n\n {}\n".format(
-                        self.project, projects)
+                    "Wrong project {}\nSelect one of the following: {}\n".format(
+                        self.project, ", ".join(projects))
                 )
 
         self.checked("Selected project: {}", self.project)

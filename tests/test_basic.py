@@ -43,8 +43,11 @@ def exec_command(capfd, command, get_out=True, get_err=False):
 
 def test_all(capfd):
 
+    # selected this to enable rabbit and test the build command with a very build
+    TEST_PROJECT = "celerytest"
+
     # INIT on rapydo-core
-    out = exec_command(capfd, "rapydo --project sql init")
+    out = exec_command(capfd, "rapydo --project {} init".format(TEST_PROJECT))
     assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo pull")
@@ -54,7 +57,8 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo update")
     assert "All updated" in out
 
-    out = exec_command(capfd, "rapydo build --rebuild-templates")
+    # Selected a very fast service to speed up tests
+    out = exec_command(capfd, "rapydo -s rabbitmq build --rebuild-templates")
     assert "Images built" in out
 
     # CHECK on rapydo-core
@@ -90,12 +94,12 @@ def test_all(capfd):
     os.remove(".projectrc")
 
     command = local["cp"]
-    command(["-r", "projects/sql", "projects/second"])
+    command(["-r", "projects/{}".format(TEST_PROJECT), "projects/second"])
 
     out = exec_command(capfd, "rapydo check -s")
     assert "Please add the --project option with one of the following:" in out
 
-    out = exec_command(capfd, "rapydo -p sql check -s")
+    out = exec_command(capfd, "rapydo -p {} check -s".format(TEST_PROJECT))
     assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo -p invalid_character check -s")
@@ -104,7 +108,7 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo -p celery check -s")
     assert "You selected a reserved name, invalid project name: celery" in out
 
-    out = exec_command(capfd, "rapydo --project sql init")
+    out = exec_command(capfd, "rapydo --project {} init".format(TEST_PROJECT))
     assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo check -s")
