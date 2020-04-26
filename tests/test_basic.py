@@ -58,7 +58,7 @@ def test_all(capfd):
     assert "All updated" in out
 
     # Selected a very fast service to speed up tests
-    out = exec_command(capfd, "rapydo -s rabbitmq build --rebuild-templates")
+    out = exec_command(capfd, "rapydo -s rabbit build --rebuild-templates")
     assert "Images built" in out
 
     # CHECK on rapydo-core
