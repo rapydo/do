@@ -3,7 +3,7 @@ import os
 import random
 import string
 from jinja2 import FileSystemLoader, Environment, DebugUndefined
-from jinja2.meta import find_undeclared_variables
+# from jinja2.meta import find_undeclared_variables
 from jinja2.exceptions import TemplateNotFound, UndefinedError
 from controller import log
 
@@ -48,6 +48,7 @@ class Templating:
         self.env = Environment(
             loader=loader,
             undefined=DebugUndefined,
+            autoescape=True
         )
         self.env.filters['password'] = password
         self.env.filters['username'] = username
