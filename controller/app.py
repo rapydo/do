@@ -78,7 +78,6 @@ class Application:
 
         self.arguments = arguments
         self.current_args = self.arguments.current_args
-        self.reserved_project_names = self.get_reserved_project_names()
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
         self.project_scaffold = Project()
 
@@ -276,7 +275,7 @@ class Application:
                 )
                 log.exit("Wrong project name, _ is not a valid character.{}", suggest)
 
-            if self.project in self.reserved_project_names:
+            if self.project in self.project_scaffold.reserved_project_names:
                 log.exit(
                     "You selected a reserved name, invalid project name: {}",
                     self.project
@@ -1927,7 +1926,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if "_" in project_name:
             log.exit("Wrong project name, _ is not a valid character")
 
-        if project_name in self.reserved_project_names:
+        if project_name in self.project_scaffold.reserved_project_names:
             log.exit(
                 "You selected a reserved name, invalid project name: {}",
                 project_name
@@ -2289,62 +2288,6 @@ rapydo start
             log.info("Controller version {} installed from local folder", version)
             installed_version = check_version("rapydo-controller")
             log.info("Check on installed version: {}", installed_version)
-
-    # issues/57
-    # I'm temporary here... to be decided how to handle me
-    @staticmethod
-    def get_reserved_project_names():
-        names = [
-            'abc',
-            'attr',
-            'base64',
-            'bravado_core',
-            'celery',
-            'click',
-            'collections',
-            'datetime',
-            'dateutil',
-            'email',
-            'errno',
-            'flask',
-            'flask_restful',
-            'flask_sqlalchemy',
-            'authlib',
-            'functools',
-            'glob',
-            'hashlib',
-            'hmac',
-            'inspect',
-            'io',
-            'irods',
-            'iRODSPickleSession',
-            'json',
-            'jwt',
-            'logging',
-            'neo4j',
-            'neomodel',
-            'os',
-            'platform',
-            'pickle',
-            'plumbum',
-            'pymodm',
-            'pymongo',
-            'pyotp',
-            'pyqrcode',
-            'pytz',
-            'random',
-            're',
-            'smtplib',
-            'socket',
-            'sqlalchemy',
-            'string',
-            'submodules',
-            'sys',
-            'time',
-            'unittest',
-            'werkzeug',
-        ]
-        return names
 
     @staticmethod
     def get_vars_to_services_mapping():
