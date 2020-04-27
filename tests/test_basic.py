@@ -56,35 +56,25 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo create test --auth sql --frontend angular --current")
     assert "Project test successfully created" in out
 
-    # INIT on rapydo-core
     out = exec_command(capfd, "rapydo init")
     assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo pull")
     assert "Base images pulled from docker hub" in out
 
-    # UPDATE on rapydo-core
-    out = exec_command(capfd, "rapydo update")
+    # Skipping main because we are on a fake git repository
+    out = exec_command(capfd, "rapydo update -i main")
     assert "All updated" in out
 
     # Selected a very fast service to speed up tests
     out = exec_command(capfd, "rapydo -s rabbit build --rebuild-templates")
     assert "Images built" in out
 
-    # CHECK on rapydo-core
     out = exec_command(capfd, "rapydo check")
     assert "Checks completed" in out
 
-    # CHECK on rapydo-core by enabling permissions checks
     out = exec_command(capfd, "rapydo check --check-permissions")
     assert "Checks completed" in out
-
-    # NOW we are on a fork of rapydo-core
-    gitobj = Repo(".")
-    gitobj.remotes.origin.set_url("just_a_non_url")
-
-    out = exec_command(capfd, "rapydo init")
-    assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo list --env")
     assert "List env variables:" in out
