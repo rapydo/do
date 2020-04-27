@@ -181,9 +181,10 @@ class Application:
 
             self.check_time()
 
-        if not callable(func):
+        if callable(func):
+            func()
+        else:
             log.exit("Cannot execute {}", func)
-        func()
 
     def checked(self, message, *args, **kws):
         if self.action == "check":

@@ -1,45 +1,9 @@
 import os
+import shutil
 from git import Repo
-# from ast import literal_eval
 from plumbum import local
-# from prettyprinter import pprint as pp
-from controller import log
 from controller.arguments import ArgParser
 from controller.app import Application
-
-
-# Old version
-# def exec_command(capfd, command, get_out=True, get_err=False):
-#     command = command.split(" ")
-
-#     arguments = ArgParser(args=command)
-
-#     try:
-#         Application(arguments)
-#     # NOTE: docker-compose calls SystemExit at the end of the command...
-#     except SystemExit:
-#         log.info('completed')
-
-#     out, err = capfd.readouterr()
-#     out = out.replace('\r', '').split("\n")
-#     err = err.replace('\r', '').split("\n")
-
-#     if get_out:
-#         pp(out)
-
-#     if get_err:
-#         pp(err)
-
-#     if get_out and get_err:
-#         return out, err
-
-#     if get_out:
-#         return out
-
-#     if get_err:
-#         return err
-
-#     return None
 
 
 def exec_command(capfd, command):
@@ -181,27 +145,21 @@ def test_all(capfd):
     exec_command(capfd, "rapydo ssl")
     exec_command(capfd, "rapydo dhparam")
 
-    # Output is too long? Removed last tests...
     # exec_command(capfd, "rapydo create test")
     # assert 'You are on a git repo, unable to continue' in out
 
-    # Save parent folder
     current_folder = os.getcwd()
-    parent_folder = os.path.dirname(current_folder)
+    # DANGER!! Delete everything!!!
+    for f in os.listdir(current_folder):
+        p = os.path.join(current_folder, f)
+        if os.path.isfile(p):
+            os.unlink(p)
+        elif os.path.isdir(p):
+            shutil.rmtree(p)
 
-    # testing a command from a subfolder
-    os.chdir("projects")
-    out = exec_command(capfd, "rapydo check --no-git --no-builds")
-    # .projectrc is not found from subfolders...
-    assert "Please add the --project option with one of the following:" in out
-
-    os.chdir(parent_folder)
     # testing a command from outside project dir
     out = exec_command(capfd, "rapydo check --no-git --no-builds")
     assert "Folder not found: projects" in out
 
-    os.makedirs("test")
-    os.chdir("test")
     out = exec_command(capfd, "rapydo create test")
     assert "Project test successfully created" in out
-    os.chdir(current_folder)
