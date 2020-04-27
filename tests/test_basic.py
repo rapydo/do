@@ -61,7 +61,6 @@ def exec_command(capfd, command):
 
     for o in out:
         print(o)
-    print("*********************************************")
 
     return out
 
@@ -206,3 +205,4 @@ def test_all(capfd):
     # out = exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
     os.chdir(current_folder)
+    print(os.getcwd())

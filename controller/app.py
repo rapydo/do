@@ -53,6 +53,9 @@ class Application:
         self.current_args = self.arguments.current_args
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
         self.project_scaffold = Project()
+        self.run()
+
+    def run(self):
 
         if self.current_args.get('action', 'unknown') != 'create':
             first_level_error = self.project_scaffold.find_main_folder()
@@ -184,6 +187,8 @@ class Application:
 
             self.check_time()
 
+        if not callable(func):
+            log.exit("Cannot execute {}", func)
         func()
 
     def checked(self, message, *args, **kws):
