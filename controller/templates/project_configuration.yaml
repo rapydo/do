@@ -1,14 +1,28 @@
 ---
 project:
   title: YourProject
-  description: "Your projected"
+  description: "Your project"
   version: {{ version }}
   rapydo: {{ version }}
 
 variables:
   env:
 
-    FRONTEND_FRAMEWORK: angular
+    FRONTEND_FRAMEWORK: {{ frontend }}
+    AUTH_SERVICE: {{ auth_service }}
+
+    {% if enable_sql %}
+    ACTIVATE_ALCHEMY: 1
+    ACTIVATE_POSTGRES: 1
+    {% endif %}
+
+    {% if enable_neo4j %}
+    ACTIVATE_NEO4J: 1
+    {% endif %}
+
+    {% if enable_mongo %}
+    ACTIVATE_MONGODB: 1
+    {% endif %}
 
   backend:
     credentials:

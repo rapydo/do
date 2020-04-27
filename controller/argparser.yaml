@@ -397,6 +397,32 @@ subcommands:
         metavalue: NAME
         default: null
         help: Name of your new project
+      current:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force creation in current folder
+      force:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force files overwriting
+      no-auto:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable automatic project creation
+      auth:
+        type: str
+        metavalue: FRAMEWORK
+        default: null
+        help: Auth service to enable (sql, neo4j, mongo)
+      frontend:
+        type: str
+        metavalue: FRAMEWORK
+        default: null
+        help: Frontend framework to enable (no, angular)
+
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

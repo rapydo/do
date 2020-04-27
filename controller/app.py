@@ -19,7 +19,7 @@ from plumbum.commands.processes import ProcessExecutionError
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller.project import Project
-from controller.project import ANGULAR, ANGULARJS, REACT
+from controller.project import NO_FRONTEND, ANGULAR, ANGULARJS, REACT
 from controller.services_utilities import apply_variables, find_active
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
@@ -1819,13 +1819,32 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
-    def _create(self, auto=True, force=True):
+    def _create(self):
+
+        force = self.current_args.get("force", False)
+        current = self.current_args.get("current", False)
+        auto = not self.current_args.get("no_auto", False)
+        auth = self.current_args.get("auth")
+        frontend = self.current_args.get("frontend")
+
+        if frontend is None or frontend not in [NO_FRONTEND, ANGULAR]:
+            log.exit("Invalid frontend framework: {}", frontend)
+
+        if auth is None or auth not in ['sql', 'neo4j', 'mongo']:
+            log.exit("Invalid authentication service: {}", auth)
+
+        if auth == 'sql':
+            auth = 'sqlalchemy'
+
+        if not current and len(os.listdir(".")) > 0:
+            log.exit("Current folder is not empty, cannot create a new project here." +
+                     "\nUse --current to force the creation here")
 
         project_name = self.current_args.get("name")
 
         self.project_scaffold.load_project_scaffold(project_name)
-        # should be a parameter in create
-        self.project_scaffold.load_frontend_scaffold(ANGULAR)
+        if frontend != NO_FRONTEND:
+            self.project_scaffold.load_frontend_scaffold(frontend)
 
         if "_" in project_name:
             log.exit("Wrong project name, _ is not a valid character")
@@ -1859,12 +1878,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             self.project_scaffold.data_folders
         for f in folders:
             if os.path.exists(f):
-                log.debug("{} already exists", f)
+                log.info("Folder {} already exists", f)
                 continue
             if not auto:
                 log.exit("\nmkdir -p {}", f)
-            else:
-                os.makedirs(f)
+
+            os.makedirs(f)
 
         # 5 - files
         for p in self.project_scaffold.expected_files:
@@ -1874,14 +1893,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 {
                     'version': __version__,
                     'project': self.project,
+                    'auth_service': auth,
+                    'enable_sql': auth == 'sqlalchemy',
+                    'enable_neo4j': auth == 'neo4j',
+                    'enable_mongo': auth == 'mongo',
+                    'frontend': frontend,
                 }
             )
 
+            # automatic creation
             if auto:
-                templating.save_template(p, template, force=force)
+                if os.path.exists(p) and not force:
+                    log.info("{} already exists", p)
+                else:
+                    templating.save_template(p, template, force=force)
                 continue
+
             # manual creation
-            if not os.path.exists(p):
+            if os.path.exists(p):
+                log.info("{} already exists", p)
+            else:
                 print("\n{}".format(template))
                 log.exit(p)
 

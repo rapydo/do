@@ -1,5 +1,5 @@
 import os
-import shutil
+# import shutil
 from git import Repo
 from plumbum import local
 from controller.arguments import ArgParser
@@ -163,4 +163,4 @@ def test_all(capfd):
 
     # out = exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
-    exec_command(capfd, "rapydo create test")
+    # exec_command(capfd, "rapydo create test")

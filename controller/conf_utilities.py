@@ -158,11 +158,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     filepath = get_yaml_path(file, path=path)
 
     if filepath is None:
-        if is_optional:
-            log.info(
-                "Failed to read YAML file {}/{}: File does not exist", path, file,
-            )
-        else:
+        if not is_optional:
             log.exit(
                 "Failed to read YAML file {}/{}: File does not exist", path, file,
             )

@@ -5,6 +5,7 @@ from controller import gitter
 from controller import PROJECT_DIR
 from controller import log
 
+NO_FRONTEND = 'no'
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
 REACT = 'react'
