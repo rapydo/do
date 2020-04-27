@@ -31,11 +31,12 @@ def exec_command(capfd, command):
 
 def test_all(capfd):
 
-    # selected this to enable rabbit and test the build command with a very build
-    TEST_PROJECT = "celerytest"
+    out = exec_command(capfd, "rapydo create test")
+    assert "Project test successfully created" in out
+    exec_command(capfd, "rapydo create test --auth sql --frontend angular")
 
     # INIT on rapydo-core
-    out = exec_command(capfd, "rapydo --project {} init".format(TEST_PROJECT))
+    out = exec_command(capfd, "rapydo init")
     assert "Project initialized" in out
 
     out = exec_command(capfd, "rapydo pull")
@@ -82,24 +83,24 @@ def test_all(capfd):
     os.remove(".projectrc")
 
     command = local["cp"]
-    command(["-r", "projects/{}".format(TEST_PROJECT), "projects/second"])
+    command(["-r", "projects/test", "projects/second"])
 
-    out = exec_command(capfd, "rapydo check -s")
+    out = exec_command(capfd, "rapydo check --no-git --no-builds")
     assert "Please add the --project option with one of the following:" in out
 
-    out = exec_command(capfd, "rapydo -p {} check -s".format(TEST_PROJECT))
+    out = exec_command(capfd, "rapydo -p test check --no-git --no-builds")
     assert "Checks completed" in out
 
-    out = exec_command(capfd, "rapydo -p invalid_character check -s")
+    out = exec_command(capfd, "rapydo -p invalid_character check --no-git --no-builds")
     assert "Wrong project name, _ is not a valid character." in out
 
-    out = exec_command(capfd, "rapydo -p celery check -s")
+    out = exec_command(capfd, "rapydo -p celery check --no-git --no-builds")
     assert "You selected a reserved name, invalid project name: celery" in out
 
-    out = exec_command(capfd, "rapydo --project {} init".format(TEST_PROJECT))
+    out = exec_command(capfd, "rapydo --project test init")
     assert "Project initialized" in out
 
-    out = exec_command(capfd, "rapydo check -s")
+    out = exec_command(capfd, "rapydo check --no-git --no-builds")
     assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo start")
@@ -144,23 +145,3 @@ def test_all(capfd):
     exec_command(capfd, "rapydo ancestors XYZ")
     exec_command(capfd, "rapydo ssl")
     exec_command(capfd, "rapydo dhparam")
-
-    # # exec_command(capfd, "rapydo create test")
-    # # assert 'You are on a git repo, unable to continue' in out
-
-    # current_folder = os.getcwd()
-    # # DANGER!! Delete everything!!!
-    # for f in os.listdir(current_folder):
-    #     p = os.path.join(current_folder, f)
-    #     if os.path.isfile(p):
-    #         os.unlink(p)
-    #     elif os.path.isdir(p):
-    #         shutil.rmtree(p)
-
-    # # testing a command from outside project dir
-    # out = exec_command(capfd, "rapydo check --no-git --no-builds")
-    # assert "Folder not found: projects" in out
-
-    # out = exec_command(capfd, "rapydo create test")
-    # assert "Project test successfully created" in out
-    # exec_command(capfd, "rapydo create test")
