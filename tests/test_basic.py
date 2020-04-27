@@ -145,21 +145,22 @@ def test_all(capfd):
     exec_command(capfd, "rapydo ssl")
     exec_command(capfd, "rapydo dhparam")
 
-    # exec_command(capfd, "rapydo create test")
-    # assert 'You are on a git repo, unable to continue' in out
+    # # exec_command(capfd, "rapydo create test")
+    # # assert 'You are on a git repo, unable to continue' in out
 
-    current_folder = os.getcwd()
-    # DANGER!! Delete everything!!!
-    for f in os.listdir(current_folder):
-        p = os.path.join(current_folder, f)
-        if os.path.isfile(p):
-            os.unlink(p)
-        elif os.path.isdir(p):
-            shutil.rmtree(p)
+    # current_folder = os.getcwd()
+    # # DANGER!! Delete everything!!!
+    # for f in os.listdir(current_folder):
+    #     p = os.path.join(current_folder, f)
+    #     if os.path.isfile(p):
+    #         os.unlink(p)
+    #     elif os.path.isdir(p):
+    #         shutil.rmtree(p)
 
-    # testing a command from outside project dir
-    out = exec_command(capfd, "rapydo check --no-git --no-builds")
-    assert "Folder not found: projects" in out
+    # # testing a command from outside project dir
+    # out = exec_command(capfd, "rapydo check --no-git --no-builds")
+    # assert "Folder not found: projects" in out
 
-    out = exec_command(capfd, "rapydo create test")
-    assert "Project test successfully created" in out
+    # out = exec_command(capfd, "rapydo create test")
+    # assert "Project test successfully created" in out
+    exec_command(capfd, "rapydo create test")
