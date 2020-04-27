@@ -1343,9 +1343,7 @@ Verify that you are in the right folder, now you are in: {}
             else:
                 env['CELERYBEAT_SCHEDULER'] = 'Unknown'
 
-        net = self.current_args.get('net', 'bridge')
-        env['DOCKER_NETWORK_MODE'] = net
-        # env.update({'PLACEHOLDER': PLACEHOLDER})
+        env['DOCKER_NETWORK_MODE'] = self.current_args.get('net', 'bridge')
 
         # # docker network mode
         # # https://docs.docker.com/compose/compose-file/#network_mode
@@ -1356,6 +1354,13 @@ Verify that you are in the right folder, now you are in: {}
         #     nmode = nmodes[0]
         # env['DOCKER_NETWORK_MODE'] = nmode
         # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
+
+        invalid_rabbit_characters = ['£', '§', '”', '’']
+        pwd = env.get("RABBITMQ_PASSWORD")
+        if any([c in pwd for c in invalid_rabbit_characters]):
+            log.exit("""Invalid characters in RABBITMQ_PASSWORD.
+Some special characters, including {}, should be avoided due to unexpected crashes
+occurred during RabbitMQ startup """, ' '.join(invalid_rabbit_characters))
 
         with open(envfile, 'w+') as whandle:
             for key, value in sorted(env.items()):
