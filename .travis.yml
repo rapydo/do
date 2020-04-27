@@ -15,8 +15,7 @@ script:
 - git init
 - git remote add origin https://your_remote_git/your_project.git
 - export LOGURU_LEVEL=DEBUG
-- TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests
-- pwd
+- TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
 - bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ../
 
 jobs:
