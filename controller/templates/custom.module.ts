@@ -33,7 +33,7 @@ const routes: Routes = [
     RouterModule.forChild(routes),
   ],
   declarations: [
-    MyComponent
+    // MyComponent
   ],
 
   providers: [],

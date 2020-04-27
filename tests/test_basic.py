@@ -31,9 +31,33 @@ def exec_command(capfd, command):
 
 def test_all(capfd):
 
+    out = exec_command(capfd, "rapydo create")
+    assert "the following arguments are required: NAME" in out
+
     out = exec_command(capfd, "rapydo create test")
+    assert "Invalid authentication service: None" in out
+
+    out = exec_command(capfd, "rapydo create test --auth xyz")
+    assert "Invalid authentication service: xyz" in out
+
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend angular")
+    assert "Invalid frontend framework: None" in out
+
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend xyz")
+    assert "Invalid frontend framework: xyz" in out
+
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend angular")
     assert "Project test successfully created" in out
-    exec_command(capfd, "rapydo create test --auth sql --frontend angular")
+
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend angular")
+    assert "Current folder is not empty, cannot create a new project here." in out
+
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend angular --current --force")
+    assert "Project test successfully created" in out
+
+    # In this case the command should create/modify nothing... to be tested!
+    out = exec_command(capfd, "rapydo create test --auth sql --frontend angular --current")
+    assert "Project test successfully created" in out
 
     # INIT on rapydo-core
     out = exec_command(capfd, "rapydo init")

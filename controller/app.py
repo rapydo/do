@@ -1828,14 +1828,18 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         auth = self.current_args.get("auth")
         frontend = self.current_args.get("frontend")
 
-        if frontend is None or frontend not in [NO_FRONTEND, ANGULAR]:
-            log.exit("Invalid frontend framework: {}", frontend)
-
-        if auth is None or auth not in ['sql', 'neo4j', 'mongo']:
+        if auth is None:
+            log.exit("Missing authentication service, add --auth option")
+        elif auth not in ['sql', 'neo4j', 'mongo']:
             log.exit("Invalid authentication service: {}", auth)
 
         if auth == 'sql':
             auth = 'sqlalchemy'
+
+        if frontend is None:
+            log.exit("Missing frontend framework, add --frontend option")
+        elif frontend not in [NO_FRONTEND, ANGULAR]:
+            log.exit("Invalid frontend framework: {}", frontend)
 
         if not current and len(os.listdir(".")) > 0:
             log.exit("Current folder is not empty, cannot create a new project here." +
