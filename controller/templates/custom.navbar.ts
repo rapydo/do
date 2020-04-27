@@ -4,17 +4,7 @@ import { environment } from '@rapydo/../environments/environment';
 @Component({
   selector: 'customlinks',
   providers: [],
-  template: `
-<ul class="navbar-nav">
-
-  <li class='nav-item' *ngIf="user && (user.isAdmin || user.isGroupAdmin)">
-    <a class='nav-link' routerLink="/app/admin/users">
-      Users
-    </a>
-  </li>
-
-</ul>
-`,
+  templateUrl: "custom.navbar.links.html"
 })
 export class CustomNavbarComponent {
 
@@ -28,21 +18,17 @@ export class CustomNavbarComponent {
 @Component({
   selector: 'custombrand',
   providers: [],
-  template: `
-<a class="navbar-brand" href="" target="_blank">
-    {{ myproject }}
-</a>
-`,
+  templateUrl: "custom.navbar.brand.html",
 })
 export class CustomBrandComponent {
 
-  public myproject: string
+  public project: string
 
   constructor() {
     var t = environment.projectTitle;
     t = t.replace(/^'/, "");
     t = t.replace(/'$/, "");
-    this.myproject = t; 
+    this.project = t; 
   }
 
 }
