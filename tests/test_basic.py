@@ -45,7 +45,7 @@ from controller.app import Application
 def exec_command(capfd, command):
     print("*********************************************")
     print(command)
-    print("*********************************************")
+    print("_____________________________________________")
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -54,7 +54,7 @@ def exec_command(capfd, command):
         Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
-        log.info('completed')
+        print("*********************************************")
 
     out, _ = capfd.readouterr()
     out = out.replace('\r', '').split("\n")
@@ -202,7 +202,6 @@ def test_all(capfd):
 
     os.makedirs("test")
     os.chdir("test")
-    # out = exec_command(capfd, "rapydo create test")
-    # assert "Project test successfully created" in out
+    out = exec_command(capfd, "rapydo create test")
+    assert "Project test successfully created" in out
     os.chdir(current_folder)
-    print(os.getcwd())

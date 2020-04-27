@@ -53,9 +53,25 @@ class Application:
         self.current_args = self.arguments.current_args
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
         self.project_scaffold = Project()
-        self.run()
 
-    def run(self):
+        self.check_main_folder()
+        # Initial inspection
+        self.get_args()
+
+        if not self.print_version:
+            log.debug("You are using RAPyDo version {}", __version__)
+        self.check_installed_software()
+
+        if self.create:
+            self._create()
+        else:
+            self.get_project()
+            self.project_scaffold.load_project_scaffold(self.project)
+            self.preliminary_version_check()
+
+            self.run()
+
+    def check_main_folder(self):
 
         if self.current_args.get('action', 'unknown') != 'create':
             first_level_error = self.project_scaffold.find_main_folder()
@@ -65,30 +81,8 @@ class Application:
                 else:
                     log.exit(first_level_error)
 
-        # Initial inspection
-        self.get_args()
+    def run(self):
 
-        if not self.print_version:
-            log.debug("You are using RAPyDo version {}", __version__)
-        self.check_installed_software()
-
-        if self.create:
-
-            project_name = self.current_args.get("name")
-            project_template = self.current_args.get("template")
-
-            self.project_scaffold.load_project_scaffold(project_name)
-            # should be a parameter in create
-            self.project_scaffold.load_frontend_scaffold(ANGULAR)
-
-            self._create(project_name, project_template)
-
-            return
-
-        self.get_project()
-        self.project_scaffold.load_project_scaffold(self.project)
-
-        self.preliminary_version_check()
         if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
@@ -1824,7 +1818,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
-    def _create(self, project_name, template_name, auto=True, force=True):
+    def _create(self, auto=True, force=True):
+
+        project_name = self.current_args.get("name")
+
+        self.project_scaffold.load_project_scaffold(project_name)
+        # should be a parameter in create
+        self.project_scaffold.load_frontend_scaffold(ANGULAR)
 
         if "_" in project_name:
             log.exit("Wrong project name, _ is not a valid character")

@@ -10,12 +10,11 @@ script:
 - pip3 install --upgrade --no-cache-dir --editable .
 - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
 - git clone -b ${BRANCH} --depth=1 https://github.com/rapydo/tests.git rapydo_tests
+- MAIN_DIR=$(pwd)
 - cd rapydo_tests
 - export LOGURU_LEVEL=DEBUG
-- pwd
-- TESTING=1 py.test -s -x --cov-report=xml --cov=controller ../tests
-- pwd
-- bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ../
+- TESTING=1 py.test -s -x --cov-report=xml --cov=controller ${MAIN_DIR}/tests
+- bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ${MAIN_DIR}
 
 jobs:
   include:
