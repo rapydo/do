@@ -1,8 +1,8 @@
 import os
 from git import Repo
-from ast import literal_eval
+# from ast import literal_eval
 from plumbum import local
-from prettyprinter import pprint as pp
+# from prettyprinter import pprint as pp
 from controller import log
 from controller.arguments import ArgParser
 from controller.app import Application
@@ -43,6 +43,9 @@ from controller.app import Application
 
 
 def exec_command(capfd, command):
+    print("*********************************************")
+    print(command)
+    print("*********************************************")
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -58,6 +61,7 @@ def exec_command(capfd, command):
 
     for o in out:
         print(o)
+    print("*********************************************")
 
     return out
 
@@ -188,12 +192,14 @@ def test_all(capfd):
 
     # testing a command from a subfolder
     os.chdir("projects")
-    exec_command(capfd, "rapydo check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo check --no-git --no-builds")
+    # .projectrc is not found from subfolders...
+    assert "Please add the --project option with one of the following:" in out
 
     os.chdir(parent_folder)
     # testing a command from outside project dir
     out = exec_command(capfd, "rapydo check --no-git --no-builds")
-    assert "You are not in a git repository" in out
+    assert "Folder not found: projects" in out
 
     os.makedirs("test")
     os.chdir("test")
