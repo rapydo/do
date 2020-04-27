@@ -32,13 +32,13 @@ def exec_command(capfd, command):
 def test_all(capfd):
 
     out = exec_command(capfd, "rapydo create test")
-    assert "Invalid authentication service: None" in out
+    assert "Missing authentication service, add --auth option" in out
 
     out = exec_command(capfd, "rapydo create test --auth xyz")
     assert "Invalid authentication service: xyz" in out
 
     out = exec_command(capfd, "rapydo create test --auth sql --frontend angular")
-    assert "Invalid frontend framework: None" in out
+    assert "Missing frontend framework, add --frontend option" in out
 
     out = exec_command(capfd, "rapydo create test --auth sql --frontend xyz")
     assert "Invalid frontend framework: xyz" in out
