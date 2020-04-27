@@ -70,10 +70,11 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo -s rabbit build --rebuild-templates")
     assert "Images built" in out
 
-    out = exec_command(capfd, "rapydo check")
+    # Skipping main because we are on a fake git repository
+    out = exec_command(capfd, "rapydo check -i main")
     assert "Checks completed" in out
 
-    out = exec_command(capfd, "rapydo check --check-permissions")
+    out = exec_command(capfd, "rapydo check -i main --check-permissions")
     assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo list --env")
@@ -96,22 +97,22 @@ def test_all(capfd):
     command = local["cp"]
     command(["-r", "projects/test", "projects/second"])
 
-    out = exec_command(capfd, "rapydo check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo check -i main --no-git --no-builds")
     assert "Please add the --project option with one of the following:" in out
 
-    out = exec_command(capfd, "rapydo -p test check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo -p test check -i main --no-git --no-builds")
     assert "Checks completed" in out
 
-    out = exec_command(capfd, "rapydo -p invalid_character check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo -p invalid_character check -i main --no-git --no-builds")
     assert "Wrong project name, _ is not a valid character." in out
 
-    out = exec_command(capfd, "rapydo -p celery check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo -p celery check -i main --no-git --no-builds")
     assert "You selected a reserved name, invalid project name: celery" in out
 
     out = exec_command(capfd, "rapydo --project test init")
     assert "Project initialized" in out
 
-    out = exec_command(capfd, "rapydo check --no-git --no-builds")
+    out = exec_command(capfd, "rapydo check -i main --no-git --no-builds")
     assert "Checks completed" in out
 
     out = exec_command(capfd, "rapydo start")
