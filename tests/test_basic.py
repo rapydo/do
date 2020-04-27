@@ -31,9 +31,6 @@ def exec_command(capfd, command):
 
 def test_all(capfd):
 
-    out = exec_command(capfd, "rapydo create")
-    assert "the following arguments are required: NAME" in out
-
     out = exec_command(capfd, "rapydo create test")
     assert "Invalid authentication service: None" in out
 
