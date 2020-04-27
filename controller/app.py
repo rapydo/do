@@ -9,7 +9,7 @@ import urllib3
 import requests
 import pytz
 import yaml
-from distutils.dir_util import copy_tree
+# from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
 from collections import OrderedDict
 from datetime import datetime
@@ -25,7 +25,7 @@ from controller.project import ANGULAR, ANGULARJS, REACT
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
-from controller import RAPYDO_TEMPLATE
+# from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
 from controller.templating import Templating
@@ -36,8 +36,6 @@ from controller.conf_utilities import mix_configuration
 from controller.conf_utilities import read_composer_yamls
 from controller.conf_utilities import load_yaml_file, get_yaml_path
 from controller.conf_utilities import PROJECT_CONF_FILENAME
-
-
 
 ROOT_UID = 0
 BASE_UID = 990
@@ -123,7 +121,7 @@ class Application:
 
             self.project_scaffold.load_project_scaffold(project_name)
             # should be a parameter in create
-            self.project_scaffold.load_frontend_scaffold(None)
+            self.project_scaffold.load_frontend_scaffold(ANGULAR)
 
             self._create(project_name, project_template)
 
@@ -1924,165 +1922,76 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         dc = self.get_compose(files=self.files)
         dc.create_volatile_container(service, command)
 
-    # def _create(self, project_name, template_name, auto=False, force=True):
+    def _create(self, project_name, template_name, auto=True, force=True):
 
-    #     if "_" in project_name:
-    #         log.exit("Wrong project name, _ is not a valid character")
+        if "_" in project_name:
+            log.exit("Wrong project name, _ is not a valid character")
 
-    #     if project_name in self.reserved_project_names:
-    #         log.exit(
-    #             "You selected a reserved name, invalid project name: {}",
-    #             project_name
-    #         )
+        if project_name in self.reserved_project_names:
+            log.exit(
+                "You selected a reserved name, invalid project name: {}",
+                project_name
+            )
 
-    #     from controller.conf_utilities import PROJECT_CONF_FILENAME
-    #     templating = Templating()
+        # if gitter.get_local(".") is not None:
+        #     log.exit("You are on a git repo, unable to continue")
 
-    #     # 1 - create project folder
-    #     # if os.path.exists(project_name):
-    #     #      log.exit("{} folder already exists, unable to continue", project_name)
-    #     #  os.makedirs(project_name)
-    #     # if not os.path.exists(project_name):
-    #     #     log.exit("Errors creating {} folder", project_name)
+        # if os.path.exists(project_name):
+        #     log.exit("{} folder already exists, unable to continue", project_name)
 
-    #     # 2 - cd project_name
+        # os.makedirs(project_name)
 
-    #     # 3 - git init
+        # if not os.path.exists(project_name):
+        #     log.exit("Errors creating {} folder", project_name)
 
-    #     # 4 - create folders
-    #     folders = [
-    #         'data',
-    #         'submodules',
-    #         os.path.join(PROJECT_DIR, project_name, 'confs'),
-    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'apis'),
-    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'models'),
-    #         os.path.join(PROJECT_DIR, project_name, 'backend', 'tests'),
-    #         os.path.join(PROJECT_DIR, project_name, 'frontend', 'app'),
-    #         os.path.join(PROJECT_DIR, project_name, 'frontend', 'css'),
-    #         # 'frontend/package.json',
-    #         # 'frontend/app/custom.project.options.ts',
-    #         # 'frontend/app/custom.module.ts',
-    #         # 'frontend/app/custom.navbar.ts',
-    #         # 'frontend/app/custom.profile.ts',
-    #         # 'frontend/css/style.css',
-    #         # 'frontend/app/custom.navbar.links.html',
-    #         # 'frontend/app/custom.navbar.brand.html',
-    #         # 'frontend/app/custom.profile.html',
-    #     ]
-    #     for f in folders:
-    #         if os.path.exists(f):
-    #             log.debug("{} already exists")
-    #             continue
-    #         if not auto:
-    #             log.exit("\nmkdir -p {}", f)
-    #         else:
-    #             os.makedirs(f)
+        templating = Templating()
 
-    #     # 5 - crete project_configuration.yml
+        # 2 - cd project_name
 
-    #     template = templating.get_template(
-    #         PROJECT_CONF_FILENAME,
-    #         {
-    #             'version': __version__
-    #         }
-    #     )
-    #     out_path = os.path.join(PROJECT_DIR, project_name, PROJECT_CONF_FILENAME)
+        # 3 - git init
 
-    #     if not auto:
-    #         if not os.path.exists(out_path):
-    #             print("\n{}".format(template))
-    #             log.exit(out_path)
-    #     else:
-    #         templating.save_template(out_path, template, force=force)
+        # 4 - create folders
+        folders = \
+            self.project_scaffold.expected_folders + \
+            self.project_scaffold.data_folders
+        for f in folders:
+            if os.path.exists(f):
+                log.debug("{} already exists")
+                continue
+            if not auto:
+                log.exit("\nmkdir -p {}", f)
+            else:
+                os.makedirs(f)
 
-    #     # 6 - create confs ymls
-    #     for f in ['commons.yml', 'development.yml', 'production.yml']:
-    #         template = templating.get_template(f, data={})
-    #         out_path = os.path.join(PROJECT_DIR, project_name, 'confs', f)
-    #         if not auto:
-    #             if not os.path.exists(out_path):
-    #                 print("\n{}".format(template))
-    #                 log.exit(out_path)
-    #         else:
-    #             templating.save_template(out_path, template, force=force)
+        # 5 - files
+        for p in self.project_scaffold.expected_files:
+            fname = os.path.basename(p)
+            template = templating.get_template(
+                fname,
+                {
+                    'version': __version__,
+                    'project': self.project,
+                }
+            )
 
-    @staticmethod
-    def _create(project_name, template_name):
+            if auto:
+                templating.save_template(p, template, force=force)
+                continue
+            # manual creation
+            if not os.path.exists(p):
+                print("\n{}".format(template))
+                log.exit(p)
 
-        if gitter.get_local(".") is not None:
-            log.exit("You are on a git repo, unable to continue")
+        log.info("Project {} successfully created", project_name)
+        print("""
+You can now init and start the project:
 
-        if os.path.exists(project_name):
-            log.exit("{} folder already exists, unable to continue", project_name)
-
-        os.makedirs(project_name)
-
-        if not os.path.exists(project_name):
-            log.exit("Errors creating {} folder", project_name)
-
-        template_tmp_dir = "__template"
-        template_tmp_path = os.path.join(project_name, template_tmp_dir)
-        online_url = "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_TEMPLATE)
-        gitter.clone(
-            online_url,
-            template_tmp_path,
-            branch=__version__,
-            do=True,
-            check=True,
-            expand_path=False,
-        )
-
-        copy_tree(template_tmp_path, project_name)
-
-        data_dir = os.path.join(project_name, 'data')
-        if not os.path.exists(data_dir):
-            os.makedirs(data_dir)
-
-        shutil.rmtree(template_tmp_path)
-
-        if template_name is None:
-            log.info("Project {} successfully created", project_name)
-            print("")
-            print("You can run one of the following templates:")
-
-        project_dir = os.path.join(project_name, PROJECT_DIR)
-        vanilla_dir = os.path.join(project_dir, project_name)
-        template_path = os.path.join(project_dir, template_name)
-
-        if not os.path.exists(template_path):
-            log.exit("Invalid template name: {}", template_name)
-
-        if not os.path.exists(vanilla_dir):
-
-            os.makedirs(vanilla_dir)
-            copy_tree(template_path, vanilla_dir)
-            log.info("Copy from {}", template_path)
-
-        with open(os.path.join(project_name, PROJECTRC), 'w+') as f:
-            f.write("project: {}".format(project_name))
-
-        git_dir = os.path.join(project_name, ".git")
-        shutil.rmtree(git_dir)
-
-        log.info(
-            "Project {} successfully created from {} template",
-            project_name,
-            template_name,
-        )
-        projects = os.listdir(project_dir)
-        for p in projects:
-            if p != project_name:
-                pdir = os.path.join(project_dir, p)
-                shutil.rmtree(pdir)
-                log.info("Unused template project deleted: {}", p)
-
-        print("")
-        print("Now you can enter the project and execute rapydo init")
-        print("")
-        print("cd {}".format(project_name))
-        print("git init")
-        print("git remote add origin https://your_remote_git/your_project.git")
-        print("rapydo init")
+git init
+git remote add origin https://your_remote_git/your_project.git
+rapydo init
+rapydo pull
+rapydo start
+""")
 
     def _version(self):
         # You are not inside a rapydo project print only rapydo version

@@ -56,13 +56,13 @@ class Templating:
         try:
             template = self.env.get_template(filename)
             content = template.render(**data)
-            ast = self.env.parse(content)
-            undefined = find_undeclared_variables(ast)
-            if undefined:
-                log.exit(
-                    'Missing variables in template: {}',
-                    undefined
-                )
+            # ast = self.env.parse(content)
+            # undefined = find_undeclared_variables(ast)
+            # if undefined:
+            #     log.exit(
+            #         'Missing variables in template: {}',
+            #         undefined
+            #     )
 
             return content
         except TemplateNotFound as e:

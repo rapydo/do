@@ -391,12 +391,6 @@ subcommands:
   create:
     description: Create a new rapydo project
     suboptions:
-      template:
-        positional: true
-        type: str
-        metavalue: TEMPLATE_NAME
-        default: null
-        help: Name of the template used to initialize your project. Allowed values are sql, neo, mongo, celerytest, irodstest, centos 
       name:
         positional: true
         type: str

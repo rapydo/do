@@ -103,6 +103,10 @@ class Project:
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
 
+        self.data_folders.extend([
+            os.path.join("data", "logs")
+        ])
+
         # Deprecated on 0.7.0
         self.obsolete_files.append(self.p_path("backend", "swagger", "models.yaml"))
         self.obsolete_files.append(self.p_path("frontend", "custom.ts"))
@@ -118,19 +122,16 @@ class Project:
             log.debug("No frontend specified")
             return False
 
-        # log.critical(self.frontend)
-        return True
-
         if self.frontend is not None:
             self.expected_folders.append(self.p_path("frontend"))
 
         if self.frontend == ANGULAR:
-            self.expected_folders.extend(
+            self.expected_folders.extend([
                 self.p_path("frontend", "app"),
                 self.p_path("frontend", "css")
-            )
+            ])
 
-            self.expected_files.extend(
+            self.expected_files.extend([
                 self.p_path("frontend", "package.json"),
                 self.p_path("frontend", "app", "custom.project.options.ts"),
                 self.p_path("frontend", "app", "custom.module.ts"),
@@ -140,18 +141,18 @@ class Project:
                 self.p_path("frontend", "app", "custom.navbar.links.html"),
                 self.p_path("frontend", "app", "custom.navbar.brand.html"),
                 self.p_path("frontend", "app", "custom.profile.html"),
-            )
+            ])
 
             data_dir = os.path.join("data", self.project, "frontend")
-            self.data_folders.extend(
+            self.data_folders.extend([
                 data_dir,
                 os.path.join(data_dir, "app"),
                 os.path.join(data_dir, "courtesy"),
                 os.path.join(data_dir, "e2e"),
                 os.path.join(data_dir, "node_modules"),
-            )
+            ])
 
-            self.data_files.extend(
+            self.data_files.extend([
                 os.path.join(data_dir, "angular.json"),
                 os.path.join(data_dir, "browserslist"),
                 os.path.join(data_dir, "karma.conf.js"),
@@ -161,9 +162,9 @@ class Project:
                 os.path.join(data_dir, "tsconfig.json"),
                 os.path.join(data_dir, "tsconfig.spec.json"),
                 os.path.join(data_dir, "tslint.json"),
-            )
+            ])
 
-            self.obsolete_files.extend(
+            self.obsolete_files.extend([
                 self.p_path("frontend", "app", "app.routes.ts"),
                 self.p_path("frontend", "app", "app.declarations.ts"),
                 self.p_path("frontend", "app", "app.providers.ts"),
@@ -174,16 +175,18 @@ class Project:
                 self.p_path("frontend", "app", "app.home.html"),
                 self.p_path("frontend", "app", "custom.declarations.ts"),
                 self.p_path("frontend", "app", "custom.routes.ts"),
-            )
+            ])
 
         if self.frontend == ANGULARJS:
 
-            self.expected_folders.extend(
+            self.expected_folders.extend([
                 self.p_path("frontend", "js"),
                 self.p_path("frontend", "templates"),
-            )
+            ])
 
-            self.expected_files.extend(
+            self.expected_files.extend([
                 self.p_path("frontend", "js", "app.js"),
                 self.p_path("frontend", "js", "routing.extra.js"),
-            )
+            ])
+
+        return True
