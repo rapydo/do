@@ -1,5 +1,6 @@
 import os
 from git import Repo
+from ast import literal_eval
 from plumbum import local
 from prettyprinter import pprint as pp
 from controller import log
@@ -7,7 +8,41 @@ from controller.arguments import ArgParser
 from controller.app import Application
 
 
-def exec_command(capfd, command, get_out=True, get_err=False):
+# Old version
+# def exec_command(capfd, command, get_out=True, get_err=False):
+#     command = command.split(" ")
+
+#     arguments = ArgParser(args=command)
+
+#     try:
+#         Application(arguments)
+#     # NOTE: docker-compose calls SystemExit at the end of the command...
+#     except SystemExit:
+#         log.info('completed')
+
+#     out, err = capfd.readouterr()
+#     out = out.replace('\r', '').split("\n")
+#     err = err.replace('\r', '').split("\n")
+
+#     if get_out:
+#         pp(out)
+
+#     if get_err:
+#         pp(err)
+
+#     if get_out and get_err:
+#         return out, err
+
+#     if get_out:
+#         return out
+
+#     if get_err:
+#         return err
+
+#     return None
+
+
+def exec_command(capfd, command):
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -18,26 +53,13 @@ def exec_command(capfd, command, get_out=True, get_err=False):
     except SystemExit:
         log.info('completed')
 
-    out, err = capfd.readouterr()
+    out, _ = capfd.readouterr()
     out = out.replace('\r', '').split("\n")
-    err = err.replace('\r', '').split("\n")
 
-    if get_out:
-        pp(out)
+    for o in out:
+        print(o)
 
-    if get_err:
-        pp(err)
-
-    if get_out and get_err:
-        return out, err
-
-    if get_out:
-        return out
-
-    if get_err:
-        return err
-
-    return None
+    return out
 
 
 def test_all(capfd):
@@ -161,7 +183,8 @@ def test_all(capfd):
     # assert 'You are on a git repo, unable to continue' in out
 
     # Save parent folder
-    parent_folder = os.path.dirname(os.getcwd())
+    current_folder = os.getcwd()
+    parent_folder = os.path.dirname(current_folder)
 
     # testing a command from a subfolder
     os.chdir("projects")
@@ -176,3 +199,4 @@ def test_all(capfd):
     os.chdir("test")
     # out = exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
+    os.chdir(current_folder)
