@@ -19,7 +19,9 @@ from plumbum.commands.processes import ProcessExecutionError
 
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
-from controller import project
+from controller.project import Project
+from controller.project import apply_variables, find_active
+from controller.project import ANGULAR, ANGULARJS, REACT
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
@@ -35,9 +37,7 @@ from controller.conf_utilities import read_composer_yamls
 from controller.conf_utilities import load_yaml_file, get_yaml_path
 from controller.conf_utilities import PROJECT_CONF_FILENAME
 
-ANGULARJS = 'angularjs'
-ANGULAR = 'angular'
-REACT = 'react'
+
 
 ROOT_UID = 0
 BASE_UID = 990
@@ -82,6 +82,7 @@ class Application:
         self.current_args = self.arguments.current_args
         self.reserved_project_names = self.get_reserved_project_names()
         self.vars_to_services_mapping = self.get_vars_to_services_mapping()
+        self.project_scaffold = Project()
 
         if self.current_args.get('action', 'unknown') != 'create':
             first_level_error = self.inspect_main_folder()
@@ -110,23 +111,37 @@ class Application:
 
         # Initial inspection
         self.get_args()
+
         if not self.print_version:
             log.debug("You are using RAPyDo version {}", __version__)
         self.check_installed_software()
 
         if self.create:
 
-            self._create(
-                self.current_args.get("name"), self.current_args.get("template")
-            )
+            project_name = self.current_args.get("name")
+            project_template = self.current_args.get("template")
+
+            self.project_scaffold.load_project_scaffold(project_name)
+            # should be a parameter in create
+            self.project_scaffold.load_frontend_scaffold(None)
+
+            self._create(project_name, project_template)
+
             return
 
-        self.check_projects()
+        self.get_project()
+        self.project_scaffold.load_project_scaffold(self.project)
+        # TODO: check self.project_scaffold.expected_folders
+        # TODO: check self.project_scaffold.expected_files
+
         self.preliminary_version_check()
         if not self.install or self.local_install:
             self.git_submodules(confs_only=True)
             self.read_specs()  # read project configuration
             self.hostname = self.current_args.get('hostname', 'localhost')
+
+        # from read_specs
+        self.project_scaffold.load_frontend_scaffold(self.frontend)
         if not self.install and not self.print_version:
             self.verify_rapydo_version()
             self.inspect_project_folder()
@@ -269,7 +284,7 @@ class Application:
                     self.project
                 )
 
-    def check_projects(self):
+    def get_project(self):
 
         try:
             projects = os.listdir(PROJECT_DIR)
@@ -423,8 +438,7 @@ To fix this issue, please update docker to version {}+
         except TypeError as e:
             log.error("{}: {}", e, found_version)
 
-    @staticmethod
-    def inspect_main_folder():
+    def inspect_main_folder(self):
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -437,94 +451,41 @@ To fix this issue, please update docker to version {}+
 Verify that you are in the right folder, now you are in: {}
                 """.format(os.getcwd())
 
-        required_files = [PROJECT_DIR, 'data', 'submodules']
+        for fpath in self.project_scaffold.expected_main_folders:
+            if not os.path.exists(fpath) or not os.path.isdir(fpath):
 
-        for fname in required_files:
-            if not os.path.exists(fname):
-
-                if fname == 'data':
+                if fpath == 'data':
                     log.warning(
                         "Data folder is missing, execute rapydo init to create it")
                     continue
 
-                return """File or folder not found {}
+                return """Folder not found: {}
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {}
-                    """.format(fname, os.getcwd())
+                    """.format(fpath, os.getcwd())
 
         return None
 
     def inspect_project_folder(self):
 
-        required_files = [
-            'confs',
-            'confs/commons.yml',
-            'confs/development.yml',
-            'confs/production.yml',
-            'backend',
-            'backend/apis',
-            'backend/models',
-            'backend/tests',
-        ]
-        # Deprecated on 0.7.0
-        obsolete_files = [
-            'backend/swagger/models.yaml',
-            'confs/debug.yml',
-            'frontend/custom.ts'
-        ]
-
-        if self.frontend is not None:
-            required_files.extend(
-                [
-                    'frontend',
-                    'frontend/package.json',
-                    'frontend/app',
-                    'frontend/app/custom.project.options.ts',
-                    'frontend/app/custom.module.ts',
-                    'frontend/app/custom.navbar.ts',
-                    'frontend/app/custom.profile.ts',
-                    'frontend/css/style.css',
-                    'frontend/app/custom.navbar.links.html',
-                    'frontend/app/custom.navbar.brand.html',
-                    'frontend/app/custom.profile.html',
-                ]
-            )
-
-            obsolete_files.extend(
-                [
-                    'frontend/app/app.routes.ts',
-                    'frontend/app/app.declarations.ts',
-                    'frontend/app/app.providers.ts',
-                    'frontend/app/app.imports.ts',
-                    'frontend/app/app.custom.navbar.ts',
-                    'frontend/app/app.entryComponents.ts',
-                    'frontend/app/app.home.ts',
-                    'frontend/app/app.home.html',
-                    'frontend/app/custom.declarations.ts',
-                    'frontend/app/custom.routes.ts',
-                ]
-            )
-
-            if self.frontend == ANGULARJS:
-                required_files.extend(
-                    [
-                        'frontend/js',
-                        'frontend/js/app.js',
-                        'frontend/js/routing.extra.js',
-                        'frontend/templates',
-                    ]
-                )
-
-        for fname in required_files:
-            fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath):
+        for fpath in self.project_scaffold.expected_folders:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if not os.path.exists(fpath) or not os.path.isdir(fpath):
                 log.exit(
-                    "Project {} is invalid: file or folder not found {}",
+                    "Project {} is invalid: required folder not found {}",
                     self.project, fpath
                 )
 
-        for fname in obsolete_files:
-            fpath = os.path.join(PROJECT_DIR, self.project, fname)
+        for fpath in self.project_scaffold.expected_files:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if not os.path.exists(fpath) or not os.path.isfile(fpath):
+                log.exit(
+                    "Project {} is invalid: required file not found {}",
+                    self.project, fpath
+                )
+
+        for fpath in self.project_scaffold.obsolete_files:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
             if os.path.exists(fpath):
                 log.exit(
                     "Project {} contains an obsolete file or folder: {}",
@@ -777,7 +738,7 @@ Verify that you are in the right folder, now you are in: {}
                 ANGULAR: self.frontend == ANGULAR,
                 REACT: self.frontend == REACT
             }
-        repo = project.apply_variables(repo, myvars)
+        repo = apply_variables(repo, myvars)
 
         # Is this single repo enabled?
         repo_enabled = repo.pop('if', False)
@@ -901,7 +862,7 @@ Verify that you are in the right folder, now you are in: {}
 
         confs = self.vars.get('composers', {})
         for name, conf in confs.items():
-            compose_files[name] = project.apply_variables(conf, myvars)
+            compose_files[name] = apply_variables(conf, myvars)
 
         # Read necessary files
         self.files, self.base_files = read_composer_yamls(compose_files)
@@ -1196,33 +1157,11 @@ Verify that you are in the right folder, now you are in: {}
         if self.frontend != ANGULAR:
             return False
 
-        frontend_data_dir = os.path.join("data", self.project, "frontend")
-        if not os.path.isdir(frontend_data_dir):
-            os.makedirs(frontend_data_dir)
-            log.info(
-                "{} folder not found, created with expected subtree", frontend_data_dir
-            )
-
-        expected_folders = ["app", "courtesy", "e2e", "node_modules"]
-        expected_files = [
-            "angular.json",
-            "browserslist",
-            "karma.conf.js",
-            "package.json",
-            "polyfills.ts",
-            "tsconfig.app.json",
-            "tsconfig.json",
-            "tsconfig.spec.json",
-            "tslint.json"
-        ]
-
-        for f in expected_folders:
-            p = os.path.join(frontend_data_dir, f)
+        for p in self.project_scaffold.data_folders:
             if not os.path.isdir(p):
                 os.makedirs(p)
 
-        for f in expected_files:
-            p = os.path.join(frontend_data_dir, f)
+        for p in self.project_scaffold.data_files:
             if not os.path.exists(p):
                 open(p, 'a').close()
 
@@ -1375,7 +1314,7 @@ occurred during RabbitMQ startup """, ' '.join(invalid_rabbit_characters))
 
     def check_placeholders(self):
 
-        self.services_dict, self.active_services = project.find_active(self.services)
+        self.services_dict, self.active_services = find_active(self.services)
 
         if len(self.active_services) == 0:
             log.exit(
@@ -1936,8 +1875,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if not printed_something:
             log.error(
-                "You have to specify what to list, "
-                + "please use rapydo list -h for available options"
+                "Nothing to list, please use rapydo list -h for available options"
             )
 
     def _scale(self):
