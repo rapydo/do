@@ -1853,7 +1853,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             self.project_scaffold.data_folders
         for f in folders:
             if os.path.exists(f):
-                log.debug("{} already exists")
+                log.debug("{} already exists", f)
                 continue
             if not auto:
                 log.exit("\nmkdir -p {}", f)

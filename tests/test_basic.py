@@ -167,12 +167,13 @@ def test_all(capfd):
     os.chdir("projects")
     exec_command(capfd, "rapydo check --no-git --no-builds")
 
+    # testing a command from outside project dir
+    os.chdir(tempfile.gettempdir())
+    out = exec_command(capfd, "rapydo check --no-git --no-builds")
+    assert "You are not in a git repository" in out
+
     os.makedirs("test")
     os.chdir("test")
-
-    # testing a command from outside project dir
-    exec_command(capfd, "rapydo check --no-git --no-builds")
-
-    exec_command(capfd, "rapydo create test")
+    # out = exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
     os.chdir(prev_folder)
