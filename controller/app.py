@@ -38,7 +38,7 @@ from controller.conf_utilities import load_yaml_file, get_yaml_path
 from controller.conf_utilities import PROJECT_CONF_FILENAME
 
 ROOT_UID = 0
-BASE_UID = 990
+BASE_UID = 1000
 
 
 def get_username(uid):
