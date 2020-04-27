@@ -1,5 +1,4 @@
 import os
-import tempfile
 from git import Repo
 from plumbum import local
 from prettyprinter import pprint as pp
@@ -161,14 +160,15 @@ def test_all(capfd):
     # exec_command(capfd, "rapydo create test")
     # assert 'You are on a git repo, unable to continue' in out
 
-    prev_folder = os.getcwd()
+    # Save parent folder
+    parent_folder = os.path.dirname(os.getcwd())
 
     # testing a command from a subfolder
     os.chdir("projects")
     exec_command(capfd, "rapydo check --no-git --no-builds")
 
+    os.chdir(parent_folder)
     # testing a command from outside project dir
-    os.chdir(tempfile.gettempdir())
     out = exec_command(capfd, "rapydo check --no-git --no-builds")
     assert "You are not in a git repository" in out
 
@@ -176,4 +176,3 @@ def test_all(capfd):
     os.chdir("test")
     # out = exec_command(capfd, "rapydo create test")
     # assert "Project test successfully created" in out
-    os.chdir(prev_folder)
