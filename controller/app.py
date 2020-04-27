@@ -1823,7 +1823,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     def _create(self):
 
         force = self.current_args.get("force", False)
-        current = self.current_args.get("current", False)
+        force_current = self.current_args.get("current", False)
         auto = not self.current_args.get("no_auto", False)
         auth = self.current_args.get("auth")
         frontend = self.current_args.get("frontend")
@@ -1841,9 +1841,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         elif frontend not in [NO_FRONTEND, ANGULAR]:
             log.exit("Invalid frontend framework: {}", frontend)
 
-        if not current and len(os.listdir(".")) > 0:
-            log.exit("Current folder is not empty, cannot create a new project here." +
-                     "\nUse --current to force the creation here")
+        if not force_current:
+            dirs = os.listdir(".")
+            if len(dirs) > 0 and dirs != ['.git']:
+                log.exit(
+                    "Current folder is not empty, cannot create a new project here." +
+                    "\nUse --current to force the creation here")
 
         project_name = self.current_args.get("name")
 
