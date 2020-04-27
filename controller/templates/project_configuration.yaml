@@ -24,6 +24,9 @@ variables:
     ACTIVATE_MONGODB: 1
     {% endif %}
 
+    # Temporary, for controller tests... to be enabled only if requested
+    ACTIVATE_RABBIT: 1
+
   backend:
     credentials:
       roles:

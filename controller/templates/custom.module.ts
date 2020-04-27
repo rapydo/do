@@ -4,9 +4,10 @@ import { RouterModule, Routes } from '@angular/router';
 import { RapydoModule } from '@rapydo/rapydo.module';
 import { AuthGuard } from '@rapydo/app.auth.guard';
 
-import { MyComponent } from './components/mycomponent'
+// import { MyComponent } from './components/mycomponent'
 
 const routes: Routes = [
+/*
   {
     path: '',
     redirectTo: '/app/myroute',
@@ -23,6 +24,7 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     runGuardsAndResolvers: 'always',
   },
+*/
 ];
 
 @NgModule({
