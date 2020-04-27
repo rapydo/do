@@ -66,7 +66,8 @@ class Application:
             self._create()
         else:
             self.get_project()
-            self.project_scaffold.load_project_scaffold(self.project)
+            # Auth is not yet available, will be read by read_specs
+            self.project_scaffold.load_project_scaffold(self.project, auth=None)
             self.preliminary_version_check()
 
             self.run()
@@ -1842,7 +1843,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         project_name = self.current_args.get("name")
 
-        self.project_scaffold.load_project_scaffold(project_name)
+        self.project_scaffold.load_project_scaffold(project_name, auth)
         if frontend != NO_FRONTEND:
             self.project_scaffold.load_frontend_scaffold(frontend)
 
