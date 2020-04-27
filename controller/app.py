@@ -9,7 +9,6 @@ import urllib3
 import requests
 import pytz
 import yaml
-# from distutils.dir_util import copy_tree
 from distutils.version import LooseVersion
 from collections import OrderedDict
 from datetime import datetime
@@ -20,17 +19,16 @@ from plumbum.commands.processes import ProcessExecutionError
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller.project import Project
-from controller.project import apply_variables, find_active
 from controller.project import ANGULAR, ANGULARJS, REACT
+from controller.services_utilities import apply_variables, find_active
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
-# from controller import RAPYDO_TEMPLATE
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
 from controller.templating import Templating
 from controller import log
-
+from controller.utilities import get_username, get_current_uid, get_current_gid
 from controller.conf_utilities import read_configuration
 from controller.conf_utilities import mix_configuration
 from controller.conf_utilities import read_composer_yamls
@@ -39,31 +37,6 @@ from controller.conf_utilities import PROJECT_CONF_FILENAME
 
 ROOT_UID = 0
 BASE_UID = 1000
-
-
-def get_username(uid):
-    try:
-        import pwd
-        return pwd.getpwuid(uid).pw_name
-    except ImportError as e:
-        log.warning(e)
-        return str(uid)
-
-
-def get_current_uid():
-    try:
-        return os.getuid()
-    except AttributeError as e:
-        log.warning(e)
-        return 0
-
-
-def get_current_gid():
-    try:
-        return os.getgid()
-    except AttributeError as e:
-        log.warning(e)
-        return 0
 
 
 class Application:
@@ -82,24 +55,7 @@ class Application:
         self.project_scaffold = Project()
 
         if self.current_args.get('action', 'unknown') != 'create':
-            first_level_error = self.inspect_main_folder()
-            if first_level_error is not None:
-                cwd = os.getcwd()
-                num_iterations = 0
-                while cwd != '/' and num_iterations < 10:
-                    num_iterations += 1
-                    # TODO: use utils.path here
-                    os.chdir("..")
-                    cwd = os.getcwd()
-                    if self.inspect_main_folder() is not None:
-                        continue
-                    # You found a rapydo folder among your parents!
-                    log.warning(
-                        "You are not in the main folder,  working dir changed to {}",
-                        cwd,
-                    )
-                    first_level_error = None
-                    break
+            first_level_error = self.project_scaffold.find_main_folder()
             if first_level_error is not None:
                 if self.current_args.get('action') == 'version':
                     return self._version()
@@ -128,8 +84,6 @@ class Application:
 
         self.get_project()
         self.project_scaffold.load_project_scaffold(self.project)
-        # TODO: check self.project_scaffold.expected_folders
-        # TODO: check self.project_scaffold.expected_files
 
         self.preliminary_version_check()
         if not self.install or self.local_install:
@@ -141,7 +95,7 @@ class Application:
         self.project_scaffold.load_frontend_scaffold(self.frontend)
         if not self.install and not self.print_version:
             self.verify_rapydo_version()
-            self.inspect_project_folder()
+            self.project_scaffold.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = get_current_uid()
@@ -250,7 +204,6 @@ class Application:
         self.initialize = self.action == 'init'
         self.update = self.action == 'update'
         self.start = self.action == 'start'
-        # self.upgrade = self.action == 'upgrade'
         self.check = self.action == 'check'
         self.install = self.action == 'install'
         self.print_version = self.action == 'version'
@@ -434,61 +387,6 @@ To fix this issue, please update docker to version {}+
             self.checked("{} version: {}", package_name, found_version)
         except TypeError as e:
             log.error("{}: {}", e, found_version)
-
-    def inspect_main_folder(self):
-        """
-        RAPyDo commands only works on rapydo projects, we want to ensure that
-        the current folder have a rapydo-like structure. These checks are based
-        on file existence. Further checks are performed in the following steps
-        """
-
-        if gitter.get_local(".") is None:
-            return """You are not in a git repository
-\nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                """.format(os.getcwd())
-
-        for fpath in self.project_scaffold.expected_main_folders:
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
-
-                if fpath == 'data':
-                    log.warning(
-                        "Data folder is missing, execute rapydo init to create it")
-                    continue
-
-                return """Folder not found: {}
-\nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                    """.format(fpath, os.getcwd())
-
-        return None
-
-    def inspect_project_folder(self):
-
-        for fpath in self.project_scaffold.expected_folders:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
-                log.exit(
-                    "Project {} is invalid: required folder not found {}",
-                    self.project, fpath
-                )
-
-        for fpath in self.project_scaffold.expected_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isfile(fpath):
-                log.exit(
-                    "Project {} is invalid: required file not found {}",
-                    self.project, fpath
-                )
-
-        for fpath in self.project_scaffold.obsolete_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if os.path.exists(fpath):
-                log.exit(
-                    "Project {} contains an obsolete file or folder: {}",
-                    self.project,
-                    fpath,
-                )
 
     @staticmethod
     def path_is_readable(filepath):

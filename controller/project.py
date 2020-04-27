@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from glom import glom
+from controller import gitter
 
 from controller import PROJECT_DIR
 from controller import log
@@ -8,63 +8,6 @@ from controller import log
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
 REACT = 'react'
-
-
-def walk_services(actives, dependecies, index=0):
-
-    if index >= len(actives):
-        return actives
-
-    next_active = actives[index]
-
-    for service in dependecies.get(next_active, []):
-        if service not in actives:
-            actives.append(service)
-
-    index += 1
-    if index >= len(actives):
-        return actives
-    return walk_services(actives, dependecies, index)
-
-
-def find_active(services):
-    """
-    Check only services involved in current mode,
-    which is equal to services 'activated' + 'depends_on'.
-    """
-
-    dependencies = {}
-    all_services = {}
-    base_actives = []
-
-    for service in services:
-
-        name = service.get('name')
-        all_services[name] = service
-        dependencies[name] = list(service.get('depends_on', {}).keys())
-
-        ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
-        is_active = str(ACTIVATE) == "1"
-        if is_active:
-            base_actives.append(name)
-
-    log.verbose("Base active services = {}", base_actives)
-    log.verbose("Services dependencies = {}", dependencies)
-    active_services = walk_services(base_actives, dependencies)
-    return all_services, active_services
-
-
-def apply_variables(dictionary, variables):
-
-    new_dict = {}
-    for key, value in dictionary.items():
-        if isinstance(value, str) and value.startswith('$$'):
-            value = variables.get(value.lstrip('$'), None)
-        else:
-            pass
-        new_dict[key] = value
-
-    return new_dict
 
 
 # move here all checks on project (required files, creation functions, templating, etc)
@@ -190,6 +133,83 @@ class Project:
             ])
 
         return True
+
+    def find_main_folder(self):
+        first_level_error = self.inspect_main_folder()
+        if first_level_error is None:
+            return first_level_error
+        cwd = os.getcwd()
+        num_iterations = 0
+        while cwd != '/' and num_iterations < 10:
+            num_iterations += 1
+            # TODO: use utils.path here
+            os.chdir("..")
+            cwd = os.getcwd()
+            if self.inspect_main_folder() is not None:
+                continue
+            # You found a rapydo folder among your parents!
+            log.warning(
+                "You are not in the main folder,  working dir changed to {}",
+                cwd,
+            )
+            first_level_error = None
+            break
+        return first_level_error
+
+    def inspect_main_folder(self):
+        """
+        RAPyDo commands only works on rapydo projects, we want to ensure that
+        the current folder have a rapydo-like structure. These checks are based
+        on file existence. Further checks are performed in the following steps
+        """
+
+        if gitter.get_local(".") is None:
+            return """You are not in a git repository
+\nPlease note that this command only works from inside a rapydo-like repository
+Verify that you are in the right folder, now you are in: {}
+                """.format(os.getcwd())
+
+        for fpath in self.expected_main_folders:
+            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+
+                if fpath == 'data':
+                    log.warning(
+                        "Data folder is missing, execute rapydo init to create it")
+                    continue
+
+                return """Folder not found: {}
+\nPlease note that this command only works from inside a rapydo-like repository
+Verify that you are in the right folder, now you are in: {}
+                    """.format(fpath, os.getcwd())
+
+        return None
+
+    def inspect_project_folder(self):
+
+        for fpath in self.expected_folders:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+                log.exit(
+                    "Project {} is invalid: required folder not found {}",
+                    self.project, fpath
+                )
+
+        for fpath in self.expected_files:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if not os.path.exists(fpath) or not os.path.isfile(fpath):
+                log.exit(
+                    "Project {} is invalid: required file not found {}",
+                    self.project, fpath
+                )
+
+        for fpath in self.obsolete_files:
+            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
+            if os.path.exists(fpath):
+                log.exit(
+                    "Project {} contains an obsolete file or folder: {}",
+                    self.project,
+                    fpath,
+                )
 
     # issues/57
     # I'm temporary here... to be decided how to handle me
