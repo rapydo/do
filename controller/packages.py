@@ -7,7 +7,6 @@
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
 from sultan.api import Sultan
-from subprocess import CalledProcessError
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
@@ -36,7 +35,7 @@ def install(package, editable=False, user=False, use_pip3=True):
             for r in result.stderr:
                 print(r)
             return result.rc == 0
-    except CalledProcessError as e:
+    except BaseException as e:
         log.exit(e)
 
 

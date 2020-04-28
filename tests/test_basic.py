@@ -1,6 +1,5 @@
 import os
 # import shutil
-from git import Repo
 from plumbum import local
 from controller.arguments import ArgParser
 from controller.app import Application
