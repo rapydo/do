@@ -344,7 +344,7 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: List environment variable (.env file)
-      services:
+      active-services:
         alias: s
         type: bool
         metavalue: TRUE_OR_FALSE

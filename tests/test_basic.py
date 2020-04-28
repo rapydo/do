@@ -83,7 +83,7 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo list --args")
     assert "List of configured rapydo arguments:" in out
 
-    out = exec_command(capfd, "rapydo list --services")
+    out = exec_command(capfd, "rapydo list --active-services")
     assert "List of active services:" in out
 
     out = exec_command(capfd, "rapydo list --submodules")

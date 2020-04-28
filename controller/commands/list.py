@@ -40,7 +40,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
             val = env.get(var)
             print("%-36s\t%s" % (var, val))
 
-    if args.get('services'):
+    if args.get('active_services'):
         printed_something = True
         log.info("List of active services:\n")
         print("%-12s %-24s %s" % ("Name", "Image", "Path"))
