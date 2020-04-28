@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 current_version = "0.7.3"
 
@@ -15,7 +15,10 @@ setup(
     description='Manage and deploy projects based on RAPyDo framework',
     url='https://rapydo.github.io/do',
     license='MIT',
-    packages=[main_package],
+    packages=find_packages(
+        where='.',
+        exclude=['tests*']
+    ),
     package_data={
         main_package: ['argparser.yaml', 'templates/*']
     },
