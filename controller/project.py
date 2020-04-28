@@ -139,6 +139,34 @@ class Project:
 
         return True
 
+    @staticmethod
+    def get_project(project):
+
+        try:
+            projects = os.listdir(PROJECT_DIR)
+        except FileNotFoundError:
+            log.exit("Could not access the dir '{}'", PROJECT_DIR)
+
+        if project is None:
+            prj_num = len(projects)
+
+            if prj_num == 0:
+                log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
+            if prj_num > 1:
+                log.exit(
+                    "Please add the --project option with one of the following:\n\n {}",
+                    projects
+                )
+            return projects.pop()
+
+        if project not in projects:
+            log.exit(
+                "Wrong project {}\nSelect one of the following: {}\n".format(
+                    project, ", ".join(projects))
+            )
+
+        return project
+
     def find_main_folder(self):
         first_level_error = self.inspect_main_folder()
         if first_level_error is None:

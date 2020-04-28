@@ -36,8 +36,8 @@ def exit_msg(message="", *args, **kwargs):
         raise ValueError("Error code must be an integer")
     if error_code < 1:
         raise ValueError("Cannot exit with value below 1")
-
-    log.critical(message, *args, **kwargs)
+    if message:
+        log.critical(message, *args, **kwargs)
     sys.exit(error_code)
 
 

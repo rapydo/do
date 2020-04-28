@@ -58,3 +58,45 @@ def apply_variables(dictionary, variables):
         new_dict[key] = value
 
     return new_dict
+
+
+vars_to_services_mapping = {
+    'CELERYUI_USER': ['celeryui'],
+    'CELERYUI_PASSWORD': ['celeryui'],
+    'RABBITMQ_USER': ['rabbit'],
+    'RABBITMQ_PASSWORD': ['rabbit'],
+    'ALCHEMY_USER': ['postgres', 'mariadb'],
+    'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
+    'NEO4J_PASSWORD': ['neo4j'],
+    'IRODS_ANONYMOUS': ['icat'],
+    'AUTH_DEFAULT_PASSWORD': ['backend'],
+    'AUTH_DEFAULT_USERNAME': ['backend'],
+    'SMTP_PORT': ['backend'],
+    'SMTP_ADMIN': ['backend'],
+    'SMTP_NOREPLY': ['backend'],
+    'SMTP_HOST': ['backend'],
+    'SMTP_USERNAME': ['backend'],
+    'SMTP_PASSWORD': ['backend'],
+}
+
+
+def normalize_placeholder_variable(key):
+    if key == 'NEO4J_AUTH':
+        return 'NEO4J_PASSWORD'
+
+    if key == 'POSTGRES_USER':
+        return 'ALCHEMY_USER'
+    if key == 'POSTGRES_PASSWORD':
+        return 'ALCHEMY_PASSWORD'
+
+    if key == 'MYSQL_USER':
+        return 'ALCHEMY_USER'
+    if key == 'MYSQL_PASSWORD':
+        return 'ALCHEMY_PASSWORD'
+
+    if key == 'RABBITMQ_DEFAULT_USER':
+        return 'RABBITMQ_USER'
+    if key == 'RABBITMQ_DEFAULT_PASS':
+        return 'RABBITMQ_PASSWORD'
+
+    return key

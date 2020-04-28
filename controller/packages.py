@@ -7,32 +7,37 @@
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
 from sultan.api import Sultan
+from subprocess import CalledProcessError
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
+from controller import log
 
 
 def install(package, editable=False, user=False, use_pip3=True):
-    with Sultan.load(sudo=not user) as sultan:
-        command = 'install --upgrade'
-        if editable:
-            command += " --editable"
-        if user:
-            command += " --user"
-        command += ' {}'.format(package)
+    try:
+        with Sultan.load(sudo=not user) as sultan:
+            command = 'install --upgrade'
+            if editable:
+                command += " --editable"
+            if user:
+                command += " --user"
+            command += ' {}'.format(package)
 
-        if use_pip3:
-            result = sultan.pip3(command).run()
-        else:
-            result = sultan.pip(command).run()
+            if use_pip3:
+                result = sultan.pip3(command).run()
+            else:
+                result = sultan.pip(command).run()
 
-        for r in result.stdout:
-            print(r)
+            for r in result.stdout:
+                print(r)
 
-        for r in result.stderr:
-            print(r)
-        return result.rc == 0
+            for r in result.stderr:
+                print(r)
+            return result.rc == 0
+    except CalledProcessError as e:
+        log.exit(e)
 
 
 def check_version(package_name):

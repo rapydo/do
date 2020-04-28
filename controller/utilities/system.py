@@ -1,7 +1,21 @@
 # -*- coding: utf-8 -*-
 import os
 import pwd
+from plumbum import local
+from plumbum.commands.processes import ProcessExecutionError
 from controller import log
+
+
+def execute_command(command, parameters):
+    try:
+
+        # Pattern in plumbum library for executing a shell command
+        command = local[command]
+        log.verbose("Executing command {} {}", command, parameters)
+        return command(parameters)
+
+    except ProcessExecutionError as e:
+        raise e
 
 
 def get_username(uid):
