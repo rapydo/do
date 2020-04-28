@@ -26,11 +26,12 @@ def __call__(files, active_services, **kwargs):
 
     obj = yaml.safe_load(yaml_string.replace(main_dir, '.'))
 
-    active_services = {}
+    services_list = {}
+    # Remove not active services from compose configuration
     for key, value in obj.get('services', {}).items():
         if key in active_services:
-            active_services[key] = value
-    obj['services'] = active_services
+            services_list[key] = value
+    obj['services'] = services_list
 
     #################
     # 3. write file
