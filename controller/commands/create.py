@@ -16,7 +16,7 @@ def __call__(args, project, project_scaffold, **kwargs):
 
     if auth is None:
         log.exit("Missing authentication service, add --auth option")
-    elif auth not in ['sql', 'neo4j', 'mongo']:
+    if auth not in ['sql', 'neo4j', 'mongo']:
         log.exit("Invalid authentication service: {}", auth)
 
     if auth == 'sql':
@@ -24,7 +24,9 @@ def __call__(args, project, project_scaffold, **kwargs):
 
     if frontend is None:
         log.exit("Missing frontend framework, add --frontend option")
-    elif frontend not in [NO_FRONTEND, ANGULAR]:
+    if not frontend or frontend == 'no':
+        frontend = NO_FRONTEND
+    if frontend not in [NO_FRONTEND, ANGULAR]:
         log.exit("Invalid frontend framework: {}", frontend)
 
     if not force_current:

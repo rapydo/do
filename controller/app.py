@@ -20,7 +20,7 @@ from controller import __version__
 from controller.commands import version as version_cmd
 from controller.commands import install as install_cmd
 from controller.commands import create as create_cmd
-from controller.project import Project, ANGULAR, ANGULARJS, REACT
+from controller.project import Project, NO_FRONTEND, ANGULAR, ANGULARJS, REACT
 from controller.utilities import services
 from controller.utilities import system
 from controller.utilities import configuration
@@ -528,9 +528,9 @@ To fix this issue, please update docker to version {}+
 
         log.verbose("Configuration loaded")
 
-        framework = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=None)
+        framework = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND)
 
-        if framework == 'None':
+        if framework == NO_FRONTEND:
             framework = None
 
         self.frontend = framework

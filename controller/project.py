@@ -5,7 +5,7 @@ from controller import gitter
 from controller import PROJECT_DIR
 from controller import log
 
-NO_FRONTEND = 'no'
+NO_FRONTEND = 'nofrontend'
 ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
 REACT = 'react'
@@ -182,7 +182,7 @@ class Project:
                 continue
             # You found a rapydo folder among your parents!
             log.warning(
-                "You are not in the main folder,  working dir changed to {}",
+                "You are not in the main folder, working dir changed to {}",
                 cwd,
             )
             first_level_error = None
