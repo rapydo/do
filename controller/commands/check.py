@@ -104,6 +104,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
 
                 if image_tag not in dimages:
                     # Missing images will be created at startup
+                    log.info("Image {} is missing", image_tag)
                     continue
 
                 if not any(x in active_services for x in build['services']):
