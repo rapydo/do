@@ -3,6 +3,7 @@ import os
 from plumbum import local
 from controller.arguments import ArgParser
 from controller.app import Application
+from controller import __version__
 
 
 def exec_command(capfd, command):
@@ -190,6 +191,9 @@ def test_all(capfd):
 
     out = exec_command(capfd, "rapydo formatter")
     assert "All done!" in out
+
+    out = exec_command(capfd, "rapydo version")
+    assert __version__ in out
 
     out = exec_command(capfd, "rapydo volatile backend --command hostname")
     assert "backend-server" in out
