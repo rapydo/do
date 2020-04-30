@@ -12,14 +12,14 @@ def __call__(args, project, files, hostname, **kwargs):
 
     if chain is not None or key is not None:
         if chain is None:
-            log.exit("Invalid chain file (your provided none)")
+            log.exit("Invalid chain file (you provided none)")
         elif not os.path.exists(chain):
-            log.exit("Invalid chain file (your provided {})", chain)
+            log.exit("Invalid chain file (you provided {})", chain)
 
         if key is None:
-            log.exit("Invalid key file (your provided none)")
+            log.exit("Invalid key file (you provided none)")
         elif not os.path.exists(key):
-            log.exit("Invalid key file (your provided {})", key)
+            log.exit("Invalid key file (you provided {})", key)
 
     service = "proxy"
 
