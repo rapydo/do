@@ -158,5 +158,12 @@ def test_all(capfd):
     exec_command(capfd, "rapydo ssl")
     exec_command(capfd, "rapydo dhparam")
 
-    exec_command(capfd, "rapydo install --editable auto")
-    exec_command(capfd, "rapydo install auto")
+    out = exec_command(capfd, "rapydo formatter")
+    assert "All done!" in out
+
+    # out = exec_command(capfd, "rapydo volatile backend --command hostname")
+    # assert "backend-server" in out
+
+    # out = exec_command(capfd, "rapydo install --editable auto")
+    # out = exec_command(capfd, "rapydo install --user auto")
+    # out = exec_command(capfd, "rapydo install auto")
