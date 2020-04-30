@@ -31,14 +31,21 @@ def __call__(args, files, base_files, services, base_services,
     for img, build in builds.items():
         if img in overriding_imgs:
             custom_services.extend(build.get('services', []))
-    options = {
-        'SERVICE': remove_redundant_services(custom_services, builds),
-        '--no-cache': args.get('force'),
-        '--force-rm': True,
-        '--pull': not args.get('core'),
-        '--parallel': True,
-    }
-    dc = Compose(files=files)
-    dc.command('build', options)
+    build_services = remove_redundant_services(custom_services, builds)
 
-    log.info("Images built")
+    # Remove services not selected at project level, i.e. restricted by --services
+    build_services = [i for i in build_services if i in services]
+    if not build_services:
+        log.info("Nothing to build")
+    else:
+        options = {
+            'SERVICE': build_services,
+            '--no-cache': args.get('force'),
+            '--force-rm': True,
+            '--pull': not args.get('core'),
+            '--parallel': True,
+        }
+        dc = Compose(files=files)
+        dc.command('build', options)
+
+        log.info("Images built")
