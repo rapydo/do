@@ -67,7 +67,8 @@ def test_all(capfd):
 
     # Selected a very fast service to speed up tests
     out = exec_command(capfd, "rapydo -s rabbit build --core")
-    assert "Images built" in out
+    assert "Core images built" in out
+    assert "No custom images to build" in out
 
     # Skipping main because we are on a fake git repository
     out = exec_command(capfd, "rapydo check -i main")

@@ -24,6 +24,7 @@ def __call__(args, files, base_files, services, base_services,
         }
         dc = Compose(files=base_files)
         dc.command('build', options)
+        log.info("Core images built")
 
     # Only build images defined at project level, overriding core images
     # Core images should only be pulled or built by specificing --core
@@ -36,7 +37,7 @@ def __call__(args, files, base_files, services, base_services,
     # Remove services not selected at project level, i.e. restricted by --services
     build_services = [i for i in build_services if i in services]
     if not build_services:
-        log.info("Nothing to build")
+        log.info("No custom images to build")
     else:
         options = {
             'SERVICE': build_services,
@@ -48,4 +49,4 @@ def __call__(args, files, base_files, services, base_services,
         dc = Compose(files=files)
         dc.command('build', options)
 
-        log.info("Images built")
+        log.info("Custom images built")
