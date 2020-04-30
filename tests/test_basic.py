@@ -122,7 +122,7 @@ def test_all(capfd):
 
     out = exec_command(capfd, "rapydo status")
     assert "docker-compose command: 'ps'" in out
-    assert "x_backend_1" in out
+    assert "test_backend_1" in out
 
     out = exec_command(capfd, "rapydo shell backend --command hostname")
     assert "backend-server" in out
@@ -137,12 +137,12 @@ def test_all(capfd):
     # assert "Service postgres is reachable" in out
 
     out = exec_command(capfd, "rapydo scale rabbit=2")
-    assert "Starting x_rabbit_1" in out
-    assert "Creating x_rabbit_2" in out
+    assert "Starting test_rabbit_1" in out
+    assert "Creating test_rabbit_2" in out
 
     out = exec_command(capfd, "rapydo scale rabbit=1")
-    assert "Stopping and removing x_rabbit_2" in out
-    assert "Starting x_rabbit_1" in out
+    assert "Stopping and removing test_rabbit_2" in out
+    assert "Starting test_rabbit_1" in out
 
     exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
