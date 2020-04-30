@@ -87,8 +87,6 @@ def install_controller_from_folder(gits, version, user):
 
 def __call__(args, rapydo_version, gits, **kwargs):
 
-    log.critical("Just to be sure!!")
-
     version = args.get('version')
     pip = args.get('pip')
     editable = args.get('editable')
