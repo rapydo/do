@@ -1,37 +1,44 @@
 # -*- coding: utf-8 -*-
 from controller.compose import Compose
-from controller import __version__
-from controller.utilities import system
 from controller.builds import remove_redundant_services
+from controller.builds import locate_builds
 from controller import log
 
 
-def __call__(args, files, base_files, services, template_builds, builds, **kwargs):
+def __call__(args, files, base_files, services, base_services,
+             compose_config, **kwargs):
 
-    if args.get('rebuild_templates'):
+    builds, template_builds, overriding_imgs = locate_builds(
+        base_services, compose_config
+    )
+
+    if args.get('core'):
+        log.debug("Forcing rebuild of core builds")
+
+        options = {
+            'SERVICE': remove_redundant_services(services, template_builds),
+            '--no-cache': args.get('force'),
+            '--force-rm': True,
+            '--pull': True,
+            '--parallel': True,
+        }
         dc = Compose(files=base_files)
-        log.debug("Forcing rebuild of cached templates")
-        dc.build_images(
-            template_builds,
-            current_version=__version__,
-            current_uid=system.get_current_uid(),
-            current_gid=system.get_current_gid(),
-            no_cache=args.get('force')
-        )
-        pull_templates = False
-    else:
-        pull_templates = True
+        dc.command('build', options)
 
-    dc = Compose(files=files)
-    services = remove_redundant_services(services, builds)
-
+    # Only build images defined at project level, overriding core images
+    # Core images should only be pulled or built by specificing --core
+    custom_services = []
+    for img, build in builds.items():
+        if img in overriding_imgs:
+            custom_services.extend(build.get('services', []))
     options = {
-        'SERVICE': services,
+        'SERVICE': remove_redundant_services(custom_services, builds),
         '--no-cache': args.get('force'),
         '--force-rm': True,
-        '--pull': pull_templates,
+        '--pull': not args.get('core'),
         '--parallel': True,
     }
+    dc = Compose(files=files)
     dc.command('build', options)
 
     log.info("Images built")

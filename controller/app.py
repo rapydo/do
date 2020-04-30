@@ -6,12 +6,10 @@ import time
 import shutil
 import urllib3
 import requests
-import pytz
 import importlib
 from distutils.version import LooseVersion
 from collections import OrderedDict
 from datetime import datetime
-import dateutil.parser
 from glom import glom
 from plumbum.commands.processes import ProcessExecutionError
 
@@ -27,7 +25,6 @@ from controller.utilities import configuration
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
 from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
-from controller.builds import locate_builds
 from controller.compose import Compose
 from controller.templating import Templating
 from controller import log
@@ -190,8 +187,9 @@ class Application:
 
         if self.update or self.check:
             if self.current_args.get('no_git', False):
-                log.verbose("Skipping heavy get operations")
+                log.info("Skipping git checks")
             else:
+                log.info("Checking git (skip with --no-git)")
                 self.git_checks()
 
         if self.update:
@@ -203,9 +201,6 @@ class Application:
         # Compose services and variables
         self.read_composers()
         self.check_placeholders()
-
-        # Build or check template containers images
-        self.build_dependencies()
 
         # Install or check frontend libraries (only if frontend is enabled)
         self.frontend_libs()
@@ -782,275 +777,6 @@ To fix this issue, please update docker to version {}+
 
         log.verbose("Configuration order:\n{}", self.files)
 
-    def build_dependencies(self):
-        """ Look up for builds which are depending on templates """
-
-        if self.action not in ['check', 'update', 'build']:
-            return
-
-        if self.current_args.get('no_builds', False):
-            log.info("Skipping builds checks")
-            return
-
-        # Compare builds depending on templates (slow operation!)
-        self.builds, self.template_builds, overriding_imgs = locate_builds(
-            self.base_services, self.compose_config
-        )
-
-        if self.action == 'build':
-            # Nothing more to do now, builds will be performed later (in _build method)
-            return
-
-        # we are in check or build case
-        from controller.dockerizing import Dock
-        dimages = Dock().images()
-        # if rebuild templates is forced, these checks are not needed
-        if not self.current_args.get('rebuild_templates', False):
-            rebuilt = self.verify_template_builds(dimages, self.template_builds)
-            if rebuilt:
-                # locate again builds
-                self.builds, self.template_builds, overriding_imgs = locate_builds(
-                    self.base_services, self.compose_config
-                )
-
-        self.verify_obsolete_builds(
-            dimages, self.builds, overriding_imgs, self.template_builds
-        )
-
-    @staticmethod
-    def date_from_string(date, fmt="%d/%m/%Y"):
-
-        if date == "":
-            return ""
-        try:
-            return_date = datetime.strptime(date, fmt)
-        except BaseException:
-            return_date = dateutil.parser.parse(date)
-
-        # TODO: test me with: 2017-09-22T07:10:35.822772835Z
-        if return_date.tzinfo is None:
-            return pytz.utc.localize(return_date)
-
-        return return_date
-
-    def get_build_timestamp(self, timestamp, as_date=False):
-
-        if timestamp is None:
-            log.warning("Received a null timestamp, defaulting to zero")
-            timestamp = 0
-        # Prior of dockerpy 2.5.1 image build timestamps were given as epoch
-        # i.e. were convertable to float
-        # From dockerpy 2.5.1 we are obtaining strings like this:
-        # 2017-09-22T07:10:35.822772835Z as we need to convert to epoch
-        try:
-            # verify if timestamp is already an epoch
-            float(timestamp)
-        except ValueError:
-            # otherwise, convert it
-            timestamp = self.date_from_string(timestamp).timestamp()
-
-        if as_date:
-            return datetime.fromtimestamp(timestamp)
-        return timestamp
-
-    def build_is_obsolete(self, build):
-        # compare dates between git and docker
-        path = build.get('path')
-        build_templates = self.gits.get('build-templates')
-        vanilla = self.gits.get('main')
-
-        if path.startswith(build_templates.working_dir):
-            git_repo = build_templates
-        elif path.startswith(vanilla.working_dir):
-            git_repo = vanilla
-        else:
-            log.exit("Unable to find git repo {}", path)
-
-        build_timestamp = self.get_build_timestamp(build.get('timestamp'))
-
-        files = os.listdir(path)
-        for f in files:
-            local_file = os.path.join(path, f)
-
-            obsolete, build_ts, last_commit = gitter.check_file_younger_than(
-                gitobj=git_repo, filename=local_file, timestamp=build_timestamp
-            )
-
-            if obsolete:
-                log.info("File changed: {}", f)
-                return obsolete, build_ts, last_commit
-
-        return False, 0, 0
-
-    @staticmethod
-    def get_compose(files):
-        return Compose(files=files)
-
-    def verify_template_builds(self, docker_images, builds):
-
-        if len(builds) == 0:
-            log.debug("No template build to be verified")
-            return False
-
-        rebuilt = False
-        found_obsolete = 0
-        fmt = "%Y-%m-%d %H:%M:%S"
-        for image_tag, build in builds.items():
-
-            is_active = False
-            for service in build['services']:
-                if service in self.active_services:
-                    is_active = True
-                    break
-            if not is_active:
-                log.verbose(
-                    "Checks skipped: template {} not enabled (service list = {})",
-                    image_tag,
-                    build['services'],
-                )
-                continue
-
-            if image_tag not in docker_images:
-
-                found_obsolete += 1
-                message = "Missing template build for {} ({})".format(
-                    build['services'],
-                    image_tag,
-                )
-                if self.action == 'check':
-                    message += "\nSuggestion: execute the pull command"
-                    log.exit(message)
-                else:
-                    log.debug(message)
-                    dc = self.get_compose(files=self.base_files)
-                    dc.build_images(
-                        builds={image_tag: build},
-                        current_version=__version__,
-                        current_uid=self.current_uid,
-                        current_gid=self.current_gid,
-                    )
-                    rebuilt = True
-
-                continue
-
-            obsolete, build_ts, last_commit = self.build_is_obsolete(build)
-            if obsolete:
-                found_obsolete += 1
-                b = datetime.fromtimestamp(build_ts).strftime(fmt)
-                c = last_commit.strftime(fmt)
-                message = \
-                    "Obsolete image {} obsolete (built on {} but changed on {})".format(
-                        image_tag, b, c)
-                if self.current_args.get('rebuild'):
-                    log.info("{}, rebuilding", message)
-                    dc = self.get_compose(files=self.base_files)
-                    dc.build_images(
-                        builds={image_tag: build},
-                        current_version=__version__,
-                        current_uid=self.currert_uid,
-                        current_gid=self.currert_gid,
-                        no_cache=True
-                    )
-                    rebuilt = True
-                else:
-                    message += "\nUpdate it with: rapydo --services {} pull".format(
-                        build.get('service')
-                    )
-                    log.warning(message)
-
-        if found_obsolete == 0:
-            log.debug("No template build to be updated")
-
-        return rebuilt
-
-    def verify_obsolete_builds(
-        self, docker_images, builds, overriding_imgs, template_builds
-    ):
-
-        if len(builds) == 0:
-            log.debug("No build to be verified")
-            return
-
-        found_obsolete = 0
-        fmt = "%Y-%m-%d %H:%M:%S"
-        for image_tag, build in builds.items():
-
-            if image_tag not in docker_images:
-                # Missing images will be created at startup
-                continue
-
-            is_active = False
-            for service in build['services']:
-                if service in self.active_services:
-                    is_active = True
-                    break
-            if not is_active:
-                log.verbose(
-                    "Checks skipped: template {} not enabled (service list = {})",
-                    image_tag,
-                    build['services'],
-                )
-                continue
-
-            build_is_obsolete = False
-            message = ""
-
-            # if FROM image is newer, this build should be re-built
-            if image_tag in overriding_imgs:
-                from_img = overriding_imgs.get(image_tag)
-                from_build = template_builds.get(from_img)
-                from_timestamp = self.get_build_timestamp(
-                    from_build.get('timestamp'), as_date=True
-                )
-                build_timestamp = self.get_build_timestamp(
-                    build.get('timestamp'), as_date=True
-                )
-
-                if from_timestamp > build_timestamp:
-                    build_is_obsolete = True
-                    b = build_timestamp.strftime(fmt)
-                    c = from_timestamp.strftime(fmt)
-                    message = "Image {} is obsolete".format(image_tag)
-                    message += " (built on {} FROM {} that changed on {})".format(
-                        b, from_img, c)
-
-            if not build_is_obsolete:
-                # Check if some recent commit modified the Dockerfile
-                obsolete, build_ts, last_commit = self.build_is_obsolete(build)
-                if obsolete:
-                    build_is_obsolete = True
-                    b = datetime.fromtimestamp(build_ts).strftime(fmt)
-                    c = last_commit.strftime(fmt)
-                    message = "Image {} is obsolete".format(image_tag)
-                    message += " (built on {} but changed on {})".format(b, c)
-
-            # TODO: for backend build check for any commit on utils o backend
-            # TODO: for rapydo builds check for any commit on utils
-            if build_is_obsolete:
-                found_obsolete += 1
-                if self.current_args.get('rebuild'):
-                    log.info("{}, rebuilding", message)
-                    dc = self.get_compose(files=self.files)
-
-                    # Don't force pull when building an image FROM a template build
-                    # force_pull = image_tag not in overriding_imgs
-                    dc.build_images(
-                        builds={image_tag: build},
-                        current_version=__version__,
-                        current_uid=self.current_uid,
-                        current_gid=self.current_gid,
-                        # force_pull=force_pull,
-                        force_pull=True
-                    )
-                else:
-                    message += "\nUpdate it with: rapydo --services {} pull".format(
-                        build.get('service')
-                    )
-                    log.warning(message)
-
-        if found_obsolete == 0:
-            log.debug("No build to be updated")
-
     def frontend_libs(self):
 
         if self.frontend is None:
@@ -1313,4 +1039,3 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         except BaseException:
             log.critical("Cannot parse command output: {}", output)
             return output
-

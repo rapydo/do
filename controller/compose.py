@@ -22,10 +22,6 @@ from compose.cli.command import (
 from compose.cli.main import TopLevelCommand
 from controller import log
 
-# # inspect containers:
-# for container in self.get_handle().project.containers():
-#     log.info(container.dictionary.get('State').get('Status'))
-
 
 class Compose:
 
@@ -55,54 +51,14 @@ class Compose:
         else:
             return services_list
 
-    def get_handle(self):
-        return TopLevelCommand(project_from_options(self.project_dir, self.options))
-
-    def build_images(
-        self, builds, current_version, current_uid, current_gid,
-        force_pull=True, no_cache=False,
-    ):
-
-        try:
-            compose_handler = self.get_handle()
-
-            for image, build in builds.items():
-
-                service = build.get('service')
-                log.verbose("Building image: {}", image)
-
-                options = {
-                    '--no-cache': no_cache,
-                    '--parallel': True,
-                    '--pull': force_pull,
-                    '--force-rm': True,
-                    'SERVICE': [service],
-                }
-
-                build_args = []
-                # NOTE: we can set only 1 variable since options is a dict
-                build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
-                build_args.append("{}={}".format("CURRENT_UID", current_uid))
-                build_args.append("{}={}".format("CURRENT_GID", current_gid))
-
-                if len(build_args) > 0:
-                    options['--build-arg'] = build_args
-
-                compose_handler.build(options=options)
-                log.info("Built image: {}", image)
-
-            return
-        except SystemExit:
-            log.info("SystemExit during template building")
-
     def command(self, command, options=None, nofailure=False):
 
-        # NOTE: debug defaults
-        # tmp = self.get_defaults(command)
-        # print("TEST", tmp, type(tmp))
-        # # exit(1)
-
-        compose_handler = self.get_handle()
+        compose_handler = TopLevelCommand(
+            project_from_options(
+                self.project_dir,
+                self.options
+            )
+        )
         method = getattr(compose_handler, command)
 
         if options is None:

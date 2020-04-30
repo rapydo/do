@@ -92,11 +92,11 @@ subcommands:
         alias: s
         type: bool
         default: False
-        help: ignore the heaviest check operations on git commits
+        help: skip checks on git commits
       no-builds:
         type: bool
         default: False
-        help: ignore the heaviest builds operations
+        help: skip check on docker builds
       check-permissions:
         type: bool
         default: False
@@ -122,11 +122,6 @@ subcommands:
         type: str
         metavalue: IGNORE_SUBMODULE
         help: ignore a given list of submodules (command delimited)
-      rebuild:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: rebuild templates if required
 
   install:
     description: Install a rapydo-controller version
@@ -158,12 +153,11 @@ subcommands:
   build:
     description: Force building of one or more services docker images
     suboptions:
-      rebuild-templates:
-        alias: t
+      core:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: force rebuild of parent images (templates) used in local builds
+        help: force build of all images including core builds
       force:
         alias: f
         type: bool
