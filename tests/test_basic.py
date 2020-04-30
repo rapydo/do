@@ -157,3 +157,6 @@ def test_all(capfd):
     exec_command(capfd, "rapydo ancestors XYZ")
     exec_command(capfd, "rapydo ssl")
     exec_command(capfd, "rapydo dhparam")
+
+    exec_command(capfd, "rapydo install --editable auto")
+    exec_command(capfd, "rapydo install auto")
