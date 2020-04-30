@@ -100,6 +100,7 @@ class Application:
         self.check_installed_software()
 
         if self.install:
+            self.project = self.project_scaffold.get_project(self.project)
             self.read_specs()
             self.git_submodules()
             install_cmd.__call__(
