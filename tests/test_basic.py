@@ -192,6 +192,7 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo formatter")
     # assert "All done!" in out
     # This is because no endpoint is implemented in this project...
+    assert out[-1] == 'debug code'
     assert "No paths given. Nothing to do" in out
 
     out = exec_command(
