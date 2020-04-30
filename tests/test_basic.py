@@ -122,6 +122,7 @@ def test_all(capfd):
 
     out = exec_command(capfd, "rapydo status")
     assert "docker-compose command: 'ps'" in out
+    assert "x_backend_1" in out
 
     out = exec_command(capfd, "rapydo shell backend --command hostname")
     assert "backend-server" in out
@@ -135,7 +136,13 @@ def test_all(capfd):
     # This output is not capture, since it is produced by the backend
     # assert "Service postgres is reachable" in out
 
-    exec_command(capfd, "rapydo scale backend=1")
+    out = exec_command(capfd, "rapydo scale rabbit=2")
+    assert "Starting x_rabbit_1" in out
+    assert "Creating x_rabbit_2" in out
+
+    out = exec_command(capfd, "rapydo scale rabbit=1")
+    assert "Stopping and removing x_rabbit_2" in out
+    assert "Starting x_rabbit_1" in out
 
     exec_command(capfd, "rapydo logs")
     # FIXME: how is possible that this message is not found??
@@ -192,8 +199,7 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo formatter")
     # assert "All done!" in out
     # This is because no endpoint is implemented in this project...
-    assert out[-2][7:] == 'debug code'
-    assert "No paths given. Nothing to do" in out
+    assert "No paths given" in out
 
     out = exec_command(
         capfd,
