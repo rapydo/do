@@ -168,6 +168,10 @@ def test_all(capfd):
 
     out = exec_command(capfd, "rapydo ssl")
     assert "No container found for proxy_1" in out
+    out = exec_command(capfd, "rapydo ssl --volatile")
+    assert "No container found for proxy_1" in out
+    out = exec_command(capfd, "rapydo ssl --force")
+    assert "No container found for proxy_1" in out
     out = exec_command(capfd, "rapydo ssl --chain-file /no/file")
     assert "Invalid chain file (you provided /no/file)" in out
     assert "Invalid key file (you provided none)" in out
