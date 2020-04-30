@@ -190,6 +190,14 @@ def test_all(capfd):
     assert "No container found for proxy_1" in out
 
     out = exec_command(capfd, "rapydo formatter")
+    # assert "All done!" in out
+    # This is because no endpoint is implemented in this project...
+    assert "No paths given. Nothing to do" in out
+
+    out = exec_command(
+        capfd,
+        "rapydo formatter --submodule http-api/restapi --folder resources"
+    )
     assert "All done!" in out
 
     out = exec_command(capfd, "rapydo version")
