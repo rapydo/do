@@ -66,12 +66,11 @@ class Project:
     def load_frontend_scaffold(self, frontend):
         self.frontend = frontend
 
-        if self.frontend is None:
-            log.debug("No frontend specified")
+        if self.frontend is None or self.frontend == NO_FRONTEND:
+            log.debug("Frontend not enabled")
             return False
 
-        if self.frontend is not None:
-            self.expected_folders.append(self.p_path("frontend"))
+        self.expected_folders.append(self.p_path("frontend"))
 
         if self.frontend == ANGULAR:
             self.expected_folders.extend([
