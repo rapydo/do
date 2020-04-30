@@ -122,6 +122,9 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo status")
     assert "docker-compose command: 'ps'" in out
 
+    out = exec_command(capfd, "rapydo shell backend --command hostname")
+    assert "backend-server" in out
+
     # Template project is based on sql
     exec_command(capfd, "rapydo verify neo4j")
     # This output is not capture, since it is produced by the backend
@@ -153,16 +156,27 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo remove --all")
     assert "Stack removed" in out
 
-    exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
-    exec_command(capfd, "rapydo ancestors XYZ")
-    exec_command(capfd, "rapydo ssl")
-    exec_command(capfd, "rapydo dhparam")
+    out = exec_command(capfd, "rapydo shell backend --command hostname")
+    assert "No container found for backend_1" in out
+
+    out = exec_command(capfd, "rapydo interfaces sqlalchemy --port 123 --detach")
+    assert "Launching interface: sqlalchemyui" in out
+    assert "docker-compose command: 'run'" in out
+
+    out = exec_command(capfd, "rapydo ancestors XYZ")
+    assert "No parent found for XYZ" in out
+
+    out = exec_command(capfd, "rapydo ssl")
+    assert "No container found for proxy_1" in out
+
+    out = exec_command(capfd, "rapydo dhparam")
+    assert "No container found for proxy_1" in out
 
     out = exec_command(capfd, "rapydo formatter")
     assert "All done!" in out
 
-    # out = exec_command(capfd, "rapydo volatile backend --command hostname")
-    # assert "backend-server" in out
+    out = exec_command(capfd, "rapydo volatile backend --command hostname")
+    assert "backend-server" in out
 
     # out = exec_command(capfd, "rapydo install --editable auto")
     # out = exec_command(capfd, "rapydo install --user auto")
