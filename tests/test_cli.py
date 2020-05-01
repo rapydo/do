@@ -265,7 +265,7 @@ def test_all(capfd):
     assert not os.path.isdir('data/logs')
     exec_command(
         capfd,
-        "rapydo  init",
+        "rapydo init",
         "Project initialized",
     )
     assert os.path.isdir('data/logs')
