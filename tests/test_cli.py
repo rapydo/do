@@ -551,8 +551,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        "rapydo: {v}".format(v=__version__),
-        "required rapydo: {v}".format(v=__version__),
+        "rapydo: \033[1;32m{v}".format(v=__version__),
+        "required rapydo: \033[1;32m{v}".format(v=__version__),
     )
 
     exec_command(
@@ -591,6 +591,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo version",
+        "rapydo: \033[1;31m0.7.2",
+        "required rapydo: \033[1;31m{v}".format(v=__version__),
         "This project is not compatible with rapydo version 0.7.2"
         "Please upgrade rapydo to version {} or modify this project".format(__version__)
     )
