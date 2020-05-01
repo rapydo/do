@@ -295,6 +295,17 @@ def test_all(capfd):
         "rapydo verify sqlalchemy",
         'Service sqlalchemy is reachable'
     )
+    exec_command(
+        capfd,
+        "rapydo scale rabbit",
+        "Please specify how to scale: SERVICE=NUM_REPLICA",
+        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file"
+    )
+    exec_command(
+        capfd,
+        "rapydo scale rabbit=x",
+        "Invalid number of replicas: x",
+    )
 
     exec_command(
         capfd,
