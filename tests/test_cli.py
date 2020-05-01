@@ -299,6 +299,22 @@ def test_all(capfd):
         "rapydo shell backend --command hostname",
         "backend-server",
     )
+    # Testing default users
+    exec_command(
+        capfd,
+        "rapydo shell backend --command whoami",
+        "developer",
+    )
+    exec_command(
+        capfd,
+        "rapydo shell frontend --command whoami",
+        "node",
+    )
+    exec_command(
+        capfd,
+        "rapydo shell postgres --command whoami",
+        "postgres",
+    )
 
     # Template project is based on sql
     exec_command(
