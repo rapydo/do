@@ -310,7 +310,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo --prod init -f",
-        "No container found for proxy_1",
+        "Created default .projectrc file",
+        "Project initialized",
     )
 
     exec_command(

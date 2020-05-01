@@ -12,3 +12,8 @@ project_configuration:
       AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
 
+      RABBITMQ_USER: {{ 'RANDOM'| username }}
+      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      ALCHEMY_USER: sqluser
+      ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
+
