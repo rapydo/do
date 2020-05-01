@@ -20,11 +20,14 @@ def exec_command(capfd, command):
     except SystemExit:
         print("*********************************************")
 
-    out, _ = capfd.readouterr()
+    out, err = capfd.readouterr()
     out = out.replace('\r', '').split("\n")
+    err = err.replace('\r', '').split("\n")
 
     for o in out:
-        print(o)
+        print("OUT: ".format(o))
+    for e in err:
+        print("ERR: ".format(e))
 
     return out
 
@@ -129,7 +132,7 @@ def test_all(capfd):
 
     # Template project is based on sql
     exec_command(capfd, "rapydo verify neo4j")
-    # This output is not capture, since it is produced by the backend
+    # This output is not captured, since it is produced by the backend
     # assert 'Service "neo4j" was NOT detected' in out
 
     exec_command(capfd, "rapydo verify postgres")
