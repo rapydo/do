@@ -1,6 +1,6 @@
 import os
 import signal
-# import shutil
+import shutil
 from plumbum import local
 from controller.arguments import ArgParser
 from controller.app import Application
@@ -260,6 +260,14 @@ def test_all(capfd):
         "Project initialized",
     )
 
+    shutil.rmtree('data/logs')
+    assert not os.path.isdir('data/logs')
+    exec_command(
+        capfd,
+        "rapydo  init",
+        "Project initialized",
+    )
+    assert os.path.isdir('data/logs')
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
