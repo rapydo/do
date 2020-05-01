@@ -6,7 +6,7 @@ from controller.app import Application
 from controller import __version__
 
 
-def exec_command(capfd, command):
+def exec_command(capfd, command, *asserts):
     print("*********************************************")
     print(command)
     print("_____________________________________________")
@@ -20,12 +20,16 @@ def exec_command(capfd, command):
     except SystemExit:
         print("*********************************************")
 
-    out, _ = capfd.readouterr()
+    out, err = capfd.readouterr()
     out = out.replace('\r', '').split("\n")
+    err = err.replace('\r', '').split("\n")
 
     for o in out:
         print(o)
-
+    for e in err:
+        print(e)
+    for a in asserts:
+        assert a in out or a in err
     return out
 
 
