@@ -309,6 +309,12 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo --prod init -f",
+        "No container found for proxy_1",
+    )
+
+    exec_command(
+        capfd,
         "rapydo ssl",
         "No container found for proxy_1",
     )
@@ -382,16 +388,16 @@ def test_all(capfd):
         "backend-server",
     )
 
-    exec_command(
-        capfd,
-        "rapydo install --editable auto",
-    )
+    # exec_command(
+    #     capfd,
+    #     "rapydo install --editable auto",
+    # )
 
     exec_command(
         capfd,
         "rapydo install --user auto",
     )
-    exec_command(
-        capfd,
-        "rapydo install auto",
-    )
+    # exec_command(
+    #     capfd,
+    #     "rapydo install auto",
+    # )
