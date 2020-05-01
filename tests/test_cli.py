@@ -87,8 +87,7 @@ def test_all(capfd):
         "rapydo create test --auth sql --frontend angular --current",
         "Project test successfully created",
     )
-    if True:
-        return
+
     exec_command(
         capfd,
         "rapydo init",
