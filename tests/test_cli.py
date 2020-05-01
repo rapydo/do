@@ -34,7 +34,7 @@ def exec_command(capfd, command, *asserts):
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
-        assert any(a in x for x in out + err)
+        assert a in out + err or any(a in x for x in out + err)
 
     return out
 
@@ -230,8 +230,8 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo verify postgres",
-        'Service "postgres" is reachable'
+        "rapydo verify sqlalchemy",
+        'Service "sqlalchemy" is reachable'
     )
 
     exec_command(
