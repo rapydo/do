@@ -7,13 +7,13 @@ from controller import __version__
 
 
 def exec_command(capfd, command, *asserts):
+
     with capfd.disabled():
         print("_____________________________________________")
         print(command)
         print("_____________________________________________")
-    command = command.split(" ")
 
-    arguments = ArgParser(args=command)
+    arguments = ArgParser(args=command.split(" "))
 
     try:
         Application(arguments)
@@ -27,9 +27,9 @@ def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
         for o in out:
-            print(o)
+            print("\033[92m{}\033[0m".format(o))
         for e in err:
-            print(e)
+            print("\033[91m{}\033[0m".format(e))
 
     for a in asserts:
         assert a in out or a in err
@@ -69,8 +69,6 @@ def test_all(capfd):
         "Project test successfully created",
     )
 
-    if True:
-        return
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular",
@@ -89,7 +87,8 @@ def test_all(capfd):
         "rapydo create test --auth sql --frontend angular --current",
         "Project test successfully created",
     )
-
+    if True:
+        return
     exec_command(
         capfd,
         "rapydo init",
