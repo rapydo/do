@@ -317,18 +317,6 @@ def test_all(capfd):
         "postgres",
     )
 
-    # Template project is based on sql
-    exec_command(
-        capfd,
-        "rapydo verify neo4j",
-        'Service neo4j not detected'
-    )
-
-    exec_command(
-        capfd,
-        "rapydo verify sqlalchemy",
-        'Service sqlalchemy is reachable'
-    )
     exec_command(
         capfd,
         "rapydo scale rabbit",
@@ -369,6 +357,19 @@ def test_all(capfd):
         "rapydo logs -s backend --tail 10 --follow",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
+    )
+
+    # Template project is based on sql
+    exec_command(
+        capfd,
+        "rapydo verify neo4j",
+        'Service neo4j not detected'
+    )
+
+    exec_command(
+        capfd,
+        "rapydo verify sqlalchemy",
+        'Service sqlalchemy is reachable'
     )
 
     exec_command(
