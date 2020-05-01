@@ -68,13 +68,6 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular",
-        "Project test successfully created",
-    )
-
-
-    exec_command(
-        capfd,
         "rapydo create test_celery --auth sql --frontend angular",
         "Wrong project name, _ is not a valid character",
     )
@@ -83,6 +76,12 @@ def test_all(capfd):
         capfd,
         "rapydo create celery --auth sql --frontend angular",
         "You selected a reserved name, invalid project name: celery",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo create test --auth sql --frontend angular",
+        "Project test successfully created",
     )
 
     exec_command(
