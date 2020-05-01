@@ -5,9 +5,12 @@ from controller.arguments import ArgParser
 from controller.app import Application
 from controller import __version__
 
+OK = 0
+FAIL = 1
+
 
 def exec_command(capfd, command, *asserts):
-    print("*********************************************")
+    print("_____________________________________________")
     print(command)
     print("_____________________________________________")
     command = command.split(" ")
@@ -18,18 +21,21 @@ def exec_command(capfd, command, *asserts):
         Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
-        print("*********************************************")
+        pass
 
     out, err = capfd.readouterr()
     out = out.replace('\r', '').split("\n")
     err = err.replace('\r', '').split("\n")
 
-    for o in out:
-        print(o)
-    for e in err:
-        print(e)
+    with capfd.disabled():
+        for o in out:
+            print(o)
+        for e in err:
+            print(e)
+
     for a in asserts:
         assert a in out or a in err
+
     return out
 
 
