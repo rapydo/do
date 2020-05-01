@@ -10,8 +10,9 @@ class GlobalCapfd:
     capfd = None
 
 
-def exec_command(capfd, command):
+def exec_command(capfd, command, *args):
     print(GlobalCapfd.capfd)
+    print(args)
     print("*********************************************")
     print(command)
     print("_____________________________________________")
@@ -41,7 +42,7 @@ def test_all(capfd):
 
     GlobalCapfd.capfd = capfd
 
-    out = exec_command(capfd, "rapydo create test")
+    out = exec_command(capfd, "rapydo create test", "a", "b")
     assert "Missing authentication service, add --auth option" in out
 
     out = exec_command(capfd, "rapydo create test --auth xyz")
