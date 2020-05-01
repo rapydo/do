@@ -56,6 +56,7 @@ def exec_command(capfd, command, *asserts):
 
 def test_all(capfd):
 
+    # Test failed create
     exec_command(
         capfd,
         "rapydo create test",
@@ -97,7 +98,9 @@ def test_all(capfd):
         "rapydo create test --auth sql --frontend no --no-auto",
         "mkdir -p projects",
     )
+    # Still nothing created
 
+    # Let's create a project
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular",
@@ -141,6 +144,7 @@ def test_all(capfd):
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
     )
+    # After some more tests... the project is ready
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend no --no-auto --current",
@@ -149,12 +153,14 @@ def test_all(capfd):
         "Project test successfully created",
     )
 
+    # Basic initilization
     exec_command(
         capfd,
         "rapydo init",
         "Project initialized",
     )
 
+    # Basic pull
     exec_command(
         capfd,
         "rapydo pull",
@@ -183,49 +189,49 @@ def test_all(capfd):
         "Checks completed",
     )
 
+    # Verify fs permissions
     exec_command(
         capfd,
         "rapydo check -i main --check-permissions",
         "Checks completed",
     )
 
+    # Some tests with list
     exec_command(
         capfd,
         "rapydo list",
         "Nothing to list, please use rapydo list -h for available options",
     )
-
     exec_command(
         capfd,
         "rapydo list --env",
         "List env variables:",
         "ACTIVATE_ALCHEMY",
     )
-
     exec_command(
         capfd,
         "rapydo list --args",
         "List of configured rapydo arguments:",
     )
-
     exec_command(
         capfd,
         "rapydo list --active-services",
         "List of active services:",
     )
-
     exec_command(
         capfd,
         "rapydo list --submodules",
         "List of submodules:",
     )
 
+    # docker dump
     exec_command(
         capfd,
         "rapydo dump",
         "Config dump: docker-compose.yml",
     )
 
+    # Test selection with teo projects
     os.remove(".projectrc")
 
     command = local["cp"]
@@ -243,29 +249,25 @@ def test_all(capfd):
         "Checks completed",
     )
 
+    # Check invalid and reserved project names
     exec_command(
         capfd,
         "rapydo -p invalid_character check -i main --no-git --no-builds",
         "Wrong project name, _ is not a valid character.",
     )
-
     exec_command(
         capfd,
         "rapydo -p celery check -i main --no-git --no-builds",
         "You selected a reserved name, invalid project name: celery",
     )
 
+    # Test init of data folders
+    shutil.rmtree('data/logs')
+    assert not os.path.isdir('data/logs')
+    # Let's restore .projectrc and data/logs
     exec_command(
         capfd,
         "rapydo --project test init",
-        "Project initialized",
-    )
-
-    shutil.rmtree('data/logs')
-    assert not os.path.isdir('data/logs')
-    exec_command(
-        capfd,
-        "rapydo init",
         "Project initialized",
     )
     assert os.path.isdir('data/logs')
@@ -275,12 +277,14 @@ def test_all(capfd):
         "Checks completed",
     )
 
+    # Stack not yet started...
     exec_command(
         capfd,
         "rapydo verify sqlalchemy",
         'No container found for backend_1'
     )
 
+    # Let's start with the stack
     exec_command(
         capfd,
         "rapydo start",
@@ -363,17 +367,18 @@ def test_all(capfd):
         print(e)
 
     # Template project is based on sql
+    """
     exec_command(
         capfd,
         "rapydo verify neo4j",
         'Service neo4j not detected'
     )
-
     exec_command(
         capfd,
         "rapydo verify sqlalchemy",
         'Service sqlalchemy is reachable'
     )
+    """
 
     exec_command(
         capfd,
