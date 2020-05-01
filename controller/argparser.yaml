@@ -186,8 +186,6 @@ subcommands:
         type: str
         metavalue: SERVICE
         default: null
-  custom:
-    description: Execute predefined custom commands inside containers
   ssl:
     description: Issue a SSL certificate with Let's Encrypt
     suboptions:

@@ -145,16 +145,12 @@ class Application:
         if not skip_check_perm:
             self.inspect_permissions()
 
-        # Generate and get the extra arguments in case of a custom command
-        if self.action == 'custom':
-            self.custom_parse_args()
+        try:
+            argname = next(iter(self.arguments.remaining_args))
+        except StopIteration:
+            pass
         else:
-            try:
-                argname = next(iter(self.arguments.remaining_args))
-            except StopIteration:
-                pass
-            else:
-                log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
+            log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
 
         # Verify if we implemented the requested command
         cmd_name = self.action.replace("-", "_")
