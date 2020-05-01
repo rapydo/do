@@ -6,8 +6,10 @@ from controller.app import Application
 from controller import __version__
 
 
-class GlobalCapfd:
+class GlobalVars:
     capfd = None
+    out_len = 0
+    err_len = 0
 
 
 def check_command(command, *asserts):
@@ -24,33 +26,30 @@ def check_command(command, *asserts):
     except SystemExit:
         print("*********************************************")
 
-    out, err = GlobalCapfd.capfd.readouterr()
+    out, err = GlobalVars.capfd.readouterr()
     out = out.replace('\r', '').split("\n")
     err = err.replace('\r', '').split("\n")
-    print(len(out))
-    print(len(err))
-    for o in out:
-        if not o:
-            continue
-        print("OUT: {}".format(o))
-    for e in err:
-        if not e:
-            continue
-        print("ERR: {}".format(e))
+    with GlobalVars.capfd.disabled():
+        for o in out:
+            if not o:
+                continue
+            print("\033[92m{}\033[0m".format(o))
+        for e in err:
+            if not e:
+                continue
+            print("\033[91m{}\033[0m".format(e))
 
     for a in asserts:
-        assert a in out or a in err
+        assert a in out[GlobalVars.out_len:] or a in err[GlobalVars.err_len:]
 
+    GlobalVars.out_len = len(out)
+    GlobalVars.err_len = len(err)
     return True
-
-# DEBUG 1 = out + err
-# DEBUG 1 = GlobalCapfd
-# DEBUG 1 = *args
 
 
 def test_all(capfd):
 
-    GlobalCapfd.capfd = capfd
+    GlobalVars.capfd = capfd
 
     check_command(
         "rapydo create test",
