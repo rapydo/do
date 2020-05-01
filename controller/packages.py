@@ -6,6 +6,7 @@
 
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
+import os
 from sultan.api import Sultan
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
@@ -13,6 +14,8 @@ except NameError:
     import_exceptions = ImportError
 from controller.app import Application
 from controller import log
+
+TESTING = os.environ.get("TESTING") == '1'
 
 
 def install(package, editable=False, user=False, use_pip3=True):
@@ -26,11 +29,18 @@ def install(package, editable=False, user=False, use_pip3=True):
         )
 
     try:
-        with Sultan.load(sudo=not user) as sultan:
+        sudo = not user
+        # sudo does not work on travis
+        if TESTING:
+            sudo = False
+        with Sultan.load(sudo=sudo) as sultan:
             command = 'install --upgrade'
             if editable:
                 command += " --editable"
-            if user:
+            # --user does not work on travis:
+            # Can not perform a '--user' install.
+            # User site-packages are not visible in this virtualenv.
+            if not TESTING and user:
                 command += " --user"
             command += ' {}'.format(package)
 

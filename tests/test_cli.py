@@ -391,13 +391,15 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo install --local --user auto",
+        "rapydo install --editable auto",
     )
 
     exec_command(
         capfd,
         "rapydo install --user auto",
     )
+
+    # This is the very last command... installing an old version!
     exec_command(
         capfd,
         "rapydo install --pip --user 0.7.2",

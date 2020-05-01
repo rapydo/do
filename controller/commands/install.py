@@ -47,7 +47,7 @@ def install_controller_from_git(version, user):
         log.info("Check on installed version: {}", installed_version)
 
 
-def install_controller_from_folder(gits, version, user):
+def install_controller_from_folder(gits, version, user, editable):
 
     # BEWARE: to not import this package outside the function
     # Otherwise pip will go crazy
@@ -73,7 +73,7 @@ def install_controller_from_folder(gits, version, user):
     else:
         log.exit("Invalid version")
 
-    installed = install(do_path, editable=True, user=user)
+    installed = install(do_path, editable=editable, user=user)
 
     if not installed:
         log.error("Unable to install controller {} from local folder", version)
@@ -103,7 +103,7 @@ def __call__(args, rapydo_version, gits, **kwargs):
         log.info("Detected version {} to be installed", version)
 
     if editable or local:
-        return install_controller_from_folder(gits, version, user)
+        return install_controller_from_folder(gits, version, user, editable)
     elif pip:
         return install_controller_from_pip(version, user)
     else:
