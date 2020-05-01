@@ -123,7 +123,7 @@ def test_all(capfd):
         "rapydo create test --auth sql --frontend no --no-auto --current",
         "Folder projects/test/confs already exists",
         "{f} already exists".format(f=pconf),
-        "Project x successfully created",
+        "Project test successfully created",
     )
 
     exec_command(
