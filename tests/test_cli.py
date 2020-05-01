@@ -231,7 +231,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo verify sqlalchemy",
-        'Service "sqlalchemy" is reachable'
+        'Service sqlalchemy is reachable'
     )
 
     exec_command(
