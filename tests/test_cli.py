@@ -27,9 +27,9 @@ def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
         for o in out:
-            print("\033[92m{}\033[0m".format(o))
+            print("_ {}".format(o))
         for e in err:
-            print("\033[91m{}\033[0m".format(e))
+            print("! {}".format(e))
 
     for a in asserts:
         assert a in out or a in err
@@ -210,7 +210,7 @@ def test_all(capfd):
         capfd,
         "rapydo status",
         "docker-compose command: 'ps'",
-        "test_backend_1",
+        # "test_backend_1",
     )
 
     exec_command(
