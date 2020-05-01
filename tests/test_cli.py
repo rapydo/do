@@ -1,9 +1,15 @@
 import os
+import signal
 # import shutil
 from plumbum import local
 from controller.arguments import ArgParser
 from controller.app import Application
 from controller import __version__
+
+
+def handler(signum, frame):
+    print("Forever is over!")
+    raise Exception("end of time")
 
 
 def exec_command(capfd, command, *asserts):
@@ -80,6 +86,12 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo create test --auth sql --frontend no --no-auto",
+        "mkdir -p projects",
+    )
+
+    exec_command(
+        capfd,
         "rapydo create test --auth sql --frontend angular",
         "Project test successfully created",
     )
@@ -93,13 +105,24 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular --current --force",
+        "Folder projects/test/confs already exists",
+        "projects/test/project_configuration.yaml already exists",
         "Project test successfully created",
     )
 
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend no --current",
+        "Folder projects/test/confs already exists",
+        "projects/test/project_configuration.yaml already exists",
         "Project test successfully created",
+    )
+    exec_command(
+        capfd,
+        "rapydo create test --auth sql --frontend no --no-auto --current",
+        "Folder projects/test/confs already exists",
+        "projects/test/project_configuration.yaml already exists",
+        "Project x successfully created",
     )
 
     exec_command(
@@ -322,6 +345,18 @@ def test_all(capfd):
         "rapydo remove --all",
         "Stack removed",
     )
+
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(3)
+
+    try:
+        exec_command(
+            capfd,
+            "rapydo -s backend start --no-detach",
+            "REST API backend server is ready to be launched",
+        )
+    except Exception as e:
+        print(e)
 
     exec_command(
         capfd,
