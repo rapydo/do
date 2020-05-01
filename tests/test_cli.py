@@ -15,6 +15,10 @@ def handler(signum, frame):
     raise Timeout("Time is up")
 
 
+def mock_KeyboardInterrupt(signum, frame):
+    raise KeyboardInterrupt("Time is up")
+
+
 def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
@@ -50,8 +54,6 @@ def exec_command(capfd, command, *asserts):
 
 
 def test_all(capfd):
-
-    signal.signal(signal.SIGALRM, handler)
 
     exec_command(
         capfd,
@@ -335,17 +337,14 @@ def test_all(capfd):
         "backend_1",
     )
 
+    signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
     signal.alarm(3)
-    interrupted = False
-    try:
-        exec_command(
-            capfd,
-            "rapydo logs -s backend --tail 10 --follow",
-            "docker-compose command: 'logs'",
-        )
-    except Timeout:
-        interrupted = True
-    assert interrupted
+    exec_command(
+        capfd,
+        "rapydo logs -s backend --tail 10 --follow",
+        "docker-compose command: 'logs'",
+        "Stopped by keyboard",
+    )
 
     exec_command(
         capfd,
@@ -396,6 +395,7 @@ def test_all(capfd):
         "No container found for backend_1",
     )
 
+    signal.signal(signal.SIGALRM, handler)
     signal.alarm(3)
 
     interrupted = False
