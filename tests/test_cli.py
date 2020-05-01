@@ -358,9 +358,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo formatter",
-        "All udone!",
         # This is becase no endpoint is implemented in this project...
-        "No paths given",
+        "No paths given. Nothing to do",
     )
 
     exec_command(
