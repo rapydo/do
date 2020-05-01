@@ -142,6 +142,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: install in editable mode from submodules folder
+      local:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: install from submodules folder
       user:
         type: bool
         metavalue: TRUE_OR_FALSE

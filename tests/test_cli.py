@@ -389,16 +389,16 @@ def test_all(capfd):
         "backend-server",
     )
 
-    # exec_command(
-    #     capfd,
-    #     "rapydo install --editable auto",
-    # )
+    exec_command(
+        capfd,
+        "rapydo install --local --user auto",
+    )
 
     exec_command(
         capfd,
         "rapydo install --user auto",
     )
-    # exec_command(
-    #     capfd,
-    #     "rapydo install auto",
-    # )
+    exec_command(
+        capfd,
+        "rapydo install --pip --user 0.7.2",
+    )
