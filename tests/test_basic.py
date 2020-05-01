@@ -31,11 +31,15 @@ def exec_command(capfd, command, *args):
     err = err.replace('\r', '').split("\n")
 
     for o in out:
-        print("OUT: ".format(o))
+        print("OUT: {}".format(o))
     for e in err:
-        print("ERR: ".format(e))
+        print("ERR: {}".format(e))
 
     return out
+
+# DEBUG 1 = out + err
+# DEBUG 1 = GlobalCapfd
+# DEBUG 1 = *args
 
 
 def test_all(capfd):
@@ -224,14 +228,6 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo volatile backend --command hostname")
     # assert "backend-server" in out
 
-    # TEMPORARY - ONLY FOR >DEBUG<
-    out = exec_command(capfd, "rapydo ssl")
-    assert "No container found for proxy_1" in out
-
     out = exec_command(capfd, "rapydo install --editable auto")
     out = exec_command(capfd, "rapydo install --user auto")
     out = exec_command(capfd, "rapydo install auto")
-
-    # TEMPORARY - ONLY FOR >DEBUG<
-    out = exec_command(capfd, "rapydo ssl")
-    assert "No container found for proxy_1" in out
