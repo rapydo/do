@@ -5,11 +5,8 @@ from controller.arguments import ArgParser
 from controller.app import Application
 from controller import __version__
 
-OK = 0
-FAIL = 1
 
-
-def exec_command(capfd, command, *asserts, status=None):
+def exec_command(capfd, command, *asserts):
     with capfd.disabled():
         print("_____________________________________________")
         print(command)
@@ -22,7 +19,6 @@ def exec_command(capfd, command, *asserts, status=None):
         Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit as e:
-        print("EXIT VALUE", e)
         pass
 
     captured = capfd.readouterr()
@@ -46,8 +42,7 @@ def test_all(capfd):
     out = exec_command(
         capfd,
         "rapydo create test",
-        "Missing authentication service, add --auth option",
-        status=FAIL
+        "Missing authentication service, add -auth option"
     )
     assert "Missing authentication service, add --auth option" in out
 
@@ -197,7 +192,7 @@ def test_all(capfd):
     assert "No container found for proxy_1" in out
     # You should pull the proxy before testing --volatile
     out = exec_command(capfd, "rapydo ssl --volatile")
-    assert "No container found for proxy_1" in out
+    assert "Creating test_certificates-proxy_1" in out
     out = exec_command(capfd, "rapydo ssl --force")
     assert "No container found for proxy_1" in out
     out = exec_command(capfd, "rapydo ssl --chain-file /file")
