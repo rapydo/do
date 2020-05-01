@@ -102,11 +102,12 @@ def test_all(capfd):
         "Current folder is not empty, cannot create a new project here.",
     )
 
+    pconf = "projects/test/project_configuration.yaml"
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular --current --force",
         "Folder projects/test/confs already exists",
-        "projects/test/project_configuration.yaml already exists",
+        "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project test successfully created",
     )
 
@@ -114,14 +115,14 @@ def test_all(capfd):
         capfd,
         "rapydo create test --auth sql --frontend no --current",
         "Folder projects/test/confs already exists",
-        "projects/test/project_configuration.yaml already exists",
+        "{f} already exists".format(f=pconf),
         "Project test successfully created",
     )
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend no --no-auto --current",
         "Folder projects/test/confs already exists",
-        "projects/test/project_configuration.yaml already exists",
+        "{f} already exists".format(f=pconf),
         "Project x successfully created",
     )
 
@@ -410,20 +411,19 @@ def test_all(capfd):
         "rapydo ssl --key-file /file",
         "Invalid chain file (you provided none)",
     )
-    f = "projects/test/project_configuration.yaml"
     exec_command(
         capfd,
-        "rapydo ssl --chain-file {}".format(f),
+        "rapydo ssl --chain-file {f}".format(f=pconf),
         "Invalid key file (you provided none)",
     )
     exec_command(
         capfd,
-        "rapydo ssl --chain-file {} --key-file /file".format(f),
+        "rapydo ssl --chain-file {f} --key-file /file".format(f=pconf),
         "Invalid key file (you provided /file)",
     )
     exec_command(
         capfd,
-        "rapydo ssl --chain-file {f} --key-file {f}".format(f=f),
+        "rapydo ssl --chain-file {f} --key-file {f}".format(f=pconf),
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
     )
