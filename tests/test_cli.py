@@ -121,6 +121,12 @@ def test_all(capfd):
         capfd,
         "rapydo create test --auth sql --frontend angular --current --force",
         "Folder projects/test/confs already exists",
+        "Project test successfully created",
+    )
+    exec_command(
+        capfd,
+        "rapydo create test --auth sql --frontend angular --current --force",
+        "Folder projects/test/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project test successfully created",
     )
