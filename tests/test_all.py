@@ -13,9 +13,10 @@ class GlobalVars:
 
 
 def check_command(command, *asserts):
-    print("*********************************************")
-    print(command)
-    print("_____________________________________________")
+    with GlobalVars.capfd.disabled():
+        print("_____________________________________________")
+        print(command)
+        print("_____________________________________________")
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -24,22 +25,24 @@ def check_command(command, *asserts):
         Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
-        print("*********************************************")
+        # print("Command completed")
+        pass
 
     out, err = GlobalVars.capfd.readouterr()
     out = out.replace('\r', '').split("\n")
     err = err.replace('\r', '').split("\n")
     with GlobalVars.capfd.disabled():
-        for o in out:
+        for o in out[GlobalVars.out_len:]:
             if not o:
                 continue
             print("\033[92m{}\033[0m".format(o))
-        for e in err:
+        for e in err[GlobalVars.err_len:]:
             if not e:
                 continue
             print("\033[91m{}\033[0m".format(e))
 
     for a in asserts:
+        # Only search on newly added lines
         assert a in out[GlobalVars.out_len:] or a in err[GlobalVars.err_len:]
 
     GlobalVars.out_len = len(out)
@@ -56,188 +59,296 @@ def test_all(capfd):
         "Missing authentication service, add --auth option"
     )
 
-    out = check_command("rapydo create test --auth xyz")
-    assert "Invalid authentication service: xyz" in out
+    check_command(
+        "rapydo create test --auth xyz",
+        "Invalid authentication service: xyz",
+    )
 
-    out = check_command("rapydo create test --auth sql")
-    assert "Missing frontend framework, add --frontend option" in out
+    check_command(
+        "rapydo create test --auth sql",
+        "Missing frontend framework, add --frontend option",
+    )
 
-    out = check_command("rapydo create test --auth sql --frontend xyz")
-    assert "Invalid frontend framework: xyz" in out
+    check_command(
+        "rapydo create test --auth sql --frontend xyz",
+        "Invalid frontend framework: xyz",
+    )
 
-    out = check_command("rapydo create test --auth sql --frontend angular")
-    assert "Project test successfully created" in out
+    check_command(
+        "rapydo create test --auth sql --frontend angular",
+        "Project test successfully created",
+    )
 
-    out = check_command("rapydo create test --auth sql --frontend angular")
-    assert "Current folder is not empty, cannot create a new project here." in out
+    check_command(
+        "rapydo create test --auth sql --frontend angular",
+        "Current folder is not empty, cannot create a new project here.",
+    )
 
-    out = check_command("rapydo create test --auth sql --frontend angular --current --force")
-    assert "Project test successfully created" in out
+    check_command(
+        "rapydo create test --auth sql --frontend angular --current --force",
+        "Project test successfully created",
+    )
 
     # In this case the command should create/modify nothing... to be tested!
-    out = check_command("rapydo create test --auth sql --frontend angular --current")
-    assert "Project test successfully created" in out
+    check_command(
+        "rapydo create test --auth sql --frontend angular --current",
+        "Project test successfully created",
+    )
 
-    out = check_command("rapydo init")
-    assert "Project initialized" in out
+    check_command(
+        "rapydo init",
+        "Project initialized",
+    )
 
-    out = check_command("rapydo pull")
-    assert "Base images pulled from docker hub" in out
+    check_command(
+        "rapydo pull",
+        "Base images pulled from docker hub",
+    )
 
-    # out = check_command("rapydo --prod -s proxy pull")
-    # assert "Base images pulled from docker hub" in out
+    check_command(
+        "rapydo --prod -s proxy pull",
+        "Base images pulled from docker hub",
+    )
 
     # Skipping main because we are on a fake git repository
-    out = check_command("rapydo update -i main")
-    assert "All updated" in out
+    check_command(
+        "rapydo update -i main",
+        "All updated",
+    )
 
     # Selected a very fast service to speed up tests
-    out = check_command("rapydo -s rabbit build --core")
-    assert "Core images built" in out
-    assert "No custom images to build" in out
+    check_command(
+        "rapydo -s rabbit build --core",
+        "Core images built",
+        "No custom images to build",
+    )
 
     # Skipping main because we are on a fake git repository
-    out = check_command("rapydo check -i main")
-    assert "Checks completed" in out
+    check_command(
+        "rapydo check -i main",
+        "Checks completed",
+    )
 
-    out = check_command("rapydo check -i main --check-permissions")
-    assert "Checks completed" in out
+    check_command(
+        "rapydo check -i main --check-permissions",
+        "Checks completed",
+    )
 
-    out = check_command("rapydo list --env")
-    assert "List env variables:" in out
+    check_command(
+        "rapydo list --env",
+        "List env variables:",
+    )
 
-    out = check_command("rapydo list --args")
-    assert "List of configured rapydo arguments:" in out
+    check_command(
+        "rapydo list --args",
+        "List of configured rapydo arguments:",
+    )
 
-    out = check_command("rapydo list --active-services")
-    assert "List of active services:" in out
+    check_command(
+        "rapydo list --active-services",
+        "List of active services:",
+    )
 
-    out = check_command("rapydo list --submodules")
-    assert "List of submodules:" in out
+    check_command(
+        "rapydo list --submodules",
+        "List of submodules:",
+    )
 
-    out = check_command("rapydo dump")
-    assert "Config dump: docker-compose.yml" in out
+    check_command(
+        "rapydo dump",
+        "Config dump: docker-compose.yml",
+    )
 
     os.remove(".projectrc")
 
     command = local["cp"]
     command(["-r", "projects/test", "projects/second"])
 
-    out = check_command("rapydo check -i main --no-git --no-builds")
-    assert "Please add the --project option with one of the following:" in out
+    check_command(
+        "rapydo check -i main --no-git --no-builds",
+        "Please add the --project option with one of the following:",
+    )
 
-    out = check_command("rapydo -p test check -i main --no-git --no-builds")
-    assert "Checks completed" in out
+    check_command(
+        "rapydo -p test check -i main --no-git --no-builds",
+        "Checks completed",
+    )
 
-    out = check_command("rapydo -p invalid_character check -i main --no-git --no-builds")
-    assert "Wrong project name, _ is not a valid character." in out
+    check_command(
+        "rapydo -p invalid_character check -i main --no-git --no-builds",
+        "Wrong project name, _ is not a valid character.",
+    )
 
-    out = check_command("rapydo -p celery check -i main --no-git --no-builds")
-    assert "You selected a reserved name, invalid project name: celery" in out
+    check_command(
+        "rapydo -p celery check -i main --no-git --no-builds",
+        "You selected a reserved name, invalid project name: celery",
+    )
 
-    out = check_command("rapydo --project test init")
-    assert "Project initialized" in out
+    check_command(
+        "rapydo --project test init",
+        "Project initialized",
+    )
 
-    out = check_command("rapydo check -i main --no-git --no-builds")
-    assert "Checks completed" in out
+    check_command(
+        "rapydo check -i main --no-git --no-builds",
+        "Checks completed",
+    )
 
-    out = check_command("rapydo start")
-    assert "docker-compose command: 'up'" in out
-    assert "Stack started" in out
+    check_command(
+        "rapydo start",
+        "docker-compose command: 'up'",
+        "Stack started",
+    )
 
-    out = check_command("rapydo status")
-    assert "docker-compose command: 'ps'" in out
-    # assert "test_backend_1" in out
+    check_command(
+        "rapydo status",
+        "docker-compose command: 'ps'",
+        "test_backend_1",
+    )
 
-    out = check_command("rapydo shell backend --command hostname")
-    assert "backend-server" in out
+    check_command(
+        "rapydo shell backend --command hostname",
+        "backend-server",
+    )
 
     # Template project is based on sql
-    check_command("rapydo verify neo4j")
-    # This output is not captured, since it is produced by the backend
-    # assert 'Service "neo4j" was NOT detected' in out
-
-    check_command("rapydo verify postgres")
-    # This output is not capture, since it is produced by the backend
-    # assert "Service postgres is reachable" in out
-
-    out = check_command("rapydo scale rabbit=2")
-    # assert "Starting test_rabbit_1" in out
-    # assert "Creating test_rabbit_2" in out
-
-    out = check_command("rapydo scale rabbit=1")
-    # assert "Stopping and removing test_rabbit_2" in out
-    # assert "Starting test_rabbit_1" in out
-
-    check_command("rapydo logs")
-    # FIXME: how is possible that this message is not found??
-    # assert "docker-compose command: 'logs'" in out
-
-    out = check_command("rapydo stop")
-    assert "Stack stopped" in out
-
-    out = check_command("rapydo restart")
-    assert "Stack restarted" in out
-
-    out = check_command("rapydo remove")
-    assert "docker-compose command: 'stop'" in out
-    assert "Stack removed" in out
-
-    out = check_command("rapydo remove --networks")
-    assert "Stack removed" in out
-
-    out = check_command("rapydo remove --all")
-    assert "Stack removed" in out
-
-    out = check_command("rapydo shell backend --command hostname")
-    assert "No container found for backend_1" in out
-
-    out = check_command("rapydo interfaces sqlalchemy --port 123 --detach")
-    assert "Launching interface: sqlalchemyui" in out
-    assert "docker-compose command: 'run'" in out
-
-    out = check_command("rapydo ancestors XYZ")
-    assert "No parent found for XYZ" in out
-
-    out = check_command("rapydo ssl")
-    assert "No container found for proxy_1" in out
-    out = check_command("rapydo ssl --volatile")
-    assert "No container found for proxy_1" in out
-    assert "Creating test_certificates-proxy_1" in out
-    out = check_command("rapydo ssl --force")
-    assert "No container found for proxy_1" in out
-    out = check_command("rapydo ssl --chain-file /file")
-    assert "Invalid chain file (you provided /file)" in out
-    out = check_command("rapydo ssl --key-file /file")
-    assert "Invalid chain file (you provided none)" in out
-    f = "projects/test/project_configuration.yaml"
-    out = check_command("rapydo ssl --chain-file {}".format(f))
-    assert "Invalid key file (you provided none)" in out
-    out = check_command("rapydo ssl --chain-file {} --key-file /file".format(f))
-    assert "Invalid key file (you provided /file)" in out
-    out = check_command("rapydo ssl --chain-file {f} --key-file {f}".format(f=f))
-    assert "Unable to automatically perform the requested operation" in out
-    assert "You can execute the following commands by your-self:" in out
-
-    out = check_command("rapydo dhparam")
-    assert "No container found for proxy_1" in out
-
-    out = check_command("rapydo formatter")
-    # assert "All done!" in out
-    # This is because no endpoint is implemented in this project...
-    # assert "No paths given" in out
-
-    out = check_command(
-        "rapydo formatter --submodule http-api/restapi --folder resources"
+    check_command(
+        "rapydo verify neo4j",
+        'Service "neo4j" was NOT detected',
     )
-    # assert "All done!" in out
 
-    out = check_command("rapydo version")
-    # assert __version__ in out
+    check_command(
+        "rapydo verify postgres",
+        "Service postgres is reachable",
+    )
 
-    out = check_command("rapydo volatile backend --command hostname")
-    # assert "backend-server" in out
+    check_command(
+        "rapydo scale rabbit=2",
+        "Starting test_rabbit_1",
+        "Creating test_rabbit_2",
+    )
 
-    out = check_command("rapydo install --editable auto")
-    out = check_command("rapydo install --user auto")
-    out = check_command("rapydo install auto")
+    check_command(
+        "rapydo scale rabbit=1",
+        "Stopping and removing test_rabbit_2",
+        "Starting test_rabbit_1",
+    )
+
+    check_command(
+        "rapydo logs",
+        "docker-compose command: 'logs'"
+    )
+
+    check_command(
+        "rapydo stop",
+        "Stack stopped",
+    )
+
+    check_command(
+        "rapydo restart",
+        "Stack restarted",
+    )
+
+    check_command(
+        "rapydo remove",
+        "docker-compose command: 'stop'",
+        "Stack removed",
+    )
+
+    check_command(
+        "rapydo remove --networks",
+        "Stack removed",
+    )
+
+    check_command(
+        "rapydo remove --all",
+        "Stack removed",
+    )
+
+    check_command(
+        "rapydo shell backend --command hostname",
+        "No container found for backend_1",
+    )
+
+    check_command(
+        "rapydo interfaces sqlalchemy --port 123 --detach",
+        "Launching interface: sqlalchemyui",
+        "docker-compose command: 'run'",
+    )
+
+    check_command(
+        "rapydo ancestors XYZ",
+        "No parent found for XYZ",
+    )
+
+    check_command(
+        "rapydo ssl",
+        "No container found for proxy_1",
+    )
+    check_command(
+        "rapydo ssl --volatile",
+        "Creating test_certificates-proxy_1"
+    )
+    check_command(
+        "rapydo ssl --force",
+        "No container found for proxy_1",
+    )
+    check_command(
+        "rapydo ssl --chain-file /file",
+        "Invalid chain file (you provided /file)",
+    )
+    check_command(
+        "rapydo ssl --key-file /file",
+        "Invalid chain file (you provided none)",
+    )
+    f = "projects/test/project_configuration.yaml"
+    check_command(
+        "rapydo ssl --chain-file {}".format(f),
+        "Invalid key file (you provided none)",
+    )
+    check_command(
+        "rapydo ssl --chain-file {} --key-file /file".format(f),
+        "Invalid key file (you provided /file)",
+    )
+    check_command(
+        "rapydo ssl --chain-file {f} --key-file {f}".format(f=f),
+        "Unable to automatically perform the requested operation",
+        "You can execute the following commands by your-self:",
+    )
+
+    check_command(
+        "rapydo dhparam",
+        "No container found for proxy_1",
+    )
+
+    check_command(
+        "rapydo formatter",
+        "All done!",
+        # This is because no endpoint is implemented in this project...
+        "No paths given. Nothing to do"
+    )
+
+    check_command(
+        "rapydo formatter --submodule http-api/restapi --folder resources",
+        "All done!",
+    )
+
+    check_command(
+        "rapydo version",
+        __version__,
+    )
+
+    check_command(
+        "rapydo volatile backend --command hostname",
+        "backend-server",
+    )
+
+    check_command(
+        "rapydo install --editable auto",
+    )
+    check_command(
+        "rapydo install --user auto",
+    )
+    check_command(
+        "rapydo install auto",
+    )
