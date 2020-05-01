@@ -44,6 +44,18 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo create test_celery",
+        "Wrong project name, _ is not a valid character",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo create celery",
+        "You selected a reserved name, invalid project name: celery",
+    )
+
+    exec_command(
+        capfd,
         "rapydo create test",
         "Missing authentication service, add --auth option",
     )
@@ -133,6 +145,12 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo list",
+        "Nothing to list, please use rapydo list -h for available options",
+    )
+
+    exec_command(
+        capfd,
         "rapydo list --env",
         "List env variables:",
         "ACTIVATE_ALCHEMY",
@@ -205,6 +223,12 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo verify sqlalchemy",
+        'No container found for backend_1'
+    )
+
+    exec_command(
+        capfd,
         "rapydo start",
         "docker-compose command: 'up'",
         "Stack started",
@@ -267,6 +291,18 @@ def test_all(capfd):
         capfd,
         "rapydo restart",
         "Stack restarted",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo -s backend remove --net",
+        "Incompatibile options --networks and --services",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo -s backend remove --all",
+        "Incompatibile options --all and --services",
     )
 
     exec_command(
