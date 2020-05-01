@@ -350,6 +350,12 @@ def test_all(capfd):
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(3)
 
+    exec_command(
+        capfd,
+        "rapydo shell backend --command hostname",
+        "No container found for backend_1",
+    )
+
     try:
         exec_command(
             capfd,
@@ -358,12 +364,6 @@ def test_all(capfd):
         )
     except Exception as e:
         print(e)
-
-    exec_command(
-        capfd,
-        "rapydo shell backend --command hostname",
-        "No container found for backend_1",
-    )
 
     exec_command(
         capfd,
