@@ -22,8 +22,9 @@ def exec_command(capfd, command, *asserts):
         pass
 
     captured = capfd.readouterr()
-    out = captured.out.replace('\r', '').split("\n")
-    err = captured.err.replace('\r', '').split("\n")
+    # Remove empty lines
+    out = [x for x in captured.out.replace('\r', '').split("\n") if x.strip()]
+    err = [x for x in captured.err.replace('\r', '').split("\n") if x.strip()]
 
     with capfd.disabled():
         for o in out:
@@ -32,7 +33,8 @@ def exec_command(capfd, command, *asserts):
             print("! {}".format(e))
 
     for a in asserts:
-        assert a in out or a in err
+        # Check if the assert is in any line (also as substring) from out or err
+        assert any([a in x for x in out+err])
 
     return out
 
@@ -249,7 +251,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo logs",
-        "docker-compose command: 'logs'"
+        "docker-compose command: 'logs'",
+        "test_backend_1",
     )
 
     exec_command(
