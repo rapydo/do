@@ -413,10 +413,15 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo --prod -s proxy pull",
+        "Base images pulled from docker hub",
+    )
+
+    exec_command(
+        capfd,
         "rapydo ssl",
         "No container found for proxy_1",
     )
-    # You should pull the proxy before testing --volatile
     exec_command(
         capfd,
         "rapydo ssl --volatile",
