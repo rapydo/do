@@ -213,6 +213,14 @@ def test_all(capfd):
     out = exec_command(capfd, "rapydo volatile backend --command hostname")
     # assert "backend-server" in out
 
+    # TEMPORARY - ONLY FOR >DEBUG<
+    out = exec_command(capfd, "rapydo ssl")
+    assert "No container found for proxy_1" in out
+
     out = exec_command(capfd, "rapydo install --editable auto")
     out = exec_command(capfd, "rapydo install --user auto")
     out = exec_command(capfd, "rapydo install auto")
+
+    # TEMPORARY - ONLY FOR >DEBUG<
+    out = exec_command(capfd, "rapydo ssl")
+    assert "No container found for proxy_1" in out
