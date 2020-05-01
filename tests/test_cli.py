@@ -44,18 +44,6 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test_celery",
-        "Wrong project name, _ is not a valid character",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo create celery",
-        "You selected a reserved name, invalid project name: celery",
-    )
-
-    exec_command(
-        capfd,
         "rapydo create test",
         "Missing authentication service, add --auth option",
     )
@@ -84,6 +72,19 @@ def test_all(capfd):
         "Project test successfully created",
     )
 
+
+    exec_command(
+        capfd,
+        "rapydo create test_celery --auth sql --frontend angular",
+        "Wrong project name, _ is not a valid character",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo create celery --auth sql --frontend angular",
+        "You selected a reserved name, invalid project name: celery",
+    )
+
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular",
@@ -96,10 +97,9 @@ def test_all(capfd):
         "Project test successfully created",
     )
 
-    # In this case the command should create/modify nothing... to be tested!
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current",
+        "rapydo create test --auth sql --frontend no --current",
         "Project test successfully created",
     )
 
