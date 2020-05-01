@@ -7,9 +7,12 @@ from controller.app import Application
 from controller import __version__
 
 
+class Timeout(Exception):
+    pass
+
+
 def handler(signum, frame):
-    print("Forever is over!")
-    raise Exception("end of time")
+    raise Timeout("Time is up")
 
 
 def exec_command(capfd, command, *asserts):
@@ -105,6 +108,14 @@ def test_all(capfd):
     )
 
     pconf = "projects/test/project_configuration.yaml"
+    os.remove(pconf)
+    exec_command(
+        capfd,
+        "rapydo create test --auth sql --frontend no --current",
+        "Folder projects/test/confs already exists",
+        "{f}".format(f=pconf),
+    )
+
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend angular --current --force",
@@ -307,14 +318,16 @@ def test_all(capfd):
     )
 
     signal.alarm(3)
+    interrupted = False
     try:
         exec_command(
             capfd,
             "rapydo logs -s backend --tail 10 --follow",
             "docker-compose command: 'logs'",
         )
-    except Exception as e:
-        print(e)
+    except Timeout:
+        interrupted = True
+    assert interrupted
 
     exec_command(
         capfd,
@@ -367,14 +380,16 @@ def test_all(capfd):
 
     signal.alarm(3)
 
+    interrupted = False
     try:
         exec_command(
             capfd,
             "rapydo -s backend start --no-detach",
             "REST API backend server is ready to be launched",
         )
-    except Exception as e:
-        print(e)
+    except Timeout:
+        interrupted = True
+    assert interrupted
 
     exec_command(
         capfd,
