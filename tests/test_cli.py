@@ -391,6 +391,18 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo install --pip --editable auto",
+        "--pip and --editable options are not compatible"
+    )
+
+    exec_command(
+        capfd,
+        "rapydo install --user --editable auto",
+        "--user and --editable options are not compatible"
+    )
+
+    exec_command(
+        capfd,
         "rapydo install --editable auto",
     )
 

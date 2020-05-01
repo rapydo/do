@@ -88,13 +88,10 @@ def __call__(args, rapydo_version, gits, **kwargs):
     version = args.get('version')
     pip = args.get('pip')
     editable = args.get('editable')
-    local = args.get('local')
     user = args.get('user')
 
     if pip and editable:
         log.exit("--pip and --editable options are not compatible")
-    if pip and local:
-        log.exit("--pip and --local options are not compatible")
     if user and editable:
         log.exit("--user and --editable options are not compatible")
 
@@ -102,7 +99,7 @@ def __call__(args, rapydo_version, gits, **kwargs):
         version = rapydo_version
         log.info("Detected version {} to be installed", version)
 
-    if editable or local:
+    if editable:
         return install_controller_from_folder(gits, version, user, editable)
     elif pip:
         return install_controller_from_pip(version, user)
