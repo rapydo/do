@@ -6,7 +6,12 @@ from controller.app import Application
 from controller import __version__
 
 
+class GlobalCapfd:
+    capfd = None
+
+
 def exec_command(capfd, command):
+    print(GlobalCapfd.capfd)
     print("*********************************************")
     print(command)
     print("_____________________________________________")
@@ -33,6 +38,8 @@ def exec_command(capfd, command):
 
 
 def test_all(capfd):
+
+    GlobalCapfd.capfd = capfd
 
     out = exec_command(capfd, "rapydo create test")
     assert "Missing authentication service, add --auth option" in out
