@@ -48,6 +48,8 @@ def exec_command(capfd, command, *asserts):
 
 def test_all(capfd):
 
+    signal.signal(signal.SIGALRM, handler)
+
     exec_command(
         capfd,
         "rapydo create test",
@@ -304,6 +306,16 @@ def test_all(capfd):
         "backend_1",
     )
 
+    signal.alarm(3)
+    try:
+        exec_command(
+            capfd,
+            "rapydo logs -s backend --tail 10 --follow",
+            "docker-compose command: 'logs'",
+        )
+    except Exception as e:
+        print(e)
+
     exec_command(
         capfd,
         "rapydo stop",
@@ -347,14 +359,13 @@ def test_all(capfd):
         "Stack removed",
     )
 
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(3)
-
     exec_command(
         capfd,
         "rapydo shell backend --command hostname",
         "No container found for backend_1",
     )
+
+    signal.alarm(3)
 
     try:
         exec_command(
