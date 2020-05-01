@@ -3,6 +3,7 @@ import signal
 import shutil
 from plumbum import local
 from controller.arguments import ArgParser
+from controller.dockerizing import Dock
 from controller.app import Application
 from controller import __version__
 
@@ -444,6 +445,18 @@ def test_all(capfd):
         capfd,
         "rapydo ancestors XYZ",
         "No parent found for XYZ",
+    )
+
+    dock = Dock()
+    img = dock.images().pop(0)
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info(img).get('Id')
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all parents and (grand)+ parents of {}".format(img_id),
     )
 
     exec_command(
