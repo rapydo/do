@@ -225,7 +225,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo verify neo4j",
-        'Service "neo4j" was NOT detected'
+        'Service neo4j not detected'
     )
 
     exec_command(
