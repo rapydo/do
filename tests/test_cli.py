@@ -9,6 +9,7 @@ from controller import __version__
 def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
+        print("\n")
         print("_____________________________________________")
         print(command)
         print("_____________________________________________")
@@ -134,6 +135,7 @@ def test_all(capfd):
         capfd,
         "rapydo list --env",
         "List env variables:",
+        "ACTIVATE_ALCHEMY",
     )
 
     exec_command(
@@ -250,9 +252,9 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo logs",
+        "rapydo logs -s backend --tail 10",
         "docker-compose command: 'logs'",
-        "test_backend_1",
+        "backend_1",
     )
 
     exec_command(

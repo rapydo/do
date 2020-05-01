@@ -11,10 +11,20 @@ try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
+from controller.app import Application
 from controller import log
 
 
 def install(package, editable=False, user=False, use_pip3=True):
+
+    if use_pip3 and Application.get_bin_version('pip3') is None:
+        return install(
+            package=package,
+            editable=editable,
+            user=user,
+            use_pip3=False,
+        )
+
     try:
         with Sultan.load(sudo=not user) as sultan:
             command = 'install --upgrade'

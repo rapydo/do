@@ -37,8 +37,6 @@ def install_controller_from_git(version, user):
     rapydo_uri = "https://github.com/rapydo"
     controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
 
-    # installed = install(utils)
-    # if installed:
     installed = install(controller, user=user)
 
     if not installed:
