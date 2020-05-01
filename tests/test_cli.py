@@ -10,9 +10,10 @@ FAIL = 1
 
 
 def exec_command(capfd, command, *asserts, status=None):
-    print("_____________________________________________")
-    print(command)
-    print("_____________________________________________")
+    with capfd.disabled():
+        print("_____________________________________________")
+        print(command)
+        print("_____________________________________________")
     command = command.split(" ")
 
     arguments = ArgParser(args=command)
@@ -194,6 +195,7 @@ def test_all(capfd):
 
     out = exec_command(capfd, "rapydo ssl")
     assert "No container found for proxy_1" in out
+    # You should pull the proxy before testing --volatile
     out = exec_command(capfd, "rapydo ssl --volatile")
     assert "No container found for proxy_1" in out
     out = exec_command(capfd, "rapydo ssl --force")
