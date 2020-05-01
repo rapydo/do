@@ -105,13 +105,14 @@ def test_all(capfd):
         capfd,
         "rapydo create test --auth sql --frontend angular",
         "Current folder is not empty, cannot create a new project here.",
+        "Use --current to force the creation here",
     )
 
     pconf = "projects/test/project_configuration.yaml"
     os.remove(pconf)
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --current",
+        "rapydo create test --auth sql --frontend no --current --no-auto",
         "Folder projects/test/confs already exists",
         "{f}".format(f=pconf),
     )
