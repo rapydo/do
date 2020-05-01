@@ -27,17 +27,15 @@ def __call__(project, version, rapydo_version, **kwargs):
     if __version__ != rapydo_version:
         c = LooseVersion(__version__)
         v = LooseVersion(rapydo_version)
+        updown = "upgrade" if c < v else "downgrade"
         print(
-            '\nThis project is not compatible with the current rapydo version ({})'.format(__version__)
+            '\nThis project is not compatible with rapydo version {}'.format(
+                __version__)
         )
-        if c < v:
-            print(
-                "Please upgrade rapydo to version {} or modify this project".format(rapydo_version)
-            )
-        else:
-            print(
-                "Please downgrade rapydo to version {} or modify this project".format(rapydo_version)
-            )
+        print(
+            "Please {} rapydo to version {} or modify this project".format(
+                updown, rapydo_version)
+        )
 
         print("\n\033[1;31mrapydo install {}\033[0m".format(
             rapydo_version))

@@ -499,7 +499,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        __version__,
+        "rapydo: {v}".format(v=__version__),
+        "required rapydo: {v}".format(v=__version__),
     )
 
     exec_command(
@@ -534,4 +535,10 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo install --pip --user 0.7.2",
+    )
+    exec_command(
+        capfd,
+        "rapydo version",
+        "This project is not compatible with rapydo version 0.7.2"
+        "Please upgrade rapydo to version {} or modify this project".format(__version__)
     )
