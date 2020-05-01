@@ -202,15 +202,11 @@ class Application:
         self.read_composers()
         self.check_placeholders()
 
-        # Install or check frontend libraries (only if frontend is enabled)
-        self.frontend_libs()
-
-        # Final step, launch the command
-
         if self.tested_connection:
 
             self.check_time()
 
+        # Final step, launch the command
         services = self.get_services(default=self.active_services)
         command.__call__(
             args=self.current_args,
@@ -776,31 +772,6 @@ To fix this issue, please update docker to version {}+
         self.compose_config = dc.config()
 
         log.verbose("Configuration order:\n{}", self.files)
-
-    def frontend_libs(self):
-
-        if self.frontend is None:
-            return False
-
-        if not self.initialize:
-            return False
-
-        # What to do with REACT?
-        if self.frontend != ANGULAR:
-            return False
-
-        for p in self.project_scaffold.data_folders:
-            if not os.path.isdir(p):
-                os.makedirs(p)
-
-        for p in self.project_scaffold.data_files:
-            if not os.path.exists(p):
-                open(p, 'a').close()
-
-        karma_coverage_dir = os.path.join("data", self.project, "karma")
-        if not os.path.isdir(karma_coverage_dir):
-            os.makedirs(karma_coverage_dir)
-            log.verbose("{} folder not found, created", karma_coverage_dir)
 
     def get_services(self, default):
 

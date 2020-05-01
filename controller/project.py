@@ -97,6 +97,7 @@ class Project:
                 os.path.join(data_dir, "courtesy"),
                 os.path.join(data_dir, "e2e"),
                 os.path.join(data_dir, "node_modules"),
+                os.path.join("data", self.project, "karma"),
             ])
 
             self.data_files.extend([
