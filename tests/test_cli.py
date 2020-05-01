@@ -352,12 +352,15 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
     signal.alarm(3)
-    exec_command(
-        capfd,
-        "rapydo logs -s backend --tail 10 --follow",
-        "docker-compose command: 'logs'",
-        "Stopped by keyboard",
-    )
+    try:
+        exec_command(
+            capfd,
+            "rapydo logs -s backend --tail 10 --follow",
+            "docker-compose command: 'logs'",
+            "Stopped by keyboard",
+        )
+    except Exception as e:
+        print(e)
 
     # Template project is based on sql
     exec_command(
