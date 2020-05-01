@@ -436,6 +436,21 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "rapydo interfaces XYZ",
+        "Container 'XYZui' is not defined",
+        "You can use rapydo interfaces list to get available interfaces",
+    )
+    exec_command(
+        capfd,
+        "rapydo interfaces list",
+        "List of available interfaces:",
+        " - mongo",
+        " - sqlalchemy",
+        " - swagger",
+        " - celery",
+    )
+    exec_command(
+        capfd,
         "rapydo interfaces sqlalchemy --port 123 --detach",
         "Launching interface: sqlalchemyui",
         "docker-compose command: 'run'",
