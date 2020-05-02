@@ -411,6 +411,12 @@ def test_all(capfd):
         "rapydo shell frontend --command whoami",
         "node",
     )
+    # No default user for rabbit container
+    exec_command(
+        capfd,
+        "rapydo shell rabbit --command whoami",
+        "root",
+    )
     exec_command(
         capfd,
         "rapydo shell postgres --command whoami",
