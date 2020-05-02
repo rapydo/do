@@ -418,8 +418,6 @@ services:
         capfd,
         "rapydo -p second check -i main --no-git",
         "Obsolete image second/rabbit:{}".format(__version__),
-        "built on ",
-        " that changed on ",
         "Update it with: rapydo --services rabbit pull",
     )
 
