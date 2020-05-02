@@ -53,11 +53,21 @@ def exec_command(capfd, command, *asserts):
 
     return out
 
+# Available tests:
+# - test_before_create
+# - test_create
+# - test_after_create
+# - test_before_start
+# - test_start
+# - test_after_start
+# - test_remove
+# - test_alternative_starts
+# - test_prod
+# - test_install
+
 
 def test_before_create(capfd):
 
-
-    # Test failed create
     exec_command(
         capfd,
         "rapydo create test",
@@ -107,7 +117,7 @@ def test_before_create(capfd):
     )
 
 
-def test_all(capfd):
+def test_create(capfd):
 
     # Let's create a project
     exec_command(
@@ -153,7 +163,7 @@ def test_all(capfd):
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
     )
-    # After some more tests... the project is ready
+
     exec_command(
         capfd,
         "rapydo create test --auth sql --frontend no --no-auto --current",
@@ -162,6 +172,8 @@ def test_all(capfd):
         "Project test successfully created",
     )
 
+
+def test_after_create(capfd):
     # Basic initilization
     exec_command(
         capfd,
@@ -233,6 +245,66 @@ def test_all(capfd):
         "List of submodules:",
     )
 
+    exec_command(
+        capfd,
+        "rapydo interfaces XYZ",
+        "Container 'XYZui' is not defined",
+        "You can use rapydo interfaces list to get available interfaces",
+    )
+    exec_command(
+        capfd,
+        "rapydo interfaces list",
+        "List of available interfaces:",
+        " - mongo",
+        " - sqlalchemy",
+        " - swagger",
+        " - celery",
+    )
+    exec_command(
+        capfd,
+        "rapydo interfaces sqlalchemy --port 123 --detach",
+        "Launching interface: sqlalchemyui",
+        "docker-compose command: 'run'",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo ancestors XYZ",
+        "No parent found for XYZ",
+    )
+
+    dock = Dock()
+    img = dock.images().pop(0)
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info(img).get('Id')
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all parents and (grand)+ parents of {}".format(img_id),
+    )
+
+    exec_command(
+        capfd,
+        "rapydo formatter",
+        # This is becase no endpoint is implemented in this project...
+        "No paths given. Nothing to do",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo formatter --submodule http-api/restapi --folder resources",
+        "All done!",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo version",
+        "rapydo: \033[1;32m{v}".format(v=__version__),
+        "required rapydo: \033[1;32m{v}".format(v=__version__),
+    )
+
     # docker dump
     exec_command(
         capfd,
@@ -286,13 +358,17 @@ def test_all(capfd):
         "Checks completed",
     )
 
-    # Stack not yet started...
+
+def test_before_start(capfd):
+
     exec_command(
         capfd,
         "rapydo verify sqlalchemy",
         'No container found for backend_1'
     )
 
+
+def test_start(capfd):
     # Let's start with the stack
     exec_command(
         capfd,
@@ -300,6 +376,9 @@ def test_all(capfd):
         "docker-compose command: 'up'",
         "Stack started",
     )
+
+
+def test_after_start(capfd):
 
     exec_command(
         capfd,
@@ -401,6 +480,9 @@ def test_all(capfd):
         "Stack restarted",
     )
 
+
+def test_remove(capfd):
+
     exec_command(
         capfd,
         "rapydo -s backend remove --net",
@@ -438,6 +520,8 @@ def test_all(capfd):
         "No container found for backend_1",
     )
 
+
+def test_alternative_starts(capfd):
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(3)
 
@@ -454,43 +538,14 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo interfaces XYZ",
-        "Container 'XYZui' is not defined",
-        "You can use rapydo interfaces list to get available interfaces",
-    )
-    exec_command(
-        capfd,
-        "rapydo interfaces list",
-        "List of available interfaces:",
-        " - mongo",
-        " - sqlalchemy",
-        " - swagger",
-        " - celery",
-    )
-    exec_command(
-        capfd,
-        "rapydo interfaces sqlalchemy --port 123 --detach",
-        "Launching interface: sqlalchemyui",
-        "docker-compose command: 'run'",
+        "rapydo volatile backend --command hostname",
+        "backend-server",
     )
 
-    exec_command(
-        capfd,
-        "rapydo ancestors XYZ",
-        "No parent found for XYZ",
-    )
 
-    dock = Dock()
-    img = dock.images().pop(0)
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get('Id')
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all parents and (grand)+ parents of {}".format(img_id),
-    )
+def test_prod(capfd):
+
+    pconf = "projects/test/project_configuration.yaml"
 
     exec_command(
         capfd,
@@ -553,31 +608,8 @@ def test_all(capfd):
         "No container found for proxy_1",
     )
 
-    exec_command(
-        capfd,
-        "rapydo formatter",
-        # This is becase no endpoint is implemented in this project...
-        "No paths given. Nothing to do",
-    )
 
-    exec_command(
-        capfd,
-        "rapydo formatter --submodule http-api/restapi --folder resources",
-        "All done!",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo version",
-        "rapydo: \033[1;32m{v}".format(v=__version__),
-        "required rapydo: \033[1;32m{v}".format(v=__version__),
-    )
-
-    exec_command(
-        capfd,
-        "rapydo volatile backend --command hostname",
-        "backend-server",
-    )
+def test_install(capfd):
 
     exec_command(
         capfd,
