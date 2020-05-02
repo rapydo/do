@@ -330,6 +330,10 @@ services:
     # Test selection with two projects
     os.remove(".projectrc")
 
+    r = Repo(".")
+    r.git.add("-A")
+    r.git.commit("-a", "-m", "'fake'")
+
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
