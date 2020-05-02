@@ -74,7 +74,7 @@ class Application:
                 project=self.project,
                 project_scaffold=self.project_scaffold,
             )
-            log.exit("")
+            sys.exit(0)
 
         err = self.project_scaffold.find_main_folder()
 
@@ -87,7 +87,7 @@ class Application:
                 version=self.version,
                 rapydo_version=self.rapydo_version,
             )
-            log.exit("")
+            sys.exit(0)
 
         if err is not None:
             log.exit(err)
@@ -105,7 +105,7 @@ class Application:
                 gits=self.gits,
                 rapydo_version=self.rapydo_version,
             )
-            log.exit("")
+            sys.exit(0)
 
         # if project is None, it is retrieve by project folder
         self.project = self.project_scaffold.get_project(self.project)
