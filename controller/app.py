@@ -796,9 +796,7 @@ To fix this issue, please update docker to version {}+
         except FileNotFoundError:
             pass
 
-        env = self.vars.get('env')
-        if env is None:
-            env = {}
+        env = self.vars.get('env', {})
         env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
         # Relative paths from ./submodules/rapydo-confs/confs
@@ -823,10 +821,8 @@ To fix this issue, please update docker to version {}+
         env['CURRENT_GID'] = self.current_gid
         env['PROJECT_TITLE'] = self.project_title
         env['PROJECT_DESCRIPTION'] = self.project_description
-        if self.current_args.get('privileged'):
-            env['DOCKER_PRIVILEGED_MODE'] = "true"
-        else:
-            env['DOCKER_PRIVILEGED_MODE'] = "false"
+        privileged_mode = self.current_args.get('privileged')
+        env['DOCKER_PRIVILEGED_MODE'] = "true" if privileged_mode else "false"
 
         if self.action == "formatter" and self.current_args.get('folder') is not None:
             VANILLA_SUBMODULE = 'vanilla'

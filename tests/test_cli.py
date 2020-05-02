@@ -315,7 +315,11 @@ def test_all(capfd):
 
     os.makedirs("projects/second/builds/rabbit")
     fin = open("projects/second/builds/rabbit/Dockerfile", "wt+")
-    fin.write("FROM rapydo/rabbitmq:{}".format(__version__))
+    fin.write("""
+FROM rapydo/rabbitmq:{}
+# Just a simple command differentiate from the parent
+RUN mkdir xyz
+""".format(__version__))
     fin.close()
 
     fin = open("projects/second/confs/commons.yml", "a")
@@ -418,6 +422,8 @@ services:
         capfd,
         "rapydo -p second check -i main --no-git",
         "Obsolete image second/rabbit:{}".format(__version__),
+        "built on ",
+        " that changed on ",
         "Update it with: rapydo --services rabbit pull",
     )
 
@@ -620,6 +626,12 @@ services:
     # def test_prod(capfd):
 
     pconf = "projects/test/project_configuration.yaml"
+
+    exec_command(
+        capfd,
+        "rapydo --prod check -i main --no-git --no-builds",
+        "The following variables are missing in your configuration",
+    )
 
     exec_command(
         capfd,
