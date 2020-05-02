@@ -786,6 +786,7 @@ services:
     os.chdir("projects")
     exec_command(
         capfd,
-        "rapydo check -i main --no-git --no-builds",
+        "rapydo -p test check -i main --no-git --no-builds",
+        "You are not in the main folder",
         "Checks completed",
     )
