@@ -3,6 +3,7 @@ import os
 import signal
 import shutil
 from plumbum import local
+from git import Repo
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
 from controller.app import Application
@@ -362,12 +363,23 @@ def test_all(capfd):
     fin = open("submodules/do/new_file", "wt+")
     fin.write("xyz")
     fin.close()
+
+    fin = open("submodules/build-templates/backend/Dockerfile", "a")
+    fin.write("xyz")
+    fin.close()
+    r = Repo("submodules/build-templates")
+    r.git.commit("-a", "-m", "'fake'")
+
     exec_command(
         capfd,
-        "rapydo check -i main --no-builds",
+        "rapydo check -i main",
         "You have unstaged files on do",
         "Untracked files:",
         "submodules/do/new_file",
+        "Obsolete image rapydo/backend:{}".format(__version__),
+        "built on ",
+        " but changed on ",
+        "Update it with: rapydo --services backend pull",
     )
     # def test_before_start(capfd):
 

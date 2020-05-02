@@ -16,9 +16,8 @@ def test_all(capfd):
     assert not gitter.switch_branch(do_repo, branch_name=None)
     assert not gitter.switch_branch(do_repo, branch_name=__version__)
     assert not gitter.switch_branch(do_repo, branch_name="XYZ")
-
-    assert gitter.switch_branch(do_repo, branch_name="0.7.2", remote=False)
-    assert gitter.get_active_branch(do_repo) == "0.7.2"
+    # non remote branch is not found, because we only fetched current version
+    assert not gitter.switch_branch(do_repo, branch_name="0.7.2", remote=False)
 
     assert gitter.switch_branch(do_repo, branch_name="0.7.2")
     assert gitter.get_active_branch(do_repo) == "0.7.2"
