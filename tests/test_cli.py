@@ -97,13 +97,13 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test_celery --auth sql --frontend angular",
+        "rapydo create test_celery --auth sql --frontend no",
         "Wrong project name, _ is not a valid character",
     )
 
     exec_command(
         capfd,
-        "rapydo create celery --auth sql --frontend angular",
+        "rapydo create celery --auth sql --frontend no",
         "You selected a reserved name, invalid project name: celery",
     )
 
@@ -124,13 +124,13 @@ def test_all(capfd):
     # Let's create a project
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular",
+        "rapydo create test --auth sql --frontend no",
         "Project test successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular",
+        "rapydo create test --auth sql --frontend no",
         "Current folder is not empty, cannot create a new project here.",
         "Use --current to force the creation here",
     )
@@ -146,13 +146,13 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current --force",
+        "rapydo create test --auth sql --frontend no --current --force",
         "Folder projects/test/confs already exists",
         "Project test successfully created",
     )
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current --force",
+        "rapydo create test --auth sql --frontend no --current --force",
         "Folder projects/test/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project test successfully created",
@@ -305,11 +305,11 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
-    # first project is --auth sql --frontend angular
-    # the second one is --auth neo4j --frontend no
+    # first project is --auth sql --frontend no
+    # the second one is --auth neo4j --frontend angular
     exec_command(
         capfd,
-        "rapydo create second --extend test --auth neo4j --frontend no --current",
+        "rapydo create second --extend test --auth neo4j --frontend angular --current",
         "Folder projects already exists",
         "Project second successfully created",
     )
