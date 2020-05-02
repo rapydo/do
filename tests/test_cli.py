@@ -98,11 +98,11 @@ def test_all(capfd):
         "mkdir -p projects",
     )
 
-    exec_command(
-        capfd,
-        "rapydo version",
-        __version__,
-    )
+    # exec_command(
+    #     capfd,
+    #     "rapydo version",
+    #     __version__,
+    # )
 
     # Let's create a project
     exec_command(
