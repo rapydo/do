@@ -14,13 +14,25 @@ def __call__(args, project, project_scaffold, **kwargs):
     auth = args.get("auth")
     frontend = args.get("frontend")
     extend = args.get("extend")
+    services = args.get("services", "").split(",")
 
     if auth is None:
         log.exit("Missing authentication service, add --auth option")
-    if auth not in ['sql', 'neo4j', 'mongo']:
+    if auth not in ['postgres', 'mysql', 'neo4j', 'mongo']:
         log.exit("Invalid authentication service: {}", auth)
 
-    if auth == 'sql':
+    enable_postgres = auth == 'postgres' or 'postgres' in services
+    enable_mysql = auth == 'mysql' or 'mysql' in services
+    enable_neo4j = auth == 'neo4j' or 'neo4j' in services
+    enable_mongo = auth == 'mongo' or 'mongo' in services
+    enable_rabbit = 'rabbit' in services
+    enable_redis = 'redis' in services
+    enable_irods = 'irods' in services
+    enable_celery = 'celery' in services
+    enable_pushpin = 'pushpin' in services
+    enable_ftp = 'ftp' in services
+
+    if auth == 'postgres' or auth == 'mysql':
         auth = 'sqlalchemy'
 
     if frontend is None:
@@ -91,11 +103,19 @@ def __call__(args, project, project_scaffold, **kwargs):
                 'version': __version__,
                 'project': project,
                 'auth_service': auth,
-                'enable_sql': auth == 'sqlalchemy',
-                'enable_neo4j': auth == 'neo4j',
-                'enable_mongo': auth == 'mongo',
+                'enable_postgres': enable_postgres,
+                'enable_mysql': enable_mysql,
+                'enable_neo4j': enable_neo4j,
+                'enable_mongo': enable_mongo,
+                'enable_rabbit': enable_rabbit,
+                'enable_redis': enable_redis,
+                'enable_irods': enable_irods,
+                'enable_celery': enable_celery,
+                'enable_pushpin': enable_pushpin,
+                'enable_ftp': enable_ftp,
                 'frontend': frontend,
                 'extend': extend,
+                'services': services,
             }
         )
 

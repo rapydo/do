@@ -2,7 +2,6 @@
 import os
 import signal
 import shutil
-from plumbum import local
 from git import Repo
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
@@ -55,22 +54,8 @@ def exec_command(capfd, command, *asserts):
 
     return out
 
-# Available tests:
-# - test_before_create
-# - test_create
-# - test_after_create
-# - test_before_start
-# - test_start
-# - test_after_start
-# - test_remove
-# - test_alternative_starts
-# - test_prod
-# - test_install
-
 
 def test_all(capfd):
-    # def test_before_create(capfd):
-
     exec_command(
         capfd,
         "rapydo create test",
@@ -85,31 +70,31 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql",
+        "rapydo create test --auth postgres",
         "Missing frontend framework, add --frontend option",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend xyz",
+        "rapydo create test --auth postgres --frontend xyz",
         "Invalid frontend framework: xyz",
     )
 
     exec_command(
         capfd,
-        "rapydo create test_celery --auth sql --frontend angular",
+        "rapydo create test_celery --auth postgres --frontend angular",
         "Wrong project name, _ is not a valid character",
     )
 
     exec_command(
         capfd,
-        "rapydo create celery --auth sql --frontend angular",
+        "rapydo create celery --auth postgres --frontend angular",
         "You selected a reserved name, invalid project name: celery",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --no-auto",
+        "rapydo create test --auth postgres --frontend angular --no-auto",
         "mkdir -p projects",
     )
 
@@ -119,18 +104,16 @@ def test_all(capfd):
     #     __version__,
     # )
 
-    # def test_create(capfd):
-
     # Let's create a project
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular",
+        "rapydo create test --auth postgres --frontend angular --services rabbit",
         "Project test successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular",
+        "rapydo create test --auth postgres --frontend angular",
         "Current folder is not empty, cannot create a new project here.",
         "Use --current to force the creation here",
     )
@@ -139,20 +122,20 @@ def test_all(capfd):
     os.remove(pconf)
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current --no-auto",
+        "rapydo create test --auth postgres --frontend angular --current --no-auto",
         "Folder projects/test/confs already exists",
         "{f}".format(f=pconf),
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current --force",
+        "rapydo create test --auth postgres --frontend angular --services rabbit --current --force",
         "Folder projects/test/confs already exists",
         "Project test successfully created",
     )
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current --force",
+        "rapydo create test --auth postgres --frontend angular --services rabbit --current --force",
         "Folder projects/test/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project test successfully created",
@@ -160,7 +143,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --current",
+        "rapydo create test --auth postgres --frontend angular --current",
         "Folder projects/test/confs already exists",
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
@@ -168,13 +151,12 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend angular --no-auto --current",
+        "rapydo create test --auth postgres --frontend angular --no-auto --current",
         "Folder projects/test/confs already exists",
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
     )
 
-    # def test_after_create(capfd):
     # Basic initilization
     exec_command(
         capfd,
@@ -305,7 +287,7 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
-    # first project is --auth sql --frontend angular
+    # first project is --auth postgres --frontend angular
     # the second one is --auth neo4j --frontend angular
     exec_command(
         capfd,
@@ -315,7 +297,7 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "rapydo create second --extend first --auth neo4j --frontend angular --current",
+        "rapydo create second --extend first --auth neo4j --frontend angular --current --services rabbit",
         "Folder projects already exists",
         "Project second successfully created",
     )
@@ -453,7 +435,6 @@ services:
         'No container found for backend_1'
     )
 
-    # def test_start(capfd):
     # Let's start with the stack
     exec_command(
         capfd,
@@ -461,8 +442,6 @@ services:
         "docker-compose command: 'up'",
         "Stack started",
     )
-
-    # def test_after_start(capfd):
 
     exec_command(
         capfd,
@@ -570,8 +549,6 @@ services:
         "Stack restarted",
     )
 
-    # def test_remove(capfd):
-
     exec_command(
         capfd,
         "rapydo -s backend remove --net",
@@ -609,7 +586,6 @@ services:
         "No container found for backend_1",
     )
 
-    # def test_alternative_starts(capfd):
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(3)
 
@@ -642,8 +618,6 @@ services:
         "rapydo volatile backend --command hostname",
         "backend-server",
     )
-
-    # def test_prod(capfd):
 
     pconf = "projects/test/project_configuration.yaml"
 
@@ -714,8 +688,6 @@ services:
         "No container found for proxy_1",
     )
 
-    # def test_install(capfd):
-
     exec_command(
         capfd,
         "rapydo install --pip --editable auto",
@@ -744,7 +716,6 @@ services:
         "rapydo install --pip --user 0.7.2",
     )
 
-    # def test_with_wrong_version(capfd):
     # This test will change the required version
     pconf = "projects/test/project_configuration.yaml"
 

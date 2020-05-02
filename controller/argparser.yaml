@@ -419,6 +419,11 @@ subcommands:
         metavalue: PROJECT
         default: null
         help: Extend from another project
+      services:
+        type: str
+        metavalue: S1,S2
+        default: ''
+        help: Comma separated list of services to be enabled
 
   ancestors:
     description: Find all ancestors of a docker image
