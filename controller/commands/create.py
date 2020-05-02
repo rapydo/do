@@ -13,6 +13,7 @@ def __call__(args, project, project_scaffold, **kwargs):
     auto = not args.get("no_auto", False)
     auth = args.get("auth")
     frontend = args.get("frontend")
+    extend = args.get("extend")
 
     if auth is None:
         log.exit("Missing authentication service, add --auth option")
@@ -94,6 +95,7 @@ def __call__(args, project, project_scaffold, **kwargs):
                 'enable_neo4j': auth == 'neo4j',
                 'enable_mongo': auth == 'mongo',
                 'frontend': frontend,
+                'extend': extend,
             }
         )
 

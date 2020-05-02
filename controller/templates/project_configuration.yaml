@@ -4,6 +4,10 @@ project:
   description: "Your project"
   version: {{ version }}
   rapydo: {{ version }}
+  {% if extend %}
+  extends: {{ extend }}
+  extends-from: projects
+  {% endif %}
 
 variables:
   env:

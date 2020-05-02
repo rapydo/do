@@ -414,6 +414,11 @@ subcommands:
         metavalue: FRAMEWORK
         default: null
         help: Frontend framework to enable (no, angular)
+      extend:
+        type: str
+        metavalue: PROJECT
+        default: null
+        help: Extend from another project
 
   ancestors:
     description: Find all ancestors of a docker image

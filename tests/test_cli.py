@@ -313,11 +313,15 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
-    # Test selection with teo projects
-    os.remove(".projectrc")
+    exec_command(
+        capfd,
+        "rapydo create second --extend test --auth sql --frontend angular --current"
+        "Folder projects already exists",
+        "Project second successfully created",
+    )
 
-    command = local["cp"]
-    command(["-r", "projects/test", "projects/second"])
+    # Test selection with two projects
+    os.remove(".projectrc")
 
     exec_command(
         capfd,
