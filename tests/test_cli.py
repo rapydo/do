@@ -54,7 +54,8 @@ def exec_command(capfd, command, *asserts):
     return out
 
 
-def test_all(capfd):
+def test_before_create(capfd):
+
 
     # Test failed create
     exec_command(
@@ -98,7 +99,15 @@ def test_all(capfd):
         "rapydo create test --auth sql --frontend no --no-auto",
         "mkdir -p projects",
     )
-    # Still nothing created
+
+    exec_command(
+        capfd,
+        "rapydo version",
+        __version__,
+    )
+
+
+def test_all(capfd):
 
     # Let's create a project
     exec_command(
