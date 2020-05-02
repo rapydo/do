@@ -196,14 +196,6 @@ def test_all(capfd):
         "All updated",
     )
 
-    # Selected a very fast service to speed up tests
-    exec_command(
-        capfd,
-        "rapydo -s rabbit build --core",
-        "Core images built",
-        "No custom images to build",
-    )
-
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd,
@@ -315,11 +307,26 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create second --extend test --auth sql --frontend angular --current"
+        "rapydo create second --extend test --auth sql --frontend angular --current",
         "Folder projects already exists",
         "Project second successfully created",
     )
+    # Add a custom image to extend base rabbit image:
 
+    os.makedirs("projects/second/builds/rabbit")
+    fin = open("projects/second/builds/rabbit/Dockerfile", "wt+")
+    fin.write("FROM rapydo/rabbitmq:{}".format(__version__))
+    fin.close()
+
+    fin = open("projects/second/confs/commons.yml", "a")
+    fin.write("""
+services:
+  rabbit:
+    build: ${PROJECT_DIR}/builds/rabbit
+    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+
+    """)
+    fin.close()
     # Test selection with two projects
     os.remove(".projectrc")
 
@@ -385,7 +392,30 @@ def test_all(capfd):
         " but changed on ",
         "Update it with: rapydo --services backend pull",
     )
-    # def test_before_start(capfd):
+
+    # Selected a very fast service to speed up tests
+    # Build custom rabbit image in second project from pulled image
+    exec_command(
+        capfd,
+        "rapydo -p second -s rabbit build",
+        "Core images built",
+        "Custom images built",
+    )
+    # Rebuild core rabbit image => custom rabbit is now obsolete
+    exec_command(
+        capfd,
+        "rapydo -p test -s rabbit build --core",
+        "Core images built",
+        "No custom images to build",
+    )
+    exec_command(
+        capfd,
+        "rapydo -p second check -i main --no-git",
+        "Obsolete image second/rabbit:{}".format(__version__),
+        "built on ",
+        " that changed on ",
+        "Update it with: rapydo --services rabbit pull",
+    )
 
     exec_command(
         capfd,

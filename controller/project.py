@@ -37,6 +37,7 @@ class Project:
             return False
 
         self.expected_folders.append(self.p_path("confs"))
+        self.expected_folders.append(self.p_path("builds"))
         self.expected_folders.append(self.p_path("backend"))
         self.expected_folders.append(self.p_path("backend", "apis"))
         self.expected_folders.append(self.p_path("backend", "models"))
