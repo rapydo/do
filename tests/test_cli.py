@@ -369,6 +369,12 @@ services:
         "rapydo -p celery check -i main --no-git --no-builds",
         "You selected a reserved name, invalid project name: celery",
     )
+    exec_command(
+        capfd,
+        "rapydo -p third check -i main --no-git --no-builds",
+        "Wrong project third",
+        "Select one of the following: ",
+    )
 
     # Test init of data folders
     shutil.rmtree('data/logs')
