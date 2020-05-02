@@ -66,7 +66,8 @@ def exec_command(capfd, command, *asserts):
 # - test_install
 
 
-def test_before_create(capfd):
+def test_all(capfd):
+    # def test_before_create(capfd):
 
     exec_command(
         capfd,
@@ -116,8 +117,7 @@ def test_before_create(capfd):
         __version__,
     )
 
-
-def test_create(capfd):
+    # def test_create(capfd):
 
     # Let's create a project
     exec_command(
@@ -172,8 +172,7 @@ def test_create(capfd):
         "Project test successfully created",
     )
 
-
-def test_after_create(capfd):
+    # def test_after_create(capfd):
     # Basic initilization
     exec_command(
         capfd,
@@ -358,8 +357,7 @@ def test_after_create(capfd):
         "Checks completed",
     )
 
-
-def test_before_start(capfd):
+    # def test_before_start(capfd):
 
     exec_command(
         capfd,
@@ -367,8 +365,7 @@ def test_before_start(capfd):
         'No container found for backend_1'
     )
 
-
-def test_start(capfd):
+    # def test_start(capfd):
     # Let's start with the stack
     exec_command(
         capfd,
@@ -377,8 +374,7 @@ def test_start(capfd):
         "Stack started",
     )
 
-
-def test_after_start(capfd):
+    # def test_after_start(capfd):
 
     exec_command(
         capfd,
@@ -480,8 +476,7 @@ def test_after_start(capfd):
         "Stack restarted",
     )
 
-
-def test_remove(capfd):
+    # def test_remove(capfd):
 
     exec_command(
         capfd,
@@ -520,8 +515,7 @@ def test_remove(capfd):
         "No container found for backend_1",
     )
 
-
-def test_alternative_starts(capfd):
+    # def test_alternative_starts(capfd):
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(3)
 
@@ -542,8 +536,7 @@ def test_alternative_starts(capfd):
         "backend-server",
     )
 
-
-def test_prod(capfd):
+    # def test_prod(capfd):
 
     pconf = "projects/test/project_configuration.yaml"
 
@@ -608,8 +601,7 @@ def test_prod(capfd):
         "No container found for proxy_1",
     )
 
-
-def test_install(capfd):
+    # def test_install(capfd):
 
     exec_command(
         capfd,
@@ -637,4 +629,42 @@ def test_install(capfd):
     exec_command(
         capfd,
         "rapydo install --pip --user 0.7.2",
+    )
+
+    # def test_with_wrong_version(capfd):
+    # Ths test will change the required version
+    pconf = "projects/test/project_configuration.yaml"
+
+    # Read and change the content
+    fin = open(pconf, "rt")
+    data = fin.read()
+    data = data.replace("rapydo: {}".format(__version__), 'rapydo: 0.7.0')
+    fin.close()
+    # Write the new content
+    fin = open(pconf, "wt")
+    fin.write(data)
+    fin.close()
+
+    exec_command(
+        capfd,
+        "rapydo version",
+        "This project is not compatible with rapydo version {}".format(__version__),
+        "Please downgrade rapydo to version 0.7.0 or modify this project"
+    )
+
+    # Read and change the content
+    fin = open(pconf, "rt")
+    data = fin.read()
+    data = data.replace("rapydo: 0.7.0", 'rapydo: 99.99.99')
+    fin.close()
+    # Write the new content
+    fin = open(pconf, "wt")
+    fin.write(data)
+    fin.close()
+
+    exec_command(
+        capfd,
+        "rapydo version",
+        "This project is not compatible with rapydo version 0.7.0",
+        "Please upgrade rapydo to version 99.99.99 or modify this project"
     )
