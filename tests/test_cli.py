@@ -402,6 +402,12 @@ services:
         " but changed on ",
         "Update it with: rapydo --services backend pull",
     )
+    # Init second project to download submodules/frontend (not enabled on test project)
+    exec_command(
+        capfd,
+        "rapydo -p second init",
+        "Project initialized",
+    )
 
     # Selected a very fast service to speed up tests
     # Build custom rabbit image in second project from pulled image
