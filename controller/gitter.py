@@ -13,6 +13,7 @@ from controller import log
 
 
 def get_repo(path):
+    # TODO: CATCH git.exc.NoSuchPathError
     return Repo(path)
 
 
