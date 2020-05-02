@@ -311,7 +311,7 @@ def test_all(capfd):
         capfd,
         "rapydo create first --auth neo4j --frontend no --current",
         "Folder projects already exists",
-        "Project second successfully created",
+        "Project first successfully created",
     )
     exec_command(
         capfd,
