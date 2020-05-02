@@ -358,6 +358,17 @@ def test_all(capfd):
         "Checks completed",
     )
 
+    # Test dirty repo
+    fin = open("submodules/do/new_file", "wt+")
+    fin.write("xyz")
+    fin.close()
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-builds",
+        "You have unstaged files on do",
+        "Untracked files:",
+        "submodules/do/new_file",
+    )
     # def test_before_start(capfd):
 
     exec_command(
@@ -646,7 +657,7 @@ def test_all(capfd):
     )
 
     # def test_with_wrong_version(capfd):
-    # Ths test will change the required version
+    # This test will change the required version
     pconf = "projects/test/project_configuration.yaml"
 
     # Read and change the content
@@ -679,6 +690,6 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        "This project is not compatible with rapydo version 0.7.0",
+        "This project is not compatible with rapydo version {}".format(__version__),
         "Please upgrade rapydo to version 99.99.99 or modify this project"
     )

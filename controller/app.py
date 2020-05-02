@@ -638,9 +638,6 @@ To fix this issue, please update docker to version {}+
         if not repo_enabled:
             return None
 
-        # if self.upgrade and self.current_args.get('current'):
-        #     repo['do'] = True
-        # else:
         repo['do'] = self.initialize
         repo['check'] = not self.install
 
