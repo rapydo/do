@@ -305,9 +305,11 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
+    # first project is --auth sql --frontend angular
+    # the second one is --auth neo4j --frontend no
     exec_command(
         capfd,
-        "rapydo create second --extend test --auth sql --frontend angular --current",
+        "rapydo create second --extend test --auth neo4j --frontend no --current",
         "Folder projects already exists",
         "Project second successfully created",
     )
