@@ -97,19 +97,19 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test_celery --auth sql --frontend no",
+        "rapydo create test_celery --auth sql --frontend angular",
         "Wrong project name, _ is not a valid character",
     )
 
     exec_command(
         capfd,
-        "rapydo create celery --auth sql --frontend no",
+        "rapydo create celery --auth sql --frontend angular",
         "You selected a reserved name, invalid project name: celery",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --no-auto",
+        "rapydo create test --auth sql --frontend angular --no-auto",
         "mkdir -p projects",
     )
 
@@ -124,13 +124,13 @@ def test_all(capfd):
     # Let's create a project
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no",
+        "rapydo create test --auth sql --frontend angular",
         "Project test successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no",
+        "rapydo create test --auth sql --frontend angular",
         "Current folder is not empty, cannot create a new project here.",
         "Use --current to force the creation here",
     )
@@ -139,20 +139,20 @@ def test_all(capfd):
     os.remove(pconf)
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --current --no-auto",
+        "rapydo create test --auth sql --frontend angular --current --no-auto",
         "Folder projects/test/confs already exists",
         "{f}".format(f=pconf),
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --current --force",
+        "rapydo create test --auth sql --frontend angular --current --force",
         "Folder projects/test/confs already exists",
         "Project test successfully created",
     )
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --current --force",
+        "rapydo create test --auth sql --frontend angular --current --force",
         "Folder projects/test/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project test successfully created",
@@ -160,7 +160,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --current",
+        "rapydo create test --auth sql --frontend angular --current",
         "Folder projects/test/confs already exists",
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
@@ -168,7 +168,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth sql --frontend no --no-auto --current",
+        "rapydo create test --auth sql --frontend angular --no-auto --current",
         "Folder projects/test/confs already exists",
         "{f} already exists".format(f=pconf),
         "Project test successfully created",
@@ -305,11 +305,17 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
-    # first project is --auth sql --frontend no
+    # first project is --auth sql --frontend angular
     # the second one is --auth neo4j --frontend angular
     exec_command(
         capfd,
-        "rapydo create second --extend test --auth neo4j --frontend angular --current",
+        "rapydo create first --auth neo4j --frontend no --current",
+        "Folder projects already exists",
+        "Project second successfully created",
+    )
+    exec_command(
+        capfd,
+        "rapydo create second --extend first --auth neo4j --frontend angular --current",
         "Folder projects already exists",
         "Project second successfully created",
     )
