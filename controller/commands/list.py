@@ -8,10 +8,6 @@ from controller import log
 def read_env():
     envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
     env = {}
-    if not os.path.isfile(envfile):
-        log.critical("Env file not found")
-        return env
-
     with open(envfile, 'r') as f:
         lines = f.readlines()
         for line in lines:

@@ -474,14 +474,11 @@ To fix this issue, please update docker to version {}+
 
             break
 
-    def read_specs(self, read_only_project=False):
+    def read_specs(self):
         """ Read project configuration """
 
         project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        if read_only_project:
-            default_file_path = None
-        else:
-            default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
+        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         try:
             if self.initialize:
                 read_extended = False
@@ -703,12 +700,6 @@ To fix this issue, please update docker to version {}+
             self.gits[name] = self.working_clone(
                 name, repo, confs_only=confs_only, from_path=from_local_path
             )
-
-    def git_update_repos(self):
-
-        for name, gitobj in self.gits.items():
-            if gitobj is not None:
-                gitter.update(name, gitobj)
 
     def read_composers(self):
 
