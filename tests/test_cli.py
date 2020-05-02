@@ -781,3 +781,11 @@ services:
         "This project is not compatible with rapydo version {}".format(__version__),
         "Please upgrade rapydo to version 99.99.99 or modify this project"
     )
+
+    # Tests from a subfolder
+    os.chdir("projects")
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git --no-builds",
+        "Checks completed",
+    )
