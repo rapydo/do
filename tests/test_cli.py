@@ -398,9 +398,11 @@ services:
     exec_command(
         capfd,
         "rapydo -p second -s rabbit build",
-        "Core images built",
+        "Successfully built",
+        "Successfully tagged second/rabbit:{}".format(__version__),
         "Custom images built",
     )
+
     # Rebuild core rabbit image => custom rabbit is now obsolete
     exec_command(
         capfd,
