@@ -531,6 +531,19 @@ def test_all(capfd):
         interrupted = True
     assert interrupted
 
+    # This is because after start --no-detach the container in still in exited status
+    exec_command(
+        capfd,
+        "rapydo volatile backend --command hostname",
+        "Bind for 0.0.0.0:8080 failed: port is already allocated",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo remove --all",
+        "Stack removed",
+    )
+
     exec_command(
         capfd,
         "rapydo volatile backend --command hostname",

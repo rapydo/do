@@ -7,14 +7,18 @@ from urllib.parse import urlparse
 
 import pytz
 from git import Repo
+from git.exc import NoSuchPathError
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
 from controller import log
 
 
 def get_repo(path):
-    # TODO: CATCH git.exc.NoSuchPathError
-    return Repo(path)
+    try:
+        return Repo(path)
+    except NoSuchPathError as e:
+        log.warning(e)
+        return None
 
 
 def get_local(path):
