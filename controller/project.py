@@ -41,6 +41,7 @@ class Project:
         self.expected_folders.append(self.p_path("backend"))
         self.expected_folders.append(self.p_path("backend", "apis"))
         self.expected_folders.append(self.p_path("backend", "models"))
+        self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
 
         self.expected_files.append(self.p_path("project_configuration.yaml"))
