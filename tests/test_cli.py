@@ -282,7 +282,7 @@ def test_all(capfd):
     # to be deprecated
     exec_command(
         capfd,
-        "rapydo create testwrapped --wrapped --current --force --auth postgres ",
+        "rapydo create testwrapped --wrapped --current --force --auth postgres --frontend no",
         "Project testwrapped successfully created",
     )
     exec_command(
