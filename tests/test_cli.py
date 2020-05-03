@@ -264,6 +264,9 @@ def test_all(capfd):
             ),
             "Project a successfully created",
         )
+        if service == 'mysql':
+            service = 'mariadb'
+
         exec_command(
             capfd,
             "rapydo list --active-services",
