@@ -239,24 +239,23 @@ def test_all(capfd):
     ]
     opt = "--frontend no --current --force"
     for service in services:
+
         if service == 'postgres':
             auth = 'postgres'
-            service = None
+            serv_opt = ''
         elif service == 'mysql':
             auth = 'mysql'
-            service = None
+            serv_opt = ''
         elif service == 'neo4j':
             auth = 'neo4j'
-            service = None
+            serv_opt = ''
         elif service == 'mongo':
             auth = 'mongo'
-            service = None
-        else:
-            auth = 'postgres'
-        if service is None:
             serv_opt = ''
         else:
+            auth = 'postgres'
             serv_opt = '--services {}'.format(service)
+
         exec_command(
             capfd,
             "rapydo create a {opt} --auth {auth} {service} ".format(
