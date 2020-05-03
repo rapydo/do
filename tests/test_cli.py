@@ -230,7 +230,7 @@ def test_all(capfd):
         'mysql',
         'neo4j',
         'mongo',
-        'rabbit'
+        'rabbit',
         'redis',
         'irods',
         'celery',
@@ -272,6 +272,13 @@ def test_all(capfd):
             "List of active services:",
             service,
         )
+
+    # to be deprecated
+    exec_command(
+        capfd,
+        "rapydo create testwrapped --wrapped --current --force --auth postgres ",
+        "Project testwrapped successfully created",
+    )
     exec_command(
         capfd,
         "rapydo interfaces XYZ",

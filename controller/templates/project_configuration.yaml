@@ -4,53 +4,55 @@ project:
   description: "Your project"
   version: {{ version }}
   rapydo: {{ version }}
-  {% if extend %}
+  {% if extend -%}
   extends: {{ extend }}
   extends-from: projects
-  {% endif %}
+  {%- endif %}
 
 variables:
   env:
 
     FRONTEND_FRAMEWORK: {{ frontend }}
     AUTH_SERVICE: {{ auth_service }}
-    {% if enable_postgres %}
+    {% if enable_postgres -%}
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_POSTGRES: 1
-    {% endif %}
-    {% if enable_mysql %}
+    {%- endif %}
+    {% if enable_mysql -%}
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_MYSQL: 1
-    {% endif %}
-    {% if enable_neo4j %}
+    {%- endif %}
+    {% if enable_neo4j -%}
     ACTIVATE_NEO4J: 1
-    {% endif %}
-    {% if enable_mongo %}
+    {%- endif %}
+    {% if enable_mongo -%}
     ACTIVATE_MONGODB: 1
-    {% endif %}
-    {% if enable_rabbit %}
+    {%- endif %}
+    {% if enable_rabbit -%}
     ACTIVATE_RABBIT: 1
-    {% endif %}
-    {% if enable_redis %}
+    {%- endif %}
+    {% if enable_redis -%}
     ACTIVATE_REDIS: 1
-    {% endif %}
-    {% if enable_irods %}
+    {%- endif %}
+    {% if enable_irods -%}
     ACTIVATE_ICAT: 1
     ACTIVATE_IRODS: 1
-    {% endif %}
-    {% if enable_celery %}
+    {%- endif %}
+    {% if enable_celery -%}
     ACTIVATE_CELERY: 1
     ACTIVATE_CELERYUI: 1
     ACTIVATE_CELERYBEAT: 1
-    {% endif %}
-    {% if enable_pushpin %}
+    {%- endif %}
+    {% if enable_pushpin -%}
     ACTIVATE_PUSHPIN: 0
-    {% endif %}
-    {% if enable_ftp %}
+    {%- endif %}
+    {% if enable_ftp -%}
     ACTIVATE_FTP: 1
-    {% endif %}
-
-    # Temporary, for controller tests... to be enabled only if requested
+    {%- endif %}
+    # to be deprecated
+    {% if wrapped -%}
+    WRAP_RESPONSE: 1
+    {%- endif %}
 
   backend:
     credentials:
