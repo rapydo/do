@@ -58,25 +58,25 @@ def exec_command(capfd, command, *asserts):
 def test_all(capfd):
     exec_command(
         capfd,
-        "rapydo create test",
+        "rapydo create first",
         "Missing authentication service, add --auth option",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth xyz",
+        "rapydo create first --auth xyz",
         "Invalid authentication service: xyz",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres",
+        "rapydo create first --auth postgres",
         "Missing frontend framework, add --frontend option",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend xyz",
+        "rapydo create first --auth postgres --frontend xyz",
         "Invalid frontend framework: xyz",
     )
 
@@ -94,7 +94,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --no-auto",
+        "rapydo create first --auth postgres --frontend angular --no-auto",
         "mkdir -p projects",
     )
 
@@ -107,54 +107,54 @@ def test_all(capfd):
     # Let's create a project
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --services rabbit",
-        "Project test successfully created",
+        "rapydo create first --auth postgres --frontend angular --services rabbit",
+        "Project first successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular",
+        "rapydo create first --auth postgres --frontend angular",
         "Current folder is not empty, cannot create a new project here.",
         "Use --current to force the creation here",
     )
 
-    pconf = "projects/test/project_configuration.yaml"
+    pconf = "projects/first/project_configuration.yaml"
     os.remove(pconf)
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --current --no-auto",
-        "Folder projects/test/confs already exists",
+        "rapydo create first --auth postgres --frontend angular --current --no-auto",
+        "Folder projects/first/confs already exists",
         "{f}".format(f=pconf),
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --services rabbit --current --force",
-        "Folder projects/test/confs already exists",
-        "Project test successfully created",
+        "rapydo create first --auth postgres --frontend angular --services rabbit --current --force",
+        "Folder projects/first/confs already exists",
+        "Project first successfully created",
     )
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --services rabbit --current --force",
-        "Folder projects/test/confs already exists",
+        "rapydo create first --auth postgres --frontend angular --services rabbit --current --force",
+        "Folder projects/first/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
-        "Project test successfully created",
+        "Project first successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --current",
-        "Folder projects/test/confs already exists",
+        "rapydo create first --auth postgres --frontend angular --current",
+        "Folder projects/first/confs already exists",
         "{f} already exists".format(f=pconf),
-        "Project test successfully created",
+        "Project first successfully created",
     )
 
     exec_command(
         capfd,
-        "rapydo create test --auth postgres --frontend angular --no-auto --current",
-        "Folder projects/test/confs already exists",
+        "rapydo create first --auth postgres --frontend angular --no-auto --current",
+        "Folder projects/first/confs already exists",
         "{f} already exists".format(f=pconf),
-        "Project test successfully created",
+        "Project first successfully created",
     )
 
     # Basic initilization
@@ -287,24 +287,24 @@ def test_all(capfd):
         "Config dump: docker-compose.yml",
     )
 
-    # first project is --auth postgres --frontend angular
-    # the second one is --auth neo4j --frontend angular
+    # second project is --auth postgres --frontend angular
+    # the third one is --auth neo4j --frontend angular
     exec_command(
         capfd,
-        "rapydo create first --auth neo4j --frontend no --current",
-        "Folder projects already exists",
-        "Project first successfully created",
-    )
-    exec_command(
-        capfd,
-        "rapydo create second --extend first --auth neo4j --frontend angular --current --services rabbit",
+        "rapydo create second --auth neo4j --frontend no --current",
         "Folder projects already exists",
         "Project second successfully created",
     )
+    exec_command(
+        capfd,
+        "rapydo create third --extend second --auth neo4j --frontend angular --current --services rabbit",
+        "Folder projects already exists",
+        "Project third successfully created",
+    )
     # Add a custom image to extend base rabbit image:
 
-    os.makedirs("projects/second/builds/rabbit")
-    fin = open("projects/second/builds/rabbit/Dockerfile", "wt+")
+    os.makedirs("projects/third/builds/rabbit")
+    fin = open("projects/third/builds/rabbit/Dockerfile", "wt+")
     fin.write("""
 FROM rapydo/rabbitmq:{}
 # Just a simple command differentiate from the parent
@@ -312,7 +312,7 @@ RUN mkdir xyz
 """.format(__version__))
     fin.close()
 
-    fin = open("projects/second/confs/commons.yml", "a")
+    fin = open("projects/third/confs/commons.yml", "a")
     fin.write("""
 services:
   rabbit:
@@ -336,7 +336,7 @@ services:
 
     exec_command(
         capfd,
-        "rapydo -p test check -i main --no-git --no-builds",
+        "rapydo -p first check -i main --no-git --no-builds",
         "Checks completed",
     )
 
@@ -353,8 +353,8 @@ services:
     )
     exec_command(
         capfd,
-        "rapydo -p third check -i main --no-git --no-builds",
-        "Wrong project third",
+        "rapydo -p fourth check -i main --no-git --no-builds",
+        "Wrong project fourth",
         "Select one of the following: ",
     )
 
@@ -364,7 +364,7 @@ services:
     # Let's restore .projectrc and data/logs
     exec_command(
         capfd,
-        "rapydo --project test init",
+        "rapydo --project first init",
         "Project initialized",
     )
     assert os.path.isdir('data/logs')
@@ -396,34 +396,28 @@ services:
         " but changed on ",
         "Update it with: rapydo --services backend pull",
     )
-    # Init second project to download submodules/frontend (not enabled on test project)
-    exec_command(
-        capfd,
-        "rapydo -p second init",
-        "Project initialized",
-    )
 
     # Selected a very fast service to speed up tests
-    # Build custom rabbit image in second project from pulled image
+    # Build custom rabbit image in third project from pulled image
     exec_command(
         capfd,
-        "rapydo -p second -s rabbit build",
+        "rapydo -p third -s rabbit build",
         "Successfully built",
-        "Successfully tagged second/rabbit:{}".format(__version__),
+        "Successfully tagged third/rabbit:{}".format(__version__),
         "Custom images built",
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
     exec_command(
         capfd,
-        "rapydo -p test -s rabbit build --core",
+        "rapydo -p first -s rabbit build --core",
         "Core images built",
         "No custom images to build",
     )
     exec_command(
         capfd,
-        "rapydo -p second check -i main --no-git",
-        "Obsolete image second/rabbit:{}".format(__version__),
+        "rapydo -p third check -i main --no-git",
+        "Obsolete image third/rabbit:{}".format(__version__),
         "built on ",
         " that changed on ",
         "Update it with: rapydo --services rabbit pull",
@@ -447,7 +441,7 @@ services:
         capfd,
         "rapydo status",
         "docker-compose command: 'ps'",
-        # "test_backend_1",
+        # "first_backend_1",
     )
 
     exec_command(
@@ -493,15 +487,15 @@ services:
     exec_command(
         capfd,
         "rapydo scale rabbit=2",
-        "Starting test_rabbit_1",
-        "Creating test_rabbit_2",
+        "Starting first_rabbit_1",
+        "Creating first_rabbit_2",
     )
 
     exec_command(
         capfd,
         "rapydo scale rabbit=1",
-        "Stopping and removing test_rabbit_2",
-        "Starting test_rabbit_1",
+        "Stopping and removing first_rabbit_2",
+        "Starting first_rabbit_1",
     )
 
     exec_command(
@@ -619,7 +613,7 @@ services:
         "backend-server",
     )
 
-    pconf = "projects/test/project_configuration.yaml"
+    pconf = "projects/first/project_configuration.yaml"
 
     exec_command(
         capfd,
@@ -648,7 +642,7 @@ services:
     exec_command(
         capfd,
         "rapydo ssl --volatile",
-        "Creating test_certificates-proxy_1",
+        "Creating first_certificates-proxy_1",
     )
     exec_command(
         capfd,
@@ -717,7 +711,7 @@ services:
     )
 
     # This test will change the required version
-    pconf = "projects/test/project_configuration.yaml"
+    pconf = "projects/first/project_configuration.yaml"
 
     # Read and change the content
     fin = open(pconf, "rt")
@@ -757,7 +751,7 @@ services:
     os.chdir("projects")
     exec_command(
         capfd,
-        "rapydo -p second check -i main --no-git --no-builds",
+        "rapydo -p third check -i main --no-git --no-builds",
         "You are not in the main folder",
         "Checks completed",
     )

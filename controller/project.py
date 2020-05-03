@@ -294,6 +294,7 @@ Verify that you are in the right folder, now you are in: {}
         'submodules',
         'sys',
         'time',
+        'test',
         'unittest',
         'werkzeug',
     ]
