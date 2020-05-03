@@ -17,3 +17,4 @@ project_configuration:
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
 
+      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
