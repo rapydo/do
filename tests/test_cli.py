@@ -211,15 +211,65 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "rapydo list --active-services",
-        "List of active services:",
-    )
-    exec_command(
-        capfd,
         "rapydo list --submodules",
         "List of submodules:",
     )
 
+    exec_command(
+        capfd,
+        "rapydo list --active-services",
+        "List of active services:",
+        "backend",
+        "frontend",
+        "postgres",
+        "rabbit",
+    )
+    # Test services activation from create --services
+    services = [
+        'postgres',
+        'mysql',
+        'neo4j',
+        'mongo',
+        'rabbit'
+        'redis',
+        'irods',
+        'celery',
+        'pushpin',
+        'ftp',
+    ]
+    opt = "--frontend no --current --force"
+    for service in services:
+        if service == 'postgres':
+            auth = 'postgres'
+            service = None
+        elif service == 'mysql':
+            auth = 'mysql'
+            service = None
+        elif service == 'neo4j':
+            auth = 'neo4j'
+            service = None
+        elif service == 'mongo':
+            auth = 'mongo'
+            service = None
+        else:
+            auth = 'postgres'
+        if service is None:
+            serv_opt = ''
+        else:
+            serv_opt = '--services {}'.format(service)
+        exec_command(
+            capfd,
+            "rapydo create a {opt} --auth {auth} {service} ".format(
+                opt=opt, auth=auth, service=serv_opt
+            ),
+            "Project a successfully created",
+        )
+        exec_command(
+            capfd,
+            "rapydo list --active-services",
+            "List of active services:",
+            service,
+        )
     exec_command(
         capfd,
         "rapydo interfaces XYZ",
