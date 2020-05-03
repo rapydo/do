@@ -76,7 +76,7 @@ def __call__(args, project, project_scaffold, **kwargs):
 
     project_name = args.get("name")
 
-    project_scaffold.load_project_scaffold(project_name, auth)
+    project_scaffold.load_project_scaffold(project_name, auth, extended=extend)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 

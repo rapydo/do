@@ -29,7 +29,7 @@ class Project:
     def p_path(self, *args):
         return os.path.join(PROJECT_DIR, self.project, *args)
 
-    def load_project_scaffold(self, project, auth):
+    def load_project_scaffold(self, project, auth, extended=False):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         if self.project is None:
@@ -49,7 +49,7 @@ class Project:
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
 
-        if auth is not None:
+        if auth is not None and not extended:
             model_file = "{}.py".format(auth)
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
