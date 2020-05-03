@@ -232,7 +232,7 @@ def test_all(capfd):
         'mongo',
         'rabbit',
         'redis',
-        'irods',
+        # 'irods',
         'celery',
         'pushpin',
         'ftp',
@@ -264,13 +264,19 @@ def test_all(capfd):
             "Project testservices successfully created",
         )
         if service == 'mysql':
-            service = 'mariadb'
+            service = ['mariadb']
+        elif service == 'irods':
+            service = ['icat']
+        elif service == 'celery':
+            service = ['celery', 'celeryui', 'celery-beat']
+        else:
+            service = [service]
 
         exec_command(
             capfd,
             "rapydo -p testservices list --active-services",
             "List of active services:",
-            service,
+            *service,
         )
 
     # to be deprecated
