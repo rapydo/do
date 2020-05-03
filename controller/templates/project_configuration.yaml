@@ -44,7 +44,7 @@ variables:
     ACTIVATE_CELERYBEAT: 1
     {%- endif %}
     {% if enable_pushpin -%}
-    ACTIVATE_PUSHPIN: 0
+    ACTIVATE_PUSHPIN: 1
     {%- endif %}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1
