@@ -892,17 +892,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         else:
             self.checked("Active services: {}", self.active_services)
 
-        missing = []
+        missing = set()
         for service_name in self.active_services:
             service = self.services_dict.get(service_name)
 
             for key, value in service.get('environment', {}).items():
                 if PLACEHOLDER in str(value):
                     key = services.normalize_placeholder_variable(key)
-                    missing.append(key)
-
-        # Removed duplicates
-        missing = set(missing)
+                    missing.add(key)
 
         placeholders = []
         for key in missing:

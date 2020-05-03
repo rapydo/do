@@ -7,6 +7,10 @@ from loguru import logger as log
 __version__ = '0.7.3'
 
 
+# NOTE: telling the app if testing or not
+# http://j.mp/2uifoza
+TESTING = hasattr(sys, '_called_from_test')
+
 DATA_FOLDER = "data"
 LOGS_FOLDER = os.path.join(DATA_FOLDER, "logs")
 
@@ -73,7 +77,3 @@ CONTAINERS_YAML_DIRNAME = 'confs'
 BACKEND_DIR = 'backend'  # directory outside docker
 BACKEND_PACKAGE = 'restapi'  # package inside rapydo-http
 ENDPOINTS_CODE_DIR = 'apis'
-
-# NOTE: telling the app if testing or not
-# http://j.mp/2uifoza
-TESTING = hasattr(sys, '_called_from_test')
