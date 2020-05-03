@@ -258,17 +258,17 @@ def test_all(capfd):
 
         exec_command(
             capfd,
-            "rapydo create a {opt} --auth {auth} {service} ".format(
+            "rapydo create testservices {opt} --auth {auth} {service} ".format(
                 opt=opt, auth=auth, service=serv_opt
             ),
-            "Project a successfully created",
+            "Project testservices successfully created",
         )
         if service == 'mysql':
             service = 'mariadb'
 
         exec_command(
             capfd,
-            "rapydo list --active-services",
+            "rapydo -p testservices list --active-services",
             "List of active services:",
             service,
         )
