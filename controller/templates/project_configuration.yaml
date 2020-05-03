@@ -37,6 +37,8 @@ variables:
     {% if enable_irods -%}
     ACTIVATE_ICAT: 1
     ACTIVATE_IRODS: 1
+    BACKEND_BUILD_MODE: backendirods
+    ALCHEMY_DBS: 'ICAT SQL_API'
     {%- endif %}
     {% if enable_celery -%}
     ACTIVATE_CELERY: 1
