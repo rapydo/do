@@ -51,6 +51,29 @@ def __call__(args, project, project_scaffold, **kwargs):
                 "Current folder is not empty, cannot create a new project here." +
                 "\nUse --current to force the creation here")
 
+    celery_broker = None  # Keep default value == RABBIT
+    celery_backend = None  # Keep default value == RABBIT
+    if enable_celery:
+        # BROKER SELECTION = rabbit | redis
+        if not enable_rabbit and not enable_redis:
+            enable_rabbit = True
+
+        if enable_rabbit:
+            celery_broker = 'RABBIT'
+        elif enable_redis:
+            celery_broker = 'REDIS'
+
+        # BACKEND SELECTION = rabbit | redis | mongo
+        if not enable_rabbit and not enable_redis and not enable_mongo:
+            enable_rabbit = True
+
+        if enable_redis:
+            celery_backend = 'REDIS'
+        elif enable_mongo:
+            celery_backend = 'MONGODB'
+        elif enable_rabbit:
+            celery_backend = 'RABBIT'
+
     project_name = args.get("name")
 
     project_scaffold.load_project_scaffold(project_name, auth)
@@ -69,21 +92,8 @@ def __call__(args, project, project_scaffold, **kwargs):
     # if gitter.get_local(".") is not None:
     #     log.exit("You are on a git repo, unable to continue")
 
-    # if os.path.exists(project_name):
-    #     log.exit("{} folder already exists, unable to continue", project_name)
-
-    # os.makedirs(project_name)
-
-    # if not os.path.exists(project_name):
-    #     log.exit("Errors creating {} folder", project_name)
-
     templating = Templating()
 
-    # 2 - cd project_name
-
-    # 3 - git init
-
-    # 4 - create folders
     folders = \
         project_scaffold.expected_folders + \
         project_scaffold.data_folders
@@ -96,7 +106,6 @@ def __call__(args, project, project_scaffold, **kwargs):
 
         os.makedirs(f)
 
-    # 5 - files
     for p in project_scaffold.expected_files:
         fname = os.path.basename(p)
         template = templating.get_template(
@@ -115,6 +124,8 @@ def __call__(args, project, project_scaffold, **kwargs):
                 'enable_celery': enable_celery,
                 'enable_pushpin': enable_pushpin,
                 'enable_ftp': enable_ftp,
+                'celery_broker': celery_broker,
+                'celery_backend': celery_backend,
                 'frontend': frontend,
                 'extend': extend,
                 'services': services,
