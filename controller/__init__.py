@@ -7,13 +7,10 @@ from loguru import logger as log
 __version__ = '0.7.3'
 
 
-TESTING = os.environ.get("TESTING") == '1'
 DATA_FOLDER = "data"
 LOGS_FOLDER = os.path.join(DATA_FOLDER, "logs")
 
-if TESTING:
-    LOGS_FILE = None
-elif not os.path.exists(DATA_FOLDER) or not os.path.isdir(DATA_FOLDER):
+if not os.path.exists(DATA_FOLDER) or not os.path.isdir(DATA_FOLDER):
     # log.error("Data folder not found, execute rapydo init please", DATA_FOLDER)
     LOGS_FILE = None
 elif not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
