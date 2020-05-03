@@ -21,6 +21,7 @@ variables:
     {% if enable_mysql -%}
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_MYSQL: 1
+    ALCHEMY_PORT: 3306
     {%- endif %}
     {% if enable_neo4j -%}
     ACTIVATE_NEO4J: 1
