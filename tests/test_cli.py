@@ -232,7 +232,7 @@ def test_all(capfd):
         'mongo',
         'rabbit',
         'redis',
-        # 'irods',
+        'irods',
         'celery',
         'pushpin',
         'ftp',
