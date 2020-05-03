@@ -11,14 +11,9 @@ __version__ = '0.7.3'
 # http://j.mp/2uifoza
 TESTING = hasattr(sys, '_called_from_test')
 
-DATA_FOLDER = "data"
-LOGS_FOLDER = os.path.join(DATA_FOLDER, "logs")
+LOGS_FOLDER = os.path.join("data", "logs")
 
-if not os.path.exists(DATA_FOLDER) or not os.path.isdir(DATA_FOLDER):
-    # log.error("Data folder not found, execute rapydo init please", DATA_FOLDER)
-    LOGS_FILE = None
-elif not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
-    # log.error("Logs folder not found ({}), execute rapydo init please", LOGS_FOLDER)
+if not os.path.isdir(LOGS_FOLDER):
     LOGS_FILE = None
 else:
     LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
