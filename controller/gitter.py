@@ -42,6 +42,10 @@ def get_local(path):
     try:
         gitobj = get_repo(path)
 
+        if gitobj is None:
+            log.warning("Invalid repository in {}", path)
+            return None
+
         if len(gitobj.remotes) == 0:
             log.warning("Unable to fetch remotes from {}", path)
             return None
