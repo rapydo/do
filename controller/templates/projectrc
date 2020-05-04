@@ -1,7 +1,12 @@
 project: {{ project }}
 # stack: your_custom_stack 
-# production: True
 hostname: {{ hostname }}
+{% if production -%}
+production: True
+{% else %}
+# production: True
+{%- endif %}
+
 
 project_configuration:
   variables:
@@ -9,9 +14,34 @@ project_configuration:
       LOG_LEVEL: INFO
       # SMTP_ADMIN: your@email.org
 
+      {% if production -%}
+
+      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+
+      # You should remove unwanted credentials
+      RABBITMQ_USER: {{ 'RANDOM'| username }}
+      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      ALCHEMY_USER: sqluser
+      ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
+
+      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
+
+      CELERYUI_PASSWORD: {{ 'RANDOM'| password }}
+      CELERYUI_USER: {{ 'RANDOM'| username }}
+
+      {% if testing -%}
+      DEFAULT_DHLEN: 256
+      {%- endif %}
+
+      {% else %}
+
       # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
       {% if testing -%}
       APP_MODE: test
       {%- endif %}
+
+      {%- endif %}
+
 

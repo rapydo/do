@@ -768,15 +768,13 @@ To fix this issue, please update docker to version {}+
 
     def create_projectrc(self):
         templating = Templating()
-        if self.production:
-            pfile = 'projectrc.prod'
-        else:
-            pfile = 'projectrc'
+        log.critical(self.active_services)
         t = templating.get_template(
-            pfile,
+            'projectrc',
             {
                 'project': self.project,
                 'hostname': self.hostname,
+                'production': self.production,
                 'testing': os.environ.get('APP_MODE', '') == 'test',
             }
         )
