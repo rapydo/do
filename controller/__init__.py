@@ -9,13 +9,12 @@ __version__ = '0.7.3'
 
 # NOTE: telling the app if testing or not
 # http://j.mp/2uifoza
-TESTING = hasattr(sys, '_called_from_test')
+TESTING = hasattr(sys, '_called_from_test') or os.environ.get('TESTING', '0') == '1'
 
 LOGS_FOLDER = os.path.join("data", "logs")
 
-if not os.path.isdir(LOGS_FOLDER):
-    LOGS_FILE = None
-else:
+LOGS_FILE = None
+if os.path.isdir(LOGS_FOLDER):
     LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
 
 log.level("VERBOSE", no=1, color="<fg #666>")

@@ -13,6 +13,7 @@ from datetime import datetime
 from glom import glom
 from plumbum.commands.processes import ProcessExecutionError
 
+from controller import TESTING
 from controller import PROJECT_DIR, EXTENDED_PROJECT_DISABLED, CONTAINERS_YAML_DIRNAME
 from controller import __version__
 from controller.commands import version as version_cmd
@@ -768,14 +769,13 @@ To fix this issue, please update docker to version {}+
 
     def create_projectrc(self):
         templating = Templating()
-        log.critical(self.active_services)
         t = templating.get_template(
             'projectrc',
             {
                 'project': self.project,
                 'hostname': self.hostname,
                 'production': self.production,
-                'testing': os.environ.get('APP_MODE', '') == 'test',
+                'testing': TESTING,
             }
         )
         templating.save_template(PROJECTRC, t, force=True)
