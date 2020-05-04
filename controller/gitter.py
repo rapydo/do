@@ -16,13 +16,14 @@ from controller import log
 def get_repo(path):
     try:
         return Repo(path)
-    except NoSuchPathError as e:
-        log.warning(e)
+    except NoSuchPathError:
+        return None
+    except InvalidGitRepositoryError:
         return None
 
 
 def init(path):
-    return Repo.init(".")
+    return Repo.init(path)
 
 
 def get_origin(gitobj):

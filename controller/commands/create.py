@@ -149,7 +149,7 @@ def __call__(args, project, project_scaffold, **kwargs):
 
     log.info("Project {} successfully created", project_name)
 
-    git_repo = gitter.get_local(".")
+    git_repo = gitter.get_repo(".")
     if git_repo is None:
         git_repo = gitter.init(".")
 
