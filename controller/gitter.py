@@ -21,6 +21,22 @@ def get_repo(path):
         return None
 
 
+def init(path):
+    return Repo.init(".")
+
+
+def get_origin(gitobj):
+    try:
+        if gitobj is None:
+            return None
+
+        if len(gitobj.remotes) == 0:
+            return None
+        return gitobj.remotes.origin.url
+    except InvalidGitRepositoryError:
+        return None
+
+
 def get_local(path):
     try:
         gitobj = get_repo(path)

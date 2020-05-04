@@ -430,6 +430,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Enable (old) wrapped response
+      origin-url:
+        type: str
+        metavalue: URL
+        default: null
+        help: Set the git origin url for the project
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

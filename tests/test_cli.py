@@ -104,10 +104,10 @@ def test_all(capfd):
     #     __version__,
     # )
 
-    # Let's create a project
+    # Let's create a project and init git
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --services rabbit",
+        "rapydo create first --auth postgres --frontend angular --services rabbit --origin https://your_remote_git/your_project.git",
         "Project first successfully created",
     )
 

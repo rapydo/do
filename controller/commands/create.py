@@ -3,6 +3,7 @@ import os
 from controller import __version__
 from controller.project import NO_FRONTEND, ANGULAR  # ANGULARJS, REACT
 from controller.templating import Templating
+from controller import gitter
 from controller import log
 
 
@@ -16,6 +17,7 @@ def __call__(args, project, project_scaffold, **kwargs):
     auth = args.get("auth")
     frontend = args.get("frontend")
     extend = args.get("extend")
+    origin_url = args.get("origin_url")
     services = args.get("services", "").split(",")
 
     if auth is None:
@@ -89,9 +91,6 @@ def __call__(args, project, project_scaffold, **kwargs):
             project_name
         )
 
-    # if gitter.get_local(".") is not None:
-    #     log.exit("You are on a git repo, unable to continue")
-
     templating = Templating()
 
     folders = \
@@ -149,12 +148,20 @@ def __call__(args, project, project_scaffold, **kwargs):
             log.exit(p)
 
     log.info("Project {} successfully created", project_name)
-    print("""
-You can now init and start the project:
 
-git init
-git remote add origin https://your_remote_git/your_project.git
-rapydo init
-rapydo pull
-rapydo start
-""")
+    git_repo = gitter.get_local(".")
+    if git_repo is None:
+        git_repo = gitter.init(".")
+
+    print("\nYou can now init and start the project:\n")
+    current_origin = gitter.get_origin(git_repo)
+
+    if current_origin is None:
+        if origin_url is None:
+            print("git remote add origin https://your_remote_git/your_project.git")
+        else:
+            git_repo.create_remote('origin', origin_url)
+
+    print("rapydo init")
+    print("rapydo pull")
+    print("rapydo start")
