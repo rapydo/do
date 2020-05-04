@@ -27,11 +27,7 @@ class ArgParser:
         # This method can raise ValueErrors
         self.check_args(args)
 
-        # This method saves configuration objects in self
-        self.read_configuration()
-
-        options = sorted(self.parse_conf.get('options', {}).items())
-        commands = sorted(self.parse_conf.get('subcommands', {}).items())
+        options, commands = self.read_configuration()
 
         # Arguments definition
         parser = argparse.ArgumentParser(
@@ -113,7 +109,7 @@ class ArgParser:
     def read_configuration(self):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
 
-        self.parse_conf = load_yaml_file(
+        parse_conf = load_yaml_file(
             'argparser.yaml', path=os.path.dirname(os.path.realpath(__file__))
         )
 
@@ -130,7 +126,7 @@ class ArgParser:
 
         self.host_configuration = self.projectrc.pop('project_configuration', {})
 
-        # Mix with parse_conf
+        # Mix with projectrc
         for key, value in self.projectrc.items():
 
             if value is None:
@@ -138,22 +134,28 @@ class ArgParser:
 
             if not isinstance(value, dict):
                 # This is a first level option
-                if key in self.parse_conf['options']:
-                    self.parse_conf['options'][key]['default'] = value
+                if key in parse_conf['options']:
+                    parse_conf['options'][key]['default'] = value
+                    parse_conf['options'][key]['projectrc'] = True
                 else:
                     print("\nUnknown parameter {} found in {}\n".format(key, PROJECTRC))
             else:
                 # This is a second level parameter
-                if key not in self.parse_conf['subcommands']:
+                if key not in parse_conf['subcommands']:
                     print("\nUnknown command {} found in {}\n".format(key, PROJECTRC))
                 else:
-                    conf = self.parse_conf['subcommands'][key]['suboptions']
+                    conf = parse_conf['subcommands'][key]['suboptions']
                     for subkey, subvalue in value.items():
                         if subkey in conf:
                             conf[subkey]['default'] = subvalue
                         else:
                             print("Unknown parameter {}/{} found in {}\n".format(
                                 key, subkey, PROJECTRC))
+
+        options = sorted(parse_conf.get('options', {}).items())
+        commands = sorted(parse_conf.get('subcommands', {}).items())
+
+        return options, commands
 
     @staticmethod
     def prepare_params(options):
@@ -167,10 +169,12 @@ class ArgParser:
 
         if options.get('type') == 'bool':
 
-            if default:
-                pconf['action'] = 'store_false'
+            # This flag is set in projectrc => keep action as default
+            if options.get('projectrc', False):
+                pconf['action'] = 'store_true' if default else 'store_false'
             else:
-                pconf['action'] = 'store_true'
+                # invert default if flag is enabled
+                pconf['action'] = 'store_false' if default else 'store_true'
 
         else:
             # type and metavar are allowed for bool

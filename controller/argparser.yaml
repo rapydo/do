@@ -106,7 +106,7 @@ subcommands:
     suboptions:
       submodules-path:
         type: str
-        metavalue: SUBMODULE_PATH
+        metavalue: PATH
         help: link all submodules in an existing folder instead of download them
       force:
         alias: f

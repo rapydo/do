@@ -693,6 +693,19 @@ services:
         "Project initialized",
     )
 
+    # This is a BUG correct in 0.7.3
+    # by setting a bolean flag in .project it was disabled by also including it via cli
+    exec_command(
+        capfd,
+        "rapydo list --args",
+        "production             True",
+    )
+    exec_command(
+        capfd,
+        "rapydo --prod list --args",
+        "production             True",
+    )
+
     exec_command(
         capfd,
         "rapydo --prod -s proxy pull",
