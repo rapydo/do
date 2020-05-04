@@ -6,16 +6,14 @@
 
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
-import os
 from sultan.api import Sultan
 try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
 from controller.app import Application
+from controller import TESTING
 from controller import log
-
-TESTING = os.environ.get("TESTING") == '1'
 
 
 def install(package, editable=False, user=False, use_pip3=True):
