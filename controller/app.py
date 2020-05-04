@@ -770,8 +770,6 @@ To fix this issue, please update docker to version {}+
         templating = Templating()
         if self.production:
             pfile = 'projectrc.prod'
-        elif os.environ.get('APP_MODE', '') == 'test':
-            pfile = 'projectrc.test'
         else:
             pfile = 'projectrc'
         t = templating.get_template(
@@ -779,6 +777,7 @@ To fix this issue, please update docker to version {}+
             {
                 'project': self.project,
                 'hostname': self.hostname,
+                'testing': os.environ.get('APP_MODE', '') == 'test',
             }
         )
         templating.save_template(PROJECTRC, t, force=True)

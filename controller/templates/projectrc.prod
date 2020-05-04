@@ -21,3 +21,7 @@ project_configuration:
 
       CELERYUI_PASSWORD: {{ 'RANDOM'| password }}
       CELERYUI_USER: {{ 'RANDOM'| username }}
+
+      {% if testing -%}
+      DEFAULT_DHLEN: 256
+      {%- endif %}
