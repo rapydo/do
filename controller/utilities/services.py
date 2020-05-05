@@ -77,8 +77,8 @@ vars_to_services_mapping = {
     'SMTP_HOST': ['backend'],
     'SMTP_USERNAME': ['backend'],
     'SMTP_PASSWORD': ['backend'],
-    'IRODS_PASSWORD': ['irods'],
-    'IRODS_USER': ['irods'],
+    'IRODS_PASSWORD': ['icat'],
+    'IRODS_USER': ['icat'],
 }
 
 

@@ -5,8 +5,7 @@ hostname: {{ hostname }}
 production: True
 {% else %}
 # production: True
-{%- endif %}
-
+{% endif -%}
 
 project_configuration:
   variables:
@@ -15,33 +14,40 @@ project_configuration:
       # SMTP_ADMIN: your@email.org
 
       {% if production -%}
-
+      {% if services -%}{% for service in services -%}
+      {% if service == 'backend' -%}
       AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
-
-      # You should remove unwanted credentials
-      RABBITMQ_USER: {{ 'RANDOM'| username }}
-      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'postgres' or service == 'mariadb' -%}
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
-
+      {% endif -%}
+      {% if service == 'neo4j' -%}
       NEO4J_PASSWORD: {{ 'RANDOM'| password }}
-
+      {% endif -%}
+      {% if service == 'celeryui' -%}
       CELERYUI_PASSWORD: {{ 'RANDOM'| password }}
       CELERYUI_USER: {{ 'RANDOM'| username }}
-
+      {% endif -%}
+      {% if service == 'rabbit' -%}
+      RABBITMQ_USER: {{ 'RANDOM'| username }}
+      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'icat' -%}
+      IRODS_USER: {{ 'RANDOM'| username }}
+      IRODS_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% endfor %}{% endif -%}
       {% if testing -%}
       DEFAULT_DHLEN: 1024
-      {%- endif %}
+      {% endif -%}
 
       {% else %}
-
       # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
       {% if testing -%}
       APP_MODE: test
-      {%- endif %}
+      {% endif -%}
 
-      {%- endif %}
-
-
+      {% endif -%}

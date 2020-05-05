@@ -97,6 +97,10 @@ class Application:
 
         self.check_installed_software()
 
+        # TODO: give an option to skip things when you are not connected
+        if self.initialize or self.update or self.check:
+            self.check_internet_connection()
+
         if self.install:
             self.project = self.project_scaffold.get_project(self.project)
             self.read_specs()
@@ -124,6 +128,8 @@ class Application:
         self.project_scaffold.load_frontend_scaffold(self.frontend)
         self.verify_rapydo_version()
         self.project_scaffold.inspect_project_folder()
+        # will be set to True if init and projectrc is missing or forced
+        self.force_projectrc_creation = False
 
         # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
@@ -170,33 +176,48 @@ class Application:
             log.exit("Command not implemented: {}", self.action)
 
         if self.initialize:
-            if not self.arguments.projectrc or self.current_args.get('force', False):
-                f = self.create_projectrc()
-                self.arguments.projectrc = configuration.load_yaml_file(
-                    f, path=os.curdir, is_optional=True
-                )
-                self.arguments.host_configuration = self.arguments.projectrc.pop(
-                    'project_configuration', {}
-                )
-                self.read_specs()
+            self.force_projectrc_creation = (
+                not self.arguments.projectrc or self.current_args.get('force', False)
+            )
+
+            # We have to create the .projectrc twice
+            # One generic here with main options and another after the complete
+            # conf reading to set services variables
+            if self.force_projectrc_creation:
+                self.create_projectrc()
 
         self.git_submodules(confs_only=False)
 
-        if self.update or self.check:
+        if self.update:
+            self.git_checks_or_update()
+            # Reading again the configuration, it may change with git updates
+            self.read_specs()
+        elif self.check:
             if self.current_args.get('no_git', False):
                 log.info("Skipping git checks")
             else:
                 log.info("Checking git (skip with --no-git)")
-                self.git_checks()
-
-        if self.update:
-            # Reading again the configuration, it may change with git updates
-            self.read_specs()
+                self.git_checks_or_update()
 
         self.make_env()
 
         # Compose services and variables
         self.read_composers()
+        self.services_dict, self.active_services = services.find_active(
+            self.compose_config
+        )
+        # We have to create the .projectrc twice
+        # One generic with main options and another here
+        # when services are available to set specific configurations
+        if self.force_projectrc_creation:
+            self.create_projectrc()
+            # Read again! :-(
+            self.make_env()
+            self.read_composers()
+            self.services_dict, self.active_services = services.find_active(
+                self.compose_config
+            )
+
         self.check_placeholders()
 
         if self.tested_connection:
@@ -204,14 +225,14 @@ class Application:
             self.check_time()
 
         # Final step, launch the command
-        services = self.get_services(default=self.active_services)
+        enabled_services = self.get_services(default=self.active_services)
         command.__call__(
             args=self.current_args,
             specs=self.specs,
             arguments=self.arguments,
             files=self.files,
             base_files=self.base_files,
-            services=services,
+            services=enabled_services,
             active_services=self.active_services,
             base_services=self.base_services,
             project=self.project,
@@ -575,7 +596,7 @@ To fix this issue, please update docker to version {}+
 
         log.exit(msg)
 
-    def check_connection(self):
+    def check_internet_connection(self):
         """ Check if connected to internet """
 
         try:
@@ -638,10 +659,6 @@ To fix this issue, please update docker to version {}+
 
         repo['do'] = self.initialize
         repo['check'] = not self.install
-
-        # This step may require an internet connection in case of 'init'
-        if not self.tested_connection and self.initialize:
-            self.check_connection()
 
         ################
         # - repo path to the repo name
@@ -776,13 +793,23 @@ To fix this issue, please update docker to version {}+
                 'hostname': self.hostname,
                 'production': self.production,
                 'testing': TESTING,
+                'services': self.active_services,
             }
         )
         templating.save_template(PROJECTRC, t, force=True)
 
-        log.info("Created default {} file", PROJECTRC)
-
-        return PROJECTRC
+        self.arguments.projectrc = configuration.load_yaml_file(
+            PROJECTRC, path=os.curdir, is_optional=True
+        )
+        self.arguments.host_configuration = self.arguments.projectrc.pop(
+            'project_configuration', {}
+        )
+        if self.active_services is None:
+            log.debug("Created temporary default {} file", PROJECTRC)
+            os.remove(PROJECTRC)
+        else:
+            log.info("Created default {} file", PROJECTRC)
+        self.read_specs()
 
     def make_env(self):
         envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
@@ -877,8 +904,6 @@ occurred during RabbitMQ startup """, ' '.join(invalid_rabbit_characters))
 
     def check_placeholders(self):
 
-        self.services_dict, self.active_services = services.find_active(self.compose_config)
-
         if len(self.active_services) == 0:
             log.exit(
                 """You have no active service
@@ -942,15 +967,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return ''
         return ignore_submodule.split(",")
 
-    def git_checks(self):
-
-        # TODO: give an option to skip things when you are not connected
-        if not self.tested_connection:
-            self.check_connection()
-
-        # FIXME: give the user an option to skip this
-        # or eventually print it in a clearer way
-        # (a table? there is python ascii table plugin)
+    def git_checks_or_update(self):
 
         ignore_submodule_list = self.get_ignore_submodules()
 
@@ -958,12 +975,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule_list:
                 log.debug("Skipping {} on {}", self.action, name)
                 continue
-            if gitobj is not None:
-                if self.update:
-                    gitter.update(name, gitobj)
-                elif self.check:
-                    gitter.check_updates(name, gitobj)
-                    gitter.check_unstaged(name, gitobj)
+            if gitobj is None:
+                continue
+            if self.update:
+                gitter.update(name, gitobj)
+            elif self.check:
+                gitter.check_updates(name, gitobj)
+                gitter.check_unstaged(name, gitobj)
 
     def get_bin_version(exec_cmd, option='--version'):
 
