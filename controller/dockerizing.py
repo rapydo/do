@@ -13,31 +13,21 @@ class Dock:
     def __init__(self):
         super(Dock, self).__init__()
 
-        if not self.is_daemon_alive():
+        if not self.is_daemon_alive():  # pragma: no cover
             log.exit("Docker daemon not reachable")
 
     def is_daemon_alive(self):
 
         if self.client is None:
             self.client = docker.from_env()
-        else:
-            pass
-
-        # from requests.packages.urllib3 import exceptions as reqex
-        # try:
-        #     self.client.containers.list()
-        # except (FileNotFoundError, reqex.ProtocolError, ConnectionError):
-        #     return False
-        # else:
-        #     return True
 
         try:
             return self.client.ping()
         # this is the case of docker daemon not started
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError:  # pragma: no cover
             return False
         # this is the case of docker daemon starting or not working properly
-        except APIError:
+        except APIError:  # pragma: no cover
             return False
 
     def image_info(self, tag):
