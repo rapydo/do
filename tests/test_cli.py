@@ -268,7 +268,7 @@ def test_all(capfd):
         elif service == 'irods':
             service = ['icat']
         elif service == 'celery':
-            service = ['celery', 'celeryui', 'celery-beat', 'rabbit']
+            service = ['celery', 'celeryui', 'rabbit']
         else:
             service = [service]
 
