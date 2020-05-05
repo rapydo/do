@@ -656,7 +656,7 @@ services:
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(3)
+    signal.alarm(4)
 
     interrupted = False
     try:
