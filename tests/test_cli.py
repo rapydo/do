@@ -719,6 +719,8 @@ services:
         "rapydo ssl --volatile",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
+        # Just to verify that the default does not change
+        "Generating DH parameters, 1024 bit long safe prime, generator 2",
     )
 
     exec_command(

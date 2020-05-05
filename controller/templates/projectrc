@@ -35,7 +35,7 @@ project_configuration:
       RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
       {% endif -%}
       {% if service == 'icat' -%}
-      IRODS_USER: {{ 'RANDOM'| username }}
+      IRODS_USER: irods
       IRODS_PASSWORD: {{ 'RANDOM'| password }}
       {% endif -%}
       {% endfor %}{% endif -%}
