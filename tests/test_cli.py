@@ -282,8 +282,8 @@ def test_all(capfd):
     # to be deprecated
     exec_command(
         capfd,
-        "rapydo create testwrapped --wrapped --current --force --auth postgres --frontend no",
-        "Project testwrapped successfully created",
+        "rapydo create wrap --wrapped --current --force --auth postgres --frontend no",
+        "Project wrap successfully created",
     )
     exec_command(
         capfd,
@@ -363,7 +363,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo create new --extend third --auth neo4j --frontend no --current",
+        "rapydo create new --extend new --auth neo4j --frontend no --current",
         "A project cannot extend itself",
     )
     exec_command(
@@ -595,7 +595,6 @@ services:
         print(e)
 
     # Template project is based on sql
-    """
     exec_command(
         capfd,
         "rapydo verify neo4j",
@@ -606,7 +605,6 @@ services:
         "rapydo verify sqlalchemy",
         'Service sqlalchemy is reachable'
     )
-    """
 
     exec_command(
         capfd,
