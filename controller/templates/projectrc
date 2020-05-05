@@ -31,7 +31,8 @@ project_configuration:
       CELERYUI_USER: {{ 'RANDOM'| username }}
 
       {% if testing -%}
-      DEFAULT_DHLEN: 256
+      # DEFAULT_DHLEN: 256
+      DEFAULT_DHLEN: 512
       {%- endif %}
 
       {% else %}
