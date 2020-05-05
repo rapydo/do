@@ -717,8 +717,10 @@ services:
     exec_command(
         capfd,
         "rapydo ssl --volatile",
-        "Creating first_certificates-proxy_1",
+        "Creating a self signed SSL certificate",
+        "Self signed SSL certificate successfully created",
     )
+
     exec_command(
         capfd,
         "rapydo ssl --force",

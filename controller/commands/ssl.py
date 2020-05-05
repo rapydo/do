@@ -44,19 +44,21 @@ def __call__(args, project, files, hostname, **kwargs):
         return True
 
     command = "/bin/bash updatecertificates"
-    dc = Compose(files=files)
-
-    if args.get('volatile'):
-        return dc.start_containers(["certificates-proxy"], detach=False)
-
     if args.get('force'):
         command = "{} --force".format(command)
 
     command = "{} {}".format(command, hostname)
 
-    return dc.exec_command(
+    dc = Compose(files=files)
+
+    if args.get('volatile'):
+        dc.create_volatile_container(service, command)
+        return True
+
+    dc.exec_command(
         service,
         user="root",
         command=command,
         disable_tty=no_tty
     )
+    return True
