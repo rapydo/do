@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
 from controller import __version__
+from controller import PROJECT_DIR
 from controller.project import NO_FRONTEND, ANGULAR  # ANGULARJS, REACT
 from controller.templating import Templating
 from controller import gitter
 from controller import log
 
 
-def __call__(args, project, project_scaffold, **kwargs):
+def __call__(args, project_scaffold, **kwargs):
 
+    project_name = args.get("name")
     force = args.get("force", False)
     force_current = args.get("current", False)
     auto = not args.get("no_auto", False)
@@ -19,6 +21,12 @@ def __call__(args, project, project_scaffold, **kwargs):
     extend = args.get("extend")
     origin_url = args.get("origin_url")
     services = args.get("services", "").split(",")
+
+    if extend is not None:
+        if project_name == extend:
+            log.exit("A project cannot extend itself")
+        if not os.path.isdir(os.path.join(PROJECT_DIR, extend)):
+            log.exit("Invalid extend value: project {} not found", extend)
 
     if auth is None:
         log.exit("Missing authentication service, add --auth option")
@@ -50,7 +58,7 @@ def __call__(args, project, project_scaffold, **kwargs):
         dirs = os.listdir(".")
         if len(dirs) > 0 and dirs != ['.git']:
             log.exit(
-                "Current folder is not empty, cannot create a new project here." +
+                "Current folder is not empty, cannot create a new project here."
                 "\nUse --current to force the creation here")
 
     celery_broker = None  # Keep default value == RABBIT
@@ -75,8 +83,6 @@ def __call__(args, project, project_scaffold, **kwargs):
             celery_backend = 'MONGODB'
         elif enable_rabbit:
             celery_backend = 'RABBIT'
-
-    project_name = args.get("name")
 
     project_scaffold.load_project_scaffold(project_name, auth, extended=extend)
     if frontend != NO_FRONTEND:
@@ -111,7 +117,7 @@ def __call__(args, project, project_scaffold, **kwargs):
             fname,
             {
                 'version': __version__,
-                'project': project,
+                'project': project_name,
                 'auth_service': auth,
                 'enable_postgres': enable_postgres,
                 'enable_mysql': enable_mysql,

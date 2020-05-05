@@ -360,6 +360,18 @@ def test_all(capfd):
         "Folder projects already exists",
         "Project second successfully created",
     )
+
+    exec_command(
+        capfd,
+        "rapydo create new --extend third --auth neo4j --frontend no --current",
+        "A project cannot extend itself",
+    )
+    exec_command(
+        capfd,
+        "rapydo create new --extend doesnotexist --auth neo4j --frontend no --current",
+        "Invalid extend value: project doesnotexist not found",
+    )
+
     exec_command(
         capfd,
         "rapydo create third --extend second --auth neo4j --frontend angular --current --services rabbit",
