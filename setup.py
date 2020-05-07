@@ -4,30 +4,27 @@ from setuptools import setup, find_packages
 
 current_version = "0.7.3"
 
-main_package = "controller"
-app = '{}.__main__:main'.format(main_package)
-
 setup(
     name='rapydo_controller',
     version=current_version,
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
     description='Manage and deploy projects based on RAPyDo framework',
-    url='https://rapydo.github.io/do',
+    url='https://github.com/rapydo',
     license='MIT',
     packages=find_packages(
         where='.',
         exclude=['tests*']
     ),
     package_data={
-        main_package: ['argparser.yaml', 'templates/*']
+        'controller': ['argparser.yaml', 'templates/*']
     },
     # End-of-life: 2020-09-13
     python_requires='>=3.5.0',
     entry_points={
         'console_scripts': [
-            'rapydo={}'.format(app),
-            'do={}'.format(app),
+            'rapydo=controller.__main__:main',
+            'do=controller.__main__:main',
         ],
     },
     install_requires=[
