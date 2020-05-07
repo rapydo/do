@@ -688,6 +688,21 @@ services:
         "backend-server",
     )
 
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(4)
+
+    interrupted = False
+    try:
+        exec_command(
+            capfd,
+            "rapydo volatile maintenance",
+            "Maintenance server is up and waiting for connections",
+        )
+    except Timeout:
+        interrupted = True
+    assert interrupted
+
+
     pconf = "projects/first/project_configuration.yaml"
 
     exec_command(
