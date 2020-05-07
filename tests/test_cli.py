@@ -497,7 +497,7 @@ services:
         "Obsolete image third/rabbit:{}".format(__version__),
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --services rabbit pull",
+        "Update it with: rapydo --services rabbit build",
     )
 
     exec_command(
