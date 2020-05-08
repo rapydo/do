@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '@rapydo/../environments/environment'
 
 @Component({
   selector: 'customfooter',
@@ -7,6 +8,14 @@ import { Component } from '@angular/core';
 })
 export class CustomFooterComponent {
 
-  constructor() { }
+  public project: string;
+  public version: string;
+
+  constructor() {
+    var t = environment.projectTitle;
+    t = t.replace(/^'/, "");
+    t = t.replace(/'$/, "");
+    this.project = t;
+  }
 
 }
