@@ -3,7 +3,6 @@ import { environment } from '@rapydo/../environments/environment'
 
 @Component({
   selector: 'customfooter',
-  providers: [],
   templateUrl: './custom.footer.html',
 })
 export class CustomFooterComponent {

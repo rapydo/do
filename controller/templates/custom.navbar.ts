@@ -17,7 +17,6 @@ export class CustomNavbarComponent {
 
 @Component({
   selector: 'custombrand',
-  providers: [],
   templateUrl: "custom.navbar.brand.html",
   changeDetection: ChangeDetectionStrategy.OnPush
 })
