@@ -1,4 +1,4 @@
-import { Component, Inputt, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { environment } from '@rapydo/../environments/environment';
 
 @Component({
