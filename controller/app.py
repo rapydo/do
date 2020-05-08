@@ -841,6 +841,7 @@ To fix this issue, please update docker to version {}+
             env['EXTENDED_PROJECT'] = self.extended_project
 
         env['RAPYDO_VERSION'] = __version__
+        env['PROJECT_VERSION'] = self.version
         env['CURRENT_UID'] = self.current_uid
         env['CURRENT_GID'] = self.current_gid
         env['PROJECT_TITLE'] = self.project_title
