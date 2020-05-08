@@ -16,6 +16,7 @@ export class CustomFooterComponent {
     t = t.replace(/^'/, "");
     t = t.replace(/'$/, "");
     this.project = t;
+    this.version = environment.projectVersion;
   }
 
 }
