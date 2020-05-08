@@ -1,10 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Inputt, ChangeDetectionStrategy } from '@angular/core';
 import { environment } from '@rapydo/../environments/environment';
 
 @Component({
   selector: 'customlinks',
-  providers: [],
   templateUrl: "custom.navbar.links.html"
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomNavbarComponent {
 
@@ -19,6 +19,7 @@ export class CustomNavbarComponent {
   selector: 'custombrand',
   providers: [],
   templateUrl: "custom.navbar.brand.html",
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomBrandComponent {
 
