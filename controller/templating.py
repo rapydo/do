@@ -56,7 +56,7 @@ class Templating:
 
     def get_template(self, filename, data):
         try:
-            template = self.env.get_template(filename)
+            template = self.env.get_template("{}.j2".format(filename))
             content = template.render(**data)
             # ast = self.env.parse(content)
             # undefined = find_undeclared_variables(ast)
