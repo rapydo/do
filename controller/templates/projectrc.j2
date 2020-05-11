@@ -53,6 +53,8 @@ project_configuration:
       SMTP_PORT: 0
       SMTP_USERNAME: {{ 'RANDOM'| username }}
       SMTP_PASSWORD: {{ 'RANDOM'| password }}
+      ALLOW_PASSWORD_RESET: 'true'
+      ALLOW_REGISTRATION: 'true'
       {% endif -%}
 
       {% endif -%}
