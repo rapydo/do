@@ -50,6 +50,9 @@ project_configuration:
       APP_MODE: test
       SMTP_HOST: mock.mail.service
       SMTP_ADMIN: mock@nomail.org
+      SMTP_PORT: 0
+      SMTP_USERNAME: {{ 'RANDOM'| username }}
+      SMTP_PASSWORD: {{ 'RANDOM'| password }}
       {% endif -%}
 
       {% endif -%}
