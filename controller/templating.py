@@ -48,7 +48,8 @@ class Templating:
         self.env = Environment(
             loader=loader,
             undefined=DebugUndefined,
-            autoescape=True
+            autoescape=True,
+            keep_trailing_newline=True
         )
         self.env.filters['password'] = password
         self.env.filters['username'] = username

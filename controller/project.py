@@ -43,11 +43,15 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "models"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
+        self.expected_folders.append(self.p_path("backend", "initialization"))
 
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
+        self.expected_files.append(
+            self.p_path("backend", "initialization", "initialization.py")
+        )
 
         if auth is not None and not extended:
             model_file = "{}.py".format(auth)
