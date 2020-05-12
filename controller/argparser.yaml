@@ -435,6 +435,11 @@ subcommands:
         metavalue: URL
         default: null
         help: Set the git origin url for the project
+      env:
+        type: str
+        metavalue: ENV_VARIABLES
+        default: null
+        help: Command separated list of ENV=VALUE to be added in project_configuration
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

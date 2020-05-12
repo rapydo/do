@@ -21,6 +21,7 @@ def __call__(args, project_scaffold, **kwargs):
     extend = args.get("extend")
     origin_url = args.get("origin_url")
     services = args.get("services", "").split(",")
+    envs = args.get("env")
 
     if extend is not None:
         if project_name == extend:
@@ -84,6 +85,16 @@ def __call__(args, project_scaffold, **kwargs):
         elif enable_rabbit:
             celery_backend = 'RABBIT'
 
+    env_variables = {}
+    if envs:
+        for e in envs.split(","):
+            e = e.split("=")
+            if len(e) != 2:
+                log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
+            k = e[0].upper()
+            v = e[1]
+            env_variables[k] = v
+
     project_scaffold.load_project_scaffold(project_name, auth, extended=extend)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
@@ -134,6 +145,7 @@ def __call__(args, project_scaffold, **kwargs):
                 'frontend': frontend,
                 'extend': extend,
                 'services': services,
+                'env_variables': env_variables,
                 'wrapped': wrapped,
             }
         )

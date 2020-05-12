@@ -98,6 +98,22 @@ def test_all(capfd):
         "mkdir -p projects",
     )
 
+    exec_command(
+        capfd,
+        "rapydo create first --auth postgres --frontend no --env X",
+        "Invalid envs format, expected: K1=V1,K2=V2,...",
+    )
+    exec_command(
+        capfd,
+        "rapydo create first --auth postgres --frontend no --env X,",
+        "Invalid envs format, expected: K1=V1,K2=V2,...",
+    )
+    exec_command(
+        capfd,
+        "rapydo create first --auth postgres --frontend no --env X=1,Y",
+        "Invalid envs format, expected: K1=V1,K2=V2,...",
+    )
+
     # exec_command(
     #     capfd,
     #     "rapydo version",
@@ -105,9 +121,13 @@ def test_all(capfd):
     # )
 
     # Let's create a project and init git
+    create_command = "rapydo create first --auth postgres --frontend angular"
+    create_command += " --services rabbit"
+    create_command += " --origin https://your_remote_git/your_project.git"
+    create_command += " --env CUSTOMVAR1=mycustomvalue,CUSTOMVAR2=mycustomvalue"
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --services rabbit --origin https://your_remote_git/your_project.git",
+        create_command,
         "Project first successfully created",
     )
 
@@ -203,6 +223,9 @@ def test_all(capfd):
         "rapydo list --env",
         "List env variables:",
         "ACTIVATE_ALCHEMY",
+        "CUSTOMVAR1",
+        "CUSTOMVAR2",
+        "mycustomvalue",
     )
     exec_command(
         capfd,
