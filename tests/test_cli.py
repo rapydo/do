@@ -124,7 +124,6 @@ def test_all(capfd):
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit"
     create_command += " --origin https://your_remote_git/your_project.git"
-    create_command += " --env CUSTOMVAR1=mycustomvalue,CUSTOMVAR2=mycustomvalue"
     exec_command(
         capfd,
         create_command,
@@ -147,15 +146,24 @@ def test_all(capfd):
         "{f}".format(f=pconf),
     )
 
+    create_command = "rapydo create first --auth postgres --frontend angular"
+    create_command += " --services rabbit"
+    create_command += " --current --force"
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --services rabbit --current --force",
+        create_command,
         "Folder projects/first/confs already exists",
         "Project first successfully created",
     )
+
+    # this is the last version that is created
+    create_command = "rapydo create first --auth postgres --frontend angular"
+    create_command += " --services rabbit"
+    create_command += " --current --force"
+    create_command += " --env CUSTOMVAR1=mycustomvalue,CUSTOMVAR2=mycustomvalue"
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --services rabbit --current --force",
+        create_command,
         "Folder projects/first/confs already exists",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project first successfully created",
@@ -395,9 +403,12 @@ def test_all(capfd):
         "Invalid extend value: project doesnotexist not found",
     )
 
+    create_command = "rapydo create third --extend second"
+    create_command += " --auth neo4j --frontend angular"
+    create_command += " --current --services rabbit"
     exec_command(
         capfd,
-        "rapydo create third --extend second --auth neo4j --frontend angular --current --services rabbit",
+        create_command,
         "Folder projects already exists",
         "Project third successfully created",
     )
