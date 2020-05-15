@@ -7,18 +7,44 @@ from urllib.parse import urlparse
 
 import pytz
 from git import Repo
+from git.exc import NoSuchPathError
 from git.exc import InvalidGitRepositoryError, GitCommandError
 from controller import SUBMODULES_DIR, TESTING
 from controller import log
 
 
 def get_repo(path):
-    return Repo(path)
+    try:
+        return Repo(path)
+    except NoSuchPathError:
+        return None
+    except InvalidGitRepositoryError:
+        return None
+
+
+def init(path):
+    return Repo.init(path)
+
+
+def get_origin(gitobj):
+    try:
+        if gitobj is None:
+            return None
+
+        if len(gitobj.remotes) == 0:
+            return None
+        return gitobj.remotes.origin.url
+    except InvalidGitRepositoryError:
+        return None
 
 
 def get_local(path):
     try:
         gitobj = get_repo(path)
+
+        if gitobj is None:
+            log.warning("Invalid repository in {}", path)
+            return None
 
         if len(gitobj.remotes) == 0:
             log.warning("Unable to fetch remotes from {}", path)
@@ -82,15 +108,11 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     return True
 
 
-def clone(online_url, path, branch='master', do=False, check=True, expand_path=True):
+def clone(online_url, path, branch='master', do=False, check=True):
 
-    if expand_path:
-        local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
-    else:
-        local_path = path
-    local_path_exists = os.path.exists(local_path)
+    local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
 
-    if local_path_exists:
+    if os.path.exists(local_path):
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
@@ -157,10 +179,8 @@ Suggestion: remove {} and execute the init command
             if check_only:
                 return False
             log.exit(
-                """{p}: wrong branch {ab}, expected {b}.
-Suggestion:\n\ncd {wdir}; git fetch; git checkout {b}; cd -;\n""".format(
-                    p=path, ab=active_branch, b=branch, wdir=gitobj.working_dir
-                )
+                "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
+                path, active_branch, branch
             )
     return True
 

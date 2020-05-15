@@ -18,7 +18,7 @@ name_priorities = [
     'celery',
     'celeryui',
     'celery-beat',
-    'certificates-proxy'
+    'maintenance'
 ]
 
 

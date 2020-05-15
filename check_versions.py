@@ -98,9 +98,7 @@ def check_versions(skip_angular=False):
                     line = line.replace("FROM", "").strip()
 
                     dependencies[service]['Dockerfile'] = line
-                elif not skip_angular and 'RUN npm install' in line:
-                    if line.startswith("#"):
-                        continue
+                elif not skip_angular and ('RUN npm install' in line or 'RUN yarn add' in line or 'RUN yarn global add' in line):
 
                     tokens = line.split(" ")
                     for t in tokens:
@@ -112,8 +110,7 @@ def check_versions(skip_angular=False):
                                 dependencies[service]["npm"] = []
                             dependencies[service]["npm"].append(t)
                 elif 'RUN pip install' in line or 'RUN pip3 install' in line:
-                    if line.startswith("#"):
-                        continue
+
                     tokens = line.split(" ")
                     for t in tokens:
                         t = t.strip()
@@ -263,7 +260,8 @@ def check_versions(skip_angular=False):
 
     pp(filtered_dependencies)
 
-    log.info("Note: very hard to upgrade ubuntu:16.04 from backendirods and icat")
+    log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
+    log.info("oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required")
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
     log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 

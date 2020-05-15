@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
-current_version = "0.7.2"
-
-main_package = "controller"
-app = '{}.__main__:main'.format(main_package)
+current_version = "0.7.3"
 
 setup(
     name='rapydo_controller',
@@ -13,41 +10,36 @@ setup(
     author="Paolo D'Onorio De Meo",
     author_email='p.donorio.de.meo@gmail.com',
     description='Manage and deploy projects based on RAPyDo framework',
-    url='https://rapydo.github.io/do',
+    url='https://github.com/rapydo',
     license='MIT',
-    packages=[main_package],
+    packages=find_packages(
+        where='.',
+        exclude=['tests*']
+    ),
     package_data={
-        main_package: [
-            'argparser.yaml',
-            'templates/class.py',
-            'templates/get.yaml',
-            'templates/specs.yaml',
-            'templates/unittests.py',
-        ],
+        'controller': ['argparser.yaml', 'templates/*']
     },
     # End-of-life: 2020-09-13
     python_requires='>=3.5.0',
     entry_points={
         'console_scripts': [
-            'rapydo={}'.format(app),
-            'do={}'.format(app),
+            'rapydo=controller.__main__:main',
+            'do=controller.__main__:main',
         ],
     },
     install_requires=[
-        "docker-compose==1.25.1",
+        "docker-compose==1.25.4",
         "dockerfile-parse",
         "python-dateutil",
         "pytz",
         "loguru",
-        "pretty_errors",
         "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "gitpython==3.0.8",
-        # Ubuntu 18 has 4.0 installed, not compatible with gitpython
-        "gitdb2==3.0.1",
+        "gitpython==3.1.0",
+        "PyYAML==5.3.1",
         "pip>=10.0.0"
 
     ],

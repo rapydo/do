@@ -22,8 +22,6 @@ from compose.cli.command import (
 from compose.cli.main import TopLevelCommand
 from controller import log
 
-compose_log = 'docker-compose command: '
-
 
 class Compose:
 
@@ -53,54 +51,14 @@ class Compose:
         else:
             return services_list
 
-    def get_handle(self):
-        return TopLevelCommand(project_from_options(self.project_dir, self.options))
-
-    def build_images(
-        self, builds, current_version, current_uid, current_gid,
-        force_pull=True, no_cache=False,
-    ):
-
-        try:
-            compose_handler = self.get_handle()
-
-            for image, build in builds.items():
-
-                service = build.get('service')
-                log.verbose("Building image: {}", image)
-
-                options = {
-                    '--no-cache': no_cache,
-                    '--parallel': True,
-                    '--pull': force_pull,
-                    '--force-rm': True,
-                    'SERVICE': [service],
-                }
-
-                build_args = []
-                # NOTE: we can set only 1 variable since options is a dict
-                build_args.append("{}={}".format("RAPYDO_VERSION", current_version))
-                build_args.append("{}={}".format("CURRENT_UID", current_uid))
-                build_args.append("{}={}".format("CURRENT_GID", current_gid))
-
-                if len(build_args) > 0:
-                    options['--build-arg'] = build_args
-
-                compose_handler.build(options=options)
-                log.info("Built image: {}", image)
-
-            return
-        except SystemExit:
-            log.info("SystemExit during template building")
-
     def command(self, command, options=None, nofailure=False):
 
-        # NOTE: debug defaults
-        # tmp = self.get_defaults(command)
-        # print("TEST", tmp, type(tmp))
-        # # exit(1)
-
-        compose_handler = self.get_handle()
+        compose_handler = TopLevelCommand(
+            project_from_options(
+                self.project_dir,
+                self.options
+            )
+        )
         method = getattr(compose_handler, command)
 
         if options is None:
@@ -109,7 +67,7 @@ class Compose:
         if options.get('SERVICE', None) is None:
             options['SERVICE'] = []
 
-        log.debug("{}'{}'", compose_log, command)
+        log.debug("docker-compose command: '{}'", command)
 
         out = None
         # sometimes this import stucks... importing here to avoid unnecessary waits
@@ -198,7 +156,7 @@ class Compose:
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
-                "you can use rapydo clean or docker system prune"
+                "you can use rapydo remove --networks or docker system prune"
             )
 
     def create_volatile_container(

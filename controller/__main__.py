@@ -4,13 +4,10 @@
     Command line script: main function
 """
 
-import pretty_errors
-
 from controller import log
 
 
 def main():
-    pretty_errors  # pylint:disable=pointless-statement
     try:
         # imported here to avoid uncatched Keyboard Interruptions
         from controller.arguments import ArgParser

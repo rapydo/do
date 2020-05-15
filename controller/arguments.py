@@ -12,7 +12,7 @@ import os
 import sys
 import argparse
 from controller import __version__, PROJECTRC, PROJECTRC_ALTERNATIVE
-from controller.conf_utilities import load_yaml_file
+from controller.utilities.configuration import load_yaml_file
 from controller import log
 
 
@@ -22,82 +22,47 @@ class ArgParser:
             args = sys.argv
 
         self.current_args = {}
+        self.projectrc = {}
         self.host_configuration = {}
         # This method can raise ValueErrors
         self.check_args(args)
 
-        # This method saves configuration objects in self
-        self.read_configuration()
+        options, commands = self.read_configuration()
 
         # Arguments definition
         parser = argparse.ArgumentParser(
-            prog=args[0], description=self.parse_conf.get('description')
+            prog=args[0],
+            formatter_class=lambda prog: argparse.HelpFormatter(
+                prog, width=90, max_help_position=30
+            )
         )
+        parser._optionals.title = "Options"
 
-        # PARAMETERS
-        sorted_options = sorted(self.parse_conf.get('options', {}).items())
-        for option_name, options in sorted_options:
+        for option_name, options in options:
             self.add_parser_argument(parser, option_name, options)
 
         version_string = 'rapydo version {}'.format(__version__)
         parser.add_argument('--version', action='version', version=version_string)
+
         # Sub-parser of commands [check, init, etc]
-        main_command = self.parse_conf.get('action')
-
-        subparsers = parser.add_subparsers(
-            title='Available commands',
-            dest=main_command.get('name'),
-            help=main_command.get('help'),
-        )
-
+        subparsers = parser.add_subparsers(dest='action', title='Commands')
         subparsers.required = True
 
-        # ##########################
-        # COMMANDS
-
-        # BASE normal commands
-        mycommands = self.parse_conf.get('subcommands', {})
-
-        for command_name, options in sorted(mycommands.items()):
+        for command_name, options in commands:
 
             # Creating a parser for each sub-command [check, init, etc]
             subparse = subparsers.add_parser(
                 command_name, help=options.get('description')
             )
 
-            # controlcommands = options.get('controlcommands', {})
-            # # Some subcommands can have further subcommands
-            # [control start, stop, etc]
-            # if len(controlcommands) > 0:
-            #     innerparser = subparse.add_subparsers(
-            #         dest='controlcommand'
-            #     )
-            #     innerparser.required = options.get('controlrequired', False)
-            #     for subcommand, suboptions in controlcommands.items():
-            #         subcommand_help = suboptions.pop(0)
-            #         # Creating a parser for each sub-sub-command
-            #         # [control start/stop]
-            #         innerparser.add_parser(subcommand, help=subcommand_help)
-
             suboptions = options.get('suboptions', {}).items()
             for option_name, suboptions in suboptions:
                 self.add_parser_argument(subparse, option_name, suboptions)
 
-        # ##########################
-        # Print usage if no arguments provided
         if len(args) == 1:
             parser.print_help()
             sys.exit(1)
 
-        # ##########################
-        # Reading input parameters
-
-        # Partial parsing
-        # https://docs.python.org/3.4/library/argparse.html#partial-parsing
-        # Example
-        # https://gist.github.com/von/949337/
-
-        # self.current_args = parser.parse_args()
         current_args_namespace, self.remaining_args = parser.parse_known_args(args[1:])
         self.current_args = vars(current_args_namespace)
 
@@ -113,12 +78,6 @@ class ArgParser:
             help='list of custom commands',
         )
         self.extra_command_parser.required = True
-
-        # ##########################
-        if self.current_args.get("log_level", "DEPRECATED") != "DEPRECATED":
-            # Deprecated since version 0.7.0
-            log.warning(
-                "--log-level parameter is deprecated, set env variable LOGURU_LEVEL")
 
         log.verbose("Parsed arguments: {}", self.current_args)
 
@@ -150,48 +109,53 @@ class ArgParser:
     def read_configuration(self):
         # READ MAIN FILE WITH COMMANDS AND OPTIONS
 
-        self.parse_conf = load_yaml_file(
+        parse_conf = load_yaml_file(
             'argparser.yaml', path=os.path.dirname(os.path.realpath(__file__))
         )
 
         try:
             # READ PROJECT INIT FILE: .projectrc
-            pinit_conf = load_yaml_file(
+            self.projectrc = load_yaml_file(
                 PROJECTRC, path=os.curdir, is_optional=True)
             # Allow alternative for PROJECT INIT FILE: .project.yml
-            if len(pinit_conf) < 1:
-                pinit_conf = load_yaml_file(
+            if len(self.projectrc) < 1:
+                self.projectrc = load_yaml_file(
                     PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True)
         except AttributeError as e:
             log.exit(e)
 
-        self.host_configuration = pinit_conf.pop('project_configuration', {})
+        self.host_configuration = self.projectrc.pop('project_configuration', {})
 
-        # Mix with parse_conf
-        for key, value in pinit_conf.items():
-            # value = pinit_conf.get(key, None)
+        # Mix with projectrc
+        for key, value in self.projectrc.items():
 
             if value is None:
                 continue
 
             if not isinstance(value, dict):
                 # This is a first level option
-                if key in self.parse_conf['options']:
-                    self.parse_conf['options'][key]['default'] = value
+                if key in parse_conf['options']:
+                    parse_conf['options'][key]['default'] = value
+                    parse_conf['options'][key]['projectrc'] = True
                 else:
                     print("\nUnknown parameter {} found in {}\n".format(key, PROJECTRC))
             else:
                 # This is a second level parameter
-                if key not in self.parse_conf['subcommands']:
+                if key not in parse_conf['subcommands']:
                     print("\nUnknown command {} found in {}\n".format(key, PROJECTRC))
                 else:
-                    conf = self.parse_conf['subcommands'][key]['suboptions']
+                    conf = parse_conf['subcommands'][key]['suboptions']
                     for subkey, subvalue in value.items():
                         if subkey in conf:
                             conf[subkey]['default'] = subvalue
                         else:
                             print("Unknown parameter {}/{} found in {}\n".format(
                                 key, subkey, PROJECTRC))
+
+        options = sorted(parse_conf.get('options', {}).items())
+        commands = sorted(parse_conf.get('subcommands', {}).items())
+
+        return options, commands
 
     @staticmethod
     def prepare_params(options):
@@ -205,10 +169,12 @@ class ArgParser:
 
         if options.get('type') == 'bool':
 
-            if default:
-                pconf['action'] = 'store_false'
+            # This flag is set in projectrc => keep action as default
+            if options.get('projectrc', False):
+                pconf['action'] = 'store_true' if default else 'store_false'
             else:
-                pconf['action'] = 'store_true'
+                # invert default if flag is enabled
+                pconf['action'] = 'store_false' if default else 'store_true'
 
         else:
             # type and metavar are allowed for bool

@@ -11,30 +11,50 @@ try:
     import_exceptions = (ModuleNotFoundError, ImportError)
 except NameError:
     import_exceptions = ImportError
-
-DEFAULT_BIN_OPTION = '--version'
+from controller.app import Application
+from controller import TESTING
+from controller import log
 
 
 def install(package, editable=False, user=False, use_pip3=True):
-    with Sultan.load(sudo=not user) as sultan:
-        command = 'install --upgrade'
-        if editable:
-            command += " --editable"
-        if user:
-            command += " --user"
-        command += ' {}'.format(package)
 
-        if use_pip3:
-            result = sultan.pip3(command).run()
-        else:
-            result = sultan.pip(command).run()
+    if use_pip3 and Application.get_bin_version('pip3') is None:
+        return install(
+            package=package,
+            editable=editable,
+            user=user,
+            use_pip3=False,
+        )
 
-        for r in result.stdout:
-            print(r)
+    try:
+        sudo = not user
+        # sudo does not work on travis
+        if TESTING:
+            sudo = False
+        with Sultan.load(sudo=sudo) as sultan:
+            command = 'install --upgrade'
+            if editable:
+                command += " --editable"
+            # --user does not work on travis:
+            # Can not perform a '--user' install.
+            # User site-packages are not visible in this virtualenv.
+            if not TESTING and user:
+                command += " --user"
+            command += ' {}'.format(package)
 
-        for r in result.stderr:
-            print(r)
-        return result.rc == 0
+            if use_pip3:
+                result = sultan.pip3(command).run()
+            else:
+                result = sultan.pip(command).run()
+
+            for r in result.stdout:
+                print(r)
+
+            for r in result.stderr:
+                print(r)
+            return result.rc == 0
+    except BaseException as e:
+        log.exit(e)
 
 
 def check_version(package_name):
@@ -46,35 +66,6 @@ def check_version(package_name):
             return pkg._version  # pylint:disable=protected-access
 
     return None
-
-
-def executable(exec_cmd, option=DEFAULT_BIN_OPTION, parse_ver=False):
-
-    from subprocess import check_output
-
-    try:
-        if isinstance(option, list):
-            cmd = [exec_cmd]
-            cmd.extend(option)
-        else:
-            cmd = [exec_cmd, option]
-        stdout = check_output(cmd)
-        output = stdout.decode()
-    except OSError:
-        return None
-    else:
-        if option == DEFAULT_BIN_OPTION:
-            parse_ver = True
-        if parse_ver:
-            try:
-                # try splitting on comma and/or parenthesis
-                # then last element on spaces
-                output = output.split('(')[0].split(',')[0].split()[::-1][0]
-                output = output.strip()
-                output = output.replace("'", "")
-            except BaseException:
-                pass
-        return output
 
 
 def import_package(package_name):

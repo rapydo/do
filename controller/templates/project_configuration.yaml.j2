@@ -1,0 +1,77 @@
+---
+project:
+  title: YourProject
+  description: "Your project"
+  version: {{ version }}
+  rapydo: {{ version }}
+  {% if extend -%}
+  extends: {{ extend }}
+  extends-from: projects
+  {% endif %}
+
+variables:
+  backend:
+    credentials:
+      roles:
+        user: normal_user
+        internal: staff_user
+        admin: admin_root
+        default: normal_user
+  env:
+
+    FRONTEND_FRAMEWORK: {{ frontend }}
+    AUTH_SERVICE: {{ auth_service }}
+    {% if enable_postgres -%}
+    ACTIVATE_ALCHEMY: 1
+    ACTIVATE_POSTGRES: 1
+    {% endif -%}
+    {% if enable_mysql -%}
+    ACTIVATE_ALCHEMY: 1
+    ACTIVATE_MYSQL: 1
+    ALCHEMY_PORT: 3306
+    ALCHEMY_DBTYPE: 'mysql+pymysql'
+    {% endif -%}
+    {% if enable_neo4j -%}
+    ACTIVATE_NEO4J: 1
+    {% endif -%}
+    {% if enable_mongo -%}
+    ACTIVATE_MONGODB: 1
+    {% endif -%}
+    {% if enable_rabbit -%}
+    ACTIVATE_RABBIT: 1
+    {% endif -%}
+    {% if enable_redis -%}
+    ACTIVATE_REDIS: 1
+    {% endif -%}
+    {% if enable_irods -%}
+    ACTIVATE_ICAT: 1
+    ACTIVATE_IRODS: 1
+    BACKEND_BUILD_MODE: backendirods
+    ALCHEMY_DBS: 'ICAT SQL_API'
+    {% endif -%}
+    {% if enable_celery -%}
+    ACTIVATE_CELERY: 1
+    ACTIVATE_CELERYUI: 1
+    {% if enable_mongo or enable_redis -%}
+    ACTIVATE_CELERYBEAT: 1
+    {% endif -%}
+    {% endif -%}
+    {% if enable_pushpin -%}
+    ACTIVATE_PUSHPIN: 1
+    {% endif -%}
+    {% if enable_ftp -%}
+    ACTIVATE_FTP: 1
+    {% endif -%}
+    {% if celery_broker -%}
+    CELERY_BROKER: {{ celery_broker }}
+    {% endif -%}
+    {% if celery_backend -%}
+    CELERY_BACKEND: {{ celery_backend }}
+    {% endif -%}
+    {% if wrapped -%}
+    # to be deprecated
+    WRAP_RESPONSE: 1
+    {% endif -%}
+    {% for KEY, VALUE in env_variables.items() -%}
+    {{ KEY }}: {{ VALUE }}
+    {% endfor %} 

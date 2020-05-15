@@ -1,0 +1,63 @@
+project: {{ project }}
+# stack: your_custom_stack 
+hostname: {{ hostname }}
+{% if production -%}
+production: True
+{% else %}
+# production: True
+{% endif -%}
+
+project_configuration:
+  variables:
+    env:
+      LOG_LEVEL: INFO
+      # SMTP_ADMIN: your@email.org
+
+      {% if production -%}
+      {% if services -%}{% for service in services -%}
+      {% if service == 'backend' -%}
+      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'postgres' or service == 'mariadb' -%}
+      ALCHEMY_USER: sqluser
+      ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'neo4j' -%}
+      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'celeryui' -%}
+      CELERYUI_PASSWORD: {{ 'RANDOM'| password }}
+      CELERYUI_USER: {{ 'RANDOM'| username }}
+      {% endif -%}
+      {% if service == 'rabbit' -%}
+      RABBITMQ_USER: {{ 'RANDOM'| username }}
+      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% if service == 'icat' -%}
+      IRODS_USER: irods
+      IRODS_PASSWORD: {{ 'RANDOM'| password }}
+      {% endif -%}
+      {% endfor %}{% endif -%}
+      {% if testing -%}
+      DEFAULT_DHLEN: 1024
+      {% endif -%}
+
+      {% else %}
+      # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+      {% if testing -%}
+      APP_MODE: test
+      SMTP_HOST: mock.mail.service
+      SMTP_ADMIN: mock@nomail.org
+      SMTP_PORT: 0
+      SMTP_USERNAME: {{ 'RANDOM'| username }}
+      SMTP_PASSWORD: {{ 'RANDOM'| password }}
+      ALLOW_PASSWORD_RESET: 'true'
+      ALLOW_REGISTRATION: 'true'
+      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}+Aa1-nowit'sstrong!
+      UPLOAD_PATH: /tmp
+      {% endif -%}
+
+      {% endif -%}

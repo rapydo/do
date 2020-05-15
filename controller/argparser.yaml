@@ -1,91 +1,57 @@
-
-description: Do actions with your RAPyDo project
-action:
-  name: action
-  help: all possible commands
-
 options:
 
   project:
     alias: p
     # NOTE: this is the equivalent of the old concept of `blueprint`
     type: str
-    metavalue: PROJECT_NAME
-    help: name of the project to be found inside the './projects' directory
-    # The only one if exists otherwise list the projects.
+    metavalue: NAME
+    help: Name of the project
     default: null
-
-  # deprecated since 0.7.1
-  mode:
-    alias: m
-    type: str
-    metavalue: CONTAINERS_YAML_SELECTED_MODE
-    default: null
-    help: mode is like a 'blueprint' marker of the configuration to launch - DEPRECATED! user --stack instead
 
   stack:
     type: str
-    metavalue: CONTAINERS_YAML_STACK
+    metavalue: STACK
     default: null
-    help: the docker-compose stack to be loaded (from the projects conf folder)
-
-  # deprecated since 0.7.0
-  log-level:
-    alias: l
-    type: str
-    metavalue: LEVEL_OF_DEBUGGER
-    default: DEPRECATED
-    help: level of verbosity - DEPRECATED! export LOGURU_LEVEL env variable instead
+    help: Docker-compose stack to be loaded
 
   no-backend:
     type: bool
     default: False
-    help: Exclude backend configuration from rapydo stack
+    help: Exclude backend configuration
 
   no-frontend:
     type: bool
     default: False
-    help: Exclude frontend configuration from rapydo stack
+    help: Exclude frontend configuration
 
   no-commons:
     type: bool
     default: False
-    help: Exclude project common configuration from rapydo stack
+    help: Exclude project common configuration
 
   hostname:
     alias: H
     type: str
-    metavalue: MACHINE_HOST_NAME
+    metavalue: NAME
     default: localhost
-    help: "host name of the current machine where the server is running"
+    help: Hostname of the current machine
 
   services:
     alias: s
     type: str
-    metavalue: SERVICES_COMMA_SEPARATED
-    help: list of services referring to a command
-
-  # deprecated since 0.7.0
-  development:
-    type: bool
-    default: False
-    help: switch to development mode - DEPRECATED!
+    metavalue: S1,S2
+    help: Comma separated list of services
 
   privileged:
     type: bool
     default: False
-    help: allow containers to start in privileged mode
-
-  check-permissions:
-    type: bool
-    default: False
-    help: Enabled permission checks on file system
+    help: Allow containers privileged mode
 
   production:
     alias: -prod
     type: bool
     default: False
-    help: enable production mode
+    help: Enable production mode
 
   # net:
   #   type: str
@@ -95,10 +61,10 @@ options:
 subcommands:
 
   dump:
-    description: dump current config into docker compose YAML
+    description: Dump current config into docker compose YAML
 
   formatter:
-    description: "run 'black' formatter on main project backend code"
+    description: Run 'black' formatter on python code
     suboptions:
       folder:
         alias: f
@@ -114,8 +80,7 @@ subcommands:
         help: name of submodule to be formatted. Project folder is defined as vanilla submodule
 
   check:
-    description: "only verify if currently compliant to RAPyDo specs
-        (NOTE: this is done at every call)"
+    description: Verify if current project is compliant to RAPyDo specs
     suboptions:
       ignore-submodule:
         alias: i
@@ -127,33 +92,36 @@ subcommands:
         alias: s
         type: bool
         default: False
-        help: ignore the heaviest check operations on git commits
+        help: skip checks on git commits
       no-builds:
         type: bool
         default: False
-        help: ignore the heaviest builds operations
+        help: skip check on docker builds
+      check-permissions:
+        type: bool
+        default: False
+        help: Enabled permission checks on file system
   init:
-    description: "
-      make current project compliant to RAPyDo requirements
-      (if not yet being)"
+    description: Make current project compliant to RAPyDo requirements
     suboptions:
       submodules-path:
         type: str
-        metavalue: SUBMODULE_PATH
+        metavalue: PATH
         help: link all submodules in an existing folder instead of download them
+      force:
+        alias: f
+        type: bool
+        # metavalue: TRUE_OR_FALSE
+        default: False
+        help: overwrite initialization files if already exist
   update:
-    description: update the current project
+    description: Update the current project
     suboptions:
       ignore-submodule:
         alias: i
         type: str
         metavalue: IGNORE_SUBMODULE
         help: ignore a given list of submodules (command delimited)
-      rebuild:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: rebuild templates if required
 
   install:
     description: Install a rapydo-controller version
@@ -181,16 +149,15 @@ subcommands:
         help: install at user level (sudo not required)
 
   status:
-    description: list current status of containers
+    description: List current status of containers
   build:
-    description: force building of one or more services docker images
+    description: Force building of one or more services docker images
     suboptions:
-      rebuild-templates:
-        alias: t
+      core:
         type: bool
         # metavalue: TRUE_OR_FALSE
         default: False
-        help: force rebuild of parent images (templates) used in local builds
+        help: force build of all images including core builds
       force:
         alias: f
         type: bool
@@ -198,9 +165,9 @@ subcommands:
         default: False
         help: remove the build cache to force the complete rebuilding
   pull:
-    description: pull available images from docker hub
+    description: Pull available images from docker hub
   logs:
-    description: watch log tails of all or specified containers
+    description: Watch log tails of all or specified containers
     suboptions:
       follow:
         alias: f
@@ -219,10 +186,8 @@ subcommands:
         type: str
         metavalue: SERVICE
         default: null
-  custom:
-    description: execute predefined custom commands inside containers
-  ssl-certificate:
-    description: issue a production certificate with service Letsencrypt
+  ssl:
+    description: Issue a SSL certificate with Let's Encrypt
     suboptions:
       chain-file:
         type: str
@@ -249,10 +214,39 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
-  ssl-dhparam:
-    description: "generate DH DSA parameters, 4096 bit long prime. BEWARE: this may take very long time to complete"
+  # Deprecated since 0.7.3
+  ssl-certificate:
+    description: Deprecated command, use rapydo ssl instead 
+    suboptions:
+      chain-file:
+        type: str
+        metavalue: PATH_TO_CHAIN_FILE
+        default: null
+        help: path to existing chain file (.pem format)
+      key-file:
+        type: str
+        metavalue: PATH_TO_KEY_FILE
+        default: null
+        help: path to existing key file (.pem format)
+      volatile:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Create a volatile proxy service to request the certificate
+      force:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force Let's Encrypt to renew the certificate
+      no-tty:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable pseudo-tty allocation, useful to execute the command from a cronjob
+  dhparam:
+    description: Generate SSL DH DSA parameters, 4096 bit long prime
   interfaces:
-    description: run off some predefined interfaces to services
+    description: Run off some predefined interfaces to services
     suboptions:
       service:
         positional: true
@@ -272,7 +266,7 @@ subcommands:
         help: Detached mode to run the container in background
 
   shell:
-    description: open a shell inside one available 'dockerized' service
+    description: Open a shell or execute a command onto a container
     suboptions:
       service:
         positional: true
@@ -309,26 +303,26 @@ subcommands:
         default: False
         help: Disable detach mode and attach to container execution
   stop:
-    description: stop running containers, but do not remove them
+    description: Stop running containers, but do not remove them
   restart:
-    description: restart running containers
+    description: Restart running containers
   remove:
-    description: stop containers (if running) and also remove them
-  toggle-freeze:
-    description: toggle a temporary block/pause on running containers
-  clean:
-    description: "remove all:
-      containers, networks and OPTIONALLY data volumes"
+    description: Stop and remove containers
     suboptions:
-      rm-volumes:
-      # remove-all-volumes:
-        alias: rm
+      networks:
+        alias: -net
         type: bool
         metavalue: TRUE_OR_FALSE
         default: False
-        help: remove also containers persistent data
+        help: also remove containers networks
+      all:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: also remove networks and persistent data stored in docker volumes
+
   list:
-    description: print rapydo configurations
+    description: Print rapydo configurations
     suboptions:
       args:
         alias: a
@@ -342,7 +336,7 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: List environment variable (.env file)
-      services:
+      active-services:
         alias: s
         type: bool
         metavalue: TRUE_OR_FALSE
@@ -355,7 +349,7 @@ subcommands:
         default: False
         help: List submodules
   scale:
-    description: scale the number of containers for one service
+    description: Scale the number of containers for one service
     suboptions:
       value:
         positional: yes
@@ -363,37 +357,8 @@ subcommands:
         metavalue: "SERVICE=NUM_REPLICA"
         default:
         help: scale SERVICE to NUM_REPLICA
-  find:
-    description: show information about an existing endpoint
-    suboptions:
-      endpoint:
-        positional: no
-        type: str
-        metavalue: ENDPOINT_NAME
-        help: an existing endpoint name to search inside the swagger definition
-  template:
-    description: create a new endpoint based on a template
-    suboptions:
-      endpoint:
-        positional: yes  # note: yes is equivalent to True in YAML
-        type: str
-        metavalue: ENDPOINT_NAME
-        default: foo
-        help: the endpoint name to be created
-      'yes':
-        alias: y
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: say yes to all questions
-      service:
-        alias: s
-        type: str
-        metavalue: CONNECTED_SERVICE
-        # default: sqlalchemy
-        help: the first service that will be connected inside the code
   verify:
-    description: check a service connection within the backend container
+    description: Test if service is reachable from the backend
     suboptions:
       service:
         positional: yes
@@ -401,7 +366,7 @@ subcommands:
         metavalue: SERVICE
         default: null
   volatile:
-    description: one command container
+    description: Create a single-command container
     suboptions:
       service:
         positional: yes
@@ -416,22 +381,67 @@ subcommands:
         default: bash
         help: UNIX command to be executed
   create:
-    description: create a new rapydo project
+    description: Create a new rapydo project
     suboptions:
-      template:
-        positional: true
-        type: str
-        metavalue: TEMPLATE_NAME
-        default: null
-        help: Name of the template used to initialize your project. Allowed values are sql, neo, mongo, celerytest, irodstest, centos 
       name:
         positional: true
         type: str
         metavalue: NAME
         default: null
         help: Name of your new project
+      current:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force creation in current folder
+      force:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Force files overwriting
+      no-auto:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Disable automatic project creation
+      auth:
+        type: str
+        metavalue: FRAMEWORK
+        default: null
+        help: Auth service to enable (sql, neo4j, mongo)
+      frontend:
+        type: str
+        metavalue: FRAMEWORK
+        default: null
+        help: Frontend framework to enable (no, angular)
+      extend:
+        type: str
+        metavalue: PROJECT
+        default: null
+        help: Extend from another project
+      services:
+        type: str
+        metavalue: S1,S2
+        default: ''
+        help: Comma separated list of services to be enabled
+      # to be deprecated
+      wrapped:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Enable (old) wrapped response
+      origin-url:
+        type: str
+        metavalue: URL
+        default: null
+        help: Set the git origin url for the project
+      env:
+        type: str
+        metavalue: ENV_VARIABLES
+        default: null
+        help: Command separated list of ENV=VALUE to be added in project_configuration
   ancestors:
-    description: find all ancestors of a docker image
+    description: Find all ancestors of a docker image
     suboptions:
       imagetag:
         positional: true

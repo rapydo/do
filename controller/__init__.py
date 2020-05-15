@@ -4,18 +4,17 @@ import os
 import sys
 from loguru import logger as log
 
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 
 
-TESTING = os.environ.get("TESTING") == '1'
-LOGS_FOLDER = "data/logs"
+# NOTE: telling the app if testing or not
+# http://j.mp/2uifoza
+TESTING = hasattr(sys, '_called_from_test') or os.environ.get('TESTING', '0') == '1'
 
-if TESTING:
-    LOGS_FILE = None
-elif not os.path.exists(LOGS_FOLDER) or not os.path.isdir(LOGS_FOLDER):
-    log.error("Logs folder not found ({}), execute rapydo init please", LOGS_FOLDER)
-    LOGS_FILE = None
-else:
+LOGS_FOLDER = os.path.join("data", "logs")
+
+LOGS_FILE = None
+if os.path.isdir(LOGS_FOLDER):
     LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
 
 log.level("VERBOSE", no=1, color="<fg #666>")
@@ -32,8 +31,8 @@ def exit_msg(message="", *args, **kwargs):
         raise ValueError("Error code must be an integer")
     if error_code < 1:
         raise ValueError("Cannot exit with value below 1")
-
-    log.critical(message, *args, **kwargs)
+    if message:
+        log.critical(message, *args, **kwargs)
     sys.exit(error_code)
 
 
@@ -41,20 +40,24 @@ log.verbose = verbose
 log.exit = exit_msg
 
 log.remove()
-if LOGS_FILE is not None:
-    log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
 else:
     log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
 
+if LOGS_FILE is not None:
+    try:
+        log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
+    except PermissionError as e:
+        log.error(e)
+        LOGS_FILE = None
+
 # FRAMEWORK_NAME = 'RAPyDo'
 # PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 PROJECT_DIR = 'projects'
-SWAGGER_DIR = 'swagger'
 RAPYDO_CONFS = 'rapydo-confs'
 RAPYDO_TEMPLATE = 'tests'
 RAPYDO_GITHUB = "https://github.com/rapydo"
@@ -68,7 +71,3 @@ CONTAINERS_YAML_DIRNAME = 'confs'
 BACKEND_DIR = 'backend'  # directory outside docker
 BACKEND_PACKAGE = 'restapi'  # package inside rapydo-http
 ENDPOINTS_CODE_DIR = 'apis'
-
-# NOTE: telling the app if testing or not
-# http://j.mp/2uifoza
-TESTING = hasattr(sys, '_called_from_test')

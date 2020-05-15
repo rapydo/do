@@ -1,0 +1,10 @@
+
+<ul class="navbar-nav">
+
+  <li class='nav-item' *ngIf="user && (user.isAdmin || user.isLocalAdmin)">
+    <a class='nav-link' routerLink="/app/admin/users">
+      Users
+    </a>
+  </li>
+
+</ul>
