@@ -732,7 +732,7 @@ To fix this issue, please update docker to version {}+
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': "{}.yml".format(stack),
             'extended-mode': self.extended_project is not None,
-            'baseconf': os.path.join(CONFS_DIR, 'compose'),
+            'baseconf': CONFS_DIR,
             'customconf': os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
         }
 
@@ -809,7 +809,6 @@ To fix this issue, please update docker to version {}+
         env = self.vars.get('env', {})
         env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
-        # Relative paths from ./submodules/do/do/controller/confs/compose
         env['VANILLA_DIR'] = os.path.abspath(os.curdir)
         env['SUBMODULE_DIR'] = os.path.join(env['VANILLA_DIR'], SUBMODULES_DIR)
         env['PROJECT_DIR'] = os.path.join(env['VANILLA_DIR'], PROJECT_DIR, self.project)
