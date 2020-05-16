@@ -247,9 +247,7 @@ services:
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
     volumes:
-      - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx:/etc/nginx/sites-enabled-templates
-      # - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/${NGINX_PROD_CONF}:/etc/nginx/sites-enabled-templates/production
-      # - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/${NGINX_PROD_HEADERS}:/etc/nginx/sites-enabled-templates/production-headers
+      - ${SUBMODULE_DIR}/do/controller/confs/nginx:/etc/nginx/sites-enabled-templates
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     networks:
@@ -288,7 +286,7 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     volumes:
-      - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/maintenance.conf:/etc/nginx/sites-enabled/maintenance.conf
+      - ${SUBMODULE_DIR}/do/controller/confs/nginx/maintenance.conf:/etc/nginx/sites-enabled/maintenance.conf
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     networks:
@@ -309,7 +307,7 @@ services:
     image: postgres:12.2-alpine
     volumes:
       - sqldata:/var/lib/postgresql/data
-      - ${SUBMODULE_DIR}/rapydo-confs/confs/postgresql/pgs_init.sh:/docker-entrypoint-initdb.d/setup-my-schema.sh:ro
+      - ${SUBMODULE_DIR}/do/controller/confs/postgresql/pgs_init.sh:/docker-entrypoint-initdb.d/setup-my-schema.sh:ro
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
@@ -816,4 +814,4 @@ services:
     ports:
       - 7999:7999
     volumes:
-      - ${SUBMODULE_DIR}/rapydo-confs/confs/pushpin/routes:/etc/pushpin/routes
+      - ${SUBMODULE_DIR}/do/controller/confs/pushpin/routes:/etc/pushpin/routes
