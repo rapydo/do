@@ -16,11 +16,6 @@ variables:
       online_url: https://github.com/rapydo/rapydo-react.git
       if: $$react
       path: frontend
-    rapydo-angularjs:
-      online_url: https://github.com/rapydo/angularjs-on-flask.git
-      if: $$angularjs
-      branch: master
-      path: frontend
     do:
       online_url: https://github.com/rapydo/do.git
       if: true
@@ -61,12 +56,6 @@ variables:
       path: $$baseconf
       mandatory: True
       if: $$react
-    angularjs:
-      file: angularjs.yml
-      base: True
-      path: $$baseconf
-      mandatory: True
-      if: $$angularjs
     extended-commons:
       file: commons.yml
       base: False

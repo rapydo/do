@@ -19,7 +19,7 @@ from controller import __version__
 from controller.commands import version as version_cmd
 from controller.commands import install as install_cmd
 from controller.commands import create as create_cmd
-from controller.project import Project, NO_FRONTEND, ANGULAR, ANGULARJS, REACT
+from controller.project import Project, NO_FRONTEND, ANGULAR, REACT
 from controller.utilities import services
 from controller.utilities import system
 from controller.utilities import configuration
@@ -646,7 +646,6 @@ To fix this issue, please update docker to version {}+
 
         # substitute values starting with '$$'
         myvars = {
-            ANGULARJS: self.frontend == ANGULARJS,
             ANGULAR: self.frontend == ANGULAR,
             REACT: self.frontend == REACT
         }
@@ -725,7 +724,6 @@ To fix this issue, please update docker to version {}+
 
         myvars = {
             'backend': not self.current_args.get('no_backend'),
-            ANGULARJS: self.frontend == ANGULARJS and load_frontend,
             ANGULAR: self.frontend == ANGULAR and load_frontend,
             REACT: self.frontend == REACT and load_frontend,
             'commons': load_commons,

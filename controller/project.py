@@ -6,7 +6,6 @@ from controller import PROJECT_DIR
 from controller import log
 
 NO_FRONTEND = 'nofrontend'
-ANGULARJS = 'angularjs'
 ANGULAR = 'angular'
 REACT = 'react'
 
@@ -128,18 +127,6 @@ class Project:
                 self.p_path("frontend", "app", "app.home.html"),
                 self.p_path("frontend", "app", "custom.declarations.ts"),
                 self.p_path("frontend", "app", "custom.routes.ts"),
-            ])
-
-        if self.frontend == ANGULARJS:
-
-            self.expected_folders.extend([
-                self.p_path("frontend", "js"),
-                self.p_path("frontend", "templates"),
-            ])
-
-            self.expected_files.extend([
-                self.p_path("frontend", "js", "app.js"),
-                self.p_path("frontend", "js", "routing.extra.js"),
             ])
 
         return True

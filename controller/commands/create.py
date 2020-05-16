@@ -2,7 +2,7 @@
 import os
 from controller import __version__
 from controller import PROJECT_DIR
-from controller.project import NO_FRONTEND, ANGULAR  # ANGULARJS, REACT
+from controller.project import NO_FRONTEND, ANGULAR  # REACT
 from controller.templating import Templating
 from controller import gitter
 from controller import log
