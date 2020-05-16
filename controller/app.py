@@ -135,7 +135,7 @@ class Application:
         self.verify_rapydo_version()
         self.project_scaffold.inspect_project_folder()
         # will be set to True if init and projectrc is missing or forced
-        self.force_projectrc_creation = False
+        force_projectrc_creation = False
 
         # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
@@ -182,14 +182,17 @@ class Application:
             log.exit("Command not implemented: {}", self.action)
 
         if self.initialize:
-            self.force_projectrc_creation = (
-                not self.arguments.projectrc or self.current_args.get('force', False)
-            )
+
+            if self.current_args.get('force', False):
+                force_projectrc_creation = True
+            else:
+                force_projectrc_creation = not self.arguments.projectrc and \
+                    not self.arguments.host_configuration
 
             # We have to create the .projectrc twice
             # One generic here with main options and another after the complete
             # conf reading to set services variables
-            if self.force_projectrc_creation:
+            if force_projectrc_creation:
                 self.create_projectrc()
 
         self.git_submodules()
@@ -215,7 +218,7 @@ class Application:
         # We have to create the .projectrc twice
         # One generic with main options and another here
         # when services are available to set specific configurations
-        if self.force_projectrc_creation:
+        if force_projectrc_creation:
             self.create_projectrc()
             # Read again! :-(
             self.make_env()
