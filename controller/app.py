@@ -25,7 +25,7 @@ from controller.utilities import system
 from controller.utilities import configuration
 from controller import gitter
 from controller import COMPOSE_ENVIRONMENT_FILE, PLACEHOLDER
-from controller import SUBMODULES_DIR, RAPYDO_CONFS, RAPYDO_GITHUB, PROJECTRC
+from controller import SUBMODULES_DIR, CONFS_DIR, PROJECTRC
 from controller.compose import Compose
 from controller.templating import Templating
 from controller import log
@@ -81,6 +81,9 @@ class Application:
 
         if self.print_version:
             # from inside project folder, load configuration
+            self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
+                self.project
+            )
             if err is None:
                 self.read_specs()
             version_cmd.__call__(
@@ -102,7 +105,9 @@ class Application:
             self.check_internet_connection()
 
         if self.install:
-            self.project = self.project_scaffold.get_project(self.project)
+            self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
+                self.project
+            )
             self.read_specs()
             self.git_submodules()
             install_cmd.__call__(
@@ -113,14 +118,15 @@ class Application:
             sys.exit(0)
 
         # if project is None, it is retrieve by project folder
-        self.project = self.project_scaffold.get_project(self.project)
+        self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
+            self.project
+        )
         self.current_args['project'] = self.project
         self.checked("Selected project: {}", self.project)
         # Auth is not yet available, will be read by read_specs
         self.project_scaffold.load_project_scaffold(self.project, auth=None)
         self.preliminary_version_check()
 
-        self.git_submodules(confs_only=True)
         self.read_specs()  # read project configuration
         self.hostname = self.current_args.get('hostname', 'localhost')
 
@@ -186,7 +192,7 @@ class Application:
             if self.force_projectrc_creation:
                 self.create_projectrc()
 
-        self.git_submodules(confs_only=False)
+        self.git_submodules()
 
         if self.update:
             self.git_checks_or_update()
@@ -298,7 +304,7 @@ class Application:
         # https://devguide.python.org/#status-of-python-branches
         if sys.version_info < (3, 6):
             log.warning(
-                "You are using pyton {}.{}.{}, please consider to upgrade " +
+                "You are using pyton {}.{}.{}, please consider to upgrade "
                 "before reaching End Of Life (expected in September 2020)",
                 sys.version_info.major,
                 sys.version_info.minor,
@@ -499,8 +505,6 @@ To fix this issue, please update docker to version {}+
     def read_specs(self):
         """ Read project configuration """
 
-        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
-        default_file_path = os.path.join(SUBMODULES_DIR, RAPYDO_CONFS)
         try:
             if self.initialize:
                 read_extended = False
@@ -510,8 +514,8 @@ To fix this issue, please update docker to version {}+
                 read_extended = True
 
             confs = configuration.read_configuration(
-                default_file_path=default_file_path,
-                base_project_path=project_file_path,
+                default_file_path=CONFS_DIR,
+                base_project_path=self.ABS_PROJECT_PATH,
                 projects_path=PROJECT_DIR,
                 submodules_path=SUBMODULES_DIR,
                 read_extended=read_extended,
@@ -557,10 +561,9 @@ To fix this issue, please update docker to version {}+
 
     def preliminary_version_check(self):
 
-        project_file_path = os.path.join(os.curdir, PROJECT_DIR, self.project)
         specs = configuration.load_yaml_file(
             file=configuration.PROJECT_CONF_FILENAME,
-            path=project_file_path,
+            path=self.ABS_PROJECT_PATH,
             keep_order=True
         )
         v = glom(specs, "project.rapydo", default=None)
@@ -639,17 +642,14 @@ To fix this issue, please update docker to version {}+
             )
             log.exit("Unable to continue, please fix the host date\n{}", tips)
 
-    def working_clone(self, name, repo, confs_only=False, from_path=None):
+    def working_clone(self, name, repo, from_path=None):
 
         # substitute values starting with '$$'
-        if confs_only:
-            myvars = {}
-        else:
-            myvars = {
-                ANGULARJS: self.frontend == ANGULARJS,
-                ANGULAR: self.frontend == ANGULAR,
-                REACT: self.frontend == REACT
-            }
+        myvars = {
+            ANGULARJS: self.frontend == ANGULARJS,
+            ANGULAR: self.frontend == ANGULAR,
+            REACT: self.frontend == REACT
+        }
         repo = services.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
@@ -666,7 +666,7 @@ To fix this issue, please update docker to version {}+
             repo['path'] = name
         # - version is the one we have on the working controller
         if 'branch' not in repo:
-            if confs_only or self.rapydo_version is None:
+            if self.rapydo_version is None:
                 repo['branch'] = __version__
             else:
                 repo['branch'] = self.rapydo_version
@@ -694,7 +694,7 @@ To fix this issue, please update docker to version {}+
 
         return gitter.clone(**repo)
 
-    def git_submodules(self, confs_only=False):
+    def git_submodules(self):
         """ Check and/or clone git projects """
 
         from_local_path = self.current_args.get('submodules_path')
@@ -702,22 +702,12 @@ To fix this issue, please update docker to version {}+
             if not os.path.exists(from_local_path):
                 log.exit("Local path not found: {}", from_local_path)
 
-        if confs_only:
-            repos = {
-                RAPYDO_CONFS: {
-                    "online_url": "{}/{}.git".format(RAPYDO_GITHUB, RAPYDO_CONFS),
-                    "if": "true",
-                }
-            }
-        else:
-            repos = self.vars.get('submodules', {}).copy()
+        repos = self.vars.get('submodules', {}).copy()
 
         self.gits['main'] = gitter.get_repo(".")
 
         for name, repo in repos.items():
-            self.gits[name] = self.working_clone(
-                name, repo, confs_only=confs_only, from_path=from_local_path
-            )
+            self.gits[name] = self.working_clone(name, repo, from_path=from_local_path)
 
     def read_composers(self):
 
@@ -742,12 +732,8 @@ To fix this issue, please update docker to version {}+
             'extended-commons': self.extended_project is not None and load_commons,
             'mode': "{}.yml".format(stack),
             'extended-mode': self.extended_project is not None,
-            'baseconf': os.path.join(
-                os.curdir, SUBMODULES_DIR, RAPYDO_CONFS, CONTAINERS_YAML_DIRNAME
-            ),
-            'customconf': os.path.join(
-                os.curdir, PROJECT_DIR, self.project, CONTAINERS_YAML_DIRNAME
-            ),
+            'baseconf': os.path.join(CONFS_DIR, 'compose'),
+            'customconf': os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
         }
 
         if self.extended_project_path is None:
@@ -823,9 +809,9 @@ To fix this issue, please update docker to version {}+
         env = self.vars.get('env', {})
         env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
-        # Relative paths from ./submodules/rapydo-confs/confs
-        env['SUBMODULE_DIR'] = "../.."
-        env['VANILLA_DIR'] = "../../.."
+        # Relative paths from ./submodules/do/do/controller/confs/compose
+        env['SUBMODULE_DIR'] = "../../../.."
+        env['VANILLA_DIR'] = "../../../../.."
         env['PROJECT_DIR'] = os.path.join(env['VANILLA_DIR'], PROJECT_DIR, self.project)
 
         if self.extended_project_path is None:

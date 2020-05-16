@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  frontend:
+    restart: on-failure:5
+    image: rapydo/frontend
+    command: ./boot
+    hostname: frontend
+    # TO FIX: fix all mounts!!
+    working_dir: /data/submodules/frontend
+    environment:
+      ACTIVATE: 1  # fixed, because it is enabled by frontend.framework variable
+      APP_MODE: ${APP_MODE}
+    volumes:
+      # Main dir. It has to be the root directory, to make links work
+      - ${VANILLA_DIR}:/data
+      # Vanilla code
+      - ${PROJECT_DIR}:/temporaryfix
+      # SHARED WITH PROXY:
+      - ${SUBMODULE_DIR}/frontend/js/angular:/data/submodules/frontend/felask/static/app/commons
+      - ${SUBMODULE_DIR}/frontend/css:/data/submodules/frontend/felask/static/css/base
+      - ${SUBMODULE_DIR}/frontend/fonts:/data/submodules/frontend/felask/static/fonts
+      - ${SUBMODULE_DIR}/frontend/templates:/data/submodules/frontend/felask/static/app/templates/common
+      # js/css libraries installed via bower
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/bower_components:/data/submodules/frontend/felask/static/bower
+      # js/css custom
+      - ${PROJECT_DIR}/frontend/js:/data/submodules/frontend/felask/static/app/custom
+      - ${PROJECT_DIR}/frontend/templates:/data/submodules/frontend/felask/static/app/templates/custom
+      - ${PROJECT_DIR}/frontend/css:/data/submodules/frontend/felask/static/css/custom
+      - ${PROJECT_DIR}/frontend/assets:/data/submodules/frontend/felask/static/assets
+
+  ###############################
+  # Make automatic to install libraries
+  bower:
+    # restart: no
+    image: pdonorio/jsdev
+    working_dir: /confs
+    volumes:
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}:/libs
+      - ${PROJECT_DIR}/frontend/package.json:/confs/bower.js
+  ###############################
+  proxy:
+    volumes:
+      # SHARED WITH FRONTEND:
+      - ${SUBMODULE_DIR}/frontend/js/angular:/data/submodules/frontend/felask/static/app/commons
+      - ${SUBMODULE_DIR}/frontend/css:/data/submodules/frontend/felask/static/css/base
+      - ${SUBMODULE_DIR}/frontend/fonts:/data/submodules/frontend/felask/static/fonts
+      - ${SUBMODULE_DIR}/frontend/templates:/data/submodules/frontend/felask/static/app/templates/common
+      # js/css libraries installed via bower
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/bower_components:/data/submodules/frontend/felask/static/bower
+      # Custom css/js
+      - ${PROJECT_DIR}/frontend/js:/data/submodules/frontend/felask/static/app/custom
+      - ${PROJECT_DIR}/frontend/templates:/data/submodules/frontend/felask/static/app/templates/custom
+      - ${PROJECT_DIR}/frontend/css:/data/submodules/frontend/felask/static/css/custom
+      - ${PROJECT_DIR}/frontend/assets:/data/submodules/frontend/felask/static/assets

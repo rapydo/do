@@ -1,0 +1,24 @@
+version: '3'
+
+networks:
+  default:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+services:
+
+  vanilla-formatter:
+    image: unibeautify/black:latest
+    command: -S .
+    volumes:
+      - ${SUBMODULE_DIR}/do/controller/confs/black/formatter.toml:/workdir/pyproject.toml
+      - ${PROJECT_DIR}/backend/${BLACK_FOLDER}:/workdir/${BLACK_FOLDER}
+    working_dir: /workdir
+
+  submodules-formatter:
+    image: unibeautify/black:latest
+    command: -S .
+    volumes:
+      - ${SUBMODULE_DIR}/do/controller/confs/black/formatter.toml:/workdir/pyproject.toml
+      - ${SUBMODULE_DIR}/${BLACK_SUBMODULE}/${BLACK_FOLDER}:/workdir/${BLACK_FOLDER}
+    working_dir: /workdir

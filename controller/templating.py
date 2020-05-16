@@ -6,8 +6,7 @@ from jinja2 import FileSystemLoader, Environment, DebugUndefined
 # from jinja2.meta import find_undeclared_variables
 from jinja2.exceptions import TemplateNotFound, UndefinedError
 from controller import log
-
-TEMPLATE_DIR = 'templates'
+from controller import TEMPLATE_DIR
 
 
 def username(param_not_used, length=8):
@@ -21,15 +20,15 @@ def username(param_not_used, length=8):
 
 
 def password(param_not_used, length=12):
-        rand = random.SystemRandom()
-        charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
+    rand = random.SystemRandom()
+    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
-        random_string = rand.choice(charset)
-        charset += string.digits
-        for _ in range(length - 1):
-            random_string += rand.choice(charset)
+    random_string = rand.choice(charset)
+    charset += string.digits
+    for _ in range(length - 1):
+        random_string += rand.choice(charset)
 
-        return random_string
+    return random_string
 
 
 class Templating:

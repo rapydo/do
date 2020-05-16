@@ -67,7 +67,7 @@ def check_versions(skip_angular=False):
 
     dependencies = {}
 
-    backend = load_yaml_file("../rapydo-confs/confs/backend.yml")
+    backend = load_yaml_file("confs/compose/backend.yml")
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)

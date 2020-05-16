@@ -165,15 +165,17 @@ class Project:
                     "Please add the --project option with one of the following:\n\n {}",
                     projects
                 )
-            return projects.pop()
+            project = projects.pop()
 
-        if project not in projects:
+        elif project not in projects:
             log.exit(
                 "Wrong project {}\nSelect one of the following: {}\n".format(
                     project, ", ".join(projects))
             )
 
-        return project
+        # self.ABS_PROJECT_PATH = os.path.join(os.curdir, PROJECT_DIR, project)
+        ABS_PROJECT_PATH = os.path.join(PROJECT_DIR, project)
+        return project, ABS_PROJECT_PATH
 
     def find_main_folder(self):
         first_level_error = self.inspect_main_folder()

@@ -1,20 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 from controller.compose import Compose
-from controller import SUBMODULES_DIR, RAPYDO_CONFS
-from controller import CONTAINERS_YAML_DIRNAME
+from controller import CONFS_DIR
 # from controller import log
 
 
 def __call__(args, **kwargs):
 
-    yml = os.path.join(
-        os.curdir,
-        SUBMODULES_DIR,
-        RAPYDO_CONFS,
-        CONTAINERS_YAML_DIRNAME,
-        'formatter.yml'
-    )
+    yml = os.path.join(CONFS_DIR, 'black', 'formatter.yml')
 
     command = 'run'
     dc = Compose(files=[yml])

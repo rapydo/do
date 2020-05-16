@@ -4,7 +4,7 @@ import os
 import sys
 from loguru import logger as log
 
-__version__ = '0.7.3'
+__version__ = '0.7.4'
 
 
 # NOTE: telling the app if testing or not
@@ -53,21 +53,14 @@ if LOGS_FILE is not None:
         log.error(e)
         LOGS_FILE = None
 
-# FRAMEWORK_NAME = 'RAPyDo'
-# PROJECT_YAML_SPECSDIR = 'specs'
 COMPOSE_ENVIRONMENT_FILE = '.env'
 SUBMODULES_DIR = 'submodules'
 PROJECT_DIR = 'projects'
-RAPYDO_CONFS = 'rapydo-confs'
-RAPYDO_TEMPLATE = 'tests'
-RAPYDO_GITHUB = "https://github.com/rapydo"
-PLACEHOLDER = '**PLACEHOLDER**'
 TEMPLATE_DIR = 'templates'
+# CONFS_DIR = os.path.join(SUBMODULES_DIR, 'do', 'controller', 'confs')
+CONFS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'confs')
+PLACEHOLDER = '**PLACEHOLDER**'
 PROJECTRC = '.projectrc'
 PROJECTRC_ALTERNATIVE = '.project.yml'
-# Also configured in http-api
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = 'confs'
-BACKEND_DIR = 'backend'  # directory outside docker
-BACKEND_PACKAGE = 'restapi'  # package inside rapydo-http
-ENDPOINTS_CODE_DIR = 'apis'

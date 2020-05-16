@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  frontend:
+    # restart: no
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/angular
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/angular:${RAPYDO_VERSION}
+    hostname: angular
+    # user: node
+    privileged: ${DOCKER_PRIVILEGED_MODE}
+    environment:
+      ACTIVATE: 1  # fixed, because it is enabled by frontend.framework variable
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      APP_MODE: ${APP_MODE}
+      VERSION: ${PROJECT_VERSION}
+      RAPYDO_VERSION: ${RAPYDO_VERSION}
+      PROJECT_TITLE: ${PROJECT_TITLE}
+      PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      ENABLE_FOOTER: ${ENABLE_FOOTER}
+      ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
+      BACKEND_URI: ${BACKEND_URI}
+      BACKEND_PORT: ${BACKEND_API_PORT}
+      BACKEND_HOST: ${PROJECT_DOMAIN}
+      BACKEND_PREFIX: ${BACKEND_PREFIX}
+      BASE_HREF: ${PROJECT_DOMAIN}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
+      # ENABLE_TOASTR: ${ENABLE_TOASTR}
+      PUSHPIN_HOST: ${PROJECT_DOMAIN}
+      PUSHPIN_PORT: ${PUSHPIN_PORT}
+      # COVERALLS_REPO_TOKEN: ${COVERALLS_REPO_TOKEN}
+      SENTRY_URL: ${SENTRY_URL}
+      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
+      WRAP_RESPONSE: ${WRAP_RESPONSE}
+
+    volumes:
+      - ${SUBMODULE_DIR}/frontend/utility:/rapydo
+
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/karma:/coverage
+
+      # - ${SUBMODULE_DIR}/frontend/angular.json:/app/angular.json
+      - ${SUBMODULE_DIR}/frontend/browserslist:/app/browserslist
+      - ${SUBMODULE_DIR}/frontend/e2e:/app/e2e
+      - ${SUBMODULE_DIR}/frontend/karma.conf.js:/app/karma.conf.js
+      - ${SUBMODULE_DIR}/frontend/polyfills.ts:/app/polyfills.ts
+      - ${SUBMODULE_DIR}/frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ${SUBMODULE_DIR}/frontend/tsconfig.json:/app/tsconfig.json
+      - ${SUBMODULE_DIR}/frontend/tsconfig.spec.json:/app/tsconfig.spec.json
+      - ${SUBMODULE_DIR}/frontend/tslint.json:/app/tslint.json
+
+      - ${SUBMODULE_DIR}/frontend/src:/app/app/rapydo
+      - ${PROJECT_DIR}/frontend:/app/app/custom
+      - ${SUBMODULE_DIR}/frontend/courtesy:/app/courtesy
+      # - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend/node_modules:/app/node_modules
+      # - ${SUBMODULE_DIR}/frontend/node_modules:/app/node_modules
+
+  ###############################
+  proxy:
+    volumes:
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app

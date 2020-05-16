@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-current_version = "0.7.3"
+current_version = "0.7.4"
 
 setup(
     name='rapydo_controller',
@@ -17,7 +17,7 @@ setup(
         exclude=['tests*']
     ),
     package_data={
-        'controller': ['argparser.yaml', 'templates/*']
+        'controller': ['argparser.yaml', 'templates/*', 'confs/*']
     },
     # End-of-life: 2020-09-13
     python_requires='>=3.5.0',

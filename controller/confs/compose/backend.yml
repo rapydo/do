@@ -1,0 +1,819 @@
+version: '3'
+
+# #####################
+# VOLUMES
+# #####################
+
+volumes:
+  jwt_tokens:
+    driver: local
+  rabbitdata:
+    driver: local
+  sqldata:
+    driver: local
+  mariadb:
+    driver: local
+  graphdata:
+    driver: local
+  mongodata:
+    driver: local
+  pureftpd:
+    driver: local
+  letsencrypt_certs:
+    driver: local
+  ssl_dhparam:
+    driver: local
+  flower_db:
+    driver: local
+  celerybeat:
+    driver: local
+  redisdata:
+    driver: local
+
+# #####################
+# NETWORKS
+# #####################
+
+networks:
+  default:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+  app_net:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+  proxy_net:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+  worker_net:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+  ftp_net:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+  db_net:
+    driver_opts:
+      com.docker.network.driver.mtu: ${NETWORK_MTU}
+
+    # # driver: bridge
+    # ipam:
+    #   driver: default
+    #   config:
+    #     # Note: use this configuration to match inside internal rules
+    #     # TOFIX: make this an env variable
+    #     - subnet: ${DB_SUBNET}/16
+
+# #####################
+# SERVICES
+# #####################
+services:
+
+  ########################
+  ###  MAIN CONTAINER  ###
+  ########################
+  backend:
+    restart: on-failure:5
+    # TO TEST the failure:
+    # 1. go inside backend
+    # 2. ps aux --forest
+    # 3. kill process 1 and the tree branches
+
+    # restart: always
+    # command: sleep infinity
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    hostname: backend-server
+    privileged: ${DOCKER_PRIVILEGED_MODE}
+    environment:
+
+      WRAP_RESPONSE: ${WRAP_RESPONSE}
+
+      ACTIVATE: ${ACTIVATE_BACKEND}
+      APP_MODE: ${APP_MODE}
+      LOGURU_LEVEL: ${LOG_LEVEL}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      # APIUID is set in Dockerfile, overwriting with fixed value
+      APIUID: ${CURRENT_UID}
+      PYTHON_PATH: ${PYTHON_PATH}
+      FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
+      UWSGI_APP: restapi.${PYTHON_MAIN_FILE}
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
+      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      UPLOAD_PATH: ${UPLOAD_PATH}
+      DOMAIN: ${PROJECT_DOMAIN}
+
+      # enable the basic /api/login method
+      MAIN_LOGIN_ENABLE: 1
+      # base the user/role mechanism on some database
+      AUTH_ENABLE: ${ACTIVATE_AUTH}
+      AUTH_SERVICE: ${AUTH_SERVICE}
+      AUTH_MIN_PASSWORD_LENGTH: ${AUTH_MIN_PASSWORD_LENGTH}
+      AUTH_FORCE_FIRST_PASSWORD_CHANGE: ${AUTH_FORCE_FIRST_PASSWORD_CHANGE}
+      AUTH_VERIFY_PASSWORD_STRENGTH: ${AUTH_VERIFY_PASSWORD_STRENGTH}
+      AUTH_MAX_PASSWORD_VALIDITY: ${AUTH_MAX_PASSWORD_VALIDITY}
+      AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: ${AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER}
+      AUTH_REGISTER_FAILED_LOGIN: ${AUTH_REGISTER_FAILED_LOGIN}
+      AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
+      AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
+      AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME} 
+      AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD} 
+      AUTH_JWT_TOKEN_TTL: ${AUTH_JWT_TOKEN_TTL}
+      ALLOW_ACCESS_TOKEN_PARAMETER: ${ALLOW_ACCESS_TOKEN_PARAMETER}
+      ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
+
+      REGISTRATION_NOTIFICATIONS: ${REGISTRATION_NOTIFICATIONS}
+      DEBUG_ENDPOINTS: 0
+
+      ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
+      ALCHEMY_ENABLE_CONNECTOR: ${ALCHEMY_ENABLE_CONNECTOR}
+      ALCHEMY_HOST: ${ALCHEMY_HOST}
+      ALCHEMY_PORT: ${ALCHEMY_PORT}
+      ALCHEMY_USER: ${ALCHEMY_USER}
+      ALCHEMY_PASSWORD: ${ALCHEMY_PASSWORD}
+      ALCHEMY_DB: ${ALCHEMY_DB}
+      ALCHEMY_POOLSIZE: ${ALCHEMY_POOLSIZE}
+      ALCHEMY_DBTYPE: ${ALCHEMY_DBTYPE}
+
+      NEO4J_ENABLE: ${ACTIVATE_NEO4J}
+      NEO4J_ENABLE_CONNECTOR: ${NEO4J_ENABLE_CONNECTOR}
+      NEO4J_HOST: ${NEO4J_HOST}
+      NEO4J_PORT: ${NEO4J_BOLT_PORT}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_AUTOINDEXING: ${NEO4J_AUTOINDEXING}
+
+      MONGO_ENABLE: ${ACTIVATE_MONGODB}
+      MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+
+      CELERY_ENABLE: ${ACTIVATE_CELERY}
+      CELERY_ENABLE_CONNECTOR: ${CELERY_ENABLE_CONNECTOR}
+      CELERY_BROKER: ${CELERY_BROKER}
+      CELERY_BACKEND: ${CELERY_BACKEND}
+      CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
+      CELERYBEAT_ENABLE_CONNECTOR: ${CELERYBEAT_ENABLE_CONNECTOR}
+
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
+      RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST}
+      RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
+
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
+      PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
+      PUSHPIN_HOST: ${PUSHPIN_HOST}
+      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
+
+      IRODS_ENABLE: ${ACTIVATE_IRODS}
+      IRODS_HOST: ${IRODS_HOST}
+      IRODS_PORT: ${IRODS_PORT}
+      IRODS_USER: ${IRODS_USER}
+      IRODS_ZONE: ${IRODS_ZONE}
+      IRODS_HOME: ${IRODS_HOME}
+      IRODS_DN: ${IRODS_DN}
+      IRODS_PASSWORD: ${IRODS_PASSWORD}
+      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
+      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
+      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
+
+      SMTP_ADMIN: ${SMTP_ADMIN}
+      SMTP_NOREPLY: ${SMTP_NOREPLY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+
+      SENTRY_URL: ${SENTRY_URL}
+      RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
+
+    volumes:
+      # configuration files
+      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
+      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      # Vanilla code
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      # From project, if any
+      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
+      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      # JWT tokens secret
+      - jwt_tokens:${JWT_APP_SECRETS}
+      # submodules
+      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Unit tests
+      - ${SUBMODULE_DIR}/http-api/tests:/code/tests
+      - ${PROJECT_DIR}/backend/tests:/code/tests/custom
+      # Logs
+      - ${VANILLA_DIR}/data/logs:/logs
+    networks:
+      app_net:
+        aliases:
+          - ${FLASK_HOST}
+      db_net:
+      worker_net:
+      proxy_net:
+        aliases:
+          - ${FLASK_HOST}
+
+  ##############################
+  proxy:
+    restart: always
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/proxy
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/proxy:${RAPYDO_VERSION}
+    hostname: proxy
+    volumes:
+      - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx:/etc/nginx/sites-enabled-templates
+      # - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/${NGINX_PROD_CONF}:/etc/nginx/sites-enabled-templates/production
+      # - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/${NGINX_PROD_HEADERS}:/etc/nginx/sites-enabled-templates/production-headers
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
+    networks:
+      proxy_net:
+        aliases:
+          - ${PROXY_HOST}
+      app_net:
+    ports:
+      - ${PROXY_DEV_PORT}:80   # 80 redirect
+      - ${PROXY_PROD_PORT}:443 # 443 SSL
+    environment:
+      DOMAIN: ${PROJECT_DOMAIN}
+      MODE: ${LETSENCRYPT_MODE}
+      ACTIVATE: ${ACTIVATE_PROXY}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      SMTP_ADMIN: ${SMTP_ADMIN}
+      DEFAULT_DHLEN: ${DEFAULT_DHLEN}
+      FRONTEND: ${FRONTEND_FRAMEWORK} 
+      UNSAFE_EVAL: ${SET_UNSAFE_EVAL}
+      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS}
+      CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
+      CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
+    depends_on:
+      - backend
+
+  maintenance:
+    restart: always
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/proxy
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/proxy:${RAPYDO_VERSION}
+    entrypoint: docker-entrypoint-maintenanance
+    hostname: proxy
+    volumes:
+      - ${SUBMODULE_DIR}/rapydo-confs/confs/nginx/maintenance.conf:/etc/nginx/sites-enabled/maintenance.conf
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
+    networks:
+      proxy_net:
+        aliases:
+          - ${PROXY_HOST}
+      app_net:
+    ports:
+      - ${PROXY_DEV_PORT}:80   # 80 redirect
+      - ${PROXY_PROD_PORT}:443 # 443 SSL
+
+  ###################
+  ###  DATABASES  ###
+  ###################
+  postgres:
+    # restart: always
+    restart: on-failure:5
+    image: postgres:12.2-alpine
+    volumes:
+      - sqldata:/var/lib/postgresql/data
+      - ${SUBMODULE_DIR}/rapydo-confs/confs/postgresql/pgs_init.sh:/docker-entrypoint-initdb.d/setup-my-schema.sh:ro
+    environment:
+      ACTIVATE: ${ACTIVATE_POSTGRES}
+      POSTGRES_USER: "${ALCHEMY_USER}"
+      POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
+      POSTGRES_DBS: ${ALCHEMY_DBS}
+    networks:
+      db_net:
+        aliases:
+          - ${ALCHEMY_HOST}
+
+  mariadb:
+    # restart: always
+    restart: on-failure:5
+    image: mariadb:10.5.1
+    volumes:
+      - mariadb:/var/lib/mysql
+    environment:
+      ACTIVATE: ${ACTIVATE_MYSQL}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_USER: "${ALCHEMY_USER}"
+      MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
+      MYSQL_DATABASE: ${ALCHEMY_DB}
+    networks:
+      db_net:
+        aliases:
+          - ${ALCHEMY_HOST}
+
+  neo4j:
+    restart: on-failure:5
+    image: neo4j:3.5.16
+    volumes:
+      - graphdata:/data
+      # it is used to enable SSL in production mode
+      - letsencrypt_certs:${NEO4J_SSL_PATH}
+    networks:
+      db_net:
+        aliases:
+          - ${NEO4J_HOST}
+    environment:
+      ACTIVATE: ${ACTIVATE_NEO4J}
+      # Note: once changed this, also set NEO4J_PASSWORD in backend service
+      NEO4J_AUTH: ${NEO4J_USER}/${NEO4J_PASSWORD}
+      NEO4J_USERNAME: ${NEO4J_USER}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      SECURE_FILE_PERMISSIONS: "yes"
+      # NEO4J_dbms_memory_pagecache_size: 2048M
+      # NEO4J_dbms_memory_heap_maxSize: 4096M
+    # ports:
+    #   - 9090:7474
+    #   - 7687:7687
+
+  mongodb:
+    restart: on-failure:5
+    image: mongo:4.2.3
+    volumes:
+      - mongodata:/data/db
+    networks:
+      db_net:
+        aliases:
+          - ${MONGO_HOST}
+    environment:
+      ACTIVATE: ${ACTIVATE_MONGODB}
+
+  #########################
+  ###  QUEUE MANAGEMENT ###
+  #########################
+
+  celery:
+    restart: on-failure:5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    entrypoint: docker-entrypoint-celery
+    command: celery worker --concurrency=1 -Ofair -A restapi.connectors.celery.worker.celery_app -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    
+    # user: developer
+    working_dir: /code
+    environment:
+      APP_MODE: ${APP_MODE}
+      LOGURU_LEVEL: ${LOG_LEVEL}
+      ACTIVATE: ${ACTIVATE_CELERY}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      DOMAIN: ${PROJECT_DOMAIN}
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
+      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+
+      CELERY_ENABLE: 1
+      CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
+
+      CELERY_BROKER: ${CELERY_BROKER}
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
+      RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST}
+      RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
+
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      CELERY_BACKEND: ${CELERY_BACKEND}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+
+      ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
+      ALCHEMY_ENABLE_CONNECTOR: ${ALCHEMY_ENABLE_CONNECTOR}
+      ALCHEMY_HOST: ${ALCHEMY_HOST}
+      ALCHEMY_PORT: ${ALCHEMY_PORT}
+      ALCHEMY_USER: ${ALCHEMY_USER}
+      ALCHEMY_PASSWORD: ${ALCHEMY_PASSWORD}
+      ALCHEMY_DB: ${ALCHEMY_DB}
+      ALCHEMY_POOLSIZE: ${ALCHEMY_POOLSIZE}
+      ALCHEMY_DBTYPE: ${ALCHEMY_DBTYPE}
+
+      NEO4J_ENABLE: ${ACTIVATE_NEO4J}
+      NEO4J_ENABLE_CONNECTOR: ${NEO4J_ENABLE_CONNECTOR}
+      NEO4J_HOST: ${NEO4J_HOST}
+      NEO4J_PORT: ${NEO4J_BOLT_PORT}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+
+      MONGO_ENABLE: ${ACTIVATE_MONGODB}
+      MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+
+      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
+      PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
+      PUSHPIN_HOST: ${PUSHPIN_HOST}
+      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
+
+      IRODS_ENABLE: ${ACTIVATE_IRODS}
+      IRODS_HOST: ${IRODS_HOST}
+      IRODS_PORT: ${IRODS_PORT}
+      IRODS_USER: ${IRODS_USER}
+      IRODS_ZONE: ${IRODS_ZONE}
+      IRODS_HOME: ${IRODS_HOME}
+      IRODS_DN: ${IRODS_DN}
+      IRODS_PASSWORD: ${IRODS_PASSWORD}
+      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
+      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
+      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
+
+      SMTP_ADMIN: ${SMTP_ADMIN}
+      SMTP_NOREPLY: ${SMTP_NOREPLY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    volumes:
+      # configuration files
+      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
+      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      # Vanilla code
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      # From project, if any
+      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
+      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      # JWT tokens secret
+      # - jwt_tokens:${JWT_APP_SECRETS}
+      # submodules
+      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Logs
+      - ${VANILLA_DIR}/data/logs:/logs
+    networks:
+      db_net:
+      worker_net:
+    # depends_on:
+    #   - rabbit
+    #   # - celeryui
+
+  celery-beat:
+    restart: on-failure:5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    hostname: celery-beat
+    entrypoint: docker-entrypoint-celery
+    command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel ${LOG_LEVEL} --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    
+    # user: developer
+    working_dir: /code
+    environment:
+      APP_MODE: ${APP_MODE}
+      LOGURU_LEVEL: ${LOG_LEVEL}
+      ACTIVATE: ${ACTIVATE_CELERYBEAT}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      DOMAIN: ${PROJECT_DOMAIN}
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
+      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+
+      CELERY_ENABLE: 1
+      CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
+      CELERYBEAT_SCHEDULER: ${CELERYBEAT_SCHEDULER}
+
+      CELERY_BROKER: ${CELERY_BROKER}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST}
+      RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
+
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
+
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      CELERY_BACKEND: ${CELERY_BACKEND}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATABASE: ${MONGO_DATABASE}
+
+      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
+      PUSHPIN_HOST: ${PUSHPIN_HOST}
+      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
+
+      SMTP_ADMIN: ${SMTP_ADMIN}
+      SMTP_NOREPLY: ${SMTP_NOREPLY}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    volumes:
+      - celerybeat:/beat
+      # configuration files
+      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
+      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      # Vanilla code
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      # From project, if any
+      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
+      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      # JWT tokens secret
+      # - jwt_tokens:${JWT_APP_SECRETS}
+      # submodules
+      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Logs
+      - ${VANILLA_DIR}/data/logs:/logs
+    networks:
+      db_net:
+      worker_net:
+
+  rabbit:
+    restart: on-failure:5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/rabbitmq
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/rabbitmq:${RAPYDO_VERSION}
+    hostname: rabbit
+    environment:
+      # CAN BE locally changed by ovverride with:
+      ACTIVATE: ${ACTIVATE_RABBIT}  
+      # ACTIVATE: ${ACTIVATE_CELERY}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_ENABLE_MANAGEMENT_PLUGIN: ${RABBITMQ_ENABLE_MANAGEMENT_PLUGIN}
+      RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
+
+      RABBITMQ_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
+      RABBITMQ_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
+      RABBITMQ_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
+      RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: ${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}
+
+      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
+      RABBITMQ_MANAGEMENT_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
+      RABBITMQ_MANAGEMENT_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
+      RABBITMQ_MANAGEMENT_SSL_FAIL_IF_NO_PEER_CERT: ${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}
+
+      RABBITMQ_CTL_ERL_ARGS: "-proto_dist inet_tls"
+
+    volumes:
+      - rabbitdata:/var/lib/rabbitmq
+      # it is used to enable SSL in production mode
+      - letsencrypt_certs:/ssl
+    networks:
+      worker_net:
+        aliases:
+          - ${RABBITMQ_HOST}
+
+  redis:
+    restart: on-failure:5
+    image: redis:5.0.8
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    networks:
+      db_net:
+        aliases:
+          - ${REDIS_HOST}
+    environment:
+      ACTIVATE: ${ACTIVATE_REDIS}
+
+  ##########################
+  ### SERVICE INTERFACES ###
+  ##########################
+
+  celeryui:
+    restart: on-failure:5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    entrypoint: docker-entrypoint-celery
+    # user: root
+    command: flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -A restapi.connectors.celery.worker.celery_app -n flower_monitor
+    hostname: flower
+    working_dir: /code
+    expose:
+      - ${CELERYUI_PORT}
+    ports:
+      - ${CELERYUI_PORT}:${CELERYUI_PORT}
+    volumes:
+      # configuration files
+      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
+      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      # Vanilla code
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      # From project, if any
+      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
+      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      # JWT tokens secret and SSL
+      # - jwt_tokens:${JWT_APP_SECRETS}
+      # it is used to enable SSL in production mode
+      - letsencrypt_certs:/ssl
+      # submodules
+      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Logs
+      - ${VANILLA_DIR}/data/logs:/logs
+      # DB
+      - flower_db:${CELERYUI_DBDIR}
+    networks:
+      db_net:
+      worker_net:
+    # depends_on:
+    #   - rabbit
+    environment:
+      APP_MODE: ${APP_MODE}
+      LOGURU_LEVEL: ${LOG_LEVEL}
+      ACTIVATE: ${ACTIVATE_CELERYUI}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
+      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+
+      CELERY_ENABLE: 1
+
+      CELERY_BROKER: ${CELERY_BROKER}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST}
+      RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
+
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
+
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      CELERY_BACKEND: ${CELERY_BACKEND}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USER: ${MONGO_USER}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+
+      CELERYUI_PORT: ${CELERYUI_PORT}
+      CELERYUI_USER: ${CELERYUI_USER}
+      CELERYUI_PASSWORD: ${CELERYUI_PASSWORD}
+      CELERYUI_DBDIR: ${CELERYUI_DBDIR}
+
+
+  swaggerui:
+    # restart: no
+    image: swaggerapi/swagger-ui:v3.24.3
+    environment:
+      ACTIVATE: ${ACTIVATE_SWAGGERUI}
+    ports:
+      - 7777:8080
+
+  sqlalchemyui:
+    # restart: no
+    image: adminer:4.7.6-standalone
+    networks:
+      db_net:
+    environment:
+      ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
+      # https://github.com/vrana/adminer/tree/master/designs
+      # ADMINER_DESIGN: brade
+    ports:
+      - 7777:8080
+
+  mongoui:
+    # restart: no
+    image: mongo-express:0.54.0
+    environment:
+      ACTIVATE: ${ACTIVATE_MONGOUI}
+      ME_CONFIG_MONGODB_SERVER: ${MONGO_HOST}
+      ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
+    networks:
+      db_net:
+    ports:
+      - 7777:8081
+
+  ###################
+  ### FTP SERVER  ###
+  ###################
+  ftp:
+    restart: on-failure:5 
+    build: ${SUBMODULE_DIR}/build-templates/ftp
+    image: rapydo/ftp:${RAPYDO_VERSION}
+    volumes:
+      - pureftpd:/etc/pure-ftpd/passwd
+  # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
+  # with the server's SSL certificates for TLS support. Optional TLS is
+  # automatically enabled when the container finds this file on startup.
+    environment:
+      ACTIVATE: ${ACTIVATE_FTP}
+      PUBLICHOST: ${PROJECT_DOMAIN}
+      ADDED_FLAGS: -d -d
+    networks:
+      ftp_net:
+
+  ######################################################
+  ###  iRODS iCAT server (usually for EUDAT B2safe)  ###
+  ######################################################
+  icat:
+    # restart: no
+    # B2safe instance on irods
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/icat
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/icat:${RAPYDO_VERSION}
+    hostname: ${IRODS_HOST}
+    # command: sleep infinity
+    environment:
+      ACTIVATE: ${ACTIVATE_ICAT}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      POSTGRES_USER: ${ALCHEMY_USER}
+      POSTGRES_PASSWORD: ${ALCHEMY_PASSWORD}
+      POSTGRES_HOST: ${ALCHEMY_HOST}
+      IRODS_HOST: "${IRODS_HOST}"
+      IRODS_PORT: ${IRODS_PORT}
+      IRODS_ZONE: ${IRODS_ZONE}
+      IRODS_USER: ${IRODS_USER}
+      IRODS_PASSWORD: ${IRODS_PASSWORD}
+      IRODS_DB: "${IRODS_DB}"
+
+      IRODS_ANONYMOUS: ${IRODS_ANONYMOUS}
+    networks:
+      app_net:
+        aliases:
+          - ${IRODS_HOST}
+      db_net:
+    depends_on:
+      - postgres
+
+  pushpin:
+    restart: always
+    image: fanout/pushpin:1.25.0
+    environment:
+      ACTIVATE: ${ACTIVATE_PUSHPIN}
+    networks:
+      app_net:
+        aliases:
+          - ${PUSHPIN_HOST}
+      worker_net:
+        aliases:
+          - ${PUSHPIN_HOST}
+
+    ports:
+      - 7999:7999
+    volumes:
+      - ${SUBMODULE_DIR}/rapydo-confs/confs/pushpin/routes:/etc/pushpin/routes
