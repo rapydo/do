@@ -68,10 +68,6 @@ variables:
     {% if celery_backend -%}
     CELERY_BACKEND: {{ celery_backend }}
     {% endif -%}
-    {% if wrapped -%}
-    # to be deprecated
-    WRAP_RESPONSE: 1
-    {% endif -%}
     {% for KEY, VALUE in env_variables.items() -%}
     {{ KEY }}: {{ VALUE }}
     {% endfor %} 

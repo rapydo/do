@@ -37,7 +37,6 @@ services:
       # COVERALLS_REPO_TOKEN: ${COVERALLS_REPO_TOKEN}
       SENTRY_URL: ${SENTRY_URL}
       GA_TRACKING_CODE: ${GA_TRACKING_CODE}
-      WRAP_RESPONSE: ${WRAP_RESPONSE}
 
     volumes:
       - ${SUBMODULE_DIR}/frontend/utility:/rapydo

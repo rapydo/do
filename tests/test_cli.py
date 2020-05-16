@@ -310,12 +310,6 @@ def test_all(capfd):
             *service,
         )
 
-    # to be deprecated
-    exec_command(
-        capfd,
-        "rapydo create wrap --wrapped --current --force --auth postgres --frontend no",
-        "Project wrap successfully created",
-    )
     exec_command(
         capfd,
         "rapydo interfaces XYZ",

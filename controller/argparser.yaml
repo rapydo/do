@@ -424,12 +424,6 @@ subcommands:
         metavalue: S1,S2
         default: ''
         help: Comma separated list of services to be enabled
-      # to be deprecated
-      wrapped:
-        type: bool
-        metavalue: TRUE_OR_FALSE
-        default: False
-        help: Enable (old) wrapped response
       origin-url:
         type: str
         metavalue: URL

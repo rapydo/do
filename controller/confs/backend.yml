@@ -95,8 +95,6 @@ services:
     privileged: ${DOCKER_PRIVILEGED_MODE}
     environment:
 
-      WRAP_RESPONSE: ${WRAP_RESPONSE}
-
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}

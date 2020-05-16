@@ -14,8 +14,6 @@ def __call__(args, project_scaffold, **kwargs):
     force = args.get("force", False)
     force_current = args.get("current", False)
     auto = not args.get("no_auto", False)
-    # to be deprecated
-    wrapped = args.get("wrapped", False)
     auth = args.get("auth")
     frontend = args.get("frontend")
     extend = args.get("extend")
@@ -146,7 +144,6 @@ def __call__(args, project_scaffold, **kwargs):
                 'extend': extend,
                 'services': services,
                 'env_variables': env_variables,
-                'wrapped': wrapped,
             }
         )
 
