@@ -810,8 +810,8 @@ To fix this issue, please update docker to version {}+
         env['PROJECT_DOMAIN'] = self.hostname
         env['COMPOSE_PROJECT_NAME'] = self.project
         # Relative paths from ./submodules/do/do/controller/confs/compose
-        env['SUBMODULE_DIR'] = "../../../.."
-        env['VANILLA_DIR'] = "../../../../.."
+        env['VANILLA_DIR'] = os.path.abspath(os.curdir)
+        env['SUBMODULE_DIR'] = os.path.join(env['VANILLA_DIR'], SUBMODULES_DIR)
         env['PROJECT_DIR'] = os.path.join(env['VANILLA_DIR'], PROJECT_DIR, self.project)
 
         if self.extended_project_path is None:
