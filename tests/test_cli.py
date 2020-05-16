@@ -838,7 +838,7 @@ services:
     # Read and change the content
     fin = open(pconf, "rt")
     data = fin.read()
-    data = data.replace("rapydo: {}".format(__version__), 'rapydo: 0.7.0')
+    data = data.replace("rapydo: {}".format(__version__), 'rapydo: 0.7.3')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -849,13 +849,13 @@ services:
         capfd,
         "rapydo version",
         "This project is not compatible with rapydo version {}".format(__version__),
-        "Please downgrade rapydo to version 0.7.0 or modify this project"
+        "Please downgrade rapydo to version 0.7.3 or modify this project"
     )
 
     # Read and change the content
     fin = open(pconf, "rt")
     data = fin.read()
-    data = data.replace("rapydo: 0.7.0", 'rapydo: 99.99.99')
+    data = data.replace("rapydo: 0.7.3", 'rapydo: 99.99.99')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")

@@ -61,10 +61,7 @@ class Project:
             os.path.join("data", "logs")
         ])
 
-        # Deprecated on 0.7.0
-        self.obsolete_files.append(self.p_path("backend", "swagger", "models.yaml"))
-        self.obsolete_files.append(self.p_path("frontend", "custom.ts"))
-        # Deprecated on 0.7.1
+        # Deprecated since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
 
         return True
