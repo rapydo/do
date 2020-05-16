@@ -8,11 +8,7 @@ VERY IMPORTANT!
 Imports and models have to be defined/used AFTER normal Graphdb connection.
 """
 
-from neomodel import ZeroOrMore, OneOrMore
-
-from neomodel.util import NodeClassRegistry
-
-from restapi.connectors.neo4j.types import (
+from neomodel import (
     StringProperty,
     IntegerProperty,
     DateProperty,
@@ -22,13 +18,21 @@ from restapi.connectors.neo4j.types import (
     FloatProperty,
     BooleanProperty,
     AliasProperty,
-    IdentifiedNode,
+    # UniqueIdProperty
+
     StructuredRel,
-    TimestampedNode,
+
     RelationshipTo,
     RelationshipFrom,
-    # UniqueIdProperty
+
+    ZeroOrMore,
+    OneOrMore
 )
+
+from neomodel.util import NodeClassRegistry
+
+from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
+
 from restapi.models.neo4j import User as UserBase
 
 # from restapi.utilities.logs import log
@@ -46,29 +50,29 @@ for c in registry._NODE_CLASS_REGISTRY:
 class User(UserBase):
 
     belongs_to = RelationshipTo(
-        'Group', 'BELONGS_TO', cardinality=ZeroOrMore, show=True)
+        'Group', 'BELONGS_TO', cardinality=ZeroOrMore)
 
 
 class RelationTest(StructuredRel):
-    pp = StringProperty(show=True)
+    pp = StringProperty()
 
 
 class Group(IdentifiedNode):
-    name = StringProperty(required=True, unique_index=True, show=True)
-    extra = StringProperty(required=True, unique_index=True, show=False)
+    name = StringProperty(required=True, unique_index=True)
+    extra = StringProperty(required=True, unique_index=True)
     members = RelationshipFrom(
-        'User', 'BELONGS_TO', cardinality=ZeroOrMore, show=True)
+        'User', 'BELONGS_TO', cardinality=ZeroOrMore)
 
     test1 = RelationshipTo(
         'JustATest', 'TEST', cardinality=OneOrMore,
-        show=True, model=RelationTest)
+        model=RelationTest)
     test2 = RelationshipTo(
         'JustATest', 'TEST2', cardinality=OneOrMore,
-        show=False, model=RelationTest)
+        model=RelationTest)
 
 
 class JustATest(TimestampedNode):
-    p_str = StringProperty(required=True, show=True)
+    p_str = StringProperty(required=True)
     p_int = IntegerProperty()
     p_arr = ArrayProperty()
     p_json = JSONProperty()
