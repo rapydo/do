@@ -113,6 +113,9 @@ def __call__(args, project_scaffold, **kwargs):
         project_scaffold.expected_folders + \
         project_scaffold.data_folders
 
+    if add_optionals:
+        folders += project_scaffold.optionals_folders
+
     for f in folders:
         if os.path.exists(f):
             log.info("Folder {} already exists", f)

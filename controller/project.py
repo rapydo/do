@@ -57,7 +57,20 @@ class Project:
             model_file = "{}.py".format(auth)
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
+        self.optionals_folders.append(self.p_path("backend", "models", "emails"))
         self.optionals_files.append(self.p_path("backend", "apis", "profile.py"))
+        self.optionals_files.append(
+            self.p_path("backend", "models", "emails", "activate_account.html")
+        )
+        self.optionals_files.append(
+            self.p_path("backend", "models", "emails", "new_credentials.html")
+        )
+        self.optionals_files.append(
+            self.p_path("backend", "models", "emails", "reset_password.html")
+        )
+        self.optionals_files.append(
+            self.p_path("backend", "models", "emails", "update_credentials.html")
+        )
         self.data_folders.extend([
             os.path.join("data", "logs")
         ])

@@ -354,7 +354,9 @@ def test_all(capfd):
         capfd,
         "rapydo formatter",
         # This is becase no endpoint is implemented in this project...
-        "No paths given. Nothing to do",
+        # "No paths given. Nothing to do",
+        # Now we included a profile.py by using --add-optionals
+        "1 file left unchanged.",
     )
 
     exec_command(
