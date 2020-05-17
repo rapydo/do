@@ -21,6 +21,7 @@ class Project:
         ]
         self.expected_folders = []
         self.expected_files = []
+        self.optionals_folders = []
         self.optionals_files = []
         self.data_folders = []
         self.data_files = []
