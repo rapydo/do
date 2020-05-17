@@ -20,7 +20,7 @@ def __call__(args, project_scaffold, **kwargs):
     origin_url = args.get("origin_url")
     services = args.get("services", "").split(",")
     envs = args.get("env")
-    add_optionals = not args.get("add_optionals", False)
+    add_optionals = args.get("add_optionals", False)
 
     if extend is not None:
         if project_name == extend:
