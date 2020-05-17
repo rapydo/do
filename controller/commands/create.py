@@ -20,6 +20,7 @@ def __call__(args, project_scaffold, **kwargs):
     origin_url = args.get("origin_url")
     services = args.get("services", "").split(",")
     envs = args.get("env")
+    add_optionals = not args.get("add_optionals", False)
 
     if extend is not None:
         if project_name == extend:
@@ -111,6 +112,10 @@ def __call__(args, project_scaffold, **kwargs):
     folders = \
         project_scaffold.expected_folders + \
         project_scaffold.data_folders
+
+    if add_optionals:
+        folders += project_scaffold.optionals_files
+
     for f in folders:
         if os.path.exists(f):
             log.info("Folder {} already exists", f)

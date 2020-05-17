@@ -122,7 +122,7 @@ def test_all(capfd):
 
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit"
+    create_command += " --services rabbit --add-optionals"
     create_command += " --origin https://your_remote_git/your_project.git"
     exec_command(
         capfd,

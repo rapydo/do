@@ -21,6 +21,7 @@ class Project:
         ]
         self.expected_folders = []
         self.expected_files = []
+        self.optionals_files = []
         self.data_folders = []
         self.data_files = []
         self.obsolete_files = []
@@ -56,6 +57,7 @@ class Project:
             model_file = "{}.py".format(auth)
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
+        self.optionals_files.append(self.p_path("backend", "apis", "profile.py"))
         self.data_folders.extend([
             os.path.join("data", "logs")
         ])
