@@ -113,9 +113,6 @@ def __call__(args, project_scaffold, **kwargs):
         project_scaffold.expected_folders + \
         project_scaffold.data_folders
 
-    if add_optionals:
-        folders += project_scaffold.optionals_files
-
     for f in folders:
         if os.path.exists(f):
             log.info("Folder {} already exists", f)
@@ -125,7 +122,11 @@ def __call__(args, project_scaffold, **kwargs):
 
         os.makedirs(f)
 
-    for p in project_scaffold.expected_files:
+    files = project_scaffold.expected_files
+    if add_optionals:
+        files += project_scaffold.optionals_files
+
+    for p in files:
         fname = os.path.basename(p)
         template = templating.get_template(
             fname,
