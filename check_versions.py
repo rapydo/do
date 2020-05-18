@@ -11,6 +11,10 @@ import yaml
 from prettyprinter import pprint as pp
 from loguru import logger as log
 
+# change current dir to the folder containing this script
+# this way the script will be allowed to access all required files
+# by providing relative links
+os.chdir(os.path.dirname(__file__))
 
 def load_yaml_file(filepath):
 
@@ -67,7 +71,7 @@ def check_versions(skip_angular=False):
 
     dependencies = {}
 
-    backend = load_yaml_file("confs/compose/backend.yml")
+    backend = load_yaml_file("controller/confs/backend.yml")
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)
@@ -263,8 +267,11 @@ def check_versions(skip_angular=False):
     log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
     log.info("oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required")
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
-    log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 
 
 if __name__ == '__main__':
     check_versions()
+
+# Changelogs and release notes
+
+# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
