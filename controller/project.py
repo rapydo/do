@@ -162,8 +162,9 @@ class Project:
                 log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
             if prj_num > 1:
                 log.exit(
-                    "Please add the --project option with one of the following:\n\n {}",
-                    projects
+                    "Multiple projects found, "
+                    "please use --project to specify one of the following: {}",
+                    ','.join(projects)
                 )
             project = projects.pop()
 

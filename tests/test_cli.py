@@ -438,7 +438,7 @@ services:
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
-        "Please add the --project option with one of the following:",
+        "Multiple projects found, please use --project to specify one of the following:"
     )
 
     exec_command(
