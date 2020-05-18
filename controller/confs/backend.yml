@@ -303,7 +303,13 @@ services:
   postgres:
     # restart: always
     restart: on-failure:5
-    image: postgres:12.3-alpine
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/postgres
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/postgres:${RAPYDO_VERSION}
     volumes:
       - sqldata:/var/lib/postgresql/data
       - ${SUBMODULE_DIR}/do/controller/confs/postgresql/pgs_init.sh:/docker-entrypoint-initdb.d/setup-my-schema.sh:ro
@@ -336,7 +342,13 @@ services:
 
   neo4j:
     restart: on-failure:5
-    image: neo4j:3.5.18
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/neo4j
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/neo4j:${RAPYDO_VERSION}
     volumes:
       - graphdata:/data
       # it is used to enable SSL in production mode
@@ -354,6 +366,8 @@ services:
       SECURE_FILE_PERMISSIONS: "yes"
       # NEO4J_dbms_memory_pagecache_size: 2048M
       # NEO4J_dbms_memory_heap_maxSize: 4096M
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
     # ports:
     #   - 9090:7474
     #   - 7687:7687
