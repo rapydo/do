@@ -27,6 +27,8 @@ def __call__(args, files, frontend, **kwargs):
                 user = 'node'
         elif service == 'postgres':
             user = 'postgres'
+        elif service == 'neo4j':
+            user = 'neo4j'
         else:
             # None == get the docker-compose default
             user = None
