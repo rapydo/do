@@ -269,6 +269,7 @@ services:
       CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS}
       CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
       CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
+      CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
     depends_on:
       - backend
 

@@ -224,6 +224,7 @@ variables:
     SET_CSP_SCRIPT_SRC:
     # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
     SET_CSP_IMG_SRC:
+    SET_CSP_FONT_SRC:
     CORS_ALLOW_ALL_ORIGINS: 1
 
     SMTP_ADMIN: 
