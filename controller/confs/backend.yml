@@ -245,7 +245,6 @@ services:
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
     volumes:
-      - ${SUBMODULE_DIR}/do/controller/confs/nginx:/etc/nginx/sites-enabled-templates
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     networks:
@@ -285,7 +284,6 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     volumes:
-      - ${SUBMODULE_DIR}/do/controller/confs/nginx/maintenance.conf:/etc/nginx/sites-enabled/maintenance.conf
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     networks:
@@ -312,7 +310,6 @@ services:
     image: rapydo/postgres:${RAPYDO_VERSION}
     volumes:
       - sqldata:/var/lib/postgresql/data
-      - ${SUBMODULE_DIR}/do/controller/confs/postgresql/pgs_init.sh:/docker-entrypoint-initdb.d/setup-my-schema.sh:ro
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
@@ -492,8 +489,6 @@ services:
       # From project, if any
       - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
       - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret
-      # - jwt_tokens:${JWT_APP_SECRETS}
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
@@ -575,8 +570,6 @@ services:
       # From project, if any
       - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
       - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret
-      # - jwt_tokens:${JWT_APP_SECRETS}
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
