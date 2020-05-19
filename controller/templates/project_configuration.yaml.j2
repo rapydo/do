@@ -10,13 +10,13 @@ project:
   {% endif %}
 
 variables:
-  backend:
-    credentials:
-      roles:
-        user: normal_user
-        internal: staff_user
-        admin: admin_root
-        default: normal_user
+  roles:
+    # normal_user: YourCustomName
+    # staff_user: YourCustomName
+    # admin_root: YourCustomName
+    # extra_role: YourExtraRole
+    # default: normal_user
+
   env:
 
     FRONTEND_FRAMEWORK: {{ frontend }}

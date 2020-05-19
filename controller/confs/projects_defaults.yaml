@@ -20,13 +20,11 @@ variables:
       online_url: https://github.com/rapydo/do.git
       if: true
 
-  backend:
-    credentials:
-      roles:
-        user: normal_user
-        internal: staff_user
-        admin: admin_root
-        default: normal_user
+  roles:
+    normal_user: User
+    staff_user: Staff
+    admin_root: Admin
+    default: normal_user
     # Roles allowed for non-admin users (e.g. coordinator allowed to create users)
     # allowed_roles:
     #   - normal_user
