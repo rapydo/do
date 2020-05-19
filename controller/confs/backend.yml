@@ -107,6 +107,7 @@ services:
       UWSGI_APP: restapi.${PYTHON_MAIN_FILE}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
+      WSGI_SERVER: ${WSGI_SERVER}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       JWT_APP_SECRETS: ${JWT_APP_SECRETS}
