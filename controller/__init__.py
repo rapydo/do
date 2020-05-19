@@ -9,7 +9,7 @@ __version__ = '0.7.4'
 
 # NOTE: telling the app if testing or not
 # http://j.mp/2uifoza
-TESTING = hasattr(sys, '_called_from_test') or os.environ.get('TESTING', '0') == '1'
+TESTING = hasattr(sys, '_called_from_test') or os.getenv('TESTING', '0') == '1'
 
 LOGS_FOLDER = os.path.join("data", "logs")
 
