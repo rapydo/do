@@ -118,8 +118,8 @@ variables:
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
     PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
-    WSGI_SERVER: UWSGI
-    # WSGI_SERVER: GUNICORN
+    # WSGI_SERVER: UWSGI
+    WSGI_SERVER: GUNICORN
     # in backendirods it is:
     # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
     # DB_SUBNET: 172.1.0.0
