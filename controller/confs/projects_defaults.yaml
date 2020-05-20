@@ -271,7 +271,6 @@ project:
 
 tags:
   specifications: OpenAPI 2.0 Specification in JSON format
-  base: endpoints for base operations
   helpers: tools for checking status and privileges
   authentication: log in and out of the REST API
   profile: Visualize profile for current credentials
