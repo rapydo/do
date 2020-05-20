@@ -34,6 +34,7 @@ from neomodel.util import NodeClassRegistry
 from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
 
 from restapi.connectors.neo4j.models import User as UserBase
+from restapi.connectors.neo4j.models import Group as GroupBase
 
 # from restapi.utilities.logs import log
 
@@ -46,22 +47,18 @@ for c in registry._NODE_CLASS_REGISTRY:
         break
 
 
-# Extension of User model for accounting in API login/logout
-class User(UserBase):
-
-    belongs_to = RelationshipTo(
-        'Group', 'BELONGS_TO', cardinality=ZeroOrMore)
-
-
 class RelationTest(StructuredRel):
     pp = StringProperty()
 
 
-class Group(IdentifiedNode):
-    name = StringProperty(required=True, unique_index=True)
+# Extension of User model
+class User(UserBase):
+    pass
+
+
+# Extension of Group model
+class Group(GroupBase):
     extra = StringProperty(required=True, unique_index=True)
-    members = RelationshipFrom(
-        'User', 'BELONGS_TO', cardinality=ZeroOrMore)
 
     test1 = RelationshipTo(
         'JustATest', 'TEST', cardinality=OneOrMore,
