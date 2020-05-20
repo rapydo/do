@@ -34,7 +34,7 @@ from neomodel.util import NodeClassRegistry
 from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
 
 from restapi.connectors.neo4j.models import User as UserBase
-from restapi.connectors.neo4j.models import Group as GroupBase
+# from restapi.connectors.neo4j.models import Group as GroupBase
 
 # from restapi.utilities.logs import log
 
@@ -47,25 +47,13 @@ for c in registry._NODE_CLASS_REGISTRY:
         break
 
 
-class RelationTest(StructuredRel):
-    pp = StringProperty()
-
-
 # Extension of User model
 class User(UserBase):
     pass
 
 
-# Extension of Group model
-class Group(GroupBase):
-    extra = StringProperty(required=True, unique_index=True)
-
-    test1 = RelationshipTo(
-        'JustATest', 'TEST', cardinality=OneOrMore,
-        model=RelationTest)
-    test2 = RelationshipTo(
-        'JustATest', 'TEST2', cardinality=OneOrMore,
-        model=RelationTest)
+class RelationTest(StructuredRel):
+    pp = StringProperty()
 
 
 class JustATest(TimestampedNode):
