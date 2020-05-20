@@ -41,6 +41,7 @@ project_configuration:
       {% endfor %}{% endif -%}
       {% if testing -%}
       DEFAULT_DHLEN: 1024
+      GUNICORN_WORKERS: 1
       {% endif -%}
 
       {% else %}
