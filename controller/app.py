@@ -661,17 +661,11 @@ To fix this issue, please update docker to version {}+
 
         repo['do'] = self.initialize
         repo['check'] = not self.install
-
-        ################
-        # - repo path to the repo name
-        if 'path' not in repo:
-            repo['path'] = name
-        # - version is the one we have on the working controller
-        if 'branch' not in repo:
-            if self.rapydo_version is None:
-                repo['branch'] = __version__
-            else:
-                repo['branch'] = self.rapydo_version
+        repo.setdefault('path', name)
+        repo.setdefault(
+            'branch',
+            self.rapydo_version if self.rapydo_version else __version__
+        )
 
         if from_path is not None:
 
@@ -860,16 +854,6 @@ To fix this issue, please update docker to version {}+
                 env['CELERYBEAT_SCHEDULER'] = 'Unknown'
 
         env['DOCKER_NETWORK_MODE'] = self.current_args.get('net', 'bridge')
-
-        # # docker network mode
-        # # https://docs.docker.com/compose/compose-file/#network_mode
-        # nmode = self.current_args.get('net')
-        # nmodes = ['bridge', 'hosts']
-        # if nmode not in nmodes:
-        #     log.warning("Invalid network mode: {}", nmode)
-        #     nmode = nmodes[0]
-        # env['DOCKER_NETWORK_MODE'] = nmode
-        # print("TEST", nmode, env['DOCKER_NETWORK_MODE'])
 
         invalid_rabbit_characters = ['£', '§', '”', '’']
         pwd = env.get("RABBITMQ_PASSWORD")

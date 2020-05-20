@@ -59,12 +59,11 @@ def find_templates_build(base_services):
             else:
 
                 if template_image not in templates:
-                    templates[template_image] = {}
-                    templates[template_image]['services'] = []
-                    templates[template_image]['path'] = template_build.get('context')
-                    templates[template_image]['timestamp'] = docker.image_attribute(
-                        template_image
-                    )
+                    templates[template_image] = {
+                        'services': [],
+                        'path': template_build.get('context'),
+                        'timestamp': docker.image_attribute(template_image)
+                    }
 
                 if 'service' not in templates[template_image]:
                     templates[template_image]['service'] = template_name
@@ -161,8 +160,7 @@ def remove_redundant_services(services, builds):
             non_redundant_services.append(service)
             continue
 
-        if build_name not in requested_builds:
-            requested_builds[build_name] = []
+        requested_builds.setdefault(build_name, [])
         requested_builds[build_name].append(service)
 
     # Transform requested builds from:

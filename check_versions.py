@@ -79,8 +79,7 @@ def check_versions(skip_angular=False):
 
         if image.startswith("rapydo/"):
             continue
-        if service not in dependencies:
-            dependencies[service] = {}
+        dependencies.setdefault(service, {})
 
         dependencies[service]['compose'] = image
 
@@ -90,8 +89,7 @@ def check_versions(skip_angular=False):
         with open(d) as f:
             service = d.replace("../build-templates/", "")
             service = service.replace("/Dockerfile", "")
-            if service not in dependencies:
-                dependencies[service] = {}
+            dependencies.setdefault(service, {})
 
             for line in f:
 
@@ -108,10 +106,8 @@ def check_versions(skip_angular=False):
                     for t in tokens:
                         t = t.strip()
                         if '@' in t:
-                            if service not in dependencies:
-                                dependencies[service] = {}
-                            if "npm" not in dependencies[service]:
-                                dependencies[service]["npm"] = []
+                            dependencies.setdefault(service, {})
+                            dependencies[service].setdefault('npm', [])
                             dependencies[service]["npm"].append(t)
                 elif 'RUN pip install' in line or 'RUN pip3 install' in line:
 
@@ -119,10 +115,8 @@ def check_versions(skip_angular=False):
                     for t in tokens:
                         t = t.strip()
                         if '==' in t:
-                            if service not in dependencies:
-                                dependencies[service] = {}
-                            if "pip" not in dependencies[service]:
-                                dependencies[service]["pip"] = []
+                            dependencies.setdefault(service, {})
+                            dependencies[service].setdefault("pip", [])
                             dependencies[service]["pip"].append(t)
                 elif 'ENV ACMEV' in line:
                     line = line.replace("ENV ACMEV", "").strip()
@@ -138,12 +132,8 @@ def check_versions(skip_angular=False):
             for line in f:
                 line = line.strip()
 
-                if service not in dependencies:
-                    dependencies[service] = {}
-
-                if "pip" not in dependencies[service]:
-                    dependencies[service]["pip"] = []
-
+                dependencies.setdefault(service, {})
+                dependencies[service].setdefault("pip", [])
                 dependencies[service]["pip"].append(line)
 
     if not skip_angular:
@@ -160,11 +150,8 @@ def check_versions(skip_angular=False):
                 package_dependencies = package.get('dependencies', {})
                 package_devDependencies = package.get('devDependencies', {})
 
-                if 'angular' not in dependencies:
-                    dependencies['angular'] = {}
-
-                if "package.json" not in dependencies['angular']:
-                    dependencies['angular']["package.json"] = []
+                dependencies.setdefault('angular', {})
+                dependencies['angular'].setdefault('package.json', [])
 
                 for dep in package_dependencies:
                     ver = package_dependencies[dep]
@@ -210,8 +197,7 @@ def check_versions(skip_angular=False):
 
         elif isinstance(service_dependencies, dict):
             for category in service_dependencies:
-                if service not in filtered_dependencies:
-                    filtered_dependencies[service] = {}
+                filtered_dependencies.setdefault(service, {})
                 deps = service_dependencies[category]
 
                 was_str = False
