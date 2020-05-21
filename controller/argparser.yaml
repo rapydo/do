@@ -278,7 +278,7 @@ subcommands:
         type: str
         metavalue: UNIX_EXISTING_USER
         default: ''
-        help: user existing inside selected service
+        help: user existing in selected service
       command:
         alias: c
         type: str
@@ -375,11 +375,17 @@ subcommands:
         default: null
       command:
         positional: no
-        # alias: c
+        alias: c
         type: str
-        metavalue: TERMINAL_COMMAND_UNIX-LIKE
+        metavalue: COMMAND
         default: bash
         help: UNIX command to be executed
+      user:
+        positional: no
+        alias: u
+        type: str
+        metavalue: USER
+        help: user existing in selected service
   create:
     description: Create a new rapydo project
     suboptions:

@@ -160,7 +160,7 @@ class Compose:
             )
 
     def create_volatile_container(
-        self, service, command=None, publish=None, detach=False
+        self, service, command=None, publish=None, detach=False, user=None
     ):
         """
             Execute a command on a not container
@@ -187,7 +187,7 @@ class Compose:
             '--rm': True,
             '--no-deps': True,
             '--name': None,
-            '--user': None,
+            '--user': user,
             '--workdir': None,
             '--entrypoint': None,
             '--detach': detach,
