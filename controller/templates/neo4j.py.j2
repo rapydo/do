@@ -45,7 +45,13 @@ for c in registry._NODE_CLASS_REGISTRY:
     if c == base_user:
         registry._NODE_CLASS_REGISTRY.pop(base_user)
         break
-
+"""
+base_group = frozenset({'Group'})
+for c in registry._NODE_CLASS_REGISTRY:
+    if c == base_group:
+        registry._NODE_CLASS_REGISTRY.pop(base_group)
+        break
+"""
 
 # Extension of User model
 class User(UserBase):
