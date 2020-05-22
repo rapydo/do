@@ -140,6 +140,7 @@ class Project:
                 self.p_path("frontend", "app", "app.providers.ts"),
                 self.p_path("frontend", "app", "app.imports.ts"),
                 self.p_path("frontend", "app", "app.custom.navbar.ts"),
+                self.p_path("frontend", "app", "app.custom.navbar.html"),
                 self.p_path("frontend", "app", "app.entryComponents.ts"),
                 self.p_path("frontend", "app", "app.home.ts"),
                 self.p_path("frontend", "app", "app.home.html"),
