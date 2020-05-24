@@ -548,7 +548,7 @@ services:
         capfd,
         "rapydo ancestors {}".format(img_id),
         "Finding all parents and (grand)+ parents of {}".format(img_id),
-        "third/rabbit",
+        # "third/rabbit",
     )
 
     exec_command(
