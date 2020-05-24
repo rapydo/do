@@ -198,7 +198,7 @@ def check_file_younger_than(gitobj, filename, timestamp):
 
     try:
         commits = gitobj.blame(rev='HEAD', file=filename)
-    except GitCommandError as e:
+    except GitCommandError as e:  # pragma: no cover
         log.exit("Failed 'blame' operation on {}.\n{}", filename, e)
     dates = []
     for commit in commits:

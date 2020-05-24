@@ -21,7 +21,8 @@ def execute_command(command, parameters):
 def get_username(uid):
     try:
         return pwd.getpwuid(uid).pw_name
-    except ImportError as e:
+    # Can fail on Windows
+    except ImportError as e:  # pragma: no cover
         log.warning(e)
         return str(uid)
 
@@ -29,7 +30,8 @@ def get_username(uid):
 def get_current_uid():
     try:
         return os.getuid()
-    except AttributeError as e:
+    # Can fail on Windows
+    except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return 0
 
@@ -37,6 +39,7 @@ def get_current_uid():
 def get_current_gid():
     try:
         return os.getgid()
-    except AttributeError as e:
+    # Can fail on Windows
+    except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return 0
