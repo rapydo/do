@@ -522,7 +522,6 @@ services:
         "Update it with: rapydo --services rabbit build",
     )
 
-
     exec_command(
         capfd,
         "rapydo ancestors XYZ",
@@ -542,7 +541,7 @@ services:
     )
 
     # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info("rapydo/rabbit:{}".format(__version__)).get('Id')
+    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get('Id')
     # => c1a845de8052
     img_id = img_id[7:19]
     exec_command(
