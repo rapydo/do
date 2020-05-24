@@ -211,8 +211,8 @@ def test_all(capfd):
         capfd,
         "rapydo update -i main",
         "Unable to update do repo, you have unstaged files",
-        "Untracked files:"
-        "temp.file"
+        "Untracked files:",
+        "submodules/do/temp.file"
     )
     os.unlink("submodules/do/temp.file")
 
