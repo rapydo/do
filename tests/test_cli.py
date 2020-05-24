@@ -206,15 +206,15 @@ def test_all(capfd):
         "All updated",
     )
 
-    open("temp.file", 'a').close()
+    open("submodules/do/temp.file", 'a').close()
     exec_command(
         capfd,
-        "rapydo update",
+        "rapydo update -i main",
         "Unable to update main repo, you have unstaged files",
         "Untracked files:"
         "temp.file"
     )
-    os.unlink("temp.file")
+    os.unlink("submodules/do/temp.file")
 
     # Skipping main because we are on a fake git repository
     exec_command(
