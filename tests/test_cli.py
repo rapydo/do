@@ -210,7 +210,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo update -i main",
-        "Unable to update main repo, you have unstaged files",
+        "Unable to update do repo, you have unstaged files",
         "Untracked files:"
         "temp.file"
     )
