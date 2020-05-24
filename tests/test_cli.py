@@ -344,24 +344,6 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo ancestors XYZ",
-        "No parent found for XYZ",
-    )
-
-    dock = Dock()
-    img = dock.images().pop(0)
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get('Id')
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all parents and (grand)+ parents of {}".format(img_id),
-    )
-
-    exec_command(
-        capfd,
         "rapydo formatter",
         # This is becase no endpoint is implemented in this project...
         # "No paths given. Nothing to do",
@@ -538,6 +520,36 @@ services:
         "built on ",
         " that changed on ",
         "Update it with: rapydo --services rabbit build",
+    )
+
+
+    exec_command(
+        capfd,
+        "rapydo ancestors XYZ",
+        "No parent found for XYZ",
+    )
+
+    dock = Dock()
+    img = dock.images().pop(0)
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info(img).get('Id')
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all parents and (grand)+ parents of {}".format(img_id),
+    )
+
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info("rapydo/rabbit:{}".format(__version__)).get('Id')
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all parents and (grand)+ parents of {}".format(img_id),
+        "third/rabbit",
     )
 
     exec_command(
