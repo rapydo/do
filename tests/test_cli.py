@@ -782,6 +782,11 @@ services:
     )
     exec_command(
         capfd,
+        "rapydo ssl_certificate",
+        "Deprecated command, use rapydo ssl instead",
+    )
+    exec_command(
+        capfd,
         "rapydo ssl --volatile",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",

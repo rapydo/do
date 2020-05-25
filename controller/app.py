@@ -140,7 +140,8 @@ class Application:
         # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
         self.current_gid = system.get_current_gid()
-        if self.current_uid == ROOT_UID:
+        # Cannot be tested
+        if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
             self.current_os_user = 'privileged'
             skip_check_perm = True
