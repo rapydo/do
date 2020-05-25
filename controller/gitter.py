@@ -264,9 +264,9 @@ def update(path, gitobj):
                 branch = gitobj.active_branch
                 log.info("Updating {} {} (branch {})", remote, path, branch)
                 remote.pull(branch)
-            except GitCommandError as e:
+            except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
-            except TypeError as e:
+            except TypeError as e:  # pragma: no cover
                 if TESTING:
                     log.warning("Unable to update {} repo, {}", path, e)
                 else:
@@ -291,7 +291,7 @@ def fetch(path, gitobj, fetch_remote='origin'):
         log.verbose("Fetching {} on {}", remote, path)
         try:
             remote.fetch()
-        except GitCommandError as e:
+        except GitCommandError as e:  # pragma: no cover
             log.exit(str(e))
 
 
@@ -342,7 +342,7 @@ def check_updates(path, gitobj, fetch_remote='origin', remote_branch=None):
         commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
         try:
             commits_ahead_list = list(commits_ahead)
-        except GitCommandError:
+        except GitCommandError:  # pragma: no cover
             log.info(
                 "Remote branch {} not found for {}. Is it a local branch?".format(
                     branch, path)
