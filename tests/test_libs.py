@@ -30,13 +30,11 @@ def test_all(capfd):
     assert gitter.get_active_branch(do_repo) == __version__
 
     assert gitter.get_origin(None) is None
-    try:
-        gitter.get_origin('not-a-git-object')
-        pytest.fail("No exception raised")
-    except InvalidGitRepositoryError:
-        pass
-    except BaseException:
-        pytest.fail("Unexpected exception raised")
+    assert gitter.get_origin('not-a-git-object') is None
+
+    # It is invalid because has invalid remote
+    r = gitter.get_repo(".")
+    assert gitter.get_origin(r) is None
 
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"

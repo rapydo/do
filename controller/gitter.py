@@ -36,6 +36,8 @@ def get_origin(gitobj):
         return gitobj.remotes.origin.url
     except InvalidGitRepositoryError:
         return None
+    except AttributeError:
+        return None
 
 
 def get_local(path):
