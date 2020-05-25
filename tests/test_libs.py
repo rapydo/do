@@ -31,6 +31,7 @@ def test_all(capfd):
 
     assert gitter.get_origin(None) is None
     assert gitter.get_origin('not-a-git-object') is None
+    assert gitter.get_active_branch('not-a-git-object') is None
 
     r = gitter.get_repo(".")
     assert gitter.get_origin(r) == 'https://your_remote_git/your_project.git'
@@ -38,6 +39,7 @@ def test_all(capfd):
     # Create an invalid repo (i.e. without any remote)
     r = gitter.init("../justatest")
     assert gitter.get_origin(r) is None
+    assert gitter.get_local(r) is None
 
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"

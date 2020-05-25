@@ -18,7 +18,7 @@ def get_repo(path):
         return Repo(path)
     except NoSuchPathError:
         return None
-    except InvalidGitRepositoryError:
+    except InvalidGitRepositoryError:  # pragma: no cover
         return None
 
 
@@ -34,26 +34,21 @@ def get_origin(gitobj):
         if len(gitobj.remotes) == 0:
             return None
         return gitobj.remotes.origin.url
-    except InvalidGitRepositoryError:
-        return None
     except AttributeError:
         return None
 
 
 def get_local(path):
-    try:
-        gitobj = get_repo(path)
+    gitobj = get_repo(path)
 
-        if gitobj is None:
-            log.warning("Invalid repository in {}", path)
-            return None
-
-        if len(gitobj.remotes) == 0:
-            log.warning("Unable to fetch remotes from {}", path)
-            return None
-        return gitobj.remotes.origin.url
-    except InvalidGitRepositoryError:
+    if gitobj is None:
+        log.warning("Invalid repository in {}", path)
         return None
+
+    if len(gitobj.remotes) == 0:
+        log.warning("Unable to fetch remotes from {}", path)
+        return None
+    return gitobj.remotes.origin.url
 
 
 def get_active_branch(gitobj):
@@ -63,7 +58,7 @@ def get_active_branch(gitobj):
         return None
     try:
         return str(gitobj.active_branch)
-    except TypeError as e:
+    except AttributeError as e:
         log.warning(e)
         return None
 
