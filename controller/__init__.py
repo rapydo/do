@@ -27,9 +27,9 @@ def verbose(*args, **kwargs):
 
 def exit_msg(message="", *args, **kwargs):
     error_code = kwargs.pop('error_code', 1)
-    if not isinstance(error_code, int):
+    if not isinstance(error_code, int):  # pragma: no cover
         raise ValueError("Error code must be an integer")
-    if error_code < 1:
+    if error_code < 1:  # pragma: no cover
         raise ValueError("Cannot exit with value below 1")
     if message:
         log.critical(message, *args, **kwargs)
@@ -43,8 +43,12 @@ log.remove()
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
-else:
-    log.add(sys.stderr, colorize=True, format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>")
+else:  # pragma: no cover
+    log.add(
+        sys.stderr,
+        colorize=True,
+        format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>"
+    )
 
 if LOGS_FILE is not None:
     try:

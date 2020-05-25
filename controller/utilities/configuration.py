@@ -28,13 +28,15 @@ def read_configuration(
 
     # Verify custom project configuration
     project = custom_configuration.get("project")
-    if project is None:
+    # Can't be tested because it is included in default configuration
+    if project is None:  # pragma: no cover
         raise AttributeError("Missing project configuration")
 
     variables = ["title", "description", "version", "rapydo"]
 
     for key in variables:
-        if project.get(key) is None:
+        # Can't be tested because it is included in default configuration
+        if project.get(key) is None:  # pragma: no cover
 
             log.exit(
                 "Project not configured, missing key '{}' in file {}/{}",
@@ -43,20 +45,17 @@ def read_configuration(
                 PROJECT_CONF_FILENAME,
             )
 
-    if default_file_path is None:
-        base_configuration = {}
-    else:
-        base_configuration = load_yaml_file(
-            file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
-        )
+    base_configuration = load_yaml_file(
+        file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
+    )
 
-        if production:
-            base_prod_conf = load_yaml_file(
-                file=PROJECTS_PROD_DEFAULTS_FILE,
-                path=default_file_path,
-                keep_order=True,
-            )
-            base_configuration = mix_configuration(base_configuration, base_prod_conf)
+    if production:
+        base_prod_conf = load_yaml_file(
+            file=PROJECTS_PROD_DEFAULTS_FILE,
+            path=default_file_path,
+            keep_order=True,
+        )
+        base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
     if read_extended:
         extended_project = project.get("extends")
@@ -94,7 +93,7 @@ def read_configuration(
 
 
 def mix_configuration(base, custom):
-    if base is None:
+    if base is None:  # pragma: no cover
         base = {}
 
     for key, elements in custom.items():
@@ -104,7 +103,7 @@ def mix_configuration(base, custom):
             continue
 
         if elements is None:
-            if isinstance(base[key], dict):
+            if isinstance(base[key], dict):  # pragma: no cover
                 log.warning("Cannot replace {} with empty list", key)
                 continue
 
@@ -158,7 +157,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     filepath = get_yaml_path(file, path=path)
 
     if filepath is None:
-        if not is_optional:
+        if not is_optional:  # pragma: no cover
             log.exit(
                 "Failed to read YAML file {}/{}: File does not exist", path, file,
             )
