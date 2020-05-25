@@ -782,7 +782,7 @@ services:
     )
     exec_command(
         capfd,
-        "rapydo ssl_certificate",
+        "rapydo ssl-certificate",
         "Deprecated command, use rapydo ssl instead",
     )
     exec_command(
