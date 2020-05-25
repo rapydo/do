@@ -38,7 +38,7 @@ def install(package, editable=False, user=False, use_pip3=True):
             # --user does not work on travis:
             # Can not perform a '--user' install.
             # User site-packages are not visible in this virtualenv.
-            if not TESTING and user:
+            if not TESTING and user:  # pragma: no cover
                 command += " --user"
             command += ' {}'.format(package)
 
@@ -53,7 +53,7 @@ def install(package, editable=False, user=False, use_pip3=True):
             for r in result.stderr:
                 print(r)
             return result.rc == 0
-    except BaseException as e:
+    except BaseException as e:  # pragma: no cover
         log.exit(e)
 
 
@@ -74,7 +74,7 @@ def import_package(package_name):
 
     try:
         package = import_module(package_name)
-    except import_exceptions:  # pylint:disable=catching-non-exception
+    except import_exceptions:  # pylint:disable=catching-non-exception  # pragma: no cover
         return None
     else:
         return package

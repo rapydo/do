@@ -27,7 +27,10 @@ def __call__(args, files, frontend, **kwargs):
                 user = 'node'
         elif service == 'postgres':
             user = 'postgres'
-        elif service == 'neo4j':
+        # Tests are not based on neo4j... pull an additional image and slow down the
+        # test suite only to test this case is not needed, we can assume it works
+        # having tested 3 images out of 4
+        elif service == 'neo4j':  # pragma: no cover
             user = 'neo4j'
         else:
             # None == get the docker-compose default
@@ -35,7 +38,8 @@ def __call__(args, files, frontend, **kwargs):
     log.verbose("Command as user '{}'", user)
 
     command = args.get('command')
-    if command is None:
+    # Not easy to test all default commands...
+    if command is None:   # pragma: no cover
         if not default_command:
             command = "bash"
         elif service == 'backend':

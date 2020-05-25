@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 from plumbum.commands.processes import ProcessExecutionError
+from git.exc import InvalidGitRepositoryError
 
 from controller import gitter
 from controller import __version__
@@ -28,6 +29,15 @@ def test_all(capfd):
     assert gitter.switch_branch(do_repo, branch_name=__version__)
     assert gitter.get_active_branch(do_repo) == __version__
 
+    assert gitter.get_origin(None) is None
+    try:
+        gitter.get_origin('not-a-git-object')
+        pytest.fail("No exception raised")
+    except InvalidGitRepositoryError:
+        pass
+    except BaseException:
+        pytest.fail("Unexpected exception raised")
+
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
@@ -39,3 +49,5 @@ def test_all(capfd):
         pytest.fail("ProcessExecutionError not raised!")
     except ProcessExecutionError:
         pass
+    except BaseException:
+        pytest.fail("Unexpected exception raised")
