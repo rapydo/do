@@ -57,7 +57,7 @@ for c in registry._NODE_CLASS_REGISTRY:
 class User(UserBase):
     pass
 
-
+{% if not extend -%}
 class RelationTest(StructuredRel):
     pp = StringProperty()
 
@@ -78,3 +78,4 @@ class JustATest(TimestampedNode):
 
     test2 = RelationshipFrom(
         'Group', 'TEST2', cardinality=ZeroOrMore, model=RelationTest)
+{% endif -%}

@@ -94,7 +94,7 @@ def __call__(args, project_scaffold, **kwargs):
             v = e[1]
             env_variables[k] = v
 
-    project_scaffold.load_project_scaffold(project_name, auth, extended=extend)
+    project_scaffold.load_project_scaffold(project_name, auth)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
