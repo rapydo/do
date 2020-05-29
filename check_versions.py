@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 import os
 import re
@@ -51,16 +49,16 @@ def check_updates(category, lib):
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        print('https://pypi.org/project/{}/{}'.format(token[0], token[1]))
+        print(f'https://pypi.org/project/{token[0]}/{token[1]}')
     elif category in ['compose', 'Dockerfile']:
         token = lib.split(":")
-        print("https://hub.docker.com/_/{}?tab=tags".format(token[0]))
+        print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
     elif category in ['package.json', 'npm']:
         token = lib.split(":")
-        print("https://www.npmjs.com/package/{}".format(token[0]))
+        print(f"https://www.npmjs.com/package/{token[0]}")
     elif category in ['ACME']:
         token = lib.split(":")
-        print("https://github.com/Neilpang/acme.sh/releases/tag/{}".format(token[1]))
+        print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
     else:
         log.critical("{}: {}", category, lib)
 
@@ -122,7 +120,7 @@ def check_versions(skip_angular=False):
                     line = line.replace("ENV ACMEV", "").strip()
                     line = line.replace("\"", "").strip()
 
-                    dependencies[service]['ACME'] = "ACME:{}".format(line)
+                    dependencies[service]['ACME'] = f"ACME:{line}"
 
     for d in glob("../build-templates/*/requirements.txt"):
 
@@ -155,11 +153,11 @@ def check_versions(skip_angular=False):
 
                 for dep in package_dependencies:
                     ver = package_dependencies[dep]
-                    lib = "{}:{}".format(dep, ver)
+                    lib = f"{dep}:{ver}"
                     dependencies['angular']["package.json"].append(lib)
                 for dep in package_devDependencies:
                     ver = package_devDependencies[dep]
-                    lib = "{}:{}".format(dep, ver)
+                    lib = f"{dep}:{ver}"
                     dependencies['angular']["package.json"].append(lib)
 
     controller = distutils.core.run_setup("../do/setup.py")
