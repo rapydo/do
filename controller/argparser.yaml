@@ -71,13 +71,13 @@ subcommands:
         type: str
         metavalue: FOLDER_NAME
         default: apis
-        help: name of folder to be formatted
+        help: folder to be formatted
       submodule:
         alias: s
         type: str
         metavalue: SUBMODULE_NAME
         default: vanilla
-        help: name of submodule to be formatted. Project folder is defined as vanilla submodule
+        help: submodule to be formatted. Project folder is defined as vanilla submodule
 
   check:
     description: Verify if current project is compliant to RAPyDo specs

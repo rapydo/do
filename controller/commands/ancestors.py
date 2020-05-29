@@ -39,7 +39,7 @@ def __call__(args, **kwargs):
     parameters = ["images", "--all"]
     # log.info("Executing command {} {}", command, parameters)
     img = system.execute_command("docker", parameters).split("\n")
-    img = [re.split("\s+", i) for i in img[1:]]
+    img = [re.split(r"\s+", i) for i in img[1:]]
     images = {}
     for i in img:
         if len(i) != 7:

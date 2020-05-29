@@ -911,7 +911,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     active_serv.append(i)
             if len(active_serv) > 0:
                 placeholders.append(
-                    "%-20s\trequired by\t%s" % (key, ', '.join(active_serv))
+                    "{:<20}\trequired by\t{}".format(key, ', '.join(active_serv))
                 )
             else:
                 log.verbose(

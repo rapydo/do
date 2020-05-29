@@ -26,7 +26,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
         log.info("List of configured rapydo arguments:\n")
         for var in sorted(args):
             val = args.get(var)
-            print("%-20s\t%s" % (var, val))
+            print("{:<20}\t{}".format(var, val))
 
     if args.get('env'):
         printed_something = True
@@ -34,12 +34,12 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
         env = read_env()
         for var in sorted(env):
             val = env.get(var)
-            print("%-36s\t%s" % (var, val))
+            print("{:<36}\t{}".format(var, val))
 
     if args.get('active_services'):
         printed_something = True
         log.info("List of active services:\n")
-        print("%-12s %-24s %s" % ("Name", "Image", "Path"))
+        print("{:<12} {:<24} {}".format("Name", "Image", "Path"))
 
         for service in compose_config:
             name = service.get('name')
@@ -47,18 +47,18 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
                 image = service.get("image")
                 build = service.get("build")
                 if build is None:
-                    print("%-12s %-24s" % (name, image))
+                    print("{:<12} {:<24}".format(name, image))
                 else:
                     path = build.get('context')
                     path = path.replace(os.getcwd(), "")
                     if path.startswith("/"):
                         path = path[1:]
-                    print("%-12s %-24s %s" % (name, image, path))
+                    print("{:<12} {:<24} {}".format(name, image, path))
 
     if args.get('submodules'):
         printed_something = True
         log.info("List of submodules:\n")
-        print("%-18s %-18s %s" % ("Repo", "Branch", "Path"))
+        print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
         for name in gits:
             repo = gits.get(name)
             if repo is None:
@@ -68,7 +68,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
             path = path.replace(os.getcwd(), "")
             if path.startswith("/"):
                 path = path[1:]
-            print("%-18s %-18s %s" % (name, branch, path))
+            print("{:<18} {:<18} {}".format(name, branch, path))
 
     if not printed_something:
         log.error(
