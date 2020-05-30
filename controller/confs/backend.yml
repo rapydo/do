@@ -207,6 +207,7 @@ services:
 
       SENTRY_URL: ${SENTRY_URL}
       RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
+      MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
 
     volumes:
       # configuration files
