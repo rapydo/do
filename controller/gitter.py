@@ -83,7 +83,7 @@ def switch_branch(gitobj, branch_name='master', remote=True):
     branch_found = False
     for branch in branches:
         if remote:
-            branch_found = branch.name.endswith('/' + branch_name)
+            branch_found = branch.name.endswith('/{}'.format(branch_name))
         else:
             branch_found = branch.name == branch_name
 

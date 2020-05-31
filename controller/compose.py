@@ -264,11 +264,11 @@ class Compose:
             options = merge
         for variable in variables:
             if len(variable) == 1:
-                key = '-' + variable
+                key = '-{}'.format(variable)
             elif variable.upper() == variable:
                 key = variable
             else:
-                key = '--' + variable
+                key = '--{}'.format(variable)
             options[key] = None
         log.verbose('defaults: {}', options)
         return options
