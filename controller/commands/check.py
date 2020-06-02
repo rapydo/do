@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import glob
 import dateutil.parser
 from datetime import datetime
 from controller.dockerizing import Dock
@@ -65,9 +66,10 @@ def build_is_obsolete(build, gits):
 
     build_timestamp = get_build_timestamp(build)
 
-    files = os.listdir(path)
-    for f in files:
+    for f in glob.iglob(f"{path}/**/*", recursive=True):
         local_file = os.path.join(path, f)
+        if os.path.isdir(local_file):
+            continue
 
         obsolete, build_ts, last_commit = gitter.check_file_younger_than(
             gitobj=git_repo, filename=local_file, timestamp=build_timestamp
