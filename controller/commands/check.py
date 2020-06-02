@@ -66,7 +66,7 @@ def build_is_obsolete(build, gits):
 
     build_timestamp = get_build_timestamp(build)
 
-    for f in glob.iglob(f"{path}/**/*", recursive=True):
+    for f in glob.iglob("{}/**/*".format(path), recursive=True):
         local_file = os.path.join(path, f)
         if os.path.isdir(local_file):
             continue
