@@ -178,7 +178,8 @@ class Application:
             command = importlib.import_module("controller.commands.{}".format(cmd_name))
         # enable me after dropping python 3.5
         # except ModuleNotFoundError:
-        except BaseException:
+        except BaseException as e:
+            log.error(e)
             log.exit("Command not found: {}", self.action)
 
         if not hasattr(command, "__call__"):
