@@ -274,6 +274,7 @@ variables:
     AUTH_DEFAULT_USERNAME: "user@nomail.org"    
     AUTH_DEFAULT_PASSWORD: "test"  
 
+    FORCE_PRODUCTION_TESTS: 0  # Very dangerous, do not touch it!
     NETWORK_MTU: 1500
 
 project:
