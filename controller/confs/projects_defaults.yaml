@@ -119,8 +119,18 @@ variables:
     PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
     # WSGI_SERVER: UWSGI
     WSGI_SERVER: GUNICORN
-    GUNICORN_WORKERS:  # total number of workers. if empty this parameter will not be used
-    GUNICORN_WORKERS_PER_CORE: 1  # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
+    # from GUNICORN docs:
+    # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
+    # the formula is based on the assumption that for a given core, one worker will be
+    # reading or writing from the socket while the other worker is processing a request.
+    # Obviously, your particular hardware and application are going to affect the optimal
+    # number of workers. Our recommendation is to start with the above guess and tune
+    # using TTIN and TTOU signals while the application is under load.
+    # number of workers will calculated as:
+    # $GUNICORN_WORKERS + #cores * $GUNICORN_WORKERS_PER_CORE
+    GUNICORN_WORKERS: 1 # total number of workers. if empty this parameter will not be used
+    GUNICORN_WORKERS_PER_CORE: 2  # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
+    GUNICORN_MAX_NUM_WORKERS: 24
     # in backendirods it is:
     # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
     # DB_SUBNET: 172.1.0.0
