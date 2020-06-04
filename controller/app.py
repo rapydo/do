@@ -101,7 +101,7 @@ class Application:
         self.check_installed_software()
 
         # TODO: give an option to skip things when you are not connected
-        if self.initialize or self.update or self.check:
+        if self.initialize or self.update or self.check or self.install:
             self.check_internet_connection()
 
         if self.install:
