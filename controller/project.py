@@ -23,6 +23,7 @@ class Project:
         self.expected_files = []
         self.optionals_folders = []
         self.optionals_files = []
+        self.test_files = []
         self.data_folders = []
         self.data_files = []
         self.obsolete_files = []
@@ -30,7 +31,7 @@ class Project:
     def p_path(self, *args):
         return os.path.join(PROJECT_DIR, self.project, *args)
 
-    def load_project_scaffold(self, project, auth):
+    def load_project_scaffold(self, project, auth, celery=False):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         if self.project is None:
@@ -72,10 +73,11 @@ class Project:
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
-        # Should be only enabled if celery is ON
-        self.optionals_files.append(
-            self.p_path("backend", "tasks", "task_example.py")
-        )
+
+        if celery:
+            self.test_files.append(
+                self.p_path("backend", "tasks", "task_example.py")
+            )
         self.data_folders.extend([
             os.path.join("data", "logs")
         ])

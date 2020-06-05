@@ -94,7 +94,7 @@ def __call__(args, project_scaffold, **kwargs):
             v = e[1]
             env_variables[k] = v
 
-    project_scaffold.load_project_scaffold(project_name, auth)
+    project_scaffold.load_project_scaffold(project_name, auth, celery=enable_celery)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
@@ -128,6 +128,8 @@ def __call__(args, project_scaffold, **kwargs):
     files = project_scaffold.expected_files
     if add_optionals:
         files += project_scaffold.optionals_files
+    # should be included only if a testing flag is enabled
+    files += project_scaffold.test_files
 
     for p in files:
         fname = os.path.basename(p)
