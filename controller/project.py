@@ -72,6 +72,10 @@ class Project:
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
+        # Should be only enabled if celery is ON
+        self.optionals_files.append(
+            self.p_path("backend", "tasks", "task_example.py")
+        )
         self.data_folders.extend([
             os.path.join("data", "logs")
         ])
