@@ -310,7 +310,7 @@ class Application:
     def check_installed_software(self):
 
         # Python 3.5 deprecated since 0.7.3
-        # EOL expected 2020-09-13 (~ rapydo 0.7.6?)
+        # EOL expected 2020-09-13 (~ rapydo 0.7.5)
         # https://devguide.python.org/#status-of-python-branches
         if sys.version_info < (3, 6):
             log.warning(

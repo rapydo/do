@@ -147,6 +147,18 @@ def parsePackageJson(package_json, dependencies):
     return dependencies
 
 
+def parsePrecommitConfig(f, dependencies, key):
+    y = load_yaml_file(f)
+    for r in y.get("repos"):
+        rev = r.get("rev")
+        repo = r.get("repo")
+        if "gitlab" in repo:
+            u = f"{repo}/-/tags/{rev}"
+        else:
+            u = f"{repo}/releases/tag/{rev}"
+        dependencies[key].append(u)
+
+
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
 def check_versions(skip_angular=False):
@@ -176,15 +188,12 @@ def check_versions(skip_angular=False):
         dependencies = parseRequirements(d, dependencies)
 
     if not skip_angular:
-        package_json = None
 
         if os.path.exists("../frontend/src/package.json"):
             package_json = "../frontend/src/package.json"
+            dependencies = parsePackageJson(package_json, dependencies)
         elif os.path.exists("../rapydo-angular/src/package.json"):
             package_json = "../rapydo-angular/src/package.json"
-
-        if package_json is not None:
-
             dependencies = parsePackageJson(package_json, dependencies)
 
     controller = distutils.core.run_setup("../do/setup.py")
@@ -194,26 +203,10 @@ def check_versions(skip_angular=False):
     dependencies["http-api"] = http_api.install_requires
 
     if os.path.exists(f := "../do/.pre-commit-config.yaml"):
-        y = load_yaml_file(f)
-        for r in y.get("repos"):
-            rev = r.get("rev")
-            repo = r.get("repo")
-            if "gitlab" in repo:
-                u = f"{repo}/-/tags/{rev}"
-            else:
-                u = f"{repo}/releases/tag/{rev}"
-            dependencies["controller"].append(u)
+        dependencies = parsePrecommitConfig(f, dependencies, "controller")
 
     if os.path.exists(f := "../http-api/.pre-commit-config.yaml"):
-        y = load_yaml_file(f)
-        for r in y.get("repos"):
-            rev = r.get("rev")
-            repo = r.get("repo")
-            if "gitlab" in repo:
-                u = f"{repo}/-/tags/{rev}"
-            else:
-                u = f"{repo}/releases/tag/{rev}"
-            dependencies["http-api"].append(u)
+        dependencies = parsePrecommitConfig(f, dependencies, "http-api")
 
     filtered_dependencies = {}
 

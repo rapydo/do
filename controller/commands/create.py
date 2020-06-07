@@ -5,6 +5,18 @@ from controller.project import ANGULAR, NO_FRONTEND  # REACT
 from controller.templating import Templating
 
 
+def parse_env_variables(envs):
+    env_variables = {}
+    if envs:
+        for e in envs.split(","):
+            e = e.split("=")
+            if len(e) != 2:
+                log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
+            k = e[0].upper()
+            v = e[1]
+            env_variables[k] = v
+
+
 def __call__(args, project_scaffold, **kwargs):
 
     project_name = args.get("name")
@@ -82,15 +94,7 @@ def __call__(args, project_scaffold, **kwargs):
         elif enable_rabbit:
             celery_backend = "RABBIT"
 
-    env_variables = {}
-    if envs:
-        for e in envs.split(","):
-            e = e.split("=")
-            if len(e) != 2:
-                log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
-            k = e[0].upper()
-            v = e[1]
-            env_variables[k] = v
+    env_variables = parse_env_variables(envs)
 
     project_scaffold.load_project_scaffold(project_name, auth, celery=enable_celery)
     if frontend != NO_FRONTEND:
