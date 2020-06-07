@@ -830,17 +830,6 @@ To fix this issue, please update docker to version {}+
         privileged_mode = self.current_args.get("privileged")
         env["DOCKER_PRIVILEGED_MODE"] = "true" if privileged_mode else "false"
 
-        if self.action == "formatter" and self.current_args.get("folder") is not None:
-            VANILLA_SUBMODULE = "vanilla"
-            submodule = self.current_args.get("submodule", VANILLA_SUBMODULE)
-
-            if submodule == VANILLA_SUBMODULE:
-                env["BLACK_SUBMODULE"] = ""
-                env["BLACK_FOLDER"] = self.current_args.get("folder")
-            else:
-                env["BLACK_SUBMODULE"] = submodule
-                env["BLACK_FOLDER"] = self.current_args.get("folder")
-
         if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
             env["CELERYBEAT_SCHEDULER"] = "Unknown"
         else:

@@ -327,21 +327,6 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo formatter",
-        # This is becase no endpoint is implemented in this project...
-        # "No paths given. Nothing to do",
-        # Now we included a profile.py by using --add-optionals
-        "1 file left unchanged.",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo formatter --submodule http-api/restapi --folder resources",
-        "All done!",
-    )
-
-    exec_command(
-        capfd,
         "rapydo version",
         "rapydo: \033[1;32m{v}".format(v=__version__),
         "required rapydo: \033[1;32m{v}".format(v=__version__),

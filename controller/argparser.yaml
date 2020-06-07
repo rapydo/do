@@ -63,22 +63,6 @@ subcommands:
   dump:
     description: Dump current config into docker compose YAML
 
-  formatter:
-    description: Run 'black' formatter on python code
-    suboptions:
-      folder:
-        alias: f
-        type: str
-        metavalue: FOLDER_NAME
-        default: apis
-        help: folder to be formatted
-      submodule:
-        alias: s
-        type: str
-        metavalue: SUBMODULE_NAME
-        default: vanilla
-        help: submodule to be formatted. Project folder is defined as vanilla submodule
-
   check:
     description: Verify if current project is compliant to RAPyDo specs
     suboptions:
