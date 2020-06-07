@@ -26,11 +26,7 @@ def verbose(*args, **kwargs):
 
 
 def exit_msg(message="", *args, **kwargs):
-    error_code = kwargs.pop('error_code', 1)
-    if not isinstance(error_code, int):  # pragma: no cover
-        raise ValueError("Error code must be an integer")
-    if error_code < 1:  # pragma: no cover
-        raise ValueError("Cannot exit with value below 1")
+    error_code = abs(int(kwargs.pop('error_code', 1)))
     if message:
         log.critical(message, *args, **kwargs)
     sys.exit(error_code)

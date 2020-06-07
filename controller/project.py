@@ -54,6 +54,7 @@ class Project:
         self.expected_files.append(
             self.p_path("backend", "initialization", "initialization.py")
         )
+        self.expected_files.append(".gitignore")
 
         if auth is not None:
             model_file = "{}.py".format(auth)
