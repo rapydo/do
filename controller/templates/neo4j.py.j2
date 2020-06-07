@@ -74,8 +74,8 @@ class JustATest(TimestampedNode):
     p_alias = AliasProperty()
 
     test1 = RelationshipFrom(
-        'Group', 'TEST', cardinality=ZeroOrMore, model=RelationTest)
+        'User', 'TEST', cardinality=ZeroOrMore, model=RelationTest)
 
     test2 = RelationshipFrom(
-        'Group', 'TEST2', cardinality=ZeroOrMore, model=RelationTest)
+        'User', 'TEST2', cardinality=ZeroOrMore, model=RelationTest)
 {% endif -%}
