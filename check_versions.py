@@ -60,8 +60,54 @@ def check_updates(category, lib):
     elif category in ["ACME"]:
         token = lib.split(":")
         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
+    elif category == "url":
+        print(lib)
     else:
         log.critical("{}: {}", category, lib)
+
+
+def parseDockerfile(d, dependencies, skip_angular):
+    with open(d) as f:
+        service = d.replace("../build-templates/", "")
+        service = service.replace("/Dockerfile", "")
+        dependencies.setdefault(service, {})
+
+        for line in f:
+
+            if line.startswith("#"):
+                continue
+
+            if "FROM" in line:
+                line = line.replace("FROM", "").strip()
+
+                dependencies[service]["Dockerfile"] = line
+            elif not skip_angular and (
+                "RUN npm install" in line
+                or "RUN yarn add" in line
+                or "RUN yarn global add" in line
+            ):
+
+                tokens = line.split(" ")
+                for t in tokens:
+                    t = t.strip()
+                    if "@" in t:
+                        dependencies.setdefault(service, {})
+                        dependencies[service].setdefault("npm", [])
+                        dependencies[service]["npm"].append(t)
+            elif "RUN pip install" in line or "RUN pip3 install" in line:
+
+                tokens = line.split(" ")
+                for t in tokens:
+                    t = t.strip()
+                    if "==" in t:
+                        dependencies.setdefault(service, {})
+                        dependencies[service].setdefault("pip", [])
+                        dependencies[service]["pip"].append(t)
+            elif "ENV ACMEV" in line:
+                line = line.replace("ENV ACMEV", "").strip()
+                line = line.replace('"', "").strip()
+
+                dependencies[service]["ACME"] = f"ACME:{line}"
 
 
 @click.command()
@@ -85,47 +131,8 @@ def check_versions(skip_angular=False):
     for d in glob("../build-templates/*/Dockerfile"):
         if "not_used_anymore_" in d:
             continue
-        with open(d) as f:
-            service = d.replace("../build-templates/", "")
-            service = service.replace("/Dockerfile", "")
-            dependencies.setdefault(service, {})
 
-            for line in f:
-
-                if line.startswith("#"):
-                    continue
-
-                if "FROM" in line:
-                    line = line.replace("FROM", "").strip()
-
-                    dependencies[service]["Dockerfile"] = line
-                elif not skip_angular and (
-                    "RUN npm install" in line
-                    or "RUN yarn add" in line
-                    or "RUN yarn global add" in line
-                ):
-
-                    tokens = line.split(" ")
-                    for t in tokens:
-                        t = t.strip()
-                        if "@" in t:
-                            dependencies.setdefault(service, {})
-                            dependencies[service].setdefault("npm", [])
-                            dependencies[service]["npm"].append(t)
-                elif "RUN pip install" in line or "RUN pip3 install" in line:
-
-                    tokens = line.split(" ")
-                    for t in tokens:
-                        t = t.strip()
-                        if "==" in t:
-                            dependencies.setdefault(service, {})
-                            dependencies[service].setdefault("pip", [])
-                            dependencies[service]["pip"].append(t)
-                elif "ENV ACMEV" in line:
-                    line = line.replace("ENV ACMEV", "").strip()
-                    line = line.replace('"', "").strip()
-
-                    dependencies[service]["ACME"] = f"ACME:{line}"
+        dependencies = parseDockerfile(d, dependencies, skip_angular)
 
     for d in glob("../build-templates/*/requirements.txt"):
 
@@ -171,6 +178,28 @@ def check_versions(skip_angular=False):
     dependencies["controller"] = controller.install_requires
     dependencies["http-api"] = http_api.install_requires
 
+    if os.path.exists(f := "../do/.pre-commit-config.yaml"):
+        y = load_yaml_file(f)
+        for r in y.get("repos"):
+            rev = r.get("rev")
+            repo = r.get("repo")
+            if "gitlab" in repo:
+                u = f"{repo}/-/tags/{rev}"
+            else:
+                u = f"{repo}/releases/tag/{rev}"
+            dependencies["controller"].append(u)
+
+    if os.path.exists(f := "../http-api/.pre-commit-config.yaml"):
+        y = load_yaml_file(f)
+        for r in y.get("repos"):
+            rev = r.get("rev")
+            repo = r.get("repo")
+            if "gitlab" in repo:
+                u = f"{repo}/-/tags/{rev}"
+            else:
+                u = f"{repo}/releases/tag/{rev}"
+            dependencies["http-api"].append(u)
+
     filtered_dependencies = {}
 
     for service in dependencies:
@@ -185,7 +214,15 @@ def check_versions(skip_angular=False):
             for d in service_dependencies:
 
                 skipped = False
-                if "==" not in d and ">=" not in d:
+                # repos from pre-commit (github)
+                if "/releases/tag/" in d:
+                    filtered_dependencies[service].append(d)
+                    check_updates("url", d)
+                # repos from pre-commit (gitlab)
+                elif "/tags/" in d:
+                    filtered_dependencies[service].append(d)
+                    check_updates("url", d)
+                elif "==" not in d and ">=" not in d:
                     skipped = True
                 else:
                     filtered_dependencies[service].append(d)
