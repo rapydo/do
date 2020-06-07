@@ -16,6 +16,8 @@ def parse_env_variables(envs):
             v = e[1]
             env_variables[k] = v
 
+    return env_variables
+
 
 def __call__(args, project_scaffold, **kwargs):
 
