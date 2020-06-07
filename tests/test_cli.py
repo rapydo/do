@@ -1,12 +1,13 @@
-# -*- coding: utf-8 -*-
 import os
-import signal
 import shutil
+import signal
+
 from git import Repo
+
+from controller import __version__
+from controller.app import Application
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
-from controller.app import Application
-from controller import __version__
 
 
 class Timeout(Exception):
@@ -39,8 +40,8 @@ def exec_command(capfd, command, *asserts):
 
     captured = capfd.readouterr()
     # Remove empty lines
-    out = [x for x in captured.out.replace('\r', '').split("\n") if x.strip()]
-    err = [x for x in captured.err.replace('\r', '').split("\n") if x.strip()]
+    out = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
+    err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
 
     with capfd.disabled():
         for o in out:
@@ -63,9 +64,7 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd,
-        "rapydo create first --auth xyz",
-        "Invalid authentication service: xyz",
+        capfd, "rapydo create first --auth xyz", "Invalid authentication service: xyz",
     )
 
     exec_command(
@@ -125,9 +124,7 @@ def test_all(capfd):
     create_command += " --services rabbit --add-optionals"
     create_command += " --origin https://your_remote_git/your_project.git"
     exec_command(
-        capfd,
-        create_command,
-        "Project first successfully created",
+        capfd, create_command, "Project first successfully created",
     )
 
     exec_command(
@@ -187,47 +184,37 @@ def test_all(capfd):
 
     # Basic initilization
     exec_command(
-        capfd,
-        "rapydo init",
-        "Project initialized",
+        capfd, "rapydo init", "Project initialized",
     )
 
     # Basic pull
     exec_command(
-        capfd,
-        "rapydo pull",
-        "Base images pulled from docker hub",
+        capfd, "rapydo pull", "Base images pulled from docker hub",
     )
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd,
-        "rapydo update -i main",
-        "All updated",
+        capfd, "rapydo update -i main", "All updated",
     )
 
-    open("submodules/do/temp.file", 'a').close()
+    open("submodules/do/temp.file", "a").close()
     exec_command(
         capfd,
         "rapydo update -i main",
         "Unable to update do repo, you have unstaged files",
         "Untracked files:",
-        "submodules/do/temp.file"
+        "submodules/do/temp.file",
     )
     os.unlink("submodules/do/temp.file")
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd,
-        "rapydo check -i main",
-        "Checks completed",
+        capfd, "rapydo check -i main", "Checks completed",
     )
 
     # Verify fs permissions
     exec_command(
-        capfd,
-        "rapydo check -i main --check-permissions",
-        "Checks completed",
+        capfd, "rapydo check -i main --check-permissions", "Checks completed",
     )
 
     # Some tests with list
@@ -246,14 +233,10 @@ def test_all(capfd):
         "mycustomvalue",
     )
     exec_command(
-        capfd,
-        "rapydo list --args",
-        "List of configured rapydo arguments:",
+        capfd, "rapydo list --args", "List of configured rapydo arguments:",
     )
     exec_command(
-        capfd,
-        "rapydo list --submodules",
-        "List of submodules:",
+        capfd, "rapydo list --submodules", "List of submodules:",
     )
 
     exec_command(
@@ -267,35 +250,35 @@ def test_all(capfd):
     )
     # Test services activation from create --services
     services = [
-        'postgres',
-        'mysql',
-        'neo4j',
-        'mongo',
-        'rabbit',
-        'redis',
-        'irods',
-        'celery',
-        'pushpin',
-        'ftp',
+        "postgres",
+        "mysql",
+        "neo4j",
+        "mongo",
+        "rabbit",
+        "redis",
+        "irods",
+        "celery",
+        "pushpin",
+        "ftp",
     ]
     opt = "--frontend no --current --force"
     for service in services:
 
-        if service == 'postgres':
-            auth = 'postgres'
-            serv_opt = ''
-        elif service == 'mysql':
-            auth = 'mysql'
-            serv_opt = ''
-        elif service == 'neo4j':
-            auth = 'neo4j'
-            serv_opt = ''
-        elif service == 'mongo':
-            auth = 'mongo'
-            serv_opt = ''
+        if service == "postgres":
+            auth = "postgres"
+            serv_opt = ""
+        elif service == "mysql":
+            auth = "mysql"
+            serv_opt = ""
+        elif service == "neo4j":
+            auth = "neo4j"
+            serv_opt = ""
+        elif service == "mongo":
+            auth = "mongo"
+            serv_opt = ""
         else:
-            auth = 'postgres'
-            serv_opt = '--services {}'.format(service)
+            auth = "postgres"
+            serv_opt = "--services {}".format(service)
 
         exec_command(
             capfd,
@@ -304,12 +287,12 @@ def test_all(capfd):
             ),
             "Project testservices successfully created",
         )
-        if service == 'mysql':
-            service = ['mariadb']
-        elif service == 'irods':
-            service = ['icat']
-        elif service == 'celery':
-            service = ['celery', 'celeryui', 'rabbit']
+        if service == "mysql":
+            service = ["mariadb"]
+        elif service == "irods":
+            service = ["icat"]
+        elif service == "celery":
+            service = ["celery", "celeryui", "rabbit"]
         else:
             service = [service]
 
@@ -366,9 +349,7 @@ def test_all(capfd):
 
     # docker dump
     exec_command(
-        capfd,
-        "rapydo dump",
-        "Config dump: docker-compose.yml",
+        capfd, "rapydo dump", "Config dump: docker-compose.yml",
     )
 
     # second project is --auth postgres --frontend angular
@@ -404,21 +385,27 @@ def test_all(capfd):
 
     os.makedirs("projects/third/builds/rabbit")
     fin = open("projects/third/builds/rabbit/Dockerfile", "wt+")
-    fin.write("""
+    fin.write(
+        """
 FROM rapydo/rabbitmq:{}
 # Just a simple command differentiate from the parent
 RUN mkdir xyz
-""".format(__version__))
+""".format(
+            __version__
+        )
+    )
     fin.close()
 
     fin = open("projects/third/confs/commons.yml", "a")
-    fin.write("""
+    fin.write(
+        """
 services:
   rabbit:
     build: ${PROJECT_DIR}/builds/rabbit
     image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
 
-    """)
+    """
+    )
     fin.close()
     # Test selection with two projects
     os.remove(".projectrc")
@@ -430,13 +417,11 @@ services:
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
-        "Multiple projects found, please use --project to specify one of the following:"
+        "Multiple projects found, please use --project to specify one of the following:",
     )
 
     exec_command(
-        capfd,
-        "rapydo -p first check -i main --no-git --no-builds",
-        "Checks completed",
+        capfd, "rapydo -p first check -i main --no-git --no-builds", "Checks completed",
     )
 
     # Check invalid and reserved project names
@@ -458,19 +443,15 @@ services:
     )
 
     # Test init of data folders
-    shutil.rmtree('data/logs')
-    assert not os.path.isdir('data/logs')
+    shutil.rmtree("data/logs")
+    assert not os.path.isdir("data/logs")
     # Let's restore .projectrc and data/logs
     exec_command(
-        capfd,
-        "rapydo --project first init",
-        "Project initialized",
+        capfd, "rapydo --project first init", "Project initialized",
     )
-    assert os.path.isdir('data/logs')
+    assert os.path.isdir("data/logs")
     exec_command(
-        capfd,
-        "rapydo check -i main --no-git --no-builds",
-        "Checks completed",
+        capfd, "rapydo check -i main --no-git --no-builds", "Checks completed",
     )
 
     # Test dirty repo
@@ -523,15 +504,13 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo ancestors XYZ",
-        "No parent found for XYZ",
+        capfd, "rapydo ancestors XYZ", "No parent found for XYZ",
     )
 
     dock = Dock()
     img = dock.images().pop(0)
     # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get('Id')
+    img_id = dock.image_info(img).get("Id")
     # => c1a845de8052
     img_id = img_id[7:19]
     exec_command(
@@ -541,7 +520,7 @@ services:
     )
 
     # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get('Id')
+    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
     # => c1a845de8052
     img_id = img_id[7:19]
     exec_command(
@@ -551,18 +530,11 @@ services:
         # "third/rabbit",
     )
 
-    exec_command(
-        capfd,
-        "rapydo verify sqlalchemy",
-        'No container found for backend_1'
-    )
+    exec_command(capfd, "rapydo verify sqlalchemy", "No container found for backend_1")
 
     # Let's start with the stack
     exec_command(
-        capfd,
-        "rapydo start",
-        "docker-compose command: 'up'",
-        "Stack started",
+        capfd, "rapydo start", "docker-compose command: 'up'", "Stack started",
     )
 
     exec_command(
@@ -573,43 +545,31 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo shell backend --command hostname",
-        "backend-server",
+        capfd, "rapydo shell backend --command hostname", "backend-server",
     )
     # Testing default users
     exec_command(
-        capfd,
-        "rapydo shell backend --command whoami",
-        "developer",
+        capfd, "rapydo shell backend --command whoami", "developer",
     )
     exec_command(
-        capfd,
-        "rapydo shell frontend --command whoami",
-        "node",
+        capfd, "rapydo shell frontend --command whoami", "node",
     )
     # No default user for rabbit container
     exec_command(
-        capfd,
-        "rapydo shell rabbit --command whoami",
-        "root",
+        capfd, "rapydo shell rabbit --command whoami", "root",
     )
     exec_command(
-        capfd,
-        "rapydo shell postgres --command whoami",
-        "postgres",
+        capfd, "rapydo shell postgres --command whoami", "postgres",
     )
 
     exec_command(
         capfd,
         "rapydo scale rabbit",
         "Please specify how to scale: SERVICE=NUM_REPLICA",
-        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file"
+        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
     )
     exec_command(
-        capfd,
-        "rapydo scale rabbit=x",
-        "Invalid number of replicas: x",
+        capfd, "rapydo scale rabbit=x", "Invalid number of replicas: x",
     )
 
     exec_command(
@@ -646,27 +606,15 @@ services:
         print(e)
 
     # Template project is based on sql
+    exec_command(capfd, "rapydo verify neo4j", "Service neo4j not detected")
+    exec_command(capfd, "rapydo verify sqlalchemy", "Service sqlalchemy is reachable")
+
     exec_command(
-        capfd,
-        "rapydo verify neo4j",
-        'Service neo4j not detected'
-    )
-    exec_command(
-        capfd,
-        "rapydo verify sqlalchemy",
-        'Service sqlalchemy is reachable'
+        capfd, "rapydo stop", "Stack stopped",
     )
 
     exec_command(
-        capfd,
-        "rapydo stop",
-        "Stack stopped",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo restart",
-        "Stack restarted",
+        capfd, "rapydo restart", "Stack restarted",
     )
 
     exec_command(
@@ -682,22 +630,15 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo remove",
-        "docker-compose command: 'stop'",
-        "Stack removed",
+        capfd, "rapydo remove", "docker-compose command: 'stop'", "Stack removed",
     )
 
     exec_command(
-        capfd,
-        "rapydo remove --networks",
-        "Stack removed",
+        capfd, "rapydo remove --networks", "Stack removed",
     )
 
     exec_command(
-        capfd,
-        "rapydo remove --all",
-        "Stack removed",
+        capfd, "rapydo remove --all", "Stack removed",
     )
 
     exec_command(
@@ -728,15 +669,11 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo remove --all",
-        "Stack removed",
+        capfd, "rapydo remove --all", "Stack removed",
     )
 
     exec_command(
-        capfd,
-        "rapydo volatile backend --command hostname",
-        "backend-server",
+        capfd, "rapydo volatile backend --command hostname", "backend-server",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -752,7 +689,6 @@ services:
     except Timeout:
         interrupted = True
     assert interrupted
-
 
     pconf = "projects/first/project_configuration.yaml"
 
@@ -770,20 +706,14 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo --prod -s proxy pull",
-        "Base images pulled from docker hub",
+        capfd, "rapydo --prod -s proxy pull", "Base images pulled from docker hub",
     )
 
     exec_command(
-        capfd,
-        "rapydo ssl",
-        "No container found for proxy_1",
+        capfd, "rapydo ssl", "No container found for proxy_1",
     )
     exec_command(
-        capfd,
-        "rapydo ssl-certificate",
-        "Deprecated command, use rapydo ssl instead",
+        capfd, "rapydo ssl-certificate", "Deprecated command, use rapydo ssl instead",
     )
     exec_command(
         capfd,
@@ -795,9 +725,7 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo ssl --force",
-        "No container found for proxy_1",
+        capfd, "rapydo ssl --force", "No container found for proxy_1",
     )
     exec_command(
         capfd,
@@ -805,9 +733,7 @@ services:
         "Invalid chain file (you provided /file)",
     )
     exec_command(
-        capfd,
-        "rapydo ssl --key-file /file",
-        "Invalid chain file (you provided none)",
+        capfd, "rapydo ssl --key-file /file", "Invalid chain file (you provided none)",
     )
     exec_command(
         capfd,
@@ -827,46 +753,41 @@ services:
     )
 
     exec_command(
-        capfd,
-        "rapydo dhparam",
-        "No container found for proxy_1",
+        capfd, "rapydo dhparam", "No container found for proxy_1",
     )
 
     exec_command(
         capfd,
         "rapydo install --pip --editable auto",
-        "--pip and --editable options are not compatible"
+        "--pip and --editable options are not compatible",
     )
 
     exec_command(
         capfd,
         "rapydo install --user --editable auto",
-        "--user and --editable options are not compatible"
+        "--user and --editable options are not compatible",
     )
 
     exec_command(
-        capfd,
-        "rapydo install --editable auto",
+        capfd, "rapydo install --editable auto",
     )
 
     exec_command(
-        capfd,
-        "rapydo install --user auto",
+        capfd, "rapydo install --user auto",
     )
 
     # This is the very last command... installing an old version!
     exec_command(
-        capfd,
-        "rapydo install --pip --user 0.7.2",
+        capfd, "rapydo install --pip --user 0.7.2",
     )
 
     # This test will change the required version
     pconf = "projects/first/project_configuration.yaml"
 
     # Read and change the content
-    fin = open(pconf, "rt")
+    fin = open(pconf)
     data = fin.read()
-    data = data.replace("rapydo: {}".format(__version__), 'rapydo: 0.7.3')
+    data = data.replace("rapydo: {}".format(__version__), "rapydo: 0.7.3")
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -877,13 +798,13 @@ services:
         capfd,
         "rapydo version",
         "This project is not compatible with rapydo version {}".format(__version__),
-        "Please downgrade rapydo to version 0.7.3 or modify this project"
+        "Please downgrade rapydo to version 0.7.3 or modify this project",
     )
 
     # Read and change the content
-    fin = open(pconf, "rt")
+    fin = open(pconf)
     data = fin.read()
-    data = data.replace("rapydo: 0.7.3", 'rapydo: 99.99.99')
+    data = data.replace("rapydo: 0.7.3", "rapydo: 99.99.99")
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -894,7 +815,7 @@ services:
         capfd,
         "rapydo version",
         "This project is not compatible with rapydo version {}".format(__version__),
-        "Please upgrade rapydo to version 99.99.99 or modify this project"
+        "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
 
     # Tests from a subfolder

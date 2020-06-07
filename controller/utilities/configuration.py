@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import os
 from collections import OrderedDict
+
 import yaml
+
 from controller import log
 
 PROJECTS_DEFAULTS_FILE = "projects_defaults.yaml"
@@ -51,9 +51,7 @@ def read_configuration(
 
     if production:
         base_prod_conf = load_yaml_file(
-            file=PROJECTS_PROD_DEFAULTS_FILE,
-            path=default_file_path,
-            keep_order=True,
+            file=PROJECTS_PROD_DEFAULTS_FILE, path=default_file_path, keep_order=True,
         )
         base_configuration = mix_configuration(base_configuration, base_prod_conf)
 

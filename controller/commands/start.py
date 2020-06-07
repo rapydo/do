@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-from controller.compose import Compose
 from controller import log
+from controller.compose import Compose
 
 
 def __call__(args, files, services, **kwargs):
 
     dc = Compose(files=files)
-    if args.get('no_detach', False):
+    if args.get("no_detach", False):
         detach = False
     else:
         detach = True

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Parse dockerfiles and check for builds
 
@@ -7,18 +5,18 @@ Parse dockerfiles and check for builds
 # https://docker-py.readthedocs.io/en/stable/
 """
 import os
-from dockerfile_parse import DockerfileParser
-from controller import CONTAINERS_YAML_DIRNAME
-from controller import log
 
+from dockerfile_parse import DockerfileParser
+
+from controller import CONTAINERS_YAML_DIRNAME, log
 
 name_priorities = [
-    'backend',
-    'proxy',
-    'celery',
-    'celeryui',
-    'celery-beat',
-    'maintenance'
+    "backend",
+    "proxy",
+    "celery",
+    "celeryui",
+    "celery-beat",
+    "maintenance",
 ]
 
 
@@ -40,39 +38,40 @@ def find_templates_build(base_services):
 
     templates = {}
     from controller.dockerizing import Dock
+
     docker = Dock()
 
     for base_service in base_services:
 
-        template_build = base_service.get('build')
+        template_build = base_service.get("build")
 
         if template_build is not None:
 
-            template_name = base_service.get('name')
-            template_image = base_service.get('image')
+            template_name = base_service.get("name")
+            template_image = base_service.get("image")
 
             if template_image is None:
                 log.exit(
                     "Template builds must have a name, missing for {}".format(
-                        template_name)
+                        template_name
+                    )
                 )
             else:
 
                 if template_image not in templates:
                     templates[template_image] = {
-                        'services': [],
-                        'path': template_build.get('context'),
-                        'timestamp': docker.image_attribute(template_image)
+                        "services": [],
+                        "path": template_build.get("context"),
+                        "timestamp": docker.image_attribute(template_image),
                     }
 
-                if 'service' not in templates[template_image]:
-                    templates[template_image]['service'] = template_name
+                if "service" not in templates[template_image]:
+                    templates[template_image]["service"] = template_name
                 else:
-                    templates[template_image]['service'] = name_priority(
-                        templates[template_image]['service'],
-                        template_name,
+                    templates[template_image]["service"] = name_priority(
+                        templates[template_image]["service"], template_name,
                     )
-                templates[template_image]['services'].append(template_name)
+                templates[template_image]["services"].append(template_name)
 
     return templates
 
@@ -85,10 +84,10 @@ def find_templates_override(services, templates):
 
     for service in services:
 
-        builder = service.get('build')
+        builder = service.get("build")
         if builder is not None:
 
-            dpath = builder.get('context')
+            dpath = builder.get("context")
             dockerfile = os.path.join(os.curdir, CONTAINERS_YAML_DIRNAME, dpath)
             dfp = DockerfileParser(dockerfile)
 
@@ -102,17 +101,19 @@ def find_templates_override(services, templates):
                 log.exit(e)
 
             if dfp.baseimage is None:
-                dfp.baseimage = 'unknown_build'
+                dfp.baseimage = "unknown_build"
             # elif dfp.baseimage.endswith(':template'):
-            elif dfp.baseimage.startswith('rapydo/'):
+            elif dfp.baseimage.startswith("rapydo/"):
                 if dfp.baseimage not in templates:
                     log.exit(
                         """Unable to find {} in this project
 \nPlease inspect the FROM image in {}/Dockerfile
-                        """.format(dfp.baseimage, dockerfile)
+                        """.format(
+                            dfp.baseimage, dockerfile
+                        )
                     )
                 else:
-                    vanilla_img = service.get('image')
+                    vanilla_img = service.get("image")
                     template_img = dfp.baseimage
                     log.verbose("{} overrides {}", vanilla_img, template_img)
                     tbuilds[template_img] = templates.get(template_img)
@@ -147,7 +148,7 @@ def remove_redundant_services(services, builds):
     # NOTE: builds == ALL builds
     flat_builds = {}
     for b in builds:
-        for s in builds[b]['services']:
+        for s in builds[b]["services"]:
             flat_builds[s] = b
 
     # Group requested services by builds

@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
 import os
 import random
 import string
-from jinja2 import FileSystemLoader, Environment, DebugUndefined
-# from jinja2.meta import find_undeclared_variables
+
+from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
-from controller import log
-from controller import TEMPLATE_DIR
+
+from controller import TEMPLATE_DIR, log
 
 
 def username(param_not_used, length=8):
@@ -35,8 +34,7 @@ class Templating:
     def __init__(self):
 
         self.template_dir = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)),
-            TEMPLATE_DIR
+            os.path.abspath(os.path.dirname(__file__)), TEMPLATE_DIR
         )
         if not os.path.isdir(self.template_dir):
             log.exit("Template folder not found: {}", self.template_dir)
@@ -48,10 +46,10 @@ class Templating:
             loader=loader,
             undefined=DebugUndefined,
             autoescape=True,
-            keep_trailing_newline=True
+            keep_trailing_newline=True,
         )
-        self.env.filters['password'] = password
-        self.env.filters['username'] = username
+        self.env.filters["password"] = password
+        self.env.filters["username"] = username
 
     def get_template(self, filename, data):
         try:
@@ -60,6 +58,7 @@ class Templating:
 
             template = self.env.get_template("{}.j2".format(filename))
             content = template.render(**data)
+            # from jinja2.meta import find_undeclared_variables
             # ast = self.env.parse(content)
             # undefined = find_undeclared_variables(ast)
             # if undefined:

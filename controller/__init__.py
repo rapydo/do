@@ -1,15 +1,14 @@
-# -*- coding: utf-8 -*-
-
 import os
 import sys
+
 from loguru import logger as log
 
-__version__ = '0.7.4'
+__version__ = "0.7.4"
 
 
 # NOTE: telling the app if testing or not
 # http://j.mp/2uifoza
-TESTING = hasattr(sys, '_called_from_test') or os.getenv('TESTING', '0') == '1'
+TESTING = hasattr(sys, "_called_from_test") or os.getenv("TESTING", "0") == "1"
 
 LOGS_FOLDER = os.path.join("data", "logs")
 
@@ -26,7 +25,7 @@ def verbose(*args, **kwargs):
 
 
 def exit_msg(message="", *args, **kwargs):
-    error_code = abs(int(kwargs.pop('error_code', 1)))
+    error_code = abs(int(kwargs.pop("error_code", 1)))
     if message:
         log.critical(message, *args, **kwargs)
     sys.exit(error_code)
@@ -43,7 +42,7 @@ else:  # pragma: no cover
     log.add(
         sys.stderr,
         colorize=True,
-        format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>"
+        format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>",
     )
 
 if LOGS_FILE is not None:
@@ -53,14 +52,14 @@ if LOGS_FILE is not None:
         log.error(e)
         LOGS_FILE = None
 
-COMPOSE_ENVIRONMENT_FILE = '.env'
-SUBMODULES_DIR = 'submodules'
-PROJECT_DIR = 'projects'
-TEMPLATE_DIR = 'templates'
+COMPOSE_ENVIRONMENT_FILE = ".env"
+SUBMODULES_DIR = "submodules"
+PROJECT_DIR = "projects"
+TEMPLATE_DIR = "templates"
 # CONFS_DIR = os.path.join(SUBMODULES_DIR, 'do', 'controller', 'confs')
-CONFS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'confs')
-PLACEHOLDER = '**PLACEHOLDER**'
-PROJECTRC = '.projectrc'
-PROJECTRC_ALTERNATIVE = '.project.yml'
+CONFS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "confs")
+PLACEHOLDER = "**PLACEHOLDER**"
+PROJECTRC = ".projectrc"
+PROJECTRC_ALTERNATIVE = ".project.yml"
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
-CONTAINERS_YAML_DIRNAME = 'confs'
+CONTAINERS_YAML_DIRNAME = "confs"

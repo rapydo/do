@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 import os
 import pwd
+
 from plumbum import local
 from plumbum.commands.processes import ProcessExecutionError
+
 from controller import log
 
 

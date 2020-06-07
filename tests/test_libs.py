@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
 import pytest
-from plumbum.commands.processes import ProcessExecutionError
 from git.exc import InvalidGitRepositoryError
+from plumbum.commands.processes import ProcessExecutionError
 
-from controller import gitter
-from controller import __version__
+from controller import __version__, gitter
 from controller.utilities import system
 
 # These tests will directly access to functions, to verify cases
@@ -31,11 +29,11 @@ def test_all(capfd):
     assert gitter.get_active_branch(do_repo) == __version__
 
     assert gitter.get_origin(None) is None
-    assert gitter.get_origin('not-a-git-object') is None
-    assert gitter.get_active_branch('not-a-git-object') is None
+    assert gitter.get_origin("not-a-git-object") is None
+    assert gitter.get_active_branch("not-a-git-object") is None
 
     r = gitter.get_repo(".")
-    assert gitter.get_origin(r) == 'https://your_remote_git/your_project.git'
+    assert gitter.get_origin(r) == "https://your_remote_git/your_project.git"
 
     # Create an invalid repo (i.e. without any remote)
     r = gitter.init("../justatest")

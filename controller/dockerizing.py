@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
-import requests
 import docker
+import requests
 from docker.errors import APIError
+
 from controller import log
 
 
@@ -11,7 +10,7 @@ class Dock:
     client = None
 
     def __init__(self):
-        super(Dock, self).__init__()
+        super().__init__()
 
         if not self.is_daemon_alive():  # pragma: no cover
             log.exit("Docker daemon not reachable")
@@ -37,13 +36,13 @@ class Dock:
         except IndexError:
             return {}
 
-    def image_attribute(self, tag, attribute='Created'):
+    def image_attribute(self, tag, attribute="Created"):
         return self.image_info(tag).get(attribute, None)
 
     def images(self):
         images = []
         for obj in self.client.images.list():
-            tags = obj.attrs.get('RepoTags')
+            tags = obj.attrs.get("RepoTags")
             if tags is not None:
                 images.extend(tags)
         return images

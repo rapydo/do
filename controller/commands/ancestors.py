@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 import re
+
 from controller.utilities import system
+
 # from controller import log
 
 
@@ -13,7 +14,7 @@ def get_parent(IMAGE, images):
     for tag in images:
         image = images.get(tag)
         tag = image[2].strip()
-        if tag == '':
+        if tag == "":
             continue
         parameters.append(tag)
 

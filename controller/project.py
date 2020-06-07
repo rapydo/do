@@ -77,10 +77,10 @@ class Project:
         if celery:
             self.test_files.append(self.p_path("backend", "tasks", "task_example.py"))
 
-        self.recommended_files(".pre-commit-config.yaml")
-        self.recommended_files(".isort.cfg")
-        self.recommended_files("pyproject.toml")
-        self.recommended_files(".flake8")
+        self.recommended_files.append(".pre-commit-config.yaml")
+        self.recommended_files.append(".isort.cfg")
+        self.recommended_files.append("pyproject.toml")
+        self.recommended_files.append(".flake8")
         self.data_folders.extend([os.path.join("data", "logs")])
 
         # Deprecated since 0.7.1

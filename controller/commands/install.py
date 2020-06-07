@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 import os
-from controller import SUBMODULES_DIR
-from controller import gitter
-from controller import log
+
+from controller import SUBMODULES_DIR, gitter, log
 
 
 def install_controller_from_pip(version, user):
@@ -60,7 +58,7 @@ def install_controller_from_folder(gits, version, user, editable):
     if not os.path.exists(do_path):
         log.exit("{} path not found", do_path)
 
-    do_repo = gits.get('do')
+    do_repo = gits.get("do")
 
     b = gitter.get_active_branch(do_repo)
 
@@ -85,17 +83,17 @@ def install_controller_from_folder(gits, version, user, editable):
 
 def __call__(args, rapydo_version, gits, **kwargs):
 
-    version = args.get('version')
-    pip = args.get('pip')
-    editable = args.get('editable')
-    user = args.get('user')
+    version = args.get("version")
+    pip = args.get("pip")
+    editable = args.get("editable")
+    user = args.get("user")
 
     if pip and editable:
         log.exit("--pip and --editable options are not compatible")
     if user and editable:
         log.exit("--user and --editable options are not compatible")
 
-    if version == 'auto':
+    if version == "auto":
         version = rapydo_version
         log.info("Detected version {} to be installed", version)
 

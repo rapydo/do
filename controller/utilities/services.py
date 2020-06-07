@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 from glom import glom
+
 from controller import log
 
 
@@ -32,9 +32,9 @@ def find_active(services):
 
     for service in services:
 
-        name = service.get('name')
+        name = service.get("name")
         all_services[name] = service
-        dependencies[name] = list(service.get('depends_on', {}).keys())
+        dependencies[name] = list(service.get("depends_on", {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
         is_active = str(ACTIVATE) == "1"
@@ -51,8 +51,8 @@ def apply_variables(dictionary, variables):
 
     new_dict = {}
     for key, value in dictionary.items():
-        if isinstance(value, str) and value.startswith('$$'):
-            value = variables.get(value.lstrip('$'), None)
+        if isinstance(value, str) and value.startswith("$$"):
+            value = variables.get(value.lstrip("$"), None)
         else:
             pass
         new_dict[key] = value
@@ -61,44 +61,44 @@ def apply_variables(dictionary, variables):
 
 
 vars_to_services_mapping = {
-    'CELERYUI_USER': ['celeryui'],
-    'CELERYUI_PASSWORD': ['celeryui'],
-    'RABBITMQ_USER': ['rabbit'],
-    'RABBITMQ_PASSWORD': ['rabbit'],
-    'ALCHEMY_USER': ['postgres', 'mariadb'],
-    'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
-    'NEO4J_PASSWORD': ['neo4j'],
-    'IRODS_ANONYMOUS': ['icat'],
-    'AUTH_DEFAULT_PASSWORD': ['backend'],
-    'AUTH_DEFAULT_USERNAME': ['backend'],
-    'SMTP_PORT': ['backend'],
-    'SMTP_ADMIN': ['backend'],
-    'SMTP_NOREPLY': ['backend'],
-    'SMTP_HOST': ['backend'],
-    'SMTP_USERNAME': ['backend'],
-    'SMTP_PASSWORD': ['backend'],
-    'IRODS_PASSWORD': ['icat'],
-    'IRODS_USER': ['icat'],
+    "CELERYUI_USER": ["celeryui"],
+    "CELERYUI_PASSWORD": ["celeryui"],
+    "RABBITMQ_USER": ["rabbit"],
+    "RABBITMQ_PASSWORD": ["rabbit"],
+    "ALCHEMY_USER": ["postgres", "mariadb"],
+    "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
+    "NEO4J_PASSWORD": ["neo4j"],
+    "IRODS_ANONYMOUS": ["icat"],
+    "AUTH_DEFAULT_PASSWORD": ["backend"],
+    "AUTH_DEFAULT_USERNAME": ["backend"],
+    "SMTP_PORT": ["backend"],
+    "SMTP_ADMIN": ["backend"],
+    "SMTP_NOREPLY": ["backend"],
+    "SMTP_HOST": ["backend"],
+    "SMTP_USERNAME": ["backend"],
+    "SMTP_PASSWORD": ["backend"],
+    "IRODS_PASSWORD": ["icat"],
+    "IRODS_USER": ["icat"],
 }
 
 
 def normalize_placeholder_variable(key):
-    if key == 'NEO4J_AUTH':
-        return 'NEO4J_PASSWORD'
+    if key == "NEO4J_AUTH":
+        return "NEO4J_PASSWORD"
 
-    if key == 'POSTGRES_USER':
-        return 'ALCHEMY_USER'
-    if key == 'POSTGRES_PASSWORD':
-        return 'ALCHEMY_PASSWORD'
+    if key == "POSTGRES_USER":
+        return "ALCHEMY_USER"
+    if key == "POSTGRES_PASSWORD":
+        return "ALCHEMY_PASSWORD"
 
-    if key == 'MYSQL_USER':
-        return 'ALCHEMY_USER'
-    if key == 'MYSQL_PASSWORD':
-        return 'ALCHEMY_PASSWORD'
+    if key == "MYSQL_USER":
+        return "ALCHEMY_USER"
+    if key == "MYSQL_PASSWORD":
+        return "ALCHEMY_PASSWORD"
 
-    if key == 'RABBITMQ_DEFAULT_USER':
-        return 'RABBITMQ_USER'
-    if key == 'RABBITMQ_DEFAULT_PASS':
-        return 'RABBITMQ_PASSWORD'
+    if key == "RABBITMQ_DEFAULT_USER":
+        return "RABBITMQ_USER"
+    if key == "RABBITMQ_DEFAULT_PASS":
+        return "RABBITMQ_PASSWORD"
 
     return key

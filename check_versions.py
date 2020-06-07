@@ -1,18 +1,19 @@
+import distutils.core
 import json
 import os
 import re
-import distutils.core
 from glob import glob
 
 import click
 import yaml
-from prettyprinter import pprint as pp
 from loguru import logger as log
+from prettyprinter import pprint as pp
 
 # change current dir to the folder containing this script
 # this way the script will be allowed to access all required files
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
+
 
 def load_yaml_file(filepath):
 
@@ -41,7 +42,7 @@ def load_yaml_file(filepath):
 
 def check_updates(category, lib):
 
-    if category in ['pip', 'controller', 'http-api']:
+    if category in ["pip", "controller", "http-api"]:
         if "==" in lib:
             token = lib.split("==")
         elif ">=" in lib:
@@ -49,14 +50,14 @@ def check_updates(category, lib):
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        print(f'https://pypi.org/project/{token[0]}/{token[1]}')
-    elif category in ['compose', 'Dockerfile']:
+        print(f"https://pypi.org/project/{token[0]}/{token[1]}")
+    elif category in ["compose", "Dockerfile"]:
         token = lib.split(":")
         print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
-    elif category in ['package.json', 'npm']:
+    elif category in ["package.json", "npm"]:
         token = lib.split(":")
         print(f"https://www.npmjs.com/package/{token[0]}")
-    elif category in ['ACME']:
+    elif category in ["ACME"]:
         token = lib.split(":")
         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
     else:
@@ -64,7 +65,7 @@ def check_updates(category, lib):
 
 
 @click.command()
-@click.option('--skip-angular', is_flag=True, default=False)
+@click.option("--skip-angular", is_flag=True, default=False)
 def check_versions(skip_angular=False):
 
     dependencies = {}
@@ -73,16 +74,16 @@ def check_versions(skip_angular=False):
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)
-        image = definition.get('image')
+        image = definition.get("image")
 
         if image.startswith("rapydo/"):
             continue
         dependencies.setdefault(service, {})
 
-        dependencies[service]['compose'] = image
+        dependencies[service]["compose"] = image
 
     for d in glob("../build-templates/*/Dockerfile"):
-        if 'not_used_anymore_' in d:
+        if "not_used_anymore_" in d:
             continue
         with open(d) as f:
             service = d.replace("../build-templates/", "")
@@ -94,33 +95,37 @@ def check_versions(skip_angular=False):
                 if line.startswith("#"):
                     continue
 
-                if 'FROM' in line:
+                if "FROM" in line:
                     line = line.replace("FROM", "").strip()
 
-                    dependencies[service]['Dockerfile'] = line
-                elif not skip_angular and ('RUN npm install' in line or 'RUN yarn add' in line or 'RUN yarn global add' in line):
+                    dependencies[service]["Dockerfile"] = line
+                elif not skip_angular and (
+                    "RUN npm install" in line
+                    or "RUN yarn add" in line
+                    or "RUN yarn global add" in line
+                ):
 
                     tokens = line.split(" ")
                     for t in tokens:
                         t = t.strip()
-                        if '@' in t:
+                        if "@" in t:
                             dependencies.setdefault(service, {})
-                            dependencies[service].setdefault('npm', [])
+                            dependencies[service].setdefault("npm", [])
                             dependencies[service]["npm"].append(t)
-                elif 'RUN pip install' in line or 'RUN pip3 install' in line:
+                elif "RUN pip install" in line or "RUN pip3 install" in line:
 
                     tokens = line.split(" ")
                     for t in tokens:
                         t = t.strip()
-                        if '==' in t:
+                        if "==" in t:
                             dependencies.setdefault(service, {})
                             dependencies[service].setdefault("pip", [])
                             dependencies[service]["pip"].append(t)
-                elif 'ENV ACMEV' in line:
+                elif "ENV ACMEV" in line:
                     line = line.replace("ENV ACMEV", "").strip()
-                    line = line.replace("\"", "").strip()
+                    line = line.replace('"', "").strip()
 
-                    dependencies[service]['ACME'] = f"ACME:{line}"
+                    dependencies[service]["ACME"] = f"ACME:{line}"
 
     for d in glob("../build-templates/*/requirements.txt"):
 
@@ -137,39 +142,39 @@ def check_versions(skip_angular=False):
     if not skip_angular:
         package_json = None
 
-        if os.path.exists('../frontend/src/package.json'):
-            package_json = '../frontend/src/package.json'
-        elif os.path.exists('../rapydo-angular/src/package.json'):
-            package_json = '../rapydo-angular/src/package.json'
+        if os.path.exists("../frontend/src/package.json"):
+            package_json = "../frontend/src/package.json"
+        elif os.path.exists("../rapydo-angular/src/package.json"):
+            package_json = "../rapydo-angular/src/package.json"
 
         if package_json is not None:
             with open(package_json) as f:
                 package = json.load(f)
-                package_dependencies = package.get('dependencies', {})
-                package_devDependencies = package.get('devDependencies', {})
+                package_dependencies = package.get("dependencies", {})
+                package_devDependencies = package.get("devDependencies", {})
 
-                dependencies.setdefault('angular', {})
-                dependencies['angular'].setdefault('package.json', [])
+                dependencies.setdefault("angular", {})
+                dependencies["angular"].setdefault("package.json", [])
 
                 for dep in package_dependencies:
                     ver = package_dependencies[dep]
                     lib = f"{dep}:{ver}"
-                    dependencies['angular']["package.json"].append(lib)
+                    dependencies["angular"]["package.json"].append(lib)
                 for dep in package_devDependencies:
                     ver = package_devDependencies[dep]
                     lib = f"{dep}:{ver}"
-                    dependencies['angular']["package.json"].append(lib)
+                    dependencies["angular"]["package.json"].append(lib)
 
     controller = distutils.core.run_setup("../do/setup.py")
     http_api = distutils.core.run_setup("../http-api/setup.py")
 
-    dependencies['controller'] = controller.install_requires
-    dependencies['http-api'] = http_api.install_requires
+    dependencies["controller"] = controller.install_requires
+    dependencies["http-api"] = http_api.install_requires
 
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ['talib', 'react', 'icat']:
+        if service in ["talib", "react", "icat"]:
             continue
 
         service_dependencies = dependencies[service]
@@ -180,7 +185,7 @@ def check_versions(skip_angular=False):
             for d in service_dependencies:
 
                 skipped = False
-                if '==' not in d and '>=' not in d:
+                if "==" not in d and ">=" not in d:
                     skipped = True
                 else:
                     filtered_dependencies[service].append(d)
@@ -208,17 +213,17 @@ def check_versions(skip_angular=False):
                 for d in deps:
 
                     skipped = False
-                    if d == 'b2safe/server:icat':
+                    if d == "b2safe/server:icat":
                         skipped = True
-                    elif d == 'node:carbon':
+                    elif d == "node:carbon":
                         skipped = True
-                    elif re.match(r'^git\+https://github\.com.*@master$', d):
+                    elif re.match(r"^git\+https://github\.com.*@master$", d):
                         skipped = True
-                    elif d == 'docker:dind':
+                    elif d == "docker:dind":
                         skipped = True
-                    elif d.endswith(':latest'):
+                    elif d.endswith(":latest"):
                         skipped = True
-                    elif '==' in d or ':' in d:
+                    elif "==" in d or ":" in d:
 
                         if was_str:
                             filtered_dependencies[service][category] = d
@@ -226,7 +231,7 @@ def check_versions(skip_angular=False):
                         else:
                             filtered_dependencies[service][category].append(d)
                             check_updates(category, d)
-                    elif '@' in d:
+                    elif "@" in d:
                         filtered_dependencies[service][category].append(d)
                         check_updates(category, d)
                     else:
@@ -249,11 +254,13 @@ def check_versions(skip_angular=False):
     pp(filtered_dependencies)
 
     log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
-    log.info("oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required")
+    log.info(
+        "oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required"
+    )
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_versions()
 
 # Changelogs and release notes
