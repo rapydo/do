@@ -1,11 +1,8 @@
-# -*- coding: utf-8 -*-
 import os
-from controller import __version__
-from controller import PROJECT_DIR
-from controller.project import NO_FRONTEND, ANGULAR  # REACT
+
+from controller import PROJECT_DIR, __version__, gitter, log
+from controller.project import ANGULAR, NO_FRONTEND  # REACT
 from controller.templating import Templating
-from controller import gitter
-from controller import log
 
 
 def __call__(args, project_scaffold, **kwargs):
@@ -30,36 +27,37 @@ def __call__(args, project_scaffold, **kwargs):
 
     if auth is None:
         log.exit("Missing authentication service, add --auth option")
-    if auth not in ['postgres', 'mysql', 'neo4j', 'mongo']:
+    if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
         log.exit("Invalid authentication service: {}", auth)
 
-    enable_postgres = auth == 'postgres' or 'postgres' in services
-    enable_mysql = auth == 'mysql' or 'mysql' in services
-    enable_neo4j = auth == 'neo4j' or 'neo4j' in services
-    enable_mongo = auth == 'mongo' or 'mongo' in services
-    enable_rabbit = 'rabbit' in services
-    enable_redis = 'redis' in services
-    enable_irods = 'irods' in services
-    enable_celery = 'celery' in services
-    enable_pushpin = 'pushpin' in services
-    enable_ftp = 'ftp' in services
+    enable_postgres = auth == "postgres" or "postgres" in services
+    enable_mysql = auth == "mysql" or "mysql" in services
+    enable_neo4j = auth == "neo4j" or "neo4j" in services
+    enable_mongo = auth == "mongo" or "mongo" in services
+    enable_rabbit = "rabbit" in services
+    enable_redis = "redis" in services
+    enable_irods = "irods" in services
+    enable_celery = "celery" in services
+    enable_pushpin = "pushpin" in services
+    enable_ftp = "ftp" in services
 
-    if auth == 'postgres' or auth == 'mysql':
-        auth = 'sqlalchemy'
+    if auth == "postgres" or auth == "mysql":
+        auth = "sqlalchemy"
 
     if frontend is None:
         log.exit("Missing frontend framework, add --frontend option")
-    if not frontend or frontend == 'no':
+    if not frontend or frontend == "no":
         frontend = NO_FRONTEND
     if frontend not in [NO_FRONTEND, ANGULAR]:
         log.exit("Invalid frontend framework: {}", frontend)
 
     if not force_current:
         dirs = os.listdir(".")
-        if len(dirs) > 0 and dirs != ['.git']:
+        if len(dirs) > 0 and dirs != [".git"]:
             log.exit(
                 "Current folder is not empty, cannot create a new project here."
-                "\nUse --current to force the creation here")
+                "\nUse --current to force the creation here"
+            )
 
     celery_broker = None  # Keep default value == RABBIT
     celery_backend = None  # Keep default value == RABBIT
@@ -69,20 +67,20 @@ def __call__(args, project_scaffold, **kwargs):
             enable_rabbit = True
 
         if enable_rabbit:
-            celery_broker = 'RABBIT'
+            celery_broker = "RABBIT"
         elif enable_redis:
-            celery_broker = 'REDIS'
+            celery_broker = "REDIS"
 
         # BACKEND SELECTION = rabbit | redis | mongo
         if not enable_rabbit and not enable_redis and not enable_mongo:
             enable_rabbit = True
 
         if enable_redis:
-            celery_backend = 'REDIS'
+            celery_backend = "REDIS"
         elif enable_mongo:
-            celery_backend = 'MONGODB'
+            celery_backend = "MONGODB"
         elif enable_rabbit:
-            celery_backend = 'RABBIT'
+            celery_backend = "RABBIT"
 
     env_variables = {}
     if envs:
@@ -102,16 +100,11 @@ def __call__(args, project_scaffold, **kwargs):
         log.exit("Wrong project name, _ is not a valid character")
 
     if project_name in project_scaffold.reserved_project_names:
-        log.exit(
-            "You selected a reserved name, invalid project name: {}",
-            project_name
-        )
+        log.exit("You selected a reserved name, invalid project name: {}", project_name)
 
     templating = Templating()
 
-    folders = \
-        project_scaffold.expected_folders + \
-        project_scaffold.data_folders
+    folders = project_scaffold.expected_folders + project_scaffold.data_folders
 
     if add_optionals:
         folders += project_scaffold.optionals_folders
@@ -130,32 +123,33 @@ def __call__(args, project_scaffold, **kwargs):
         files += project_scaffold.optionals_files
     # should be included only if a testing flag is enabled
     files += project_scaffold.test_files
+    files += project_scaffold.recommended_files
 
     for p in files:
         fname = os.path.basename(p)
         template = templating.get_template(
             fname,
             {
-                'version': __version__,
-                'project': project_name,
-                'auth_service': auth,
-                'enable_postgres': enable_postgres,
-                'enable_mysql': enable_mysql,
-                'enable_neo4j': enable_neo4j,
-                'enable_mongo': enable_mongo,
-                'enable_rabbit': enable_rabbit,
-                'enable_redis': enable_redis,
-                'enable_irods': enable_irods,
-                'enable_celery': enable_celery,
-                'enable_pushpin': enable_pushpin,
-                'enable_ftp': enable_ftp,
-                'celery_broker': celery_broker,
-                'celery_backend': celery_backend,
-                'frontend': frontend,
-                'extend': extend,
-                'services': services,
-                'env_variables': env_variables,
-            }
+                "version": __version__,
+                "project": project_name,
+                "auth_service": auth,
+                "enable_postgres": enable_postgres,
+                "enable_mysql": enable_mysql,
+                "enable_neo4j": enable_neo4j,
+                "enable_mongo": enable_mongo,
+                "enable_rabbit": enable_rabbit,
+                "enable_redis": enable_redis,
+                "enable_irods": enable_irods,
+                "enable_celery": enable_celery,
+                "enable_pushpin": enable_pushpin,
+                "enable_ftp": enable_ftp,
+                "celery_broker": celery_broker,
+                "celery_backend": celery_backend,
+                "frontend": frontend,
+                "extend": extend,
+                "services": services,
+                "env_variables": env_variables,
+            },
         )
 
         # automatic creation
@@ -186,7 +180,7 @@ def __call__(args, project_scaffold, **kwargs):
         if origin_url is None:
             print("git remote add origin https://your_remote_git/your_project.git")
         else:
-            git_repo.create_remote('origin', origin_url)
+            git_repo.create_remote("origin", origin_url)
 
     print("rapydo init")
     print("rapydo pull")
