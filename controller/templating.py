@@ -55,6 +55,9 @@ class Templating:
 
     def get_template(self, filename, data):
         try:
+            if filename.startswith("."):
+                filename = filename[1:]
+
             template = self.env.get_template("{}.j2".format(filename))
             content = template.render(**data)
             # ast = self.env.parse(content)
