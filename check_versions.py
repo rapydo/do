@@ -109,6 +109,43 @@ def parseDockerfile(d, dependencies, skip_angular):
 
                 dependencies[service]["ACME"] = f"ACME:{line}"
 
+    return dependencies
+
+
+def parseRequirements(d, dependencies):
+    with open(d) as f:
+        service = d.replace("../build-templates/", "")
+        service = service.replace("/requirements.txt", "")
+        for line in f:
+            line = line.strip()
+
+            dependencies.setdefault(service, {})
+            dependencies[service].setdefault("pip", [])
+            dependencies[service]["pip"].append(line)
+
+    return dependencies
+
+
+def parsePackageJson(package_json, dependencies):
+    with open(package_json) as f:
+        package = json.load(f)
+        package_dependencies = package.get("dependencies", {})
+        package_devDependencies = package.get("devDependencies", {})
+
+        dependencies.setdefault("angular", {})
+        dependencies["angular"].setdefault("package.json", [])
+
+        for dep in package_dependencies:
+            ver = package_dependencies[dep]
+            lib = f"{dep}:{ver}"
+            dependencies["angular"]["package.json"].append(lib)
+        for dep in package_devDependencies:
+            ver = package_devDependencies[dep]
+            lib = f"{dep}:{ver}"
+            dependencies["angular"]["package.json"].append(lib)
+
+    return dependencies
+
 
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
@@ -136,15 +173,7 @@ def check_versions(skip_angular=False):
 
     for d in glob("../build-templates/*/requirements.txt"):
 
-        with open(d) as f:
-            service = d.replace("../build-templates/", "")
-            service = service.replace("/requirements.txt", "")
-            for line in f:
-                line = line.strip()
-
-                dependencies.setdefault(service, {})
-                dependencies[service].setdefault("pip", [])
-                dependencies[service]["pip"].append(line)
+        dependencies = parseRequirements(d, dependencies)
 
     if not skip_angular:
         package_json = None
@@ -155,22 +184,8 @@ def check_versions(skip_angular=False):
             package_json = "../rapydo-angular/src/package.json"
 
         if package_json is not None:
-            with open(package_json) as f:
-                package = json.load(f)
-                package_dependencies = package.get("dependencies", {})
-                package_devDependencies = package.get("devDependencies", {})
 
-                dependencies.setdefault("angular", {})
-                dependencies["angular"].setdefault("package.json", [])
-
-                for dep in package_dependencies:
-                    ver = package_dependencies[dep]
-                    lib = f"{dep}:{ver}"
-                    dependencies["angular"]["package.json"].append(lib)
-                for dep in package_devDependencies:
-                    ver = package_devDependencies[dep]
-                    lib = f"{dep}:{ver}"
-                    dependencies["angular"]["package.json"].append(lib)
+            dependencies = parsePackageJson(package_json, dependencies)
 
     controller = distutils.core.run_setup("../do/setup.py")
     http_api = distutils.core.run_setup("../http-api/setup.py")
