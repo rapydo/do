@@ -429,6 +429,15 @@ subcommands:
         metavalue: ENV_VARIABLES
         default: null
         help: Command separated list of ENV=VALUE to be added in project_configuration
+  add:
+    description: Add a new element
+    suboptions:
+      element:
+        positional: true
+        type: str
+        metavalue: NAME
+        default: null
+        help: One of endpoint, task, component or service
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

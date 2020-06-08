@@ -48,6 +48,7 @@ class Application:
 
     def __init__(self, arguments):
 
+        log.critical(os.path.dirname(os.path.abspath(__file__)))
         self.arguments = arguments
         self.current_args = self.arguments.current_args
         self.project_scaffold = Project()

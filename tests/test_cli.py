@@ -182,9 +182,35 @@ def test_all(capfd):
         "Project first successfully created",
     )
 
+    exec_command(
+        capfd, "rapydo add endpoint", "Endpoint creation not implemented yet",
+    )
+
+    exec_command(
+        capfd, "rapydo add task", "Task creation not implemented yet",
+    )
+
+    exec_command(
+        capfd, "rapydo add component", "Component creation not implemented yet",
+    )
+
     # Basic initilization
     exec_command(
         capfd, "rapydo init", "Project initialized",
+    )
+
+    exec_command(
+        capfd, "rapydo add service", "Service creation not implemented yet",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo add xyz",
+        "Invalid element xyz, please chose one of:",
+        "endpoint",
+        "task",
+        "component",
+        "service",
     )
 
     # Basic pull
@@ -402,7 +428,7 @@ services:
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
-        "Multiple projects found, please use --project to specify one of the following:",
+        "Multiple projects found, please use --project to specify one of the following",
     )
 
     exec_command(
