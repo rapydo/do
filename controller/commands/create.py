@@ -1,11 +1,13 @@
 import os
+from difflib import unified_diff
 
 from controller import PROJECT_DIR, __version__, gitter, log
-from controller.project import ANGULAR, NO_FRONTEND  # REACT
+from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
 from controller.templating import Templating
 
 
 def parse_env_variables(envs):
+
     env_variables = {}
     if not envs:
         return env_variables
@@ -21,7 +23,46 @@ def parse_env_variables(envs):
     return env_variables
 
 
-def __call__(args, project_scaffold, **kwargs):
+def show_file_diff(path, template):
+
+    with open(path) as f:
+        current_file = f.read().splitlines()
+
+    template = template.splitlines()
+
+    diff = unified_diff(current_file, template, n=0, lineterm="")
+
+    diff = list(diff)
+
+    if not diff:
+        log.debug("{} already exists", path)
+        return True
+
+    # should never happen
+    if diff[0] != "--- ":  # pragma: no cover
+        log.error("Malformed diff output: {}", diff)
+        return False
+
+    # should never happen
+    if diff[1] != "+++ ":  # pragma: no cover
+        log.error("Malformed diff output: {}", diff)
+        return False
+
+    log.info("{} already exists with diffs", path)
+    for d in diff[2:]:
+        if d.startswith("@@ "):
+            # print("NEW BLOCK")
+            continue
+        if d.startswith("-"):
+            print(f"\033[0;31m{d[1:].strip()}\033[0m")
+        elif d.startswith("+"):
+            print(f"\033[0;32m{d[1:].strip()}\033[0m")
+        # should never happen
+        else:  # pragma: no cover
+            log.error("Malformed diff output: {}", d)
+
+
+def __call__(args, **kwargs):
 
     project_name = args.get("name")
     force = args.get("force", False)
@@ -46,16 +87,69 @@ def __call__(args, project_scaffold, **kwargs):
     if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
         log.exit("Invalid authentication service: {}", auth)
 
+    create(
+        project_name=project_name,
+        auth=auth,
+        frontend=frontend,
+        services=services,
+        extend=extend,
+        envs=envs,
+        auto=auto,
+        force=force,
+        force_current=force_current,
+        add_optionals=add_optionals,
+    )
+
+    log.info("Project {} successfully created", project_name)
+
+    git_repo = gitter.get_repo(".")
+    if git_repo is None:
+        git_repo = gitter.init(".")
+
+    print("\nYou can now init and start the project:\n")
+    current_origin = gitter.get_origin(git_repo)
+
+    if current_origin is None:
+        if origin_url is None:
+            print("git remote add origin https://your_remote_git/your_project.git")
+        else:
+            git_repo.create_remote("origin", origin_url)
+
+    print("rapydo init")
+    print("rapydo pull")
+    print("rapydo start")
+
+
+def create(
+    project_name,
+    auth,
+    frontend,
+    services,
+    extend,
+    envs=None,
+    auto=False,
+    force=False,
+    force_current=False,
+    add_optionals=False,
+):
+
+    project_scaffold = Project()
     enable_postgres = auth == "postgres" or "postgres" in services
     enable_mysql = auth == "mysql" or "mysql" in services
     enable_neo4j = auth == "neo4j" or "neo4j" in services
     enable_mongo = auth == "mongo" or "mongo" in services
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
-    enable_irods = "irods" in services
+    enable_irods = "irods" in services or "icat" in services
     enable_celery = "celery" in services
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
+
+    # log.critical(auth)
+    # log.critical(services)
+    # log.critical(enable_postgres)
+    # log.critical(enable_neo4j)
+    # log.critical(enable_irods)
 
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
@@ -119,7 +213,7 @@ def __call__(args, project_scaffold, **kwargs):
 
     for f in folders:
         if os.path.exists(f):
-            log.info("Folder {} already exists", f)
+            log.debug("Folder {} already exists", f)
             continue
         if not auto:
             log.exit("\nmkdir -p {}", f)
@@ -161,33 +255,14 @@ def __call__(args, project_scaffold, **kwargs):
         # automatic creation
         if auto:
             if os.path.exists(p) and not force:
-                log.info("{} already exists", p)
+                show_file_diff(p, template)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
         if os.path.exists(p):
-            log.info("{} already exists", p)
+            show_file_diff(p, template)
         else:
             print("\n{}".format(template))
             log.exit(p)
-
-    log.info("Project {} successfully created", project_name)
-
-    git_repo = gitter.get_repo(".")
-    if git_repo is None:
-        git_repo = gitter.init(".")
-
-    print("\nYou can now init and start the project:\n")
-    current_origin = gitter.get_origin(git_repo)
-
-    if current_origin is None:
-        if origin_url is None:
-            print("git remote add origin https://your_remote_git/your_project.git")
-        else:
-            git_repo.create_remote("origin", origin_url)
-
-    print("rapydo init")
-    print("rapydo pull")
-    print("rapydo start")

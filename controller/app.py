@@ -75,9 +75,7 @@ class Application:
         if self.create:
             self.check_installed_software()
             create_cmd.__call__(
-                args=self.current_args,
-                project=self.project,
-                project_scaffold=self.project_scaffold,
+                args=self.current_args, project=self.project,
             )
             sys.exit(0)
 
@@ -264,7 +262,6 @@ class Application:
             template_builds=self.template_builds,
             builds=self.builds,
             gits=self.gits,
-            project_scaffold=self.project_scaffold,
         )
 
     def checked(self, message, *args, **kws):
