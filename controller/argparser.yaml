@@ -432,12 +432,18 @@ subcommands:
   add:
     description: Add a new element
     suboptions:
-      element:
+      type:
+        positional: true
+        type: str
+        metavalue: TYPE
+        default: null
+        help: One of endpoint, task, component or service
+      name:
         positional: true
         type: str
         metavalue: NAME
         default: null
-        help: One of endpoint, task, component or service
+        help: Name to be assigned to the new element
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

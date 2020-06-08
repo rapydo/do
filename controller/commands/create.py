@@ -7,14 +7,16 @@ from controller.templating import Templating
 
 def parse_env_variables(envs):
     env_variables = {}
-    if envs:
-        for e in envs.split(","):
-            e = e.split("=")
-            if len(e) != 2:
-                log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
-            k = e[0].upper()
-            v = e[1]
-            env_variables[k] = v
+    if not envs:
+        return env_variables
+
+    for e in envs.split(","):
+        e = e.split("=")
+        if len(e) != 2:
+            log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
+        k = e[0].upper()
+        v = e[1]
+        env_variables[k] = v
 
     return env_variables
 
@@ -98,7 +100,7 @@ def __call__(args, project_scaffold, **kwargs):
 
     env_variables = parse_env_variables(envs)
 
-    project_scaffold.load_project_scaffold(project_name, auth, celery=enable_celery)
+    project_scaffold.load_project_scaffold(project_name, auth)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
@@ -127,8 +129,6 @@ def __call__(args, project_scaffold, **kwargs):
     files = project_scaffold.expected_files
     if add_optionals:
         files += project_scaffold.optionals_files
-    # should be included only if a testing flag is enabled
-    files += project_scaffold.test_files
     files += project_scaffold.recommended_files
 
     for p in files:

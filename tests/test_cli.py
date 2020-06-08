@@ -206,7 +206,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo add xyz",
-        "Invalid element xyz, please chose one of:",
+        "Invalid type xyz, please chose one of:",
         "endpoint",
         "task",
         "component",

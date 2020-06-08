@@ -17,8 +17,6 @@ class Project:
         # Not verified, added by create if --add-optionals
         self.optionals_folders = []
         self.optionals_files = []
-        # Now are always added by created, a --testing should be added
-        self.test_files = []
         # Now verified by create, added by create if missing
         self.recommended_files = []
         # Created in data if missing
@@ -30,7 +28,7 @@ class Project:
     def p_path(self, *args):
         return os.path.join(PROJECT_DIR, self.project, *args)
 
-    def load_project_scaffold(self, project, auth, celery=False):
+    def load_project_scaffold(self, project, auth):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         if self.project is None:
@@ -73,9 +71,6 @@ class Project:
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
-
-        if celery:
-            self.test_files.append(self.p_path("backend", "tasks", "task_example.py"))
 
         self.recommended_files.append(".pre-commit-config.yaml")
         self.recommended_files.append(".isort.cfg")
