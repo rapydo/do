@@ -188,23 +188,23 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "rapydo add endpoint", "Endpoint creation not implemented yet",
+        capfd, "rapydo add endpoint xyz", "Endpoint creation not implemented yet",
     )
 
     path = "projects/first/backend/tasks/xyz.py"
     exec_command(
-        capfd, "rapydo add task xyz", f"Task created: {path}",
+        capfd, "rapydo add task xyz", "Task created: {}".format(path),
     )
     exec_command(
-        capfd, "rapydo add task xyz", f"{path} already exists",
-    )
-
-    exec_command(
-        capfd, "rapydo add component", "Component creation not implemented yet",
+        capfd, "rapydo add task xyz", "{} already exists".format(path),
     )
 
     exec_command(
-        capfd, "rapydo add service", "Service creation not implemented yet",
+        capfd, "rapydo add component xyz", "Component creation not implemented yet",
+    )
+
+    exec_command(
+        capfd, "rapydo add service xyz", "Service creation not implemented yet",
     )
 
     exec_command(
