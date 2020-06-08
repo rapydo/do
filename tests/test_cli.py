@@ -191,8 +191,12 @@ def test_all(capfd):
         capfd, "rapydo add endpoint", "Endpoint creation not implemented yet",
     )
 
+    path = "projects/first/backend/tasks/xyz.py"
     exec_command(
-        capfd, "rapydo add task", "Task creation not implemented yet",
+        capfd, "rapydo add task xyz", f"Task created: {path}",
+    )
+    exec_command(
+        capfd, "rapydo add task xyz", f"{path} already exists",
     )
 
     exec_command(
