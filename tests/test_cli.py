@@ -182,6 +182,11 @@ def test_all(capfd):
         "Project first successfully created",
     )
 
+    # Basic initilization
+    exec_command(
+        capfd, "rapydo init", "Project initialized",
+    )
+
     exec_command(
         capfd, "rapydo add endpoint", "Endpoint creation not implemented yet",
     )
@@ -192,11 +197,6 @@ def test_all(capfd):
 
     exec_command(
         capfd, "rapydo add component", "Component creation not implemented yet",
-    )
-
-    # Basic initilization
-    exec_command(
-        capfd, "rapydo init", "Project initialized",
     )
 
     exec_command(
