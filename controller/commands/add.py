@@ -25,7 +25,7 @@ def create_endpoint(project_scaffold, name):
 
 def create_task(project_scaffold, name):
     path = project_scaffold.p_path("backend", "tasks")
-    path = os.path.join(path, f"{name}.py")
+    path = os.path.join(path, "{}.py".format(name))
 
     create_template("task_template", path, name)
 
