@@ -54,9 +54,9 @@ def show_file_diff(path, template):
             # print("NEW BLOCK")
             continue
         if d.startswith("-"):
-            print(f"\033[0;31m{d[1:].strip()}\033[0m")
+            print("\033[0;31m{}\033[0m".format(d[1:].strip()))
         elif d.startswith("+"):
-            print(f"\033[0;32m{d[1:].strip()}\033[0m")
+            print("\033[0;32m{}\033[0m".format(d[1:].strip()))
         # should never happen
         else:  # pragma: no cover
             log.error("Malformed diff output: {}", d)
