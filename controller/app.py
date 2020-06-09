@@ -262,6 +262,7 @@ class Application:
             template_builds=self.template_builds,
             builds=self.builds,
             gits=self.gits,
+            project_scaffold=self.project_scaffold,
         )
 
     def checked(self, message, *args, **kws):
