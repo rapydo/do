@@ -1,6 +1,7 @@
 import os
 import shutil
 import signal
+import sys
 
 from git import Repo
 
@@ -187,25 +188,27 @@ def test_all(capfd):
         capfd, "rapydo init", "Project initialized",
     )
 
-    exec_command(
-        capfd, "rapydo add endpoint xyz", "Endpoint creation not implemented yet",
-    )
+    # Do not test this with python 3.5
+    if sys.version_info >= (3, 6):
+        exec_command(
+            capfd, "rapydo add endpoint xyz", "Endpoint creation not implemented yet",
+        )
 
-    path = "projects/first/backend/tasks/xyz.py"
-    exec_command(
-        capfd, "rapydo add task xyz", "Task created: {}".format(path),
-    )
-    exec_command(
-        capfd, "rapydo add task xyz", "{} already exists".format(path),
-    )
+        path = "projects/first/backend/tasks/xyz.py"
+        exec_command(
+            capfd, "rapydo add task xyz", "Task created: {}".format(path),
+        )
+        exec_command(
+            capfd, "rapydo add task xyz", "{} already exists".format(path),
+        )
 
-    exec_command(
-        capfd, "rapydo add component xyz", "Component creation not implemented yet",
-    )
+        exec_command(
+            capfd, "rapydo add component xyz", "Component creation not implemented yet",
+        )
 
-    exec_command(
-        capfd, "rapydo add service xyz", "Service creation not implemented yet",
-    )
+        exec_command(
+            capfd, "rapydo add service xyz", "Service creation not implemented yet",
+        )
 
     exec_command(
         capfd,
