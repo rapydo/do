@@ -8,6 +8,7 @@ from controller.commands.create import create
 
 def __call__(args, project, conf_vars, services, **kwargs):
 
+    path = args.get("path", None)
     frontend = glom(conf_vars, "env.FRONTEND_FRAMEWORK", default=None)
     auth = glom(conf_vars, "env.AUTH_SERVICE", default=None)
     extend = glom(conf_vars, "env.EXTENDED_PROJECT", default=None)
@@ -22,4 +23,5 @@ def __call__(args, project, conf_vars, services, **kwargs):
         services=services,
         extend=extend,
         force_current=True,
+        path=path,
     )

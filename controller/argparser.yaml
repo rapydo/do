@@ -446,6 +446,11 @@ subcommands:
         help: Name to be assigned to the new element
   upgrade:
     description: Upgrade a project by re-applying the templates 
+    suboptions:
+      path:
+        type: str
+        metavalue: PATH
+        help: path of file to be upgraded
   ancestors:
     description: Find all ancestors of a docker image
     suboptions:

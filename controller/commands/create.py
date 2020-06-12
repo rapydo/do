@@ -131,6 +131,7 @@ def create(
     force=False,
     force_current=False,
     add_optionals=False,
+    path=None,
 ):
 
     project_scaffold = Project()
@@ -225,7 +226,14 @@ def create(
         files += project_scaffold.optionals_files
     files += project_scaffold.recommended_files
 
+    if path:
+        if path not in files:
+            log.exit("Invalid path, cannot upgrade {}", path)
+        else:
+            files = [path]
+
     for p in files:
+
         fname = os.path.basename(p)
         template = templating.get_template(
             fname,
