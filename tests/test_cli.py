@@ -210,15 +210,15 @@ def test_all(capfd):
             capfd, "rapydo add service xyz", "Service creation not implemented yet",
         )
 
-    exec_command(
-        capfd,
-        "rapydo add abc xyz",
-        "Invalid type abc, please chose one of:",
-        "endpoint",
-        "task",
-        "component",
-        "service",
-    )
+        exec_command(
+            capfd,
+            "rapydo add abc xyz",
+            "Invalid type abc, please chose one of:",
+            "endpoint",
+            "task",
+            "component",
+            "service",
+        )
 
     # Basic pull
     exec_command(
