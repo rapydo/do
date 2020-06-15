@@ -315,12 +315,13 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/postgres:${RAPYDO_VERSION}
     volumes:
-      - sqldata:/var/lib/postgresql/data
+      - sqldata:/var/lib/postgresql
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
       POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
       POSTGRES_DBS: ${ALCHEMY_DBS}
+      PGDATA: /var/lib/postgresql/current
     networks:
       db_net:
         aliases:
