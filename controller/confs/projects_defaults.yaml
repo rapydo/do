@@ -158,7 +158,7 @@ variables:
     NEO4J_ENABLE_CONNECTOR: True
     NEO4J_HOST: matrix.dockerized.io
     NEO4J_BOLT_PORT: 7687
-    NEO4J_AUTOINDEXING: True
+    # NEO4J_AUTOINDEXING: True
     NEO4J_USER: neo4j
     NEO4J_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
     NEO4J_WEB_INTERFACE_PORT: 7474  # changed to 7173 in production mode
@@ -267,6 +267,7 @@ variables:
     AUTH_REGISTER_FAILED_LOGIN: False
     AUTH_SECOND_FACTOR_AUTHENTICATION: None
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
+    AUTH_TOKEN_SAVE_FREQUENCY: 60  # tokens are saved every this amount of seconds
     ALLOW_ACCESS_TOKEN_PARAMETER: False
     # AUTH_SECOND_FACTOR_AUTHENTICATION: TOTP
     DEFAULT_DHLEN: 2048
