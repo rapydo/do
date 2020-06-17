@@ -67,13 +67,13 @@ def read_configuration(
 
     if extends_from == "projects":
         extend_path = projects_path
-    elif extends_from.startswith("submodules/"):
+    elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
             log.exit("Invalid repository name in extends-from, name is empty")
 
         extend_path = os.path.join(submodules_path, repository_name, projects_path)
-    else:
+    else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
         log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
