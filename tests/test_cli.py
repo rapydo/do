@@ -199,15 +199,15 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo check -i main",
-        f"http-api: wrong branch 0.7.3, expected {__version__}",
+        "http-api: wrong branch 0.7.3, expected {}".format(__version__),
         "You can use rapydo init to fix it",
     )
     exec_command(
         capfd,
         "rapydo init",
-        f"Switched branch to origin/{__version__} on http-api",
-        f"You are already on branch {__version__} on build-templates",
-        f"You are already on branch {__version__} on do",
+        "Switched branch to origin/{} on http-api".format(__version__),
+        "You are already on branch {} on build-templates".format(__version__),
+        "You are already on branch {} on do".format(__version__),
     )
 
     # Do not test this with python 3.5
