@@ -178,11 +178,11 @@ class Application:
             command = importlib.import_module("controller.commands.{}".format(cmd_name))
         # enable me after dropping python 3.5
         # except ModuleNotFoundError:
-        except BaseException as e:
+        except BaseException as e:  # pragma: no cover
             log.error(e)
             log.exit("Command not found: {}", self.action)
 
-        if not hasattr(command, "__call__"):
+        if not hasattr(command, "__call__"):  # pragma: no cover
             log.exit("Command not implemented: {}", self.action)
 
         if self.initialize:
@@ -275,7 +275,7 @@ class Application:
 
         # Action
         self.action = self.current_args.get("action")
-        if self.action is None:
+        if self.action is None:  # pragma: no cover
             log.exit("Internal misconfiguration")
 
         # Action aliases
@@ -336,7 +336,7 @@ class Application:
             "docker", option=["version", "--format", "'{{.Server.Version}}'"]
         )
 
-        if v is None:
+        if v is None:  # pragma: no cover
             log.exit("No docker installation found, cannot continue")
 
         safe_version = "18.09.2"
@@ -367,7 +367,7 @@ To fix this issue, please update docker to version {}+
     def check_program(self, program, min_version=None, max_version=None):
 
         found_version = Application.get_bin_version(program)
-        if found_version is None:
+        if found_version is None:  # pragma: no cover
 
             hints = ""
 
@@ -378,7 +378,7 @@ To fix this issue, please update docker to version {}+
                 hints = "\n\n{}".format(hints)
 
             log.exit("Missing requirement: {} not found.{}", program, hints)
-        if min_version is not None:
+        if min_version is not None:  # pragma: no cover
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for {} is {}".format(
                     program, min_version,
@@ -386,7 +386,7 @@ To fix this issue, please update docker to version {}+
                 version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
-        if max_version is not None:
+        if max_version is not None:  # pragma: no cover
             if LooseVersion(max_version) < LooseVersion(found_version):
                 version_error = "Maximum supported version for {} is {}".format(
                     program, max_version,
@@ -404,10 +404,10 @@ To fix this issue, please update docker to version {}+
         from controller.packages import package_version
 
         found_version = package_version(package_name)
-        if found_version is None:
+        if found_version is None:  # pragma: no cover
             log.exit("Could not find the following python package: {}", package_name)
         try:
-            if min_version is not None:
+            if min_version is not None:  # pragma: no cover
                 if LooseVersion(min_version) > LooseVersion(found_version):
                     version_error = "Minimum supported version for {} is {}".format(
                         package_name, min_version
@@ -415,7 +415,7 @@ To fix this issue, please update docker to version {}+
                     version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
-            if max_version is not None:
+            if max_version is not None:  # pragma: no cover
                 if LooseVersion(max_version) < LooseVersion(found_version):
                     version_error = "Maximum supported version for {} is {}".format(
                         package_name, max_version
@@ -424,7 +424,7 @@ To fix this issue, please update docker to version {}+
                     log.exit(version_error)
 
             self.checked("{} version: {}", package_name, found_version)
-        except TypeError as e:
+        except TypeError as e:  # pragma: no cover
             log.error("{}: {}", e, found_version)
 
     @staticmethod
@@ -439,7 +439,7 @@ To fix this issue, please update docker to version {}+
             filepath, os.W_OK
         )
 
-    def check_permissions(self, path):
+    def check_permissions(self, path):  # pragma: no cover
 
         # if os.path.islink(path):
         #     log.warning("Skipping checks on {} (symbolic link)", path)
@@ -471,7 +471,7 @@ To fix this issue, please update docker to version {}+
             return False
         return True
 
-    def inspect_permissions(self, root="."):
+    def inspect_permissions(self, root="."):  # pragma: no cover
 
         for root, sub_folders, files in os.walk(root):
 
@@ -538,8 +538,7 @@ To fix this issue, please update docker to version {}+
                 self.specs, self.arguments.host_configuration
             )
 
-        except AttributeError as e:
-
+        except AttributeError as e:  # pragma: no cover
             log.exit(e)
 
         self.vars = self.specs.get("variables", {})
@@ -563,7 +562,7 @@ To fix this issue, please update docker to version {}+
             self.specs, "project.description", default="Unknown description"
         )
 
-        if self.rapydo_version is None:
+        if self.rapydo_version is None:  # pragma: no cover
             log.exit("RAPyDo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
@@ -586,7 +585,7 @@ To fix this issue, please update docker to version {}+
         if rapydo_version is None:
             rapydo_version = self.rapydo_version
 
-        if rapydo_version is None:
+        if rapydo_version is None:  # pragma: no cover
             return True
 
         r = LooseVersion(rapydo_version)
@@ -594,6 +593,7 @@ To fix this issue, please update docker to version {}+
         if r == c:
             return True
 
+        # pragma: no cover
         if r > c:
             action = "Upgrade your controller to version {}".format(r)
         else:
@@ -612,7 +612,7 @@ To fix this issue, please update docker to version {}+
 
         try:
             requests.get("https://www.google.com")
-        except requests.ConnectionError:
+        except requests.ConnectionError:  # pragma: no cover
             log.exit("Internet connection is unavailable")
         else:
             self.checked("Internet connection is available")

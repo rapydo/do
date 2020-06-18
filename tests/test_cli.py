@@ -187,7 +187,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo check -i main",
-        "Repo https://github.com/rapydo/http-api.git missing as ./submodules/http-api."
+        "Repo https://github.com/rapydo/http-api.git missing as ./submodules/http-api.",
         "You should init your project",
     )
     exec_command(
