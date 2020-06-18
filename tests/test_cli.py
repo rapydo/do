@@ -286,6 +286,9 @@ def test_all(capfd):
         capfd, "rapydo check -i main", "Checks completed",
     )
 
+    # This is to be sure that submodules contains all the repos, frontend may be missing
+    exec_command(capfd, "rapydo init", "Project initialized")
+
     os.rename("submodules", "submodules.bak")
     os.mkdir("submodules")
 

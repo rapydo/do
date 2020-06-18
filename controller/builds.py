@@ -21,10 +21,10 @@ name_priorities = [
 
 
 def name_priority(name1, name2):
-    if name1 not in name_priorities:
+    if name1 not in name_priorities:  # pragma: no cover
         log.warning("Cannot determine build priority name for {}", name1)
         return name2
-    if name2 not in name_priorities:
+    if name2 not in name_priorities:  # pragma: no cover
         log.warning("Cannot determine build priority name for {}", name2)
         return name1
     p1 = name_priorities.index(name1)
@@ -50,7 +50,7 @@ def find_templates_build(base_services):
             template_name = base_service.get("name")
             template_image = base_service.get("image")
 
-            if template_image is None:
+            if template_image is None:  # pragma: no cover
                 log.exit(
                     "Template builds must have a name, missing for {}".format(
                         template_name
