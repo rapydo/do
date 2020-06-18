@@ -38,7 +38,6 @@ def test_all(capfd):
     # Create an invalid repo (i.e. without any remote)
     r = gitter.init("../justatest")
     assert gitter.get_origin(r) is None
-    assert gitter.get_local(r) is None
 
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"

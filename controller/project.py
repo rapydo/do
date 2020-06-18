@@ -219,7 +219,8 @@ class Project:
         on file existence. Further checks are performed in the following steps
         """
 
-        if gitter.get_local(".") is None:
+        r = gitter.get_repo(".")
+        if r is None or gitter.get_origin(r) is None:
             return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {}

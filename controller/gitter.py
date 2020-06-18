@@ -35,19 +35,6 @@ def get_origin(gitobj):
         return None
 
 
-def get_local(path):
-    gitobj = get_repo(path)
-
-    if gitobj is None:
-        log.warning("Invalid repository in {}", path)
-        return None
-
-    if len(gitobj.remotes) == 0:
-        log.warning("Unable to fetch remotes from {}", path)
-        return None
-    return gitobj.remotes.origin.url
-
-
 def get_active_branch(gitobj):
 
     if gitobj is None:
@@ -93,7 +80,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
 
     try:
         gitobj.git.checkout(branch_name)
-    except GitCommandError as e:
+    except GitCommandError as e:  # pragma: no cover
         log.error(e)
         return False
 
@@ -102,7 +89,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
     return True
 
 
-def clone(online_url, path, branch="master", do=False, check=True):
+def clone(online_url, path, branch, do=False, check=True):
 
     local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
 
@@ -114,13 +101,14 @@ def clone(online_url, path, branch="master", do=False, check=True):
         log.info("Cloned repo {}@{} as {}", online_url, branch, path)
     else:
         log.exit(
-            "Repo {} missing as {}. You should init your project".format(
-                online_url, local_path
-            )
+            "Repo {} missing as {}. You should init your project",
+            online_url,
+            local_path,
         )
 
     if do:
-        if not switch_branch(gitobj, branch):
+        ret = switch_branch(gitobj, branch)
+        if not ret:  # pragma: no cover
             log.exit("Cannot switch repo {} to version {}", local_path, branch)
 
     if check:
@@ -135,7 +123,7 @@ def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
     # url = list(origin.urls).pop(0)
     url = gitobj.remotes.origin.url
 
-    if online_url != url:
+    if online_url != url:  # pragma: no cover
 
         local_url = urlparse(url)
         expected_url = urlparse(online_url)
@@ -161,14 +149,11 @@ def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
                 """Unmatched local remote
 Found: {}\nExpected: {}
 Suggestion: remove {} and execute the init command
-            """.format(
-                    url, online_url, gitobj.working_dir
-                )
+            """,
+                url,
+                online_url,
+                gitobj.working_dir,
             )
-
-    if branch is None:
-        # No more checks, we are ok
-        return True
 
     active_branch = get_active_branch(gitobj)
 
@@ -285,45 +270,40 @@ def check_unstaged(path, gitobj):
     return unstaged
 
 
-def fetch(path, gitobj, fetch_remote="origin"):
+def fetch(path, gitobj):
 
     for remote in gitobj.remotes:
-        if remote.name != fetch_remote:
-            log.verbose("Skipping fetch of remote {} on {}", remote, path)
-            continue
-        log.verbose("Fetching {} on {}", remote, path)
-        try:
-            remote.fetch()
-        except GitCommandError as e:  # pragma: no cover
-            log.exit(str(e))
+        if remote.name == "origin":
+            log.verbose("Fetching {} on {}", remote, path)
+            try:
+                remote.fetch()
+            except GitCommandError as e:  # pragma: no cover
+                log.exit(e)
 
 
-def check_updates(path, gitobj, fetch_remote="origin", remote_branch=None):
+def check_updates(path, gitobj):
 
-    fetch(path, gitobj, fetch_remote)
+    fetch(path, gitobj)
 
     branch = get_active_branch(gitobj)
     if branch is None:
         log.warning("{} repo is detached? Unable to verify updates!", path)
         return False
 
-    if remote_branch is None:
-        remote_branch = branch
-
     max_remote = 20
     log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = "{}..{}/{}".format(branch, fetch_remote, remote_branch)
+    behind_check = "{}..origin/{}".format(branch, branch)
     commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
 
     try:
         commits_behind_list = list(commits_behind)
     except GitCommandError:
         log.info(
-            "Remote branch {} not found for {} repo. Is it a local branch?".format(
-                branch, path
-            )
+            "Remote branch {} not found for {} repo. Is it a local branch?",
+            branch,
+            path,
         )
     else:
 
@@ -339,31 +319,28 @@ def check_updates(path, gitobj, fetch_remote="origin", remote_branch=None):
                 message = message[0:57] + "..."
             log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
-    # CHECKING COMMITS AHEAD (TO BE PUSHED) #
-    # if path != 'upstream' and remote_branch == branch:
-    if remote_branch == branch:
-        ahead_check = "{}/{}..{}".format(fetch_remote, remote_branch, branch)
-        commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
-        try:
-            commits_ahead_list = list(commits_ahead)
-        except GitCommandError:  # pragma: no cover
-            log.info(
-                "Remote branch {} not found for {}. Is it a local branch?".format(
-                    branch, path
-                )
+    ahead_check = "origin/{}..{}".format(branch, branch)
+    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
+    try:
+        commits_ahead_list = list(commits_ahead)
+    except GitCommandError:  # pragma: no cover
+        log.info(
+            "Remote branch {} not found for {}. Is it a local branch?".format(
+                branch, path
             )
+        )
+    else:
+
+        if len(commits_ahead_list) > 0:
+            log.warning("You have commits not pushed on {} repo", path)
         else:
+            log.debug("You pushed all commits on {} repo", path)
+        for c in commits_ahead_list:
+            message = c.message.strip().replace("\n", "")
 
-            if len(commits_ahead_list) > 0:
-                log.warning("You have commits not pushed on {} repo", path)
-            else:
-                log.debug("You pushed all commits on {} repo", path)
-            for c in commits_ahead_list:
-                message = c.message.strip().replace("\n", "")
-
-                sha = c.hexsha[0:7]
-                if len(message) > 60:
-                    message = message[0:57] + "..."
-                log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
+            sha = c.hexsha[0:7]
+            if len(message) > 60:
+                message = message[0:57] + "..."
+            log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
 
     return True

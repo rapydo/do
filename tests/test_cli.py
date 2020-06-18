@@ -5,7 +5,7 @@ import sys
 
 from git import Repo
 
-from controller import __version__
+from controller import __version__, gitter
 from controller.app import Application
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
@@ -185,7 +185,29 @@ def test_all(capfd):
 
     # Basic initilization
     exec_command(
+        capfd,
+        "rapydo check -i main",
+        "Repo https://github.com/rapydo/http-api.git missing as ./submodules/http-api."
+        "You should init your project",
+    )
+    exec_command(
         capfd, "rapydo init", "Project initialized",
+    )
+
+    r = gitter.get_repo("submodules/http-api")
+    gitter.switch_branch(r, "0.7.3")
+    exec_command(
+        capfd,
+        "rapydo check -i main",
+        f"http-api: wrong branch 0.7.3, expected {__version__}",
+        "You can use rapydo init to fix it",
+    )
+    exec_command(
+        capfd,
+        "rapydo init",
+        f"Switched branch to origin/{__version__} on http-api",
+        f"You are already on branch {__version__} on build-templates",
+        f"You are already on branch {__version__} on do",
     )
 
     # Do not test this with python 3.5
@@ -234,12 +256,17 @@ def test_all(capfd):
     )
 
     open("submodules/do/temp.file", "a").close()
+    with open("submodules/do/setup.py", "a") as f:
+        f.write("# added from tests\n")
+
     exec_command(
         capfd,
         "rapydo update -i main",
         "Unable to update do repo, you have unstaged files",
         "Untracked files:",
         "submodules/do/temp.file",
+        "Changes not staged for commit:",
+        "submodules/do/setup.py",
     )
     os.unlink("submodules/do/temp.file")
 
@@ -402,6 +429,9 @@ def test_all(capfd):
         "Folder projects already exists",
         "Project third successfully created",
     )
+
+    exec_command(capfd, "rapydo upgrade")
+
     # Add a custom image to extend base rabbit image:
 
     os.makedirs("projects/third/builds/rabbit")
