@@ -222,6 +222,9 @@ def test_all(capfd):
 
     # Basic pull
     exec_command(
+        capfd, "rapydo -s xxx pull", "Invalid service name: xxx",
+    )
+    exec_command(
         capfd, "rapydo pull", "Base images pulled from docker hub",
     )
 
