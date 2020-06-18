@@ -269,6 +269,7 @@ def test_all(capfd):
         "submodules/do/setup.py",
     )
     os.unlink("submodules/do/temp.file")
+    r = gitter.get_repo("submodules/do")
     r.git().execute(["git", "checkout", "--", "setup.py"])
 
     # Skipping main because we are on a fake git repository
