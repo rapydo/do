@@ -2,6 +2,7 @@ import os
 import shutil
 import signal
 import sys
+import tempfile
 
 from git import Repo
 
@@ -58,6 +59,14 @@ def exec_command(capfd, command, *asserts):
 
 
 def test_all(capfd):
+
+    exec_command(
+        capfd,
+        "rapydo --invalid-option",
+        "Unknown argument: --invalid-option",
+        "Use --help to list options",
+    )
+
     exec_command(
         capfd,
         "rapydo create first",
@@ -275,6 +284,39 @@ def test_all(capfd):
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd, "rapydo check -i main", "Checks completed",
+    )
+
+    os.rename("submodules", "submodules.bak")
+    os.mkdir("submodules")
+
+    # This is to re-fill the submodules folder,
+    # these folder will be removed by the next init
+    exec_command(capfd, "rapydo init", "Project initialized")
+
+    modules_path = os.path.abspath("submodules.bak")
+    exec_command(
+        capfd,
+        "rapydo init --submodules-path {}".format(modules_path),
+        "Path ./submodules/http-api already exists, removing",
+        "Project initialized",
+    )
+
+    assert os.path.islink("submodules/do")
+    assert not os.path.islink("submodules.bak/do")
+
+    # Init again, this time in submodules there are links...
+    # and will be removed as well as the folders
+    exec_command(
+        capfd,
+        "rapydo init --submodules-path {}".format(modules_path),
+        "Path ./submodules/http-api already exists, removing",
+        "Project initialized",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo init --submodules-path invalid/path",
+        "Local path not found: invalid/path",
     )
 
     # Verify fs permissions
@@ -879,3 +921,16 @@ services:
         "You are not in the main folder",
         "Checks completed",
     )
+
+    folder = os.getcwd()
+
+    os.chdir(tempfile.gettempdir())
+    exec_command(
+        capfd,
+        "rapydo check -i main",
+        "You are not in a git repository",
+        "Please note that this command only works from inside a rapydo-like repository",
+        "Verify that you are in the right folder, now you are in:",
+    )
+
+    os.chdir(folder)

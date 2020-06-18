@@ -48,6 +48,12 @@ class Application:
 
     def __init__(self, arguments):
 
+        if arguments.remaining_args:
+            log.exit(
+                "Unknown argument: {}\nUse --help to list options",
+                arguments.remaining_args[0],
+            )
+
         self.arguments = arguments
         self.current_args = self.arguments.current_args
         self.project_scaffold = Project()
@@ -158,13 +164,6 @@ class Application:
 
         if not skip_check_perm:
             self.inspect_permissions()
-
-        try:
-            argname = next(iter(self.arguments.remaining_args))
-        except StopIteration:
-            pass
-        else:
-            log.exit("Unknown argument:'{}'.\nUse --help to list options", argname)
 
         # Verify if we implemented the requested command
         cmd_name = self.action.replace("-", "_")
@@ -592,20 +591,19 @@ To fix this issue, please update docker to version {}+
         c = LooseVersion(__version__)
         if r == c:
             return True
+        else:  # pragma: no cover
+            if r > c:
+                action = "Upgrade your controller to version {}".format(r)
+            else:
+                action = "Downgrade your controller to version {}".format(r)
+                action += " or upgrade your project"
 
-        # pragma: no cover
-        if r > c:
-            action = "Upgrade your controller to version {}".format(r)
-        else:
-            action = "Downgrade your controller to version {}".format(r)
-            action += " or upgrade your project"
+            msg = "RAPyDo version is not compatible\n\n"
+            msg += "This project requires rapydo {}, you are using {}\n\n{}\n".format(
+                r, c, action
+            )
 
-        msg = "RAPyDo version is not compatible"
-        msg += "\n\nThis project requires rapydo {}, you are using {}\n\n{}\n".format(
-            r, c, action
-        )
-
-        log.exit(msg)
+            log.exit(msg)
 
     def check_internet_connection(self):
         """ Check if connected to internet """
@@ -678,12 +676,10 @@ To fix this issue, please update docker to version {}+
 
             if os.path.exists(submodule_path):
                 log.warning("Path {} already exists, removing", submodule_path)
-                if os.path.isfile(submodule_path):
-                    os.remove(submodule_path)
-                elif os.path.islink(submodule_path):
-                    os.remove(submodule_path)
-                else:
+                if os.path.isdir(submodule_path):
                     shutil.rmtree(submodule_path)
+                else:
+                    os.remove(submodule_path)
 
             os.symlink(local_path, submodule_path)
 
@@ -868,7 +864,7 @@ occurred during RabbitMQ startup """,
 
     def check_placeholders(self):
 
-        if len(self.active_services) == 0:
+        if len(self.active_services) == 0:  # pragma: no cover
             log.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
