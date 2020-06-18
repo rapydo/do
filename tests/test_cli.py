@@ -62,7 +62,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "rapydo --invalid-option",
+        "rapydo --invalid-option create first",
         "Unknown argument: --invalid-option",
         "Use --help to list options",
     )
