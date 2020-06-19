@@ -435,11 +435,32 @@ def test_all(capfd):
         " - swagger",
         " - celery",
     )
+
+    exec_command(
+        capfd,
+        "rapydo interfaces sqlalchemy XYZ --detach",
+        "Port must be a valid integer",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo interfaces sqlalchemy --detach",
+        "Launching interface: sqlalchemyui",
+        "docker-compose command: 'run'",
+    )
     exec_command(
         capfd,
         "rapydo interfaces sqlalchemy --port 123 --detach",
         "Launching interface: sqlalchemyui",
         "docker-compose command: 'run'",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo interfaces swagger --port 124 --detach",
+        "You can access swaggerui web page here:",
+        "http://localhost:124?docExpansion=list&",
+        "url=http://localhost:8080/api/specs",
     )
 
     exec_command(

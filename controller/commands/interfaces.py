@@ -41,24 +41,18 @@ def __call__(
         suggest = "You can use rapydo interfaces list to get available interfaces"
         log.exit("Container '{}' is not defined\n{}", service, suggest)
 
-    port = args.get("port")
-    publish = []
-
     info = container_info(services_dict, service)
     try:
         current_ports = info.get("ports", []).pop(0)
-    except IndexError:
+    except IndexError:  # pragma: no cover
         log.exit("No default port found?")
 
-    if port is None:
-        port = current_ports.published
-    else:
-        try:
-            int(port)
-        except TypeError:
-            log.exit("Port must be a valid integer")
+    port = str(args.get("port", current_ports.published))
 
-        publish.append("{}:{}".format(port, current_ports.target))
+    if not port.isnumeric():
+        log.exit("Port must be a valid integer")
+
+    publish = ["{}:{}".format(port, current_ports.target)]
 
     url = None
     if service == "swaggerui":
