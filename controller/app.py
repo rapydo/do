@@ -87,22 +87,21 @@ class Application:
 
         err = self.project_scaffold.find_main_folder()
 
+        if err is not None:
+            log.exit(err)
+
         if self.print_version:
             # from inside project folder, load configuration
             self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
                 self.project
             )
-            if err is None:
-                self.read_specs()
+            self.read_specs()
             version_cmd.__call__(
                 project=self.project,
                 version=self.version,
                 rapydo_version=self.rapydo_version,
             )
             sys.exit(0)
-
-        if err is not None:
-            log.exit(err)
 
         log.debug("You are using RAPyDo version {}", __version__)
 

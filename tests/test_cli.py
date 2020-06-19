@@ -58,24 +58,7 @@ def exec_command(capfd, command, *asserts):
     return out
 
 
-def test_all(capfd):
-
-    exec_command(
-        capfd,
-        "rapydo --invalid-option create first",
-        "Unknown argument: --invalid-option",
-        "Use --help to list options",
-    )
-
-    # This is to test a BUG fix:
-    # trailing space was interpreted as additional empty commands
-    # raising an Unknown argument error. With the fix a normal errors is return
-    # In this case because not project is created yet
-    exec_command(
-        capfd,
-        "rapydo version ",  # please note the trailing space
-        "Could not access the dir 'projects'",
-    )
+def test_create(capfd):
 
     exec_command(
         capfd,
@@ -203,7 +186,25 @@ def test_all(capfd):
         "Project first successfully created",
     )
 
-    # Basic initilization
+
+def test_all(capfd):
+
+    exec_command(
+        capfd,
+        "rapydo --invalid-option create first",
+        "Unknown argument: --invalid-option",
+        "Use --help to list options",
+    )
+
+    # This is to test a BUG fix: trailing space was interpreted as
+    # additional empty commands raising an Unknown argument error.
+    exec_command(
+        capfd,
+        "rapydo version ",  # please note the trailing space
+        "required rapydo {}".format(__version__),
+    )
+
+    # Basic initialization
     exec_command(
         capfd,
         "rapydo check -i main",

@@ -1,5 +1,4 @@
 import pytest
-from git.exc import InvalidGitRepositoryError
 from plumbum.commands.processes import ProcessExecutionError
 
 from controller import __version__, gitter
