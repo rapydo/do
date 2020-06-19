@@ -192,16 +192,14 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo --invalid-option create first",
-        "Unknown argument: --invalid-option",
+        "Unknown argumentrequired rapydo: --invalid-option",
         "Use --help to list options",
     )
 
     # This is to test a BUG fix: trailing space was interpreted as
     # additional empty commands raising an Unknown argument error.
     exec_command(
-        capfd,
-        "rapydo version ",  # please note the trailing space
-        "required rapydo {}".format(__version__),
+        capfd, "rapydo version ", "required rapydo",  # please note the trailing space
     )
 
     # Basic initialization
