@@ -219,10 +219,7 @@ def test_all(capfd):
     shutil.copy(".projectrc", ".projectrc.bak")
 
     with open(".projectrc", "a") as f:
-        f.write("invalid-opt: invalid\n")
-    # Temporary debug code:
-    with open(".projectrc") as f:
-        log.error(f.read().splitlines())
+        f.write("\ninvalid-opt: invalid\n")
 
     exec_command(
         capfd, "rapydo check", "Unknown parameter invalid-opt found in .projectrc"
@@ -230,13 +227,13 @@ def test_all(capfd):
     shutil.copy(".projectrc.bak", ".projectrc")
 
     with open(".projectrc", "a") as f:
-        f.write("invalid:\n")
+        f.write("\ninvalid:\n")
         f.write("  invalid-command: invalid\n")
     exec_command(capfd, "rapydo check", "Unknown command invalid found in .projectrc")
     shutil.copy(".projectrc.bak", ".projectrc")
 
     with open(".projectrc", "a") as f:
-        f.write("check:\n")
+        f.write("\ncheck:\n")
         f.write("  invalid-opt: invalid\n")
     exec_command(
         capfd, "rapydo check", "Unknown parameter check/invalid-opt found in .projectrc"
