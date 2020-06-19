@@ -3,9 +3,7 @@ import shutil
 import signal
 import sys
 import tempfile
-from datetime import datetime, timedelta
 
-from freezegun import freeze_time
 from git import Repo
 
 from controller import __version__, gitter
@@ -212,29 +210,6 @@ def test_all(capfd):
     exec_command(
         capfd, "rapydo version ", "required rapydo",  # please note the trailing space
     )
-
-    minor_diff = (datetime.now() - timedelta(seconds=120)).strftime("%Y-%m-%d %H:%M:%S")
-    major_diff = (datetime.now() - timedelta(seconds=400)).strftime("%Y-%m-%d %H:%M:%S")
-    with freeze_time(minor_diff):
-        exec_command(
-            capfd,
-            "rapydo version",
-            "Date misconfiguration on the host",
-            "Current date: {}".format(minor_diff),
-            "Expected:",
-            "Current timezone:",
-        )
-    with freeze_time(major_diff):
-        exec_command(
-            capfd,
-            "rapydo version",
-            "Date misconfiguration on the host",
-            "Current date: {}".format(major_diff),
-            "Expected:",
-            "Current timezone:",
-            "To manually set the date: sudo date --set",
-            "Unable to continue, please fix the host date",
-        )
 
     # Basic initialization
     exec_command(

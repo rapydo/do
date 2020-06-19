@@ -4,11 +4,9 @@ import shutil
 import sys
 import time
 from collections import OrderedDict
-from datetime import datetime
 from distutils.version import LooseVersion
 
 import requests
-import urllib3
 from glom import glom
 from plumbum.commands.processes import ProcessExecutionError
 
@@ -232,10 +230,6 @@ class Application:
             )
 
         self.check_placeholders()
-
-        if self.tested_connection:
-
-            self.check_time()
 
         # Final step, launch the command
         enabled_services = self.get_services(default=self.active_services)
@@ -613,38 +607,6 @@ To fix this issue, please update docker to version {}+
             self.checked("Internet connection is available")
             self.tested_connection = True
 
-    @staticmethod
-    def check_time():
-        # get online utc time
-        http = urllib3.PoolManager()
-        response = http.request("GET", "http://just-the-time.appspot.com/")
-
-        internet_time = response.data.decode("utf-8")
-        online_time = datetime.strptime(internet_time.strip(), "%Y-%m-%d %H:%M:%S")
-
-        sec_diff = (datetime.utcnow() - online_time).total_seconds()
-
-        major_diff = abs(sec_diff) >= 300
-        minor_diff = abs(sec_diff) >= 60 if not major_diff else False
-
-        if major_diff:
-            log.error("Date misconfiguration on the host.")
-        elif minor_diff:
-            log.warning("Date misconfiguration on the host.")
-
-        if major_diff or minor_diff:
-            current_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-            tz_offset = time.timezone / -3600
-            log.info("Current date: {} UTC", current_date)
-            log.info("Expected: {} UTC", online_time)
-            log.info("Current timezone: {} (offset = {}h)", time.tzname, tz_offset)
-
-        if major_diff:
-            tips = 'To manually set the date: sudo date --set "{}"'.format(
-                online_time.strftime("%d %b %Y %H:%M:%S")
-            )
-            log.exit("Unable to continue, please fix the host date\n{}", tips)
-
     def working_clone(self, name, repo, from_path=None):
 
         # substitute values starting with '$$'
@@ -918,15 +880,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         return missing
 
-    def get_ignore_submodules(self):
-        ignore_submodule = self.current_args.get("ignore_submodule", "")
-        if ignore_submodule is None:
-            return ""
-        return ignore_submodule.split(",")
-
     def git_checks_or_update(self):
 
-        ignore_submodule_list = self.get_ignore_submodules()
+        ignore_submodule_list = self.current_args.get("ignore_submodule", "").split(",")
 
         for name, gitobj in self.gits.items():
             if name in ignore_submodule_list:
