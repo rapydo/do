@@ -1,6 +1,7 @@
 """
     Command line script: main function
 """
+import sys
 
 from controller import log
 
@@ -10,7 +11,7 @@ def main():
         # imported here to avoid uncatched Keyboard Interruptions
         from controller.arguments import ArgParser
 
-        arguments = ArgParser()
+        arguments = ArgParser(args=sys.argv)
 
         from controller.app import Application
 

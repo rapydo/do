@@ -15,7 +15,7 @@ from controller.utilities.configuration import load_yaml_file
 
 
 class ArgParser:
-    def __init__(self, args=sys.argv):
+    def __init__(self, args):
 
         self.current_args = {}
         self.projectrc = {}
