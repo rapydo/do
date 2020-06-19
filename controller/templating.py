@@ -78,7 +78,8 @@ class Templating:
         if os.path.exists(filename):
             if force:
                 self.make_backup(filename)
-            else:
+            # It is always verified before calling save_template from app, create & add
+            else:  # pragma: no cover
                 log.exit("File {} already exists", filename)
 
         with open(filename, "w+") as fh:

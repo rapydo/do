@@ -48,7 +48,7 @@ else:  # pragma: no cover
 if LOGS_FILE is not None:
     try:
         log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
-    except PermissionError as e:
+    except PermissionError as e:  # pragma: no cover
         log.error(e)
         LOGS_FILE = None
 
