@@ -15,9 +15,7 @@ from controller.utilities.configuration import load_yaml_file
 
 
 class ArgParser:
-    def __init__(self, args=None):
-        if args is None:
-            args = sys.argv
+    def __init__(self, args=sys.argv):
 
         self.current_args = {}
         self.projectrc = {}
@@ -96,10 +94,10 @@ class ArgParser:
         # Check on format
         for element in args:
             if element.startswith("--") and "_" in element:
-                raise ValueError(
-                    'Wrong "{}" option provided.\n'.format(element)
-                    + "Arguments containing '_' are not allowed.\n"
-                    + "Use '-' instead\n"
+                log.exit(
+                    'Wrong "{}" option provided.\n'
+                    "Arguments containing '_' are not allowed. Use '-' instead",
+                    element,
                 )
         # NOTE: the standard is to use only '-' separators for arguments
         # beware: argparse converts them into '_' when you want to retrieve
@@ -119,7 +117,7 @@ class ArgParser:
                 self.projectrc = load_yaml_file(
                     PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True
                 )
-        except AttributeError as e:
+        except AttributeError as e:  # pragma: no cover
             log.exit(e)
 
         self.host_configuration = self.projectrc.pop("project_configuration", {})
@@ -130,28 +128,29 @@ class ArgParser:
             if value is None:
                 continue
 
-            if not isinstance(value, dict):
-                # This is a first level option
-                if key in parse_conf["options"]:
-                    parse_conf["options"][key]["default"] = value
-                    parse_conf["options"][key]["projectrc"] = True
-                else:
-                    print("\nUnknown parameter {} found in {}\n".format(key, PROJECTRC))
-            else:
-                # This is a second level parameter
+            # This is a second level parameter
+            if isinstance(value, dict):
                 if key not in parse_conf["subcommands"]:
-                    print("\nUnknown command {} found in {}\n".format(key, PROJECTRC))
+                    log.exit("Unknown command {} found in {}", key, PROJECTRC)
                 else:
                     conf = parse_conf["subcommands"][key]["suboptions"]
                     for subkey, subvalue in value.items():
                         if subkey in conf:
                             conf[subkey]["default"] = subvalue
                         else:
-                            print(
-                                "Unknown parameter {}/{} found in {}\n".format(
-                                    key, subkey, PROJECTRC
-                                )
+                            log.exit(
+                                "Unknown parameter {}/{} found in {}",
+                                key,
+                                subkey,
+                                PROJECTRC,
                             )
+            else:
+                # This is a first level option
+                if key in parse_conf["options"]:
+                    parse_conf["options"][key]["default"] = value
+                    parse_conf["options"][key]["projectrc"] = True
+                else:
+                    log.exit("Unknown parameter {} found in {}", key, PROJECTRC)
 
         options = sorted(parse_conf.get("options", {}).items())
         commands = sorted(parse_conf.get("subcommands", {}).items())
