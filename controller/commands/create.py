@@ -164,10 +164,12 @@ def create(
 
     if not force_current:
         dirs = os.listdir(".")
-        if len(dirs) > 0 and dirs != [".git"]:
+        if dirs and dirs != [".git"]:
             log.exit(
-                "Current folder is not empty, cannot create a new project here."
-                "\nUse --current to force the creation here"
+                "Current folder is not empty, cannot create a new project here.\n"
+                "Found: {}\n"
+                "Use --current to force the creation here",
+                ", ".join(dirs[0:3]),  # add first 3 files/folders found
             )
 
     celery_broker = None  # Keep default value == RABBIT

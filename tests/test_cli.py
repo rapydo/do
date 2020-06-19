@@ -151,6 +151,7 @@ def test_all(capfd):
         capfd,
         "rapydo create first --auth postgres --frontend angular",
         "Current folder is not empty, cannot create a new project here.",
+        "Found: ",
         "Use --current to force the creation here",
     )
 
