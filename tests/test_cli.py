@@ -189,9 +189,8 @@ def test_create(capfd):
 
 def test_all(capfd):
 
-    exec_command(
-        capfd, "rapydo", "usage: ",
-    )
+    # usage not intercepted... by the way... it is not imported at the moment...
+    exec_command(capfd, "rapydo")
 
     exec_command(
         capfd,
