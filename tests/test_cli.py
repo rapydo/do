@@ -363,11 +363,6 @@ def test_all(capfd):
         "Local path not found: invalid/path",
     )
 
-    # Verify fs permissions
-    exec_command(
-        capfd, "rapydo check -i main --check-permissions", "Checks completed",
-    )
-
     # Some tests with list
     exec_command(
         capfd,

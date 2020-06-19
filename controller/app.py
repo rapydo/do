@@ -149,18 +149,13 @@ class Application:
         if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
             self.current_os_user = "privileged"
-            skip_check_perm = True
             log.warning("Current user is 'root'")
         else:
             self.current_os_user = system.get_username(self.current_uid)
-            skip_check_perm = not self.current_args.get("check_permissions", False)
             log.debug(
                 "Current user: {} (UID: {})", self.current_os_user, self.current_uid
             )
             log.debug("Current group ID: {}", self.current_gid)
-
-        if not skip_check_perm:
-            self.inspect_permissions()
 
         # Verify if we implemented the requested command
         cmd_name = self.action.replace("-", "_")
@@ -418,90 +413,6 @@ To fix this issue, please update docker to version {}+
             self.checked("{} version: {}", package_name, found_version)
         except TypeError as e:  # pragma: no cover
             log.error("{}: {}", e, found_version)
-
-    @staticmethod
-    def path_is_readable(filepath):
-        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
-            filepath, os.R_OK
-        )
-
-    @staticmethod
-    def path_is_writable(filepath):
-        return (os.path.isfile(filepath) or os.path.isdir(filepath)) and os.access(
-            filepath, os.W_OK
-        )
-
-    def check_permissions(self, path):  # pragma: no cover
-
-        # if os.path.islink(path):
-        #     log.warning("Skipping checks on {} (symbolic link)", path)
-        #     return True
-
-        if path.endswith("/node_modules"):
-            return False
-
-        if not self.path_is_readable(path):
-            if os.path.islink(path):
-                log.warning("{}: path cannot be read [BROKEN LINK?]", path)
-            else:
-                log.warning("{}: path cannot be read", path)
-            return False
-
-        if not self.path_is_writable(path):
-            log.warning("{}: path cannot be written", path)
-            return False
-        try:
-            owner = system.get_username(os.stat(path).st_uid)
-        except KeyError:
-            owner = os.stat(path).st_uid
-
-        if owner != self.current_os_user:
-            if owner == 990:
-                log.debug("{}: wrong owner ({})", path, owner)
-            else:
-                log.warning("{}: wrong owner ({})", path, owner)
-            return False
-        return True
-
-    def inspect_permissions(self, root="."):  # pragma: no cover
-
-        for root, sub_folders, files in os.walk(root):
-
-            counter = 0
-            for folder in sub_folders:
-                if folder == ".git":
-                    continue
-                # produced by virtual-env?
-                if folder == "lib":
-                    continue
-                if folder.endswith("__pycache__"):
-                    continue
-                if folder.endswith(".egg-info"):
-                    continue
-
-                path = os.path.join(root, folder)
-                if self.check_permissions(path):
-                    self.inspect_permissions(root=path)
-
-                counter += 1
-                if counter > 20:
-                    log.warning("Too many folders, stopped checks in {}", root)
-                    break
-
-            counter = 0
-            for file in files:
-                if file.endswith(".pyc"):
-                    continue
-
-                path = os.path.join(root, file)
-                self.check_permissions(path)
-
-                counter += 1
-                if counter > 100:
-                    log.warning("Too many files, stopped checks in {}", root)
-                    break
-
-            break
 
     def read_specs(self):
         """ Read project configuration """

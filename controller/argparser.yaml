@@ -79,10 +79,6 @@ subcommands:
         type: bool
         default: False
         help: skip check on docker builds
-      check-permissions:
-        type: bool
-        default: False
-        help: Enabled permission checks on file system
   init:
     description: Make current project compliant to RAPyDo requirements
     suboptions:
