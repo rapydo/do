@@ -120,8 +120,10 @@ def test_create(capfd):
     )
 
     # Let's create a project and init git
+    # Please note that --current is required because data folder is already created
+    # to be able to tests logs
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit --add-optionals"
+    create_command += " --services rabbit --add-optionals --current"
     create_command += " --origin https://your_remote_git/your_project.git"
     exec_command(
         capfd, create_command, "Project first successfully created",
