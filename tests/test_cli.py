@@ -6,7 +6,7 @@ import tempfile
 
 from git import Repo
 
-from controller import __version__, gitter
+from controller import __version__, gitter, log
 from controller.app import Application
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
@@ -220,6 +220,10 @@ def test_all(capfd):
 
     with open(".projectrc", "a") as f:
         f.write("invalid-opt: invalid\n")
+    # Temporary debug code:
+    with open(".projectrc") as f:
+        log.error(f.read().splitlines())
+
     exec_command(
         capfd, "rapydo check", "Unknown parameter invalid-opt found in .projectrc"
     )
