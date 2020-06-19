@@ -544,12 +544,10 @@ To fix this issue, please update docker to version {}+
 
         log.verbose("Configuration loaded")
 
-        framework = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND)
+        self.frontend = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND)
 
-        if framework == NO_FRONTEND:
-            framework = None
-
-        self.frontend = framework
+        if self.frontend == NO_FRONTEND:
+            self.frontend = None
 
         if self.frontend is not None:
             log.verbose("Frontend framework: {}", self.frontend)
@@ -668,15 +666,15 @@ To fix this issue, please update docker to version {}+
 
         if from_path is not None:
 
-            local_path = os.path.join(from_path, name)
+            local_path = os.path.join(from_path, repo["path"])
             if not os.path.exists(local_path):
-                log.exit("Submodule {} not found in {}", repo["path"], from_path)
+                log.exit("Submodule {} not found in {}", repo["path"], local_path)
 
             submodule_path = os.path.join(os.curdir, SUBMODULES_DIR, repo["path"])
 
             if os.path.exists(submodule_path):
-                log.warning("Path {} already exists, removing", submodule_path)
-                if os.path.isdir(submodule_path):
+                log.info("Path {} already exists, removing", submodule_path)
+                if os.path.isdir(submodule_path) and not os.path.islink(submodule_path):
                     shutil.rmtree(submodule_path)
                 else:
                     os.remove(submodule_path)

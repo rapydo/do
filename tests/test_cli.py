@@ -215,8 +215,8 @@ def test_all(capfd):
         capfd,
         "rapydo init",
         "Switched branch to origin/{} on http-api".format(__version__),
-        "You are already on branch {} on build-templates".format(__version__),
-        "You are already on branch {} on do".format(__version__),
+        "build-templates already set on branch {}".format(__version__),
+        "do already set on branch {}".format(__version__),
     )
 
     # Do not test this with python 3.5
@@ -285,9 +285,6 @@ def test_all(capfd):
     exec_command(
         capfd, "rapydo check -i main", "Checks completed",
     )
-
-    # This is to be sure that submodules contains all the repos, frontend may be missing
-    exec_command(capfd, "rapydo init", "Project initialized")
 
     os.rename("submodules", "submodules.bak")
     os.mkdir("submodules")
