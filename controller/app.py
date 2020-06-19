@@ -48,7 +48,7 @@ class Application:
 
     def __init__(self, arguments):
 
-        if arguments.remaining_args:
+        if arguments.remaining_args and arguments.remaining_args[0].strip():
             log.exit(
                 "Unknown argument: {}\nUse --help to list options",
                 arguments.remaining_args[0],
