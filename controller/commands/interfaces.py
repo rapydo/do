@@ -47,7 +47,11 @@ def __call__(
     except IndexError:  # pragma: no cover
         log.exit("No default port found?")
 
-    port = str(args.get("port", current_ports.published))
+    # cannot set current_ports.published as default in get
+    # because since port is in args... but can be None
+    port = args.get("port")
+    if port is None:
+        port = str(current_ports.published)
 
     if not port.isnumeric():
         log.exit("Port must be a valid integer")
