@@ -116,12 +116,6 @@ def test_create(capfd):
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
-    # exec_command(
-    #     capfd,
-    #     "rapydo version",
-    #     __version__,
-    # )
-
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals"
@@ -188,9 +182,6 @@ def test_create(capfd):
 
 
 def test_all(capfd):
-
-    # usage not intercepted... by the way... it is not imported at the moment...
-    exec_command(capfd, "rapydo")
 
     exec_command(
         capfd,
