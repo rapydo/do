@@ -32,9 +32,8 @@ def exec_command(capfd, command, *asserts):
         print(command)
         print("_____________________________________________")
 
-    arguments = ArgParser(args=command.split(" "))
-
     try:
+        arguments = ArgParser(args=command.split(" "))
         Application(arguments)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
@@ -182,6 +181,8 @@ def test_create(capfd):
 
 
 def test_all(capfd):
+
+    exec_command(capfd, "rapydo", "usage")
 
     exec_command(
         capfd,
