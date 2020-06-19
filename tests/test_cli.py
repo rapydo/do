@@ -87,54 +87,55 @@ def test_create(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test_celery --auth postgres --frontend angular",
+        "rapydo create first --auth postgres --frontend angular",
+        "Current folder is not empty, cannot create a new project here.",
+        "Found: ",
+        "Use --current to force the creation here",
+    )
+
+    # Please note that --current is required because data folder is already created
+    # to be able to tests logs
+
+    exec_command(
+        capfd,
+        "rapydo create test_celery --auth postgres --frontend angular --current ",
         "Wrong project name, _ is not a valid character",
     )
 
     exec_command(
         capfd,
-        "rapydo create celery --auth postgres --frontend angular",
+        "rapydo create celery --auth postgres --frontend angular --current ",
         "You selected a reserved name, invalid project name: celery",
     )
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --no-auto",
+        "rapydo create first --auth postgres --frontend angular --no-auto --current ",
         "mkdir -p projects",
     )
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X",
+        "rapydo create first --auth postgres --frontend no --env X --current ",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X,",
+        "rapydo create first --auth postgres --frontend no --env X, --current ",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X=1,Y",
+        "rapydo create first --auth postgres --frontend no --env X=1,Y --current ",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
     # Let's create a project and init git
-    # Please note that --current is required because data folder is already created
-    # to be able to tests logs
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
     create_command += " --origin https://your_remote_git/your_project.git"
     exec_command(
         capfd, create_command, "Project first successfully created",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo create first --auth postgres --frontend angular",
-        "Current folder is not empty, cannot create a new project here.",
-        "Found: ",
-        "Use --current to force the creation here",
     )
 
     pconf = "projects/first/project_configuration.yaml"
