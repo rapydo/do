@@ -1,4 +1,3 @@
-
 variables:
   submodules:
     # IMPORTANT: if you change online_urls here, remember to also fix in develop
@@ -80,7 +79,6 @@ variables:
       if: True
 
   env:
-
     FRONTEND_FRAMEWORK: nofrontend
 
     ACTIVATE_BACKEND: 1
@@ -129,28 +127,28 @@ variables:
     # number of workers will calculated as:
     # $GUNICORN_WORKERS + #cores * $GUNICORN_WORKERS_PER_CORE
     GUNICORN_WORKERS: 1 # total number of workers. if empty this parameter will not be used
-    GUNICORN_WORKERS_PER_CORE: 2  # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
+    GUNICORN_WORKERS_PER_CORE: 2 # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
     GUNICORN_MAX_NUM_WORKERS: 24
     # in backendirods it is:
     # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
     # DB_SUBNET: 172.1.0.0
-    BACKEND_BUILD_MODE: backend  # or backendirods
-    FLASK_DEFAULT_PORT: 8080  # used for Flask biding (into the container)
-    BACKEND_PORT: 8080  # used for port mapping (outside the container)
-    BACKEND_API_PORT: 8080  # used to reach the backend from outer network (in production should much with proxy ssl port)
-    BACKEND_URI: ''
+    BACKEND_BUILD_MODE: backend # or backendirods
+    FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
+    BACKEND_PORT: 8080 # used for port mapping (outside the container)
+    BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
+    BACKEND_URI: ""
     FRONTEND_PREFIX: /
-    BACKEND_PREFIX: ''
-    LOG_LEVEL: DEBUG  # log level for backend and celery
+    BACKEND_PREFIX: ""
+    LOG_LEVEL: DEBUG # log level for backend and celery
     JWT_APP_SECRETS: /jwt_tokens
     UPLOAD_PATH: /uploads
 
     ALCHEMY_ENABLE_CONNECTOR: True
     ALCHEMY_HOST: sql.dockerized.io
     ALCHEMY_PORT: 5432
-    ALCHEMY_DBTYPE: 'postgresql'
-    ALCHEMY_USER: "sqluser"  # This default is invalidated in production mode
-    ALCHEMY_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
+    ALCHEMY_DBTYPE: "postgresql"
+    ALCHEMY_USER: "sqluser" # This default is invalidated in production mode
+    ALCHEMY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
     ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
@@ -160,15 +158,15 @@ variables:
     NEO4J_BOLT_PORT: 7687
     # NEO4J_AUTOINDEXING: True
     NEO4J_USER: neo4j
-    NEO4J_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
-    NEO4J_WEB_INTERFACE_PORT: 7474  # changed to 7173 in production mode
+    NEO4J_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+    NEO4J_WEB_INTERFACE_PORT: 7474 # changed to 7173 in production mode
     NEO4J_SSL_PATH: /ssl_no_used # changed to /ssl in production mode
 
     IRODS_ENABLE_CONNECTOR: True
     IRODS_HOST: rodserver.dockerized.io
     IRODS_PORT: 1247
     IRODS_DB: ICAT
-    IRODS_AUTHSCHEME:   # to be auto-detected
+    IRODS_AUTHSCHEME: # to be auto-detected
     # DN of your iRODS host with GSI plugin installed
     IRODS_DN:
     IRODS_USER: irods
@@ -178,7 +176,7 @@ variables:
     IRODS_ANONYMOUS: 0
     IRODS_GUEST_USER: guest
     # NOTE: this must match ALCHEMY_PASSWORD when running in development mode
-    IRODS_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
+    IRODS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     MONGO_ENABLE_CONNECTOR: True
     MONGO_HOST: mongo.dockerized.io
@@ -193,16 +191,16 @@ variables:
     RABBITMQ_ENABLE_CONNECTOR: True
     RABBITMQ_HOST: rabbit.dockerized.io
     RABBITMQ_PORT: 5672
-    RABBITMQ_VHOST: '/'
-    RABBITMQ_USER: "rabbit"  # This default is invalidated in production mode
-    RABBITMQ_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
+    RABBITMQ_VHOST: "/"
+    RABBITMQ_USER: "rabbit" # This default is invalidated in production mode
+    RABBITMQ_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     RABBITMQ_ENABLE_MANAGEMENT_PLUGIN: 0
     RABBITMQ_MANAGEMENT_PORT: 15672
     RABBITMQ_ENABLE_SHOVEL_PLUGIN: 0
     RABBITMQ_SSL_CERTFILE:
     RABBITMQ_SSL_KEYFILE:
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT:
-    RABBITMQ_SSL_ENABLED: False  # it is used by Celery
+    RABBITMQ_SSL_ENABLED: False # it is used by Celery
 
     REDIS_HOST: redis.dockerized.io
     REDIS_PORT: 6379
@@ -214,8 +212,8 @@ variables:
     CELERYBEAT_ENABLE_CONNECTOR: True
 
     # Flower
-    CELERYUI_USER: "flower"  # This default is invalidated in production mode
-    CELERYUI_PASSWORD: "D3vMode!"  # This default is invalidated in production mode
+    CELERYUI_USER: "flower" # This default is invalidated in production mode
+    CELERYUI_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     CELERYUI_DBDIR: /var/flower
     CELERYUI_PORT: 5555
     CELERYUI_SSL_OPTIONS:
@@ -240,7 +238,7 @@ variables:
     SET_CSP_FONT_SRC:
     CORS_ALLOW_ALL_ORIGINS: 1
 
-    SMTP_ADMIN: 
+    SMTP_ADMIN:
     SMTP_NOREPLY:
     SMTP_HOST:
     SMTP_PORT:
@@ -267,15 +265,15 @@ variables:
     AUTH_REGISTER_FAILED_LOGIN: False
     AUTH_SECOND_FACTOR_AUTHENTICATION: None
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
-    AUTH_TOKEN_SAVE_FREQUENCY: 60  # tokens are saved every this amount of seconds
+    AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
     ALLOW_ACCESS_TOKEN_PARAMETER: False
     # AUTH_SECOND_FACTOR_AUTHENTICATION: TOTP
     DEFAULT_DHLEN: 2048
 
-    AUTH_DEFAULT_USERNAME: "user@nomail.org"    
-    AUTH_DEFAULT_PASSWORD: "test"  
+    AUTH_DEFAULT_USERNAME: "user@nomail.org"
+    AUTH_DEFAULT_PASSWORD: "test"
 
-    FORCE_PRODUCTION_TESTS: 0  # Very dangerous, do not touch it!
+    FORCE_PRODUCTION_TESTS: 0 # Very dangerous, do not touch it!
     NETWORK_MTU: 1500
 
 project:

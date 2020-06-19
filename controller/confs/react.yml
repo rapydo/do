@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   frontend:
@@ -14,7 +14,7 @@ services:
     hostname: frontend
     # working_dir: /rapydo/
     environment:
-      ACTIVATE: 1  # fixed, because it is enabled by frontend.framework variable
+      ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       APP_MODE: ${APP_MODE}

@@ -1,7 +1,5 @@
-
 variables:
   env:
-
     ACTIVATE_PROXY: 1
     APP_MODE: production
     # used to reach the backend from outer network
@@ -17,7 +15,7 @@ variables:
     # RABBITMQ_SSL_DEPTH: 1
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "false"
     # RABBITMQ_SSL_VERIFY
-    RABBITMQ_SSL_ENABLED: True  # it is used by Celery
+    RABBITMQ_SSL_ENABLED: True # it is used by Celery
 
     CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
 

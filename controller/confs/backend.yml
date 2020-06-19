@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 # #####################
 # VOLUMES
@@ -58,7 +58,6 @@ networks:
   db_net:
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
-
     # # driver: bridge
     # ipam:
     #   driver: default
@@ -71,7 +70,6 @@ networks:
 # SERVICES
 # #####################
 services:
-
   ########################
   ###  MAIN CONTAINER  ###
   ########################
@@ -94,7 +92,6 @@ services:
     hostname: backend-server
     privileged: ${DOCKER_PRIVILEGED_MODE}
     environment:
-
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
@@ -128,8 +125,8 @@ services:
       AUTH_REGISTER_FAILED_LOGIN: ${AUTH_REGISTER_FAILED_LOGIN}
       AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
       AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
-      AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME} 
-      AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD} 
+      AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
+      AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}
       AUTH_JWT_TOKEN_TTL: ${AUTH_JWT_TOKEN_TTL}
       AUTH_TOKEN_SAVE_FREQUENCY: ${AUTH_TOKEN_SAVE_FREQUENCY}
       ALLOW_ACCESS_TOKEN_PARAMETER: ${ALLOW_ACCESS_TOKEN_PARAMETER}
@@ -260,7 +257,7 @@ services:
           - ${PROXY_HOST}
       app_net:
     ports:
-      - ${PROXY_DEV_PORT}:80   # 80 redirect
+      - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
     environment:
       DOMAIN: ${PROJECT_DOMAIN}
@@ -270,7 +267,7 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       SMTP_ADMIN: ${SMTP_ADMIN}
       DEFAULT_DHLEN: ${DEFAULT_DHLEN}
-      FRONTEND: ${FRONTEND_FRAMEWORK} 
+      FRONTEND: ${FRONTEND_FRAMEWORK}
       UNSAFE_EVAL: ${SET_UNSAFE_EVAL}
       CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS}
       CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
@@ -299,7 +296,7 @@ services:
           - ${PROXY_HOST}
       app_net:
     ports:
-      - ${PROXY_DEV_PORT}:80   # 80 redirect
+      - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
     environment:
       CURRENT_UID: ${CURRENT_UID}
@@ -407,7 +404,7 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
     command: celery worker --concurrency=1 -Ofair -A restapi.connectors.celery.worker.celery_app -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
-    
+
     # user: developer
     working_dir: /code
     environment:
@@ -438,11 +435,6 @@ services:
       REDIS_PORT: ${REDIS_PORT}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_DATABASE: ${MONGO_DATABASE}
 
       ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
       ALCHEMY_ENABLE_CONNECTOR: ${ALCHEMY_ENABLE_CONNECTOR}
@@ -523,7 +515,7 @@ services:
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
     command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel ${LOG_LEVEL} --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
-    
+
     # user: developer
     working_dir: /code
     environment:
@@ -601,7 +593,7 @@ services:
     hostname: rabbit
     environment:
       # CAN BE locally changed by ovverride with:
-      ACTIVATE: ${ACTIVATE_RABBIT}  
+      ACTIVATE: ${ACTIVATE_RABBIT}
       # ACTIVATE: ${ACTIVATE_CELERY}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -725,7 +717,6 @@ services:
       CELERYUI_PASSWORD: ${CELERYUI_PASSWORD}
       CELERYUI_DBDIR: ${CELERYUI_DBDIR}
 
-
   swaggerui:
     # restart: no
     image: swaggerapi/swagger-ui:v3.25.3
@@ -762,14 +753,14 @@ services:
   ### FTP SERVER  ###
   ###################
   ftp:
-    restart: on-failure:5 
+    restart: on-failure:5
     build: ${SUBMODULE_DIR}/build-templates/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
-  # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
-  # with the server's SSL certificates for TLS support. Optional TLS is
-  # automatically enabled when the container finds this file on startup.
+    # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
+    # with the server's SSL certificates for TLS support. Optional TLS is
+    # automatically enabled when the container finds this file on startup.
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
