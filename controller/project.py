@@ -31,10 +31,6 @@ class Project:
     def load_project_scaffold(self, project, auth):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
-        if self.project is None:
-            log.debug("No projected specified")
-            return False
-
         self.expected_folders.append(self.p_path("confs"))
         self.expected_folders.append(self.p_path("builds"))
         self.expected_folders.append(self.p_path("backend"))

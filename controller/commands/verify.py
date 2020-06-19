@@ -9,6 +9,6 @@ def __call__(args, files, **kwargs):
     command = "restapi verify --services {}".format(service)
 
     try:
-        return dc.exec_command("backend", command=command, nofailure=True)
-    except AttributeError as e:
+        return dc.exec_command("backend", command=command)
+    except SystemExit as e:
         log.critical(e)

@@ -10,14 +10,14 @@ from controller import TESTING, log
 from controller.app import Application
 
 try:
-    import_exceptions = (ModuleNotFoundError, ImportError)
+    import_exc = (ModuleNotFoundError, ImportError)
 except NameError:
-    import_exceptions = ImportError
+    import_exc = ImportError
 
 
 def install(package, editable=False, user=False, use_pip3=True):
 
-    if use_pip3 and Application.get_bin_version("pip3") is None:
+    if use_pip3 and Application.get_bin_version("pip3") is None:  # pragma: no cover
         return install(package=package, editable=editable, user=user, use_pip3=False,)
 
     try:
@@ -36,10 +36,8 @@ def install(package, editable=False, user=False, use_pip3=True):
                 command += " --user"
             command += " {}".format(package)
 
-            if use_pip3:
-                result = sultan.pip3(command).run()
-            else:
-                result = sultan.pip(command).run()
+            pip = sultan.pip3 if use_pip3 else sultan.pip
+            result = pip(command).run()
 
             for r in result.stdout:
                 print(r)
@@ -69,7 +67,7 @@ def import_package(package_name):
 
     try:
         package = import_module(package_name)
-    except import_exceptions:  # pylint:disable=catching-non-exception  # pragma: no cover
+    except import_exc:  # pylint:disable=catching-non-exception  # pragma: no cover
         return None
     else:
         return package
@@ -77,15 +75,6 @@ def import_package(package_name):
 
 def package_version(package_name):
     package = import_package(package_name)
-    if package is None:
+    if package is None:  # pragma: no cover
         return None
-    try:
-        version = package.__version__
-        if isinstance(version, str):
-            return version
-
-        # Fix required for requests
-        return version.__version__
-    except BaseException as e:
-        print(str(e))
-        return None
+    return package.__version__
