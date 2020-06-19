@@ -190,7 +190,7 @@ def test_create(capfd):
 def test_all(capfd):
 
     exec_command(
-        capfd, "rapydo", "usage: /usr/local/bin/rapydo ",
+        capfd, "rapydo", "usage: ",
     )
 
     exec_command(
