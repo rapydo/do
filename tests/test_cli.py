@@ -65,6 +65,10 @@ def test_create(capfd):
         "Missing authentication service, add --auth option",
     )
 
+    with open("data/logs/rapydo-controller.log") as f:
+        logs = f.read().splitlines()
+        assert logs[-1].endswith("Missing authentication service, add --auth option")
+
     exec_command(
         capfd, "rapydo create first --auth xyz", "Invalid authentication service: xyz",
     )
