@@ -293,16 +293,24 @@ def test_all(capfd):
         exec_command(
             capfd,
             "rapydo add component xyz",
-            "Component created: {}".format(path),
             "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
             "Added XyzComponent to module declarations",
-        )
-        exec_command(
-            capfd, "rapydo add component xyz", "{}/xyz.ts already exists".format(path),
+            "Component created: {}".format(path),
         )
         assert os.path.isdir(path)
         assert os.path.isfile(os.path.join(path, "xyz.ts"))
         assert os.path.isfile(os.path.join(path, "xyz.html"))
+        exec_command(
+            capfd, "rapydo add component xyz", "{}/xyz.ts already exists".format(path),
+        )
+        shutil.rmtree(path)
+        exec_command(
+            capfd,
+            "rapydo add component xyz",
+            "Import already included in module file",
+            "Added XyzComponent to module declarations",
+            "Component created: {}".format(path),
+        )
 
         path = "projects/first/frontend/app/services"
         assert not os.path.exists(path)
@@ -310,16 +318,23 @@ def test_all(capfd):
         exec_command(
             capfd,
             "rapydo add service xyz",
-            "Service created: {}".format(path),
             "Added import { XyzService } from '@app/services/xyz'; to module file",
             "Added XyzService to module declarations",
-        )
-
-        exec_command(
-            capfd, "rapydo add service xyz", "{}/xyz.ts already exists".format(path),
+            "Service created: {}".format(path),
         )
         assert os.path.isdir(path)
         assert os.path.isfile(os.path.join(path, "xyz.ts"))
+        exec_command(
+            capfd, "rapydo add service xyz", "{}/xyz.ts already exists".format(path),
+        )
+        os.remove("{}/xyz.ts".format(path))
+        exec_command(
+            capfd,
+            "rapydo add service xyz",
+            "Import already included in module file",
+            "Added XyzService to module declarations",
+            "Service created: {}".format(path),
+        )
 
         exec_command(
             capfd,
