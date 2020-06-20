@@ -693,6 +693,34 @@ services:
         "Custom images built",
     )
 
+    exec_command(
+        capfd, "rapydo ancestors XYZ", "No child found for XYZ",
+    )
+
+    dock = Dock()
+    img = dock.images().pop(0)
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info(img).get("Id")
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
+    )
+
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    # rapydo/rabbitmq has a child: third/rabbit just created
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
+        "third/rabbit",
+    )
+
     # Rebuild core rabbit image => custom rabbit is now obsolete
     exec_command(
         capfd,
@@ -709,33 +737,12 @@ services:
         "Update it with: rapydo --services rabbit build",
     )
 
-    exec_command(
-        capfd, "rapydo ancestors XYZ", "No parent found for XYZ",
-    )
-
-    dock = Dock()
-    img = dock.images().pop(0)
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
+    # rabbit images has no longer any child because it is just rebuilt
     exec_command(
         capfd,
         "rapydo ancestors {}".format(img_id),
-        "Finding all parents and (grand)+ parents of {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
     )
-
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all parents and (grand)+ parents of {}".format(img_id),
-        # "third/rabbit",
-    )
-
     exec_command(capfd, "rapydo verify sqlalchemy", "No container found for backend_1")
 
     # Let's start with the stack

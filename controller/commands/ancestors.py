@@ -5,7 +5,7 @@ from controller.utilities import system
 # from controller import log
 
 
-def get_parent(IMAGE, images):
+def get_children(IMAGE, images):
 
     parameters = [
         "inspect",
@@ -48,15 +48,15 @@ def __call__(args, **kwargs):
         images[i[2]] = i
 
     child = IMAGE
-    print("Finding all parents and (grand)+ parents of {}".format(child))
+    print("Finding all children and (grand)+ children of {}".format(child))
     found = 0
     while True:
-        parents = get_parent(child, images)
-        if len(parents) == 0:
+        children = get_children(child, images)
+        if len(children) == 0:
             break
-        child = parents[0]
+        child = children[0]
         print("\t".join(images.get(child)))
         found += 1
-        parents = get_parent(child, images)
+        children = get_children(child, images)
     if found == 0:
-        print("No parent found for {}".format(child))
+        print("No child found for {}".format(child))

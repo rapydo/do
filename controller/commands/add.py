@@ -63,11 +63,9 @@ def create_component(project_scaffold, name, services, auth):
         CNAME, name, name
     )
     for idx, row in enumerate(module):
-        if row.strip().startswith("import"):
-            if import_line in row:
-                log.info("Import already included in module file")
-                break
-            continue
+        if import_line in row:
+            log.info("Import already included in module file")
+            break
 
         if row.strip().startswith("const") or row.strip().startswith("@"):
             module = module[:idx] + [import_line, ""] + module[idx:]
@@ -110,11 +108,9 @@ def create_service(project_scaffold, name, services, auth):
     # Add service import
     import_line = "import {{ {} }} from '@app/services/{}';".format(SNAME, name)
     for idx, row in enumerate(module):
-        if row.strip().startswith("import"):
-            if import_line in row:
-                log.info("Import already included in module file")
-                break
-            continue
+        if import_line in row:
+            log.info("Import already included in module file")
+            break
 
         if row.strip().startswith("const") or row.strip().startswith("@"):
             module = module[:idx] + [import_line, ""] + module[idx:]
