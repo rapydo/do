@@ -94,6 +94,9 @@ def mix_configuration(base, custom):
     if base is None:
         base = {}
 
+    if custom is None:
+        return base
+
     for key, elements in custom.items():
 
         if key not in base:
