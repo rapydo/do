@@ -65,7 +65,7 @@ def test_all(capfd):
     y = load_yaml_file("invalid", "path", is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
-    assert len(dict) == 0
+    assert len(y) == 0
 
     try:
         load_yaml_file("invalid", "tests")
@@ -92,4 +92,4 @@ def test_all(capfd):
     y = mix_configuration(None, None)
     assert y is not None
     assert isinstance(y, dict)
-    assert len(dict) == 0
+    assert len(y) == 0
