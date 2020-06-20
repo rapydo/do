@@ -1,0 +1,23 @@
+import { Component } from "@angular/core";
+
+// import { {{name.title().replace(" ", "")}}Service } from "@app/services/{name}"
+
+import { ApiService } from "../../services/api";
+import { AuthService } from "../../services/auth";
+import { NotificationService } from "../../services/notification";
+
+
+@Component({
+  // selector: "{{name}}",
+  templateUrl: "{{name}}.html",
+})
+export class {{name.title().replace(" ", "")}}Component {
+
+  constructor(
+    private api: ApiService,
+    private auth: AuthService,
+    private notify: NotificationService,
+  ) {
+  }
+
+}

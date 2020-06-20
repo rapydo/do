@@ -1,0 +1,121 @@
+from flask_apispec import MethodResource, marshal_with, use_kwargs
+from marshmallow import fields
+# from marshmallow import validate
+
+from restapi import decorators
+from restapi.models import InputSchema, OutputSchema
+from restapi.rest.definition import EndpointResource
+from restapi.utilities.logs import log
+
+
+class MyInputSchema(InputSchema):
+    password = fields.Str()
+
+
+class MyOutputSchema(OutputSchema):
+    password = fields.Str()
+
+
+class {{name.title().replace(" ", "")}}(MethodResource, EndpointResource):
+    """ Current user informations """
+
+    labels = ["custom"]
+
+    _GET = {
+        "/{{name.replace(" ", "_").lower()}}s": {
+            "summary": "...",
+            "responses": {
+                "200": {"description": "..."}
+            },
+        }
+    }
+    _POST = {
+        "/{{name.replace(" ", "_").lower()}}s/": {
+            "summary": "...",
+            "responses": {"200": {"description": "..."}},
+        }
+    }
+    _PUT = {
+        "/{{name.replace(" ", "_").lower()}}s/<uuid>": {
+            "summary": "...",
+            "responses": {"204": {"description": "..."}},
+        }
+    }
+    _PATCH = {
+        "/{{name.replace(" ", "_").lower()}}s/<uuid>": {
+            "summary": "...",
+            "responses": {"204": {"description": "..."}},
+        }
+    }
+    _DELETE = {
+        "/{{name.replace(" ", "_").lower()}}s/<uuid>": {
+            "summary": "...",
+            "responses": {"204": {"description": "..."}},
+        }
+    }
+
+    @decorators.catch_errors()
+    @decorators.auth.required()
+    @marshal_with(MyOutputSchema, code=200)
+    def get(self):
+
+        db = self.get_service_instance("{{auth}}")
+        # db.update_properties(user, kwargs, kwargs)
+        # current_user = self.get_user()
+
+        data = {}
+        return self.response(data)
+
+    @decorators.catch_errors()
+    @decorators.auth.required()
+    @use_kwargs(MyInputSchema)
+    def post(self, **kwargs):
+        """ Update password for current user """
+
+        db = self.get_service_instance("{{auth}}")
+        # user = self.get_user()
+        log.info("Created")
+
+        # Assign with the uuid of newly created resource
+        data = {}
+
+        return self.response(data)
+
+    @decorators.catch_errors()
+    @decorators.auth.required()
+    @use_kwargs(MyInputSchema)
+    def put(self, uuid, **kwargs):
+        """ Update password for current user """
+
+        db = self.get_service_instance("{{auth}}")
+        # user = self.get_user()
+        log.info("Updated")
+
+        return self.empty_response()
+
+    @decorators.catch_errors()
+    @decorators.auth.required()
+    @use_kwargs(MyInputSchema)
+    def patch(self, uuid, **kwargs):
+        """ Update profile for current user """
+
+        db = self.get_service_instance("{{auth}}")
+        # user = self.get_user()
+
+        # db = self.get_service_instance(?)
+        # db.update_properties(user, kwargs, kwargs)
+
+        log.info("Updated")
+
+        return self.empty_response()
+
+    @decorators.catch_errors()
+    @decorators.auth.required()
+    def delete(self, uuid, **kwargs):
+        """ Update password for current user """
+
+        db = self.get_service_instance("{{auth}}")
+        # user = self.get_user()
+        log.info("Deleted")
+
+        return self.empty_response()

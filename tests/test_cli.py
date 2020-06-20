@@ -265,25 +265,52 @@ def test_all(capfd):
 
     # Do not test this with python 3.5
     if sys.version_info >= (3, 6):
-        exec_command(
-            capfd, "rapydo add endpoint xyz", "Endpoint creation not implemented yet",
-        )
 
-        path = "projects/first/backend/tasks/xyz.py"
+        path = "projects/first/backend/apis/xyz.py"
+        assert not os.exists(path)
+        exec_command(
+            capfd, "rapydo add endpoint xyz", "Endpoint created: {}".format(path),
+        )
+        exec_command(
+            capfd, "rapydo add endpoint xyz", "{} already exists".format(path),
+        )
+        assert os.isfile(path)
+
+        path = "projects/first/backend/apis/xyz.py"
+        assert not os.exists(path)
         exec_command(
             capfd, "rapydo add task xyz", "Task created: {}".format(path),
         )
         exec_command(
             capfd, "rapydo add task xyz", "{} already exists".format(path),
         )
+        assert os.isfile(path)
 
+        path = "projects/first/frontend/app/components/xyz"
+        assert not os.exists(path)
+        assert not os.exists(os.path.join(path, "xyz.ts"))
+        assert not os.exists(os.path.join(path, "xyz.html"))
         exec_command(
-            capfd, "rapydo add component xyz", "Component creation not implemented yet",
+            capfd, "rapydo add component xyz", "Component created: {}".format(path),
         )
+        exec_command(
+            capfd, "rapydo add component xyz", "{}/xyz.ts already exists".format(path),
+        )
+        assert os.isdir(path)
+        assert os.isfile(os.path.join(path, "xyz.ts"))
+        assert os.isfile(os.path.join(path, "xyz.html"))
 
+        path = "projects/first/frontend/app/services/xyz"
+        assert not os.exists(path)
+        assert not os.exists(os.path.join(path, "xyz.ts"))
         exec_command(
-            capfd, "rapydo add service xyz", "Service creation not implemented yet",
+            capfd, "rapydo add service xyz", "Service created: {}".format(path),
         )
+        exec_command(
+            capfd, "rapydo add service xyz", "{}/xyz.ts already exists".format(path),
+        )
+        assert os.isdir(path)
+        assert os.isfile(os.path.join(path, "xyz.ts"))
 
         exec_command(
             capfd,

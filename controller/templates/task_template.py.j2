@@ -9,7 +9,7 @@ celery_app = CeleryExt.celery_app
 def {{name}}(self):
     with celery_app.app.app_context():
 
-        # self.db = celery_app.get_service('your-service')
+        db = celery_app.get_service("{{auth}}")
 
         log.info("Task started!")
 
