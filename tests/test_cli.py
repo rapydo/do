@@ -291,7 +291,11 @@ def test_all(capfd):
         assert not os.path.exists(os.path.join(path, "xyz.ts"))
         assert not os.path.exists(os.path.join(path, "xyz.html"))
         exec_command(
-            capfd, "rapydo add component xyz", "Component created: {}".format(path),
+            capfd,
+            "rapydo add component xyz",
+            "Component created: {}".format(path),
+            "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
+            "Added XyzComponent to module declarations",
         )
         exec_command(
             capfd, "rapydo add component xyz", "{}/xyz.ts already exists".format(path),
@@ -304,8 +308,13 @@ def test_all(capfd):
         assert not os.path.exists(path)
         assert not os.path.exists(os.path.join(path, "xyz.ts"))
         exec_command(
-            capfd, "rapydo add service xyz", "Service created: {}".format(path),
+            capfd,
+            "rapydo add service xyz",
+            "Service created: {}".format(path),
+            "Added import { XyzService } from '@app/services/xyz'; to module file",
+            "Added XyzService to module declarations",
         )
+
         exec_command(
             capfd, "rapydo add service xyz", "{}/xyz.ts already exists".format(path),
         )

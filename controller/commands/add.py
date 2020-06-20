@@ -50,6 +50,44 @@ def create_component(project_scaffold, name, services, auth):
 
     log.info("Component created: {}", path)
 
+    module_path = project_scaffold.p_path("frontend", "app", "custom.module.ts")
+
+    module = None
+    with open(module_path) as f:
+        module = f.read().splitlines()
+
+    CNAME = "{}Component".format(name.title().replace(" ", ""))
+
+    # Add component import
+    import_line = "import {{ {} }} from '@app/components/{}/{}';".format(
+        CNAME, name, name
+    )
+    for idx, row in enumerate(module):
+        if row.strip().startswith("import"):
+            if import_line in row:
+                log.info("Import already included in module file")
+                break
+            continue
+
+        if row.strip().startswith("const") or row.strip().startswith("@"):
+            module = module[:idx] + [import_line, ""] + module[idx:]
+            log.info("Added {} to module file", import_line)
+            break
+
+    # Add component declaration
+    for idx, row in enumerate(module):
+        if row.strip().startswith("declarations"):
+            module = module[: idx + 1] + ["    {},".format(CNAME)] + module[idx + 1 :]
+            log.info("Added {} to module declarations", CNAME)
+            break
+
+    templating.make_backup(module_path)
+    # Save new module file
+    with open(module_path, "w") as f:
+        for row in module:
+            f.write("{}\n".format(row))
+        f.write("\n")
+
 
 def create_service(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("frontend", "app", "services")
@@ -60,6 +98,42 @@ def create_service(project_scaffold, name, services, auth):
     create_template("service_template.ts", path, name, services, auth)
 
     log.info("Service created: {}", path)
+
+    module_path = project_scaffold.p_path("frontend", "app", "custom.module.ts")
+
+    module = None
+    with open(module_path) as f:
+        module = f.read().splitlines()
+
+    SNAME = "{}Service".format(name.title().replace(" ", ""))
+
+    # Add service import
+    import_line = "import {{ {} }} from '@app/services/{}';".format(SNAME, name)
+    for idx, row in enumerate(module):
+        if row.strip().startswith("import"):
+            if import_line in row:
+                log.info("Import already included in module file")
+                break
+            continue
+
+        if row.strip().startswith("const") or row.strip().startswith("@"):
+            module = module[:idx] + [import_line, ""] + module[idx:]
+            log.info("Added {} to module file", import_line)
+            break
+
+    # Add service declaration
+    for idx, row in enumerate(module):
+        if row.strip().startswith("declarations"):
+            module = module[: idx + 1] + ["    {},".format(SNAME)] + module[idx + 1 :]
+            log.info("Added {} to module declarations", SNAME)
+            break
+
+    templating.make_backup(module_path)
+    # Save new module file
+    with open(module_path, "w") as f:
+        for row in module:
+            f.write("{}\n".format(row))
+        f.write("\n")
 
 
 def __call__(args, project_scaffold, services, conf_vars, **kwargs):
