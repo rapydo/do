@@ -91,7 +91,7 @@ def read_configuration(
 
 
 def mix_configuration(base, custom):
-    if base is None:  # pragma: no cover
+    if base is None:
         base = {}
 
     for key, elements in custom.items():
@@ -155,7 +155,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     filepath = get_yaml_path(file, path=path)
 
     if filepath is None:
-        if not is_optional:  # pragma: no cover
+        if not is_optional:
             log.exit(
                 "Failed to read YAML file {}/{}: File does not exist", path, file,
             )
