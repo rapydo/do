@@ -87,37 +87,40 @@ def find_templates_override(services, templates):
         builder = service.get("build")
         if builder is not None:
 
-            dpath = builder.get("context")
-            dockerfile = os.path.join(os.curdir, CONTAINERS_YAML_DIRNAME, dpath)
-            dfp = DockerfileParser(dockerfile)
+            dfp = DockerfileParser(builder.get("context"))
 
             try:
                 cont = dfp.content
-                if cont is None:
-                    log.warning("Dockerfile is empty?")
+                if not cont:
+                    log.exit(
+                        "Build failed, is {}/Dockerfile empty?", builder.get("context")
+                    )
                 else:
-                    log.verbose("Parsed dockerfile {}", dpath)
+                    log.verbose("Parsed dockerfile {}", builder.get("context"))
             except FileNotFoundError as e:
                 log.exit(e)
 
             if dfp.baseimage is None:
-                dfp.baseimage = "unknown_build"
-            # elif dfp.baseimage.endswith(':template'):
-            elif dfp.baseimage.startswith("rapydo/"):
-                if dfp.baseimage not in templates:
-                    log.exit(
-                        """Unable to find {} in this project
-\nPlease inspect the FROM image in {}/Dockerfile
-                        """.format(
-                            dfp.baseimage, dockerfile
-                        )
-                    )
-                else:
-                    vanilla_img = service.get("image")
-                    template_img = dfp.baseimage
-                    log.verbose("{} overrides {}", vanilla_img, template_img)
-                    tbuilds[template_img] = templates.get(template_img)
-                    vbuilds[vanilla_img] = template_img
+                log.exit(
+                    "No base image found in {}/Dockerfile, unable to build",
+                    builder.get("context"),
+                )
+
+            if not dfp.baseimage.startswith("rapydo/"):
+                continue
+
+            if dfp.baseimage not in templates:
+                log.exit(
+                    "Unable to find {} in this project"
+                    "\nPlease inspect the FROM image in {}/Dockerfile",
+                    dfp.baseimage,
+                    builder.get("context"),
+                )
+            vanilla_img = service.get("image")
+            template_img = dfp.baseimage
+            log.verbose("{} overrides {}", vanilla_img, template_img)
+            tbuilds[template_img] = templates.get(template_img)
+            vbuilds[vanilla_img] = template_img
 
     return tbuilds, vbuilds
 

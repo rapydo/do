@@ -11,12 +11,8 @@ def get_children(IMAGE, images):
         "inspect",
         "--format='{{.Id}} {{.Parent}}'",
     ]
-    for tag in images:
-        image = images.get(tag)
-        tag = image[2].strip()
-        if tag == "":
-            continue
-        parameters.append(tag)
+
+    parameters.extend(set(images.keys()))
 
     out = system.execute_command("docker", parameters).split("\n")
     final_output = []
@@ -37,9 +33,7 @@ def __call__(args, **kwargs):
 
     IMAGE = args.get("imagetag")
 
-    parameters = ["images", "--all"]
-    # log.info("Executing command {} {}", command, parameters)
-    img = system.execute_command("docker", parameters).split("\n")
+    img = system.execute_command("docker", ["images", "--all"]).split("\n")
     img = [re.split(r"\s+", i) for i in img[1:]]
     images = {}
     for i in img:

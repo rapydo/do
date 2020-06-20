@@ -588,31 +588,76 @@ def test_all(capfd):
     exec_command(capfd, "rapydo upgrade")
 
     # Add a custom image to extend base rabbit image:
-
-    os.makedirs("projects/third/builds/rabbit")
-    fin = open("projects/third/builds/rabbit/Dockerfile", "wt+")
-    fin.write(
-        """
-FROM rapydo/rabbitmq:{}
-# Just a simple command differentiate from the parent
-RUN mkdir xyz
-""".format(
-            __version__
-        )
-    )
-    fin.close()
-
-    fin = open("projects/third/confs/commons.yml", "a")
-    fin.write(
-        """
+    with open("projects/third/confs/commons.yml", "a") as f:
+        f.write(
+            """
 services:
   rabbit:
     build: ${PROJECT_DIR}/builds/rabbit
     image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
 
     """
+        )
+
+    os.makedirs("projects/third/builds/rabbit")
+
+    # Missing Dockerfile
+    exec_command(
+        capfd,
+        "rapydo -p third -s rabbit build",
+        "No such file or directory: ",
+        "projects/x/builds/rabbit/Dockerfile",
     )
-    fin.close()
+
+    # Empty Dockerfile
+    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
+        pass
+    exec_command(
+        capfd,
+        "rapydo -p third -s rabbit build",
+        "Build failed, is ",
+        "projects/x/builds/rabbit/Dockerfile empty?",
+    )
+
+    # Missing base image
+    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("RUN ls")
+    exec_command(
+        capfd,
+        "rapydo -p third -s rabbit build",
+        "No base image found ",
+        "projects/x/builds/rabbit/Dockerfile, unable to build",
+    )
+
+    # Not a RAPyDo child
+    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM ubuntu")
+    exec_command(
+        capfd, "rapydo -p third -s rabbit build", "No custom images to build",
+    )
+
+    # Invalid RAPyDo template
+    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM rapydo/invalid")
+    exec_command(
+        capfd,
+        "rapydo -p third -s rabbit build",
+        "Unable to find rapydo/invalid in this project",
+        "Please inspect the FROM image in",
+        "projects/third/builds/rabbit/Dockerfile",
+    )
+
+    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
+        f.write(
+            """
+FROM rapydo/rabbitmq:{}
+# Just a simple command differentiate from the parent
+RUN mkdir xyz
+""".format(
+                __version__
+            )
+        )
+
     # Test selection with two projects
     os.remove(".projectrc")
 
