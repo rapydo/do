@@ -837,11 +837,23 @@ RUN mkdir xyz
         "Creating first_rabbit_2",
     )
 
+    with open(".projectrc", "a") as f:
+        f.write("\n      DEFAULT_SCALE_RABBIT: 3\n")
+
+    exec_command(
+        capfd,
+        "rapydo scale rabbit",
+        "Starting first_rabbit_1",
+        "Starting first_rabbit_2",
+        "Creating first_rabbit_3",
+    )
+
     exec_command(
         capfd,
         "rapydo scale rabbit=1",
-        "Stopping and removing first_rabbit_2",
         "Starting first_rabbit_1",
+        "Stopping and removing first_rabbit_2",
+        "Stopping and removing first_rabbit_3",
     )
 
     exec_command(
