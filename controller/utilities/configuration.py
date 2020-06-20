@@ -79,7 +79,7 @@ def read_configuration(
 
     extend_path = os.path.join(extend_path, extended_project)
 
-    if not os.path.exists(extend_path):
+    if not os.path.exists(extend_path):  # pragma: no cover
         log.exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
@@ -109,7 +109,7 @@ def mix_configuration(base, custom):
             mix_configuration(base[key], custom[key])
 
         elif isinstance(elements, list):
-            for e in elements:
+            for e in elements:  # pragma: no cover
                 base[key].append(e)
         else:
             base[key] = elements
@@ -223,7 +223,7 @@ def read_composer_yamls(composers):
             if base:
                 base_files.append(filepath)
 
-        except KeyError as e:
+        except KeyError as e:  # pragma: no cover
 
             log.exit("Error reading {}: {}", filepath, e)
 

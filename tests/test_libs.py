@@ -1,8 +1,11 @@
+import tempfile
+
 import pytest
 from plumbum.commands.processes import ProcessExecutionError
 
 from controller import __version__, gitter
 from controller.utilities import system
+from controller.utilities.configuration import load_yaml_file
 
 # These tests will directly access to functions, to verify cases
 # not easly testable through cli commands:
@@ -51,3 +54,32 @@ def test_all(capfd):
         pass
     except BaseException:
         pytest.fail("Unexpected exception raised")
+
+    # Invalid file / path
+    try:
+        load_yaml_file("invalid", "path")
+        pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    try:
+        load_yaml_file("invalid", "tests")
+        pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    # Valid path, but not in yaml format
+    try:
+        load_yaml_file("pyproject.toml", "tests")
+        pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    # File is empty
+    f = tempfile.NamedTemporaryFile()
+    try:
+        load_yaml_file(f.name, ".")
+        pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+    f.close()
