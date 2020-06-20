@@ -276,7 +276,7 @@ def test_all(capfd):
         )
         assert os.path.isfile(path)
 
-        path = "projects/first/backend/apis/xyz.py"
+        path = "projects/first/backend/tasks/xyz.py"
         assert not os.path.exists(path)
         exec_command(
             capfd, "rapydo add task xyz", "Task created: {}".format(path),
