@@ -606,7 +606,7 @@ services:
         capfd,
         "rapydo -p third -s rabbit build",
         "No such file or directory: ",
-        "projects/x/builds/rabbit/Dockerfile",
+        "projects/third/builds/rabbit/Dockerfile",
     )
 
     # Empty Dockerfile
@@ -616,7 +616,7 @@ services:
         capfd,
         "rapydo -p third -s rabbit build",
         "Build failed, is ",
-        "projects/x/builds/rabbit/Dockerfile empty?",
+        "projects/third/builds/rabbit/Dockerfile empty?",
     )
 
     # Missing base image
@@ -626,7 +626,7 @@ services:
         capfd,
         "rapydo -p third -s rabbit build",
         "No base image found ",
-        "projects/x/builds/rabbit/Dockerfile, unable to build",
+        "projects/third/builds/rabbit/Dockerfile, unable to build",
     )
 
     # Not a RAPyDo child
