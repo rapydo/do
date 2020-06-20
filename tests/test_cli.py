@@ -300,7 +300,7 @@ def test_all(capfd):
         assert os.path.isfile(os.path.join(path, "xyz.ts"))
         assert os.path.isfile(os.path.join(path, "xyz.html"))
 
-        path = "projects/first/frontend/app/services/xyz"
+        path = "projects/first/frontend/app/services"
         assert not os.path.exists(path)
         assert not os.path.exists(os.path.join(path, "xyz.ts"))
         exec_command(
