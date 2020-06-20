@@ -793,7 +793,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     def git_checks_or_update(self):
 
-        ignore_submodule_list = self.current_args.get("ignore_submodule", "").split(",")
+        ignore = self.current_args.get("ignore_submodule", "") or ""
+        ignore_submodule_list = ignore.split(",")
 
         for name, gitobj in self.gits.items():
             if name in ignore_submodule_list:

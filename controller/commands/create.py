@@ -110,7 +110,7 @@ def __call__(args, **kwargs):
     current_origin = gitter.get_origin(git_repo)
 
     if current_origin is None:
-        if origin_url is None:
+        if origin_url is None:  # pragma: no cover
             print("git remote add origin https://your_remote_git/your_project.git")
         else:
             git_repo.create_remote("origin", origin_url)

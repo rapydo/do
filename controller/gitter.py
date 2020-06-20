@@ -117,7 +117,7 @@ def clone(online_url, path, branch, do=False, check=True):
     return gitobj
 
 
-def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
+def compare_repository(gitobj, branch, online_url, path=None):
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -143,8 +143,6 @@ def compare_repository(gitobj, branch, online_url, check_only=False, path=None):
             url_match = True
 
         if not url_match:
-            if check_only:
-                return False
             log.exit(
                 """Unmatched local remote
 Found: {}\nExpected: {}
@@ -159,8 +157,6 @@ Suggestion: remove {} and execute the init command
 
     if active_branch is not None:
         if branch != active_branch:
-            if check_only:
-                return False
             log.exit(
                 "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
                 path,
@@ -218,7 +214,7 @@ def print_diff(gitobj, unstaged):
         repo_folder = repo_folder[1:]
     if not repo_folder.endswith("/"):
         repo_folder += "/"
-    if repo_folder == "/":
+    if repo_folder == "/":  # pragma: no cover
         repo_folder = ""
 
     if changed:
@@ -286,8 +282,8 @@ def check_updates(path, gitobj):
     fetch(path, gitobj)
 
     branch = get_active_branch(gitobj)
-    if branch is None:
-        log.warning("{} repo is detached? Unable to verify updates!", path)
+    if branch is None:  # pragma: no cover
+        log.warning("Is {} repo detached? Unable to verify updates", path)
         return False
 
     max_remote = 20
@@ -299,7 +295,7 @@ def check_updates(path, gitobj):
 
     try:
         commits_behind_list = list(commits_behind)
-    except GitCommandError:
+    except GitCommandError:  # pragma: no cover
         log.info(
             "Remote branch {} not found for {} repo. Is it a local branch?",
             branch,

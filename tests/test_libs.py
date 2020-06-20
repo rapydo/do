@@ -68,16 +68,16 @@ def test_all(capfd):
     assert len(y) == 0
 
     try:
-        load_yaml_file("invalid", "tests")
+        load_yaml_file("invalid", "projects")
         pytest.fail("No exception raised")
-    except AttributeError:
+    except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
         load_yaml_file("pyproject.toml", "tests")
         pytest.fail("No exception raised")
-    except AttributeError:
+    except SystemExit:
         pass
 
     # File is empty
@@ -85,7 +85,7 @@ def test_all(capfd):
     try:
         load_yaml_file(f.name, ".")
         pytest.fail("No exception raised")
-    except AttributeError:
+    except SystemExit:
         pass
     f.close()
 
