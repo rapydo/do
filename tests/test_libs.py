@@ -14,7 +14,7 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 
 def test_all(capfd):
 
-    if os.getenv("UBUNTU_VER") == "no-docker":
+    if os.getenv("STAGE") == "no-docker":
         log.warning("Skipping test libs/all: docker is not enabled")
         return True
 
