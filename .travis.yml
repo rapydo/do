@@ -1,10 +1,5 @@
 os: linux
-dist: bionic
 language: python
-python:
-  - 3.8
-services:
-  - docker
 script:
   - pip3 install --upgrade setuptools pytest pytest-cov
   - pip3 install --upgrade --no-cache-dir --editable .
@@ -22,50 +17,70 @@ jobs:
     - stage: test
       python: 3.5
       dist: bionic
+      services:
+        - docker
       env:
         - UBUNTU_VER=18.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.6
       dist: bionic
+      services:
+        - docker
       env:
         - UBUNTU_VER=18.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.7
       dist: bionic
+      services:
+        - docker
       env:
         - UBUNTU_VER=18.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.8
       dist: bionic
+      services:
+        - docker
       env:
         - UBUNTU_VER=18.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.5
       dist: xenial
+      services:
+        - docker
       env:
         - UBUNTU_VER=16.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.6
       dist: xenial
+      services:
+        - docker
       env:
         - UBUNTU_VER=16.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.7
       dist: xenial
+      services:
+        - docker
       env:
         - UBUNTU_VER=16.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.8
       dist: xenial
+      services:
+        - docker
       env:
         - UBUNTU_VER=16.04 # only used as utility from the web interface, since the dist is not reported
 
     - python: 3.6
       dist: trusty
+      services:
+        - docker
       env:
         - UBUNTU_VER=14.04 # only used as utility from the web interface, since the dist is not reported
   # - python: 3.6
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -77,6 +92,8 @@ jobs:
   #     - sh get-docker.sh
   # - python: 3.7
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -88,6 +105,8 @@ jobs:
   #     - sh get-docker.sh
   # - python: 3.8
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -102,6 +121,8 @@ jobs:
   # - os: windows
   #   language: sh # The language 'python' is currently unsupported on the Windows Build Environment.
   #   python: "3.x"
+  #     services:
+  #       - docker
   #   before_install:
   #     - choco install python3 --params "/InstallDir:C:\\Python"
   #     - export PATH="/c/Python:/c/Python/Scripts:$PATH"
