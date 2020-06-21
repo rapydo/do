@@ -187,8 +187,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.warning("Failed to read YAML file [{}]: {}", filepath, e)
-            return {}
+            log.exit("Failed to read YAML file [{}]: {}", filepath, e)
 
 
 def read_composer_yamls(composers):

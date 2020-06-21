@@ -1,9 +1,10 @@
+import os
 import tempfile
 
 import pytest
 from plumbum.commands.processes import ProcessExecutionError
 
-from controller import __version__, gitter
+from controller import __version__, gitter, log
 from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
 
@@ -12,6 +13,10 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 
 
 def test_all(capfd):
+
+    if os.getenv("UBUNTU_VER") == "no-docker":
+        log.warning("Skipping test libs/all: docker is not enabled")
+        return True
 
     assert gitter.get_repo("does/not/exist") is None
     do_repo = gitter.get_repo("submodules/do")

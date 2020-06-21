@@ -6,7 +6,7 @@ import tempfile
 
 from git import Repo
 
-from controller import __version__, gitter
+from controller import __version__, gitter, log
 from controller.app import Application
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
@@ -58,6 +58,10 @@ def exec_command(capfd, command, *asserts):
 
 
 def test_create(capfd):
+
+    if os.getenv("UBUNTU_VER") == "no-docker":
+        log.warning("Skipping test cli/create: docker is not enabled")
+        return True
 
     exec_command(
         capfd,
@@ -188,6 +192,10 @@ def test_create(capfd):
 
 
 def test_all(capfd):
+
+    if os.getenv("UBUNTU_VER") == "no-docker":
+        log.warning("Skipping test cli/all: docker is not enabled")
+        return True
 
     exec_command(capfd, "rapydo", "usage")
 
@@ -1123,3 +1131,11 @@ RUN mkdir xyz
     )
 
     os.chdir(folder)
+
+
+def test_no_docker(capfd):
+    if os.getenv("UBUNTU_VER") != "no-docker":
+        log.warning("Skipping test cli/no_docker: docker is enabled")
+        return True
+
+    assert True
