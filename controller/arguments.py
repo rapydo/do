@@ -125,7 +125,8 @@ class ArgParser:
         # Mix with projectrc
         for key, value in self.projectrc.items():
 
-            if value is None:
+            if value is None:  # pragma: no cover
+                log.warning("Uncovered condition, please report to extend tests")
                 continue
 
             # This is a second level parameter

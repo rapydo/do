@@ -170,6 +170,7 @@ class Application:
         # enable me after dropping python 3.5
         # except ModuleNotFoundError:
         except BaseException as e:  # pragma: no cover
+            log.warning("Uncovered condition, please report to extend tests")
             log.error(e)
             log.exit("Command not found: {}", self.action)
 
@@ -826,4 +827,4 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             return None
         except BaseException:
             log.critical("Cannot parse command output: {}", output)
-            return output
+            return None

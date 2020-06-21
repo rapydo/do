@@ -7,11 +7,6 @@ from controller import __version__
 
 def __call__(project, version, rapydo_version, **kwargs):
 
-    # You are not inside a rapydo project print only rapydo version
-    if version is None:
-        print("\nrapydo version: {}".format(__version__))
-        return
-
     # Check if rapydo version is compatible with version required by the project
     if __version__ == rapydo_version:
         c = "\033[1;32m"  # Light Green

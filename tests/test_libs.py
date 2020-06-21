@@ -4,7 +4,7 @@ import pytest
 from plumbum.commands.processes import ProcessExecutionError
 
 from controller import __version__, gitter
-from controller.utilities import system
+from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
 
 # These tests will directly access to functions, to verify cases
@@ -75,7 +75,7 @@ def test_all(capfd):
 
     # Valid path, but not in yaml format
     try:
-        load_yaml_file("pyproject.toml", "tests")
+        load_yaml_file("pyproject.toml", ".")
         pytest.fail("No exception raised")
     except SystemExit:
         pass
@@ -93,3 +93,14 @@ def test_all(capfd):
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
+
+    shorten = services.normalize_placeholder_variable
+    assert shorten("NEO4J_AUTH") == "NEO4J_PASSWORD"
+    assert shorten("POSTGRES_USER") == "ALCHEMY_USER"
+    assert shorten("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert shorten("MYSQL_USER") == "ALCHEMY_USER"
+    assert shorten("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert shorten("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
+    assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
+    key = "anyother"
+    assert shorten(key) == key

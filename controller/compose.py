@@ -73,7 +73,7 @@ class Compose:
                 log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             log.exit("Failed command execution:\n{}", e)
-        except APIError as e:
+        except APIError as e:  # pragma: no cover
             log.exit("Failed docker container:\n{}", e)
         except (ProjectError, NoSuchService) as e:
             log.exit(e)
@@ -95,12 +95,10 @@ class Compose:
         try:
             shell_command = pieces[0]
             shell_args = pieces[1:]
+            return (shell_command, shell_args)
         except IndexError:
             # no command, use default
-            shell_command = None
-            shell_args = []
-
-        return (shell_command, shell_args)
+            return (None, [])
 
     def start_containers(
         self,
@@ -135,7 +133,7 @@ class Compose:
 
         try:
             return self.command("up", options)
-        except NetworkConfigChangedError as e:
+        except NetworkConfigChangedError as e:  # pragma: no cover
             log.exit(
                 "{}.\n{} ({})",
                 e,

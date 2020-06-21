@@ -15,8 +15,7 @@ def walk_services(actives, dependecies, index=0):
             actives.append(service)
 
     index += 1
-    if index >= len(actives):
-        return actives
+
     return walk_services(actives, dependecies, index)
 
 

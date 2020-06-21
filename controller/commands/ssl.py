@@ -43,7 +43,7 @@ def __call__(args, project, files, hostname, **kwargs):
         print('rapydo shell {} --command "nginx -s reload"'.format(service))
         print("")
 
-        return True
+        return
 
     command = "/bin/bash updatecertificates"
     if args.get("force"):
@@ -55,7 +55,5 @@ def __call__(args, project, files, hostname, **kwargs):
 
     if args.get("volatile"):
         dc.create_volatile_container(service, command)
-        return True
-
-    dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
-    return True
+    else:
+        dc.exec_command(service, user="root", command=command, disable_tty=no_tty)

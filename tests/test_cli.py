@@ -247,6 +247,20 @@ def test_all(capfd):
     )
     shutil.copy(".projectrc.bak", ".projectrc")
 
+    with open(".projectrc", "a") as f:
+        f.write("\ncheck:\n")
+        f.write("  ignore-submodule: main\n")
+        f.write("  no-git: True\n")
+        f.write("  no-builds: True\n")
+    exec_command(
+        capfd,
+        "rapydo check",
+        "Skipping git checks",
+        "Skipping builds checks",
+        "Checks completed",
+    )
+    shutil.copy(".projectrc.bak", ".projectrc")
+
     r = gitter.get_repo("submodules/http-api")
     gitter.switch_branch(r, "0.7.3")
     exec_command(
