@@ -285,7 +285,7 @@ def test_all(capfd):
         "do already set on branch {}".format(__version__),
     )
 
-    shutil.rmtree("data")
+    os.rename("data", "data.bak")
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
@@ -293,16 +293,15 @@ def test_all(capfd):
         "Please note that this command only works from inside a rapydo-like repository",
         "Verify that you are in the right folder, now you are in: ",
     )
+    os.rename("data.bak", "data")
 
-    os.mkdir("data")
-
-    shutil.rmtree("projects/first/builds")
+    os.rename("projects/first/builds", "projects/first/builds.bak")
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
         "Project first is invalid: required folder not found projects/first/builds",
     )
-    os.mkdir("projects/first/builds")
+    os.rename("projects/first/builds.bak", "projects/first/builds")
 
     os.rename(".gitignore", ".gitignore.bak")
     exec_command(
