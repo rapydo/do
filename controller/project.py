@@ -227,12 +227,6 @@ Verify that you are in the right folder, now you are in: {}
         for fpath in self.expected_main_folders:
             if not os.path.exists(fpath) or not os.path.isdir(fpath):
 
-                if fpath == "data":
-                    log.warning(
-                        "Data folder is missing, execute rapydo init to create it"
-                    )
-                    continue
-
                 return """Folder not found: {}
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {}

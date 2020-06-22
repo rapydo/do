@@ -126,7 +126,6 @@ def find_templates_override(services, templates):
 
 
 def locate_builds(base_services, services):
-    # TODO: cool progress bar in cli for the whole function START
 
     # All builds used for the current configuration (templates + custom)
     builds = find_templates_build(services)

@@ -285,6 +285,33 @@ def test_all(capfd):
         "do already set on branch {}".format(__version__),
     )
 
+    shutil.rmtree("data")
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git --no-builds",
+        "Folder not found: data",
+        "Please note that this command only works from inside a rapydo-like repository",
+        "Verify that you are in the right folder, now you are in: ",
+    )
+
+    os.mkdir("data")
+
+    shutil.rmtree("projects/first/builds")
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git --no-builds",
+        "Project first is invalid: required folder not found projects/first/builds",
+    )
+    os.mkdir("projects/first/builds")
+
+    os.rename(".gitignore", ".gitignore.bak")
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git --no-builds",
+        "Project first is invalid: required file not found .gitignore",
+    )
+    os.rename(".gitignore.bak", ".gitignore")
+
     # Do not test this with python 3.5
     if sys.version_info >= (3, 6):
 
