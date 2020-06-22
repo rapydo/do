@@ -285,6 +285,7 @@ def test_all(capfd):
         "do already set on branch {}".format(__version__),
     )
 
+    folder = os.getcwd()
     os.rename("data", "data.bak")
     exec_command(
         capfd,
@@ -293,6 +294,11 @@ def test_all(capfd):
         "Please note that this command only works from inside a rapydo-like repository",
         "Verify that you are in the right folder, now you are in: ",
     )
+    # Since data is missing, controller try to find a root dir by chdir("..")
+    # recursively. If no main folder is found the controller exits. Since we are in a
+    # controlled environment, the contreller exists by keeping the chdir active
+    # This this chdir we back the current dir to the previous path
+    os.chdir(folder)
     os.rename("data.bak", "data")
 
     os.rename("projects/first/builds", "projects/first/builds.bak")
@@ -301,6 +307,7 @@ def test_all(capfd):
         "rapydo check -i main --no-git --no-builds",
         "Project first is invalid: required folder not found projects/first/builds",
     )
+    os.chdir(folder)
     os.rename("projects/first/builds.bak", "projects/first/builds")
 
     os.rename(".gitignore", ".gitignore.bak")
