@@ -478,7 +478,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
-        "Project first contains an obsolete file or folder submodules/rapydo-confs",
+        "Project first contains an obsolete file or folder: submodules/rapydo-confs",
     )
     os.remove("submodules/rapydo-confs")
     # Some tests with list
