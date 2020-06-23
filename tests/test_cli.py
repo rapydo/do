@@ -1187,7 +1187,7 @@ def test_no_docker(capfd):
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend",
+        "rapydo create first --auth postgres --frontend no",
         "Missing requirement: docker not found.",
         "To install docker visit",
     )
