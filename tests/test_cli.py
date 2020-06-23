@@ -656,7 +656,7 @@ def test_all(capfd):
     exec_command(
         capfd, "rapydo upgrade --path invalid", "Invalid path, cannot upgrade invalid"
     )
-    exec_command(capfd, "rapydo upgrade --path invalid", ".gitignore")
+    exec_command(capfd, "rapydo upgrade --path .gitignore")
 
     # Add a custom image to extend base rabbit image:
     with open("projects/third/confs/commons.yml", "a") as f:
