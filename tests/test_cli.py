@@ -447,7 +447,7 @@ def test_all(capfd):
         exec_command(
             capfd,
             "rapydo init --submodules-path {}".format(modules_path),
-            "Submodule do not found in submodules.bak",
+            "Submodule do not found in ",
         )
     exec_command(
         capfd,
