@@ -14,6 +14,20 @@ from controller.compose import Compose
 from controller.dockerizing import Dock
 
 
+class TemporaryRemovePath:
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
+        self.tmp_path = "{}.bak".format(self.path)
+
+    def __enter__(self):
+
+        os.rename(self.path, self.tmp_path)
+        return self
+
+    def __exit__(self, _type, value, tb):
+        os.rename(self.tmp_path, self.path)
+
+
 class Timeout(Exception):
     pass
 
@@ -289,38 +303,28 @@ def test_all(capfd):
         "do already set on branch {}".format(__version__),
     )
 
-    folder = os.getcwd()
-    os.rename("data", "data.bak")
-    exec_command(
-        capfd,
-        "rapydo check -i main --no-git --no-builds",
-        "Folder not found: data",
-        "Please note that this command only works from inside a rapydo-like repository",
-        "Verify that you are in the right folder, now you are in: ",
-    )
-    # Since data is missing, controller try to find a root dir by chdir("..")
-    # recursively. If no main folder is found the controller exits. Since we are in a
-    # controlled environment, the contreller exists by keeping the chdir active
-    # This this chdir we back the current dir to the previous path
-    os.chdir(folder)
-    os.rename("data.bak", "data")
+    with TemporaryRemovePath("data"):
+        exec_command(
+            capfd,
+            "rapydo check -i main --no-git --no-builds",
+            "Folder not found: data",
+            "Please note that this command only works from inside a rapydo-like repo",
+            "Verify that you are in the right folder, now you are in: ",
+        )
 
-    os.rename("projects/first/builds", "projects/first/builds.bak")
-    exec_command(
-        capfd,
-        "rapydo check -i main --no-git --no-builds",
-        "Project first is invalid: required folder not found projects/first/builds",
-    )
-    os.chdir(folder)
-    os.rename("projects/first/builds.bak", "projects/first/builds")
+    with TemporaryRemovePath("projects/first/builds"):
+        exec_command(
+            capfd,
+            "rapydo check -i main --no-git --no-builds",
+            "Project first is invalid: required folder not found projects/first/builds",
+        )
 
-    os.rename(".gitignore", ".gitignore.bak")
-    exec_command(
-        capfd,
-        "rapydo check -i main --no-git --no-builds",
-        "Project first is invalid: required file not found .gitignore",
-    )
-    os.rename(".gitignore.bak", ".gitignore")
+    with TemporaryRemovePath(".gitignore"):
+        exec_command(
+            capfd,
+            "rapydo check -i main --no-git --no-builds",
+            "Project first is invalid: required file not found .gitignore",
+        )
 
     # Do not test this with python 3.5
     if sys.version_info >= (3, 6):
@@ -431,7 +435,7 @@ def test_all(capfd):
         "Changes not staged for commit:",
         "submodules/do/setup.py",
     )
-    os.unlink("submodules/do/temp.file")
+    os.remove("submodules/do/temp.file")
     r = gitter.get_repo("submodules/do")
     r.git().execute(["git", "checkout", "--", "setup.py"])
 
@@ -1183,7 +1187,9 @@ def test_no_docker(capfd):
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend" "To install docker visit",
+        "rapydo create first --auth postgres --frontend",
+        "Missing requirement: docker not found.",
+        "To install docker visit",
     )
 
     try:
