@@ -303,7 +303,7 @@ def test_all(capfd):
         "do already set on branch {}".format(__version__),
     )
 
-    with TemporaryRemovePath("data"):
+    with TemporaryRemovePath("./data"):
         exec_command(
             capfd,
             "rapydo check -i main --no-git --no-builds",
@@ -312,14 +312,14 @@ def test_all(capfd):
             "Verify that you are in the right folder, now you are in: ",
         )
 
-    with TemporaryRemovePath("projects/first/builds"):
+    with TemporaryRemovePath("./projects/first/builds"):
         exec_command(
             capfd,
             "rapydo check -i main --no-git --no-builds",
             "Project first is invalid: required folder not found projects/first/builds",
         )
 
-    with TemporaryRemovePath(".gitignore"):
+    with TemporaryRemovePath("./.gitignore"):
         exec_command(
             capfd,
             "rapydo check -i main --no-git --no-builds",
