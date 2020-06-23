@@ -190,6 +190,8 @@ def test_create(capfd):
         "Project first successfully created",
     )
 
+    # here a single and valid project is created (not initialized)
+
 
 def test_all(capfd):
 
@@ -1171,4 +1173,13 @@ def test_no_docker(capfd):
         log.warning("Skipping test cli/no_docker: docker is enabled")
         return True
 
-    assert True
+    exec_command(
+        capfd,
+        "rapydo check -i main",
+        "Please note that this command only works from inside a rapydo-like repository",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo create first --auth postgres --frontend" "To install docker visit",
+    )

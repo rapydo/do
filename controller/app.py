@@ -324,9 +324,6 @@ class Application:
             "docker", option=["version", "--format", "'{{.Server.Version}}'"]
         )
 
-        if v is None:  # pragma: no cover
-            log.exit("No docker installation found, cannot continue")
-
         safe_version = "18.09.2"
         if LooseVersion(safe_version) > LooseVersion(v):
             log.critical(
@@ -355,7 +352,7 @@ To fix this issue, please update docker to version {}+
     def check_program(self, program, min_version=None, max_version=None):
 
         found_version = Application.get_bin_version(program)
-        if found_version is None:  # pragma: no cover
+        if found_version is None:
 
             hints = ""
 
@@ -366,6 +363,7 @@ To fix this issue, please update docker to version {}+
                 hints = "\n\n{}".format(hints)
 
             log.exit("Missing requirement: {} not found.{}", program, hints)
+
         if min_version is not None:  # pragma: no cover
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for {} is {}".format(

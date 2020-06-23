@@ -5,6 +5,7 @@ import pytest
 from plumbum.commands.processes import ProcessExecutionError
 
 from controller import __version__, gitter, log
+from controller.templating import Templating
 from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
 
@@ -109,3 +110,24 @@ def test_all(capfd):
     assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
     key = "anyother"
     assert shorten(key) == key
+
+    os.rename(
+        "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
+    )
+    try:
+        Templating()
+        pytest.fail("No exception raised")
+    except SystemExit:
+        pass
+
+    os.rename(
+        "submodules/do/controller/templates.bak", "submodules/do/controller/templates"
+    )
+
+    templating = Templating()
+
+    try:
+        templating.get_template("invalid", {})
+        pytest.fail("No exception raised")
+    except SystemExit:
+        pass

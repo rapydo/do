@@ -70,7 +70,7 @@ class Templating:
             return content
         except TemplateNotFound as e:
             log.exit("Template {} not found in: {}", str(e), self.template_dir)
-        except UndefinedError as e:
+        except UndefinedError as e:  # pragma: no cover
             log.exit(e)
 
     def save_template(self, filename, content, force=False):
