@@ -12,7 +12,7 @@ class Dock:
     def __init__(self):
         super().__init__()
 
-        if not self.is_daemon_alive():
+        if not self.is_daemon_alive():  # pragma: no cove
             log.exit("Docker daemon not reachable")
 
     def is_daemon_alive(self):
@@ -23,7 +23,7 @@ class Dock:
         try:
             return self.client.ping()
         # this is the case of docker daemon not started
-        except requests.exceptions.ConnectionError:
+        except requests.exceptions.ConnectionError:  # pragma: no cover
             return False
         # this is the case of docker daemon starting or not working properly
         except APIError:  # pragma: no cover

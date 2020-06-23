@@ -1,5 +1,7 @@
 os: linux
 language: python
+services:
+  - docker
 script:
   - pip3 install --upgrade setuptools pytest pytest-cov
   - pip3 install --upgrade --no-cache-dir --editable .
@@ -17,62 +19,40 @@ jobs:
     - stage: test
       python: 3.5
       dist: bionic
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
     - python: 3.6
       dist: bionic
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
     - python: 3.7
       dist: bionic
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
     - python: 3.8
       dist: bionic
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
     - python: 3.5
       dist: xenial
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.6
       dist: xenial
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.7
       dist: xenial
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.8
       dist: xenial
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.6
       dist: trusty
-      services:
-        - docker
       env:
         - STAGE=UBUNTU_14.04 # only used as information on the web interface
-    - python: 3.8
-      dist: bionic
-      env:
-        - STAGE=no-docker # only used as information on the web interface  # - python: 3.6
   #   os: osx
   #     services:
   #       - docker

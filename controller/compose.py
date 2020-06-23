@@ -73,7 +73,7 @@ class Compose:
                 log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             log.exit("Failed command execution:\n{}", e)
-        except (clierrors.ConnectionError, APIError) as e:
+        except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
             log.exit("Failed docker container:\n{}", e)
         except (ProjectError, NoSuchService) as e:
             log.exit(e)
