@@ -83,9 +83,11 @@ class Application:
             )
             sys.exit(0)
 
+        current_folder = os.getcwd()
         err = self.project_scaffold.find_main_folder()
 
         if err is not None:
+            os.chdir(current_folder)
             log.exit(err)
 
         if self.print_version:
