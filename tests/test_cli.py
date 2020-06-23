@@ -442,6 +442,13 @@ def test_all(capfd):
     exec_command(capfd, "rapydo init", "Project initialized")
 
     modules_path = os.path.abspath("submodules.bak")
+
+    with TemporaryRemovePath("submodules.bak/do"):
+        exec_command(
+            capfd,
+            "rapydo init --submodules-path {}".format(modules_path),
+            "Submodule do not found in submodules.bak",
+        )
     exec_command(
         capfd,
         "rapydo init --submodules-path {}".format(modules_path),
@@ -467,6 +474,13 @@ def test_all(capfd):
         "Local path not found: invalid/path",
     )
 
+    os.mkdir("submodules/rapydo-confs")
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git --no-builds",
+        "Project first contains an obsolete file or folder submodules/rapydo-confs",
+    )
+    os.remove("submodules/rapydo-confs")
     # Some tests with list
     exec_command(
         capfd,
@@ -595,6 +609,13 @@ def test_all(capfd):
         "http://localhost:124?docExpansion=list&",
         "url=http://localhost:8080/api/specs",
     )
+    exec_command(
+        capfd,
+        "rapydo --prod interfaces swagger --port 124 --detach",
+        "You can access swaggerui web page here:",
+        "http://localhost:124?docExpansion=list&",
+        "url=https://localhost/api/specs",
+    )
 
     exec_command(
         capfd,
@@ -639,6 +660,10 @@ def test_all(capfd):
     )
 
     exec_command(capfd, "rapydo upgrade")
+    exec_command(
+        capfd, "rapydo upgrade --path invalid", "Invalid path, cannot upgrade invalid"
+    )
+    exec_command(capfd, "rapydo upgrade --path invalid", ".gitignore")
 
     # Add a custom image to extend base rabbit image:
     with open("projects/third/confs/commons.yml", "a") as f:
@@ -1090,6 +1115,11 @@ RUN mkdir xyz
         "rapydo install --user --editable auto",
         "--user and --editable options are not compatible",
     )
+
+    with TemporaryRemovePath("submodules/do"):
+        exec_command(
+            capfd, "rapydo install --editable auto", "path not found",
+        )
 
     exec_command(
         capfd, "rapydo install --editable auto",

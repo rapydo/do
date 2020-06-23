@@ -12,7 +12,7 @@ class Dock:
     def __init__(self):
         super().__init__()
 
-        if not self.is_daemon_alive():  # pragma: no cove
+        if not self.is_daemon_alive():  # pragma: no cover
             log.exit("Docker daemon not reachable")
 
     def is_daemon_alive(self):

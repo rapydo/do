@@ -63,7 +63,7 @@ def install_controller_from_folder(gits, version, user, editable):
     b = gitter.get_active_branch(do_repo)
 
     if b is None:
-        log.error("Unable to read local controller repository")
+        log.error("Unable to read local controller repository")  # pragma: no cover
     elif b == version:
         log.info("Controller repository already at {}", version)
     elif gitter.switch_branch(do_repo, version):

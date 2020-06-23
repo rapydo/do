@@ -8,7 +8,6 @@ import os
 import shlex
 
 import compose.cli.errors as clierrors
-import compose.config.errors as conferrors
 import compose.errors as cerrors
 from compose.cli.command import (
     get_config_from_options,
@@ -200,7 +199,4 @@ class Compose:
         }
         if shell_command is not None:
             log.debug("Command: {}({}+{})", service.lower(), shell_command, shell_args)
-        try:
-            return self.command("exec_command", options)
-        except NoSuchService:
-            log.exit("Cannot find a running container called {}", service)
+        return self.command("exec_command", options)
