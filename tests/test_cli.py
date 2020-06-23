@@ -4,11 +4,13 @@ import signal
 import sys
 import tempfile
 
+import pytest
 from git import Repo
 
 from controller import __version__, gitter, log
 from controller.app import Application
 from controller.arguments import ArgParser
+from controller.compose import Compose
 from controller.dockerizing import Dock
 
 
@@ -1183,3 +1185,16 @@ def test_no_docker(capfd):
         capfd,
         "rapydo create first --auth postgres --frontend" "To install docker visit",
     )
+
+    try:
+        Dock()
+        pytest.fail("No exception raised")
+    except SystemExit:
+        pass
+
+    try:
+        c = Compose(["submodules/do/controller/confs/backend.yml"])
+        c.command("run")
+        pytest.fail("No exception raised")
+    except SystemExit:
+        pass

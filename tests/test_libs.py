@@ -111,18 +111,18 @@ def test_all(capfd):
     key = "anyother"
     assert shorten(key) == key
 
-    os.rename(
-        "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
-    )
-    try:
-        Templating()
-        pytest.fail("No exception raised")
-    except SystemExit:
-        pass
+    # os.rename(
+    #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
+    # )
+    # try:
+    #     Templating()
+    #     pytest.fail("No exception raised")
+    # except SystemExit:
+    #     pass
 
-    os.rename(
-        "submodules/do/controller/templates.bak", "submodules/do/controller/templates"
-    )
+    # os.rename(
+    #     "submodules/do/controller/templates.bak", "submodules/do/controller/templates"
+    # )
 
     templating = Templating()
 
