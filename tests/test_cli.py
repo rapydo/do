@@ -609,13 +609,6 @@ def test_all(capfd):
         "http://localhost:124?docExpansion=list&",
         "url=http://localhost:8080/api/specs",
     )
-    exec_command(
-        capfd,
-        "rapydo --prod interfaces swagger --port 124 --detach",
-        "You can access swaggerui web page here:",
-        "http://localhost:124?docExpansion=list&",
-        "url=https://localhost/api/specs",
-    )
 
     exec_command(
         capfd,
@@ -1051,6 +1044,14 @@ RUN mkdir xyz
         "rapydo --prod init -f",
         "Created default .projectrc file",
         "Project initialized",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo --prod interfaces swagger --port 124 --detach",
+        "You can access swaggerui web page here:",
+        "http://localhost:124?docExpansion=list&",
+        "url=https://localhost/api/specs",
     )
 
     exec_command(
