@@ -480,7 +480,7 @@ def test_all(capfd):
         "rapydo check -i main --no-git --no-builds",
         "Project first contains an obsolete file or folder: submodules/rapydo-confs",
     )
-    os.remove("submodules/rapydo-confs")
+    shutil.rmtree("submodules/rapydo-confs")
     # Some tests with list
     exec_command(
         capfd,
