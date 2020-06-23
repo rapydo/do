@@ -1119,7 +1119,9 @@ RUN mkdir xyz
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
-            capfd, "rapydo install --editable auto", "path not found",
+            capfd,
+            "rapydo install --editable auto",
+            "missing as ./submodules/do. You should init your project",
         )
 
     exec_command(

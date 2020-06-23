@@ -55,8 +55,6 @@ def install_controller_from_folder(gits, version, user, editable):
     log.info("You asked to install rapydo-controller {} from local folder", version)
 
     do_path = os.path.join(SUBMODULES_DIR, "do")
-    if not os.path.exists(do_path):
-        log.exit("{} path not found", do_path)
 
     do_repo = gits.get("do")
 
