@@ -354,7 +354,8 @@ To fix this issue, please update docker to version {}+
     def check_program(self, program, min_version=None, max_version=None):
 
         found_version = Application.get_bin_version(program)
-        if found_version is None:
+        # Can't be tested on travis...
+        if found_version is None:  # pragma: no cover
 
             hints = ""
 

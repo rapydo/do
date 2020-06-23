@@ -1185,12 +1185,12 @@ def test_no_docker(capfd):
         "Please note that this command only works from inside a rapydo-like repository",
     )
 
-    exec_command(
-        capfd,
-        "rapydo create first --auth postgres --frontend no",
-        "Missing requirement: docker not found.",
-        "To install docker visit",
-    )
+    # exec_command(
+    #     capfd,
+    #     "rapydo create first --auth postgres --frontend no",
+    #     "Missing requirement: docker not found.",
+    #     "To install docker visit",
+    # )
 
     try:
         Dock()
@@ -1200,7 +1200,7 @@ def test_no_docker(capfd):
 
     try:
         c = Compose(["submodules/do/controller/confs/backend.yml"])
-        c.command("run")
+        c.command("run", {})
         pytest.fail("No exception raised")
     except SystemExit:
         pass
