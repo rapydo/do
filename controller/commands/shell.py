@@ -8,6 +8,7 @@ def __call__(args, files, frontend, **kwargs):
     dc = Compose(files=files)
     service = args.get("service")
     no_tty = args.get("no_tty")
+    detach = args.get("detach")
     default_command = args.get("default_command")
 
     user = args.get("user")
@@ -43,4 +44,6 @@ def __call__(args, files, frontend, **kwargs):
         else:
             command = "bash"
 
-    return dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
+    return dc.exec_command(
+        service, user=user, command=command, disable_tty=no_tty, detach=detach
+    )

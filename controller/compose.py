@@ -179,7 +179,9 @@ class Compose:
 
         return self.command("run", options)
 
-    def exec_command(self, service, user=None, command=None, disable_tty=False):
+    def exec_command(
+        self, service, user=None, command=None, disable_tty=False, detach=False
+    ):
         """
             Execute a command on a running container
         """
@@ -194,7 +196,7 @@ class Compose:
             "--env": None,
             "--workdir": None,
             # '-d': False,
-            "--detach": False,
+            "--detach": detach,
             "--privileged": False,
         }
         if shell_command is not None:

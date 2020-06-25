@@ -272,6 +272,11 @@ subcommands:
         metavalue: TRUE_OR_FALSE
         default: False
         help: Disable pseudo-tty allocation, useful to execute the command from non interactive script
+      detach:
+        type: bool
+        metavalue: TRUE_OR_FALSE
+        default: False
+        help: Execute command in detach mode
   start:
     description: Start containers for this configuration
     suboptions:
