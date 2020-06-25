@@ -200,5 +200,10 @@ class Compose:
             "--privileged": False,
         }
         if shell_command is not None:
-            log.debug("Command: {}({}+{})", service.lower(), shell_command, shell_args)
+            log.debug(
+                "Command: {}({} {})",
+                service.lower(),
+                shell_command,
+                " ".join(shell_args),
+            )
         return self.command("exec_command", options)
