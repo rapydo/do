@@ -92,7 +92,11 @@ class Project:
 
         if self.frontend == ANGULAR:
             self.expected_folders.extend(
-                [self.p_path("frontend", "app"), self.p_path("frontend", "css")]
+                [
+                    self.p_path("frontend", "app"),
+                    self.p_path("frontend", "css"),
+                    self.p_path("frontend", "integration"),
+                ]
             )
 
             self.expected_files.extend(
@@ -120,6 +124,7 @@ class Project:
                     os.path.join(data_dir, "e2e"),
                     os.path.join(data_dir, "node_modules"),
                     os.path.join("data", self.project, "karma"),
+                    os.path.join("data", self.project, "cypress"),
                 ]
             )
 
@@ -134,6 +139,7 @@ class Project:
                     os.path.join(data_dir, "tsconfig.json"),
                     os.path.join(data_dir, "tsconfig.spec.json"),
                     os.path.join(data_dir, "tslint.json"),
+                    os.path.join(data_dir, "cypress.json"),
                 ]
             )
 
