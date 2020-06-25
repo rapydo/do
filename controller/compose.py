@@ -201,7 +201,7 @@ class Compose:
         }
         if shell_command is not None:
             log.debug(
-                "Command: {}({} {})",
+                "Command on {}: {} {}",
                 service.lower(),
                 shell_command,
                 " ".join(shell_args),
