@@ -144,6 +144,13 @@ def test_create(capfd):
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
+    with TemporaryRemovePath("submodules/do/controller/templates"):
+        exec_command(
+            capfd,
+            "rapydo create first --auth postgres --frontend no --current",
+            "Template folder not found",
+        )
+
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
@@ -1126,11 +1133,6 @@ RUN mkdir xyz
             capfd,
             "rapydo install --editable auto",
             "missing as ./submodules/do. You should init your project",
-        )
-
-    with TemporaryRemovePath("submodules/do/controller/templates"):
-        exec_command(
-            capfd, "rapydo init --force", "Template folder not found",
         )
 
     # I hope that one day this test will fail! :-)
