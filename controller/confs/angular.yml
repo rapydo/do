@@ -13,6 +13,8 @@ services:
     hostname: angular
     # user: node
     privileged: ${DOCKER_PRIVILEGED_MODE}
+    networks:
+      app_net:
     environment:
       ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
       CURRENT_UID: ${CURRENT_UID}
@@ -38,6 +40,7 @@ services:
 
       CYPRESS_AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
       CYPRESS_AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}
+      CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
       # FROM ENV, USED BY CYPRESS TO RECORD RESULTS:
       CYPRESS_RECORD_KEY:
       CYPRESS_PROJECT_ID:
