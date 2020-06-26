@@ -861,6 +861,10 @@ RUN mkdir xyz
     )
     exec_command(capfd, "rapydo verify sqlalchemy", "No container found for backend_1")
 
+    exec_command(
+        capfd, "rapydo -s invalid start", "No such service: invalid",
+    )
+
     # Let's start with the stack
     exec_command(
         capfd, "rapydo start", "docker-compose command: 'up'", "Stack started",
@@ -1123,6 +1127,27 @@ RUN mkdir xyz
             "rapydo install --editable auto",
             "missing as ./submodules/do. You should init your project",
         )
+
+    with TemporaryRemovePath("submodules/do/controller/templates"):
+        exec_command(
+            capfd, "rapydo init --force", "Template folder not found",
+        )
+
+    # I hope that one day this test will fail! :-)
+    exec_command(capfd, "rapydo install --editable 1.0", "Invalid version")
+
+    exec_command(
+        capfd, "rapydo install --editable auto",
+    )
+
+    r = gitter.get_repo("submodules/do")
+    gitter.switch_branch(r, "0.7.3")
+
+    exec_command(
+        capfd,
+        "rapydo install --editable auto",
+        "Controller repository switched to {}".format(__version__),
+    )
 
     exec_command(
         capfd, "rapydo install --editable auto",

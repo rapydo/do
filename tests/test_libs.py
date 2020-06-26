@@ -5,6 +5,7 @@ import pytest
 from plumbum.commands.processes import ProcessExecutionError
 
 from controller import __version__, gitter, log
+from controller.compose import Compose
 from controller.templating import Templating
 from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
@@ -131,3 +132,22 @@ def test_all(capfd):
         pytest.fail("No exception raised")
     except SystemExit:
         pass
+
+    cmd = Compose.split_command(None)
+    assert cmd[0] is None
+    assert len(cmd) == 0
+
+    cmd = Compose.split_command("a")
+    assert cmd[0] is None
+    assert len(cmd) == 0
+
+    cmd = Compose.split_command("a b")
+    assert cmd[0] == "a"
+    assert len(cmd) == 1
+    assert cmd[1] == "b"
+
+    cmd = Compose.split_command("a b c")
+    assert cmd[0] == "a"
+    assert len(cmd) == 2
+    assert cmd[1] == "b"
+    assert cmd[2] == "c"

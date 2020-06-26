@@ -164,17 +164,14 @@ class Project:
     @staticmethod
     def get_project(project):
 
-        try:
-            projects = os.listdir(PROJECT_DIR)
-        except FileNotFoundError:
-            log.exit("Could not access the dir '{}'", PROJECT_DIR)
+        projects = os.listdir(PROJECT_DIR)
 
         if project is None:
-            prj_num = len(projects)
 
-            if prj_num == 0:
+            if len(projects) == 0:
                 log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
-            if prj_num > 1:
+
+            if len(projects) > 1:
                 log.exit(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
@@ -189,7 +186,6 @@ class Project:
                 )
             )
 
-        # self.ABS_PROJECT_PATH = os.path.join(os.curdir, PROJECT_DIR, project)
         ABS_PROJECT_PATH = os.path.join(PROJECT_DIR, project)
         return project, ABS_PROJECT_PATH
 
