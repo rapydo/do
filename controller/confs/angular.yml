@@ -4,12 +4,12 @@ services:
   frontend:
     # restart: no
     build:
-      context: ${SUBMODULE_DIR}/build-templates/angular
+      context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/angular:${RAPYDO_VERSION}
+    image: rapydo/${FRONTEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: angular
     # user: node
     privileged: ${DOCKER_PRIVILEGED_MODE}
@@ -31,7 +31,6 @@ services:
       BACKEND_PREFIX: ${BACKEND_PREFIX}
       BASE_HREF: ${PROJECT_DOMAIN}
       FRONTEND_PREFIX: ${FRONTEND_PREFIX}
-      # ENABLE_TOASTR: ${ENABLE_TOASTR}
       PUSHPIN_HOST: ${PROJECT_DOMAIN}
       PUSHPIN_PORT: ${PUSHPIN_PORT}
       SENTRY_URL: ${SENTRY_URL}
