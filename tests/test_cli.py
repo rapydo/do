@@ -742,6 +742,16 @@ RUN mkdir xyz
         "Multiple projects found, please use --project to specify one of the following",
     )
 
+    # Test with zero projects
+    with TemporaryRemovePath("projects"):
+        os.mkdir("projects")
+        exec_command(
+            capfd,
+            "rapydo check -i main --no-git --no-builds",
+            "No project found (projects folder is empty?)",
+        )
+        shutil.rmtree("projects")
+
     exec_command(
         capfd, "rapydo -p first check -i main --no-git --no-builds", "Checks completed",
     )
