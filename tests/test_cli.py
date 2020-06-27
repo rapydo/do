@@ -10,6 +10,7 @@ from controller import __version__, gitter
 from controller.app import Application
 from controller.arguments import ArgParser
 from controller.dockerizing import Dock
+from controller.templating import Templating
 
 
 class TemporaryRemovePath:
@@ -742,6 +743,16 @@ RUN mkdir xyz
         "Multiple projects found, please use --project to specify one of the following",
     )
 
+    # Test with zero projects
+    with TemporaryRemovePath("projects"):
+        os.mkdir("projects")
+        exec_command(
+            capfd,
+            "rapydo check -i main --no-git --no-builds",
+            "No project found (projects folder is empty?)",
+        )
+        shutil.rmtree("projects")
+
     exec_command(
         capfd, "rapydo -p first check -i main --no-git --no-builds", "Checks completed",
     )
@@ -1135,14 +1146,13 @@ RUN mkdir xyz
         capfd, "rapydo install --editable auto",
     )
 
-    # This can be done after having installed the controller in editable mode
-    # This does not work because the editable install above probably fails...
-    # with TemporaryRemovePath("submodules/do/controller/templates"):
-    #     exec_command(
-    #         capfd,
-    #         "rapydo create last --auth postgres --frontend no --current",
-    #         "Template folder not found",
-    #     )
+    templating = Templating()
+    with TemporaryRemovePath(templating.template_dir):
+        exec_command(
+            capfd,
+            "rapydo create last --auth postgres --frontend no --current",
+            "Template folder not found",
+        )
 
     r = gitter.get_repo("submodules/do")
     gitter.switch_branch(r, "0.7.3")
