@@ -30,7 +30,9 @@ def test_all(capfd):
     assert gitter.switch_branch(do_repo, branch_name=__version__)
     assert not gitter.switch_branch(do_repo, branch_name="XYZ")
     # non remote branch is not found, because we only fetched current version
-    assert not gitter.switch_branch(do_repo, branch_name="0.7.3", remote=False)
+    # 0.7.3 is already test for automatic switch in editable mode,
+    # i.e. local branch already exists and remote=False fails... let's use 0.7.2
+    assert not gitter.switch_branch(do_repo, branch_name="0.7.2", remote=False)
 
     assert gitter.switch_branch(do_repo, branch_name="0.7.3")
     assert gitter.get_active_branch(do_repo) == "0.7.3"
