@@ -136,20 +136,28 @@ def test_all(capfd):
         pass
 
     cmd = Compose.split_command(None)
+    assert len(cmd) == 2
     assert cmd[0] is None
-    assert len(cmd) == 0
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 0
 
     cmd = Compose.split_command("a")
+    assert len(cmd) == 2
     assert cmd[0] is None
-    assert len(cmd) == 0
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 0
 
     cmd = Compose.split_command("a b")
+    assert len(cmd) == 2
     assert cmd[0] == "a"
-    assert len(cmd) == 1
-    assert cmd[1] == "b"
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 1
+    assert cmd[1][0] == "b"
 
     cmd = Compose.split_command("a b c")
-    assert cmd[0] == "a"
     assert len(cmd) == 2
-    assert cmd[1] == "b"
-    assert cmd[2] == "c"
+    assert cmd[0] == "a"
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 2
+    assert cmd[1][0] == "b"
+    assert cmd[1][1] == "c"
