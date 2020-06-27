@@ -1,20 +1,16 @@
 import os
 
 from controller import SUBMODULES_DIR, gitter, log
+from controller.packages import Packages
 
 
 def install_controller_from_pip(version, user):
-
-    # BEWARE: to not import this package outside the function
-    # Otherwise pip will go crazy
-    # (we cannot understand why, but it does!)
-    from controller.packages import install
 
     log.info("You asked to install rapydo-controller {} from pip", version)
 
     package = "rapydo-controller"
     controller = "{}=={}".format(package, version)
-    installed = install(controller, user=user)
+    installed = Packages.install(controller, user=user)
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from pip", version)
     else:
@@ -23,11 +19,6 @@ def install_controller_from_pip(version, user):
 
 def install_controller_from_git(version, user):
 
-    # BEWARE: to not import this package outside the function
-    # Otherwise pip will go crazy
-    # (we cannot understand why, but it does!)
-    from controller.packages import install, check_version
-
     log.info("You asked to install rapydo-controller {} from git", version)
 
     package = "rapydo-controller"
@@ -35,22 +26,17 @@ def install_controller_from_git(version, user):
     rapydo_uri = "https://github.com/rapydo"
     controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
 
-    installed = install(controller, user=user)
+    installed = Packages.install(controller, user=user)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from git", version)
     else:
         log.info("Controller version {} installed from git", version)
-        installed_version = check_version(package)
+        installed_version = Packages.check_version(package)
         log.info("Check on installed version: {}", installed_version)
 
 
 def install_controller_from_folder(gits, version, user, editable):
-
-    # BEWARE: to not import this package outside the function
-    # Otherwise pip will go crazy
-    # (we cannot understand why, but it does!)
-    from controller.packages import install, check_version
 
     log.info("You asked to install rapydo-controller {} from local folder", version)
 
@@ -69,13 +55,13 @@ def install_controller_from_folder(gits, version, user, editable):
     else:
         log.exit("Invalid version")
 
-    installed = install(do_path, editable=editable, user=user)
+    installed = Packages.install(do_path, editable=editable, user=user)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from local folder", version)
     else:
         log.info("Controller version {} installed from local folder", version)
-        installed_version = check_version("rapydo-controller")
+        installed_version = Packages.check_version("rapydo-controller")
         log.info("Check on installed version: {}", installed_version)
 
 

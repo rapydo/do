@@ -8,7 +8,6 @@ from distutils.version import LooseVersion
 
 import requests
 from glom import glom
-from plumbum.commands.processes import ProcessExecutionError
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -28,6 +27,7 @@ from controller.commands import create as create_cmd
 from controller.commands import install as install_cmd
 from controller.commands import version as version_cmd
 from controller.compose import Compose
+from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, REACT, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
@@ -315,106 +315,18 @@ class Application:
                 sys.version_info.minor,
                 sys.version_info.micro,
             )
-        # Check if docker is installed
+
         # 17.05 added support for multi-stage builds
-        self.check_program("docker", min_version="17.05")
+        Packages.check_program("docker", min_version="17.05")
+        Packages.check_program("git")
 
         # Check for CVE-2019-5736 vulnerability
-        # Checking version of docker server, since docker client is not affected
-        # and the two versions can differ
-        v = Application.get_bin_version(
-            "docker", option=["version", "--format", "'{{.Server.Version}}'"]
-        )
+        Packages.check_docker_vulnerability()
 
-        safe_version = "18.09.2"
-        if LooseVersion(safe_version) > LooseVersion(v):
-            log.critical(
-                """Your docker version is vulnerable to CVE-2019-5736
-
-***************************************************************************************
-Your docker installation (version {}) is affected by a critical vulnerability
-that allows specially-crafted containers to gain administrative privileges on the host.
-For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
-***************************************************************************************
-To fix this issue, please update docker to version {}+
-            """,
-                v,
-                safe_version,
-            )
-
-        # Check docker-compose version
-        self.check_python_package("compose", min_version="1.18")
-        self.check_python_package("docker", min_version="4.0.0")
-        self.check_python_package("requests", min_version="2.6.1")
-        self.check_python_package("pip", min_version="10.0.0")
-
-        # Check if git is installed
-        self.check_program("git")  # , max_version='2.14.3')
-
-    def check_program(self, program, min_version=None, max_version=None):
-
-        found_version = Application.get_bin_version(program)
-        # Can't be tested on travis...
-        if found_version is None:  # pragma: no cover
-
-            hints = ""
-
-            if program == "docker":
-                hints = "To install docker visit: https://get.docker.com"
-
-            if len(hints) > 0:
-                hints = "\n\n{}".format(hints)
-
-            log.exit("Missing requirement: {} not found.{}", program, hints)
-
-        if min_version is not None:  # pragma: no cover
-            if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for {} is {}".format(
-                    program, min_version,
-                )
-                version_error += ", found {} ".format(found_version)
-                log.exit(version_error)
-
-        if max_version is not None:  # pragma: no cover
-            if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for {} is {}".format(
-                    program, max_version,
-                )
-                version_error += ", found {} ".format(found_version)
-                log.exit(version_error)
-
-        self.checked("{} version: {}", program, found_version)
-
-    def check_python_package(self, package_name, min_version=None, max_version=None):
-
-        # BEWARE: to not import this package outside the function
-        # Otherwise pip will go crazy
-        # (we cannot understand why, but it does!)
-        from controller.packages import package_version
-
-        found_version = package_version(package_name)
-        if found_version is None:  # pragma: no cover
-            log.exit("Could not find the following python package: {}", package_name)
-        try:
-            if min_version is not None:  # pragma: no cover
-                if LooseVersion(min_version) > LooseVersion(found_version):
-                    version_error = "Minimum supported version for {} is {}".format(
-                        package_name, min_version
-                    )
-                    version_error += ", found {} ".format(found_version)
-                    log.exit(version_error)
-
-            if max_version is not None:  # pragma: no cover
-                if LooseVersion(max_version) < LooseVersion(found_version):
-                    version_error = "Maximum supported version for {} is {}".format(
-                        package_name, max_version
-                    )
-                    version_error += ", found {} ".format(found_version)
-                    log.exit(version_error)
-
-            self.checked("{} version: {}", package_name, found_version)
-        except TypeError as e:  # pragma: no cover
-            log.error("{}: {}", e, found_version)
+        Packages.check_python_package("compose", min_version="1.18")
+        Packages.check_python_package("docker", min_version="4.0.0")
+        Packages.check_python_package("requests", min_version="2.6.1")
+        Packages.check_python_package("pip", min_version="10.0.0")
 
     def read_specs(self):
         """ Read project configuration """
@@ -759,7 +671,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         for key in missing:
 
             serv = services.vars_to_services_mapping.get(key)
-            if serv is None:
+            # Should never happens since all services are configured, cannot be tested
+            if not serv:  # pragma: no cover
                 log.exit(
                     "Missing variable: {}. Cannot find a service mapping this variable",
                     key,
@@ -809,23 +722,3 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             elif self.check:
                 gitter.check_updates(name, gitobj)
                 gitter.check_unstaged(name, gitobj)
-
-    def get_bin_version(exec_cmd, option="--version"):
-
-        output = None
-        try:
-            output = system.execute_command(exec_cmd, option)
-
-            # try splitting on comma and/or parenthesis
-            # then last element on spaces
-            output = output.split("(")[0].split(",")[0].split()[::-1][0]
-            output = output.strip()
-            output = output.replace("'", "")
-
-            return output
-        except ProcessExecutionError as e:
-            log.error("{} not found: {}", exec_cmd, e)
-            return None
-        except BaseException:
-            log.critical("Cannot parse command output: {}", output)
-            return None
