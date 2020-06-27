@@ -144,13 +144,6 @@ def test_create(capfd):
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
-    with TemporaryRemovePath("submodules/do/controller/templates"):
-        exec_command(
-            capfd,
-            "rapydo create first --auth postgres --frontend no --current",
-            "Template folder not found",
-        )
-
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
@@ -1141,6 +1134,14 @@ RUN mkdir xyz
     exec_command(
         capfd, "rapydo install --editable auto",
     )
+
+    # This can be done after having installed the controller in editable mode
+    with TemporaryRemovePath("submodules/do/controller/templates"):
+        exec_command(
+            capfd,
+            "rapydo create last --auth postgres --frontend no --current",
+            "Template folder not found",
+        )
 
     r = gitter.get_repo("submodules/do")
     gitter.switch_branch(r, "0.7.3")
