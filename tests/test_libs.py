@@ -141,9 +141,15 @@ def test_all(capfd):
     assert isinstance(cmd[1], list)
     assert len(cmd[1]) == 0
 
-    cmd = Compose.split_command("a")
+    cmd = Compose.split_command("")
     assert len(cmd) == 2
     assert cmd[0] is None
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 0
+
+    cmd = Compose.split_command("a")
+    assert len(cmd) == 2
+    assert cmd[0] == "a"
     assert isinstance(cmd[1], list)
     assert len(cmd[1]) == 0
 
@@ -161,3 +167,10 @@ def test_all(capfd):
     assert len(cmd[1]) == 2
     assert cmd[1][0] == "b"
     assert cmd[1][1] == "c"
+
+    cmd = Compose.split_command("a 'b c'")
+    assert len(cmd) == 2
+    assert cmd[0] == "a"
+    assert isinstance(cmd[1], list)
+    assert len(cmd[1]) == 1
+    assert cmd[1][0] == "b c"
