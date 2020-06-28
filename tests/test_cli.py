@@ -172,11 +172,14 @@ def test_create(capfd):
         "Project first successfully created",
     )
 
-    informative = "Some special characters, including £ § ” ’, should be avoided "
-    informative = "due to unexpected crashes occurred during RabbitMQ startup"
+    informative = "Some special characters, including £ § ” ’, are not allowed "
+    informative = "because make RabbitMQ crash at startup"
 
     exec_command(
-        capfd, "rapydo init", "Invalid characters in RABBITMQ_PASSWORD.", informative,
+        capfd,
+        "rapydo init",
+        "Not allowed characters found in RABBITMQ_PASSWORD.",
+        informative,
     )
 
     create_command = "rapydo create first --auth postgres --frontend angular"
