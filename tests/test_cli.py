@@ -145,6 +145,14 @@ def test_create(capfd):
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
+    templating = Templating()
+    with TemporaryRemovePath(templating.template_dir):
+        exec_command(
+            capfd,
+            "rapydo create last --auth postgres --frontend no --current",
+            "Template folder not found",
+        )
+
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
@@ -1056,6 +1064,9 @@ RUN mkdir xyz
         interrupted = True
     assert interrupted
 
+
+def test_prod(capfd):
+
     pconf = "projects/first/project_configuration.yaml"
 
     exec_command(
@@ -1152,9 +1163,13 @@ def test_rabbit_invalid_characters(capfd):
 
     shutil.rmtree("projects/testinvalid")
 
+    # Restore the default project
+    exec_command(
+        capfd, "rapydo -p first init --force", "Project initialized",
+    )
 
-# Most of the following tests will destroy the environment... keep them as last tests
-def test_last(capfd):
+
+def test_install(capfd):
 
     exec_command(
         capfd,
@@ -1181,14 +1196,6 @@ def test_last(capfd):
     exec_command(
         capfd, "rapydo install --editable auto",
     )
-
-    templating = Templating()
-    with TemporaryRemovePath(templating.template_dir):
-        exec_command(
-            capfd,
-            "rapydo create last --auth postgres --frontend no --current",
-            "Template folder not found",
-        )
 
     r = gitter.get_repo("submodules/do")
     gitter.switch_branch(r, "0.7.3")
@@ -1249,6 +1256,10 @@ def test_last(capfd):
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
 
+
+# Some final tests
+def test_bonus(capfd):
+    folder = os.getcwd()
     # Tests from a subfolder
     os.chdir("projects")
     exec_command(
@@ -1258,8 +1269,7 @@ def test_last(capfd):
         "Checks completed",
     )
 
-    folder = os.getcwd()
-
+    # Tests from outside the folder
     os.chdir(tempfile.gettempdir())
     exec_command(
         capfd,
