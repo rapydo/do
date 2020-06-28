@@ -203,6 +203,7 @@ def test_all(capfd):
     v = Packages.get_bin_version("git")
     assert v is not None
     vv = LooseVersion(v)
+    # Something like 2.25.1
     assert len(vv.version) == 3
     assert isinstance(vv.version[0], int)
     assert isinstance(vv.version[1], int)
@@ -212,7 +213,8 @@ def test_all(capfd):
     v = Packages.get_bin_version("docker")
     assert v is not None
     vv = LooseVersion(v)
-    assert len(vv.version) == 3
+    # Something like 19.03.8 or 18.06.0-ce
+    assert len(vv.version) >= 3
     assert isinstance(vv.version[0], int)
     assert isinstance(vv.version[1], int)
     assert isinstance(vv.version[2], int)
@@ -223,7 +225,7 @@ def test_all(capfd):
     )
     assert v is not None
     vv = LooseVersion(v)
-    assert len(vv.version) == 3
+    assert len(vv.version) >= 3
     assert isinstance(vv.version[0], int)
     assert isinstance(vv.version[1], int)
     assert isinstance(vv.version[2], int)
