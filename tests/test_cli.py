@@ -72,7 +72,7 @@ def exec_command(capfd, command, *asserts):
     return out
 
 
-def test_create(capfd):
+def test_failed_create(capfd):
 
     exec_command(
         capfd,
@@ -119,12 +119,6 @@ def test_create(capfd):
 
     exec_command(
         capfd,
-        "rapydo create celery --auth postgres --frontend angular --current ",
-        "You selected a reserved name, invalid project name: celery",
-    )
-
-    exec_command(
-        capfd,
         "rapydo create first --auth postgres --frontend angular --no-auto --current ",
         "mkdir -p projects",
     )
@@ -149,10 +143,18 @@ def test_create(capfd):
     with TemporaryRemovePath(templating.template_dir):
         exec_command(
             capfd,
-            "rapydo create last --auth postgres --frontend no --current",
+            "rapydo create firsts --auth postgres --frontend no --current",
             "Template folder not found",
         )
 
+    exec_command(
+        capfd,
+        "rapydo create celery --auth postgres --frontend angular --current ",
+        "You selected a reserved name, invalid project name: celery",
+    )
+
+
+def test_create(capfd):
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
@@ -531,60 +533,6 @@ def test_all(capfd):
         "postgres",
         "rabbit",
     )
-    # Test services activation from create --services
-    services = [
-        "postgres",
-        "mysql",
-        "neo4j",
-        "mongo",
-        "rabbit",
-        "redis",
-        "irods",
-        "celery",
-        "pushpin",
-        "ftp",
-    ]
-    opt = "--frontend no --current --force"
-    for service in services:
-
-        if service == "postgres":
-            auth = "postgres"
-            serv_opt = ""
-        elif service == "mysql":
-            auth = "mysql"
-            serv_opt = ""
-        elif service == "neo4j":
-            auth = "neo4j"
-            serv_opt = ""
-        elif service == "mongo":
-            auth = "mongo"
-            serv_opt = ""
-        else:
-            auth = "postgres"
-            serv_opt = "--services {}".format(service)
-
-        exec_command(
-            capfd,
-            "rapydo create testservices {opt} --auth {auth} {service}".format(
-                opt=opt, auth=auth, service=serv_opt
-            ),
-            "Project testservices successfully created",
-        )
-        if service == "mysql":
-            service = ["mariadb"]
-        elif service == "irods":
-            service = ["icat"]
-        elif service == "celery":
-            service = ["celery", "celeryui", "rabbit"]
-        else:
-            service = [service]
-
-        exec_command(
-            capfd,
-            "rapydo -p testservices list --active-services",
-            "List of active services:",
-            *service,
-        )
 
     exec_command(
         capfd,
@@ -641,119 +589,20 @@ def test_all(capfd):
         capfd, "rapydo dump", "Config dump: docker-compose.yml",
     )
 
-    # second project is --auth postgres --frontend angular
-    # the third one is --auth neo4j --frontend angular
-    exec_command(
-        capfd,
-        "rapydo create second --auth neo4j --frontend no --current",
-        "Folder projects already exists",
-        "Project second successfully created",
-    )
-
-    exec_command(
-        capfd,
-        "rapydo create new --extend new --auth neo4j --frontend no --current",
-        "A project cannot extend itself",
-    )
-    exec_command(
-        capfd,
-        "rapydo create new --extend doesnotexist --auth neo4j --frontend no --current",
-        "Invalid extend value: project doesnotexist not found",
-    )
-
-    create_command = "rapydo create third --extend second"
-    create_command += " --auth neo4j --frontend angular"
-    create_command += " --current --services rabbit"
-    exec_command(
-        capfd,
-        create_command,
-        "Folder projects already exists",
-        "Project third successfully created",
-    )
-
     exec_command(capfd, "rapydo upgrade")
     exec_command(
         capfd, "rapydo upgrade --path invalid", "Invalid path, cannot upgrade invalid"
     )
     exec_command(capfd, "rapydo upgrade --path .gitignore")
 
-    # Add a custom image to extend base rabbit image:
-    with open("projects/third/confs/commons.yml", "a") as f:
-        f.write(
-            """
-services:
-  rabbit:
-    build: ${PROJECT_DIR}/builds/rabbit
-    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
-
-    """
-        )
-
-    os.makedirs("projects/third/builds/rabbit")
-
-    # Missing Dockerfile
-    exec_command(
-        capfd,
-        "rapydo -p third -s rabbit build",
-        "No such file or directory: ",
-        "projects/third/builds/rabbit/Dockerfile",
-    )
-
-    # Empty Dockerfile
-    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
-        pass
-    exec_command(
-        capfd,
-        "rapydo -p third -s rabbit build",
-        "Build failed, is ",
-        "projects/third/builds/rabbit/Dockerfile empty?",
-    )
-
-    # Missing base image
-    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
-        f.write("RUN ls")
-    exec_command(
-        capfd,
-        "rapydo -p third -s rabbit build",
-        "No base image found ",
-        "projects/third/builds/rabbit/Dockerfile, unable to build",
-    )
-
-    # Not a RAPyDo child
-    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
-        f.write("FROM ubuntu")
-    exec_command(
-        capfd, "rapydo -p third -s rabbit build", "No custom images to build",
-    )
-
-    # Invalid RAPyDo template
-    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
-        f.write("FROM rapydo/invalid")
-    exec_command(
-        capfd,
-        "rapydo -p third -s rabbit build",
-        "Unable to find rapydo/invalid in this project",
-        "Please inspect the FROM image in",
-        "projects/third/builds/rabbit/Dockerfile",
-    )
-
-    with open("projects/third/builds/rabbit/Dockerfile", "w+") as f:
-        f.write(
-            """
-FROM rapydo/rabbitmq:{}
-# Just a simple command differentiate from the parent
-RUN mkdir xyz
-""".format(
-                __version__
-            )
-        )
-
     # Test selection with two projects
-    os.remove(".projectrc")
+    exec_command(
+        capfd,
+        "rapydo create justanother --auth postgres --frontend no --current",
+        "Project first successfully created",
+    )
 
-    r = Repo(".")
-    r.git.add("-A")
-    r.git.commit("-a", "-m", "'fake'")
+    os.remove(".projectrc")
 
     exec_command(
         capfd,
@@ -828,66 +677,6 @@ RUN mkdir xyz
         "Update it with: rapydo --services backend pull",
     )
 
-    # Selected a very fast service to speed up tests
-    # Build custom rabbit image in third project from pulled image
-    exec_command(
-        capfd,
-        "rapydo -p third -s rabbit build",
-        "Successfully built",
-        "Successfully tagged third/rabbit:{}".format(__version__),
-        "Custom images built",
-    )
-
-    exec_command(
-        capfd, "rapydo ancestors XYZ", "No child found for XYZ",
-    )
-
-    dock = Dock()
-    img = dock.images().pop(0)
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
-    )
-
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    # rapydo/rabbitmq has a child: third/rabbit just created
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
-        "third/rabbit",
-    )
-
-    # Rebuild core rabbit image => custom rabbit is now obsolete
-    exec_command(
-        capfd,
-        "rapydo -p first -s rabbit build --core",
-        "Core images built",
-        "No custom images to build",
-    )
-    exec_command(
-        capfd,
-        "rapydo -p third check -i main --no-git",
-        "Obsolete image third/rabbit:{}".format(__version__),
-        "built on ",
-        " that changed on ",
-        "Update it with: rapydo --services rabbit build",
-    )
-
-    # rabbit images has no longer any child because it is just rebuilt
-    exec_command(
-        capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
-    )
     exec_command(capfd, "rapydo verify sqlalchemy", "No container found for backend_1")
 
     exec_command(
@@ -1064,9 +853,6 @@ RUN mkdir xyz
         interrupted = True
     assert interrupted
 
-
-def test_prod(capfd):
-
     pconf = "projects/first/project_configuration.yaml"
 
     exec_command(
@@ -1140,6 +926,251 @@ def test_prod(capfd):
     exec_command(
         capfd, "rapydo dhparam", "No container found for proxy_1",
     )
+
+
+def test_build(capfd):
+
+    create_command = "rapydo create testbuild --auth postgres --frontend angular"
+    create_command += " --services rabbit --add-optionals --current"
+    exec_command(
+        capfd, create_command, "Project first successfully created",
+    )
+
+    # Restore the default project
+    exec_command(
+        capfd, "rapydo -p testbuild init --force", "Project initialized",
+    )
+
+    # Add a custom image to extend base rabbit image:
+    with open("projects/testbuild/confs/commons.yml", "a") as f:
+        f.write(
+            """
+services:
+  rabbit:
+    build: ${PROJECT_DIR}/builds/rabbit
+    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+
+    """
+        )
+
+    os.makedirs("projects/testbuild/builds/rabbit")
+
+    # Missing Dockerfile
+    exec_command(
+        capfd,
+        "rapydo -p testbuild -s rabbit build",
+        "No such file or directory: ",
+        "projects/testbuild/builds/rabbit/Dockerfile",
+    )
+
+    # Empty Dockerfile
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        pass
+    exec_command(
+        capfd,
+        "rapydo -p testbuild -s rabbit build",
+        "Build failed, is ",
+        "projects/testbuild/builds/rabbit/Dockerfile empty?",
+    )
+
+    # Missing base image
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("RUN ls")
+    exec_command(
+        capfd,
+        "rapydo -p testbuild -s rabbit build",
+        "No base image found ",
+        "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
+    )
+
+    # Not a RAPyDo child
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM ubuntu")
+    exec_command(
+        capfd, "rapydo -p testbuild -s rabbit build", "No custom images to build",
+    )
+
+    # Invalid RAPyDo template
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM rapydo/invalid")
+    exec_command(
+        capfd,
+        "rapydo -p testbuild -s rabbit build",
+        "Unable to find rapydo/invalid in this project",
+        "Please inspect the FROM image in",
+        "projects/testbuild/builds/rabbit/Dockerfile",
+    )
+
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write(
+            """
+FROM rapydo/rabbitmq:{}
+# Just a simple command differentiate from the parent
+RUN mkdir xyz
+""".format(
+                __version__
+            )
+        )
+
+    r = Repo(".")
+    r.git.add("-A")
+    r.git.commit("-a", "-m", "'fake'")
+
+    # Selected a very fast service to speed up tests
+    # Build custom rabbit image in third project from pulled image
+    exec_command(
+        capfd,
+        "rapydo -p third -s rabbit build",
+        "Successfully built",
+        "Successfully tagged third/rabbit:{}".format(__version__),
+        "Custom images built",
+    )
+
+    exec_command(
+        capfd, "rapydo ancestors XYZ", "No child found for XYZ",
+    )
+
+    dock = Dock()
+    img = dock.images().pop(0)
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info(img).get("Id")
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
+    )
+
+    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
+    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
+    # => c1a845de8052
+    img_id = img_id[7:19]
+    # rapydo/rabbitmq has a child: third/rabbit just created
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
+        "third/rabbit",
+    )
+
+    # Rebuild core rabbit image => custom rabbit is now obsolete
+    exec_command(
+        capfd,
+        "rapydo -s rabbit build --core",
+        "Core images built",
+        "No custom images to build",
+    )
+    exec_command(
+        capfd,
+        "rapydo check -i main --no-git",
+        "Obsolete image third/rabbit:{}".format(__version__),
+        "built on ",
+        " that changed on ",
+        "Update it with: rapydo --services rabbit build",
+    )
+
+    # rabbit images has no longer any child because it is just rebuilt
+    exec_command(
+        capfd,
+        "rapydo ancestors {}".format(img_id),
+        "Finding all children and (grand)+ children of {}".format(img_id),
+    )
+
+    # Restore the default project
+    exec_command(
+        capfd, "rapydo -p first init --force", "Project initialized",
+    )
+
+
+def test_extend(capfd):
+    # second project is --auth postgres --frontend angular
+    # the third one is --auth neo4j --frontend angular
+    exec_command(
+        capfd,
+        "rapydo create second --auth neo4j --frontend no --current",
+        "Folder projects already exists",
+        "Project second successfully created",
+    )
+
+    exec_command(
+        capfd,
+        "rapydo create new --extend new --auth neo4j --frontend no --current",
+        "A project cannot extend itself",
+    )
+    exec_command(
+        capfd,
+        "rapydo create new --extend doesnotexist --auth neo4j --frontend no --current",
+        "Invalid extend value: project doesnotexist not found",
+    )
+
+    create_command = "rapydo create third --extend second"
+    create_command += " --auth neo4j --frontend angular"
+    create_command += " --current --services rabbit"
+    exec_command(
+        capfd,
+        create_command,
+        "Folder projects already exists",
+        "Project third successfully created",
+    )
+
+
+def test_services_activation(capfd):
+
+    # Test services activation from create --services
+    services = [
+        "postgres",
+        "mysql",
+        "neo4j",
+        "mongo",
+        "rabbit",
+        "redis",
+        "irods",
+        "celery",
+        "pushpin",
+        "ftp",
+    ]
+    opt = "--frontend no --current --force"
+    for service in services:
+
+        if service == "postgres":
+            auth = "postgres"
+            serv_opt = ""
+        elif service == "mysql":
+            auth = "mysql"
+            serv_opt = ""
+        elif service == "neo4j":
+            auth = "neo4j"
+            serv_opt = ""
+        elif service == "mongo":
+            auth = "mongo"
+            serv_opt = ""
+        else:
+            auth = "postgres"
+            serv_opt = "--services {}".format(service)
+
+        exec_command(
+            capfd,
+            "rapydo create testservices {opt} --auth {auth} {service}".format(
+                opt=opt, auth=auth, service=serv_opt
+            ),
+            "Project testservices successfully created",
+        )
+        if service == "mysql":
+            service = ["mariadb"]
+        elif service == "irods":
+            service = ["icat"]
+        elif service == "celery":
+            service = ["celery", "celeryui", "rabbit"]
+        else:
+            service = [service]
+
+        exec_command(
+            capfd,
+            "rapydo -p testservices list --active-services",
+            "List of active services:",
+            *service,
+        )
 
 
 def test_rabbit_invalid_characters(capfd):
