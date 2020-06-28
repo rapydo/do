@@ -1121,6 +1121,8 @@ def test_extend(capfd):
 
 def test_services_activation(capfd):
 
+    os.remove(".projectrc")
+
     # Test services activation from create --services
     services = [
         "postgres",
