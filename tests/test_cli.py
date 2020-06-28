@@ -1299,8 +1299,8 @@ def test_lastest(capfd):
 
     exec_command(
         capfd,
-        "rapydo create abc --auth postgres --frontend no --current --force",
-        "Project abc successfully created",
+        "rapydo create latest --auth postgres --frontend no --current --force",
+        "Project latest successfully created",
     )
 
     folder = os.getcwd()
@@ -1308,7 +1308,7 @@ def test_lastest(capfd):
     os.chdir("projects")
     exec_command(
         capfd,
-        "rapydo -p abc check -i main --no-git --no-builds",
+        "rapydo -p latest check -i main --no-git --no-builds",
         "You are not in the main folder",
         "Checks completed",
     )
