@@ -958,7 +958,7 @@ services:
     # Missing Dockerfile
     exec_command(
         capfd,
-        "rapydo -p testbuild -s rabbit build",
+        "rapydo -s rabbit build",
         "No such file or directory: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -968,7 +968,7 @@ services:
         pass
     exec_command(
         capfd,
-        "rapydo -p testbuild -s rabbit build",
+        "rapydo -s rabbit build",
         "Build failed, is ",
         "projects/testbuild/builds/rabbit/Dockerfile empty?",
     )
@@ -978,7 +978,7 @@ services:
         f.write("RUN ls")
     exec_command(
         capfd,
-        "rapydo -p testbuild -s rabbit build",
+        "rapydo -s rabbit build",
         "No base image found ",
         "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
     )
@@ -987,7 +987,7 @@ services:
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write("FROM ubuntu")
     exec_command(
-        capfd, "rapydo -p testbuild -s rabbit build", "No custom images to build",
+        capfd, "rapydo -s rabbit build", "No custom images to build",
     )
 
     # Invalid RAPyDo template
@@ -995,7 +995,7 @@ services:
         f.write("FROM rapydo/invalid")
     exec_command(
         capfd,
-        "rapydo -p testbuild -s rabbit build",
+        "rapydo -s rabbit build",
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
@@ -1005,7 +1005,7 @@ services:
         f.write(
             """
 FROM rapydo/rabbitmq:{}
-# Just a simple command differentiate from the parent
+# Just a simple command to differentiate from the parent
 RUN mkdir xyz
 """.format(
                 __version__
@@ -1020,7 +1020,7 @@ RUN mkdir xyz
     # Build custom rabbit image from pulled image
     exec_command(
         capfd,
-        "rapydo -p testbuild -s rabbit build",
+        "rapydo -s rabbit build",
         "Successfully built",
         "Successfully tagged testbuild/rabbit:{}".format(__version__),
         "Custom images built",
