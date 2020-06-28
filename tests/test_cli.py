@@ -1145,7 +1145,7 @@ def test_rabbit_invalid_characters(capfd):
 
     exec_command(
         capfd,
-        "rapydo -p testinvalid init",
+        "rapydo -p testinvalid init --force",
         "Not allowed characters found in RABBITMQ_PASSWORD.",
         informative,
     )
