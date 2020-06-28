@@ -933,7 +933,7 @@ def test_build(capfd):
     create_command = "rapydo create testbuild --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
     exec_command(
-        capfd, create_command, "Project first successfully created",
+        capfd, create_command, "Project testbuild successfully created",
     )
 
     # Restore the default project
