@@ -1118,6 +1118,10 @@ def test_extend(capfd):
         "Project ext successfully created",
     )
 
+    exec_command(
+        capfd, "rapydo -p ext check -i main --no-git --no-builds", "Checks completed",
+    )
+
 
 def test_services_activation(capfd):
 
