@@ -108,7 +108,7 @@ class Packages:
                     version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
-            log.info("{} version: {}", package_name, found_version)
+            log.debug("{} version: {}", package_name, found_version)
             return found_version
         except TypeError as e:  # pragma: no cover
             log.error("{}: {}", e, found_version)
@@ -142,7 +142,7 @@ class Packages:
                 version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
-        log.info("{} version: {}", program, found_version)
+        log.debug("{} version: {}", program, found_version)
         return found_version
 
     @staticmethod

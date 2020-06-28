@@ -163,6 +163,23 @@ def test_create(capfd):
     )
 
     create_command = "rapydo create first --auth postgres --frontend angular"
+    create_command += " --services rabbit --env RABBITMQ_PASSWORD=invalid£password"
+    create_command += " --current --force"
+    exec_command(
+        capfd,
+        create_command,
+        "Folder projects/first/confs already exists",
+        "Project first successfully created",
+    )
+
+    informative = "Some special characters, including £ § ” ’, should be avoided "
+    informative = "due to unexpected crashes occurred during RabbitMQ startup"
+
+    exec_command(
+        capfd, "rapydo init", "Invalid characters in RABBITMQ_PASSWORD.", informative,
+    )
+
+    create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit"
     create_command += " --current --force"
     exec_command(

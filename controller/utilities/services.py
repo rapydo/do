@@ -121,3 +121,14 @@ def get_celerybeat_scheduler(env):
         return "redbeat.RedBeatScheduler"
 
     return "Unknown"
+
+
+def check_rabbit_password(pwd):
+    invalid_rabbit_characters = ["£", "§", "”", "’"]
+    if any([c in pwd for c in invalid_rabbit_characters]):
+        log.exit(
+            """Invalid characters in RABBITMQ_PASSWORD.
+Some special characters, including {}, should be avoided due to unexpected crashes
+occurred during RabbitMQ startup """,
+            " ".join(invalid_rabbit_characters),
+        )

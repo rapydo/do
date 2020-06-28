@@ -2,9 +2,10 @@ import { Component } from "@angular/core";
 
 // import { {{name.title().replace(" ", "")}}Service } from "@app/services/{name}"
 
-import { ApiService } from "../../services/api";
-import { AuthService } from "../../services/auth";
-import { NotificationService } from "../../services/notification";
+import { NgxSpinnerService } from "ngx-spinner";
+import { ApiService } from "@rapydo/services/api";
+import { AuthService } from "@rapydo/services/auth";
+import { NotificationService } from "@rapydo/services/notification";
 
 
 @Component({
@@ -14,6 +15,7 @@ import { NotificationService } from "../../services/notification";
 export class {{name.title().replace(" ", "")}}Component {
 
   constructor(
+    private spinner: NgxSpinnerService,
     private api: ApiService,
     private auth: AuthService,
     private notify: NotificationService,
