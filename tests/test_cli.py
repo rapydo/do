@@ -1056,9 +1056,12 @@ RUN mkdir xyz
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
+    # Please note the use of the first project.
+    # This way we prevent to rebuilt the custom image of testbuild
+    # This simulate a pull updating a core image making the custom image obsolete
     exec_command(
         capfd,
-        "rapydo -s rabbit build --core",
+        "rapydo -p first -s rabbit build --core",
         "Core images built",
         "No custom images to build",
     )
