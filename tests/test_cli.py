@@ -1119,6 +1119,9 @@ def test_extend(capfd):
     )
 
     exec_command(
+        capfd, "rapydo -p ext init --force", "Project initialized",
+    )
+    exec_command(
         capfd, "rapydo -p ext check -i main --no-git --no-builds", "Checks completed",
     )
 
