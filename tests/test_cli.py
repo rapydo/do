@@ -927,8 +927,9 @@ def test_all(capfd):
         capfd, "rapydo dhparam", "No container found for proxy_1",
     )
 
-
-def test_build(capfd):
+    ####################
+    # ### TEST BUILD ###
+    ####################
 
     create_command = "rapydo create testbuild --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
