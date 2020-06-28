@@ -102,3 +102,22 @@ def normalize_placeholder_variable(key):
         return "RABBITMQ_PASSWORD"
 
     return key
+
+
+def get_celerybeat_scheduler(env):
+
+    if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
+        return "Unknown"
+
+    celery_backend = env.get("CELERY_BACKEND")
+
+    if celery_backend is None:
+        return "Unknown"
+
+    if celery_backend == "MONGODB":
+        return "celerybeatmongo.schedulers.MongoScheduler"
+
+    if celery_backend == "REDIS":
+        return "redbeat.RedBeatScheduler"
+
+    return "Unknown"

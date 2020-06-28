@@ -6,7 +6,6 @@
 # Retrocompatibility for Python < 3.6
 from distutils.version import LooseVersion
 
-from plumbum.commands.processes import ProcessExecutionError
 from sultan.api import Sultan
 
 from controller import TESTING, log
@@ -149,21 +148,35 @@ class Packages:
     @staticmethod
     def get_bin_version(exec_cmd, option="--version"):
 
-        output = None
         try:
             output = system.execute_command(exec_cmd, option)
 
-            # try splitting on comma and/or parenthesis
             # then last element on spaces
-            output = output.split("(")[0].split(",")[0].split()[::-1][0]
+            # get up to the first open round bracket if any, or return the whole string
+            output = output.split("(")[0]
+            # get up to the first comma if any, or return the whole string
+            output = output.split(",")[0]
+            # split on spaces and take the last element
+            output = output.split()[-1]
+            # Remove trailing spaces
             output = output.strip()
+            # Removed single quotes
             output = output.replace("'", "")
 
+            # That's all... this magic receipt is able to extract
+            # version information from most of outputs, e.g.
+            # Python 3.8.2
+            # Docker version 19.03.8, build afacb8b7f0
+            # git version 2.25.1
+            # rapydo version 0.7.4
             return output
-        except ProcessExecutionError as e:
-            log.error("{} not found: {}", exec_cmd, e)
-        except BaseException:
-            log.critical("Cannot parse command output: {}", output)
+            # Note that in may other cases it fails...
+            # but we are interested in a very small list of programs, so it's ok
+            # echo --version -> --version
+            # ls --version -> ls
+            # pip3 --version -> a path
+        except system.ExecutionException as e:
+            log.error(e)
 
         return None
 

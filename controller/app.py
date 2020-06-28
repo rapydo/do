@@ -608,20 +608,7 @@ class Application:
         privileged_mode = self.current_args.get("privileged")
         env["DOCKER_PRIVILEGED_MODE"] = "true" if privileged_mode else "false"
 
-        if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
-            env["CELERYBEAT_SCHEDULER"] = "Unknown"
-        else:
-            celery_backend = env.get("CELERY_BACKEND")
-            if celery_backend is None:
-                env["CELERYBEAT_SCHEDULER"] = "Unknown"
-            elif celery_backend == "MONGODB":
-                env[
-                    "CELERYBEAT_SCHEDULER"
-                ] = "celerybeatmongo.schedulers.MongoScheduler"
-            elif celery_backend == "REDIS":
-                env["CELERYBEAT_SCHEDULER"] = "redbeat.RedBeatScheduler"
-            else:
-                env["CELERYBEAT_SCHEDULER"] = "Unknown"
+        env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
 
         env["DOCKER_NETWORK_MODE"] = self.current_args.get("net", "bridge")
 

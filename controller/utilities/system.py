@@ -2,9 +2,13 @@ import os
 import pwd
 
 from plumbum import local
-from plumbum.commands.processes import ProcessExecutionError
+from plumbum.commands.processes import CommandNotFound, ProcessExecutionError
 
 from controller import log
+
+
+class ExecutionException(BaseException):
+    pass
 
 
 def execute_command(command, parameters):
@@ -14,9 +18,13 @@ def execute_command(command, parameters):
         command = local[command]
         log.verbose("Executing command {} {}", command, parameters)
         return command(parameters)
+    except CommandNotFound:
+        raise ExecutionException("Command not found: {}".format(command))
 
-    except ProcessExecutionError as e:
-        raise e
+    except ProcessExecutionError:
+        raise ExecutionException(
+            "Cannot execute {} {}".format(command, " ".join(parameters))
+        )
 
 
 def get_username(uid):
