@@ -599,7 +599,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo create justanother --auth postgres --frontend no --current",
-        "Project first successfully created",
+        "Project justanother successfully created",
     )
 
     os.remove(".projectrc")
