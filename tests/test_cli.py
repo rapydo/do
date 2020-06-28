@@ -1017,12 +1017,12 @@ RUN mkdir xyz
     r.git.commit("-a", "-m", "'fake'")
 
     # Selected a very fast service to speed up tests
-    # Build custom rabbit image in third project from pulled image
+    # Build custom rabbit image from pulled image
     exec_command(
         capfd,
-        "rapydo -p third -s rabbit build",
+        "rapydo -p testbuild -s rabbit build",
         "Successfully built",
-        "Successfully tagged third/rabbit:{}".format(__version__),
+        "Successfully tagged testbuild/rabbit:{}".format(__version__),
         "Custom images built",
     )
 
@@ -1046,12 +1046,12 @@ RUN mkdir xyz
     img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
     # => c1a845de8052
     img_id = img_id[7:19]
-    # rapydo/rabbitmq has a child: third/rabbit just created
+    # rapydo/rabbitmq has a child: testbuild/rabbit just created
     exec_command(
         capfd,
         "rapydo ancestors {}".format(img_id),
         "Finding all children and (grand)+ children of {}".format(img_id),
-        "third/rabbit",
+        "testbuild/rabbit",
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
@@ -1064,7 +1064,7 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "rapydo check -i main --no-git",
-        "Obsolete image third/rabbit:{}".format(__version__),
+        "Obsolete image testbuild/rabbit:{}".format(__version__),
         "built on ",
         " that changed on ",
         "Update it with: rapydo --services rabbit build",
@@ -1084,13 +1084,13 @@ RUN mkdir xyz
 
 
 def test_extend(capfd):
-    # second project is --auth postgres --frontend angular
-    # the third one is --auth neo4j --frontend angular
+    # base project is --auth postgres --frontend angular
+    # the ext one is --auth neo4j --frontend angular
     exec_command(
         capfd,
-        "rapydo create second --auth neo4j --frontend no --current",
+        "rapydo create base --auth neo4j --frontend no --current",
         "Folder projects already exists",
-        "Project second successfully created",
+        "Project base successfully created",
     )
 
     exec_command(
@@ -1104,14 +1104,14 @@ def test_extend(capfd):
         "Invalid extend value: project doesnotexist not found",
     )
 
-    create_command = "rapydo create third --extend second"
+    create_command = "rapydo create ext --extend base"
     create_command += " --auth neo4j --frontend angular"
     create_command += " --current --services rabbit"
     exec_command(
         capfd,
         create_command,
         "Folder projects already exists",
-        "Project third successfully created",
+        "Project ext successfully created",
     )
 
 
