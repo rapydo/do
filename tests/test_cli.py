@@ -162,24 +162,15 @@ def test_create(capfd):
         "{f}".format(f=pconf),
     )
 
-    create_command = "rapydo create testinvalid --auth postgres --frontend angular"
+    create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --env RABBITMQ_PASSWORD=invalid£password"
     create_command += " --current --force"
     exec_command(
-        capfd, create_command, "Project testinvalid successfully created",
-    )
-
-    informative = "Some special characters, including £ § ” ’, are not allowed "
-    informative = "because make RabbitMQ crash at startup"
-
-    exec_command(
         capfd,
-        "rapydo -p testinvalid init",
-        "Not allowed characters found in RABBITMQ_PASSWORD.",
-        informative,
+        create_command,
+        "Folder projects/first/confs already exists",
+        "Project first successfully created",
     )
-
-    shutil.rmtree("projects/testinvalid")
 
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit"
@@ -1138,6 +1129,32 @@ RUN mkdir xyz
     exec_command(
         capfd, "rapydo dhparam", "No container found for proxy_1",
     )
+
+
+def test_rabbit_invalid_characters(capfd):
+
+    create_command = "rapydo create testinvalid --auth postgres --frontend angular"
+    create_command += " --services rabbit --env RABBITMQ_PASSWORD=invalid£password"
+    create_command += " --current --force"
+    exec_command(
+        capfd, create_command, "Project testinvalid successfully created",
+    )
+
+    informative = "Some special characters, including £ § ” ’, are not allowed "
+    informative = "because make RabbitMQ crash at startup"
+
+    exec_command(
+        capfd,
+        "rapydo -p testinvalid init",
+        "Not allowed characters found in RABBITMQ_PASSWORD.",
+        informative,
+    )
+
+    shutil.rmtree("projects/testinvalid")
+
+
+# Most of the following tests will destroy the environment... keep them as last tests
+def test_last(capfd):
 
     exec_command(
         capfd,
