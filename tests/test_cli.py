@@ -177,7 +177,7 @@ def test_create(capfd):
 
     exec_command(
         capfd,
-        "rapydo init",
+        "rapydo check -i main",
         "Not allowed characters found in RABBITMQ_PASSWORD.",
         informative,
     )
