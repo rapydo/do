@@ -1295,13 +1295,20 @@ def test_install(capfd):
 
 
 # Some final tests
-def test_bonus(capfd):
+def test_lastest(capfd):
+
+    exec_command(
+        capfd,
+        "rapydo create abc --auth postgres --frontend no --current --force",
+        "Project abc successfully created",
+    )
+
     folder = os.getcwd()
     # Tests from a subfolder
     os.chdir("projects")
     exec_command(
         capfd,
-        "rapydo -p first check -i main --no-git --no-builds",
+        "rapydo -p abc check -i main --no-git --no-builds",
         "You are not in the main folder",
         "Checks completed",
     )
