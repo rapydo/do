@@ -1121,6 +1121,8 @@ def test_extend(capfd):
 
 def test_services_activation(capfd):
 
+    os.remove(".projectrc")
+
     # Test services activation from create --services
     services = [
         "postgres",
@@ -1299,7 +1301,7 @@ def test_bonus(capfd):
     os.chdir("projects")
     exec_command(
         capfd,
-        "rapydo -p third check -i main --no-git --no-builds",
+        "rapydo -p first check -i main --no-git --no-builds",
         "You are not in the main folder",
         "Checks completed",
     )
