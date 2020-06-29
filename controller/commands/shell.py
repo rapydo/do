@@ -1,6 +1,6 @@
 from controller import log
 from controller.compose import Compose
-from controller.project import ANGULAR
+from controller.utilities import services
 
 
 def __call__(args, files, frontend, **kwargs):
@@ -13,36 +13,17 @@ def __call__(args, files, frontend, **kwargs):
 
     user = args.get("user")
     if user is not None and user.strip() == "":
-        developer_services = ["backend", "celery", "celeryui", "celery-beat"]
+        user = services.get_default_user(service, frontend)
 
-        if service in developer_services:
-            user = "developer"
-        elif service in ["frontend"]:
-            if frontend == ANGULAR:
-                user = "node"
-        elif service == "postgres":
-            user = "postgres"
-        # Tests are not based on neo4j... pull an additional image and slow down the
-        # test suite only to test this case is not needed, we can assume it works
-        # having tested 3 images out of 4
-        elif service == "neo4j":  # pragma: no cover
-            user = "neo4j"
-        else:
-            # None == get the docker-compose default
-            user = None
     log.verbose("Command as user '{}'", user)
 
     command = args.get("command")
-    # Not easy to test all default commands...
-    if command is None:  # pragma: no cover
-        if not default_command:
-            command = "bash"
-        elif service == "backend":
-            command = "restapi launch"
-        elif service == "neo4j":
-            command = "bin/cypher-shell"
-        else:
-            command = "bash"
+    if command:
+        log.debug("Requested command: {}", command)
+    elif default_command:
+        command = services.get_default_command(service)
+    else:
+        command = "bash"
 
     return dc.exec_command(
         service, user=user, command=command, disable_tty=no_tty, detach=detach

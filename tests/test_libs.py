@@ -137,6 +137,22 @@ def test_all(capfd):
     env["CELERY_BACKEND"] = "INVALID"
     assert shorten(env) == "Unknown"
 
+    assert services.get_default_user("invalid", "angular") is None
+    assert services.get_default_user("backend", "") == "developer"
+    assert services.get_default_user("celery", "") == "developer"
+    assert services.get_default_user("celeryui", "") == "developer"
+    assert services.get_default_user("celery-beat", "") == "developer"
+    assert services.get_default_user("frontend", "invalid") is None
+    assert services.get_default_user("frontend", "no") is None
+    assert services.get_default_user("frontend", "angular") == "node"
+    assert services.get_default_user("frontend", "angularjs") is None
+    assert services.get_default_user("frontend", "react") is None
+    assert services.get_default_user("postgres", "") == "postgres"
+    assert services.get_default_user("neo4j", "") == "neo4j"
+
+    assert services.get_default_command("invalid") == "bash"
+    assert services.get_default_command("backend") == "restapi launch"
+    assert services.get_default_command("neo4j") == "bin/cypher-shell"
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
     # )

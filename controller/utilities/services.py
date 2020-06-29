@@ -1,6 +1,7 @@
 from glom import glom
 
 from controller import log
+from controller.project import ANGULAR
 
 
 def walk_services(actives, dependecies, index=0):
@@ -132,3 +133,32 @@ def check_rabbit_password(pwd):
             "because make RabbitMQ crash at startup",
             " ".join(invalid_rabbit_characters),
         )
+
+
+def get_default_user(service, frontend):
+
+    if service in ["backend", "celery", "celeryui", "celery-beat"]:
+        return "developer"
+
+    if service in ["frontend"]:
+        if frontend == ANGULAR:
+            return "node"
+
+    if service == "postgres":
+        return "postgres"
+
+    if service == "neo4j":
+        return "neo4j"
+
+    return None
+
+
+def get_default_command(service):
+
+    if service == "backend":
+        return "restapi launch"
+
+    if service == "neo4j":
+        return "bin/cypher-shell"
+
+    return "bash"
