@@ -1099,7 +1099,6 @@ RUN mkdir xyz
         "Cannot determine build priority between rabbit2 and rabbit",
         "Removed redudant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
         "Successfully built",
-        "Custom images built",
     )
     # Restore the default project
     exec_command(
