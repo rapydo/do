@@ -1126,7 +1126,6 @@ RUN mkdir xyz
         capfd,
         "rapydo -s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
-        "Cannot determine build priority between rabbit2 and rabbit",
         "Removed redundant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
 
