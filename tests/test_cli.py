@@ -698,6 +698,36 @@ def test_all(capfd):
     exec_command(
         capfd, "rapydo shell backend --command hostname", "backend-server",
     )
+
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(2)
+
+    interrupted = False
+    try:
+        exec_command(
+            capfd,
+            "rapydo shell backend --default-command",
+            "*** RESTful HTTP API ***",
+            "Serving Flask app",
+        )
+
+    except Timeout:
+        interrupted = True
+    assert interrupted
+
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(2)
+
+    interrupted = False
+    try:
+        exec_command(
+            capfd, "rapydo shell backend", "developer@backend-server:[/code]",
+        )
+
+    except Timeout:
+        interrupted = True
+    assert interrupted
+
     # Testing default users
     exec_command(
         capfd, "rapydo shell backend --command whoami", "developer",
