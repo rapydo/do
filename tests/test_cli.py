@@ -1096,11 +1096,7 @@ RUN mkdir xyz
         capfd,
         "rapydo -s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
-        "Removed redudant services from ",
-        # Output is random between:
-        # "Removed redudant services from ['rabbit2', 'rabbit'] -> ['rabbit']",
-        # and:
-        # "Removed redudant services from ['rabbit1', 'rabbit2'] -> ['rabbit2']",
+        "Removed redudant services from ['rabbit', 'rabbitw'] -> ['rabbitw']",
         "Successfully built",
         "Custom images built",
     )

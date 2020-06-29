@@ -4,11 +4,10 @@ Parse dockerfiles and check for builds
 # https://github.com/DBuildService/dockerfile-parse
 # https://docker-py.readthedocs.io/en/stable/
 """
-import os
 
 from dockerfile_parse import DockerfileParser
 
-from controller import CONTAINERS_YAML_DIRNAME, log
+from controller import log
 
 name_priorities = [
     "backend",
@@ -139,6 +138,8 @@ def locate_builds(base_services, services):
 
 def remove_redundant_services(services, builds):
 
+    # Sort the list of services to obtain determinist outputs
+    services.sort()
     # this will be the output
     non_redundant_services = []
 
