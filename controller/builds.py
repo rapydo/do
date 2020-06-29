@@ -170,7 +170,7 @@ def remove_redundant_services(services, builds):
     # to list of non redudant services
     for build in requested_builds:
         redundant_services = requested_builds.get(build)
-        if redundant_services is None or len(redundant_services) == 0:
+        if not redundant_services:
             continue
         if len(redundant_services) == 1:
             non_redundant_services.append(redundant_services[0])
