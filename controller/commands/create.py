@@ -1,5 +1,4 @@
 import os
-from difflib import unified_diff
 
 from controller import PROJECT_DIR, __version__, gitter, log
 from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
@@ -21,45 +20,6 @@ def parse_env_variables(envs):
         env_variables[k] = v
 
     return env_variables
-
-
-def show_file_diff(path, template):
-
-    with open(path) as f:
-        current_file = f.read().splitlines()
-
-    template = template.splitlines()
-
-    diff = unified_diff(current_file, template, n=0, lineterm="")
-
-    diff = list(diff)
-
-    if not diff:
-        log.debug("{} already exists", path)
-        return True
-
-    # should never happen
-    if diff[0] != "--- ":  # pragma: no cover
-        log.error("Malformed diff output: {}", diff)
-        return False
-
-    # should never happen
-    if diff[1] != "+++ ":  # pragma: no cover
-        log.error("Malformed diff output: {}", diff)
-        return False
-
-    log.info("{} already exists with diffs", path)
-    for d in diff[2:]:
-        if d.startswith("@@ "):
-            # print("NEW BLOCK")
-            continue
-        if d.startswith("-"):
-            print("\033[0;31m{}\033[0m".format(d[1:].strip()))
-        elif d.startswith("+"):
-            print("\033[0;32m{}\033[0m".format(d[1:].strip()))
-        # should never happen
-        else:  # pragma: no cover
-            log.error("Malformed diff output: {}", d)
 
 
 def __call__(args, **kwargs):
@@ -265,14 +225,14 @@ def create(
         # automatic creation
         if auto:
             if os.path.exists(p) and not force:
-                show_file_diff(p, template)
+                log.info("{} already exists with diffs", p)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
         if os.path.exists(p):
-            show_file_diff(p, template)
+            log.info("{} already exists with diffs", p)
         else:
             print("\n{}".format(template))
             log.exit(p)

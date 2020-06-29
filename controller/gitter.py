@@ -303,17 +303,17 @@ def check_updates(path, gitobj):
         )
     else:
 
-        if len(commits_behind_list) > 0:
-            log.warning("{} repo should be updated!", path)
-        else:
+        if not commits_behind_list:
             log.debug("{} repo is updated", path)
-        for c in commits_behind_list:
-            message = c.message.strip().replace("\n", "")
+        else:  # pragma: no cover
+            log.warning("{} repo should be updated!", path)
+            for c in commits_behind_list:
+                message = c.message.strip().replace("\n", "")
 
-            sha = c.hexsha[0:7]
-            if len(message) > 60:
-                message = message[0:57] + "..."
-            log.warning("Missing commit from {}: {} ({})", path, sha, message)
+                sha = c.hexsha[0:7]
+                if len(message) > 60:
+                    message = message[0:57] + "..."
+                log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
     ahead_check = "origin/{}..{}".format(branch, branch)
     commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
