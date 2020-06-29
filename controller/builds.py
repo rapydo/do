@@ -167,7 +167,7 @@ def remove_redundant_services(services, builds):
     # Transform requested builds from:
     # {'build-name': {'services': ['A', 'B'], [...]}
     # NOTE: only considering requested services
-    # to list of non redudant services
+    # to list of non redundant services
     for build in requested_builds:
         redundant_services = requested_builds.get(build)
         if not redundant_services:
@@ -184,7 +184,8 @@ def remove_redundant_services(services, builds):
                     service = name_priority(service, serv)
             non_redundant_services.append(service)
 
-    log.info(
-        "Removed redudant services from {} -> {}", services, non_redundant_services
-    )
+    if len(services) != len(non_redundant_services):
+        log.info(
+            "Removed redundant services from {} -> {}", services, non_redundant_services
+        )
     return non_redundant_services

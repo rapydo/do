@@ -1097,9 +1097,9 @@ RUN mkdir xyz
         "rapydo -s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
         "Cannot determine build priority between rabbit2 and rabbit",
-        "Removed redudant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
-        "Successfully built",
+        "Removed redundant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
+
     # Restore the default project
     exec_command(
         capfd, "rapydo -p first init --force", "Project initialized",
