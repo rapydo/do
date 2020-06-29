@@ -21,12 +21,9 @@ name_priorities = [
 
 
 def name_priority(name1, name2):
-    if name1 not in name_priorities:  # pragma: no cover
-        log.warning("Cannot determine build priority name for {}", name1)
+    if name1 not in name_priorities or name2 not in name_priorities:
+        log.warning("Cannot determine build priority between {} and {}", name1, name2)
         return name2
-    if name2 not in name_priorities:  # pragma: no cover
-        log.warning("Cannot determine build priority name for {}", name2)
-        return name1
     p1 = name_priorities.index(name1)
     p2 = name_priorities.index(name2)
     if p1 <= p2:
@@ -186,7 +183,7 @@ def remove_redundant_services(services, builds):
                     service = name_priority(service, serv)
             non_redundant_services.append(service)
 
-    log.verbose(
+    log.info(
         "Removed redudant services from {} -> {}", services, non_redundant_services
     )
     return non_redundant_services

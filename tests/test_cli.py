@@ -1081,6 +1081,29 @@ RUN mkdir xyz
         "Finding all children and (grand)+ children of {}".format(img_id),
     )
 
+    # Add a second service with the same image to test redundant builds
+    with open("projects/testbuild/confs/commons.yml", "a") as f:
+        f.write(
+            """
+  rabbit2:
+    build: ${PROJECT_DIR}/builds/rabbit
+    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+
+    """
+        )
+
+    exec_command(
+        capfd,
+        "rapydo -s rabbit,rabbit2 build",
+        "Cannot determine build priority between rabbit and rabbit2",
+        "Removed redudant services from ",
+        # Output is random between:
+        # "Removed redudant services from ['rabbit2', 'rabbit'] -> ['rabbit']",
+        # and:
+        # "Removed redudant services from ['rabbit1', 'rabbit2'] -> ['rabbit2']",
+        "Successfully built",
+        "Custom images built",
+    )
     # Restore the default project
     exec_command(
         capfd, "rapydo -p first init --force", "Project initialized",
