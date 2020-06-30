@@ -170,7 +170,7 @@ def create(
 
     for f in folders:
         if os.path.exists(f):
-            log.debug("Folder {} already exists", f)
+            log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
             log.exit("\nmkdir -p {}", f)
@@ -219,14 +219,14 @@ def create(
         # automatic creation
         if auto:
             if os.path.exists(p) and not force:
-                log.info("Base file already exists: {}", p)
+                log.info("Project file already exists: {}", p)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
         if os.path.exists(p):
-            log.info("Base file already exists: {}", p)
+            log.info("Project file already exists: {}", p)
         else:
             print("\n{}".format(template))
             log.exit(p)

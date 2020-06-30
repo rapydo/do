@@ -168,7 +168,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend angular --current --no-auto",
-        "Folder projects/first/confs already exists",
+        "Project folder already exists: projects/first/confs",
         "{f}".format(f=pconf),
     )
 
@@ -178,7 +178,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         create_command,
-        "Folder projects/first/confs already exists",
+        "Project folder already exists: projects/first/confs",
         "Project first successfully created",
     )
 
@@ -188,7 +188,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         create_command,
-        "Folder projects/first/confs already exists",
+        "Project folder already exists: projects/first/confs",
         "Project first successfully created",
     )
 
@@ -200,7 +200,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         create_command,
-        "Folder projects/first/confs already exists",
+        "Project folder already exists: projects/first/confs",
         "A backup of {f} is saved as {f}.bak".format(f=pconf),
         "Project first successfully created",
     )
@@ -208,16 +208,16 @@ def test_create(capfd):
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend angular --current",
-        "Folder projects/first/confs already exists",
-        "{f} already exists".format(f=pconf),
+        "Project folder already exists: projects/first/confs ",
+        "Project file already exists: {}".format(pconf),
         "Project first successfully created",
     )
 
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend angular --no-auto --current",
-        "Folder projects/first/confs already exists",
-        "{f} already exists".format(f=pconf),
+        "Project folder already exists: projects/first/confs",
+        "Project file already exists: {}".format(pconf),
         "Project first successfully created",
     )
 
