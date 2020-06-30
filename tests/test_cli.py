@@ -208,7 +208,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend angular --current",
-        "Project folder already exists: projects/first/confs ",
+        "Project folder already exists: projects/first/confs",
         "Project file already exists: {}".format(pconf),
         "Project first successfully created",
     )
