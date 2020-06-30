@@ -1141,7 +1141,7 @@ def test_extend(capfd):
     exec_command(
         capfd,
         "rapydo create base --auth neo4j --frontend no --current",
-        "Folder projects already exists",
+        "Project folder already exists: projects",
         "Project base successfully created",
     )
 
@@ -1162,7 +1162,7 @@ def test_extend(capfd):
     exec_command(
         capfd,
         create_command,
-        "Folder projects already exists",
+        "Project folder already exists: projects",
         "Project ext successfully created",
     )
 
