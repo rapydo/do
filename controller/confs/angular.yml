@@ -83,6 +83,8 @@ services:
       - ${SUBMODULE_DIR}/frontend/src:/app/app/rapydo
       - ${PROJECT_DIR}/frontend:/app/app/custom
 
+      - ${SUBMODULE_DIR}/frontend/cypress/tsconfig.json:/app/cypress/tsconfig.json
+      - ${SUBMODULE_DIR}/frontend/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
       - ${SUBMODULE_DIR}/frontend/cypress/support:/app/cypress/support
       - ${SUBMODULE_DIR}/frontend/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/frontend/cypress/fixtures:/app/cypress/fixtures
