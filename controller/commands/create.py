@@ -106,12 +106,6 @@ def create(
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
 
-    # log.critical(auth)
-    # log.critical(services)
-    # log.critical(enable_postgres)
-    # log.critical(enable_neo4j)
-    # log.critical(enable_irods)
-
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
 
@@ -225,14 +219,14 @@ def create(
         # automatic creation
         if auto:
             if os.path.exists(p) and not force:
-                log.info("{} already exists with diffs", p)
+                log.info("Base file already exists: {}", p)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
         if os.path.exists(p):
-            log.info("{} already exists with diffs", p)
+            log.info("Base file already exists: {}", p)
         else:
             print("\n{}".format(template))
             log.exit(p)

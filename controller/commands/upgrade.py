@@ -16,6 +16,9 @@ def __call__(args, project, conf_vars, services, **kwargs):
     if extend == EXTENDED_PROJECT_DISABLED:
         extend = None
 
+    force = path is not None
+    auto = path is not None
+
     create(
         project_name=project,
         auth=auth,
@@ -23,5 +26,7 @@ def __call__(args, project, conf_vars, services, **kwargs):
         services=services,
         extend=extend,
         force_current=True,
+        force=force,
+        auto=auto,
         path=path,
     )
