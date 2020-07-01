@@ -460,5 +460,14 @@ subcommands:
         default: null
         help: Image tag ID to be inspected
 
+  backup:
+    description: Execute a backup of one service
+    suboptions:
+      service:
+        positional: true
+        type: str
+        metavalue: SERVICE
+        default: null
+
   version:
     description: Retrieve version details

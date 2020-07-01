@@ -802,6 +802,12 @@ def test_all(capfd):
     exec_command(capfd, "rapydo verify neo4j", "Service neo4j not detected")
     exec_command(capfd, "rapydo verify sqlalchemy", "Service sqlalchemy is reachable")
 
+    exec_command(capfd, "rapydo backup neo4j", "Backup on neo4j is not implemented")
+    exec_command(
+        capfd, "rapydo backup sqlalchemy", "Backup on sqlalchemy is not implemented"
+    )
+    exec_command(capfd, "rapydo backup invalid", "Backup on invalid is not implemented")
+
     exec_command(
         capfd, "rapydo stop", "Stack stopped",
     )
