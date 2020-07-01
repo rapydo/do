@@ -129,25 +129,22 @@ def create(
     celery_broker = None  # Keep default value == RABBIT
     celery_backend = None  # Keep default value == RABBIT
     if enable_celery:
-        # BROKER SELECTION = rabbit | redis
-        if not enable_rabbit and not enable_redis:
-            enable_rabbit = True
 
         if enable_rabbit:
             celery_broker = "RABBIT"
         elif enable_redis:
             celery_broker = "REDIS"
-
-        # BACKEND SELECTION = rabbit | redis | mongo
-        if not enable_rabbit and not enable_redis and not enable_mongo:
-            enable_rabbit = True
+        else:
+            celery_broker = "RABBIT"
 
         if enable_redis:
             celery_backend = "REDIS"
         elif enable_mongo:
             celery_backend = "MONGODB"
-        elif enable_rabbit:
+        else:
             celery_backend = "RABBIT"
+
+        enable_rabbit = celery_broker == "RABBIT" or celery_backend == "RABBIT"
 
     env_variables = parse_env_variables(envs)
 

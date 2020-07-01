@@ -99,7 +99,9 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
             if image_tag not in dimages:
                 continue
 
-            if not any(x in active_services for x in build["services"]):
+            if not any(
+                x in active_services for x in build["services"]
+            ):  # pragma: no cover
                 log.verbose(
                     "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
@@ -118,7 +120,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
                 from_build = template_builds.get(from_img)
 
                 # Verify if template build exists
-                if from_img not in dimages:
+                if from_img not in dimages:  # pragma: no cover
 
                     log.exit(
                         "Missing template build for {} ({})\n{}",
@@ -129,7 +131,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
 
                 # Verify if template build is obsolete or not
                 obsolete, d1, d2 = build_is_obsolete(from_build, gits)
-                if obsolete:
+                if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
                 from_timestamp = get_build_timestamp(from_build, as_date=True)

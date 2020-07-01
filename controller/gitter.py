@@ -335,7 +335,7 @@ def check_updates(path, gitobj):
             message = c.message.strip().replace("\n", "")
 
             sha = c.hexsha[0:7]
-            if len(message) > 60:
+            if len(message) > 60:  # pragma: no cover
                 message = message[0:57] + "..."
             log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
 

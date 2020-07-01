@@ -170,7 +170,7 @@ def remove_redundant_services(services, builds):
     # to list of non redundant services
     for build in requested_builds:
         redundant_services = requested_builds.get(build)
-        if not redundant_services:
+        if not redundant_services:  # pragma: no cover
             continue
         if len(redundant_services) == 1:
             non_redundant_services.append(redundant_services[0])
