@@ -44,7 +44,7 @@ def __call__(
     info = container_info(services_dict, service)
     try:
         current_ports = info.get("ports", []).pop(0)
-    except IndexError:  # pragma: no cover
+    except IndexError:  # pragma: yes cover
         log.exit("No default port found?")
 
     # cannot set current_ports.published as default in get

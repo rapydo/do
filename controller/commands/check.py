@@ -57,14 +57,14 @@ def build_is_obsolete(build, gits):
         git_repo = build_templates
     elif path.startswith(vanilla.working_dir):
         git_repo = vanilla
-    else:  # pragma: no cover
+    else:  # pragma: yes cover
         log.exit("Unable to find git repo {}", path)
 
     build_timestamp = get_build_timestamp(build)
 
     for f in glob.iglob("{}/**/*".format(path), recursive=True):
         local_file = os.path.join(path, f)
-        if os.path.isdir(local_file):  # pragma: no cover
+        if os.path.isdir(local_file):  # pragma: yes cover
             continue
 
         obsolete, build_ts, last_commit = gitter.check_file_younger_than(
@@ -101,7 +101,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
 
             if not any(
                 x in active_services for x in build["services"]
-            ):  # pragma: no cover
+            ):  # pragma: yes cover
                 log.verbose(
                     "Checks skipped: template {} not enabled (service list = {})",
                     image_tag,
@@ -120,7 +120,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
                 from_build = template_builds.get(from_img)
 
                 # Verify if template build exists
-                if from_img not in dimages:  # pragma: no cover
+                if from_img not in dimages:  # pragma: yes cover
 
                     log.exit(
                         "Missing template build for {} ({})\n{}",
@@ -131,7 +131,7 @@ def __call__(args, base_services, compose_config, active_services, gits, **kwarg
 
                 # Verify if template build is obsolete or not
                 obsolete, d1, d2 = build_is_obsolete(from_build, gits)
-                if obsolete:  # pragma: no cover
+                if obsolete:  # pragma: yes cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
                 from_timestamp = get_build_timestamp(from_build, as_date=True)

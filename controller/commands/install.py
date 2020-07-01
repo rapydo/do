@@ -11,7 +11,7 @@ def install_controller_from_pip(version, user):
     package = "rapydo-controller"
     controller = "{}=={}".format(package, version)
     installed = Packages.install(controller, user=user)
-    if not installed:  # pragma: no cover
+    if not installed:  # pragma: yes cover
         log.error("Unable to install controller {} from pip", version)
     else:
         log.info("Controller version {} installed from pip", version)
@@ -28,7 +28,7 @@ def install_controller_from_git(version, user):
 
     installed = Packages.install(controller, user=user)
 
-    if not installed:  # pragma: no cover
+    if not installed:  # pragma: yes cover
         log.error("Unable to install controller {} from git", version)
     else:
         log.info("Controller version {} installed from git", version)
@@ -47,7 +47,7 @@ def install_controller_from_folder(gits, version, user, editable):
     b = gitter.get_active_branch(do_repo)
 
     if b is None:
-        log.error("Unable to read local controller repository")  # pragma: no cover
+        log.error("Unable to read local controller repository")  # pragma: yes cover
     elif b == version:
         log.info("Controller repository already at {}", version)
     elif gitter.switch_branch(do_repo, version):
@@ -57,7 +57,7 @@ def install_controller_from_folder(gits, version, user, editable):
 
     installed = Packages.install(do_path, editable=editable, user=user)
 
-    if not installed:  # pragma: no cover
+    if not installed:  # pragma: yes cover
         log.error("Unable to install controller {} from local folder", version)
     else:
         log.info("Controller version {} installed from local folder", version)

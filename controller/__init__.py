@@ -38,7 +38,7 @@ log.remove()
 
 if TESTING:
     log.add(sys.stdout, colorize=False, format="{message}")
-else:  # pragma: no cover
+else:  # pragma: yes cover
     log.add(
         sys.stderr,
         colorize=True,
@@ -48,7 +48,7 @@ else:  # pragma: no cover
 if LOGS_FILE is not None:
     try:
         log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
-    except PermissionError as e:  # pragma: no cover
+    except PermissionError as e:  # pragma: yes cover
         log.error(e)
         LOGS_FILE = None
 

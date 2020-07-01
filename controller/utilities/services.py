@@ -13,7 +13,7 @@ def walk_services(actives, dependecies, index=0):
 
     for service in dependecies.get(next_active, []):
         # Not easy to test, since we have few services with dependencies
-        if service not in actives:  # pragma: no cover
+        if service not in actives:  # pragma: yes cover
             actives.append(service)
 
     index += 1

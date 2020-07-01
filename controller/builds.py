@@ -46,7 +46,7 @@ def find_templates_build(base_services):
             template_name = base_service.get("name")
             template_image = base_service.get("image")
 
-            if template_image is None:  # pragma: no cover
+            if template_image is None:  # pragma: yes cover
                 log.exit(
                     "Template builds must have a name, missing for {}".format(
                         template_name
@@ -170,7 +170,7 @@ def remove_redundant_services(services, builds):
     # to list of non redundant services
     for build in requested_builds:
         redundant_services = requested_builds.get(build)
-        if not redundant_services:  # pragma: no cover
+        if not redundant_services:  # pragma: yes cover
             continue
         if len(redundant_services) == 1:
             non_redundant_services.append(redundant_services[0])

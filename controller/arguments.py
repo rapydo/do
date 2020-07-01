@@ -117,7 +117,7 @@ class ArgParser:
                 self.projectrc = load_yaml_file(
                     PROJECTRC_ALTERNATIVE, path=os.curdir, is_optional=True
                 )
-        except AttributeError as e:  # pragma: no cover
+        except AttributeError as e:  # pragma: yes cover
             log.exit(e)
 
         self.host_configuration = self.projectrc.pop("project_configuration", {})
@@ -125,7 +125,7 @@ class ArgParser:
         # Mix with projectrc
         for key, value in self.projectrc.items():
 
-            if value is None:  # pragma: no cover
+            if value is None:  # pragma: yes cover
                 log.warning("Uncovered condition, please report to extend tests")
                 continue
 

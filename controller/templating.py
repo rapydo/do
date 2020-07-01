@@ -70,7 +70,7 @@ class Templating:
             return content
         except TemplateNotFound as e:
             log.exit("Template {} not found in: {}", str(e), self.template_dir)
-        except UndefinedError as e:  # pragma: no cover
+        except UndefinedError as e:  # pragma: yes cover
             log.exit(e)
 
     def save_template(self, filename, content, force=False):
@@ -79,7 +79,7 @@ class Templating:
             if force:
                 self.make_backup(filename)
             # It is always verified before calling save_template from app, create & add
-            else:  # pragma: no cover
+            else:  # pragma: yes cover
                 log.exit("File {} already exists", filename)
 
         with open(filename, "w+") as fh:

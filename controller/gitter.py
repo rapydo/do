@@ -15,7 +15,7 @@ def get_repo(path):
         return Repo(path)
     except NoSuchPathError:
         return None
-    except InvalidGitRepositoryError:  # pragma: no cover
+    except InvalidGitRepositoryError:  # pragma: yes cover
         return None
 
 
@@ -80,7 +80,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
 
     try:
         gitobj.git.checkout(branch_name)
-    except GitCommandError as e:  # pragma: no cover
+    except GitCommandError as e:  # pragma: yes cover
         log.error(e)
         return False
 
@@ -108,7 +108,7 @@ def clone(online_url, path, branch, do=False, check=True):
 
     if do:
         ret = switch_branch(gitobj, branch)
-        if not ret:  # pragma: no cover
+        if not ret:  # pragma: yes cover
             log.exit("Cannot switch repo {} to version {}", local_path, branch)
 
     if check:
@@ -123,7 +123,7 @@ def compare_repository(gitobj, branch, online_url, path=None):
     # url = list(origin.urls).pop(0)
     url = gitobj.remotes.origin.url
 
-    if online_url != url:  # pragma: no cover
+    if online_url != url:  # pragma: yes cover
 
         local_url = urlparse(url)
         expected_url = urlparse(online_url)
@@ -179,7 +179,7 @@ def check_file_younger_than(gitobj, filename, timestamp):
 
     try:
         commits = gitobj.blame(rev="HEAD", file=filename)
-    except GitCommandError as e:  # pragma: no cover
+    except GitCommandError as e:  # pragma: yes cover
         log.exit("Failed 'blame' operation on {}.\n{}", filename, e)
     dates = []
     for commit in commits:
@@ -214,7 +214,7 @@ def print_diff(gitobj, unstaged):
         repo_folder = repo_folder[1:]
     if not repo_folder.endswith("/"):
         repo_folder += "/"
-    if repo_folder == "/":  # pragma: no cover
+    if repo_folder == "/":  # pragma: yes cover
         repo_folder = ""
 
     if changed:
@@ -248,9 +248,9 @@ def update(path, gitobj):
                 branch = gitobj.active_branch
                 log.info("Updating {} {} (branch {})", remote, path, branch)
                 remote.pull(branch)
-            except GitCommandError as e:  # pragma: no cover
+            except GitCommandError as e:  # pragma: yes cover
                 log.error("Unable to update {} repo\n{}", path, e)
-            except TypeError as e:  # pragma: no cover
+            except TypeError as e:  # pragma: yes cover
                 if TESTING:
                     log.warning("Unable to update {} repo, {}", path, e)
                 else:
@@ -273,7 +273,7 @@ def fetch(path, gitobj):
             log.verbose("Fetching {} on {}", remote, path)
             try:
                 remote.fetch()
-            except GitCommandError as e:  # pragma: no cover
+            except GitCommandError as e:  # pragma: yes cover
                 log.exit(e)
 
 
@@ -282,7 +282,7 @@ def check_updates(path, gitobj):
     fetch(path, gitobj)
 
     branch = get_active_branch(gitobj)
-    if branch is None:  # pragma: no cover
+    if branch is None:  # pragma: yes cover
         log.warning("Is {} repo detached? Unable to verify updates", path)
         return False
 
@@ -295,7 +295,7 @@ def check_updates(path, gitobj):
 
     try:
         commits_behind_list = list(commits_behind)
-    except GitCommandError:  # pragma: no cover
+    except GitCommandError:  # pragma: yes cover
         log.info(
             "Remote branch {} not found for {} repo. Is it a local branch?",
             branch,
@@ -305,7 +305,7 @@ def check_updates(path, gitobj):
 
         if not commits_behind_list:
             log.debug("{} repo is updated", path)
-        else:  # pragma: no cover
+        else:  # pragma: yes cover
             log.warning("{} repo should be updated!", path)
             for c in commits_behind_list:
                 message = c.message.strip().replace("\n", "")
@@ -319,7 +319,7 @@ def check_updates(path, gitobj):
     commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
     try:
         commits_ahead_list = list(commits_ahead)
-    except GitCommandError:  # pragma: no cover
+    except GitCommandError:  # pragma: yes cover
         log.info(
             "Remote branch {} not found for {}. Is it a local branch?".format(
                 branch, path
@@ -335,7 +335,7 @@ def check_updates(path, gitobj):
             message = c.message.strip().replace("\n", "")
 
             sha = c.hexsha[0:7]
-            if len(message) > 60:  # pragma: no cover
+            if len(message) > 60:  # pragma: yes cover
                 message = message[0:57] + "..."
             log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
 

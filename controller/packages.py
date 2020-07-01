@@ -21,7 +21,7 @@ class Packages:
     @staticmethod
     def install(package, editable=False, user=False, use_pip3=True):
 
-        if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
+        if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: yes cover
             return Packages.install(
                 package=package, editable=editable, user=user, use_pip3=False
             )
@@ -38,7 +38,7 @@ class Packages:
                 # --user does not work on travis:
                 # Can not perform a '--user' install.
                 # User site-packages are not visible in this virtualenv.
-                if not TESTING and user:  # pragma: no cover
+                if not TESTING and user:  # pragma: yes cover
                     command += " --user"
                 command += " {}".format(package)
 
@@ -51,7 +51,7 @@ class Packages:
                 for r in result.stderr:
                     print(r)
                 return result.rc == 0
-        except BaseException as e:  # pragma: no cover
+        except BaseException as e:  # pragma: yes cover
             log.exit(e)
 
     @staticmethod
@@ -73,7 +73,7 @@ class Packages:
 
         try:
             package = import_module(package_name)
-        except import_exc:  # pylint:disable=catching-non-exception  # pragma: no cover
+        except import_exc:  # pylint:disable=catching-non-exception  # pragma: yes cover
             return None
         else:
             return package
@@ -81,7 +81,7 @@ class Packages:
     @staticmethod
     def package_version(package_name):
         package = Packages.import_package(package_name)
-        if package is None:  # pragma: no cover
+        if package is None:  # pragma: yes cover
             return None
         return package.__version__
 
@@ -89,10 +89,10 @@ class Packages:
     def check_python_package(package_name, min_version=None, max_version=None):
 
         found_version = Packages.package_version(package_name)
-        if found_version is None:  # pragma: no cover
+        if found_version is None:  # pragma: yes cover
             log.exit("Could not find the following python package: {}", package_name)
         try:
-            if min_version is not None:  # pragma: no cover
+            if min_version is not None:  # pragma: yes cover
                 if LooseVersion(min_version) > LooseVersion(found_version):
                     version_error = "Minimum supported version for {} is {}".format(
                         package_name, min_version
@@ -100,7 +100,7 @@ class Packages:
                     version_error += ", found {} ".format(found_version)
                     log.exit(version_error)
 
-            if max_version is not None:  # pragma: no cover
+            if max_version is not None:  # pragma: yes cover
                 if LooseVersion(max_version) < LooseVersion(found_version):
                     version_error = "Maximum supported version for {} is {}".format(
                         package_name, max_version
@@ -110,7 +110,7 @@ class Packages:
 
             log.debug("{} version: {}", package_name, found_version)
             return found_version
-        except TypeError as e:  # pragma: no cover
+        except TypeError as e:  # pragma: yes cover
             log.error("{}: {}", e, found_version)
 
     @staticmethod
@@ -118,7 +118,7 @@ class Packages:
 
         found_version = Packages.get_bin_version(program)
         # Can't be tested on travis...
-        if found_version is None:  # pragma: no cover
+        if found_version is None:  # pragma: yes cover
 
             hints = ""
             if program == "docker":
@@ -126,7 +126,7 @@ class Packages:
 
             log.exit("Missing requirement: {} not found.{}", program, hints)
 
-        if min_version is not None:  # pragma: no cover
+        if min_version is not None:  # pragma: yes cover
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for {} is {}".format(
                     program, min_version,
@@ -134,7 +134,7 @@ class Packages:
                 version_error += ", found {} ".format(found_version)
                 log.exit(version_error)
 
-        if max_version is not None:  # pragma: no cover
+        if max_version is not None:  # pragma: yes cover
             if LooseVersion(max_version) < LooseVersion(found_version):
                 version_error = "Maximum supported version for {} is {}".format(
                     program, max_version,

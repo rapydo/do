@@ -72,7 +72,7 @@ class Compose:
                 log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             log.exit("Failed command execution:\n{}", e)
-        except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
+        except (clierrors.ConnectionError, APIError) as e:  # pragma: yes cover
             log.exit("Failed docker container:\n{}", e)
         except (ProjectError, NoSuchService) as e:
             log.exit(e)
@@ -132,7 +132,7 @@ class Compose:
 
         try:
             return self.command("up", options)
-        except NetworkConfigChangedError as e:  # pragma: no cover
+        except NetworkConfigChangedError as e:  # pragma: yes cover
             log.exit(
                 "{}.\n{} ({})",
                 e,
