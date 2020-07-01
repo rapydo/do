@@ -132,7 +132,7 @@ variables:
     # in backendirods it is:
     # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
     # DB_SUBNET: 172.1.0.0
-    FRONTEND_BUILD_MODE: angular # or angular-dev or angular-test
+    FRONTEND_BUILD_MODE: angular # or angular-test
     BACKEND_BUILD_MODE: backend # or backendirods
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
     BACKEND_PORT: 8080 # used for port mapping (outside the container)

@@ -1234,6 +1234,40 @@ def test_services_activation(capfd):
         )
 
 
+def test_celery_activation(capfd):
+
+    os.remove(".projectrc")
+
+    opt = "--frontend no --current --force --auth neo4j"
+    project_configuration = "projects/testcelery/project_configuration.yaml"
+
+    def test_celery_configuration(services, broker, backend):
+        if services:
+            services = "--services celery,{}".format(services)
+        else:
+            services = "--services celery"
+
+        exec_command(
+            capfd,
+            "rapydo create testcelery {} {}".format(opt, services),
+            "Project testcelery successfully created",
+        )
+
+        with open(project_configuration) as f:
+            lines = f.readlines()
+        assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
+        assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
+
+    test_celery_configuration("", "RABBIT", "RABBIT")
+    test_celery_configuration("rabbit", "RABBIT", "RABBIT")
+    test_celery_configuration("redis", "REDIS", "REDIS")
+    test_celery_configuration("mongo", "RABBIT", "MONGODB")
+    test_celery_configuration("rabbit,redis", "RABBIT", "REDIS")
+    test_celery_configuration("rabbit,mongo", "RABBIT", "MONGODB")
+    test_celery_configuration("redis,mongo", "REDIS", "REDIS")
+    test_celery_configuration("rabbit,redis,mongo", "RABBIT", "REDIS")
+
+
 def test_rabbit_invalid_characters(capfd):
 
     create_command = "rapydo create testinvalid --auth postgres --frontend angular"
