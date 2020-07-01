@@ -1236,7 +1236,9 @@ def test_services_activation(capfd):
 
 def test_celery_activation(capfd):
 
-    os.remove(".projectrc")
+    # Previous test already deleted the .project and no init is execute afterwards
+    # => .project does not exist and cannot be removed
+    # os.remove(".projectrc")
 
     opt = "--frontend no --current --force --auth neo4j"
     project_configuration = "projects/testcelery/project_configuration.yaml"
