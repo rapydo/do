@@ -148,7 +148,7 @@ class Application:
         self.current_uid = system.get_current_uid()
         self.current_gid = system.get_current_gid()
         # Cannot be tested
-        if self.current_uid == ROOT_UID:  # pragma: yes cover
+        if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
             self.current_os_user = "privileged"
             log.warning("Current user is 'root'")
@@ -171,12 +171,12 @@ class Application:
             command = importlib.import_module("controller.commands.{}".format(cmd_name))
         # enable me after dropping python 3.5
         # except ModuleNotFoundError:
-        except BaseException as e:  # pragma: yes cover
+        except BaseException as e:  # pragma: no cover
             log.warning("Uncovered condition, please report to extend tests")
             log.error(e)
             log.exit("Command not found: {}", self.action)
 
-        if not hasattr(command, "__call__"):  # pragma: yes cover
+        if not hasattr(command, "__call__"):  # pragma: no cover
             log.exit("Command not implemented: {}", self.action)
 
         if self.initialize:
@@ -265,7 +265,7 @@ class Application:
 
         # Action
         self.action = self.current_args.get("action")
-        if self.action is None:  # pragma: yes cover
+        if self.action is None:  # pragma: no cover
             log.exit("Internal misconfiguration")
 
         # Action aliases
@@ -355,7 +355,7 @@ class Application:
                 self.specs, self.arguments.host_configuration
             )
 
-        except AttributeError as e:  # pragma: yes cover
+        except AttributeError as e:  # pragma: no cover
             log.exit(e)
 
         self.vars = self.specs.get("variables", {})
@@ -377,7 +377,7 @@ class Application:
             self.specs, "project.description", default="Unknown description"
         )
 
-        if self.rapydo_version is None:  # pragma: yes cover
+        if self.rapydo_version is None:  # pragma: no cover
             log.exit("RAPyDo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
@@ -400,14 +400,14 @@ class Application:
         if rapydo_version is None:
             rapydo_version = self.rapydo_version
 
-        if rapydo_version is None:  # pragma: yes cover
+        if rapydo_version is None:  # pragma: no cover
             return True
 
         r = LooseVersion(rapydo_version)
         c = LooseVersion(__version__)
         if r == c:
             return True
-        else:  # pragma: yes cover
+        else:  # pragma: no cover
             if r > c:
                 action = "Upgrade your controller to version {}".format(r)
             else:
@@ -426,7 +426,7 @@ class Application:
 
         try:
             requests.get("https://www.google.com")
-        except requests.ConnectionError:  # pragma: yes cover
+        except requests.ConnectionError:  # pragma: no cover
             log.exit("Internet connection is unavailable")
         else:
             self.checked("Internet connection is available")
@@ -627,7 +627,7 @@ class Application:
 
     def check_placeholders(self):
 
-        if len(self.active_services) == 0:  # pragma: yes cover
+        if len(self.active_services) == 0:  # pragma: no cover
             log.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
@@ -651,7 +651,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             serv = services.vars_to_services_mapping.get(key)
             # Should never happens since all services are configured, cannot be tested
-            if not serv:  # pragma: yes cover
+            if not serv:  # pragma: no cover
                 log.exit(
                     "Missing variable: {}. Cannot find a service mapping this variable",
                     key,

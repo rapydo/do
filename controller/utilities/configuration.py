@@ -29,14 +29,14 @@ def read_configuration(
     # Verify custom project configuration
     project = custom_configuration.get("project")
     # Can't be tested because it is included in default configuration
-    if project is None:  # pragma: yes cover
+    if project is None:  # pragma: no cover
         raise AttributeError("Missing project configuration")
 
     variables = ["title", "description", "version", "rapydo"]
 
     for key in variables:
         # Can't be tested because it is included in default configuration
-        if project.get(key) is None:  # pragma: yes cover
+        if project.get(key) is None:  # pragma: no cover
 
             log.exit(
                 "Project not configured, missing key '{}' in file {}/{}",
@@ -67,19 +67,19 @@ def read_configuration(
 
     if extends_from == "projects":
         extend_path = projects_path
-    elif extends_from.startswith("submodules/"):  # pragma: yes cover
+    elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
             log.exit("Invalid repository name in extends-from, name is empty")
 
         extend_path = os.path.join(submodules_path, repository_name, projects_path)
-    else:  # pragma: yes cover
+    else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
         log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
     extend_path = os.path.join(extend_path, extended_project)
 
-    if not os.path.exists(extend_path):  # pragma: yes cover
+    if not os.path.exists(extend_path):  # pragma: no cover
         log.exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
@@ -104,7 +104,7 @@ def mix_configuration(base, custom):
             continue
 
         if elements is None:
-            if isinstance(base[key], dict):  # pragma: yes cover
+            if isinstance(base[key], dict):  # pragma: no cover
                 log.warning("Cannot replace {} with empty list", key)
                 continue
 
@@ -112,7 +112,7 @@ def mix_configuration(base, custom):
             mix_configuration(base[key], custom[key])
 
         elif isinstance(elements, list):
-            for e in elements:  # pragma: yes cover
+            for e in elements:  # pragma: no cover
                 base[key].append(e)
         else:
             base[key] = elements
@@ -225,7 +225,7 @@ def read_composer_yamls(composers):
             if base:
                 base_files.append(filepath)
 
-        except KeyError as e:  # pragma: yes cover
+        except KeyError as e:  # pragma: no cover
 
             log.exit("Error reading {}: {}", filepath, e)
 

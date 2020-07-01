@@ -31,7 +31,7 @@ def get_username(uid):
     try:
         return pwd.getpwuid(uid).pw_name
     # Can fail on Windows
-    except ImportError as e:  # pragma: yes cover
+    except ImportError as e:  # pragma: no cover
         log.warning(e)
         return str(uid)
 
@@ -40,7 +40,7 @@ def get_current_uid():
     try:
         return os.getuid()
     # Can fail on Windows
-    except AttributeError as e:  # pragma: yes cover
+    except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return 0
 
@@ -49,6 +49,6 @@ def get_current_gid():
     try:
         return os.getgid()
     # Can fail on Windows
-    except AttributeError as e:  # pragma: yes cover
+    except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return 0
