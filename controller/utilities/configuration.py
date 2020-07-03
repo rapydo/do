@@ -1,5 +1,5 @@
 import os
-from collections import OrderedDict
+from collections import OrderedDict  # can be removed from python 3.7
 
 import yaml
 

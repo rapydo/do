@@ -232,7 +232,7 @@ variables:
     # LETSENCRYPT_MODE: --staging
     LETSENCRYPT_MODE:
     SET_UNSAFE_EVAL:
-    # SET_UNSAFE_EVAL: "'unsafe-eval'"
+    # SET_UNSAFE_EVAL: "unsafe-eval"
     SET_CSP_SCRIPT_SRC:
     # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
     SET_CSP_IMG_SRC:

@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 import time
-from collections import OrderedDict
+from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 
 import requests
