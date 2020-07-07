@@ -599,6 +599,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo create justanother --auth postgres --frontend no --current",
+        "No frontend framework enabled",
         "Project justanother successfully created",
     )
 
@@ -1148,6 +1149,7 @@ def test_extend(capfd):
         capfd,
         "rapydo create base --auth neo4j --frontend no --current",
         "Project folder already exists: projects",
+        "No frontend framework enabled",
         "Project base successfully created",
     )
 

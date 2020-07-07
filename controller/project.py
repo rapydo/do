@@ -85,7 +85,7 @@ class Project:
         self.frontend = frontend
 
         if self.frontend is None or self.frontend == NO_FRONTEND:
-            log.debug("Frontend not enabled")
+            log.debug("No frontend framework enabled")
             return False
 
         self.expected_folders.append(self.p_path("frontend"))
