@@ -1,12 +1,11 @@
-import importlib
 import os
 import shutil
 import sys
-import time
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 
 import requests
+import typer
 from glom import glom
 
 from controller import (
@@ -23,9 +22,7 @@ from controller import (
     gitter,
     log,
 )
-from controller.commands import create as create_cmd
-from controller.commands import install as install_cmd
-from controller.commands import version as version_cmd
+from controller.commands import load_commands
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, REACT, Project
@@ -36,24 +33,86 @@ ROOT_UID = 0
 BASE_UID = 1000
 
 
+class Configuration:
+    projectrc = {}
+    host_configuration = {}
+
+    def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
+        if ctx.resilient_parsing:
+            return
+
+        if value != param.get_default(ctx):
+            return value
+
+        from_projectrc = Configuration.projectrc.get(param.name)
+
+        if from_projectrc is not None:
+            return from_projectrc
+
+        return value
+
+
+# Temporary fix to ease migration to typer
+class CommandsData:
+    def __init__(
+        self,
+        files=None,
+        base_files=None,
+        services=None,
+        services_list=None,
+        active_services=None,
+        base_services=None,
+        project=None,
+        version=None,
+        rapydo_version=None,
+        hostname=None,
+        production=None,
+        frontend=None,
+        conf_vars=None,
+        compose_config=None,
+        services_dict=None,
+        template_builds=None,
+        builds=None,
+        gits=None,
+        project_scaffold=None,
+    ):
+        self.files = files
+        self.base_files = base_files
+        self.services = services
+        self.services_list = services_list
+        self.active_services = active_services
+        self.base_services = base_services
+        self.project = project
+        self.version = version
+        self.rapydo_version = rapydo_version
+        self.hostname = hostname
+        self.production = production
+        self.frontend = frontend
+        self.conf_vars = conf_vars
+        self.compose_config = compose_config
+        self.services_dict = services_dict
+        self.template_builds = template_builds
+        self.builds = builds
+        self.gits = gits
+        self.project_scaffold = project_scaffold
+
+
 class Application:
 
+    # typer app
+    app = None
+    # controller app
+    controller = None
     """
     Main application class
 
     It handles all implemented commands defined in `argparser.yaml`
     """
 
-    def __init__(self, arguments):
+    def __init__(self):
 
-        if arguments.remaining_args and arguments.remaining_args[0].strip():
-            log.exit(
-                "Unknown argument: {}\nUse --help to list options",
-                arguments.remaining_args[0],
-            )
+        Application.controller = self
 
-        self.arguments = arguments
-        self.current_args = self.arguments.current_args
         self.project_scaffold = Project()
         self.tested_connection = False
         self.rapydo_version = None  # To be retrieved from projet_configuration
@@ -74,14 +133,117 @@ class Application:
         self.template_builds = None
         self.builds = None
         self.gits = OrderedDict()
-        self.get_args()
+
+        # Register callback with CLI options and basic initialization/checks
+        Application.app = typer.Typer(
+            callback=self.controller_init,
+            context_settings={"help_option_names": ["--help", "-h"]},
+        )
+
+        load_commands()
+
+        Application.app()
+
+    def controller_init(
+        self,
+        ctx: typer.Context,
+        project: str = typer.Option(
+            None,
+            "--project",
+            "-p",
+            help="Name of the project",
+            callback=Configuration.projectrc_values,
+        ),
+        services_list: str = typer.Option(
+            None,
+            "--services",
+            "-s",
+            help="Comma separated list of services",
+            callback=Configuration.projectrc_values,
+        ),
+        hostname: str = typer.Option(
+            "localhost",
+            "--hostname",
+            "-H",
+            help="Hostname of the current machine",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+        stack: str = typer.Option(
+            None,
+            "--stack",
+            help="Docker-compose stack to be loaded",
+            callback=Configuration.projectrc_values,
+        ),
+        production: bool = typer.Option(
+            False,
+            "--production",
+            "--prod",
+            help="Enable production mode",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+        privileged: bool = typer.Option(
+            False,
+            "--privileged",
+            help="Allow containers privileged mode",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+        no_backend: bool = typer.Option(
+            False,
+            "--no-backend",
+            help="Exclude backend configuration",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+        no_frontend: bool = typer.Option(
+            False,
+            "--no-frontend",
+            help="Exclude frontend configuration",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+        no_commons: bool = typer.Option(
+            False,
+            "--no-commons",
+            help="Exclude project common configuration",
+            callback=Configuration.projectrc_values,
+            show_default=False,
+        ),
+    ):
+
+        self.action = ctx.invoked_subcommand
+
+        # Action aliases
+        self.initialize = self.action == "init"
+        self.update = self.action == "update"
+        self.start = self.action == "start"
+        self.check = self.action == "check"
+        self.install = self.action == "install"
+        self.print_version = self.action == "version"
+        self.pull = self.action == "pull"
+        self.create = self.action == "create"
+
+        self.production = production
+        self.privileged = privileged
+        self.project = project
+        self.hostname = hostname
+
+        if stack:
+            self.stack = stack
+        else:
+            self.stack = "production" if production else "development"
+
+        self.load_backend = not no_backend
+        self.load_frontend = not no_frontend
+        self.load_commons = not no_commons
 
         if self.create:
             self.check_installed_software()
-            create_cmd.__call__(
-                args=self.current_args, project=self.project,
-            )
-            sys.exit(0)
+            return True
+
+        Application.load_projectrc()
 
         current_folder = os.getcwd()
         err = self.project_scaffold.find_main_folder()
@@ -96,12 +258,14 @@ class Application:
                 self.project
             )
             self.read_specs()
-            version_cmd.__call__(
+
+            Application.data = CommandsData(
                 project=self.project,
                 version=self.version,
                 rapydo_version=self.rapydo_version,
             )
-            sys.exit(0)
+
+            return True
 
         log.debug("You are using RAPyDo version {}", __version__)
 
@@ -116,33 +280,28 @@ class Application:
                 self.project
             )
             self.read_specs()
-            self.git_submodules()
-            install_cmd.__call__(
-                args=self.current_args,
-                gits=self.gits,
-                rapydo_version=self.rapydo_version,
+
+            Application.data = CommandsData(
+                rapydo_version=self.rapydo_version, gits=self.gits,
             )
-            sys.exit(0)
+
+            return True
 
         # if project is None, it is retrieve by project folder
         self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
             self.project
         )
-        self.current_args["project"] = self.project
         self.checked("Selected project: {}", self.project)
         # Auth is not yet available, will be read by read_specs
         self.project_scaffold.load_project_scaffold(self.project, auth=None)
         self.preliminary_version_check()
 
         self.read_specs()  # read project configuration
-        self.hostname = self.current_args.get("hostname", "localhost")
 
         # from read_specs
         self.project_scaffold.load_frontend_scaffold(self.frontend)
         self.verify_rapydo_version()
         self.project_scaffold.inspect_project_folder()
-        # will be set to True if init and projectrc is missing or forced
-        force_projectrc_creation = False
 
         # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
@@ -159,52 +318,65 @@ class Application:
             )
             log.debug("Current group ID: {}", self.current_gid)
 
-        # Verify if we implemented the requested command
-        cmd_name = self.action.replace("-", "_")
-        # Deprecated since 0.7.3
-        if cmd_name == "ssl_certificate":
-            log.warning("Deprecated command, use rapydo ssl instead")
-
-            time.sleep(1)
-            cmd_name = "ssl"
-        try:
-            command = importlib.import_module(f"controller.commands.{cmd_name}")
-        except ModuleNotFoundError as e:  # pragma: no cover
-            log.warning("Uncovered condition, please report to extend tests")
-            log.error(e)
-            log.exit("Command not found: {}", self.action)
-
-        if not hasattr(command, "__call__"):  # pragma: no cover
-            log.exit("Command not implemented: {}", self.action)
-
         if self.initialize:
 
-            if self.current_args.get("force", False):
-                force_projectrc_creation = True
-            else:
-                force_projectrc_creation = (
-                    not self.arguments.projectrc
-                    and not self.arguments.host_configuration
-                )
+            enabled_services = services.get_services(
+                services_list, default=self.active_services
+            )
 
-            # We have to create the .projectrc twice
-            # One generic here with main options and another after the complete
-            # conf reading to set services variables
-            if force_projectrc_creation:
-                self.create_projectrc()
+            Application.data = CommandsData(
+                files=self.files,
+                base_files=self.base_files,
+                services=enabled_services,
+                services_list=services_list,
+                active_services=self.active_services,
+                base_services=self.base_services,
+                project=self.project,
+                version=self.version,
+                rapydo_version=self.rapydo_version,
+                hostname=self.hostname,
+                production=self.production,
+                frontend=self.frontend,
+                conf_vars=self.vars,
+                compose_config=self.compose_config,
+                services_dict=self.services_dict,
+                template_builds=self.template_builds,
+                builds=self.builds,
+                gits=self.gits,
+                project_scaffold=self.project_scaffold,
+            )
+            return True
 
         self.git_submodules()
 
         if self.update:
-            self.git_checks_or_update()
-            # Reading again the configuration, it may change with git updates
-            self.read_specs()
-        elif self.check:
-            if self.current_args.get("no_git", False):
-                log.info("Skipping git checks")
-            else:
-                log.info("Checking git (skip with --no-git)")
-                self.git_checks_or_update()
+
+            enabled_services = services.get_services(
+                services_list, default=self.active_services
+            )
+
+            Application.data = CommandsData(
+                files=self.files,
+                base_files=self.base_files,
+                services=enabled_services,
+                services_list=services_list,
+                active_services=self.active_services,
+                base_services=self.base_services,
+                project=self.project,
+                version=self.version,
+                rapydo_version=self.rapydo_version,
+                hostname=self.hostname,
+                production=self.production,
+                frontend=self.frontend,
+                conf_vars=self.vars,
+                compose_config=self.compose_config,
+                services_dict=self.services_dict,
+                template_builds=self.template_builds,
+                builds=self.builds,
+                gits=self.gits,
+                project_scaffold=self.project_scaffold,
+            )
+            return True
 
         self.make_env()
 
@@ -213,29 +385,19 @@ class Application:
         self.services_dict, self.active_services = services.find_active(
             self.compose_config
         )
-        # We have to create the .projectrc twice
-        # One generic with main options and another here
-        # when services are available to set specific configurations
-        if force_projectrc_creation:
-            self.create_projectrc()
-            # Read again! :-(
-            self.make_env()
-            self.read_composers()
-            self.services_dict, self.active_services = services.find_active(
-                self.compose_config
-            )
 
         self.check_placeholders()
 
         # Final step, launch the command
-        enabled_services = self.get_services(default=self.active_services)
-        command.__call__(
-            args=self.current_args,
-            specs=self.specs,
-            arguments=self.arguments,
+        enabled_services = services.get_services(
+            services_list, default=self.active_services
+        )
+
+        Application.data = CommandsData(
             files=self.files,
             base_files=self.base_files,
             services=enabled_services,
+            services_list=services_list,
             active_services=self.active_services,
             base_services=self.base_services,
             project=self.project,
@@ -253,45 +415,22 @@ class Application:
             project_scaffold=self.project_scaffold,
         )
 
+        return True
+
+    @staticmethod
+    def load_projectrc():
+        Configuration.projectrc = configuration.load_yaml_file(
+            PROJECTRC, path=os.curdir, is_optional=True
+        )
+        Configuration.host_configuration = Configuration.projectrc.pop(
+            "project_configuration", {}
+        )
+
     def checked(self, message, *args, **kws):
         if self.action == "check":
             log.info(message, *args, **kws)
         else:
             log.verbose(message, *args, **kws)
-
-    def get_args(self):
-
-        # Action
-        self.action = self.current_args.get("action")
-        if self.action is None:  # pragma: no cover
-            log.exit("Internal misconfiguration")
-
-        # Action aliases
-        self.initialize = self.action == "init"
-        self.update = self.action == "update"
-        self.start = self.action == "start"
-        self.check = self.action == "check"
-        self.install = self.action == "install"
-        self.print_version = self.action == "version"
-        self.pull = self.action == "pull"
-        self.create = self.action == "create"
-
-        # Others
-        self.production = self.current_args.get("production", False)
-        self.project = self.current_args.get("project")
-
-        if self.project is not None:
-            if "_" in self.project:
-                suggest = "\nPlease consider to rename {} into {}".format(
-                    self.project, self.project.replace("_", ""),
-                )
-                log.exit("Wrong project name, _ is not a valid character.{}", suggest)
-
-            if self.project in self.project_scaffold.reserved_project_names:
-                log.exit(
-                    "You selected a reserved name, invalid project name: {}",
-                    self.project,
-                )
 
     def check_installed_software(self):
 
@@ -338,7 +477,7 @@ class Application:
             self.extended_project_path = confs[2]
 
             self.specs = configuration.mix_configuration(
-                self.specs, self.arguments.host_configuration
+                self.specs, Configuration.host_configuration
             )
 
         except AttributeError as e:  # pragma: no cover
@@ -455,20 +594,15 @@ class Application:
 
         return gitter.clone(**repo)
 
-    def git_submodules(self):
+    def git_submodules(self, from_path=None):
         """ Check and/or clone git projects """
-
-        from_local_path = self.current_args.get("submodules_path")
-        if from_local_path is not None:
-            if not os.path.exists(from_local_path):
-                log.exit("Local path not found: {}", from_local_path)
 
         repos = self.vars.get("submodules", {}).copy()
 
         self.gits["main"] = gitter.get_repo(".")
 
         for name, repo in repos.items():
-            self.gits[name] = self.working_clone(name, repo, from_path=from_local_path)
+            self.gits[name] = self.working_clone(name, repo, from_path=from_path)
 
     def read_composers(self):
 
@@ -476,21 +610,13 @@ class Application:
 
         # substitute values starting with '$$'
 
-        load_commons = not self.current_args.get("no_commons")
-        load_frontend = not self.current_args.get("no_frontend")
-
-        stack = self.current_args.get("stack")
-
-        if stack is None:
-            stack = "production" if self.production else "development"
-
         myvars = {
-            "backend": not self.current_args.get("no_backend"),
-            ANGULAR: self.frontend == ANGULAR and load_frontend,
-            REACT: self.frontend == REACT and load_frontend,
-            "commons": load_commons,
-            "extended-commons": self.extended_project is not None and load_commons,
-            "mode": f"{stack}.yml",
+            "backend": self.load_backend,
+            ANGULAR: self.frontend == ANGULAR and self.load_frontend,
+            REACT: self.frontend == REACT and self.load_frontend,
+            "commons": self.load_commons,
+            "extended-commons": self.extended_project is not None and self.load_commons,
+            "mode": f"{self.stack}.yml",
             "extended-mode": self.extended_project is not None,
             "baseconf": CONFS_DIR,
             "customconf": os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
@@ -521,15 +647,6 @@ class Application:
 
         log.verbose("Configuration order:\n{}", self.files)
 
-    def get_services(self, default):
-
-        value = self.current_args.get("services")
-
-        if value is None:
-            return default
-
-        return value.split(",")
-
     def create_projectrc(self):
         templating = Templating()
         t = templating.get_template(
@@ -544,12 +661,8 @@ class Application:
         )
         templating.save_template(PROJECTRC, t, force=True)
 
-        self.arguments.projectrc = configuration.load_yaml_file(
-            PROJECTRC, path=os.curdir, is_optional=True
-        )
-        self.arguments.host_configuration = self.arguments.projectrc.pop(
-            "project_configuration", {}
-        )
+        Application.load_projectrc()
+
         if self.active_services is None:
             log.debug("Created temporary default {} file", PROJECTRC)
             os.remove(PROJECTRC)
@@ -591,12 +704,11 @@ class Application:
         env["CURRENT_GID"] = self.current_gid
         env["PROJECT_TITLE"] = self.project_title
         env["PROJECT_DESCRIPTION"] = self.project_description
-        privileged_mode = self.current_args.get("privileged")
-        env["DOCKER_PRIVILEGED_MODE"] = "true" if privileged_mode else "false"
+        env["DOCKER_PRIVILEGED_MODE"] = "true" if self.privileged else "false"
 
         env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
 
-        env["DOCKER_NETWORK_MODE"] = self.current_args.get("net", "bridge")
+        env["DOCKER_NETWORK_MODE"] = "bridge"
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
 
@@ -671,19 +783,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         return missing
 
-    def git_checks_or_update(self):
+    @staticmethod
+    def git_update(ignore_submodule, gits):
 
-        ignore = self.current_args.get("ignore_submodule", "") or ""
-        ignore_submodule_list = ignore.split(",")
-
-        for name, gitobj in self.gits.items():
-            if name in ignore_submodule_list:
-                log.debug("Skipping {} on {}", self.action, name)
+        for name, gitobj in gits.items():
+            if name in ignore_submodule:
+                log.debug("Skipping update on {}", name)
                 continue
             if gitobj is None:
                 continue
-            if self.update:
-                gitter.update(name, gitobj)
-            elif self.check:
-                gitter.check_updates(name, gitobj)
-                gitter.check_unstaged(name, gitobj)
+            gitter.update(name, gitobj)
+
+    @staticmethod
+    def git_checks(ignore_submodule, gits):
+
+        for name, gitobj in gits.items():
+            if name in ignore_submodule:
+                log.debug("Skipping checks on {}", name)
+                continue
+            if gitobj is None:
+                continue
+
+            gitter.check_updates(name, gitobj)
+            gitter.check_unstaged(name, gitobj)

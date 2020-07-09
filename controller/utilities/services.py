@@ -4,6 +4,13 @@ from controller import log
 from controller.project import ANGULAR
 
 
+def get_services(services, default):
+
+    if services:
+        return services.split(",")
+    return default
+
+
 def walk_services(actives, dependecies, index=0):
 
     if index >= len(actives):

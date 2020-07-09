@@ -1,15 +1,22 @@
+import typer
+
 from controller import log
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(args, files, services, **kwargs):
+@Application.app.command(help="Start containers for this configuration")
+def start(
+    detach: bool = typer.Option(
+        True,
+        "--no-detach",
+        help="Disable detach mode and attach to container execution",
+        show_default=False,
+    ),
+):
 
-    dc = Compose(files=files)
-    if args.get("no_detach", False):
-        detach = False
-    else:
-        detach = True
+    dc = Compose(files=Application.data.files)
 
-    dc.start_containers(services, detach=detach)
+    dc.start_containers(Application.data.services, detach=detach)
 
     log.info("Stack started")

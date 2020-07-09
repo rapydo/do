@@ -226,26 +226,12 @@ def test_create(capfd):
 
 def test_all(capfd):
 
-    exec_command(capfd, "rapydo", "usage")
-
-    exec_command(
-        capfd,
-        "rapydo --invalid_option",
-        'Wrong "--invalid_option" option provided.',
-        "Arguments containing '_' are not allowed. Use '-' instead",
-    )
+    exec_command(capfd, "rapydo", "Usage")
 
     exec_command(
         capfd,
         "rapydo --invalid-option create first",
-        "Unknown argument: --invalid-option",
-        "Use --help to list options",
-    )
-
-    # This is to test a BUG fix: trailing space was interpreted as
-    # additional empty commands raising an Unknown argument error.
-    exec_command(
-        capfd, "rapydo version ", "required rapydo",  # please note the trailing space
+        "Error: no such option: --invalid-option",
     )
 
     # Basic initialization
@@ -410,11 +396,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo add abc xyz",
-        "Invalid type abc, please chose one of:",
-        "endpoint",
-        "task",
-        "component",
-        "service",
+        "invalid choice: abc. (choose from endpoint, task, component, service)",
     )
 
     # Basic pull
@@ -503,7 +485,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo list",
-        "Nothing to list, please use rapydo list -h for available options",
+        "Nothing to list, please use rapydo list --help for available options",
     )
     exec_command(
         capfd,
@@ -513,9 +495,6 @@ def test_all(capfd):
         "CUSTOMVAR1",
         "CUSTOMVAR2",
         "mycustomvalue",
-    )
-    exec_command(
-        capfd, "rapydo list --args", "List of configured rapydo arguments:",
     )
     exec_command(
         capfd, "rapydo list --submodules", "List of submodules:",
@@ -916,9 +895,7 @@ def test_all(capfd):
     exec_command(
         capfd, "rapydo ssl", "No container found for proxy_1",
     )
-    exec_command(
-        capfd, "rapydo ssl-certificate", "Deprecated command, use rapydo ssl instead",
-    )
+
     exec_command(
         capfd,
         "rapydo ssl --volatile",

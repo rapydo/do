@@ -1,29 +1,60 @@
 import os
 
+import typer
+
 from controller import log
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(args, project, files, hostname, **kwargs):
+@Application.app.command(help="Issue a SSL certificate with Let's Encrypt")
+def ssl(
+    volatile: bool = typer.Option(
+        False,
+        "--volatile",
+        help="Create a volatile proxy service to request the certificate",
+        show_default=False,
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force Let's Encrypt to renew the certificate",
+        show_default=False,
+    ),
+    no_tty: bool = typer.Option(
+        False,
+        "--no-tty",
+        help="Disable pseudo-tty allocation, useful to execute the command from a cronjob",
+        show_default=False,
+    ),
+    chain_file: str = typer.Option(
+        None,
+        "--chain-file",
+        help="Path to existing chain file (.pem format)",
+        show_default=False,
+    ),
+    key_file: str = typer.Option(
+        None,
+        "--key-file",
+        help="Path to existing key file (.pem format)",
+        show_default=False,
+    ),
+):
 
-    chain = args.get("chain_file")
-    key = args.get("key_file")
-    no_tty = args.get("no_tty")
-
-    if chain is not None or key is not None:
-        if chain is None:
+    if chain_file is not None or key_file is not None:
+        if chain_file is None:
             log.exit("Invalid chain file (you provided none)")
-        elif not os.path.exists(chain):
-            log.exit("Invalid chain file (you provided {})", chain)
+        elif not os.path.exists(chain_file):
+            log.exit("Invalid chain file (you provided {})", chain_file)
 
-        if key is None:
+        if key_file is None:
             log.exit("Invalid key file (you provided none)")
-        elif not os.path.exists(key):
-            log.exit("Invalid key file (you provided {})", key)
+        elif not os.path.exists(key_file):
+            log.exit("Invalid key file (you provided {})", key_file)
 
     service = "proxy"
 
-    if chain is not None and key is not None:
+    if chain_file is not None and key_file is not None:
 
         log.info("Unable to automatically perform the requested operation")
         log.info("You can execute the following commands by your-self:")
@@ -31,12 +62,12 @@ def __call__(args, project, files, hostname, **kwargs):
         print("")
         print(
             "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
-                chain, project, service
+                chain_file, Application.data.project, service
             )
         )
         print(
             "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
-                key, project, service
+                key_file, Application.data.project, service
             )
         )
 
@@ -46,14 +77,14 @@ def __call__(args, project, files, hostname, **kwargs):
         return
 
     command = "/bin/bash updatecertificates"
-    if args.get("force"):
+    if force:
         command = f"{command} --force"
 
-    command = f"{command} {hostname}"
+    command = f"{command} {Application.data.hostname}"
 
-    dc = Compose(files=files)
+    dc = Compose(files=Application.data.files)
 
-    if args.get("volatile"):
+    if volatile:
         dc.create_volatile_container(service, command)
     else:
         dc.exec_command(service, user="root", command=command, disable_tty=no_tty)

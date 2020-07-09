@@ -186,6 +186,19 @@ class Project:
                 )
             )
 
+        if "_" in project:
+            log.exit(
+                "Wrong project name, _ is not a valid character."
+                "\nPlease consider to rename {} into {}",
+                project,
+                project.replace("_", ""),
+            )
+
+        if project in Project.reserved_project_names:
+            log.exit(
+                "You selected a reserved name, invalid project name: {}", project,
+            )
+
         ABS_PROJECT_PATH = os.path.join(PROJECT_DIR, project)
         return project, ABS_PROJECT_PATH
 

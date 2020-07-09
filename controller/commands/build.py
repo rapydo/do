@@ -1,27 +1,45 @@
+import typer
+
 from controller import log
+from controller.app import Application
 from controller.builds import locate_builds, remove_redundant_services
 from controller.compose import Compose
 
 
-def __call__(
-    args, files, base_files, services, base_services, compose_config, **kwargs
+@Application.app.command(help="Force building of one or more services docker images")
+def build(
+    core: bool = typer.Option(
+        False,
+        "--core",
+        help="force build of all images including core builds",
+        show_default=False,
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="remove the build cache to force the complete rebuilding",
+        show_default=False,
+    ),
 ):
 
     builds, template_builds, overriding_imgs = locate_builds(
-        base_services, compose_config
+        Application.data.base_services, Application.data.compose_config
     )
 
-    if args.get("core"):
+    if core:
         log.debug("Forcing rebuild of core builds")
 
         options = {
-            "SERVICE": remove_redundant_services(services, template_builds),
-            "--no-cache": args.get("force"),
+            "SERVICE": remove_redundant_services(
+                Application.data.services, template_builds
+            ),
+            "--no-cache": force,
             "--force-rm": True,
             "--pull": True,
             "--parallel": True,
         }
-        dc = Compose(files=base_files)
+        dc = Compose(files=Application.data.base_files)
         dc.command("build", options)
         log.info("Core images built")
 
@@ -34,18 +52,18 @@ def __call__(
     build_services = remove_redundant_services(custom_services, builds)
 
     # Remove services not selected at project level, i.e. restricted by --services
-    build_services = [i for i in build_services if i in services]
+    build_services = [i for i in build_services if i in Application.data.services]
     if not build_services:
         log.info("No custom images to build")
     else:
         options = {
             "SERVICE": build_services,
-            "--no-cache": args.get("force"),
+            "--no-cache": force,
             "--force-rm": True,
-            "--pull": not args.get("core"),
+            "--pull": not core,
             "--parallel": True,
         }
-        dc = Compose(files=files)
+        dc = Compose(files=Application.data.files)
         dc.command("build", options)
 
         log.info("Custom images built")

@@ -5,7 +5,6 @@ from loguru import logger as log
 
 __version__ = "0.7.5"
 
-
 # NOTE: telling the app if testing or not
 # http://j.mp/2uifoza
 TESTING = hasattr(sys, "_called_from_test") or os.getenv("TESTING", "0") == "1"

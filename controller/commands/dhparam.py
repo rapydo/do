@@ -1,10 +1,10 @@
+from controller.app import Application
 from controller.compose import Compose
 
-# from controller import log
 
-
-def __call__(files, **kwargs):
+@Application.app.command(help="Generate SSL DH DSA parameters, 4096 bit long prime")
+def dhparam():
 
     command = "openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096"
-    dc = Compose(files=files)
+    dc = Compose(files=Application.data.files)
     return dc.exec_command("proxy", user="root", command=command)

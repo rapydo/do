@@ -1,6 +1,33 @@
+import typer
+
 from controller import log
+from controller.app import Application
+from controller.utilities import services
 
 
-def __call__(**kwargs):
+@Application.app.command(help="Update the current project")
+def update(
+    ignore_submodules: str = typer.Option(
+        "",
+        "--ignore-submodules",
+        "-i",
+        help="Ignore a given list of submodules (comma-separated)",
+    ),
+):
+
+    Application.git_update(ignore_submodules.split(","), Application.data.gits)
+    # Reading again the configuration, it may change with git updates
+    Application.controller.read_specs()
+
+    Application.controller.make_env()
+
+    # Compose services and variables
+    Application.controller.read_composers()
+    (
+        Application.controller.services_dict,
+        Application.controller.active_services,
+    ) = services.find_active(Application.controller.compose_config)
+
+    Application.controller.check_placeholders()
 
     log.info("All updated")

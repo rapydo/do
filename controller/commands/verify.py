@@ -1,14 +1,16 @@
-from controller import log
+import typer
+
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(args, files, **kwargs):
+@Application.app.command(help="Test if service is reachable from the backend")
+def verify(service: str = typer.Argument(..., help="Service name")):
     """ Verify one service connection (inside backend) """
-    service = args.get("service")
-    dc = Compose(files=files)
+    dc = Compose(files=Application.data.files)
     command = f"restapi verify --services {service}"
 
     try:
         return dc.exec_command("backend", command=command)
-    except SystemExit as e:
-        log.critical(e)
+    except SystemExit:
+        pass

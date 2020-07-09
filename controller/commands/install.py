@@ -1,7 +1,49 @@
 import os
 
+import typer
+
 from controller import SUBMODULES_DIR, gitter, log
+from controller.app import Application
 from controller.packages import Packages
+
+
+@Application.app.command(help="Install specified version of rapydo-controller")
+def install(
+    version: str = typer.Argument("auto", help="Version to be installed"),
+    pip: bool = typer.Option(
+        False, "--pip", help="Install from pypi", show_default=False,
+    ),
+    editable: bool = typer.Option(
+        False,
+        "--editable",
+        help="Install in editable mode from submodules folder",
+        show_default=False,
+    ),
+    user: bool = typer.Option(
+        False,
+        "--user",
+        help="Install at user level (sudo not required)",
+        show_default=False,
+    ),
+):
+
+    if pip and editable:
+        log.exit("--pip and --editable options are not compatible")
+    if user and editable:
+        log.exit("--user and --editable options are not compatible")
+
+    if version == "auto":
+        version = Application.data.rapydo_version
+        log.info("Detected version {} to be installed", version)
+
+    if editable:
+        return install_controller_from_folder(
+            Application.data.gits, version, user, editable
+        )
+    elif pip:
+        return install_controller_from_pip(version, user)
+    else:
+        return install_controller_from_git(version, user)
 
 
 def install_controller_from_pip(version, user):
@@ -63,27 +105,3 @@ def install_controller_from_folder(gits, version, user, editable):
         log.info("Controller version {} installed from local folder", version)
         installed_version = Packages.check_version("rapydo-controller")
         log.info("Check on installed version: {}", installed_version)
-
-
-def __call__(args, rapydo_version, gits, **kwargs):
-
-    version = args.get("version")
-    pip = args.get("pip")
-    editable = args.get("editable")
-    user = args.get("user")
-
-    if pip and editable:
-        log.exit("--pip and --editable options are not compatible")
-    if user and editable:
-        log.exit("--user and --editable options are not compatible")
-
-    if version == "auto":
-        version = rapydo_version
-        log.info("Detected version {} to be installed", version)
-
-    if editable:
-        return install_controller_from_folder(gits, version, user, editable)
-    elif pip:
-        return install_controller_from_pip(version, user)
-    else:
-        return install_controller_from_git(version, user)

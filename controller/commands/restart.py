@@ -1,12 +1,14 @@
 from controller import log
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(services, files, **kwargs):
+@Application.app.command(help="Restart running containers")
+def restart():
 
-    options = {"SERVICE": services}
+    options = {"SERVICE": Application.data.services}
 
-    dc = Compose(files=files)
+    dc = Compose(files=Application.data.files)
     dc.command("restart", options)
 
     log.info("Stack restarted")

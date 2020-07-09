@@ -1,18 +1,32 @@
+import typer
+
 from controller import log
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(args, services, files, **kwargs):
+@Application.app.command(help="Stop and remove containers")
+def remove(
+    rm_networks: bool = typer.Option(
+        False,
+        "--networks",
+        "--net",
+        help="Also remove containers networks",
+        show_default=False,
+    ),
+    rm_all: bool = typer.Option(
+        False,
+        "--all",
+        help="Also remove networks and persistent data stored in docker volumes",
+        show_default=False,
+    ),
+):
 
-    dc = Compose(files=files)
-
-    rm_all = args.get("all", False)
-    rm_networks = args.get("networks", False)
+    dc = Compose(files=Application.data.files)
 
     if rm_networks or rm_all:
 
-        services_specified = args.get("services")
-        if services_specified is not None:
+        if Application.data.services_list is not None:
 
             opt = "--networks" if rm_networks else "--all"
 
@@ -34,7 +48,7 @@ def __call__(args, services, files, **kwargs):
     else:
 
         options = {
-            "SERVICE": services,
+            "SERVICE": Application.data.services,
             # '--stop': True,  # BUG? not working
             "--force": True,
             "-v": False,  # dangerous?

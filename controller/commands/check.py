@@ -3,12 +3,99 @@ import os
 from datetime import datetime
 
 import dateutil.parser
+import typer
 
 from controller import gitter, log
+from controller.app import Application
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
+@Application.app.command(help="Verify if current project is compliant to RAPyDo specs")
+def check(
+    no_git: bool = typer.Option(
+        False, "--no-git", "-s", help="Skip checks on git commits", show_default=False,
+    ),
+    no_builds: bool = typer.Option(
+        False, "--no-builds", help="Skip check on docker builds", show_default=False,
+    ),
+    ignore_submodules: str = typer.Option(
+        "",
+        "--ignore-submodules",
+        "-i",
+        help="Ignore a given list of submodules (comma-separated)",
+    ),
+):
+
+    if no_git:
+        log.info("Skipping git checks")
+    else:
+        log.info("Checking git (skip with --no-git)")
+        Application.git_checks(ignore_submodules.split(","), Application.data.gits)
+
+    if no_builds:
+        log.info("Skipping builds checks")
+    else:
+        log.info("Checking builds (skip with --no-builds)")
+
+        # Compare builds depending on templates (slow operation!)
+        builds, template_builds, overriding_imgs = locate_builds(
+            Application.data.base_services, Application.data.compose_config
+        )
+
+        dimages = Dock().images()
+
+        for image_tag, build in builds.items():
+
+            if image_tag not in dimages:
+                continue
+
+            if not any(
+                x in Application.data.active_services for x in build["services"]
+            ):  # pragma: no cover
+                log.verbose(
+                    "Checks skipped: template {} not enabled (service list = {})",
+                    image_tag,
+                    build["services"],
+                )
+                continue
+
+            # Check if some recent commit modified the Dockerfile
+            obsolete, d1, d2 = build_is_obsolete(build, Application.data.gits)
+            if obsolete:
+                print_obsolete(image_tag, d1, d2, build.get("service"))
+
+            # if FROM image is newer, this build should be re-built
+            elif image_tag in overriding_imgs:
+                from_img = overriding_imgs.get(image_tag)
+                from_build = template_builds.get(from_img)
+
+                # Verify if template build exists
+                if from_img not in dimages:  # pragma: no cover
+
+                    log.exit(
+                        "Missing template build for {} ({})\n{}",
+                        from_build["services"],
+                        from_img,
+                        "Suggestion: execute the pull command",
+                    )
+
+                # Verify if template build is obsolete or not
+                obsolete, d1, d2 = build_is_obsolete(from_build, Application.data.gits)
+                if obsolete:  # pragma: no cover
+                    print_obsolete(from_img, d1, d2, from_build.get("service"))
+
+                from_timestamp = get_build_timestamp(from_build, as_date=True)
+                build_timestamp = get_build_timestamp(build, as_date=True)
+
+                if from_timestamp > build_timestamp:
+                    b = build_timestamp.strftime(DATE_FORMAT)
+                    c = from_timestamp.strftime(DATE_FORMAT)
+                    print_obsolete(image_tag, b, c, build.get("service"), from_img)
+
+    log.info("Checks completed")
 
 
 def print_obsolete(image, date1, date2, service, from_img=None):
@@ -78,68 +165,3 @@ def build_is_obsolete(build, gits):
             return True, build_ts, last_commit
 
     return False, 0, 0
-
-
-def __call__(args, base_services, compose_config, active_services, gits, **kwargs):
-
-    if args.get("no_builds", False):
-        log.info("Skipping builds checks")
-    else:
-        log.info("Checking builds (skip with --no-builds)")
-
-        # Compare builds depending on templates (slow operation!)
-        builds, template_builds, overriding_imgs = locate_builds(
-            base_services, compose_config
-        )
-
-        dimages = Dock().images()
-
-        for image_tag, build in builds.items():
-
-            if image_tag not in dimages:
-                continue
-
-            if not any(
-                x in active_services for x in build["services"]
-            ):  # pragma: no cover
-                log.verbose(
-                    "Checks skipped: template {} not enabled (service list = {})",
-                    image_tag,
-                    build["services"],
-                )
-                continue
-
-            # Check if some recent commit modified the Dockerfile
-            obsolete, d1, d2 = build_is_obsolete(build, gits)
-            if obsolete:
-                print_obsolete(image_tag, d1, d2, build.get("service"))
-
-            # if FROM image is newer, this build should be re-built
-            elif image_tag in overriding_imgs:
-                from_img = overriding_imgs.get(image_tag)
-                from_build = template_builds.get(from_img)
-
-                # Verify if template build exists
-                if from_img not in dimages:  # pragma: no cover
-
-                    log.exit(
-                        "Missing template build for {} ({})\n{}",
-                        from_build["services"],
-                        from_img,
-                        "Suggestion: execute the pull command",
-                    )
-
-                # Verify if template build is obsolete or not
-                obsolete, d1, d2 = build_is_obsolete(from_build, gits)
-                if obsolete:  # pragma: no cover
-                    print_obsolete(from_img, d1, d2, from_build.get("service"))
-
-                from_timestamp = get_build_timestamp(from_build, as_date=True)
-                build_timestamp = get_build_timestamp(build, as_date=True)
-
-                if from_timestamp > build_timestamp:
-                    b = build_timestamp.strftime(DATE_FORMAT)
-                    c = from_timestamp.strftime(DATE_FORMAT)
-                    print_obsolete(image_tag, b, c, build.get("service"), from_img)
-
-    log.info("Checks completed")

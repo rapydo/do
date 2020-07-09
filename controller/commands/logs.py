@@ -1,22 +1,36 @@
+import typer
+
 from controller import log
+from controller.app import Application
 from controller.compose import Compose
 
 
-def __call__(args, services, files, **kwargs):
+@Application.app.command(help="Watch log tails of all or specified containers")
+def logs(
+    follow: bool = typer.Option(
+        False, "--follow", "-f", help="Follow logs", show_default=False,
+    ),
+    tail: int = typer.Option("500", "--tail", "-t", help="Number of lines to show",),
+    service: str = typer.Option(
+        None, "--service-file", "-s", help="Service name", show_default=False,
+    ),
+):
 
-    # if provided at command line, use specific service instead of general services opt
-    if args.get("service") is not None:
-        services = [args.get("service")]
+    # if provided, use specific service instead of general services opt
+    if service:
+        services = [service]
+    else:
+        services = Application.data.services
 
     options = {
-        "--follow": args.get("follow", False),
-        "--tail": args.get("tail", "100"),
+        "--follow": follow,
+        "--tail": str(tail),
         "--no-color": False,
         "--timestamps": True,
         "SERVICE": services,
     }
 
-    dc = Compose(files=files)
+    dc = Compose(files=Application.data.files)
     try:
         dc.command("logs", options)
     except KeyboardInterrupt:

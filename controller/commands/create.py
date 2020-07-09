@@ -1,40 +1,55 @@
 import os
 
+import typer
+
 from controller import PROJECT_DIR, __version__, gitter, log
+from controller.app import Application
 from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
 from controller.templating import Templating
 
 
-def parse_env_variables(envs):
+@Application.app.command(help="Create a new rapydo project")
+def create(
+    project_name: str = typer.Argument(..., help="Name of your project"),
+    auth: str = typer.Option(
+        None, "--auth", help="Auth service to enable (sql, neo4j, mongo)"
+    ),
+    frontend: str = typer.Option(
+        None, "--frontend", help="Frontend framework to enable (no, angular)"
+    ),
+    extend: str = typer.Option(None, "--extend", help="Extend from another project"),
+    services: str = typer.Option(
+        "", "--services", help="Comma separated list of services to be enabled"
+    ),
+    origin_url: str = typer.Option(
+        None, "--origin-url", help="Set the git origin url for the project"
+    ),
+    envs: str = typer.Option(
+        None,
+        "--env",
+        help="Command separated list of ENV=VALUE to be added in project_configuration",
+    ),
+    force_current: bool = typer.Option(
+        False, "--current", help="Force creation in current folder", show_default=False,
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force files overwriting", show_default=False,
+    ),
+    auto: bool = typer.Option(
+        True,
+        "--no-auto",
+        help="Disable automatic project creation",
+        show_default=False,
+    ),
+    add_optionals: bool = typer.Option(
+        False,
+        "--add-optionals",
+        help="Include all optionals files (html templates and customizers)",
+        show_default=False,
+    ),
+):
 
-    env_variables = {}
-    if not envs:
-        return env_variables
-
-    for e in envs.split(","):
-        e = e.split("=")
-        if len(e) != 2:
-            log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
-        k = e[0].upper()
-        v = e[1]
-        env_variables[k] = v
-
-    return env_variables
-
-
-def __call__(args, **kwargs):
-
-    project_name = args.get("name")
-    force = args.get("force", False)
-    force_current = args.get("current", False)
-    auto = not args.get("no_auto", False)
-    auth = args.get("auth")
-    frontend = args.get("frontend")
-    extend = args.get("extend")
-    origin_url = args.get("origin_url")
-    services = args.get("services", "").split(",")
-    envs = args.get("env")
-    add_optionals = args.get("add_optionals", False)
+    services = services.split(",")
 
     if extend is not None:
         if project_name == extend:
@@ -47,7 +62,7 @@ def __call__(args, **kwargs):
     if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
         log.exit("Invalid authentication service: {}", auth)
 
-    create(
+    create_project(
         project_name=project_name,
         auth=auth,
         frontend=frontend,
@@ -80,7 +95,7 @@ def __call__(args, **kwargs):
     print("rapydo start")
 
 
-def create(
+def create_project(
     project_name,
     auth,
     frontend,
@@ -227,3 +242,20 @@ def create(
         else:
             print(f"\n{template}")
             log.exit(p)
+
+
+def parse_env_variables(envs):
+
+    env_variables = {}
+    if not envs:
+        return env_variables
+
+    for e in envs.split(","):
+        e = e.split("=")
+        if len(e) != 2:
+            log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
+        k = e[0].upper()
+        v = e[1]
+        env_variables[k] = v
+
+    return env_variables

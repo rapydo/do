@@ -1,11 +1,41 @@
 import os
+from enum import Enum
 
+import typer
 from glom import glom
 
 from controller import log
+from controller.app import Application
 from controller.templating import Templating
 
 templating = Templating()
+
+
+class ElementTypes(str, Enum):
+    endpoint = "endpoint"
+    task = "task"
+    component = "component"
+    service = "service"
+
+
+@Application.app.command(help="Add a new element")
+def add(
+    element_type: ElementTypes = typer.Argument(
+        ..., help="Type of element to be created"
+    ),
+    name: str = typer.Argument(..., help="Name to be assigned to the new element"),
+):
+
+    functions = {
+        "endpoint": create_endpoint,
+        "task": create_task,
+        "component": create_component,
+        "service": create_service,
+    }
+    auth = glom(Application.data.conf_vars, "env.AUTH_SERVICE", default=None)
+
+    fn = functions.get(element_type)
+    fn(Application.data.project_scaffold, name, Application.data.services, auth)
 
 
 def create_template(template_name, target_path, name, services, auth):
@@ -130,26 +160,3 @@ def create_service(project_scaffold, name, services, auth):
         for row in module:
             f.write(f"{row}\n")
         f.write("\n")
-
-
-def __call__(args, project_scaffold, services, conf_vars, **kwargs):
-
-    functions = {
-        "endpoint": create_endpoint,
-        "task": create_task,
-        "component": create_component,
-        "service": create_service,
-    }
-    element_type = args.get("type")
-    name = args.get("name")
-    auth = glom(conf_vars, "env.AUTH_SERVICE", default=None)
-
-    if element_type not in functions:
-        log.exit(
-            "Invalid type {}, please chose one of: {}",
-            element_type,
-            ", ".join(functions.keys()),
-        )
-
-    fn = functions.get(element_type)
-    fn(project_scaffold, name, services, auth)
