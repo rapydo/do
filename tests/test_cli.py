@@ -1,16 +1,19 @@
 import os
 import shutil
 import signal
-import sys
 import tempfile
 
 from git import Repo
+from typer.testing import CliRunner
 
 from controller import __version__, gitter
 from controller.app import Application
-from controller.arguments import ArgParser
 from controller.dockerizing import Dock
 from controller.templating import Templating
+
+runner = CliRunner()
+Application.load_projectrc()
+controller = Application()
 
 
 class TemporaryRemovePath:
@@ -48,8 +51,9 @@ def exec_command(capfd, command, *asserts):
         print("_____________________________________________")
 
     try:
-        arguments = ArgParser(args=command.split(" "))
-        Application(arguments)
+        options = command.split(" ")[1:]
+        runner.invoke(controller.app, options, combined_output=False)
+        # result.exit_code
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
         pass

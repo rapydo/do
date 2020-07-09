@@ -11,7 +11,7 @@ setup(
     url="https://github.com/rapydo",
     license="MIT",
     packages=find_packages(where=".", exclude=["tests*"]),
-    package_data={"controller": ["argparser.yaml", "templates/*", "confs/*"]},
+    package_data={"controller": ["templates/*", "confs/*"]},
     python_requires=">=3.6.0",
     entry_points={
         "console_scripts": [

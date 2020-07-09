@@ -103,11 +103,6 @@ class Application:
     app = None
     # controller app
     controller = None
-    """
-    Main application class
-
-    It handles all implemented commands defined in `argparser.yaml`
-    """
 
     def __init__(self):
 
@@ -141,8 +136,6 @@ class Application:
         )
 
         load_commands()
-
-        Application.app()
 
     def controller_init(
         self,
@@ -238,6 +231,8 @@ class Application:
         self.load_backend = not no_backend
         self.load_frontend = not no_frontend
         self.load_commons = not no_commons
+
+        Application.load_projectrc()
 
         if self.create:
             self.check_installed_software()

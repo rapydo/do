@@ -7,7 +7,8 @@ from controller.app import Application
 
 def main():
     Application.load_projectrc()
-    Application()
+    controller = Application()
+    controller.app()
 
 
 if __name__ == "__main__":
