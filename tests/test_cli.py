@@ -51,7 +51,7 @@ def exec_command(capfd, command, *asserts):
         print("_____________________________________________")
 
     try:
-        options = command.split(" ")[1:]
+        options = command.strip().split(" ")[1:]
         result = runner.invoke(controller.app, options)
 
         with capfd.disabled():
@@ -120,29 +120,29 @@ def test_failed_create(capfd):
 
     exec_command(
         capfd,
-        "rapydo create test_celery --auth postgres --frontend angular --current ",
+        "rapydo create test_celery --auth postgres --frontend angular --current",
         "Wrong project name, _ is not a valid character",
     )
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend angular --no-auto --current ",
+        "rapydo create first --auth postgres --frontend angular --no-auto --current",
         "mkdir -p projects",
     )
 
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X --current ",
+        "rapydo create first --auth postgres --frontend no --env X --current",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X, --current ",
+        "rapydo create first --auth postgres --frontend no --env X, --current",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X=1,Y --current ",
+        "rapydo create first --auth postgres --frontend no --env X=1,Y --current",
         "Invalid envs format, expected: K1=V1,K2=V2,...",
     )
 
@@ -156,7 +156,7 @@ def test_failed_create(capfd):
 
     exec_command(
         capfd,
-        "rapydo create celery --auth postgres --frontend angular --current ",
+        "rapydo create celery --auth postgres --frontend angular --current",
         "You selected a reserved name, invalid project name: celery",
     )
 
