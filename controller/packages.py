@@ -168,7 +168,7 @@ class Packages:
             # Python 3.8.2
             # Docker version 19.03.8, build afacb8b7f0
             # git version 2.25.1
-            # rapydo version 0.7.4
+            # rapydo version 0.7.x
             return output
             # Note that in may other cases it fails...
             # but we are interested in a very small list of programs, so it's ok
