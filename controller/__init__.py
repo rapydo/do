@@ -36,7 +36,7 @@ log.exit = exit_msg
 log.remove()
 
 if TESTING:
-    log.add(sys.stdout, colorize=False, format="{message}")
+    log.add(sys.stderr, colorize=False, format="{message}")
 else:  # pragma: no cover
     log.add(
         sys.stderr,
