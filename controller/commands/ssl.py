@@ -40,16 +40,16 @@ def __call__(args, project, files, hostname, **kwargs):
             )
         )
 
-        print('rapydo shell {} --command "nginx -s reload"'.format(service))
+        print(f'rapydo shell {service} --command "nginx -s reload"')
         print("")
 
         return
 
     command = "/bin/bash updatecertificates"
     if args.get("force"):
-        command = "{} --force".format(command)
+        command = f"{command} --force"
 
-    command = "{} {}".format(command, hostname)
+    command = f"{command} {hostname}"
 
     dc = Compose(files=files)
 

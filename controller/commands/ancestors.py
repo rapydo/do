@@ -42,7 +42,7 @@ def __call__(args, **kwargs):
         images[i[2]] = i
 
     child = IMAGE
-    print("Finding all children and (grand)+ children of {}".format(child))
+    print(f"Finding all children and (grand)+ children of {child}")
     found = 0
     while True:
         children = get_children(child, images)
@@ -53,4 +53,4 @@ def __call__(args, **kwargs):
         found += 1
         children = get_children(child, images)
     if found == 0:
-        print("No child found for {}".format(child))
+        print(f"No child found for {child}")

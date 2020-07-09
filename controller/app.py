@@ -168,10 +168,8 @@ class Application:
             time.sleep(1)
             cmd_name = "ssl"
         try:
-            command = importlib.import_module("controller.commands.{}".format(cmd_name))
-        # enable me after dropping python 3.5
-        # except ModuleNotFoundError:
-        except BaseException as e:  # pragma: no cover
+            command = importlib.import_module(f"controller.commands.{cmd_name}")
+        except ModuleNotFoundError as e:  # pragma: no cover
             log.warning("Uncovered condition, please report to extend tests")
             log.error(e)
             log.exit("Command not found: {}", self.action)
@@ -297,24 +295,12 @@ class Application:
 
     def check_installed_software(self):
 
-        # Python 3.5 deprecated since 0.7.3
-        # EOL expected 2020-09-13 (~ rapydo 0.7.5)
-        # https://devguide.python.org/#status-of-python-branches
-        if sys.version_info < (3, 6):
-            log.warning(
-                "You are using pyton {}.{}.{}, please consider to upgrade "
-                "before reaching End Of Life (expected in September 2020)",
-                sys.version_info.major,
-                sys.version_info.minor,
-                sys.version_info.micro,
-            )
-        else:
-            self.checked(
-                "python version: {}.{}.{}",
-                sys.version_info.major,
-                sys.version_info.minor,
-                sys.version_info.micro,
-            )
+        self.checked(
+            "python version: {}.{}.{}",
+            sys.version_info.major,
+            sys.version_info.minor,
+            sys.version_info.micro,
+        )
 
         # 17.05 added support for multi-stage builds
         Packages.check_program("docker", min_version="17.05")
@@ -409,9 +395,9 @@ class Application:
             return True
         else:  # pragma: no cover
             if r > c:
-                action = "Upgrade your controller to version {}".format(r)
+                action = f"Upgrade your controller to version {r}"
             else:
-                action = "Downgrade your controller to version {}".format(r)
+                action = f"Downgrade your controller to version {r}"
                 action += " or upgrade your project"
 
             msg = "RAPyDo version is not compatible\n\n"
@@ -504,7 +490,7 @@ class Application:
             REACT: self.frontend == REACT and load_frontend,
             "commons": load_commons,
             "extended-commons": self.extended_project is not None and load_commons,
-            "mode": "{}.yml".format(stack),
+            "mode": f"{stack}.yml",
             "extended-mode": self.extended_project is not None,
             "baseconf": CONFS_DIR,
             "customconf": os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
@@ -621,8 +607,8 @@ class Application:
                 else:
                     value = str(value)
                 if " " in value:
-                    value = "'{}'".format(value)
-                whandle.write("{}={}\n".format(key, value))
+                    value = f"'{value}'"
+                whandle.write(f"{key}={value}\n")
             log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def check_placeholders(self):

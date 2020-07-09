@@ -37,7 +37,7 @@ class ArgParser:
         for option_name, options in options:
             self.add_parser_argument(parser, option_name, options)
 
-        version_string = "rapydo version {}".format(__version__)
+        version_string = f"rapydo version {__version__}"
         parser.add_argument("--version", action="version", version=version_string)
 
         # Sub-parser of commands [check, init, etc]
@@ -81,13 +81,13 @@ class ArgParser:
         params = self.prepare_params(options)
         alias = params.pop("alias", None)
         positional = params.pop("positional", False)
-        param_name = "--{}".format(option_name)
+        param_name = f"--{option_name}"
         if positional:
             parser.add_argument(option_name, **params)
         elif alias is None:
             parser.add_argument(param_name, **params)
         else:
-            parser.add_argument(param_name, "-{}".format(alias), **params)
+            parser.add_argument(param_name, f"-{alias}", **params)
 
     @staticmethod
     def check_args(args):

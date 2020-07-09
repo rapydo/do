@@ -16,7 +16,7 @@ from controller.templating import Templating
 class TemporaryRemovePath:
     def __init__(self, path):
         self.path = os.path.abspath(path)
-        self.tmp_path = "{}.bak".format(self.path)
+        self.tmp_path = f"{self.path}.bak"
 
     def __enter__(self):
 
@@ -61,9 +61,9 @@ def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
         for o in out:
-            print("_ {}".format(o))
+            print(f"_ {o}")
         for e in err:
-            print("! {}".format(e))
+            print(f"! {e}")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
@@ -169,7 +169,7 @@ def test_create(capfd):
         capfd,
         "rapydo create first --auth postgres --frontend angular --current --no-auto",
         "Project folder already exists: projects/first/confs",
-        "{f}".format(f=pconf),
+        f"{pconf}",
     )
 
     create_command = "rapydo create first --auth postgres --frontend angular"
@@ -209,7 +209,7 @@ def test_create(capfd):
         capfd,
         "rapydo create first --auth postgres --frontend angular --current",
         "Project folder already exists: projects/first/confs",
-        "Project file already exists: {}".format(pconf),
+        f"Project file already exists: {pconf}",
         "Project first successfully created",
     )
 
@@ -217,7 +217,7 @@ def test_create(capfd):
         capfd,
         "rapydo create first --auth postgres --frontend angular --no-auto --current",
         "Project folder already exists: projects/first/confs",
-        "Project file already exists: {}".format(pconf),
+        f"Project file already exists: {pconf}",
         "Project first successfully created",
     )
 
@@ -303,15 +303,15 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo check -i main",
-        "http-api: wrong branch 0.7.3, expected {}".format(__version__),
+        f"http-api: wrong branch 0.7.3, expected {__version__}",
         "You can use rapydo init to fix it",
     )
     exec_command(
         capfd,
         "rapydo init",
-        "Switched branch to origin/{} on http-api".format(__version__),
-        "build-templates already set on branch {}".format(__version__),
-        "do already set on branch {}".format(__version__),
+        f"Switched branch to origin/{__version__} on http-api",
+        f"build-templates already set on branch {__version__}",
+        f"do already set on branch {__version__}",
     )
 
     with TemporaryRemovePath("data"):
@@ -337,88 +337,85 @@ def test_all(capfd):
             "Project first is invalid: required file not found .gitignore",
         )
 
-    # Do not test this with python 3.5
-    if sys.version_info >= (3, 6):
+    path = "projects/first/backend/apis/xyz.py"
+    assert not os.path.exists(path)
+    exec_command(
+        capfd, "rapydo add endpoint xyz", f"Endpoint created: {path}",
+    )
+    exec_command(
+        capfd, "rapydo add endpoint xyz", f"{path} already exists",
+    )
+    assert os.path.isfile(path)
 
-        path = "projects/first/backend/apis/xyz.py"
-        assert not os.path.exists(path)
-        exec_command(
-            capfd, "rapydo add endpoint xyz", "Endpoint created: {}".format(path),
-        )
-        exec_command(
-            capfd, "rapydo add endpoint xyz", "{} already exists".format(path),
-        )
-        assert os.path.isfile(path)
+    path = "projects/first/backend/tasks/xyz.py"
+    assert not os.path.exists(path)
+    exec_command(
+        capfd, "rapydo add task xyz", f"Task created: {path}",
+    )
+    exec_command(
+        capfd, "rapydo add task xyz", f"{path} already exists",
+    )
+    assert os.path.isfile(path)
 
-        path = "projects/first/backend/tasks/xyz.py"
-        assert not os.path.exists(path)
-        exec_command(
-            capfd, "rapydo add task xyz", "Task created: {}".format(path),
-        )
-        exec_command(
-            capfd, "rapydo add task xyz", "{} already exists".format(path),
-        )
-        assert os.path.isfile(path)
+    path = "projects/first/frontend/app/components/xyz"
+    assert not os.path.exists(path)
+    assert not os.path.exists(os.path.join(path, "xyz.ts"))
+    assert not os.path.exists(os.path.join(path, "xyz.html"))
+    exec_command(
+        capfd,
+        "rapydo add component xyz",
+        "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
+        "Added XyzComponent to module declarations",
+        f"Component created: {path}",
+    )
+    assert os.path.isdir(path)
+    assert os.path.isfile(os.path.join(path, "xyz.ts"))
+    assert os.path.isfile(os.path.join(path, "xyz.html"))
+    exec_command(
+        capfd, "rapydo add component xyz", f"{path}/xyz.ts already exists",
+    )
+    shutil.rmtree(path)
+    exec_command(
+        capfd,
+        "rapydo add component xyz",
+        "Import already included in module file",
+        "Added XyzComponent to module declarations",
+        f"Component created: {path}",
+    )
 
-        path = "projects/first/frontend/app/components/xyz"
-        assert not os.path.exists(path)
-        assert not os.path.exists(os.path.join(path, "xyz.ts"))
-        assert not os.path.exists(os.path.join(path, "xyz.html"))
-        exec_command(
-            capfd,
-            "rapydo add component xyz",
-            "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
-            "Added XyzComponent to module declarations",
-            "Component created: {}".format(path),
-        )
-        assert os.path.isdir(path)
-        assert os.path.isfile(os.path.join(path, "xyz.ts"))
-        assert os.path.isfile(os.path.join(path, "xyz.html"))
-        exec_command(
-            capfd, "rapydo add component xyz", "{}/xyz.ts already exists".format(path),
-        )
-        shutil.rmtree(path)
-        exec_command(
-            capfd,
-            "rapydo add component xyz",
-            "Import already included in module file",
-            "Added XyzComponent to module declarations",
-            "Component created: {}".format(path),
-        )
+    path = "projects/first/frontend/app/services"
+    assert not os.path.exists(path)
+    assert not os.path.exists(os.path.join(path, "xyz.ts"))
+    exec_command(
+        capfd,
+        "rapydo add service xyz",
+        "Added import { XyzService } from '@app/services/xyz'; to module file",
+        "Added XyzService to module declarations",
+        f"Service created: {path}",
+    )
+    assert os.path.isdir(path)
+    assert os.path.isfile(os.path.join(path, "xyz.ts"))
+    exec_command(
+        capfd, "rapydo add service xyz", f"{path}/xyz.ts already exists",
+    )
+    os.remove(f"{path}/xyz.ts")
+    exec_command(
+        capfd,
+        "rapydo add service xyz",
+        "Import already included in module file",
+        "Added XyzService to module declarations",
+        f"Service created: {path}",
+    )
 
-        path = "projects/first/frontend/app/services"
-        assert not os.path.exists(path)
-        assert not os.path.exists(os.path.join(path, "xyz.ts"))
-        exec_command(
-            capfd,
-            "rapydo add service xyz",
-            "Added import { XyzService } from '@app/services/xyz'; to module file",
-            "Added XyzService to module declarations",
-            "Service created: {}".format(path),
-        )
-        assert os.path.isdir(path)
-        assert os.path.isfile(os.path.join(path, "xyz.ts"))
-        exec_command(
-            capfd, "rapydo add service xyz", "{}/xyz.ts already exists".format(path),
-        )
-        os.remove("{}/xyz.ts".format(path))
-        exec_command(
-            capfd,
-            "rapydo add service xyz",
-            "Import already included in module file",
-            "Added XyzService to module declarations",
-            "Service created: {}".format(path),
-        )
-
-        exec_command(
-            capfd,
-            "rapydo add abc xyz",
-            "Invalid type abc, please chose one of:",
-            "endpoint",
-            "task",
-            "component",
-            "service",
-        )
+    exec_command(
+        capfd,
+        "rapydo add abc xyz",
+        "Invalid type abc, please chose one of:",
+        "endpoint",
+        "task",
+        "component",
+        "service",
+    )
 
     # Basic pull
     exec_command(
@@ -467,12 +464,12 @@ def test_all(capfd):
     with TemporaryRemovePath("submodules.bak/do"):
         exec_command(
             capfd,
-            "rapydo init --submodules-path {}".format(modules_path),
+            f"rapydo init --submodules-path {modules_path}",
             "Submodule do not found in ",
         )
     exec_command(
         capfd,
-        "rapydo init --submodules-path {}".format(modules_path),
+        f"rapydo init --submodules-path {modules_path}",
         "Path ./submodules/http-api already exists, removing",
         "Project initialized",
     )
@@ -484,7 +481,7 @@ def test_all(capfd):
     # and will be removed as well as the folders
     exec_command(
         capfd,
-        "rapydo init --submodules-path {}".format(modules_path),
+        f"rapydo init --submodules-path {modules_path}",
         "Path ./submodules/http-api already exists, removing",
         "Project initialized",
     )
@@ -580,8 +577,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        "rapydo: \033[1;32m{v}".format(v=__version__),
-        "required rapydo: \033[1;32m{v}".format(v=__version__),
+        f"rapydo: \033[1;32m{__version__}",
+        f"required rapydo: \033[1;32m{__version__}",
     )
 
     # docker dump
@@ -671,7 +668,7 @@ def test_all(capfd):
         "You have unstaged files on do",
         "Untracked files:",
         "submodules/do/new_file",
-        "Obsolete image rapydo/backend:{}".format(__version__),
+        f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
         "Update it with: rapydo --services backend pull",
@@ -944,12 +941,12 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "rapydo ssl --chain-file {f}".format(f=pconf),
+        f"rapydo ssl --chain-file {pconf}",
         "Invalid key file (you provided none)",
     )
     exec_command(
         capfd,
-        "rapydo ssl --chain-file {f} --key-file /file".format(f=pconf),
+        f"rapydo ssl --chain-file {pconf} --key-file /file",
         "Invalid key file (you provided /file)",
     )
     exec_command(
@@ -1059,7 +1056,7 @@ RUN mkdir xyz
         capfd,
         "rapydo -s rabbit build",
         "Successfully built",
-        "Successfully tagged testbuild/rabbit:{}".format(__version__),
+        f"Successfully tagged testbuild/rabbit:{__version__}",
         "Custom images built",
     )
 
@@ -1075,19 +1072,19 @@ RUN mkdir xyz
     img_id = img_id[7:19]
     exec_command(
         capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
+        f"rapydo ancestors {img_id}",
+        f"Finding all children and (grand)+ children of {img_id}",
     )
 
     # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info("rapydo/rabbitmq:{}".format(__version__)).get("Id")
+    img_id = dock.image_info(f"rapydo/rabbitmq:{__version__}").get("Id")
     # => c1a845de8052
     img_id = img_id[7:19]
     # rapydo/rabbitmq has a child: testbuild/rabbit just created
     exec_command(
         capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
+        f"rapydo ancestors {img_id}",
+        f"Finding all children and (grand)+ children of {img_id}",
         "testbuild/rabbit",
     )
 
@@ -1104,7 +1101,7 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "rapydo check -i main --no-git",
-        "Obsolete image testbuild/rabbit:{}".format(__version__),
+        f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
         "Update it with: rapydo --services rabbit build",
@@ -1113,8 +1110,8 @@ RUN mkdir xyz
     # rabbit images has no longer any child because it is just rebuilt
     exec_command(
         capfd,
-        "rapydo ancestors {}".format(img_id),
-        "Finding all children and (grand)+ children of {}".format(img_id),
+        f"rapydo ancestors {img_id}",
+        f"Finding all children and (grand)+ children of {img_id}",
     )
 
     # Add a second service with the same image to test redundant builds
@@ -1214,7 +1211,7 @@ def test_services_activation(capfd):
             serv_opt = ""
         else:
             auth = "postgres"
-            serv_opt = "--services {}".format(service)
+            serv_opt = f"--services {service}"
 
         exec_command(
             capfd,
@@ -1251,13 +1248,13 @@ def test_celery_activation(capfd):
 
     def test_celery_configuration(services, broker, backend):
         if services:
-            services = "--services celery,{}".format(services)
+            services = f"--services celery,{services}"
         else:
             services = "--services celery"
 
         exec_command(
             capfd,
-            "rapydo create testcelery {} {}".format(opt, services),
+            f"rapydo create testcelery {opt} {services}",
             "Project testcelery successfully created",
         )
 
@@ -1337,7 +1334,7 @@ def test_install(capfd):
     exec_command(
         capfd,
         "rapydo install --editable auto",
-        "Controller repository switched to {}".format(__version__),
+        f"Controller repository switched to {__version__}",
     )
 
     exec_command(
@@ -1359,7 +1356,7 @@ def test_install(capfd):
     # Read and change the content
     fin = open(pconf)
     data = fin.read()
-    data = data.replace("rapydo: {}".format(__version__), "rapydo: 0.7.3")
+    data = data.replace(f"rapydo: {__version__}", "rapydo: 0.7.3")
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -1369,7 +1366,7 @@ def test_install(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        "This project is not compatible with rapydo version {}".format(__version__),
+        f"This project is not compatible with rapydo version {__version__}",
         "Please downgrade rapydo to version 0.7.3 or modify this project",
     )
 
@@ -1386,7 +1383,7 @@ def test_install(capfd):
     exec_command(
         capfd,
         "rapydo version",
-        "This project is not compatible with rapydo version {}".format(__version__),
+        f"This project is not compatible with rapydo version {__version__}",
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
 

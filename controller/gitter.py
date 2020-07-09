@@ -67,7 +67,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
     branch_found = False
     for branch in branches:
         if remote:
-            branch_found = branch.name.endswith("/{}".format(branch_name))
+            branch_found = branch.name.endswith(f"/{branch_name}")
         else:
             branch_found = branch.name == branch_name
 
@@ -220,12 +220,12 @@ def print_diff(gitobj, unstaged):
     if changed:
         print("\nChanges not staged for commit:")
         for f in unstaged["changed"]:
-            print("\t{}{}".format(repo_folder, f.a_path))
+            print(f"\t{repo_folder}{f.a_path}")
         print("")
     if untracked:
         print("\nUntracked files:")
         for f in unstaged["untracked"]:
-            print("\t{}{}".format(repo_folder, f))
+            print(f"\t{repo_folder}{f}")
         print("")
 
     return True
@@ -290,7 +290,7 @@ def check_updates(path, gitobj):
     log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = "{}..origin/{}".format(branch, branch)
+    behind_check = f"{branch}..origin/{branch}"
     commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
 
     try:
@@ -315,7 +315,7 @@ def check_updates(path, gitobj):
                     message = message[0:57] + "..."
                 log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
-    ahead_check = "origin/{}..{}".format(branch, branch)
+    ahead_check = f"origin/{branch}..{branch}"
     commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
     try:
         commits_ahead_list = list(commits_ahead)

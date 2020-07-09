@@ -5,16 +5,12 @@
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
 from distutils.version import LooseVersion
+from importlib import import_module
 
 from sultan.api import Sultan
 
 from controller import TESTING, log
 from controller.utilities import system
-
-try:
-    import_exc = (ModuleNotFoundError, ImportError)
-except NameError:
-    import_exc = ImportError
 
 
 class Packages:
@@ -40,7 +36,7 @@ class Packages:
                 # User site-packages are not visible in this virtualenv.
                 if not TESTING and user:  # pragma: no cover
                     command += " --user"
-                command += " {}".format(package)
+                command += f" {package}"
 
                 pip = sultan.pip3 if use_pip3 else sultan.pip
                 result = pip(command).run()
@@ -69,19 +65,17 @@ class Packages:
     @staticmethod
     def import_package(package_name):
 
-        from importlib import import_module
-
         try:
-            package = import_module(package_name)
-        except import_exc:  # pylint:disable=catching-non-exception  # pragma: no cover
+            return import_module(package_name)
+        except ModuleNotFoundError:
             return None
-        else:
-            return package
+        except ImportError:
+            return None
 
     @staticmethod
     def package_version(package_name):
         package = Packages.import_package(package_name)
-        if package is None:  # pragma: no cover
+        if package is None:
             return None
         return package.__version__
 
@@ -97,7 +91,7 @@ class Packages:
                     version_error = "Minimum supported version for {} is {}".format(
                         package_name, min_version
                     )
-                    version_error += ", found {} ".format(found_version)
+                    version_error += f", found {found_version} "
                     log.exit(version_error)
 
             if max_version is not None:  # pragma: no cover
@@ -105,7 +99,7 @@ class Packages:
                     version_error = "Maximum supported version for {} is {}".format(
                         package_name, max_version
                     )
-                    version_error += ", found {} ".format(found_version)
+                    version_error += f", found {found_version} "
                     log.exit(version_error)
 
             log.debug("{} version: {}", package_name, found_version)
@@ -131,7 +125,7 @@ class Packages:
                 version_error = "Minimum supported version for {} is {}".format(
                     program, min_version,
                 )
-                version_error += ", found {} ".format(found_version)
+                version_error += f", found {found_version} "
                 log.exit(version_error)
 
         if max_version is not None:  # pragma: no cover
@@ -139,7 +133,7 @@ class Packages:
                 version_error = "Maximum supported version for {} is {}".format(
                     program, max_version,
                 )
-                version_error += ", found {} ".format(found_version)
+                version_error += f", found {found_version} "
                 log.exit(version_error)
 
         log.debug("{} version: {}", program, found_version)

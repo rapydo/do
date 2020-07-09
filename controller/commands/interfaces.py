@@ -56,16 +56,16 @@ def __call__(
     if not port.isnumeric():
         log.exit("Port must be a valid integer")
 
-    publish = ["{}:{}".format(port, current_ports.target)]
+    publish = [f"{port}:{current_ports.target}"]
 
     url = None
     if service == "swaggerui":
         BACKEND_PORT = glom(conf_vars, "env.BACKEND_PORT")
         if production:
-            spec = "https://{}/api/specs".format(hostname)
+            spec = f"https://{hostname}/api/specs"
         else:
-            spec = "http://{}:{}/api/specs".format(hostname, BACKEND_PORT)
-        url = "http://{}:{}?docExpansion=list&url={}".format(hostname, port, spec)
+            spec = f"http://{hostname}:{BACKEND_PORT}/api/specs"
+        url = f"http://{hostname}:{port}?docExpansion=list&url={spec}"
 
     if url is not None:
         log.info("You can access {} web page here:\n\n{}\n", service, url)

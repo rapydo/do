@@ -19,7 +19,7 @@ def main():
     except KeyboardInterrupt:
         log.info("Interrupted by the user")
     except NotImplementedError as e:
-        print("NOT IMPLEMENTED (yet): {}".format(e))
+        print(f"NOT IMPLEMENTED (yet): {e}")
     else:
         log.verbose("Application completed")
 

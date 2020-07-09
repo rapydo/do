@@ -9,7 +9,7 @@ def install_controller_from_pip(version, user):
     log.info("You asked to install rapydo-controller {} from pip", version)
 
     package = "rapydo-controller"
-    controller = "{}=={}".format(package, version)
+    controller = f"{package}=={version}"
     installed = Packages.install(controller, user=user)
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from pip", version)
@@ -24,7 +24,7 @@ def install_controller_from_git(version, user):
     package = "rapydo-controller"
     controller_repository = "do"
     rapydo_uri = "https://github.com/rapydo"
-    controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
+    controller = f"git+{rapydo_uri}/{controller_repository}.git@{version}"
 
     installed = Packages.install(controller, user=user)
 

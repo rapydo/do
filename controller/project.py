@@ -50,7 +50,7 @@ class Project:
         self.expected_files.append(".gitignore")
 
         if auth is not None:
-            model_file = "{}.py".format(auth)
+            model_file = f"{auth}.py"
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))

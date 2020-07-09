@@ -14,10 +14,10 @@ def __call__(project, version, rapydo_version, **kwargs):
         c = "\033[1;31m"  # Light Red
     d = "\033[0m"
 
-    cv = "{}{}{}".format(c, __version__, d)
-    pv = "{}{}{}".format(c, version, d)
-    rv = "{}{}{}".format(c, rapydo_version, d)
-    print("\nrapydo: {}\t{}: {}\trequired rapydo: {}".format(cv, project, pv, rv))
+    cv = f"{c}{__version__}{d}"
+    pv = f"{c}{version}{d}"
+    rv = f"{c}{rapydo_version}{d}"
+    print(f"\nrapydo: {cv}\t{project}: {pv}\trequired rapydo: {rv}")
 
     if __version__ != rapydo_version:
         c = LooseVersion(__version__)
@@ -34,4 +34,4 @@ def __call__(project, version, rapydo_version, **kwargs):
             )
         )
 
-        print("\n\033[1;31mrapydo install {}\033[0m".format(rapydo_version))
+        print(f"\n\033[1;31mrapydo install {rapydo_version}\033[0m")

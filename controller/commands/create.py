@@ -225,5 +225,5 @@ def create(
         if os.path.exists(p):
             log.info("Project file already exists: {}", p)
         else:
-            print("\n{}".format(template))
+            print(f"\n{template}")
             log.exit(p)

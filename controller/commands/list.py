@@ -24,7 +24,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
         log.info("List of configured rapydo arguments:\n")
         for var in sorted(args):
             val = args.get(var)
-            print("{:<20}\t{}".format(var, val))
+            print(f"{var:<20}\t{val}")
 
     if args.get("env"):
         printed_something = True
@@ -32,7 +32,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
         env = read_env()
         for var in sorted(env):
             val = env.get(var)
-            print("{:<36}\t{}".format(var, val))
+            print(f"{var:<36}\t{val}")
 
     if args.get("active_services"):
         printed_something = True
@@ -45,13 +45,13 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
                 image = service.get("image")
                 build = service.get("build")
                 if build is None:
-                    print("{:<12} {:<24}".format(name, image))
+                    print(f"{name:<12} {image:<24}")
                 else:
                     path = build.get("context")
                     path = path.replace(os.getcwd(), "")
                     if path.startswith("/"):
                         path = path[1:]
-                    print("{:<12} {:<24} {}".format(name, image, path))
+                    print(f"{name:<12} {image:<24} {path}")
 
     if args.get("submodules"):
         printed_something = True
@@ -66,7 +66,7 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
             path = path.replace(os.getcwd(), "")
             if path.startswith("/"):
                 path = path[1:]
-            print("{:<18} {:<18} {}".format(name, branch, path))
+            print(f"{name:<18} {branch:<18} {path}")
 
     if not printed_something:
         log.error("Nothing to list, please use rapydo list -h for available options")

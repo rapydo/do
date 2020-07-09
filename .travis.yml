@@ -17,11 +17,7 @@ script:
 jobs:
   include:
     - stage: test
-      python: 3.5
-      dist: bionic
-      env:
-        - STAGE=UBUNTU_18.04 # only used as information on the web interface
-    - python: 3.6
+      python: 3.6
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
@@ -33,10 +29,6 @@ jobs:
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
-    - python: 3.5
-      dist: xenial
-      env:
-        - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.8
       dist: xenial
       env:

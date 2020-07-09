@@ -56,7 +56,7 @@ class Templating:
             if filename.startswith("."):
                 filename = filename[1:]
 
-            template = self.env.get_template("{}.j2".format(filename))
+            template = self.env.get_template(f"{filename}.j2")
             content = template.render(**data)
             # from jinja2.meta import find_undeclared_variables
             # ast = self.env.parse(content)
@@ -87,6 +87,6 @@ class Templating:
 
     @staticmethod
     def make_backup(filename):
-        backup_filename = "{}.bak".format(filename)
+        backup_filename = f"{filename}.bak"
         os.rename(filename, backup_filename)
         log.info("A backup of {} is saved as {}", filename, backup_filename)
