@@ -52,8 +52,11 @@ def exec_command(capfd, command, *asserts):
 
     try:
         options = command.split(" ")[1:]
-        runner.invoke(controller.app, options)
-        # result.exit_code
+        result = runner.invoke(controller.app, options)
+
+        with capfd.disabled():
+            print(result.exit_code)
+            print(result.stdout)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
         pass
