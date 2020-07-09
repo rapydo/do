@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
 from glom import glom
+
 from controller import log
+from controller.project import ANGULAR
 
 
 def walk_services(actives, dependecies, index=0):
@@ -11,12 +12,12 @@ def walk_services(actives, dependecies, index=0):
     next_active = actives[index]
 
     for service in dependecies.get(next_active, []):
-        if service not in actives:
+        # Not easy to test, since we have few services with dependencies
+        if service not in actives:  # pragma: no cover
             actives.append(service)
 
     index += 1
-    if index >= len(actives):
-        return actives
+
     return walk_services(actives, dependecies, index)
 
 
@@ -32,9 +33,9 @@ def find_active(services):
 
     for service in services:
 
-        name = service.get('name')
+        name = service.get("name")
         all_services[name] = service
-        dependencies[name] = list(service.get('depends_on', {}).keys())
+        dependencies[name] = list(service.get("depends_on", {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
         is_active = str(ACTIVATE) == "1"
@@ -51,8 +52,8 @@ def apply_variables(dictionary, variables):
 
     new_dict = {}
     for key, value in dictionary.items():
-        if isinstance(value, str) and value.startswith('$$'):
-            value = variables.get(value.lstrip('$'), None)
+        if isinstance(value, str) and value.startswith("$$"):
+            value = variables.get(value.lstrip("$"), None)
         else:
             pass
         new_dict[key] = value
@@ -61,44 +62,103 @@ def apply_variables(dictionary, variables):
 
 
 vars_to_services_mapping = {
-    'CELERYUI_USER': ['celeryui'],
-    'CELERYUI_PASSWORD': ['celeryui'],
-    'RABBITMQ_USER': ['rabbit'],
-    'RABBITMQ_PASSWORD': ['rabbit'],
-    'ALCHEMY_USER': ['postgres', 'mariadb'],
-    'ALCHEMY_PASSWORD': ['postgres', 'mariadb'],
-    'NEO4J_PASSWORD': ['neo4j'],
-    'IRODS_ANONYMOUS': ['icat'],
-    'AUTH_DEFAULT_PASSWORD': ['backend'],
-    'AUTH_DEFAULT_USERNAME': ['backend'],
-    'SMTP_PORT': ['backend'],
-    'SMTP_ADMIN': ['backend'],
-    'SMTP_NOREPLY': ['backend'],
-    'SMTP_HOST': ['backend'],
-    'SMTP_USERNAME': ['backend'],
-    'SMTP_PASSWORD': ['backend'],
-    'IRODS_PASSWORD': ['icat'],
-    'IRODS_USER': ['icat'],
+    "CELERYUI_USER": ["celeryui"],
+    "CELERYUI_PASSWORD": ["celeryui"],
+    "RABBITMQ_USER": ["rabbit"],
+    "RABBITMQ_PASSWORD": ["rabbit"],
+    "ALCHEMY_USER": ["postgres", "mariadb"],
+    "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
+    "NEO4J_PASSWORD": ["neo4j"],
+    "IRODS_ANONYMOUS": ["icat"],
+    "AUTH_DEFAULT_PASSWORD": ["backend"],
+    "AUTH_DEFAULT_USERNAME": ["backend"],
+    "SMTP_PORT": ["backend"],
+    "SMTP_ADMIN": ["backend"],
+    "SMTP_NOREPLY": ["backend"],
+    "SMTP_HOST": ["backend"],
+    "SMTP_USERNAME": ["backend"],
+    "SMTP_PASSWORD": ["backend"],
+    "IRODS_PASSWORD": ["icat"],
+    "IRODS_USER": ["icat"],
 }
 
 
 def normalize_placeholder_variable(key):
-    if key == 'NEO4J_AUTH':
-        return 'NEO4J_PASSWORD'
+    if key == "NEO4J_AUTH":
+        return "NEO4J_PASSWORD"
 
-    if key == 'POSTGRES_USER':
-        return 'ALCHEMY_USER'
-    if key == 'POSTGRES_PASSWORD':
-        return 'ALCHEMY_PASSWORD'
+    if key == "POSTGRES_USER":
+        return "ALCHEMY_USER"
+    if key == "POSTGRES_PASSWORD":
+        return "ALCHEMY_PASSWORD"
 
-    if key == 'MYSQL_USER':
-        return 'ALCHEMY_USER'
-    if key == 'MYSQL_PASSWORD':
-        return 'ALCHEMY_PASSWORD'
+    if key == "MYSQL_USER":
+        return "ALCHEMY_USER"
+    if key == "MYSQL_PASSWORD":
+        return "ALCHEMY_PASSWORD"
 
-    if key == 'RABBITMQ_DEFAULT_USER':
-        return 'RABBITMQ_USER'
-    if key == 'RABBITMQ_DEFAULT_PASS':
-        return 'RABBITMQ_PASSWORD'
+    if key == "RABBITMQ_DEFAULT_USER":
+        return "RABBITMQ_USER"
+    if key == "RABBITMQ_DEFAULT_PASS":
+        return "RABBITMQ_PASSWORD"
 
     return key
+
+
+def get_celerybeat_scheduler(env):
+
+    if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
+        return "Unknown"
+
+    celery_backend = env.get("CELERY_BACKEND")
+
+    if celery_backend is None:
+        return "Unknown"
+
+    if celery_backend == "MONGODB":
+        return "celerybeatmongo.schedulers.MongoScheduler"
+
+    if celery_backend == "REDIS":
+        return "redbeat.RedBeatScheduler"
+
+    return "Unknown"
+
+
+def check_rabbit_password(pwd):
+    invalid_rabbit_characters = ["£", "§", "”", "’"]
+    if any([c in pwd for c in invalid_rabbit_characters]):
+        log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
+        log.exit(
+            "Some special characters, including {}, are not allowed "
+            "because make RabbitMQ crash at startup",
+            " ".join(invalid_rabbit_characters),
+        )
+
+
+def get_default_user(service, frontend):
+
+    if service in ["backend", "celery", "celeryui", "celery-beat"]:
+        return "developer"
+
+    if service in ["frontend"]:
+        if frontend == ANGULAR:
+            return "node"
+
+    if service == "postgres":
+        return "postgres"
+
+    if service == "neo4j":
+        return "neo4j"
+
+    return None
+
+
+def get_default_command(service):
+
+    if service == "backend":
+        return "restapi launch"
+
+    if service == "neo4j":
+        return "bin/cypher-shell"
+
+    return "bash"

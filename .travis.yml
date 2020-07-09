@@ -1,76 +1,53 @@
 os: linux
-dist: bionic
 language: python
-python:
-- 3.8
 services:
-- docker
+  - docker
 script:
-- pip3 install --upgrade setuptools pytest pytest-cov
-- pip3 install --upgrade --no-cache-dir --editable .
-- BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
-# - git clone -b ${BRANCH} --depth=1 https://github.com/rapydo/tests.git rapydo_tests
-- mkdir rapydo_tests
-- cd rapydo_tests
-- export LOGURU_LEVEL=DEBUG
-- py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
-- bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ../
+  - pip3 install --upgrade setuptools pytest pytest-cov
+  - pip3 install --upgrade --no-cache-dir --editable .
+  - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
+  # - git clone -b ${BRANCH} --depth=1 https://github.com/rapydo/tests.git rapydo_tests
+  - mkdir rapydo_tests
+  - cd rapydo_tests
+  - mkdir -p data/logs
+  - export LOGURU_LEVEL=DEBUG
+  - py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
+  - bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ../
 
 jobs:
   include:
-
-  - stage: test
-    python: 3.5
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.7
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.8
-    dist: bionic
-    env:
-    - UBUNTU_VER=18.04  # only used as utility from the web interface, since the dist is not reported
-  - python: 3.5
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.7
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.8
-    dist: xenial
-    env:
-    - UBUNTU_VER=16.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.5
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
-
-  - python: 3.6
-    dist: trusty
-    env:
-    - UBUNTU_VER=14.04  # only used as utility from the web interface, since the dist is not reported
-
-  # - python: 3.5
+    - stage: test
+      python: 3.5
+      dist: bionic
+      env:
+        - STAGE=UBUNTU_18.04 # only used as information on the web interface
+    - python: 3.6
+      dist: bionic
+      env:
+        - STAGE=UBUNTU_18.04 # only used as information on the web interface
+    - python: 3.7
+      dist: bionic
+      env:
+        - STAGE=UBUNTU_18.04 # only used as information on the web interface
+    - python: 3.8
+      dist: bionic
+      env:
+        - STAGE=UBUNTU_18.04 # only used as information on the web interface
+    - python: 3.5
+      dist: xenial
+      env:
+        - STAGE=UBUNTU_16.04 # only used as information on the web interface
+    - python: 3.8
+      dist: xenial
+      env:
+        - STAGE=UBUNTU_16.04 # only used as information on the web interface
+    - python: 3.6
+      dist: trusty
+      env:
+        - STAGE=UBUNTU_14.04 # only used as information on the web interface
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -80,21 +57,10 @@ jobs:
   #     - source .venv/bin/activate
   #     - curl -fsSL https://get.docker.com -o get-docker.sh
   #     - sh get-docker.sh
-
-  # - python: 3.6
-  #   os: osx
-  #   language: sh  # 'language: python' is an error on Travis CI macOS
-  #   before_install:
-  #     - brew update
-  #     - brew upgrade python3
-  #     - python3 -m pip install virtualenv
-  #     - virtualenv .venv -p python3
-  #     - source .venv/bin/activate
-  #     - curl -fsSL https://get.docker.com -o get-docker.sh
-  #     - sh get-docker.sh
-
   # - python: 3.7
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -104,9 +70,10 @@ jobs:
   #     - source .venv/bin/activate
   #     - curl -fsSL https://get.docker.com -o get-docker.sh
   #     - sh get-docker.sh
-
   # - python: 3.8
   #   os: osx
+  #     services:
+  #       - docker
   #   language: sh  # 'language: python' is an error on Travis CI macOS
   #   before_install:
   #     - brew update
@@ -116,29 +83,18 @@ jobs:
   #     - source .venv/bin/activate
   #     - curl -fsSL https://get.docker.com -o get-docker.sh
   #     - sh get-docker.sh
-
   # Travis error:
   # ERROR: for XYZ image operating system "linux" cannot be used on this platform
   # - os: windows
   #   language: sh # The language 'python' is currently unsupported on the Windows Build Environment.
   #   python: "3.x"
+  #     services:
+  #       - docker
   #   before_install:
   #     - choco install python3 --params "/InstallDir:C:\\Python"
   #     - export PATH="/c/Python:/c/Python/Scripts:$PATH"
   #     - python -m pip install --upgrade pip wheel
 
-  # - stage: deploy
-  #   python: 3.7
-  #   dist: xenial
-  #   os: linux
-  #   script: skip
-  #   deploy:
-  #     provider: pypi
-  #     user: pdonorio
-  #     password:
-  #       secure: t5rXTrlqnR1De/rsfO4eDTyRz6e+osTnwLqkphwJ1JQzWh3n5lA2ZYYO6Vmil2oj3X+fFOuhMMnu/QGFwdYP+Hp1EPxecj2WnBKxkW8PtC20w0oAmxFg09teRq/RBbtHs+z/NGGYmWr7V0Ic5iQt53iTX4eBb6LhQ9aLHg05+SsJDAgniKQzpOtt72m+ZYECv86xIr3q5SIl+k0os1VwJtbAqJRMRigvPP05X0ufrTq/uCyHF9EEKOtvVdgYGfiFdOFh5URSfHaV4ASNNGEsU+l3Twfhk6wqQQkvSHeZy0onY90KnCLj7sl3bTyeo6wBPG5jGV/zYhHhZgWyLJI5hZk426oIvkZ0Tj6TxsZNUDNSHNhPgKuR6tEnEt0BGd4oL3YpAKzQmFWMfwzn0UF/CPhpF5gNxWbhfO/+yfxvPfw1QvrVHb9O5hXji8U1q2a+W9dqIAAxKnH0hZZLSQcCihSBTU4oh1lJXqG+Rzo3hLb8XtMEQjMIcx5f4zPf+unRqPWe6ViMZ0eikqmA6lniKMPnqk457fyxzLoda4iaSvSqMxByGx0DSqURIcU87ejKzI+TrZh+I3hqU2SK1yN79kTJ9wFnjKL+2OMjBhIIjUDa5tNf0RauNbCNyuTv2z947PMsJGEZRX4pGR29lwMLnQH3gVcrQ2eJTlxl5x4iEKo=
-  #     on:
-  #       tags: true
 notifications:
   email: false
   slack:

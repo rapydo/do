@@ -1,0 +1,35 @@
+variables:
+  env:
+    ACTIVATE_PROXY: 1
+    APP_MODE: production
+    # used to reach the backend from outer network
+    # in production it match the with proxy ssl port (${PROXY_PROD_PORT})
+    BACKEND_API_PORT: 443
+
+    RABBITMQ_PORT: 5671
+    RABBITMQ_MANAGEMENT_PORT: 15671
+
+    RABBITMQ_SSL_CERTFILE: /ssl/real/fullchain1.pem
+    RABBITMQ_SSL_KEYFILE: /ssl/real/privkey1.pem
+    # The depth is the maximum number of non-self-issued intermediate certificates that may follow the peer certificate in a valid certification path. So if depth is 0 the peer (e.g. client) certificate must be signed by the trusted CA directly, if 1 the path can be "peer, CA, trusted CA", if it is 2 "peer, CA, CA, trusted CA", and so on. The default depth is 1.
+    # RABBITMQ_SSL_DEPTH: 1
+    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "false"
+    # RABBITMQ_SSL_VERIFY
+    RABBITMQ_SSL_ENABLED: True # it is used by Celery
+
+    CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
+
+    NEO4J_WEB_INTERFACE_PORT: 7473
+    NEO4J_SSL_PATH: /ssl
+
+    AUTH_DEFAULT_USERNAME: "**PLACEHOLDER**"
+    AUTH_DEFAULT_PASSWORD: "**PLACEHOLDER**"
+    ALCHEMY_USER: "**PLACEHOLDER**"
+    ALCHEMY_PASSWORD: "**PLACEHOLDER**"
+    NEO4J_PASSWORD: "**PLACEHOLDER**"
+    RABBITMQ_USER: "**PLACEHOLDER**"
+    RABBITMQ_PASSWORD: "**PLACEHOLDER**"
+    CELERYUI_USER: "**PLACEHOLDER**"
+    CELERYUI_PASSWORD: "**PLACEHOLDER**"
+    IRODS_USER: "**PLACEHOLDER**"
+    IRODS_PASSWORD: "**PLACEHOLDER**"

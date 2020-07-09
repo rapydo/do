@@ -1,0 +1,25 @@
+import { Component } from "@angular/core";
+
+// import { {{name.title().replace(" ", "")}}Service } from "@app/services/{name}"
+
+import { NgxSpinnerService } from "ngx-spinner";
+import { ApiService } from "@rapydo/services/api";
+import { AuthService } from "@rapydo/services/auth";
+import { NotificationService } from "@rapydo/services/notification";
+
+
+@Component({
+  // selector: "{{name}}",
+  templateUrl: "{{name}}.html",
+})
+export class {{name.title().replace(" ", "")}}Component {
+
+  constructor(
+    private spinner: NgxSpinnerService,
+    private api: ApiService,
+    private auth: AuthService,
+    private notify: NotificationService,
+  ) {
+  }
+
+}

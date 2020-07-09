@@ -1,0 +1,16 @@
+from restapi.connectors.celery import CeleryExt
+
+from restapi.utilities.logs import log
+
+celery_app = CeleryExt.celery_app
+
+
+@celery_app.task(bind=True)
+def {{name}}(self):
+    with celery_app.app.app_context():
+
+        db = celery_app.get_service("{{auth}}")
+
+        log.info("Task started!")
+
+        return "Task executed!"

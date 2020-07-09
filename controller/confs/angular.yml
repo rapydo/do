@@ -1,0 +1,101 @@
+version: "3"
+
+services:
+  frontend:
+    # restart: no
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${FRONTEND_BUILD_MODE}:${RAPYDO_VERSION}
+    hostname: angular
+    # user: node
+    privileged: ${DOCKER_PRIVILEGED_MODE}
+    networks:
+      app_net:
+    environment:
+      ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      APP_MODE: ${APP_MODE}
+      VERSION: ${PROJECT_VERSION}
+      RAPYDO_VERSION: ${RAPYDO_VERSION}
+      PROJECT_TITLE: ${PROJECT_TITLE}
+      PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      ENABLE_FOOTER: ${ENABLE_FOOTER}
+      ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
+      BACKEND_URI: ${BACKEND_URI}
+      BACKEND_PORT: ${BACKEND_API_PORT}
+      BACKEND_HOST: ${PROJECT_DOMAIN}
+      BACKEND_PREFIX: ${BACKEND_PREFIX}
+      BASE_HREF: ${PROJECT_DOMAIN}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
+      PUSHPIN_HOST: ${PROJECT_DOMAIN}
+      PUSHPIN_PORT: ${PUSHPIN_PORT}
+      SENTRY_URL: ${SENTRY_URL}
+      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
+
+      CYPRESS_AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
+      CYPRESS_AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}
+      CYPRESS_ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
+      CYPRESS_ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
+      CYPRESS_BACKEND_HOST: ${FLASK_HOST}
+      CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
+      # FROM ENV, USED BY CYPRESS TO RECORD RESULTS:
+      TRAVIS:
+      TRAVIS_BUILD_ID:
+      CYPRESS_RECORD_KEY:
+      CYPRESS_PROJECT_ID:
+      COMMIT_INFO_BRANCH:
+      COMMIT_INFO_MESSAGE:
+      COMMIT_INFO_SUBJECT:
+      COMMIT_INFO_BODY:
+      COMMIT_INFO_EMAIL: "Unknown" # Not provided
+      COMMIT_INFO_AUTHOR:
+      COMMIT_INFO_SHA:
+      COMMIT_INFO_TIMESTAMP:
+      COMMIT_INFO_REMOTE:
+
+      # DISPLAY: ":0"
+
+    volumes:
+      # - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      # - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      - ${SUBMODULE_DIR}/frontend/utility:/rapydo
+
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/karma:/coverage
+      # Output folder, configured in cypress.json
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
+
+      - ${SUBMODULE_DIR}/frontend/browserslist:/app/browserslist
+      - ${SUBMODULE_DIR}/frontend/e2e:/app/e2e
+      - ${SUBMODULE_DIR}/frontend/karma.conf.js:/app/karma.conf.js
+      - ${SUBMODULE_DIR}/frontend/polyfills.ts:/app/polyfills.ts
+      - ${SUBMODULE_DIR}/frontend/tsconfig.app.json:/app/tsconfig.app.json
+      - ${SUBMODULE_DIR}/frontend/tsconfig.json:/app/tsconfig.json
+      - ${SUBMODULE_DIR}/frontend/tsconfig.spec.json:/app/tsconfig.spec.json
+      - ${SUBMODULE_DIR}/frontend/tslint.json:/app/tslint.json
+      - ${SUBMODULE_DIR}/frontend/cypress.json:/app/cypress.json
+      - ${SUBMODULE_DIR}/frontend/courtesy:/app/courtesy
+
+      - ${SUBMODULE_DIR}/frontend/src:/app/app/rapydo
+      - ${PROJECT_DIR}/frontend:/app/app/custom
+
+      - ${SUBMODULE_DIR}/frontend/cypress/tsconfig.json:/app/cypress/tsconfig.json
+      - ${SUBMODULE_DIR}/frontend/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
+      - ${SUBMODULE_DIR}/frontend/cypress/support:/app/cypress/support
+      - ${SUBMODULE_DIR}/frontend/cypress/plugins:/app/cypress/plugins
+      - ${SUBMODULE_DIR}/frontend/cypress/fixtures:/app/cypress/fixtures
+      - ${SUBMODULE_DIR}/frontend/cypress/integration:/app/cypress/integration/rapydo
+      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+
+      - ${VANILLA_DIR}/data/logs:/logs
+
+  ###############################
+  proxy:
+    volumes:
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app

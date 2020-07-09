@@ -3,7 +3,7 @@ name: Publish to PyPI
 on:
   push:
     tags:
-    - '*'
+      - "*"
 
 jobs:
   publish:
@@ -11,26 +11,26 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.8
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
 
-    - name: Build dist
-      run: python setup.py sdist
+      - name: Build dist
+        run: python setup.py sdist
 
-    #- name: Publish to Test PyPI
-    #  uses: pypa/gh-action-pypi-publish@master
-    #  with:
-    #    user: __token__
-    #    password: ${{ secrets.test_pypi_password }}
-    #    repository_url: https://test.pypi.org/legacy/
+      #- name: Publish to Test PyPI
+      #  uses: pypa/gh-action-pypi-publish@master
+      #  with:
+      #    user: __token__
+      #    password: ${{ secrets.test_pypi_password }}
+      #    repository_url: https://test.pypi.org/legacy/
 
-    - name: Publish to PyPI
-      #if: startsWith(github.event.ref, 'refs/tags')
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        user: __token__
-        password: ${{ secrets.pypi_password }}
+      - name: Publish to PyPI
+        #if: startsWith(github.event.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}

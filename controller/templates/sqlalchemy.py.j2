@@ -2,8 +2,11 @@
 
 """ CUSTOM Models for the relational database """
 
-from restapi.models.sqlalchemy import db
-from restapi.models.sqlalchemy import User
+from restapi.connectors.sqlalchemy.models import db, User
 
 # Add (inject) attributes to User
+{% if extend -%}
+setattr(User, 'my_custom_field2', db.Column(db.String(255)))
+{% else -%}
 setattr(User, 'my_custom_field', db.Column(db.String(255)))
+{% endif -%}

@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-
 import os
-from collections import OrderedDict
+from collections import OrderedDict  # can be removed from python 3.7
+
 import yaml
+
 from controller import log
 
 PROJECTS_DEFAULTS_FILE = "projects_defaults.yaml"
@@ -28,13 +28,15 @@ def read_configuration(
 
     # Verify custom project configuration
     project = custom_configuration.get("project")
-    if project is None:
+    # Can't be tested because it is included in default configuration
+    if project is None:  # pragma: no cover
         raise AttributeError("Missing project configuration")
 
     variables = ["title", "description", "version", "rapydo"]
 
     for key in variables:
-        if project.get(key) is None:
+        # Can't be tested because it is included in default configuration
+        if project.get(key) is None:  # pragma: no cover
 
             log.exit(
                 "Project not configured, missing key '{}' in file {}/{}",
@@ -43,20 +45,15 @@ def read_configuration(
                 PROJECT_CONF_FILENAME,
             )
 
-    if default_file_path is None:
-        base_configuration = {}
-    else:
-        base_configuration = load_yaml_file(
-            file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
-        )
+    base_configuration = load_yaml_file(
+        file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
+    )
 
-        if production:
-            base_prod_conf = load_yaml_file(
-                file=PROJECTS_PROD_DEFAULTS_FILE,
-                path=default_file_path,
-                keep_order=True,
-            )
-            base_configuration = mix_configuration(base_configuration, base_prod_conf)
+    if production:
+        base_prod_conf = load_yaml_file(
+            file=PROJECTS_PROD_DEFAULTS_FILE, path=default_file_path, keep_order=True,
+        )
+        base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
     if read_extended:
         extended_project = project.get("extends")
@@ -70,19 +67,19 @@ def read_configuration(
 
     if extends_from == "projects":
         extend_path = projects_path
-    elif extends_from.startswith("submodules/"):
+    elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
             log.exit("Invalid repository name in extends-from, name is empty")
 
         extend_path = os.path.join(submodules_path, repository_name, projects_path)
-    else:
+    else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
         log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
     extend_path = os.path.join(extend_path, extended_project)
 
-    if not os.path.exists(extend_path):
+    if not os.path.exists(extend_path):  # pragma: no cover
         log.exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
@@ -97,6 +94,9 @@ def mix_configuration(base, custom):
     if base is None:
         base = {}
 
+    if custom is None:
+        return base
+
     for key, elements in custom.items():
 
         if key not in base:
@@ -104,7 +104,7 @@ def mix_configuration(base, custom):
             continue
 
         if elements is None:
-            if isinstance(base[key], dict):
+            if isinstance(base[key], dict):  # pragma: no cover
                 log.warning("Cannot replace {} with empty list", key)
                 continue
 
@@ -112,7 +112,7 @@ def mix_configuration(base, custom):
             mix_configuration(base[key], custom[key])
 
         elif isinstance(elements, list):
-            for e in elements:
+            for e in elements:  # pragma: no cover
                 base[key].append(e)
         else:
             base[key] = elements
@@ -187,8 +187,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.warning("Failed to read YAML file [{}]: {}", filepath, e)
-            return {}
+            log.exit("Failed to read YAML file [{}]: {}", filepath, e)
 
 
 def read_composer_yamls(composers):
@@ -226,7 +225,7 @@ def read_composer_yamls(composers):
             if base:
                 base_files.append(filepath)
 
-        except KeyError as e:
+        except KeyError as e:  # pragma: no cover
 
             log.exit("Error reading {}: {}", filepath, e)
 

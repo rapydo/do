@@ -1,34 +1,28 @@
-# -*- coding: utf-8 -*-
-
 """
 Parse dockerfiles and check for builds
 
 # https://github.com/DBuildService/dockerfile-parse
 # https://docker-py.readthedocs.io/en/stable/
 """
-import os
+
 from dockerfile_parse import DockerfileParser
-from controller import CONTAINERS_YAML_DIRNAME
+
 from controller import log
 
-
 name_priorities = [
-    'backend',
-    'proxy',
-    'celery',
-    'celeryui',
-    'celery-beat',
-    'maintenance'
+    "backend",
+    "proxy",
+    "celery",
+    "celeryui",
+    "celery-beat",
+    "maintenance",
 ]
 
 
 def name_priority(name1, name2):
-    if name1 not in name_priorities:
-        log.warning("Cannot determine build priority name for {}", name1)
+    if name1 not in name_priorities or name2 not in name_priorities:
+        log.warning("Cannot determine build priority between {} and {}", name1, name2)
         return name2
-    if name2 not in name_priorities:
-        log.warning("Cannot determine build priority name for {}", name2)
-        return name1
     p1 = name_priorities.index(name1)
     p2 = name_priorities.index(name2)
     if p1 <= p2:
@@ -40,40 +34,40 @@ def find_templates_build(base_services):
 
     templates = {}
     from controller.dockerizing import Dock
+
     docker = Dock()
 
     for base_service in base_services:
 
-        template_build = base_service.get('build')
+        template_build = base_service.get("build")
 
         if template_build is not None:
 
-            template_name = base_service.get('name')
-            template_image = base_service.get('image')
+            template_name = base_service.get("name")
+            template_image = base_service.get("image")
 
-            if template_image is None:
+            if template_image is None:  # pragma: no cover
                 log.exit(
                     "Template builds must have a name, missing for {}".format(
-                        template_name)
+                        template_name
+                    )
                 )
             else:
 
                 if template_image not in templates:
-                    templates[template_image] = {}
-                    templates[template_image]['services'] = []
-                    templates[template_image]['path'] = template_build.get('context')
-                    templates[template_image]['timestamp'] = docker.image_attribute(
-                        template_image
-                    )
+                    templates[template_image] = {
+                        "services": [],
+                        "path": template_build.get("context"),
+                        "timestamp": docker.image_attribute(template_image),
+                    }
 
-                if 'service' not in templates[template_image]:
-                    templates[template_image]['service'] = template_name
+                if "service" not in templates[template_image]:
+                    templates[template_image]["service"] = template_name
                 else:
-                    templates[template_image]['service'] = name_priority(
-                        templates[template_image]['service'],
-                        template_name,
+                    templates[template_image]["service"] = name_priority(
+                        templates[template_image]["service"], template_name,
                     )
-                templates[template_image]['services'].append(template_name)
+                templates[template_image]["services"].append(template_name)
 
     return templates
 
@@ -86,44 +80,48 @@ def find_templates_override(services, templates):
 
     for service in services:
 
-        builder = service.get('build')
+        builder = service.get("build")
         if builder is not None:
 
-            dpath = builder.get('context')
-            dockerfile = os.path.join(os.curdir, CONTAINERS_YAML_DIRNAME, dpath)
-            dfp = DockerfileParser(dockerfile)
+            dfp = DockerfileParser(builder.get("context"))
 
             try:
                 cont = dfp.content
-                if cont is None:
-                    log.warning("Dockerfile is empty?")
+                if not cont:
+                    log.exit(
+                        "Build failed, is {}/Dockerfile empty?", builder.get("context")
+                    )
                 else:
-                    log.verbose("Parsed dockerfile {}", dpath)
+                    log.verbose("Parsed dockerfile {}", builder.get("context"))
             except FileNotFoundError as e:
                 log.exit(e)
 
             if dfp.baseimage is None:
-                dfp.baseimage = 'unknown_build'
-            # elif dfp.baseimage.endswith(':template'):
-            elif dfp.baseimage.startswith('rapydo/'):
-                if dfp.baseimage not in templates:
-                    log.exit(
-                        """Unable to find {} in this project
-\nPlease inspect the FROM image in {}/Dockerfile
-                        """.format(dfp.baseimage, dockerfile)
-                    )
-                else:
-                    vanilla_img = service.get('image')
-                    template_img = dfp.baseimage
-                    log.verbose("{} overrides {}", vanilla_img, template_img)
-                    tbuilds[template_img] = templates.get(template_img)
-                    vbuilds[vanilla_img] = template_img
+                log.exit(
+                    "No base image found in {}/Dockerfile, unable to build",
+                    builder.get("context"),
+                )
+
+            if not dfp.baseimage.startswith("rapydo/"):
+                continue
+
+            if dfp.baseimage not in templates:
+                log.exit(
+                    "Unable to find {} in this project"
+                    "\nPlease inspect the FROM image in {}/Dockerfile",
+                    dfp.baseimage,
+                    builder.get("context"),
+                )
+            vanilla_img = service.get("image")
+            template_img = dfp.baseimage
+            log.verbose("{} overrides {}", vanilla_img, template_img)
+            tbuilds[template_img] = templates.get(template_img)
+            vbuilds[vanilla_img] = template_img
 
     return tbuilds, vbuilds
 
 
 def locate_builds(base_services, services):
-    # TODO: cool progress bar in cli for the whole function START
 
     # All builds used for the current configuration (templates + custom)
     builds = find_templates_build(services)
@@ -140,6 +138,8 @@ def locate_builds(base_services, services):
 
 def remove_redundant_services(services, builds):
 
+    # Sort the list of services to obtain determinist outputs
+    services.sort()
     # this will be the output
     non_redundant_services = []
 
@@ -148,7 +148,7 @@ def remove_redundant_services(services, builds):
     # NOTE: builds == ALL builds
     flat_builds = {}
     for b in builds:
-        for s in builds[b]['services']:
+        for s in builds[b]["services"]:
             flat_builds[s] = b
 
     # Group requested services by builds
@@ -161,17 +161,16 @@ def remove_redundant_services(services, builds):
             non_redundant_services.append(service)
             continue
 
-        if build_name not in requested_builds:
-            requested_builds[build_name] = []
+        requested_builds.setdefault(build_name, [])
         requested_builds[build_name].append(service)
 
     # Transform requested builds from:
     # {'build-name': {'services': ['A', 'B'], [...]}
     # NOTE: only considering requested services
-    # to list of non redudant services
+    # to list of non redundant services
     for build in requested_builds:
         redundant_services = requested_builds.get(build)
-        if redundant_services is None or len(redundant_services) == 0:
+        if not redundant_services:  # pragma: no cover
             continue
         if len(redundant_services) == 1:
             non_redundant_services.append(redundant_services[0])
@@ -185,7 +184,8 @@ def remove_redundant_services(services, builds):
                     service = name_priority(service, serv)
             non_redundant_services.append(service)
 
-    log.verbose(
-        "Removed redudant services from {} -> {}", services, non_redundant_services
-    )
+    if len(services) != len(non_redundant_services):
+        log.info(
+            "Removed redundant services from {} -> {}", services, non_redundant_services
+        )
     return non_redundant_services

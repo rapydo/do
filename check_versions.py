@@ -1,15 +1,18 @@
-# -*- coding: utf-8 -*-
-
+import distutils.core
 import json
 import os
 import re
-import distutils.core
 from glob import glob
 
 import click
 import yaml
-from prettyprinter import pprint as pp
 from loguru import logger as log
+from prettyprinter import pprint as pp
+
+# change current dir to the folder containing this script
+# this way the script will be allowed to access all required files
+# by providing relative links
+os.chdir(os.path.dirname(__file__))
 
 
 def load_yaml_file(filepath):
@@ -39,7 +42,7 @@ def load_yaml_file(filepath):
 
 def check_updates(category, lib):
 
-    if category in ['pip', 'controller', 'http-api']:
+    if category in ["pip", "controller", "http-api"]:
         if "==" in lib:
             token = lib.split("==")
         elif ">=" in lib:
@@ -47,140 +50,168 @@ def check_updates(category, lib):
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        print('https://pypi.org/project/{}/{}'.format(token[0], token[1]))
-    elif category in ['compose', 'Dockerfile']:
+        print(f"https://pypi.org/project/{token[0]}/{token[1]}")
+    elif category in ["compose", "Dockerfile"]:
         token = lib.split(":")
-        print("https://hub.docker.com/_/{}?tab=tags".format(token[0]))
-    elif category in ['package.json', 'npm']:
+        print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
+    elif category in ["package.json", "npm"]:
         token = lib.split(":")
-        print("https://www.npmjs.com/package/{}".format(token[0]))
-    elif category in ['ACME']:
+        print(f"https://www.npmjs.com/package/{token[0]}")
+    elif category in ["ACME"]:
         token = lib.split(":")
-        print("https://github.com/Neilpang/acme.sh/releases/tag/{}".format(token[1]))
+        print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
+    elif category == "url":
+        print(lib)
     else:
         log.critical("{}: {}", category, lib)
 
 
+def parseDockerfile(d, dependencies, skip_angular):
+    with open(d) as f:
+        service = d.replace("../build-templates/", "")
+        service = service.replace("/Dockerfile", "")
+        dependencies.setdefault(service, {})
+
+        for line in f:
+
+            if line.startswith("#"):
+                continue
+
+            if "FROM" in line:
+                line = line.replace("FROM", "").strip()
+
+                dependencies[service]["Dockerfile"] = line
+            elif not skip_angular and (
+                "RUN npm install" in line
+                or "RUN yarn add" in line
+                or "RUN yarn global add" in line
+            ):
+
+                tokens = line.split(" ")
+                for t in tokens:
+                    t = t.strip()
+                    if "@" in t:
+                        dependencies.setdefault(service, {})
+                        dependencies[service].setdefault("npm", [])
+                        dependencies[service]["npm"].append(t)
+            elif "RUN pip install" in line or "RUN pip3 install" in line:
+
+                tokens = line.split(" ")
+                for t in tokens:
+                    t = t.strip()
+                    if "==" in t:
+                        dependencies.setdefault(service, {})
+                        dependencies[service].setdefault("pip", [])
+                        dependencies[service]["pip"].append(t)
+            elif "ENV ACMEV" in line:
+                line = line.replace("ENV ACMEV", "").strip()
+                line = line.replace('"', "").strip()
+
+                dependencies[service]["ACME"] = f"ACME:{line}"
+
+    return dependencies
+
+
+def parseRequirements(d, dependencies):
+    with open(d) as f:
+        service = d.replace("../build-templates/", "")
+        service = service.replace("/requirements.txt", "")
+        for line in f:
+            line = line.strip()
+
+            dependencies.setdefault(service, {})
+            dependencies[service].setdefault("pip", [])
+            dependencies[service]["pip"].append(line)
+
+    return dependencies
+
+
+def parsePackageJson(package_json, dependencies):
+    with open(package_json) as f:
+        package = json.load(f)
+        package_dependencies = package.get("dependencies", {})
+        package_devDependencies = package.get("devDependencies", {})
+
+        dependencies.setdefault("angular", {})
+        dependencies["angular"].setdefault("package.json", [])
+
+        for dep in package_dependencies:
+            ver = package_dependencies[dep]
+            lib = f"{dep}:{ver}"
+            dependencies["angular"]["package.json"].append(lib)
+        for dep in package_devDependencies:
+            ver = package_devDependencies[dep]
+            lib = f"{dep}:{ver}"
+            dependencies["angular"]["package.json"].append(lib)
+
+    return dependencies
+
+
+def parsePrecommitConfig(f, dependencies, key):
+    y = load_yaml_file(f)
+    for r in y.get("repos"):
+        rev = r.get("rev")
+        repo = r.get("repo")
+        if "gitlab" in repo:
+            u = f"{repo}/-/tags/{rev}"
+        else:
+            u = f"{repo}/releases/tag/{rev}"
+        dependencies[key].append(u)
+
+
 @click.command()
-@click.option('--skip-angular', is_flag=True, default=False)
+@click.option("--skip-angular", is_flag=True, default=False)
 def check_versions(skip_angular=False):
 
     dependencies = {}
 
-    backend = load_yaml_file("../rapydo-confs/confs/backend.yml")
+    backend = load_yaml_file("controller/confs/backend.yml")
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)
-        image = definition.get('image')
+        image = definition.get("image")
 
         if image.startswith("rapydo/"):
             continue
-        if service not in dependencies:
-            dependencies[service] = {}
+        dependencies.setdefault(service, {})
 
-        dependencies[service]['compose'] = image
+        dependencies[service]["compose"] = image
 
     for d in glob("../build-templates/*/Dockerfile"):
-        if 'not_used_anymore_' in d:
+        if "not_used_anymore_" in d:
             continue
-        with open(d) as f:
-            service = d.replace("../build-templates/", "")
-            service = service.replace("/Dockerfile", "")
-            if service not in dependencies:
-                dependencies[service] = {}
 
-            for line in f:
-
-                if line.startswith("#"):
-                    continue
-
-                if 'FROM' in line:
-                    line = line.replace("FROM", "").strip()
-
-                    dependencies[service]['Dockerfile'] = line
-                elif not skip_angular and ('RUN npm install' in line or 'RUN yarn add' in line or 'RUN yarn global add' in line):
-
-                    tokens = line.split(" ")
-                    for t in tokens:
-                        t = t.strip()
-                        if '@' in t:
-                            if service not in dependencies:
-                                dependencies[service] = {}
-                            if "npm" not in dependencies[service]:
-                                dependencies[service]["npm"] = []
-                            dependencies[service]["npm"].append(t)
-                elif 'RUN pip install' in line or 'RUN pip3 install' in line:
-
-                    tokens = line.split(" ")
-                    for t in tokens:
-                        t = t.strip()
-                        if '==' in t:
-                            if service not in dependencies:
-                                dependencies[service] = {}
-                            if "pip" not in dependencies[service]:
-                                dependencies[service]["pip"] = []
-                            dependencies[service]["pip"].append(t)
-                elif 'ENV ACMEV' in line:
-                    line = line.replace("ENV ACMEV", "").strip()
-                    line = line.replace("\"", "").strip()
-
-                    dependencies[service]['ACME'] = "ACME:{}".format(line)
+        dependencies = parseDockerfile(d, dependencies, skip_angular)
 
     for d in glob("../build-templates/*/requirements.txt"):
 
-        with open(d) as f:
-            service = d.replace("../build-templates/", "")
-            service = service.replace("/requirements.txt", "")
-            for line in f:
-                line = line.strip()
-
-                if service not in dependencies:
-                    dependencies[service] = {}
-
-                if "pip" not in dependencies[service]:
-                    dependencies[service]["pip"] = []
-
-                dependencies[service]["pip"].append(line)
+        dependencies = parseRequirements(d, dependencies)
 
     if not skip_angular:
-        package_json = None
 
-        if os.path.exists('../frontend/src/package.json'):
-            package_json = '../frontend/src/package.json'
-        elif os.path.exists('../rapydo-angular/src/package.json'):
-            package_json = '../rapydo-angular/src/package.json'
-
-        if package_json is not None:
-            with open(package_json) as f:
-                package = json.load(f)
-                package_dependencies = package.get('dependencies', {})
-                package_devDependencies = package.get('devDependencies', {})
-
-                if 'angular' not in dependencies:
-                    dependencies['angular'] = {}
-
-                if "package.json" not in dependencies['angular']:
-                    dependencies['angular']["package.json"] = []
-
-                for dep in package_dependencies:
-                    ver = package_dependencies[dep]
-                    lib = "{}:{}".format(dep, ver)
-                    dependencies['angular']["package.json"].append(lib)
-                for dep in package_devDependencies:
-                    ver = package_devDependencies[dep]
-                    lib = "{}:{}".format(dep, ver)
-                    dependencies['angular']["package.json"].append(lib)
+        if os.path.exists("../frontend/src/package.json"):
+            package_json = "../frontend/src/package.json"
+            dependencies = parsePackageJson(package_json, dependencies)
+        elif os.path.exists("../rapydo-angular/src/package.json"):
+            package_json = "../rapydo-angular/src/package.json"
+            dependencies = parsePackageJson(package_json, dependencies)
 
     controller = distutils.core.run_setup("../do/setup.py")
     http_api = distutils.core.run_setup("../http-api/setup.py")
 
-    dependencies['controller'] = controller.install_requires
-    dependencies['http-api'] = http_api.install_requires
+    dependencies["controller"] = controller.install_requires
+    dependencies["http-api"] = http_api.install_requires
+
+    if os.path.exists(f := "../do/.pre-commit-config.yaml"):
+        dependencies = parsePrecommitConfig(f, dependencies, "controller")
+
+    if os.path.exists(f := "../http-api/.pre-commit-config.yaml"):
+        dependencies = parsePrecommitConfig(f, dependencies, "http-api")
 
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ['talib', 'react', 'icat']:
+        if service in ["talib", "react", "icat"]:
             continue
 
         service_dependencies = dependencies[service]
@@ -191,7 +222,15 @@ def check_versions(skip_angular=False):
             for d in service_dependencies:
 
                 skipped = False
-                if '==' not in d and '>=' not in d:
+                # repos from pre-commit (github)
+                if "/releases/tag/" in d:
+                    filtered_dependencies[service].append(d)
+                    check_updates("url", d)
+                # repos from pre-commit (gitlab)
+                elif "/tags/" in d:
+                    filtered_dependencies[service].append(d)
+                    check_updates("url", d)
+                elif "==" not in d and ">=" not in d:
                     skipped = True
                 else:
                     filtered_dependencies[service].append(d)
@@ -206,8 +245,7 @@ def check_versions(skip_angular=False):
 
         elif isinstance(service_dependencies, dict):
             for category in service_dependencies:
-                if service not in filtered_dependencies:
-                    filtered_dependencies[service] = {}
+                filtered_dependencies.setdefault(service, {})
                 deps = service_dependencies[category]
 
                 was_str = False
@@ -220,17 +258,17 @@ def check_versions(skip_angular=False):
                 for d in deps:
 
                     skipped = False
-                    if d == 'b2safe/server:icat':
+                    if d == "b2safe/server:icat":
                         skipped = True
-                    elif d == 'node:carbon':
+                    elif d == "node:carbon":
                         skipped = True
-                    elif re.match(r'^git\+https://github\.com.*@master$', d):
+                    elif re.match(r"^git\+https://github\.com.*@master$", d):
                         skipped = True
-                    elif d == 'docker:dind':
+                    elif d == "docker:dind":
                         skipped = True
-                    elif d.endswith(':latest'):
+                    elif d.endswith(":latest"):
                         skipped = True
-                    elif '==' in d or ':' in d:
+                    elif "==" in d or ":" in d:
 
                         if was_str:
                             filtered_dependencies[service][category] = d
@@ -238,7 +276,7 @@ def check_versions(skip_angular=False):
                         else:
                             filtered_dependencies[service][category].append(d)
                             check_updates(category, d)
-                    elif '@' in d:
+                    elif "@" in d:
                         filtered_dependencies[service][category].append(d)
                         check_updates(category, d)
                     else:
@@ -261,10 +299,15 @@ def check_versions(skip_angular=False):
     pp(filtered_dependencies)
 
     log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
-    log.info("oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required")
+    log.info(
+        "oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required"
+    )
     log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
-    log.info("typescript: angular.cli 8.2.14 requires typescript < 3.6.0, so that max ver is 3.5.3, cannot upgade to ver 3.7.3")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     check_versions()
+
+# Changelogs and release notes
+
+# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES

@@ -1,21 +1,18 @@
-# -*- coding: utf-8 -*-
 import re
+
 from controller.utilities import system
+
 # from controller import log
 
 
-def get_parent(IMAGE, images):
+def get_children(IMAGE, images):
 
     parameters = [
         "inspect",
         "--format='{{.Id}} {{.Parent}}'",
     ]
-    for tag in images:
-        image = images.get(tag)
-        tag = image[2].strip()
-        if tag == '':
-            continue
-        parameters.append(tag)
+
+    parameters.extend(set(images.keys()))
 
     out = system.execute_command("docker", parameters).split("\n")
     final_output = []
@@ -36,10 +33,8 @@ def __call__(args, **kwargs):
 
     IMAGE = args.get("imagetag")
 
-    parameters = ["images", "--all"]
-    # log.info("Executing command {} {}", command, parameters)
-    img = system.execute_command("docker", parameters).split("\n")
-    img = [re.split("\s+", i) for i in img[1:]]
+    img = system.execute_command("docker", ["images", "--all"]).split("\n")
+    img = [re.split(r"\s+", i) for i in img[1:]]
     images = {}
     for i in img:
         if len(i) != 7:
@@ -47,15 +42,15 @@ def __call__(args, **kwargs):
         images[i[2]] = i
 
     child = IMAGE
-    print("Finding all parents and (grand)+ parents of {}".format(child))
+    print("Finding all children and (grand)+ children of {}".format(child))
     found = 0
     while True:
-        parents = get_parent(child, images)
-        if len(parents) == 0:
+        children = get_children(child, images)
+        if len(children) == 0:
             break
-        child = parents[0]
+        child = children[0]
         print("\t".join(images.get(child)))
         found += 1
-        parents = get_parent(child, images)
+        children = get_children(child, images)
     if found == 0:
-        print("No parent found for {}".format(child))
+        print("No child found for {}".format(child))

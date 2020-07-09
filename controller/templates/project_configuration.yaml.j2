@@ -10,13 +10,12 @@ project:
   {% endif %}
 
 variables:
-  backend:
-    credentials:
-      roles:
-        user: normal_user
-        internal: staff_user
-        admin: admin_root
-        default: normal_user
+  # roles:
+  #   normal_user: YourCustomName
+  #   staff_user: YourCustomName
+  #   admin_root: YourCustomName
+  #   extra_role: YourExtraRole
+
   env:
 
     FRONTEND_FRAMEWORK: {{ frontend }}
@@ -67,10 +66,6 @@ variables:
     {% endif -%}
     {% if celery_backend -%}
     CELERY_BACKEND: {{ celery_backend }}
-    {% endif -%}
-    {% if wrapped -%}
-    # to be deprecated
-    WRAP_RESPONSE: 1
     {% endif -%}
     {% for KEY, VALUE in env_variables.items() -%}
     {{ KEY }}: {{ VALUE }}

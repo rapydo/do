@@ -1,0 +1,22 @@
+import { Injectable } from "@angular/core";
+
+import { ApiService } from '@rapydo/services/api';
+import { environment } from "@rapydo/../environments/environment";
+
+export interface {{name.title().replace(" ", "")}} {
+}
+
+@Injectable()
+export class {{name.title().replace(" ", "")}}Service {
+
+  constructor(private api: ApiService) {}
+
+  public get{{name.title().replace(" ", "")}}s(): Array<{{name.title().replace(" ", "")}}>  {
+    return this.api.get("{{name.replace(" ", "_").lower()}}s");
+  }
+
+  public get{{name.title().replace(" ", "")}}(uuid: string): {{name.title().replace(" ", "")}} {
+    return this.api.get(`{{name.replace(" ", "_").lower()}}s/${uuid}`);
+  }
+
+}

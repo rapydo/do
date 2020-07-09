@@ -12,13 +12,11 @@ project_configuration:
     env:
       LOG_LEVEL: INFO
       # SMTP_ADMIN: your@email.org
+      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
 
       {% if production -%}
       {% if services -%}{% for service in services -%}
-      {% if service == 'backend' -%}
-      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
-      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
-      {% endif -%}
       {% if service == 'postgres' or service == 'mariadb' -%}
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
@@ -39,15 +37,9 @@ project_configuration:
       IRODS_PASSWORD: {{ 'RANDOM'| password }}
       {% endif -%}
       {% endfor %}{% endif -%}
-      {% if testing -%}
-      DEFAULT_DHLEN: 1024
       {% endif -%}
 
-      {% else %}
-      # AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
-      # AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
       {% if testing -%}
-      APP_MODE: test
       SMTP_HOST: mock.mail.service
       SMTP_ADMIN: mock@nomail.org
       SMTP_PORT: 0
@@ -58,6 +50,14 @@ project_configuration:
       AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}+Aa1-nowit'sstrong!
       UPLOAD_PATH: /tmp
+      MAX_LOGS_LENGTH: 40
+      AUTH_TOKEN_SAVE_FREQUENCY: 1
+      FRONTEND_BUILD_MODE: angular-test
+      {% if production -%}
+      DEFAULT_DHLEN: 1024
+      GUNICORN_WORKERS: 1
+      FORCE_PRODUCTION_TESTS: 1
+      {% else -%}
+      APP_MODE: test
       {% endif -%}
-
       {% endif -%}
