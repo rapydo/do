@@ -55,7 +55,7 @@ def exec_command(capfd, command, *asserts):
         result = runner.invoke(controller.app, options)
 
         with capfd.disabled():
-            print(result.exit_code)
+            print(f"Exit code: {result.exit_code}")
             print(result.stdout)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
@@ -70,7 +70,7 @@ def exec_command(capfd, command, *asserts):
         for o in out:
             print(f"_ {o}")
         for e in err:
-            print(f"! {e}")
+            print(f"{e}")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
@@ -165,7 +165,7 @@ def test_create(capfd):
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit --add-optionals --current"
-    create_command += " --origin https://your_remote_git/your_project.git"
+    create_command += " --origin-url https://your_remote_git/your_project.git"
     exec_command(
         capfd, create_command, "Project first successfully created",
     )
