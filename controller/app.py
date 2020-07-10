@@ -250,21 +250,23 @@ class Application:
             os.chdir(current_folder)
             log.exit(err)
 
-        if Configuration.print_version:
-            # from inside project folder, load configuration
-            Configuration.project = Application.project_scaffold.get_project(
-                Configuration.project
-            )
-            Configuration.ABS_PROJECT_PATH = os.path.join(
-                PROJECT_DIR, Configuration.project
-            )
-            self.read_specs()
+        if not Configuration.print_version:
+            self.check_installed_software()
 
+        # if project is None, it is retrieve by project folder
+        Configuration.project = Application.project_scaffold.get_project(
+            Configuration.project
+        )
+        Configuration.ABS_PROJECT_PATH = os.path.join(
+            PROJECT_DIR, Configuration.project
+        )
+
+        if Configuration.print_version:
+            self.read_specs()
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
-
-        self.check_installed_software()
+        self.checked("Selected project: {}", Configuration.project)
 
         # TODO: give an option to skip things when you are not connected
         if (
@@ -276,24 +278,9 @@ class Application:
             self.check_internet_connection()
 
         if Configuration.install:
-            Configuration.project = Application.project_scaffold.get_project(
-                Configuration.project
-            )
-            Configuration.ABS_PROJECT_PATH = os.path.join(
-                PROJECT_DIR, Configuration.project
-            )
             self.read_specs()
-
             return True
 
-        # if project is None, it is retrieve by project folder
-        Configuration.project = Application.project_scaffold.get_project(
-            Configuration.project
-        )
-        Configuration.ABS_PROJECT_PATH = os.path.join(
-            PROJECT_DIR, Configuration.project
-        )
-        self.checked("Selected project: {}", Configuration.project)
         # Auth is not yet available, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
             Configuration.project, auth=None

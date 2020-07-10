@@ -619,11 +619,16 @@ def test_all(capfd):
         "rapydo -p invalid_character check -i main --no-git --no-builds",
         "Wrong project name, _ is not a valid character.",
     )
+    shutil.rmtree("projects/invalid_character")
+
+    os.makedirs("projects/celery")
     exec_command(
         capfd,
         "rapydo -p celery check -i main --no-git --no-builds",
         "You selected a reserved name, invalid project name: celery",
     )
+    shutil.rmtree("projects/celery")
+
     exec_command(
         capfd,
         "rapydo -p fourth check -i main --no-git --no-builds",
