@@ -40,6 +40,7 @@ def ssl(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     if chain_file is not None or key_file is not None:
         if chain_file is None:

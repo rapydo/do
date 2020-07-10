@@ -26,6 +26,7 @@ def install(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     if pip and editable:
         log.exit("--pip and --editable options are not compatible")

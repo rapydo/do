@@ -21,6 +21,7 @@ def list(
         False, "--submodules", help="List submodules", show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     printed_something = False
 

@@ -1,10 +1,11 @@
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
 @Application.app.command(help="Pull available images from docker hub")
 def pull():
+    Application.controller.controller_init()
 
     dc = Compose(files=Application.data.base_files)
 
@@ -12,7 +13,7 @@ def pull():
     for s in Application.data.base_services:
         base_services_list.append(s.get("name"))
 
-    if Application.data.services_list:
+    if Configuration.services_list:
         for s in Application.data.services:
             if s not in base_services_list:
                 log.exit("Invalid service name: {}", s)

@@ -14,6 +14,7 @@ def start(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     dc = Compose(files=Application.data.files)
 

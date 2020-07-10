@@ -12,6 +12,7 @@ from controller.utilities import system
 def ancestors(
     imagetag: str = typer.Argument(..., help="Image tag ID to be inspected"),
 ):
+    Application.controller.controller_init()
 
     img = system.execute_command("docker", ["images", "--all"]).split("\n")
     img = [re.split(r"\s+", i) for i in img[1:]]

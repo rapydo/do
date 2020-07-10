@@ -1,7 +1,7 @@
 import typer
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
@@ -21,12 +21,13 @@ def remove(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     dc = Compose(files=Application.data.files)
 
     if rm_networks or rm_all:
 
-        if Application.data.services_list is not None:
+        if Configuration.services_list is not None:
 
             opt = "--networks" if rm_networks else "--all"
 

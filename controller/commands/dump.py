@@ -9,6 +9,7 @@ from controller.utilities import system
 
 @Application.app.command(help="Dump current config into docker compose YAML")
 def dump():
+    Application.controller.controller_init()
 
     #################
     # 1. base dump

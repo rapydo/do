@@ -5,6 +5,7 @@ from controller.compose import Compose
 
 @Application.app.command(help="Restart running containers")
 def restart():
+    Application.controller.controller_init()
 
     options = {"SERVICE": Application.data.services}
 

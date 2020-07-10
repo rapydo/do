@@ -48,6 +48,7 @@ def create(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     services = services.split(",")
 

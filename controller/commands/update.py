@@ -12,6 +12,7 @@ def update(
         "", "--ignore-submodule", "-i", help="Ignore a submodule", show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     Application.git_update(ignore_submodules)
     # Reading again the configuration, it may change with git updates

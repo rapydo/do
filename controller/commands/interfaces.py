@@ -25,6 +25,7 @@ def interfaces(
         help="port to be associated to the current service interface",
     ),
 ):
+    Application.controller.controller_init()
 
     if service == "list":
         print("List of available interfaces:")

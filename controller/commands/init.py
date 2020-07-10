@@ -21,6 +21,7 @@ def init(
         help="Link all submodules in an existing folder instead of download them",
     ),
 ):
+    Application.controller.controller_init()
 
     for p in Application.project_scaffold.data_folders:
         if not os.path.isdir(p):

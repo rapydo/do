@@ -26,6 +26,8 @@ def add(
     name: str = typer.Argument(..., help="Name to be assigned to the new element"),
 ):
 
+    Application.controller.controller_init()
+
     functions = {
         "endpoint": create_endpoint,
         "task": create_task,
@@ -35,6 +37,7 @@ def add(
     auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
 
     fn = functions.get(element_type)
+
     fn(Application.project_scaffold, name, Application.data.services, auth)
 
 

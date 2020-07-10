@@ -15,6 +15,7 @@ def logs(
         None, "--service-file", "-s", help="Service name", show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     # if provided, use specific service instead of general services opt
     if service:

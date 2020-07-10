@@ -26,6 +26,7 @@ def check(
         "", "--ignore-submodule", "-i", help="Ignore submodule", show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     if no_git:
         log.info("Skipping git checks")

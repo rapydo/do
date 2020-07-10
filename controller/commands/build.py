@@ -22,6 +22,7 @@ def build(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     builds, template_builds, overriding_imgs = locate_builds(
         Application.data.base_services, Application.data.compose_config

@@ -83,19 +83,102 @@ class Configuration:
         Configuration.print_version = Configuration.action == "version"
         Configuration.create = Configuration.action == "create"
 
-    def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
-        if ctx.resilient_parsing:
-            return
 
-        if value != param.get_default(ctx):
-            return value
+def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
+    if ctx.resilient_parsing:
+        return
 
-        from_projectrc = Configuration.projectrc.get(param.name)
-
-        if from_projectrc is not None:
-            return from_projectrc
-
+    if value != param.get_default(ctx):
         return value
+
+    from_projectrc = Configuration.projectrc.get(param.name)
+
+    if from_projectrc is not None:
+        return from_projectrc
+
+    return value
+
+
+def controller_cli_options(
+    ctx: typer.Context,
+    project: str = typer.Option(
+        None, "--project", "-p", help="Name of the project", callback=projectrc_values,
+    ),
+    services_list: str = typer.Option(
+        None,
+        "--services",
+        "-s",
+        help="Comma separated list of services",
+        callback=projectrc_values,
+    ),
+    hostname: str = typer.Option(
+        "localhost",
+        "--hostname",
+        "-H",
+        help="Hostname of the current machine",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+    stack: str = typer.Option(
+        None,
+        "--stack",
+        help="Docker-compose stack to be loaded",
+        callback=projectrc_values,
+    ),
+    production: bool = typer.Option(
+        False,
+        "--production",
+        "--prod",
+        help="Enable production mode",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+    privileged: bool = typer.Option(
+        False,
+        "--privileged",
+        help="Allow containers privileged mode",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+    no_backend: bool = typer.Option(
+        False,
+        "--no-backend",
+        help="Exclude backend configuration",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+    no_frontend: bool = typer.Option(
+        False,
+        "--no-frontend",
+        help="Exclude frontend configuration",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+    no_commons: bool = typer.Option(
+        False,
+        "--no-commons",
+        help="Exclude project common configuration",
+        callback=projectrc_values,
+        show_default=False,
+    ),
+):
+
+    Configuration.set_action(ctx.invoked_subcommand)
+
+    Configuration.services_list = services_list
+    Configuration.production = production
+    Configuration.privileged = privileged
+    Configuration.project = project
+    Configuration.hostname = hostname
+
+    if stack:
+        Configuration.stack = stack
+    else:
+        Configuration.stack = "production" if production else "development"
+
+    Configuration.load_backend = not no_backend
+    Configuration.load_frontend = not no_frontend
+    Configuration.load_commons = not no_commons
 
 
 # Temporary fix to ease migration to typer
@@ -152,99 +235,15 @@ class Application:
 
         # Register callback with CLI options and basic initialization/checks
         Application.app = typer.Typer(
-            callback=self.controller_init,
+            callback=controller_cli_options,
             context_settings={"help_option_names": ["--help", "-h"]},
         )
 
         load_commands()
 
-    def controller_init(
-        self,
-        ctx: typer.Context,
-        project: str = typer.Option(
-            None,
-            "--project",
-            "-p",
-            help="Name of the project",
-            callback=Configuration.projectrc_values,
-        ),
-        services_list: str = typer.Option(
-            None,
-            "--services",
-            "-s",
-            help="Comma separated list of services",
-            callback=Configuration.projectrc_values,
-        ),
-        hostname: str = typer.Option(
-            "localhost",
-            "--hostname",
-            "-H",
-            help="Hostname of the current machine",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-        stack: str = typer.Option(
-            None,
-            "--stack",
-            help="Docker-compose stack to be loaded",
-            callback=Configuration.projectrc_values,
-        ),
-        production: bool = typer.Option(
-            False,
-            "--production",
-            "--prod",
-            help="Enable production mode",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-        privileged: bool = typer.Option(
-            False,
-            "--privileged",
-            help="Allow containers privileged mode",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-        no_backend: bool = typer.Option(
-            False,
-            "--no-backend",
-            help="Exclude backend configuration",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-        no_frontend: bool = typer.Option(
-            False,
-            "--no-frontend",
-            help="Exclude frontend configuration",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-        no_commons: bool = typer.Option(
-            False,
-            "--no-commons",
-            help="Exclude project common configuration",
-            callback=Configuration.projectrc_values,
-            show_default=False,
-        ),
-    ):
-
-        Configuration.set_action(ctx.invoked_subcommand)
-
-        Configuration.production = production
-        Configuration.privileged = privileged
-        Configuration.project = project
-        Configuration.hostname = hostname
-
-        if stack:
-            Configuration.stack = stack
-        else:
-            Configuration.stack = "production" if production else "development"
-
-        Configuration.load_backend = not no_backend
-        Configuration.load_frontend = not no_frontend
-        Configuration.load_commons = not no_commons
-
         Application.load_projectrc()
 
+    def controller_init(self):
         if Configuration.create:
             self.check_installed_software()
             return True
@@ -330,15 +329,11 @@ class Application:
 
         if Configuration.initialize:
 
-            enabled_services = services.get_services(
-                services_list, default=self.active_services
-            )
-
             Application.data = CommandsData(
                 files=self.files,
                 base_files=self.base_files,
-                services=enabled_services,
-                services_list=services_list,
+                services=self.enabled_services,
+                services_list=Configuration.services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
                 compose_config=self.compose_config,
@@ -352,15 +347,11 @@ class Application:
 
         if Configuration.update:
 
-            enabled_services = services.get_services(
-                services_list, default=self.active_services
-            )
-
             Application.data = CommandsData(
                 files=self.files,
                 base_files=self.base_files,
-                services=enabled_services,
-                services_list=services_list,
+                services=self.enabled_services,
+                services_list=Configuration.services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
                 compose_config=self.compose_config,
@@ -379,15 +370,12 @@ class Application:
         self.check_placeholders()
 
         # Final step, launch the command
-        enabled_services = services.get_services(
-            services_list, default=self.active_services
-        )
 
         Application.data = CommandsData(
             files=self.files,
             base_files=self.base_files,
-            services=enabled_services,
-            services_list=services_list,
+            services=self.enabled_services,
+            services_list=Configuration.services_list,
             active_services=self.active_services,
             base_services=self.base_services,
             compose_config=self.compose_config,
@@ -598,6 +586,10 @@ class Application:
     def set_active_services(self):
         self.services_dict, self.active_services = services.find_active(
             self.compose_config
+        )
+
+        self.enabled_services = services.get_services(
+            Configuration.services_list, default=self.active_services
         )
 
     def read_composers(self):

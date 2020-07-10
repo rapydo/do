@@ -22,6 +22,8 @@ def volatile(
         show_default=False,
     ),
 ):
+    Application.controller.controller_init()
+
     """ One command container (NOT executing on a running one) """
     dc = Compose(files=Application.data.files)
     dc.create_volatile_container(service, command, user=user)

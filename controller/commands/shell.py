@@ -40,6 +40,7 @@ def shell(
         False, "--detach", help="Execute command in detach mode", show_default=False,
     ),
 ):
+    Application.controller.controller_init()
 
     dc = Compose(files=Application.data.files)
 
