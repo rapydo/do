@@ -5,6 +5,7 @@ from distutils.version import LooseVersion
 import pytest
 
 from controller import __version__, gitter, log
+from controller.app import Application
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
@@ -16,6 +17,49 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 
 
 def test_all(capfd):
+
+    app = Application()
+
+    values = app.autocomplete_service("")
+    assert len(values) > 0
+    assert "backend" in values
+    values = app.autocomplete_service("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_service("b")
+    assert len(values) >= 1
+    assert "backend" in values
+
+    values = app.autocomplete_allservice("")
+    assert len(values) > 0
+    assert "backend" in values
+    values = app.autocomplete_allservice("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_allservice("b")
+    assert len(values) >= 1
+    assert "backend" in values
+    values = app.autocomplete_allservice("c")
+    assert len(values) >= 1
+    assert "backend" not in values
+
+    values = app.autocomplete_submodule("")
+    assert len(values) > 0
+    assert "main" in values
+    values = app.autocomplete_submodule("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_submodule("m")
+    assert len(values) >= 1
+    assert "main" in values
+    values = app.autocomplete_submodule("d")
+    assert len(values) >= 1
+    assert "main" not in values
+
+    os.unlink(".rapydo")
+    values = app.autocomplete_service("")
+    assert len(values) == 0
+    values = app.autocomplete_allservice("")
+    assert len(values) == 0
+    values = app.autocomplete_submodule("")
+    assert len(values) == 0
 
     if os.getenv("STAGE") == "no-docker":
         log.warning("Skipping test libs/all: docker is not enabled")
@@ -213,6 +257,9 @@ def test_all(capfd):
     assert isinstance(cmd[1], list)
     assert len(cmd[1]) == 1
     assert cmd[1][0] == "b c"
+
+    assert Packages.import_package("invalid") is None
+    assert Packages.package_version("invalid") is None
 
     assert Packages.get_bin_version("invalid") is None
 
