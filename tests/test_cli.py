@@ -56,7 +56,6 @@ def exec_command(capfd, command, *asserts):
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
         print("_____________________________________________")
-        print(result.exception)
 
     captured = capfd.readouterr()
 
@@ -74,6 +73,12 @@ def exec_command(capfd, command, *asserts):
             print(f"_ {o}")
         for o in cout:
             print(f">> {o}")
+        if result.exception:
+            print("\nException:")
+            print(result.exception)
+
+            if result.exception == "Time is up":
+                raise Timeout("Time is up")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
@@ -702,8 +707,9 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(1)
+    signal.alarm(2)
 
+    interrupted = False
     try:
         exec_command(
             capfd,
@@ -713,10 +719,11 @@ def test_all(capfd):
         )
 
     except Timeout:
-        pass
+        interrupted = True
+    assert interrupted
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(1)
+    signal.alarm(2)
 
     interrupted = False
     try:
@@ -790,15 +797,12 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
     signal.alarm(3)
-    try:
-        exec_command(
-            capfd,
-            "rapydo logs -s backend --tail 10 --follow",
-            "docker-compose command: 'logs'",
-            "Stopped by keyboard",
-        )
-    except Exception as e:
-        print(e)
+    exec_command(
+        capfd,
+        "rapydo logs -s backend --tail 10 --follow",
+        "docker-compose command: 'logs'",
+        "Stopped by keyboard",
+    )
 
     # Template project is based on sql
     exec_command(capfd, "rapydo verify neo4j", "Service neo4j not detected")
@@ -849,7 +853,7 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(1)
+    signal.alarm(4)
 
     interrupted = False
     try:
@@ -878,7 +882,7 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(1)
+    signal.alarm(4)
 
     interrupted = False
     try:
