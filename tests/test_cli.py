@@ -613,6 +613,7 @@ def test_all(capfd):
     )
 
     # Check invalid and reserved project names
+    os.makedirs("projects/invalid_character")
     exec_command(
         capfd,
         "rapydo -p invalid_character check -i main --no-git --no-builds",
