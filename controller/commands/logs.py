@@ -12,7 +12,12 @@ def logs(
     ),
     tail: int = typer.Option("500", "--tail", "-t", help="Number of lines to show",),
     service: str = typer.Option(
-        None, "--service-file", "-s", help="Service name", show_default=False,
+        None,
+        "--service",
+        "-s",
+        help="Service name",
+        show_default=False,
+        autocompletion=Application.autocomplete_service,
     ),
 ):
     Application.controller.controller_init()

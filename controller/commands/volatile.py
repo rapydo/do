@@ -6,7 +6,9 @@ from controller.compose import Compose
 
 @Application.app.command(help="Create a single-command container")
 def volatile(
-    service: str = typer.Argument(..., help="Service name"),
+    service: str = typer.Argument(
+        ..., help="Service name", autocompletion=Application.autocomplete_allservice,
+    ),
     command: str = typer.Option(
         "bash",
         "--command",

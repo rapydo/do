@@ -8,7 +8,9 @@ from controller.utilities import services
 
 @Application.app.command(help="Open a shell or execute a command onto a container")
 def shell(
-    service: str = typer.Argument(..., help="Service name"),
+    service: str = typer.Argument(
+        ..., help="Service name", autocompletion=Application.autocomplete_service
+    ),
     user: str = typer.Option(
         None,
         "--user",

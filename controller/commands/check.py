@@ -23,7 +23,12 @@ def check(
         False, "--no-builds", help="Skip check on docker builds", show_default=False,
     ),
     ignore_submodules: List[str] = typer.Option(
-        "", "--ignore-submodule", "-i", help="Ignore submodule", show_default=False,
+        "",
+        "--ignore-submodule",
+        "-i",
+        help="Ignore submodule",
+        show_default=False,
+        autocompletion=Application.autocomplete_submodule,
     ),
 ):
     Application.controller.controller_init()

@@ -9,7 +9,12 @@ from controller.app import Application
 @Application.app.command(help="Update the current project")
 def update(
     ignore_submodules: List[str] = typer.Option(
-        "", "--ignore-submodule", "-i", help="Ignore a submodule", show_default=False,
+        "",
+        "--ignore-submodule",
+        "-i",
+        help="Ignore a submodule",
+        show_default=False,
+        autocompletion=Application.autocomplete_submodule,
     ),
 ):
     Application.controller.controller_init()

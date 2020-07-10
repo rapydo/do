@@ -5,7 +5,11 @@ from controller.compose import Compose
 
 
 @Application.app.command(help="Test if service is reachable from the backend")
-def verify(service: str = typer.Argument(..., help="Service name")):
+def verify(
+    service: str = typer.Argument(
+        ..., help="Service name", autocompletion=Application.autocomplete_service
+    )
+):
     Application.controller.controller_init()
 
     """ Verify one service connection (inside backend) """

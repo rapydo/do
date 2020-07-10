@@ -1,8 +1,10 @@
+import json
 import os
 import shutil
 import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
+from functools import lru_cache
 
 import requests
 import typer
@@ -547,6 +549,8 @@ class Application:
             Configuration.services_list, default=self.active_services
         )
 
+        self.create_datafile()
+
     def read_composers(self):
 
         # Find configuration that tells us which files have to be read
@@ -670,6 +674,51 @@ class Application:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
             log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
+
+    def create_datafile(self):
+        datafile = ".rapydo"
+        try:
+            os.unlink(datafile)
+            log.verbose("Removed data cache")
+        except FileNotFoundError:
+            pass
+
+        data = {
+            "submodules": [k for k, v in Application.gits.items() if v is not None],
+            "services": self.active_services,
+            "allservices": list(self.services_dict.keys()),
+        }
+
+        with open(datafile, "w+") as outfile:
+            json.dump(data, outfile)
+
+    @staticmethod
+    @lru_cache
+    def parse_datafile():
+        datafile = ".rapydo"
+        try:
+            with open(datafile) as json_file:
+                return json.load(json_file, object_pairs_hook=OrderedDict)
+        except FileNotFoundError:
+            return {}
+
+    @staticmethod
+    @lru_cache
+    def autocomplete_service(incomplete: str):
+        values = Application.parse_datafile().get("services", [])
+        return [x for x in values if x.startswith(incomplete)]
+
+    @staticmethod
+    @lru_cache
+    def autocomplete_allservice(incomplete: str):
+        values = Application.parse_datafile().get("allservices", [])
+        return [x for x in values if x.startswith(incomplete)]
+
+    @staticmethod
+    @lru_cache
+    def autocomplete_submodule(incomplete: str):
+        values = Application.parse_datafile().get("submodules", [])
+        return [x for x in values if x.startswith(incomplete)]
 
     def check_placeholders(self):
 
