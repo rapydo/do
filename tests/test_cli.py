@@ -2,6 +2,7 @@ import os
 import shutil
 import signal
 import tempfile
+from collections import OrderedDict  # can be removed from python 3.7
 
 from git import Repo
 from typer.testing import CliRunner
@@ -52,6 +53,7 @@ def exec_command(capfd, command, *asserts):
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()
     Application.project_scaffold = Project()
+    Application.gits = OrderedDict()
     result = runner.invoke(controller.app, command)
 
     with capfd.disabled():
