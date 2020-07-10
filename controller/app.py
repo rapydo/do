@@ -86,7 +86,7 @@ class Configuration:
 
 
 def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
-    if ctx.resilient_parsing:
+    if ctx.resilient_parsing:  # pragma: no cover
         return
 
     if value != param.get_default(ctx):

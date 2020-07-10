@@ -160,7 +160,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
     if filepath is None:
         if not is_optional:
             log.exit(
-                "Failed to read YAML file {}/{}: File does not exist", path, file,
+                "Failed to read {}/{}: File does not exist", path, file,
             )
         return {}
 
@@ -187,7 +187,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.exit("Failed to read YAML file [{}]: {}", filepath, e)
+            log.exit("Failed to read [{}]: {}", filepath, e)
 
 
 def read_composer_yamls(composers):

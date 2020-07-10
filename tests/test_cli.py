@@ -458,6 +458,12 @@ def test_all(capfd):
         capfd, "check -i main", "Checks completed",
     )
 
+    exec_command(
+        capfd,
+        "--stack invalid check -i main",
+        "Failed to read projects/first/confs/invalid.yml: File does not exist",
+    )
+
     os.rename("submodules", "submodules.bak")
     os.mkdir("submodules")
 

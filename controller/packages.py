@@ -67,9 +67,7 @@ class Packages:
 
         try:
             return import_module(package_name)
-        except ModuleNotFoundError:
-            return None
-        except ImportError:
+        except (ModuleNotFoundError, ImportError):
             return None
 
     @staticmethod
