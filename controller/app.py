@@ -245,9 +245,6 @@ class Application:
 
         Application.load_projectrc()
 
-        if not Configuration.projectrc:
-            log.warning("Empty {}", PROJECTRC)
-
         if Configuration.create:
             self.check_installed_software()
             return True
@@ -261,10 +258,12 @@ class Application:
 
         if Configuration.print_version:
             # from inside project folder, load configuration
-            (
-                Configuration.project,
-                self.ABS_PROJECT_PATH,
-            ) = Application.project_scaffold.get_project(Configuration.project)
+            Configuration.project = Application.project_scaffold.get_project(
+                Configuration.project
+            )
+            Configuration.ABS_PROJECT_PATH = os.path.join(
+                PROJECT_DIR, Configuration.project
+            )
             self.read_specs()
 
             return True
@@ -283,19 +282,23 @@ class Application:
             self.check_internet_connection()
 
         if Configuration.install:
-            (
-                Configuration.project,
-                self.ABS_PROJECT_PATH,
-            ) = Application.project_scaffold.get_project(Configuration.project)
+            Configuration.project = Application.project_scaffold.get_project(
+                Configuration.project
+            )
+            Configuration.ABS_PROJECT_PATH = os.path.join(
+                PROJECT_DIR, Configuration.project
+            )
             self.read_specs()
 
             return True
 
         # if project is None, it is retrieve by project folder
-        (
-            Configuration.project,
-            self.ABS_PROJECT_PATH,
-        ) = Application.project_scaffold.get_project(Configuration.project)
+        Configuration.project = Application.project_scaffold.get_project(
+            Configuration.project
+        )
+        Configuration.ABS_PROJECT_PATH = os.path.join(
+            PROJECT_DIR, Configuration.project
+        )
         self.checked("Selected project: {}", Configuration.project)
         # Auth is not yet available, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
@@ -445,7 +448,7 @@ class Application:
 
             confs = configuration.read_configuration(
                 default_file_path=CONFS_DIR,
-                base_project_path=self.ABS_PROJECT_PATH,
+                base_project_path=Configuration.ABS_PROJECT_PATH,
                 projects_path=PROJECT_DIR,
                 submodules_path=SUBMODULES_DIR,
                 read_extended=read_extended,
@@ -492,7 +495,7 @@ class Application:
 
         specs = configuration.load_yaml_file(
             file=configuration.PROJECT_CONF_FILENAME,
-            path=self.ABS_PROJECT_PATH,
+            path=Configuration.ABS_PROJECT_PATH,
             keep_order=True,
         )
         v = glom(specs, "project.rapydo", default=None)
@@ -613,7 +616,9 @@ class Application:
             "mode": f"{Configuration.stack}.yml",
             "extended-mode": self.extended_project is not None,
             "baseconf": CONFS_DIR,
-            "customconf": os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
+            "customconf": os.path.join(
+                Configuration.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME
+            ),
         }
 
         if self.extended_project_path is None:

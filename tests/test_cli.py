@@ -591,12 +591,9 @@ def test_all(capfd):
 
     os.remove(".projectrc")
 
-    assert not os.path.exists(".projectrc")
-
     exec_command(
         capfd,
         "rapydo check -i main --no-git --no-builds",
-        "Empty .projectrc",
         "Multiple projects found, please use --project to specify one of the following",
     )
 

@@ -164,7 +164,9 @@ class Project:
     @staticmethod
     def get_project(project):
 
+        log.critical(project)
         projects = os.listdir(PROJECT_DIR)
+        log.critical(projects)
 
         if project is None:
 
@@ -199,8 +201,7 @@ class Project:
                 "You selected a reserved name, invalid project name: {}", project,
             )
 
-        ABS_PROJECT_PATH = os.path.join(PROJECT_DIR, project)
-        return project, ABS_PROJECT_PATH
+        return project
 
     def find_main_folder(self):
         first_level_error = self.inspect_main_folder()
