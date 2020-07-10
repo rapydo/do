@@ -791,9 +791,10 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
     signal.alarm(3)
+    # Here using main services option
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --follow",
+        "-s backend logs --tail 10 --follow",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
     )

@@ -1,4 +1,5 @@
 import os
+from glob import glob
 from importlib import import_module
 
 
@@ -6,13 +7,8 @@ def load_commands():
 
     commands_folder = os.path.dirname(os.path.abspath(__file__))
 
-    for c in os.listdir(commands_folder):
+    for c in glob(f"{commands_folder}/[!_|.]*.py"):
 
-        if c.startswith("_") or c.startswith("."):
-            continue
-        if not c.endswith(".py"):
-            continue
-
-        c = os.path.splitext(c)[0]
+        c = os.path.splitext(os.path.basename(c))[0]
 
         import_module(f"controller.commands.{c}")
