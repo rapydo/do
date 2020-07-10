@@ -92,6 +92,8 @@ class Configuration:
 
         from_projectrc = Configuration.projectrc.get(param.name)
 
+        log.critical("from_projectrc = {}", from_projectrc)
+
         if from_projectrc is not None:
             return from_projectrc
 
@@ -232,6 +234,7 @@ class Application:
         Configuration.production = production
         Configuration.privileged = privileged
         Configuration.project = project
+        log.critical("Initial project = {}", Configuration.project)
         Configuration.hostname = hostname
 
         if stack:

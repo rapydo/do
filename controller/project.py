@@ -164,9 +164,7 @@ class Project:
     @staticmethod
     def get_project(project):
 
-        log.critical(project)
         projects = os.listdir(PROJECT_DIR)
-        log.critical(projects)
 
         if project is None:
 
