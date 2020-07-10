@@ -4,7 +4,6 @@ import shutil
 import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
-from functools import lru_cache
 
 import requests
 import typer
@@ -693,31 +692,41 @@ class Application:
             json.dump(data, outfile)
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def parse_datafile():
-        datafile = ".rapydo"
         try:
-            with open(datafile) as json_file:
-                return json.load(json_file, object_pairs_hook=OrderedDict)
+            with open(".rapydo") as json_file:
+                return json.load(json_file)
         except FileNotFoundError:
             return {}
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def autocomplete_service(incomplete: str):
-        values = Application.parse_datafile().get("services", [])
+        d = Application.parse_datafile()
+        if not d:
+            return []
+        values = d.get("services", [])
+        if not incomplete:
+            return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def autocomplete_allservice(incomplete: str):
-        values = Application.parse_datafile().get("allservices", [])
+        d = Application.parse_datafile()
+        if not d:
+            return []
+        values = d.get("allservices", [])
+        if not incomplete:
+            return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    @lru_cache(maxsize=None)
     def autocomplete_submodule(incomplete: str):
-        values = Application.parse_datafile().get("submodules", [])
+        d = Application.parse_datafile()
+        if not d:
+            return []
+        values = d.get("submodules", [])
+        if not incomplete:
+            return values
         return [x for x in values if x.startswith(incomplete)]
 
     def check_placeholders(self):

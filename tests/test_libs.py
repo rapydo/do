@@ -54,7 +54,6 @@ def test_all(capfd):
     assert "main" not in values
 
     os.unlink(".rapydo")
-    app = Application()
     values = app.autocomplete_service("")
     assert len(values) == 0
     values = app.autocomplete_allservice("")
