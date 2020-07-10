@@ -36,13 +36,13 @@ log.exit = exit_msg
 log.remove()
 
 if TESTING:
-    log.add(sys.stderr, colorize=False, format="{message}")
+    fmt = "{message}"
 else:  # pragma: no cover
-    log.add(
-        sys.stderr,
-        colorize=True,
-        format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>",
-    )
+    fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
+    fmt += "[<level>{level}</level> "
+    fmt += "<fg #666>{name}:{line}</fg #666>] "
+    fmt += "<fg #FFF>{message}</fg #FFF>"
+log.add(sys.stderr, colorize=not TESTING, format=fmt)
 
 if LOGS_FILE is not None:
     try:

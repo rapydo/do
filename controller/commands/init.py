@@ -56,10 +56,10 @@ def init(
     # when services are available to set specific configurations
     if create_projectrc:
         Application.controller.create_projectrc()
-        # Read again! :-(
         Application.controller.make_env()
-        Application.controller.read_composers()
-        Application.controller.set_active_services()
+        # Read again! :-(
+    #     Application.controller.read_composers()
+    #     Application.controller.set_active_services()
 
-    Application.controller.check_placeholders()
+    # Application.controller.check_placeholders()
     log.info("Project initialized")
