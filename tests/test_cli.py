@@ -56,14 +56,15 @@ def exec_command(capfd, command, *asserts):
 
         with capfd.disabled():
             print(f"Exit code: {result.exit_code}")
-            print(result.stdout)
+            # print(result.stdout)
     # NOTE: docker-compose calls SystemExit at the end of the command...
     except SystemExit:
         pass
 
     captured = capfd.readouterr()
     # Remove empty lines
-    out = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
+    # out = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
+    out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
     err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
 
     with capfd.disabled():
