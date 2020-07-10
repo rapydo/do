@@ -254,6 +254,8 @@ def test_all(capfd):
     )
 
     # Manipulate .projectrc to inject invalid options
+    # No longer supported after the migration to Typer:
+    """
     shutil.copy(".projectrc", ".projectrc.bak")
 
     with open(".projectrc", "a") as f:
@@ -291,6 +293,7 @@ def test_all(capfd):
         "Checks completed",
     )
     shutil.copy(".projectrc.bak", ".projectrc")
+    """
 
     r = gitter.get_repo("submodules/http-api")
     gitter.switch_branch(r, "0.7.3")

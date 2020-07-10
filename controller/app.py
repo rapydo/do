@@ -33,6 +33,32 @@ ROOT_UID = 0
 BASE_UID = 1000
 
 
+# Old implementation
+# # This is a second level parameter
+# if isinstance(value, dict):
+#     if key not in parse_conf["subcommands"]:
+#         log.exit("Unknown command {} found in {}", key, PROJECTRC)
+#     else:
+#         conf = parse_conf["subcommands"][key]["suboptions"]
+#         for subkey, subvalue in value.items():
+#             if subkey in conf:
+#                 conf[subkey]["default"] = subvalue
+#             else:
+#                 log.exit(
+#                     "Unknown parameter {}/{} found in {}",
+#                     key,
+#                     subkey,
+#                     PROJECTRC,
+#                 )
+# else:
+#     # This is a first level option
+#     if key in parse_conf["options"]:
+#         parse_conf["options"][key]["default"] = value
+#         parse_conf["options"][key]["projectrc"] = True
+#     else:
+#         log.exit("Unknown parameter {} found in {}", key, PROJECTRC)
+
+
 class Configuration:
     projectrc = {}
     host_configuration = {}
