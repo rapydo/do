@@ -1208,7 +1208,7 @@ def test_services_activation(capfd):
 
         exec_command(
             capfd,
-            "-p testservices list --active-services",
+            "-p testservices list services",
             "List of active services:",
             *service,
         )

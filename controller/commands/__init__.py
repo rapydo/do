@@ -1,6 +1,5 @@
 import os
-import sys
-from importlib import import_module, reload
+from importlib import import_module
 
 
 def load_commands():
@@ -16,10 +15,4 @@ def load_commands():
 
         c = os.path.splitext(c)[0]
 
-        modulename = f"controller.commands.{c}"
-        # This is needed to reload the App during the tests
-        already_loaded = modulename in sys.modules
-        m = import_module(modulename)
-
-        if already_loaded:
-            reload(m)
+        import_module(f"controller.commands.{c}")
