@@ -102,7 +102,7 @@ def print_obsolete(image, date1, date2, service, from_img=None):
         log.warning(
             """Obsolete image {}
 built on {} FROM {} that changed on {}
-Update it with: rapydo --services {} build""",
+Update it with: rapydo --service {} build""",
             image,
             date1,
             from_img,
@@ -113,7 +113,7 @@ Update it with: rapydo --services {} build""",
         log.warning(
             """Obsolete image {}
 built on {} but changed on {}
-Update it with: rapydo --services {} pull""",
+Update it with: rapydo --service {} pull""",
             image,
             date1,
             date2,

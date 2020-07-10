@@ -193,7 +193,7 @@ def test_create(capfd):
     )
 
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit"
+    create_command += " --service rabbit"
     create_command += " --current --force"
     exec_command(
         capfd,
@@ -204,7 +204,7 @@ def test_create(capfd):
 
     # this is the last version that is created
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit"
+    create_command += " --service rabbit"
     create_command += " --current --force"
     create_command += " --env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
     exec_command(
@@ -669,7 +669,7 @@ def test_all(capfd):
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo --services backend pull",
+        "Update it with: rapydo --service backend pull",
     )
 
     exec_command(capfd, "rapydo verify sqlalchemy", "No container found for backend_1")
@@ -814,13 +814,13 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo -s backend remove --net",
-        "Incompatibile options --networks and --services",
+        "Incompatibile options --networks and --service",
     )
 
     exec_command(
         capfd,
         "rapydo -s backend remove --all",
-        "Incompatibile options --all and --services",
+        "Incompatibile options --all and --service",
     )
 
     exec_command(
@@ -1100,7 +1100,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --services rabbit build",
+        "Update it with: rapydo --service rabbit build",
     )
 
     # rabbit images has no longer any child because it is just rebuilt
@@ -1157,7 +1157,7 @@ def test_extend(capfd):
 
     create_command = "rapydo create ext --extend base"
     create_command += " --auth neo4j --frontend angular"
-    create_command += " --current --services rabbit"
+    create_command += " --current --service rabbit"
     exec_command(
         capfd,
         create_command,
@@ -1177,7 +1177,7 @@ def test_services_activation(capfd):
 
     os.remove(".projectrc")
 
-    # Test services activation from create --services
+    # Test services activation from create --service
     services = [
         "postgres",
         "mysql",

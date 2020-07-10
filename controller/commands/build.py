@@ -52,7 +52,7 @@ def build(
             custom_services.extend(build.get("services", []))
     build_services = remove_redundant_services(custom_services, builds)
 
-    # Remove services not selected at project level, i.e. restricted by --services
+    # Remove services not selected at project level, i.e. restricted by --service
     build_services = [i for i in build_services if i in Application.data.services]
     if not build_services:
         log.info("No custom images to build")
