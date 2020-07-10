@@ -702,7 +702,7 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(2)
+    signal.alarm(1)
 
     interrupted = False
     try:
@@ -718,7 +718,7 @@ def test_all(capfd):
     assert interrupted
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(2)
+    signal.alarm(1)
 
     interrupted = False
     try:
@@ -851,7 +851,7 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(4)
+    signal.alarm(1)
 
     interrupted = False
     try:
@@ -880,7 +880,7 @@ def test_all(capfd):
     )
 
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(4)
+    signal.alarm(1)
 
     interrupted = False
     try:
