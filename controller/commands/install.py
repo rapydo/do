@@ -79,6 +79,8 @@ def install_controller_from_git(version, user):
 
 def install_controller_from_folder(gits, version, user, editable):
 
+    Application.controller.git_submodules()
+
     log.info("You asked to install rapydo-controller {} from local folder", version)
 
     do_path = os.path.join(SUBMODULES_DIR, "do")
