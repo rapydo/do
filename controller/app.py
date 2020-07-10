@@ -245,6 +245,9 @@ class Application:
 
         Application.load_projectrc()
 
+        if not Configuration.projectrc:
+            log.warning("Empty {}", PROJECTRC)
+
         if Configuration.create:
             self.check_installed_software()
             return True
