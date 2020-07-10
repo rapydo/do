@@ -1,6 +1,7 @@
 import glob
 import os
 from datetime import datetime
+from typing import List
 
 import dateutil.parser
 import typer
@@ -21,11 +22,8 @@ def check(
     no_builds: bool = typer.Option(
         False, "--no-builds", help="Skip check on docker builds", show_default=False,
     ),
-    ignore_submodules: str = typer.Option(
-        "",
-        "--ignore-submodules",
-        "-i",
-        help="Ignore a given list of submodules (comma-separated)",
+    ignore_submodules: List[str] = typer.Option(
+        "", "--ignore-submodule", "-i", help="Ignore submodule", show_default=False,
     ),
 ):
 
@@ -33,7 +31,7 @@ def check(
         log.info("Skipping git checks")
     else:
         log.info("Checking git (skip with --no-git)")
-        Application.git_checks(ignore_submodules.split(","))
+        Application.git_checks(ignore_submodules)
 
     if no_builds:
         log.info("Skipping builds checks")

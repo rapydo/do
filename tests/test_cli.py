@@ -12,7 +12,6 @@ from controller.dockerizing import Dock
 from controller.templating import Templating
 
 runner = CliRunner()
-Application.load_projectrc()
 controller = Application()
 
 
@@ -51,6 +50,8 @@ def exec_command(capfd, command, *asserts):
         print("_____________________________________________")
 
     try:
+        # re-read everytime before invoking a command to cleanup the Configuration class
+        Application.load_projectrc()
         options = command.strip().split(" ")[1:]
         result = runner.invoke(controller.app, options)
 

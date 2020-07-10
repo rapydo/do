@@ -1,3 +1,5 @@
+from typing import List
+
 import typer
 
 from controller import log
@@ -6,15 +8,12 @@ from controller.app import Application
 
 @Application.app.command(help="Update the current project")
 def update(
-    ignore_submodules: str = typer.Option(
-        "",
-        "--ignore-submodules",
-        "-i",
-        help="Ignore a given list of submodules (comma-separated)",
+    ignore_submodules: List[str] = typer.Option(
+        "", "--ignore-submodule", "-i", help="Ignore a submodule", show_default=False,
     ),
 ):
 
-    Application.git_update(ignore_submodules.split(","))
+    Application.git_update(ignore_submodules)
     # Reading again the configuration, it may change with git updates
     Application.controller.read_specs()
 
