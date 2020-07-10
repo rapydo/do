@@ -11,9 +11,6 @@ from controller.app import Application
 from controller.dockerizing import Dock
 from controller.templating import Templating
 
-runner = CliRunner()
-controller = Application()
-
 
 class TemporaryRemovePath:
     def __init__(self, path):
@@ -49,6 +46,8 @@ def exec_command(capfd, command, *asserts):
         print(command)
 
     # re-read everytime before invoking a command to cleanup the Configuration class
+    runner = CliRunner()
+    controller = Application()
     Application.load_projectrc()
     options = command.strip().split(" ")[1:]
     result = runner.invoke(controller.app, options)
@@ -77,10 +76,10 @@ def exec_command(capfd, command, *asserts):
     with capfd.disabled():
         for e in err:
             print(f"{e}")
-        for o in out:
-            print(f"_ {o}")
         for o in cout:
             print(f">> {o}")
+        for o in out:
+            print(f"_ {o}")
         if result.exception and str(result.exception) != result.exit_code:
             print("\n!! Exception:")
             print(result.exception)
