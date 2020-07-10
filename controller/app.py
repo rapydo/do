@@ -218,7 +218,6 @@ class Application:
 
         Application.controller = self
 
-        self.tested_connection = False
         self.active_services = None
         self.files = None
         self.base_files = None
@@ -240,7 +239,7 @@ class Application:
 
     def controller_init(self):
         if Configuration.create:
-            self.check_installed_software()
+            Application.check_installed_software()
             return True
 
         current_folder = os.getcwd()
@@ -251,7 +250,7 @@ class Application:
             log.exit(err)
 
         if not Configuration.print_version:
-            self.check_installed_software()
+            Application.check_installed_software()
 
         # if project is None, it is retrieve by project folder
         Configuration.project = Application.project_scaffold.get_project(
@@ -266,7 +265,7 @@ class Application:
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
-        self.checked("Selected project: {}", Configuration.project)
+        Application.checked("Selected project: {}", Configuration.project)
 
         # TODO: give an option to skip things when you are not connected
         if (
@@ -285,13 +284,13 @@ class Application:
         Application.project_scaffold.load_project_scaffold(
             Configuration.project, auth=None
         )
-        self.preliminary_version_check()
+        Application.preliminary_version_check()
 
         self.read_specs()  # read project configuration
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
-        self.verify_rapydo_version()
+        Application.verify_rapydo_version()
         Application.project_scaffold.inspect_project_folder()
 
         # get user launching rapydo commands
@@ -356,9 +355,10 @@ class Application:
         else:
             log.verbose(message, *args, **kws)
 
-    def check_installed_software(self):
+    @staticmethod
+    def check_installed_software():
 
-        self.checked(
+        Application.checked(
             "python version: {}.{}.{}",
             sys.version_info.major,
             sys.version_info.minor,
@@ -433,18 +433,21 @@ class Application:
         if Configuration.rapydo_version is None:  # pragma: no cover
             log.exit("RAPyDo version not found in your project_configuration file")
 
-    def preliminary_version_check(self):
+    @staticmethod
+    def preliminary_version_check():
 
         specs = configuration.load_yaml_file(
             file=configuration.PROJECT_CONF_FILENAME,
             path=Configuration.ABS_PROJECT_PATH,
             keep_order=True,
         )
-        v = glom(specs, "project.rapydo", default=None)
 
-        self.verify_rapydo_version(rapydo_version=v)
+        Application.verify_rapydo_version(
+            rapydo_version=glom(specs, "project.rapydo", default=None)
+        )
 
-    def verify_rapydo_version(self, rapydo_version=None):
+    @staticmethod
+    def verify_rapydo_version(rapydo_version=None):
         """
         If your project requires a specific rapydo version, check if you are
         the rapydo-controller matching that version
@@ -479,11 +482,9 @@ class Application:
 
         try:
             requests.get("https://www.google.com")
+            Application.checked("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover
             log.exit("Internet connection is unavailable")
-        else:
-            self.checked("Internet connection is available")
-            self.tested_connection = True
 
     def working_clone(self, name, repo, from_path=None):
 
@@ -680,7 +681,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         else:
-            self.checked("Active services: {}", self.active_services)
+            Application.checked("Active services: {}", self.active_services)
 
         missing = set()
         for service_name in self.active_services:

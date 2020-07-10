@@ -80,7 +80,7 @@ def exec_command(capfd, command, *asserts):
             print(f"_ {o}")
         for o in cout:
             print(f">> {o}")
-        if result.exception and result.exception != result.exit_code:
+        if result.exception and str(result.exception) != result.exit_code:
             print("\n!! Exception:")
             print(result.exception)
 
