@@ -67,7 +67,9 @@ def exec_command(capfd, command, *asserts):
     out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
     # Here exceptions, e.g. Time is up
     if result.exception:
-        exc = [x for x in result.exception.replace("\r", "").split("\n") if x.strip()]
+        exc = [
+            x for x in str(result.exception).replace("\r", "").split("\n") if x.strip()
+        ]
     else:
         exc = []
 
