@@ -540,7 +540,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "rapydo interfaces sqlalchemy --port XYZ --detach",
-        "Port must be a valid integer",
+        "Invalid value for '--port' / '-p': XYZ is not a valid integer",
     )
 
     exec_command(

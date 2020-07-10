@@ -50,10 +50,7 @@ def init(
 
     # Compose services and variables
     Application.controller.read_composers()
-    (
-        Application.controller.services_dict,
-        Application.controller.active_services,
-    ) = services.find_active(Application.controller.compose_config)
+    Application.controller.set_active_services()
     # We have to create the .projectrc twice
     # One generic with main options and another here
     # when services are available to set specific configurations
@@ -62,10 +59,7 @@ def init(
         # Read again! :-(
         Application.controller.make_env()
         Application.controller.read_composers()
-        (
-            Application.controller.services_dict,
-            Application.controller.active_services,
-        ) = services.find_active(Application.controller.compose_config)
+        Application.controller.set_active_services()
 
     Application.controller.check_placeholders()
     log.info("Project initialized")

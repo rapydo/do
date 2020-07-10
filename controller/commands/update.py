@@ -23,10 +23,7 @@ def update(
 
     # Compose services and variables
     Application.controller.read_composers()
-    (
-        Application.controller.services_dict,
-        Application.controller.active_services,
-    ) = services.find_active(Application.controller.compose_config)
+    Application.controller.set_active_services()
 
     Application.controller.check_placeholders()
 

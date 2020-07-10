@@ -51,9 +51,6 @@ def interfaces(
     if port is None:
         port = str(current_ports.published)
 
-    if not port.isnumeric():
-        log.exit("Port must be a valid integer")
-
     publish = [f"{port}:{current_ports.target}"]
 
     url = None

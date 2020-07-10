@@ -403,9 +403,7 @@ class Application:
 
         # Compose services and variables
         self.read_composers()
-        self.services_dict, self.active_services = services.find_active(
-            self.compose_config
-        )
+        self.set_active_services()
 
         self.check_placeholders()
 
@@ -624,6 +622,11 @@ class Application:
 
         for name, repo in repos.items():
             self.gits[name] = self.working_clone(name, repo, from_path=from_path)
+
+    def set_active_services(self):
+        self.services_dict, self.active_services = services.find_active(
+            self.compose_config
+        )
 
     def read_composers(self):
 
