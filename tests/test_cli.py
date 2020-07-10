@@ -1226,8 +1226,9 @@ def test_celery_activation(capfd):
     def test_celery_configuration(services_list, broker, backend):
 
         services = "--service celery"
-        for service in services_list:
-            services += f"--service {service}"
+        if services_list:
+            for service in services_list:
+                services += f" --service {service}"
 
         exec_command(
             capfd,
