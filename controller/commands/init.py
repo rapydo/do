@@ -5,6 +5,8 @@ import typer
 from controller import log
 from controller.app import Application, Configuration
 
+print("RELOADING!!!")
+
 
 @Application.app.command(help="Initialize current RAPyDo project")
 def init(
