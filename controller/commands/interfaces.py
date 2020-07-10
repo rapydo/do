@@ -5,7 +5,7 @@ import typer
 from glom import glom
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
@@ -56,11 +56,11 @@ def interfaces(
     url = None
     if service == "swaggerui":
         BACKEND_PORT = glom(Application.data.conf_vars, "env.BACKEND_PORT")
-        if Application.data.production:
-            spec = f"https://{Application.data.hostname}/api/specs"
+        if Configuration.production:
+            spec = f"https://{Configuration.hostname}/api/specs"
         else:
-            spec = f"http://{Application.data.hostname}:{BACKEND_PORT}/api/specs"
-        url = f"http://{Application.data.hostname}:{port}?docExpansion=list&url={spec}"
+            spec = f"http://{Configuration.hostname}:{BACKEND_PORT}/api/specs"
+        url = f"http://{Configuration.hostname}:{port}?docExpansion=list&url={spec}"
 
     if url is not None:
         log.info("You can access {} web page here:\n\n{}\n", service, url)

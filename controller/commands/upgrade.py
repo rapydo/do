@@ -2,7 +2,7 @@ import typer
 from glom import glom
 
 from controller import EXTENDED_PROJECT_DISABLED
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.commands.create import create_project
 
 
@@ -24,7 +24,7 @@ def upgrade(
     auto = path is not None
 
     create_project(
-        project_name=Application.data.project,
+        project_name=Configuration.project,
         auth=auth,
         frontend=frontend,
         services=Application.data.services,

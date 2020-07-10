@@ -1,7 +1,7 @@
 import typer
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 from controller.utilities import services
 
@@ -44,7 +44,7 @@ def shell(
     dc = Compose(files=Application.data.files)
 
     if not user:
-        user = services.get_default_user(service, Application.data.frontend)
+        user = services.get_default_user(service, Configuration.frontend)
 
     if default_command:
         command = services.get_default_command(service)

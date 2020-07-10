@@ -62,6 +62,26 @@ BASE_UID = 1000
 class Configuration:
     projectrc = {}
     host_configuration = {}
+    action = None
+
+    production = False
+    privileged = False
+    project = None
+    frontend = None
+    hostname = None
+    stack = None
+    load_backend = False
+    load_frontend = False
+    load_commons = False
+
+    def set_action(action):
+        Configuration.action = action
+        Configuration.initialize = Configuration.action == "init"
+        Configuration.update = Configuration.action == "update"
+        Configuration.check = Configuration.action == "check"
+        Configuration.install = Configuration.action == "install"
+        Configuration.print_version = Configuration.action == "version"
+        Configuration.create = Configuration.action == "create"
 
     def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
         if ctx.resilient_parsing:
@@ -88,19 +108,14 @@ class CommandsData:
         services_list=None,
         active_services=None,
         base_services=None,
-        project=None,
         version=None,
         rapydo_version=None,
-        hostname=None,
-        production=None,
-        frontend=None,
         conf_vars=None,
         compose_config=None,
         services_dict=None,
         template_builds=None,
         builds=None,
         gits=None,
-        project_scaffold=None,
     ):
         self.files = files
         self.base_files = base_files
@@ -108,19 +123,14 @@ class CommandsData:
         self.services_list = services_list
         self.active_services = active_services
         self.base_services = base_services
-        self.project = project
         self.version = version
         self.rapydo_version = rapydo_version
-        self.hostname = hostname
-        self.production = production
-        self.frontend = frontend
         self.conf_vars = conf_vars
         self.compose_config = compose_config
         self.services_dict = services_dict
         self.template_builds = template_builds
         self.builds = builds
         self.gits = gits
-        self.project_scaffold = project_scaffold
 
 
 class Application:
@@ -129,12 +139,12 @@ class Application:
     app = None
     # controller app
     controller = None
+    project_scaffold = Project()
 
     def __init__(self):
 
         Application.controller = self
 
-        self.project_scaffold = Project()
         self.tested_connection = False
         self.rapydo_version = None  # To be retrieved from projet_configuration
         self.project_title = None  # To be retrieved from projet_configuration
@@ -143,11 +153,9 @@ class Application:
         self.active_services = None
         self.specs = None
         self.vars = None
-        self.hostname = None
         self.files = None
         self.base_files = None
         self.services = None
-        self.frontend = None
         self.base_services = None
         self.services_dict = None
         self.compose_config = None
@@ -232,58 +240,45 @@ class Application:
         ),
     ):
 
-        self.action = ctx.invoked_subcommand
+        Configuration.set_action(ctx.invoked_subcommand)
 
-        # Action aliases
-        self.initialize = self.action == "init"
-        self.update = self.action == "update"
-        self.start = self.action == "start"
-        self.check = self.action == "check"
-        self.install = self.action == "install"
-        self.print_version = self.action == "version"
-        self.pull = self.action == "pull"
-        self.create = self.action == "create"
-
-        self.production = production
-        self.privileged = privileged
-        self.project = project
-        self.hostname = hostname
+        Configuration.production = production
+        Configuration.privileged = privileged
+        Configuration.project = project
+        Configuration.hostname = hostname
 
         if stack:
-            self.stack = stack
+            Configuration.stack = stack
         else:
-            self.stack = "production" if production else "development"
+            Configuration.stack = "production" if production else "development"
 
-        self.load_backend = not no_backend
-        self.load_frontend = not no_frontend
-        self.load_commons = not no_commons
+        Configuration.load_backend = not no_backend
+        Configuration.load_frontend = not no_frontend
+        Configuration.load_commons = not no_commons
 
         Application.load_projectrc()
 
-        if self.create:
+        if Configuration.create:
             self.check_installed_software()
             return True
 
-        Application.load_projectrc()
-
         current_folder = os.getcwd()
-        err = self.project_scaffold.find_main_folder()
+        err = Application.project_scaffold.find_main_folder()
 
         if err is not None:
             os.chdir(current_folder)
             log.exit(err)
 
-        if self.print_version:
+        if Configuration.print_version:
             # from inside project folder, load configuration
-            self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
-                self.project
-            )
+            (
+                Configuration.project,
+                self.ABS_PROJECT_PATH,
+            ) = Application.project_scaffold.get_project(Configuration.project)
             self.read_specs()
 
             Application.data = CommandsData(
-                project=self.project,
-                version=self.version,
-                rapydo_version=self.rapydo_version,
+                version=self.version, rapydo_version=self.rapydo_version,
             )
 
             return True
@@ -293,13 +288,19 @@ class Application:
         self.check_installed_software()
 
         # TODO: give an option to skip things when you are not connected
-        if self.initialize or self.update or self.check or self.install:
+        if (
+            Configuration.initialize
+            or Configuration.update
+            or Configuration.check
+            or Configuration.install
+        ):
             self.check_internet_connection()
 
-        if self.install:
-            self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
-                self.project
-            )
+        if Configuration.install:
+            (
+                Configuration.project,
+                self.ABS_PROJECT_PATH,
+            ) = Application.project_scaffold.get_project(Configuration.project)
             self.read_specs()
 
             Application.data = CommandsData(
@@ -309,20 +310,23 @@ class Application:
             return True
 
         # if project is None, it is retrieve by project folder
-        self.project, self.ABS_PROJECT_PATH = self.project_scaffold.get_project(
-            self.project
-        )
-        self.checked("Selected project: {}", self.project)
+        (
+            Configuration.project,
+            self.ABS_PROJECT_PATH,
+        ) = Application.project_scaffold.get_project(Configuration.project)
+        self.checked("Selected project: {}", Configuration.project)
         # Auth is not yet available, will be read by read_specs
-        self.project_scaffold.load_project_scaffold(self.project, auth=None)
+        Application.project_scaffold.load_project_scaffold(
+            Configuration.project, auth=None
+        )
         self.preliminary_version_check()
 
         self.read_specs()  # read project configuration
 
         # from read_specs
-        self.project_scaffold.load_frontend_scaffold(self.frontend)
+        Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
         self.verify_rapydo_version()
-        self.project_scaffold.inspect_project_folder()
+        Application.project_scaffold.inspect_project_folder()
 
         # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
@@ -339,7 +343,7 @@ class Application:
             )
             log.debug("Current group ID: {}", self.current_gid)
 
-        if self.initialize:
+        if Configuration.initialize:
 
             enabled_services = services.get_services(
                 services_list, default=self.active_services
@@ -352,25 +356,20 @@ class Application:
                 services_list=services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
-                project=self.project,
                 version=self.version,
                 rapydo_version=self.rapydo_version,
-                hostname=self.hostname,
-                production=self.production,
-                frontend=self.frontend,
                 conf_vars=self.vars,
                 compose_config=self.compose_config,
                 services_dict=self.services_dict,
                 template_builds=self.template_builds,
                 builds=self.builds,
                 gits=self.gits,
-                project_scaffold=self.project_scaffold,
             )
             return True
 
         self.git_submodules()
 
-        if self.update:
+        if Configuration.update:
 
             enabled_services = services.get_services(
                 services_list, default=self.active_services
@@ -383,19 +382,14 @@ class Application:
                 services_list=services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
-                project=self.project,
                 version=self.version,
                 rapydo_version=self.rapydo_version,
-                hostname=self.hostname,
-                production=self.production,
-                frontend=self.frontend,
                 conf_vars=self.vars,
                 compose_config=self.compose_config,
                 services_dict=self.services_dict,
                 template_builds=self.template_builds,
                 builds=self.builds,
                 gits=self.gits,
-                project_scaffold=self.project_scaffold,
             )
             return True
 
@@ -419,19 +413,14 @@ class Application:
             services_list=services_list,
             active_services=self.active_services,
             base_services=self.base_services,
-            project=self.project,
             version=self.version,
             rapydo_version=self.rapydo_version,
-            hostname=self.hostname,
-            production=self.production,
-            frontend=self.frontend,
             conf_vars=self.vars,
             compose_config=self.compose_config,
             services_dict=self.services_dict,
             template_builds=self.template_builds,
             builds=self.builds,
             gits=self.gits,
-            project_scaffold=self.project_scaffold,
         )
 
         return True
@@ -446,7 +435,7 @@ class Application:
         )
 
     def checked(self, message, *args, **kws):
-        if self.action == "check":
+        if Configuration.check:
             log.info(message, *args, **kws)
         else:
             log.verbose(message, *args, **kws)
@@ -476,9 +465,9 @@ class Application:
         """ Read project configuration """
 
         try:
-            if self.initialize:
+            if Configuration.initialize:
                 read_extended = False
-            elif self.install:
+            elif Configuration.install:
                 read_extended = False
             else:
                 read_extended = True
@@ -489,7 +478,7 @@ class Application:
                 projects_path=PROJECT_DIR,
                 submodules_path=SUBMODULES_DIR,
                 read_extended=read_extended,
-                production=self.production,
+                production=Configuration.production,
             )
             self.specs = confs[0]
             self.extended_project = confs[1]
@@ -506,13 +495,15 @@ class Application:
 
         log.verbose("Configuration loaded")
 
-        self.frontend = glom(self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND)
+        Configuration.frontend = glom(
+            self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
+        )
 
-        if self.frontend == NO_FRONTEND:
-            self.frontend = None
+        if Configuration.frontend == NO_FRONTEND:
+            Configuration.frontend = None
 
-        if self.frontend is not None:
-            log.verbose("Frontend framework: {}", self.frontend)
+        if Configuration.frontend is not None:
+            log.verbose("Frontend framework: {}", Configuration.frontend)
 
         self.project_title = glom(self.specs, "project.title", default="Unknown title")
         self.version = glom(self.specs, "project.version", default=None)
@@ -579,7 +570,10 @@ class Application:
     def working_clone(self, name, repo, from_path=None):
 
         # substitute values starting with '$$'
-        myvars = {ANGULAR: self.frontend == ANGULAR, REACT: self.frontend == REACT}
+        myvars = {
+            ANGULAR: Configuration.frontend == ANGULAR,
+            REACT: Configuration.frontend == REACT,
+        }
         repo = services.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
@@ -587,8 +581,8 @@ class Application:
         if not repo_enabled:
             return None
 
-        repo["do"] = self.initialize
-        repo["check"] = not self.install
+        repo["do"] = Configuration.initialize
+        repo["check"] = not Configuration.install
         repo.setdefault("path", name)
         repo.setdefault(
             "branch", self.rapydo_version if self.rapydo_version else __version__
@@ -635,12 +629,13 @@ class Application:
         # substitute values starting with '$$'
 
         myvars = {
-            "backend": self.load_backend,
-            ANGULAR: self.frontend == ANGULAR and self.load_frontend,
-            REACT: self.frontend == REACT and self.load_frontend,
-            "commons": self.load_commons,
-            "extended-commons": self.extended_project is not None and self.load_commons,
-            "mode": f"{self.stack}.yml",
+            "backend": Configuration.load_backend,
+            ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
+            REACT: Configuration.frontend == REACT and Configuration.load_frontend,
+            "commons": Configuration.load_commons,
+            "extended-commons": self.extended_project is not None
+            and Configuration.load_commons,
+            "mode": f"{Configuration.stack}.yml",
             "extended-mode": self.extended_project is not None,
             "baseconf": CONFS_DIR,
             "customconf": os.path.join(self.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME),
@@ -676,9 +671,9 @@ class Application:
         t = templating.get_template(
             "projectrc",
             {
-                "project": self.project,
-                "hostname": self.hostname,
-                "production": self.production,
+                "project": Configuration.project,
+                "hostname": Configuration.hostname,
+                "production": Configuration.production,
                 "testing": TESTING,
                 "services": self.active_services,
             },
@@ -704,11 +699,13 @@ class Application:
             pass
 
         env = self.vars.get("env", {})
-        env["PROJECT_DOMAIN"] = self.hostname
-        env["COMPOSE_PROJECT_NAME"] = self.project
+        env["PROJECT_DOMAIN"] = Configuration.hostname
+        env["COMPOSE_PROJECT_NAME"] = Configuration.project
         env["VANILLA_DIR"] = os.path.abspath(os.curdir)
         env["SUBMODULE_DIR"] = os.path.join(env["VANILLA_DIR"], SUBMODULES_DIR)
-        env["PROJECT_DIR"] = os.path.join(env["VANILLA_DIR"], PROJECT_DIR, self.project)
+        env["PROJECT_DIR"] = os.path.join(
+            env["VANILLA_DIR"], PROJECT_DIR, Configuration.project
+        )
 
         if self.extended_project_path is None:
             env["EXTENDED_PROJECT_PATH"] = env["PROJECT_DIR"]
@@ -728,7 +725,7 @@ class Application:
         env["CURRENT_GID"] = self.current_gid
         env["PROJECT_TITLE"] = self.project_title
         env["PROJECT_DESCRIPTION"] = self.project_description
-        env["DOCKER_PRIVILEGED_MODE"] = "true" if self.privileged else "false"
+        env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
 
         env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
 

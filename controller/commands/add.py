@@ -35,7 +35,7 @@ def add(
     auth = glom(Application.data.conf_vars, "env.AUTH_SERVICE", default=None)
 
     fn = functions.get(element_type)
-    fn(Application.data.project_scaffold, name, Application.data.services, auth)
+    fn(Application.project_scaffold, name, Application.data.services, auth)
 
 
 def create_template(template_name, target_path, name, services, auth):

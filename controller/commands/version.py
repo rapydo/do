@@ -1,7 +1,7 @@
 from distutils.version import LooseVersion
 
 from controller import __version__
-from controller.app import Application
+from controller.app import Application, Configuration
 
 
 @Application.app.command(help="Retrieve version details")
@@ -17,7 +17,7 @@ def version():
     cv = f"{c}{__version__}{d}"
     pv = f"{c}{Application.data.version}{d}"
     rv = f"{c}{Application.data.rapydo_version}{d}"
-    print(f"\nrapydo: {cv}\t{Application.data.project}: {pv}\trequired rapydo: {rv}")
+    print(f"\nrapydo: {cv}\t{Configuration.project}: {pv}\trequired rapydo: {rv}")
 
     if __version__ != Application.data.rapydo_version:
         c = LooseVersion(__version__)

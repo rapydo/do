@@ -3,7 +3,7 @@ import os
 import typer
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
@@ -62,12 +62,12 @@ def ssl(
         print("")
         print(
             "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
-                chain_file, Application.data.project, service
+                chain_file, Configuration.project, service
             )
         )
         print(
             "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
-                key_file, Application.data.project, service
+                key_file, Configuration.project, service
             )
         )
 
@@ -80,7 +80,7 @@ def ssl(
     if force:
         command = f"{command} --force"
 
-    command = f"{command} {Application.data.hostname}"
+    command = f"{command} {Configuration.hostname}"
 
     dc = Compose(files=Application.data.files)
 

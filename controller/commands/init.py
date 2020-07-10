@@ -23,11 +23,11 @@ def init(
     ),
 ):
 
-    for p in Application.data.project_scaffold.data_folders:
+    for p in Application.project_scaffold.data_folders:
         if not os.path.isdir(p):
             os.makedirs(p)
 
-    for p in Application.data.project_scaffold.data_files:
+    for p in Application.project_scaffold.data_files:
         if not os.path.exists(p):
             open(p, "a").close()
 
