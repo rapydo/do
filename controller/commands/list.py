@@ -1,4 +1,5 @@
 import os
+from enum import Enum
 
 import typer
 
@@ -6,35 +7,28 @@ from controller import COMPOSE_ENVIRONMENT_FILE, gitter, log
 from controller.app import Application
 
 
-@Application.app.command(help="Print rapydo configurations")
-def list(
-    env: bool = typer.Option(
-        False,
-        "--env",
-        help="List environment variable (.env file)",
-        show_default=False,
-    ),
-    active_services: bool = typer.Option(
-        False, "--active-services", help="List enabled services", show_default=False,
-    ),
-    submodules: bool = typer.Option(
-        False, "--submodules", help="List submodules", show_default=False,
+class ElementTypes(str, Enum):
+    env = "env"
+    services = "services"
+    submodules = "submodules"
+
+
+@Application.app.command("list", help="Print rapydo configurations")
+def list_cmd(
+    element_type: ElementTypes = typer.Argument(
+        ..., help="Type of element to be listed"
     ),
 ):
     Application.controller.controller_init()
 
-    printed_something = False
-
-    if env:
-        printed_something = True
+    if element_type == ElementTypes.env:
         log.info("List env variables:\n")
         env = read_env()
         for var in sorted(env):
             val = env.get(var)
             print(f"{var:<36}\t{val}")
 
-    if active_services:
-        printed_something = True
+    if element_type == ElementTypes.services:
         log.info("List of active services:\n")
         print("{:<12} {:<24} {}".format("Name", "Image", "Path"))
 
@@ -52,8 +46,7 @@ def list(
                         path = path[1:]
                     print(f"{name:<12} {image:<24} {path}")
 
-    if submodules:
-        printed_something = True
+    if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")
         print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
         for name in Application.gits:
@@ -66,11 +59,6 @@ def list(
             if path.startswith("/"):
                 path = path[1:]
             print(f"{name:<18} {branch:<18} {path}")
-
-    if not printed_something:
-        log.error(
-            "Nothing to list, please use rapydo list --help for available options"
-        )
 
 
 def read_env():
