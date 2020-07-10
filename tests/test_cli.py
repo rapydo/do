@@ -65,6 +65,11 @@ def exec_command(capfd, command, *asserts):
     err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
     # Here output from other sources, e.g. typer errors o docker-compose output
     out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
+    # Here exceptions, e.g. Time is up
+    if result.exception:
+        exc = [x for x in result.exception.replace("\r", "").split("\n") if x.strip()]
+    else:
+        exc = []
 
     with capfd.disabled():
         for e in err:
@@ -73,16 +78,13 @@ def exec_command(capfd, command, *asserts):
             print(f"_ {o}")
         for o in cout:
             print(f">> {o}")
-        if result.exception:
-            print("\nException:")
+        if result.exception and result.exception != result.exit_code:
+            print("\n!! Exception:")
             print(result.exception)
-
-            if result.exception == "Time is up":
-                raise Timeout("Time is up")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
-        assert a in out + err or any(a in x for x in out + err + cout)
+        assert a in out + err or any(a in x for x in out + err + cout + exc)
 
     return out
 
@@ -708,34 +710,22 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(2)
-
-    interrupted = False
-    try:
-        exec_command(
-            capfd,
-            "rapydo shell backend --default-command",
-            # "*** RESTful HTTP API ***",
-            # "Serving Flask app",
-        )
-
-    except Timeout:
-        interrupted = True
-    assert interrupted
+    exec_command(
+        capfd,
+        "rapydo shell backend --default-command",
+        # "*** RESTful HTTP API ***",
+        # "Serving Flask app",
+        "Time is up",
+    )
 
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(2)
-
-    interrupted = False
-    try:
-        exec_command(
-            capfd,
-            "rapydo shell backend",
-            # "developer@backend-server:[/code]",
-        )
-
-    except Timeout:
-        interrupted = True
-    assert interrupted
+    exec_command(
+        capfd,
+        "rapydo shell backend",
+        # "developer@backend-server:[/code]",
+        "Time is up",
+    )
 
     # Testing default users
     exec_command(
@@ -854,17 +844,12 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(4)
-
-    interrupted = False
-    try:
-        exec_command(
-            capfd,
-            "rapydo -s backend start --no-detach",
-            # "REST API backend server is ready to be launched",
-        )
-    except Timeout:
-        interrupted = True
-    assert interrupted
+    exec_command(
+        capfd,
+        "rapydo -s backend start --no-detach",
+        # "REST API backend server is ready to be launched",
+        "Time is up",
+    )
 
     # This is because after start --no-detach the container in still in exited status
     exec_command(
@@ -883,17 +868,12 @@ def test_all(capfd):
 
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(4)
-
-    interrupted = False
-    try:
-        exec_command(
-            capfd,
-            "rapydo volatile maintenance",
-            # "Maintenance server is up and waiting for connections",
-        )
-    except Timeout:
-        interrupted = True
-    assert interrupted
+    exec_command(
+        capfd,
+        "rapydo volatile maintenance",
+        # "Maintenance server is up and waiting for connections",
+        "Time is up",
+    )
 
     pconf = "projects/first/project_configuration.yaml"
 
