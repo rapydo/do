@@ -1241,7 +1241,7 @@ def test_celery_activation(capfd):
         assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
         assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
 
-    test_celery_configuration([""], "RABBIT", "RABBIT")
+    test_celery_configuration([], "RABBIT", "RABBIT")
     test_celery_configuration(["rabbit"], "RABBIT", "RABBIT")
     test_celery_configuration(["redis"], "REDIS", "REDIS")
     test_celery_configuration(["mongo"], "RABBIT", "MONGODB")
