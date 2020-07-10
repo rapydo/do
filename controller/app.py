@@ -193,8 +193,6 @@ class CommandsData:
         base_services=None,
         compose_config=None,
         services_dict=None,
-        template_builds=None,
-        builds=None,
     ):
         self.files = files
         self.base_files = base_files
@@ -204,8 +202,6 @@ class CommandsData:
         self.base_services = base_services
         self.compose_config = compose_config
         self.services_dict = services_dict
-        self.template_builds = template_builds
-        self.builds = builds
 
 
 class Application:
@@ -227,11 +223,10 @@ class Application:
         self.files = None
         self.base_files = None
         self.services = None
+        self.enabled_services = None
         self.base_services = None
         self.services_dict = None
         self.compose_config = None
-        self.template_builds = None
-        self.builds = None
 
         # Register callback with CLI options and basic initialization/checks
         Application.app = typer.Typer(
@@ -328,37 +323,11 @@ class Application:
             log.debug("Current group ID: {}", self.current_gid)
 
         if Configuration.initialize:
-
-            Application.data = CommandsData(
-                files=self.files,
-                base_files=self.base_files,
-                services=self.enabled_services,
-                services_list=Configuration.services_list,
-                active_services=self.active_services,
-                base_services=self.base_services,
-                compose_config=self.compose_config,
-                services_dict=self.services_dict,
-                template_builds=self.template_builds,
-                builds=self.builds,
-            )
             return True
 
         self.git_submodules()
 
         if Configuration.update:
-
-            Application.data = CommandsData(
-                files=self.files,
-                base_files=self.base_files,
-                services=self.enabled_services,
-                services_list=Configuration.services_list,
-                active_services=self.active_services,
-                base_services=self.base_services,
-                compose_config=self.compose_config,
-                services_dict=self.services_dict,
-                template_builds=self.template_builds,
-                builds=self.builds,
-            )
             return True
 
         self.make_env()
@@ -380,8 +349,6 @@ class Application:
             base_services=self.base_services,
             compose_config=self.compose_config,
             services_dict=self.services_dict,
-            template_builds=self.template_builds,
-            builds=self.builds,
         )
 
         return True
