@@ -47,32 +47,30 @@ def exec_command(capfd, command, *asserts):
         print("\n")
         print("_____________________________________________")
         print(command)
+
+    # re-read everytime before invoking a command to cleanup the Configuration class
+    Application.load_projectrc()
+    options = command.strip().split(" ")[1:]
+    result = runner.invoke(controller.app, options)
+
+    with capfd.disabled():
+        print(f"Exit code: {result.exit_code}")
         print("_____________________________________________")
-
-    try:
-        # re-read everytime before invoking a command to cleanup the Configuration class
-        Application.load_projectrc()
-        options = command.strip().split(" ")[1:]
-        result = runner.invoke(controller.app, options)
-
-        with capfd.disabled():
-            print(f"Exit code: {result.exit_code}")
-            # print(result.stdout)
-    # NOTE: docker-compose calls SystemExit at the end of the command...
-    except SystemExit:
-        pass
+        # print(result.stdout)
 
     captured = capfd.readouterr()
     # Remove empty lines
-    # out = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
-    out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
+    cout = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
     err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
+    out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
 
     with capfd.disabled():
-        for o in out:
-            print(f"_ {o}")
         for e in err:
             print(f"{e}")
+        for o in out:
+            print(f"_ {o}")
+        for o in cout:
+            print(f"___ {o}")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
