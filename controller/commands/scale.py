@@ -2,7 +2,7 @@ import typer
 from glom import glom
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 # scaling should be a "Multiple Value"
@@ -14,7 +14,9 @@ def scale(scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA"
     options = scaling.split("=")
     if len(options) != 2:
         scale_var = f"DEFAULT_SCALE_{scaling.upper()}"
-        nreplicas = glom(Application.data.conf_vars, f"env.{scale_var}", default=None)
+        nreplicas = glom(
+            Configuration.specs, f"variables.env.{scale_var}", default=None
+        )
         if nreplicas is None:
             hints = "You can also set a {} variable in your .projectrc file".format(
                 scale_var

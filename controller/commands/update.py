@@ -2,7 +2,6 @@ import typer
 
 from controller import log
 from controller.app import Application
-from controller.utilities import services
 
 
 @Application.app.command(help="Update the current project")
@@ -15,7 +14,7 @@ def update(
     ),
 ):
 
-    Application.git_update(ignore_submodules.split(","), Application.data.gits)
+    Application.git_update(ignore_submodules.split(","))
     # Reading again the configuration, it may change with git updates
     Application.controller.read_specs()
 

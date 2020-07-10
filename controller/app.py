@@ -108,14 +108,10 @@ class CommandsData:
         services_list=None,
         active_services=None,
         base_services=None,
-        version=None,
-        rapydo_version=None,
-        conf_vars=None,
         compose_config=None,
         services_dict=None,
         template_builds=None,
         builds=None,
-        gits=None,
     ):
         self.files = files
         self.base_files = base_files
@@ -123,14 +119,10 @@ class CommandsData:
         self.services_list = services_list
         self.active_services = active_services
         self.base_services = base_services
-        self.version = version
-        self.rapydo_version = rapydo_version
-        self.conf_vars = conf_vars
         self.compose_config = compose_config
         self.services_dict = services_dict
         self.template_builds = template_builds
         self.builds = builds
-        self.gits = gits
 
 
 class Application:
@@ -140,19 +132,15 @@ class Application:
     # controller app
     controller = None
     project_scaffold = Project()
+    data = CommandsData()
+    gits = OrderedDict()
 
     def __init__(self):
 
         Application.controller = self
 
         self.tested_connection = False
-        self.rapydo_version = None  # To be retrieved from projet_configuration
-        self.project_title = None  # To be retrieved from projet_configuration
-        self.project_description = None  # To be retrieved from projet_configuration
-        self.version = None
         self.active_services = None
-        self.specs = None
-        self.vars = None
         self.files = None
         self.base_files = None
         self.services = None
@@ -161,7 +149,6 @@ class Application:
         self.compose_config = None
         self.template_builds = None
         self.builds = None
-        self.gits = OrderedDict()
 
         # Register callback with CLI options and basic initialization/checks
         Application.app = typer.Typer(
@@ -277,10 +264,6 @@ class Application:
             ) = Application.project_scaffold.get_project(Configuration.project)
             self.read_specs()
 
-            Application.data = CommandsData(
-                version=self.version, rapydo_version=self.rapydo_version,
-            )
-
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
@@ -302,10 +285,6 @@ class Application:
                 self.ABS_PROJECT_PATH,
             ) = Application.project_scaffold.get_project(Configuration.project)
             self.read_specs()
-
-            Application.data = CommandsData(
-                rapydo_version=self.rapydo_version, gits=self.gits,
-            )
 
             return True
 
@@ -356,14 +335,10 @@ class Application:
                 services_list=services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
-                version=self.version,
-                rapydo_version=self.rapydo_version,
-                conf_vars=self.vars,
                 compose_config=self.compose_config,
                 services_dict=self.services_dict,
                 template_builds=self.template_builds,
                 builds=self.builds,
-                gits=self.gits,
             )
             return True
 
@@ -382,14 +357,10 @@ class Application:
                 services_list=services_list,
                 active_services=self.active_services,
                 base_services=self.base_services,
-                version=self.version,
-                rapydo_version=self.rapydo_version,
-                conf_vars=self.vars,
                 compose_config=self.compose_config,
                 services_dict=self.services_dict,
                 template_builds=self.template_builds,
                 builds=self.builds,
-                gits=self.gits,
             )
             return True
 
@@ -413,14 +384,10 @@ class Application:
             services_list=services_list,
             active_services=self.active_services,
             base_services=self.base_services,
-            version=self.version,
-            rapydo_version=self.rapydo_version,
-            conf_vars=self.vars,
             compose_config=self.compose_config,
             services_dict=self.services_dict,
             template_builds=self.template_builds,
             builds=self.builds,
-            gits=self.gits,
         )
 
         return True
@@ -434,7 +401,8 @@ class Application:
             "project_configuration", {}
         )
 
-    def checked(self, message, *args, **kws):
+    @staticmethod
+    def checked(message, *args, **kws):
         if Configuration.check:
             log.info(message, *args, **kws)
         else:
@@ -480,23 +448,19 @@ class Application:
                 read_extended=read_extended,
                 production=Configuration.production,
             )
-            self.specs = confs[0]
+            Configuration.specs = configuration.mix_configuration(
+                confs[0], Configuration.host_configuration
+            )
             self.extended_project = confs[1]
             self.extended_project_path = confs[2]
-
-            self.specs = configuration.mix_configuration(
-                self.specs, Configuration.host_configuration
-            )
 
         except AttributeError as e:  # pragma: no cover
             log.exit(e)
 
-        self.vars = self.specs.get("variables", {})
-
         log.verbose("Configuration loaded")
 
         Configuration.frontend = glom(
-            self.vars, "env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
+            Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
         )
 
         if Configuration.frontend == NO_FRONTEND:
@@ -505,14 +469,20 @@ class Application:
         if Configuration.frontend is not None:
             log.verbose("Frontend framework: {}", Configuration.frontend)
 
-        self.project_title = glom(self.specs, "project.title", default="Unknown title")
-        self.version = glom(self.specs, "project.version", default=None)
-        self.rapydo_version = glom(self.specs, "project.rapydo", default=None)
-        self.project_description = glom(
-            self.specs, "project.description", default="Unknown description"
+        Configuration.project_title = glom(
+            Configuration.specs, "project.title", default="Unknown title"
+        )
+        Configuration.version = glom(
+            Configuration.specs, "project.version", default=None
+        )
+        Configuration.rapydo_version = glom(
+            Configuration.specs, "project.rapydo", default=None
+        )
+        Configuration.project_description = glom(
+            Configuration.specs, "project.description", default="Unknown description"
         )
 
-        if self.rapydo_version is None:  # pragma: no cover
+        if Configuration.rapydo_version is None:  # pragma: no cover
             log.exit("RAPyDo version not found in your project_configuration file")
 
     def preliminary_version_check(self):
@@ -533,7 +503,7 @@ class Application:
         """
 
         if rapydo_version is None:
-            rapydo_version = self.rapydo_version
+            rapydo_version = Configuration.rapydo_version
 
         if rapydo_version is None:  # pragma: no cover
             return True
@@ -585,7 +555,10 @@ class Application:
         repo["check"] = not Configuration.install
         repo.setdefault("path", name)
         repo.setdefault(
-            "branch", self.rapydo_version if self.rapydo_version else __version__
+            "branch",
+            Configuration.rapydo_version
+            if Configuration.rapydo_version
+            else __version__,
         )
 
         if from_path is not None:
@@ -610,12 +583,11 @@ class Application:
     def git_submodules(self, from_path=None):
         """ Check and/or clone git projects """
 
-        repos = self.vars.get("submodules", {}).copy()
-
-        self.gits["main"] = gitter.get_repo(".")
+        repos = glom(Configuration.specs, "variables.submodules", default={}).copy()
+        Application.gits["main"] = gitter.get_repo(".")
 
         for name, repo in repos.items():
-            self.gits[name] = self.working_clone(name, repo, from_path=from_path)
+            Application.gits[name] = self.working_clone(name, repo, from_path=from_path)
 
     def set_active_services(self):
         self.services_dict, self.active_services = services.find_active(
@@ -650,7 +622,7 @@ class Application:
 
         compose_files = OrderedDict()
 
-        confs = self.vars.get("composers", {})
+        confs = glom(Configuration.specs, "variables.composers", default={})
         for name, conf in confs.items():
             compose_files[name] = services.apply_variables(conf, myvars)
 
@@ -698,7 +670,7 @@ class Application:
         except FileNotFoundError:
             pass
 
-        env = self.vars.get("env", {})
+        env = glom(Configuration.specs, "variables.env", default={})
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
         env["VANILLA_DIR"] = os.path.abspath(os.curdir)
@@ -720,11 +692,11 @@ class Application:
             env["EXTENDED_PROJECT"] = self.extended_project
 
         env["RAPYDO_VERSION"] = __version__
-        env["PROJECT_VERSION"] = self.version
+        env["PROJECT_VERSION"] = Configuration.version
         env["CURRENT_UID"] = self.current_uid
         env["CURRENT_GID"] = self.current_gid
-        env["PROJECT_TITLE"] = self.project_title
-        env["PROJECT_DESCRIPTION"] = self.project_description
+        env["PROJECT_TITLE"] = Configuration.project_title
+        env["PROJECT_DESCRIPTION"] = Configuration.project_description
         env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
 
         env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
@@ -805,9 +777,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         return missing
 
     @staticmethod
-    def git_update(ignore_submodule, gits):
+    def git_update(ignore_submodule):
 
-        for name, gitobj in gits.items():
+        for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
@@ -816,9 +788,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             gitter.update(name, gitobj)
 
     @staticmethod
-    def git_checks(ignore_submodule, gits):
+    def git_checks(ignore_submodule):
 
-        for name, gitobj in gits.items():
+        for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping checks on {}", name)
                 continue

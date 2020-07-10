@@ -55,8 +55,8 @@ def list(
         printed_something = True
         log.info("List of submodules:\n")
         print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
-        for name in Application.data.gits:
-            repo = Application.data.gits.get(name)
+        for name in Application.gits:
+            repo = Application.gits.get(name)
             if repo is None:
                 continue
             branch = gitter.get_active_branch(repo)

@@ -5,7 +5,7 @@ import typer
 from glom import glom
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.templating import Templating
 
 templating = Templating()
@@ -32,7 +32,7 @@ def add(
         "component": create_component,
         "service": create_service,
     }
-    auth = glom(Application.data.conf_vars, "env.AUTH_SERVICE", default=None)
+    auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
 
     fn = functions.get(element_type)
     fn(Application.project_scaffold, name, Application.data.services, auth)

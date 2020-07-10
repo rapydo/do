@@ -33,7 +33,7 @@ def check(
         log.info("Skipping git checks")
     else:
         log.info("Checking git (skip with --no-git)")
-        Application.git_checks(ignore_submodules.split(","), Application.data.gits)
+        Application.git_checks(ignore_submodules.split(","))
 
     if no_builds:
         log.info("Skipping builds checks")
@@ -63,7 +63,7 @@ def check(
                 continue
 
             # Check if some recent commit modified the Dockerfile
-            obsolete, d1, d2 = build_is_obsolete(build, Application.data.gits)
+            obsolete, d1, d2 = build_is_obsolete(build, Application.gits)
             if obsolete:
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
@@ -83,7 +83,7 @@ def check(
                     )
 
                 # Verify if template build is obsolete or not
-                obsolete, d1, d2 = build_is_obsolete(from_build, Application.data.gits)
+                obsolete, d1, d2 = build_is_obsolete(from_build, Application.gits)
                 if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 

@@ -3,7 +3,7 @@ import os
 import typer
 
 from controller import SUBMODULES_DIR, gitter, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.packages import Packages
 
 
@@ -33,13 +33,11 @@ def install(
         log.exit("--user and --editable options are not compatible")
 
     if version == "auto":
-        version = Application.data.rapydo_version
+        version = Configuration.rapydo_version
         log.info("Detected version {} to be installed", version)
 
     if editable:
-        return install_controller_from_folder(
-            Application.data.gits, version, user, editable
-        )
+        return install_controller_from_folder(Application.gits, version, user, editable)
     elif pip:
         return install_controller_from_pip(version, user)
     else:

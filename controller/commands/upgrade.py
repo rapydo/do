@@ -13,9 +13,11 @@ def upgrade(
     ),
 ):
 
-    frontend = glom(Application.data.conf_vars, "env.FRONTEND_FRAMEWORK", default=None)
-    auth = glom(Application.data.conf_vars, "env.AUTH_SERVICE", default=None)
-    extend = glom(Application.data.conf_vars, "env.EXTENDED_PROJECT", default=None)
+    frontend = glom(
+        Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=None
+    )
+    auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
+    extend = glom(Configuration.specs, "variables.env.EXTENDED_PROJECT", default=None)
 
     if extend == EXTENDED_PROJECT_DISABLED:
         extend = None
