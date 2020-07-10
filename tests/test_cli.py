@@ -55,6 +55,7 @@ def exec_command(capfd, command, *asserts):
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
+        print(result.stdout)
         print("_____________________________________________")
 
     captured = capfd.readouterr()
