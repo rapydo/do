@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import typer
 
@@ -18,15 +19,16 @@ def create(
         None, "--frontend", help="Frontend framework to enable (no, angular)"
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
-    services: str = typer.Option(
-        "", "--services", help="Comma separated list of services to be enabled"
+    services: List[str] = typer.Option(
+        "", "--service", "-s", help="Comma separated list of services to be enabled"
     ),
     origin_url: str = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"
     ),
-    envs: str = typer.Option(
+    envs: List[str] = typer.Option(
         None,
         "--env",
+        "-e",
         help="Command separated list of ENV=VALUE to be added in project_configuration",
     ),
     force_current: bool = typer.Option(
@@ -49,8 +51,6 @@ def create(
     ),
 ):
     Application.controller.controller_init()
-
-    services = services.split(",")
 
     if extend is not None:
         if project_name == extend:
@@ -251,10 +251,10 @@ def parse_env_variables(envs):
     if not envs:
         return env_variables
 
-    for e in envs.split(","):
-        e = e.split("=")
+    for env in envs:
+        e = env.split("=")
         if len(e) != 2:
-            log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
+            log.exit("Invalid env {}, expected: K1=V1", env)
         k = e[0].upper()
         v = e[1]
         env_variables[k] = v

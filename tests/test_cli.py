@@ -59,9 +59,12 @@ def exec_command(capfd, command, *asserts):
         # print(result.stdout)
 
     captured = capfd.readouterr()
-    # Remove empty lines
+
+    # Here outputs from inside the containers
     cout = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
+    # Here output from rapydo
     err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
+    # Here output from other sources, e.g. typer errors o docker-compose output
     out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
 
     with capfd.disabled():
@@ -70,11 +73,11 @@ def exec_command(capfd, command, *asserts):
         for o in out:
             print(f"_ {o}")
         for o in cout:
-            print(f"___ {o}")
+            print(f">> {o}")
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
-        assert a in out + err or any(a in x for x in out + err)
+        assert a in out + err or any(a in x for x in out + err + cout)
 
     return out
 
@@ -133,17 +136,17 @@ def test_failed_create(capfd):
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend no --env X --current",
-        "Invalid envs format, expected: K1=V1,K2=V2,...",
+        "Invalid env X, expected: K1=V1",
     )
     exec_command(
         capfd,
         "rapydo create first --auth postgres --frontend no --env X, --current",
-        "Invalid envs format, expected: K1=V1,K2=V2,...",
+        "Invalid env X,, expected: K1=V1",
     )
     exec_command(
         capfd,
-        "rapydo create first --auth postgres --frontend no --env X=1,Y --current",
-        "Invalid envs format, expected: K1=V1,K2=V2,...",
+        "rapydo create first --auth postgres --frontend no --env X=a,Y=b --current",
+        "Invalid env X=a,Y=b, expected: K1=V1",
     )
 
     templating = Templating()
@@ -164,7 +167,7 @@ def test_failed_create(capfd):
 def test_create(capfd):
     # Let's create a project and init git
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit --add-optionals --current"
+    create_command += " --service rabbit --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
     exec_command(
         capfd, create_command, "Project first successfully created",
@@ -180,7 +183,7 @@ def test_create(capfd):
     )
 
     create_command = "rapydo create first --auth postgres --frontend angular"
-    create_command += " --services rabbit --env RABBITMQ_PASSWORD=invalid£password"
+    create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
     create_command += " --current --force"
     exec_command(
         capfd,
@@ -203,7 +206,7 @@ def test_create(capfd):
     create_command = "rapydo create first --auth postgres --frontend angular"
     create_command += " --services rabbit"
     create_command += " --current --force"
-    create_command += " --env CUSTOMVAR1=mycustomvalue,CUSTOMVAR2=mycustomvalue"
+    create_command += " --env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
     exec_command(
         capfd,
         create_command,
@@ -958,7 +961,7 @@ def test_all(capfd):
     ####################
 
     create_command = "rapydo create testbuild --auth postgres --frontend angular"
-    create_command += " --services rabbit --add-optionals --current"
+    create_command += " --service rabbit --add-optionals --current"
     exec_command(
         capfd, create_command, "Project testbuild successfully created",
     )
@@ -1204,7 +1207,7 @@ def test_services_activation(capfd):
             serv_opt = ""
         else:
             auth = "postgres"
-            serv_opt = f"--services {service}"
+            serv_opt = f"--service {service}"
 
         exec_command(
             capfd,
@@ -1239,11 +1242,11 @@ def test_celery_activation(capfd):
     opt = "--frontend no --current --force --auth neo4j"
     project_configuration = "projects/testcelery/project_configuration.yaml"
 
-    def test_celery_configuration(services, broker, backend):
-        if services:
-            services = f"--services celery,{services}"
-        else:
-            services = "--services celery"
+    def test_celery_configuration(services_list, broker, backend):
+
+        services = "--service celery"
+        for service in services_list:
+            services += f"--service {service}"
 
         exec_command(
             capfd,
@@ -1256,20 +1259,20 @@ def test_celery_activation(capfd):
         assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
         assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
 
-    test_celery_configuration("", "RABBIT", "RABBIT")
-    test_celery_configuration("rabbit", "RABBIT", "RABBIT")
-    test_celery_configuration("redis", "REDIS", "REDIS")
-    test_celery_configuration("mongo", "RABBIT", "MONGODB")
-    test_celery_configuration("rabbit,redis", "RABBIT", "REDIS")
-    test_celery_configuration("rabbit,mongo", "RABBIT", "MONGODB")
-    test_celery_configuration("redis,mongo", "REDIS", "REDIS")
-    test_celery_configuration("rabbit,redis,mongo", "RABBIT", "REDIS")
+    test_celery_configuration([""], "RABBIT", "RABBIT")
+    test_celery_configuration(["rabbit"], "RABBIT", "RABBIT")
+    test_celery_configuration(["redis"], "REDIS", "REDIS")
+    test_celery_configuration(["mongo"], "RABBIT", "MONGODB")
+    test_celery_configuration(["rabbit", "redis"], "RABBIT", "REDIS")
+    test_celery_configuration(["rabbit", "mongo"], "RABBIT", "MONGODB")
+    test_celery_configuration(["redis", "mongo"], "REDIS", "REDIS")
+    test_celery_configuration(["rabbit", "redis", "mongo"], "RABBIT", "REDIS")
 
 
 def test_rabbit_invalid_characters(capfd):
 
     create_command = "rapydo create testinvalid --auth postgres --frontend angular"
-    create_command += " --services rabbit --env RABBITMQ_PASSWORD=invalid£password"
+    create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
     create_command += " --current --force"
     exec_command(
         capfd, create_command, "Project testinvalid successfully created",
