@@ -2,15 +2,17 @@ import os
 import shutil
 import signal
 import tempfile
-from importlib import reload
 
 from git import Repo
 from typer.testing import CliRunner
 
-from controller import __version__, app, gitter
+from controller import __version__, gitter
+from controller.app import Application
 from controller.dockerizing import Dock
+from controller.project import Project
 from controller.templating import Templating
 
+controller = Application()
 runner = CliRunner()
 
 
@@ -48,9 +50,8 @@ def exec_command(capfd, command, *asserts):
         print(command)
 
     # re-read everytime before invoking a command to cleanup the Configuration class
-    reload(app)
-    controller = app.Application()
-    app.Application.load_projectrc()
+    Application.load_projectrc()
+    Application.project_scaffold = Project()
     result = runner.invoke(controller.app, command)
 
     with capfd.disabled():

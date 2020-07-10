@@ -693,7 +693,7 @@ class Application:
             json.dump(data, outfile)
 
     @staticmethod
-    @lru_cache
+    @lru_cache(maxsize=None)
     def parse_datafile():
         datafile = ".rapydo"
         try:
@@ -703,19 +703,19 @@ class Application:
             return {}
 
     @staticmethod
-    @lru_cache
+    @lru_cache(maxsize=None)
     def autocomplete_service(incomplete: str):
         values = Application.parse_datafile().get("services", [])
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    @lru_cache
+    @lru_cache(maxsize=None)
     def autocomplete_allservice(incomplete: str):
         values = Application.parse_datafile().get("allservices", [])
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    @lru_cache
+    @lru_cache(maxsize=None)
     def autocomplete_submodule(incomplete: str):
         values = Application.parse_datafile().get("submodules", [])
         return [x for x in values if x.startswith(incomplete)]
