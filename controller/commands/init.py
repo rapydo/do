@@ -40,6 +40,10 @@ def init(
     if create_projectrc:
         Application.controller.create_projectrc()
 
+    if submodules_path is not None:
+        if not os.path.exists(submodules_path):
+            log.exit("Local path not found: {}", submodules_path)
+
     Application.controller.git_submodules(from_path=submodules_path)
 
     Application.controller.make_env()
