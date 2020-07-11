@@ -3,6 +3,7 @@ import json
 import os
 import re
 from glob import glob
+from pathlib import Path
 
 import click
 import yaml
@@ -19,7 +20,7 @@ def load_yaml_file(filepath):
 
     log.debug("Reading file {}", filepath)
 
-    if filepath is None or not os.path.exists(filepath):
+    if filepath is None or not filepath.exists():
         log.warning("Failed to read YAML file {}: File does not exist", filepath)
         return {}
 
@@ -127,6 +128,9 @@ def parseRequirements(d, dependencies):
 
 
 def parsePackageJson(package_json, dependencies):
+    if not package_json.exists():
+        return dependencies
+
     with open(package_json) as f:
         package = json.load(f)
         package_dependencies = package.get("dependencies", {})
@@ -148,6 +152,10 @@ def parsePackageJson(package_json, dependencies):
 
 
 def parsePrecommitConfig(f, dependencies, key):
+
+    if not f.exists():
+        return dependencies
+
     y = load_yaml_file(f)
     for r in y.get("repos"):
         rev = r.get("rev")
@@ -157,6 +165,8 @@ def parsePrecommitConfig(f, dependencies, key):
         else:
             u = f"{repo}/releases/tag/{rev}"
         dependencies[key].append(u)
+
+    return dependencies
 
 
 @click.command()
@@ -189,9 +199,9 @@ def check_versions(skip_angular=False):
 
     if not skip_angular:
 
-        package_json = "../rapydo-angular/src/package.json"
-        if os.path.exists(package_json):
-            dependencies = parsePackageJson(package_json, dependencies)
+        dependencies = parsePackageJson(
+            Path("../rapydo-angular/src/package.json"), dependencies
+        )
 
     controller = distutils.core.run_setup("../do/setup.py")
     http_api = distutils.core.run_setup("../http-api/setup.py")
@@ -199,11 +209,13 @@ def check_versions(skip_angular=False):
     dependencies["controller"] = controller.install_requires
     dependencies["http-api"] = http_api.install_requires
 
-    if os.path.exists(f := "../do/.pre-commit-config.yaml"):
-        dependencies = parsePrecommitConfig(f, dependencies, "controller")
+    dependencies = parsePrecommitConfig(
+        Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
+    )
 
-    if os.path.exists(f := "../http-api/.pre-commit-config.yaml"):
-        dependencies = parsePrecommitConfig(f, dependencies, "http-api")
+    dependencies = parsePrecommitConfig(
+        Path("../http-api/.pre-commit-config.yaml"), dependencies, "http-api"
+    )
 
     filtered_dependencies = {}
 

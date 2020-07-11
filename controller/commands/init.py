@@ -26,7 +26,7 @@ def init(
             p.mkdir(parents=True, exist_ok=True)
 
     for p in Application.project_scaffold.data_files:
-        if not p.exists(p):
+        if not p.exists():
             p.touch()
 
     if not Configuration.projectrc:
