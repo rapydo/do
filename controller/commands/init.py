@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import typer
 
 from controller import log
@@ -13,7 +15,7 @@ def init(
         help="Overwrite initialization files if already exist",
         show_default=False,
     ),
-    submodules_path: str = typer.Option(
+    submodules_path: Path = typer.Option(
         None,
         "--submodules-path",
         help="Link all submodules in an existing folder instead of download them",
