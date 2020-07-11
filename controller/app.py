@@ -500,8 +500,6 @@ class Application:
         if not repo.pop("if", True):
             return None
 
-        repo["do"] = Configuration.initialize
-        repo["check"] = not Configuration.install
         repo.setdefault(
             "branch",
             Configuration.rapydo_version
@@ -526,7 +524,13 @@ class Application:
 
             os.symlink(local_path, submodule_path)
 
-        return gitter.clone(**repo)
+        return gitter.clone(
+            url=repo.get("online_url"),
+            path=name,
+            branch=repo.get("branch"),
+            do=Configuration.initialize,
+            check=not Configuration.install,
+        )
 
     def git_submodules(self, from_path=None):
         """ Check and/or clone git projects """

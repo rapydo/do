@@ -89,7 +89,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
     return True
 
 
-def clone(online_url, path, branch, do=False, check=True):
+def clone(url, path, branch, do=False, check=True):
 
     local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
 
@@ -97,13 +97,11 @@ def clone(online_url, path, branch, do=False, check=True):
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
-        gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        log.info("Cloned {}@{} as {}", online_url, branch, path)
+        gitobj = Repo.clone_from(url=url, to_path=local_path)
+        log.info("Cloned {}@{} as {}", url, branch, path)
     else:
         log.exit(
-            "Repo {} missing as {}. You should init your project",
-            online_url,
-            local_path,
+            "Repo {} missing as {}. You should init your project", url, local_path,
         )
 
     if do:
@@ -112,7 +110,7 @@ def clone(online_url, path, branch, do=False, check=True):
             log.exit("Cannot switch repo {} to version {}", local_path, branch)
 
     if check:
-        compare_repository(gitobj, branch, online_url=online_url, path=path)
+        compare_repository(gitobj, branch, online_url=url, path=path)
 
     return gitobj
 
