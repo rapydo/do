@@ -1291,18 +1291,6 @@ def test_rabbit_invalid_characters(capfd):
 
 def test_install(capfd):
 
-    exec_command(
-        capfd,
-        "install --pip --editable auto",
-        "--pip and --editable options are not compatible",
-    )
-
-    exec_command(
-        capfd,
-        "install --user --editable auto",
-        "--user and --editable options are not compatible",
-    )
-
     with TemporaryRemovePath("submodules/do"):
         exec_command(
             capfd,
@@ -1336,7 +1324,7 @@ def test_install(capfd):
 
     # This is the very last command... installing an old version!
     exec_command(
-        capfd, "install --pip --user 0.7.2",
+        capfd, "install --user 0.7.2",
     )
 
     # This test will change the required version

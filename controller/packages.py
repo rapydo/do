@@ -29,13 +29,13 @@ class Packages:
                 sudo = False
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
-                if editable:
-                    command += " --editable"
                 # --user does not work on travis:
                 # Can not perform a '--user' install.
                 # User site-packages are not visible in this virtualenv.
                 if not TESTING and user:  # pragma: no cover
                     command += " --user"
+                if editable:
+                    command += " --editable"
                 command += f" {package}"
 
                 pip = sultan.pip3 if use_pip3 else sultan.pip
