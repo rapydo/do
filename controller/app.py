@@ -502,7 +502,6 @@ class Application:
 
         repo["do"] = Configuration.initialize
         repo["check"] = not Configuration.install
-        repo.setdefault("path", name)
         repo.setdefault(
             "branch",
             Configuration.rapydo_version
@@ -512,11 +511,11 @@ class Application:
 
         if from_path is not None:
 
-            local_path = os.path.join(from_path, repo["path"])
+            local_path = os.path.join(from_path, name)
             if not os.path.exists(local_path):
-                log.exit("Submodule {} not found in {}", repo["path"], local_path)
+                log.exit("Submodule {} not found in {}", name, local_path)
 
-            submodule_path = os.path.join(os.curdir, SUBMODULES_DIR, repo["path"])
+            submodule_path = os.path.join(os.curdir, SUBMODULES_DIR, name)
 
             if os.path.exists(submodule_path):
                 log.info("Path {} already exists, removing", submodule_path)
