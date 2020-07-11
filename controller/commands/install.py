@@ -11,29 +11,23 @@ from controller.packages import Packages
 def install(
     version: str = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
-        True,
-        "--editable",
-        help="Install in editable mode from submodules folder",
-        show_default=False,
-    ),
-    user: bool = typer.Option(
-        True,
-        "--user",
-        help="Install at user level (sudo not required)",
-        show_default=False,
+        True, "--no-editable", help="Disable editable mode", show_default=False,
     ),
 ):
     Application.controller.controller_init()
 
-    user = True
     if version == "auto":
         version = Configuration.rapydo_version
         log.info("Detected version {} to be installed", version)
 
+    user_mode = not editable
     if editable:
-        return install_controller_from_folder(Application.gits, version, user, editable)
+        return install_controller_from_folder(
+            Application.gits, version, user_mode, editable
+        )
+
     else:
-        return install_controller_from_git(version, user)
+        return install_controller_from_git(version, user_mode)
 
 
 def install_controller_from_folder(gits, version, user, editable):
