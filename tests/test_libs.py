@@ -120,23 +120,29 @@ def test_all(capfd):
     try:
         load_yaml_file(Path("invalid"), "path")
         pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    try:
+        load_yaml_file(Path("invalid"), Path("path"))
+        pytest.fail("No exception raised")
     except SystemExit:
         pass
 
-    y = load_yaml_file(Path("invalid"), "path", is_optional=True)
+    y = load_yaml_file(Path("invalid"), Path("path"), is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
     try:
-        load_yaml_file(Path("invalid"), "projects")
+        load_yaml_file(Path("invalid"), Path("projects"))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
-        load_yaml_file(Path("pyproject.toml"), ".")
+        load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
@@ -144,7 +150,7 @@ def test_all(capfd):
     # File is empty
     f = tempfile.NamedTemporaryFile()
     try:
-        load_yaml_file(Path(f.name), ".")
+        load_yaml_file(Path(f.name), Path(os.curdir))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
