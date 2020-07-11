@@ -104,7 +104,7 @@ variables:
     RUN_SCHEMATHESIS: 1
     MAX_LOGS_LENGTH: 200
 
-    APP_MODE: debug
+    APP_MODE: development
     FLASK_HOST: apiserver.dockerized.io
     API_MAIN_ENDPOINT: status
     PYTHON_MAIN_FILE: __main__
