@@ -99,7 +99,6 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
-      UWSGI_APP: restapi.${PYTHON_MAIN_FILE}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
       WSGI_SERVER: ${WSGI_SERVER}
