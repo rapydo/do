@@ -1,6 +1,7 @@
 import os
 import tempfile
 from distutils.version import LooseVersion
+from pathlib import Path
 
 import pytest
 
@@ -113,23 +114,29 @@ def test_all(capfd):
     try:
         load_yaml_file("invalid", "path")
         pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    try:
+        load_yaml_file(Path("invalid"), "path")
+        pytest.fail("No exception raised")
     except SystemExit:
         pass
 
-    y = load_yaml_file("invalid", "path", is_optional=True)
+    y = load_yaml_file(Path("invalid"), "path", is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
     try:
-        load_yaml_file("invalid", "projects")
+        load_yaml_file(Path("invalid"), "projects")
         pytest.fail("No exception raised")
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
-        load_yaml_file("pyproject.toml", ".")
+        load_yaml_file(Path("pyproject.toml"), ".")
         pytest.fail("No exception raised")
     except SystemExit:
         pass
@@ -137,7 +144,7 @@ def test_all(capfd):
     # File is empty
     f = tempfile.NamedTemporaryFile()
     try:
-        load_yaml_file(f.name, ".")
+        load_yaml_file(Path(f.name), ".")
         pytest.fail("No exception raised")
     except SystemExit:
         pass
