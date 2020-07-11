@@ -1,5 +1,5 @@
-import os
 from collections import OrderedDict  # can be removed from python 3.7
+from pathlib import Path
 
 import yaml
 
@@ -66,20 +66,20 @@ def read_configuration(
     extends_from = project.get("extends-from", "projects")
 
     if extends_from == "projects":
-        extend_path = projects_path
+        extend_path = projects_path.joinpath(extended_project)
     elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
             log.exit("Invalid repository name in extends-from, name is empty")
 
-        extend_path = os.path.join(submodules_path, repository_name, projects_path)
+        extend_path = submodules_path.joinpath(
+            repository_name, projects_path, extended_project
+        )
     else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
         log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
-    extend_path = os.path.join(extend_path, extended_project)
-
-    if not os.path.exists(extend_path):  # pragma: no cover
+    if not extend_path.exists():  # pragma: no cover
         log.exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
@@ -87,7 +87,11 @@ def read_configuration(
     )
 
     m1 = mix_configuration(base_configuration, extended_configuration)
-    return mix_configuration(m1, custom_configuration), extended_project, extend_path
+    return (
+        mix_configuration(m1, custom_configuration),
+        extended_project,
+        Path(extend_path),
+    )
 
 
 def mix_configuration(base, custom):
@@ -141,11 +145,11 @@ def construct_mapping(loader, node):
 
 def get_yaml_path(file, path):
 
-    filepath = os.path.join(path, file)
+    filepath = path.joinpath(file)
 
     log.verbose("Reading file {}", filepath)
 
-    if not os.path.exists(filepath):
+    if not filepath.exists():
         return None
     return filepath
 

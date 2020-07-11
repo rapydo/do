@@ -1,5 +1,3 @@
-import glob
-import os
 from datetime import datetime
 from typing import List
 
@@ -153,13 +151,12 @@ def build_is_obsolete(build, gits):
 
     build_timestamp = get_build_timestamp(build)
 
-    for f in glob.iglob(f"{path}/**/*", recursive=True):
-        local_file = os.path.join(path, f)
-        if os.path.isdir(local_file):  # pragma: no cover
+    for f in path.rglob("*"):
+        if f.is_dir():  # pragma: no cover
             continue
 
         obsolete, build_ts, last_commit = gitter.check_file_younger_than(
-            gitobj=git_repo, filename=local_file, timestamp=build_timestamp
+            gitobj=git_repo, filename=f, timestamp=build_timestamp
         )
 
         if obsolete:

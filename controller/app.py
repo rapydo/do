@@ -4,6 +4,7 @@ import shutil
 import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
+from pathlib import Path
 
 import requests
 import typer
@@ -13,6 +14,7 @@ from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
+    DATAFILE,
     EXTENDED_PROJECT_DISABLED,
     PLACEHOLDER,
     PROJECT_DIR,
@@ -257,9 +259,7 @@ class Application:
         Configuration.project = Application.project_scaffold.get_project(
             Configuration.project
         )
-        Configuration.ABS_PROJECT_PATH = os.path.join(
-            PROJECT_DIR, Configuration.project
-        )
+        Configuration.ABS_PROJECT_PATH = PROJECT_DIR.joinpath(Configuration.project)
 
         if Configuration.print_version:
             self.read_specs()
@@ -343,7 +343,7 @@ class Application:
     @staticmethod
     def load_projectrc():
         Configuration.projectrc = configuration.load_yaml_file(
-            PROJECTRC, path=os.curdir, is_optional=True
+            PROJECTRC, path=Path(), is_optional=True
         )
         Configuration.host_configuration = Configuration.projectrc.pop(
             "project_configuration", {}
@@ -509,18 +509,18 @@ class Application:
 
         if from_path is not None:
 
-            local_path = os.path.join(from_path, name)
-            if not os.path.exists(local_path):
+            local_path = from_path.joinpath(name)
+            if not local_path.exists():
                 log.exit("Submodule {} not found in {}", name, local_path)
 
-            submodule_path = os.path.join(os.curdir, SUBMODULES_DIR, name)
+            submodule_path = Path(SUBMODULES_DIR, name)
 
-            if os.path.exists(submodule_path):
+            if submodule_path.exists():
                 log.info("Path {} already exists, removing", submodule_path)
-                if os.path.isdir(submodule_path) and not os.path.islink(submodule_path):
+                if submodule_path.is_dir() and not submodule_path.is_symlink():
                     shutil.rmtree(submodule_path)
                 else:
-                    os.remove(submodule_path)
+                    submodule_path.unlink()
 
             os.symlink(local_path, submodule_path)
 
@@ -568,16 +568,16 @@ class Application:
             "mode": f"{Configuration.stack}.yml",
             "extended-mode": self.extended_project is not None,
             "baseconf": CONFS_DIR,
-            "customconf": os.path.join(
-                Configuration.ABS_PROJECT_PATH, CONTAINERS_YAML_DIRNAME
+            "customconf": Configuration.ABS_PROJECT_PATH.joinpath(
+                CONTAINERS_YAML_DIRNAME
             ),
         }
 
         if self.extended_project_path is None:
             myvars["extendedproject"] = None
         else:
-            myvars["extendedproject"] = os.path.join(
-                self.extended_project_path, CONTAINERS_YAML_DIRNAME
+            myvars["extendedproject"] = self.extended_project_path.joinpath(
+                CONTAINERS_YAML_DIRNAME
             )
 
         compose_files = OrderedDict()
@@ -616,16 +616,15 @@ class Application:
 
         if self.active_services is None:
             log.debug("Created temporary default {} file", PROJECTRC)
-            os.remove(PROJECTRC)
+            PROJECTRC.unlink()
         else:
             log.info("Created default {} file", PROJECTRC)
         self.read_specs()
 
     def make_env(self):
-        envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
 
         try:
-            os.unlink(envfile)
+            COMPOSE_ENVIRONMENT_FILE.unlink()
             log.verbose("Removed cache of {}", COMPOSE_ENVIRONMENT_FILE)
         except FileNotFoundError:
             pass
@@ -633,18 +632,14 @@ class Application:
         env = glom(Configuration.specs, "variables.env", default={})
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
-        env["VANILLA_DIR"] = os.path.abspath(os.curdir)
-        env["SUBMODULE_DIR"] = os.path.join(env["VANILLA_DIR"], SUBMODULES_DIR)
-        env["PROJECT_DIR"] = os.path.join(
-            env["VANILLA_DIR"], PROJECT_DIR, Configuration.project
-        )
+        env["VANILLA_DIR"] = Path().cwd()
+        env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
+        env["PROJECT_DIR"] = PROJECT_DIR.joinpath(Configuration.project).resolve()
 
         if self.extended_project_path is None:
             env["EXTENDED_PROJECT_PATH"] = env["PROJECT_DIR"]
         else:
-            env["EXTENDED_PROJECT_PATH"] = os.path.join(
-                env["VANILLA_DIR"], self.extended_project_path
-            )
+            env["EXTENDED_PROJECT_PATH"] = self.extended_project_path.resolve()
 
         if self.extended_project is None:
             env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
@@ -665,7 +660,7 @@ class Application:
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
 
-        with open(envfile, "w+") as whandle:
+        with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
                 if value is None:
                     value = ""
@@ -677,9 +672,8 @@ class Application:
             log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def create_datafile(self):
-        datafile = ".rapydo"
         try:
-            os.unlink(datafile)
+            DATAFILE.unlink()
             log.verbose("Removed data cache")
         except FileNotFoundError:
             pass
@@ -690,13 +684,13 @@ class Application:
             "allservices": list(self.services_dict.keys()),
         }
 
-        with open(datafile, "w+") as outfile:
+        with open(DATAFILE, "w+") as outfile:
             json.dump(data, outfile)
 
     @staticmethod
     def parse_datafile():
         try:
-            with open(".rapydo") as json_file:
+            with open(DATAFILE) as json_file:
                 return json.load(json_file)
         except FileNotFoundError:
             return {}

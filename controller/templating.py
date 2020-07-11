@@ -1,6 +1,7 @@
 import os
 import random
 import string
+from pathlib import Path
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
@@ -33,10 +34,9 @@ def password(param_not_used, length=12):
 class Templating:
     def __init__(self):
 
-        self.template_dir = os.path.join(
-            os.path.abspath(os.path.dirname(__file__)), TEMPLATE_DIR
-        )
-        if not os.path.isdir(self.template_dir):
+        self.template_dir = Path(__file__).resolve().parent.joinpath(TEMPLATE_DIR)
+
+        if not self.template_dir.is_dir():
             log.exit("Template folder not found: {}", self.template_dir)
 
         log.debug("Template folder: {}", self.template_dir)
@@ -75,7 +75,7 @@ class Templating:
 
     def save_template(self, filename, content, force=False):
 
-        if os.path.exists(filename):
+        if filename.exists():
             if force:
                 self.make_backup(filename)
             # It is always verified before calling save_template from app, create & add

@@ -26,9 +26,7 @@ def dump():
     # 2. filter active services
 
     # replacing absolute paths with relative ones
-    main_dir = os.getcwd()
-
-    obj = yaml.safe_load(yaml_string.replace(main_dir, "."))
+    obj = yaml.safe_load(yaml_string.replace(os.getcwd(), "."))
 
     services_list = {}
     # Remove not active services from compose configuration

@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 
 import typer
@@ -43,7 +42,7 @@ def add(
 
 def create_template(template_name, target_path, name, services, auth):
 
-    if os.path.exists(target_path):
+    if target_path.exists():
         log.exit("{} already exists", target_path)
 
     template = templating.get_template(
@@ -55,7 +54,7 @@ def create_template(template_name, target_path, name, services, auth):
 
 def create_endpoint(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("backend", "apis")
-    path = os.path.join(path, f"{name}.py")
+    path = path.joinpath(f"{name}.py")
 
     create_template("endpoint_template.py", path, name, services, auth)
 
@@ -64,7 +63,7 @@ def create_endpoint(project_scaffold, name, services, auth):
 
 def create_task(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("backend", "tasks")
-    path = os.path.join(path, f"{name}.py")
+    path = path.joinpath(f"{name}.py")
 
     create_template("task_template.py", path, name, services, auth)
 
@@ -73,12 +72,12 @@ def create_task(project_scaffold, name, services, auth):
 
 def create_component(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("frontend", "app", "components", name)
-    os.makedirs(path, exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
-    cpath = os.path.join(path, f"{name}.ts")
+    cpath = path.joinpath(f"{name}.ts")
     create_template("component_template.ts", cpath, name, services, auth)
 
-    hpath = os.path.join(path, f"{name}.html")
+    hpath = path.joinpath(f"{name}.html")
     create_template("component_template.html", hpath, name, services, auth)
 
     log.info("Component created: {}", path)
@@ -122,9 +121,9 @@ def create_component(project_scaffold, name, services, auth):
 
 def create_service(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("frontend", "app", "services")
-    os.makedirs(path, exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
-    path = os.path.join(path, f"{name}.ts")
+    path = path.joinpath(f"{name}.ts")
 
     create_template("service_template.ts", path, name, services, auth)
 

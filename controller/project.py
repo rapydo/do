@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -6,11 +7,14 @@ NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
 REACT = "react"
 
+DATA = Path("data")
+SUBMODULES = Path("submodules")
+
 
 # move here all checks on project (required files, creation functions, templating, etc)
 class Project:
     def __init__(self):
-        self.expected_main_folders = [PROJECT_DIR, "data", "submodules"]
+        self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
         self.expected_folders = []
         self.expected_files = []
@@ -26,7 +30,7 @@ class Project:
         self.obsolete_files = []
 
     def p_path(self, *args):
-        return os.path.join(PROJECT_DIR, self.project, *args)
+        return PROJECT_DIR.joinpath(self.project, *args)
 
     def load_project_scaffold(self, project, auth):
         self.project = project
@@ -47,7 +51,7 @@ class Project:
         self.expected_files.append(
             self.p_path("backend", "initialization", "initialization.py")
         )
-        self.expected_files.append(".gitignore")
+        self.expected_files.append(Path(".gitignore"))
 
         if auth is not None:
             model_file = f"{auth}.py"
@@ -72,14 +76,14 @@ class Project:
         self.recommended_files.append(".isort.cfg")
         self.recommended_files.append("pyproject.toml")
         self.recommended_files.append(".flake8")
-        self.data_folders.extend([os.path.join("data", "logs")])
+        self.data_folders.extend([DATA.joinpath("logs")])
 
         # Deprecated since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
         # Deprecated since 0.7.4
-        self.obsolete_files.append(os.path.join("submodules", "rapydo-confs"))
+        self.obsolete_files.append(SUBMODULES.joinpath("rapydo-confs"))
         # Deprecated since 0.7.5
-        self.obsolete_files.append(os.path.join("submodules", "frontend"))
+        self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
 
         return True
 
@@ -117,31 +121,31 @@ class Project:
                 ]
             )
 
-            data_dir = os.path.join("data", self.project, "frontend")
+            frontend_data_dir = DATA.joinpath(self.project, "frontend")
             self.data_folders.extend(
                 [
-                    data_dir,
-                    os.path.join(data_dir, "app"),
-                    os.path.join(data_dir, "courtesy"),
-                    os.path.join(data_dir, "e2e"),
-                    os.path.join(data_dir, "node_modules"),
-                    os.path.join("data", self.project, "karma"),
-                    os.path.join("data", self.project, "cypress"),
+                    frontend_data_dir,
+                    frontend_data_dir.joinpath("app"),
+                    frontend_data_dir.joinpath("courtesy"),
+                    frontend_data_dir.joinpath("e2e"),
+                    frontend_data_dir.joinpath("node_modules"),
+                    DATA.joinpath(self.project, "karma"),
+                    DATA.joinpath(self.project, "cypress"),
                 ]
             )
 
             self.data_files.extend(
                 [
-                    os.path.join(data_dir, "angular.json"),
-                    os.path.join(data_dir, "browserslist"),
-                    os.path.join(data_dir, "karma.conf.js"),
-                    os.path.join(data_dir, "package.json"),
-                    os.path.join(data_dir, "polyfills.ts"),
-                    os.path.join(data_dir, "tsconfig.app.json"),
-                    os.path.join(data_dir, "tsconfig.json"),
-                    os.path.join(data_dir, "tsconfig.spec.json"),
-                    os.path.join(data_dir, "tslint.json"),
-                    os.path.join(data_dir, "cypress.json"),
+                    frontend_data_dir.joinpath("angular.json"),
+                    frontend_data_dir.joinpath("browserslist"),
+                    frontend_data_dir.joinpath("karma.conf.js"),
+                    frontend_data_dir.joinpath("package.json"),
+                    frontend_data_dir.joinpath("polyfills.ts"),
+                    frontend_data_dir.joinpath("tsconfig.app.json"),
+                    frontend_data_dir.joinpath("tsconfig.json"),
+                    frontend_data_dir.joinpath("tsconfig.spec.json"),
+                    frontend_data_dir.joinpath("tslint.json"),
+                    frontend_data_dir.joinpath("cypress.json"),
                 ]
             )
 
@@ -241,13 +245,13 @@ Verify that you are in the right folder, now you are in: {}
             )
 
         for fpath in self.expected_main_folders:
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+            if not fpath.is_dir():
 
                 return """Folder not found: {}
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {}
                     """.format(
-                    fpath, os.getcwd()
+                    fpath, Path.cwd()
                 )
 
         return None
@@ -255,8 +259,7 @@ Verify that you are in the right folder, now you are in: {}
     def inspect_project_folder(self):
 
         for fpath in self.expected_folders:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+            if not fpath.is_dir():
                 log.exit(
                     "Project {} is invalid: required folder not found {}",
                     self.project,
@@ -264,8 +267,7 @@ Verify that you are in the right folder, now you are in: {}
                 )
 
         for fpath in self.expected_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isfile(fpath):
+            if not fpath.is_file():
                 log.exit(
                     "Project {} is invalid: required file not found {}",
                     self.project,
@@ -273,8 +275,7 @@ Verify that you are in the right folder, now you are in: {}
                 )
 
         for fpath in self.obsolete_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if os.path.exists(fpath):
+            if fpath.exists():
                 log.exit(
                     "Project {} contains an obsolete file or folder: {}",
                     self.project,

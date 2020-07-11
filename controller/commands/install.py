@@ -1,5 +1,3 @@
-import os
-
 import typer
 
 from controller import SUBMODULES_DIR, gitter, log
@@ -36,7 +34,7 @@ def install_controller_from_folder(gits, version, user, editable):
 
     log.info("You asked to install rapydo-controller {} from local folder", version)
 
-    do_path = os.path.join(SUBMODULES_DIR, "do")
+    do_path = SUBMODULES_DIR.joinpath("do")
 
     do_repo = gits.get("do")
 

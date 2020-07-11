@@ -1,6 +1,6 @@
-import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from urllib.parse import urlparse
 
 import pytz
@@ -54,7 +54,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         return False
 
     if gitobj.active_branch.name == branch_name:
-        path = os.path.basename(gitobj.working_dir)
+        path = Path(gitobj.working_dir).name
         log.info("{} already set on branch {}", path, branch_name)
         return True
 
@@ -84,16 +84,16 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         log.error(e)
         return False
 
-    path = os.path.basename(gitobj.working_dir)
+    path = Path(gitobj.working_dir).name
     log.info("Switched branch to {} on {}", branch, path)
     return True
 
 
 def clone(url, path, branch, do=False, check=True):
 
-    local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
+    local_path = SUBMODULES_DIR.joinpath(path)
 
-    if os.path.exists(local_path):
+    if local_path.exists():
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
@@ -207,9 +207,7 @@ def print_diff(gitobj, unstaged):
     if not changed and not untracked:
         return False
 
-    repo_folder = gitobj.working_dir.replace(os.getcwd(), "")
-    if repo_folder.startswith("/"):
-        repo_folder = repo_folder[1:]
+    repo_folder = str(Path(gitobj.working_dir).relative_to(Path.cwd()))
     if not repo_folder.endswith("/"):
         repo_folder += "/"
     if repo_folder == "/":  # pragma: no cover

@@ -1,5 +1,3 @@
-import os
-
 import typer
 
 from controller import log
@@ -24,12 +22,12 @@ def init(
     Application.controller.controller_init()
 
     for p in Application.project_scaffold.data_folders:
-        if not os.path.isdir(p):
-            os.makedirs(p)
+        if not p.exists():
+            p.mkdir(parents=True, exist_ok=True)
 
     for p in Application.project_scaffold.data_files:
-        if not os.path.exists(p):
-            open(p, "a").close()
+        if not p.exists(p):
+            p.touch()
 
     if not Configuration.projectrc:
         create_projectrc = True
@@ -41,7 +39,7 @@ def init(
         Application.controller.create_projectrc()
 
     if submodules_path is not None:
-        if not os.path.exists(submodules_path):
+        if not submodules_path.exists():
             log.exit("Local path not found: {}", submodules_path)
 
     Application.controller.git_submodules(from_path=submodules_path)

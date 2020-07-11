@@ -62,9 +62,8 @@ def list_cmd(
 
 
 def read_env():
-    envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
     env = {}
-    with open(envfile) as f:
+    with open(COMPOSE_ENVIRONMENT_FILE) as f:
         lines = f.readlines()
         for line in lines:
             line = line.split("=")

@@ -35,8 +35,7 @@ class Compose:
         # if net is not None:
         #     self.options['--net'] = net
 
-        self.project_dir = os.curdir
-        self.project_name = get_project_name(self.project_dir)
+        self.project_name = get_project_name(os.curdir)
         log.verbose("Client compose {}: {}", self.project_name, files)
 
     def config(self):
@@ -47,9 +46,7 @@ class Compose:
 
     def command(self, command, options):
 
-        compose_handler = TopLevelCommand(
-            project_from_options(self.project_dir, self.options)
-        )
+        compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
         method = getattr(compose_handler, command)
 
         if options.get("SERVICE", None) is None:

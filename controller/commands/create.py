@@ -59,7 +59,7 @@ def create(
     if extend is not None:
         if project_name == extend:
             log.exit("A project cannot extend itself")
-        if not os.path.isdir(os.path.join(PROJECT_DIR, extend)):
+        if not PROJECT_DIR.joinpath(extend).is_dir():
             log.exit("Invalid extend value: project {} not found", extend)
 
     if auth is None:
@@ -186,13 +186,13 @@ def create_project(
         folders += project_scaffold.optionals_folders
 
     for f in folders:
-        if os.path.exists(f):
+        if f.exists():
             log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
             log.exit("\nmkdir -p {}", f)
 
-        os.makedirs(f)
+        f.mkdir(parents=True, exist_ok=True)
 
     files = project_scaffold.expected_files
     if add_optionals:
@@ -207,9 +207,8 @@ def create_project(
 
     for p in files:
 
-        fname = os.path.basename(p)
         template = templating.get_template(
-            fname,
+            p.name,
             {
                 "version": __version__,
                 "project": project_name,
@@ -235,14 +234,14 @@ def create_project(
 
         # automatic creation
         if auto:
-            if os.path.exists(p) and not force:
+            if p.exists() and not force:
                 log.info("Project file already exists: {}", p)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
-        if os.path.exists(p):
+        if p.exists():
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
