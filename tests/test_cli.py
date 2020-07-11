@@ -482,7 +482,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         f"init --submodules-path {modules_path}",
-        "Path ./submodules/http-api already exists, removing",
+        "Path submodules/http-api already exists, removing",
         "Project initialized",
     )
 
@@ -494,7 +494,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         f"init --submodules-path {modules_path}",
-        "Path ./submodules/http-api already exists, removing",
+        "Path submodules/http-api already exists, removing",
         "Project initialized",
     )
 
