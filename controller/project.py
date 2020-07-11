@@ -72,10 +72,10 @@ class Project:
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
 
-        self.recommended_files.append(".pre-commit-config.yaml")
-        self.recommended_files.append(".isort.cfg")
-        self.recommended_files.append("pyproject.toml")
-        self.recommended_files.append(".flake8")
+        self.recommended_files.append(Path(".pre-commit-config.yaml"))
+        self.recommended_files.append(Path(".isort.cfg"))
+        self.recommended_files.append(Path("pyproject.toml"))
+        self.recommended_files.append(Path(".flake8"))
         self.data_folders.extend([DATA.joinpath("logs")])
 
         # Deprecated since 0.7.1
