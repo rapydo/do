@@ -259,7 +259,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "check -i main",
-        "Repo https://github.com/rapydo/http-api.git missing as ./submodules/http-api.",
+        "Repo https://github.com/rapydo/http-api.git missing as submodules/http-api.",
         "You should init your project",
     )
     exec_command(
@@ -1293,9 +1293,7 @@ def test_install(capfd):
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
-            capfd,
-            "install",
-            "missing as ./submodules/do. You should init your project",
+            capfd, "install", "missing as submodules/do. You should init your project",
         )
 
     # I hope that one day this test will fail! :-)
