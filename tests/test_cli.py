@@ -1307,12 +1307,12 @@ def test_install(capfd):
     gitter.switch_branch(r, "0.7.3")
 
     exec_command(
-        capfd, "install auto", f"Controller repository switched to {__version__}",
+        capfd, "install", f"Controller repository switched to {__version__}",
     )
 
-    exec_command(capfd, "install auto")
+    exec_command(capfd, "install")
 
-    exec_command(capfd, "install --no-editable auto")
+    exec_command(capfd, "install --no-editable")
 
     # This is the very last command... installing an old version!
     exec_command(capfd, "install --no-editable 0.7.2")
