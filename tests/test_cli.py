@@ -1294,38 +1294,28 @@ def test_install(capfd):
     with TemporaryRemovePath("submodules/do"):
         exec_command(
             capfd,
-            "install --editable auto",
+            "install",
             "missing as ./submodules/do. You should init your project",
         )
 
     # I hope that one day this test will fail! :-)
-    exec_command(capfd, "install --editable 1.0", "Invalid version")
+    exec_command(capfd, "install 1.0", "Invalid version")
 
-    exec_command(
-        capfd, "install --editable auto",
-    )
+    exec_command(capfd, "install auto")
 
     r = gitter.get_repo("submodules/do")
     gitter.switch_branch(r, "0.7.3")
 
     exec_command(
-        capfd,
-        "install --editable auto",
-        f"Controller repository switched to {__version__}",
+        capfd, "install auto", f"Controller repository switched to {__version__}",
     )
 
-    exec_command(
-        capfd, "install --editable auto",
-    )
+    exec_command(capfd, "install auto")
 
-    exec_command(
-        capfd, "install --user auto",
-    )
+    exec_command(capfd, "install --no-editable auto")
 
     # This is the very last command... installing an old version!
-    exec_command(
-        capfd, "install --user 0.7.2",
-    )
+    exec_command(capfd, "install --no-editable 0.7.2")
 
     # This test will change the required version
     pconf = "projects/first/project_configuration.yaml"
