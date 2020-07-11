@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from typing import List
 
 import dateutil.parser
@@ -151,7 +152,7 @@ def build_is_obsolete(build, gits):
 
     build_timestamp = get_build_timestamp(build)
 
-    for f in path.rglob("*"):
+    for f in Path(path).rglob("*"):
         if f.is_dir():  # pragma: no cover
             continue
 
