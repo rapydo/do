@@ -3,21 +3,16 @@ variables:
     # IMPORTANT: if you change online_urls here, remember to also fix in develop
     http-api:
       online_url: https://github.com/rapydo/http-api.git
-      if: true
     build-templates:
       online_url: https://github.com/rapydo/build-templates.git
-      if: true
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
       if: $$angular
-      path: frontend
     rapydo-react:
       online_url: https://github.com/rapydo/rapydo-react.git
       if: $$react
-      path: frontend
     do:
       online_url: https://github.com/rapydo/do.git
-      if: true
 
   roles:
     normal_user: User

@@ -189,11 +189,8 @@ def check_versions(skip_angular=False):
 
     if not skip_angular:
 
-        if os.path.exists("../frontend/src/package.json"):
-            package_json = "../frontend/src/package.json"
-            dependencies = parsePackageJson(package_json, dependencies)
-        elif os.path.exists("../rapydo-angular/src/package.json"):
-            package_json = "../rapydo-angular/src/package.json"
+        package_json = "../rapydo-angular/src/package.json"
+        if os.path.exists(package_json):
             dependencies = parsePackageJson(package_json, dependencies)
 
     controller = distutils.core.run_setup("../do/setup.py")

@@ -78,6 +78,8 @@ class Project:
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
         # Deprecated since 0.7.4
         self.obsolete_files.append(os.path.join("submodules", "rapydo-confs"))
+        # Deprecated since 0.7.5
+        self.obsolete_files.append(os.path.join("submodules", "frontend"))
 
         return True
 

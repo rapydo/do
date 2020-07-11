@@ -497,8 +497,7 @@ class Application:
         repo = services.apply_variables(repo, myvars)
 
         # Is this single repo enabled?
-        repo_enabled = repo.pop("if", False)
-        if not repo_enabled:
+        if not repo.pop("if", True):
             return None
 
         repo["do"] = Configuration.initialize
