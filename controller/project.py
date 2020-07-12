@@ -127,7 +127,6 @@ class Project:
                     frontend_data_dir,
                     frontend_data_dir.joinpath("app"),
                     frontend_data_dir.joinpath("courtesy"),
-                    frontend_data_dir.joinpath("e2e"),
                     frontend_data_dir.joinpath("node_modules"),
                     DATA.joinpath(self.project, "karma"),
                     DATA.joinpath(self.project, "cypress"),
@@ -144,7 +143,6 @@ class Project:
                     frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.json"),
                     frontend_data_dir.joinpath("tsconfig.spec.json"),
-                    frontend_data_dir.joinpath("tslint.json"),
                     frontend_data_dir.joinpath("cypress.json"),
                 ]
             )
