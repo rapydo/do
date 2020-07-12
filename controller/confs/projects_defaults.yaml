@@ -241,6 +241,7 @@ variables:
 
     ALLOW_PASSWORD_RESET: "false"
     ALLOW_REGISTRATION: "false"
+    ALLOW_TERMS_OF_USE: "false"
     REGISTRATION_NOTIFICATIONS: true
     SENTRY_URL:
     GA_TRACKING_CODE:
