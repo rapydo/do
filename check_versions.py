@@ -6,7 +6,9 @@ from glob import glob
 from pathlib import Path
 
 import click
+import requests
 import yaml
+from bs4 import BeautifulSoup
 from loguru import logger as log
 from prettyprinter import pprint as pp
 
@@ -51,13 +53,42 @@ def check_updates(category, lib):
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        print(f"https://pypi.org/project/{token[0]}/{token[1]}")
+        if "[" in token[0]:
+            token[0] = token[0].split("[")[0]
+
+        # url = f"https://pypi.org/project/{token[0]}/{token[1]}"
+        url = f"https://pypi.org/project/{token[0]}"
+        latest = parse_pypi(url, token[0])
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> {latest}")
+            print(url)
+            print("")
+
     elif category in ["compose", "Dockerfile"]:
         token = lib.split(":")
         print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
-    elif category in ["package.json", "npm"]:
-        token = lib.split(":")
-        print(f"https://www.npmjs.com/package/{token[0]}")
+    elif category in ["package.json", "dev-package.json", "npm"]:
+        lib = lib.strip()
+        if ":" in lib:
+            token = lib.split(":")
+        elif "@" in lib:
+            if lib[0] == "@":
+                token = lib[1:].split("@")
+                token[0] = f"@{token[0]}"
+            else:
+                token = lib.split("@")
+        else:
+            token = [lib, ""]
+
+        url = f"https://www.npmjs.com/package/{token[0]}"
+        latest = parse_npm(url, token[0])
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> {latest}")
+            print(url)
+            print("")
+
     elif category in ["ACME"]:
         token = lib.split(":")
         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
@@ -65,6 +96,26 @@ def check_updates(category, lib):
         print(lib)
     else:
         log.critical("{}: {}", category, lib)
+
+
+def parse_npm(url, lib):
+
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, "html5lib")
+    span = soup.find("span", attrs={"title": lib})
+    return span.next_element.next_element.text.split("\xa0")[0]
+
+
+def parse_pypi(url, lib):
+
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, "html5lib")
+    span = soup.find("h1", attrs={"class": "package-header__name"})
+
+    if span is None:
+        log.critical("Cannot find pip-command for {}", lib)
+
+    return span.text.strip().replace(f"{lib} ", "").strip()
 
 
 def parseDockerfile(d, dependencies, skip_angular):
@@ -138,6 +189,7 @@ def parsePackageJson(package_json, dependencies):
 
         dependencies.setdefault("angular", {})
         dependencies["angular"].setdefault("package.json", [])
+        dependencies["angular"].setdefault("dev-package.json", [])
 
         for dep in package_dependencies:
             ver = package_dependencies[dep]
@@ -146,7 +198,7 @@ def parsePackageJson(package_json, dependencies):
         for dep in package_devDependencies:
             ver = package_devDependencies[dep]
             lib = f"{dep}:{ver}"
-            dependencies["angular"]["package.json"].append(lib)
+            dependencies["angular"]["dev-package.json"].append(lib)
 
     return dependencies
 
@@ -208,6 +260,7 @@ def check_versions(skip_angular=False):
 
     dependencies["controller"] = controller.install_requires
     dependencies["http-api"] = http_api.install_requires
+    dependencies.setdefault("rapydo-angular", [])
 
     dependencies = parsePrecommitConfig(
         Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
@@ -215,6 +268,12 @@ def check_versions(skip_angular=False):
 
     dependencies = parsePrecommitConfig(
         Path("../http-api/.pre-commit-config.yaml"), dependencies, "http-api"
+    )
+
+    dependencies = parsePrecommitConfig(
+        Path("../rapydo-angular/.pre-commit-config.yaml"),
+        dependencies,
+        "rapydo-angular",
     )
 
     filtered_dependencies = {}
