@@ -246,11 +246,9 @@ def update(path, gitobj):
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
-            except TypeError as e:  # pragma: no cover
-                if TESTING:
-                    log.warning("Unable to update {} repo, {}", path, e)
-                else:
-                    log.exit("Unable to update {} repo, {}", path, e)
+            except TypeError as e:
+                # log.warning("Unable to update {} repo, {}", path, e)
+                log.exit("Unable to update {} repo, {}", path, e)
 
 
 def check_unstaged(path, gitobj):
