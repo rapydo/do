@@ -175,7 +175,7 @@ def check_versions(skip_angular=False):
 
     dependencies = {}
 
-    backend = load_yaml_file("controller/confs/backend.yml")
+    backend = load_yaml_file(Path("controller/confs/backend.yml"))
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)
