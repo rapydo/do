@@ -9,13 +9,18 @@ from importlib import import_module
 
 from sultan.api import Sultan
 
-from controller import TESTING, log
+from controller import log
 from controller.utilities import system
 
 
 class Packages:
     @staticmethod
     def install(package, editable=False, user=False, use_pip3=True):
+
+        # Do not import outside, otherwise:
+        # cannot import name 'Configuration' from partially initialized module
+        # most likely due to a circular import
+        from controller.app import Configuration
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
             return Packages.install(
@@ -25,14 +30,14 @@ class Packages:
         try:
             sudo = not user
             # sudo does not work on travis
-            if TESTING:
+            if Configuration.testing:
                 sudo = False
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
                 # --user does not work on travis:
                 # Can not perform a '--user' install.
                 # User site-packages are not visible in this virtualenv.
-                if not TESTING and user:  # pragma: no cover
+                if not Configuration.testing and user:  # pragma: no cover
                     command += " --user"
                 if editable:
                     command += " --editable"

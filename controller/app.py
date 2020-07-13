@@ -20,7 +20,6 @@ from controller import (
     PROJECT_DIR,
     PROJECTRC,
     SUBMODULES_DIR,
-    TESTING,
     __version__,
     gitter,
     log,
@@ -68,6 +67,7 @@ class Configuration:
     action = None
 
     production = False
+    testing = False
     privileged = False
     project = None
     frontend = None
@@ -136,6 +136,15 @@ def controller_cli_options(
         callback=projectrc_values,
         show_default=False,
     ),
+    testing: bool = typer.Option(
+        False,
+        "--testing",
+        "--test",
+        help="Enable test mode",
+        callback=projectrc_values,
+        envvar="TESTING",
+        show_default=False,
+    ),
     privileged: bool = typer.Option(
         False,
         "--privileged",
@@ -170,6 +179,7 @@ def controller_cli_options(
 
     Configuration.services_list = services_list
     Configuration.production = production
+    Configuration.testing = testing
     Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
@@ -606,7 +616,7 @@ class Application:
                 "project": Configuration.project,
                 "hostname": Configuration.hostname,
                 "production": Configuration.production,
-                "testing": TESTING,
+                "testing": Configuration.testing,
                 "services": self.active_services,
             },
         )
@@ -653,6 +663,9 @@ class Application:
         env["PROJECT_TITLE"] = Configuration.project_title
         env["PROJECT_DESCRIPTION"] = Configuration.project_description
         env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
+
+        if Configuration.testing:
+            env["APP_MODE"] = "test"
 
         env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
 

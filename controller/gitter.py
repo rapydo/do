@@ -7,7 +7,7 @@ import pytz
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from controller import SUBMODULES_DIR, TESTING, log
+from controller import SUBMODULES_DIR, log
 
 
 def get_repo(path):
@@ -246,8 +246,7 @@ def update(path, gitobj):
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
-            except TypeError as e:
-                # log.warning("Unable to update {} repo, {}", path, e)
+            except TypeError as e:  # pragma: no cover
                 log.exit("Unable to update {} repo, {}", path, e)
 
 

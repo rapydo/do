@@ -6,10 +6,6 @@ from loguru import logger as log
 
 __version__ = "0.7.5"
 
-# NOTE: telling the app if testing or not
-# http://j.mp/2uifoza
-TESTING = hasattr(sys, "_called_from_test") or os.getenv("TESTING", "0") == "1"
-
 DATA_FOLDER = Path("data")
 LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
 
@@ -37,14 +33,17 @@ log.exit = exit_msg
 
 log.remove()
 
-if TESTING:
+if os.getenv("TESTING", "0") == "1":
     fmt = "{message}"
+    colorize = False
 else:  # pragma: no cover
     fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
     fmt += "[<level>{level}</level> "
     fmt += "<fg #666>{name}:{line}</fg #666>] "
     fmt += "<fg #FFF>{message}</fg #FFF>"
-log.add(sys.stderr, colorize=not TESTING, format=fmt)
+    colorize = True
+
+log.add(sys.stderr, colorize=colorize, format=fmt)
 
 if LOGS_FILE is not None:
     try:
