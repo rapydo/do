@@ -765,8 +765,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             serv = services.vars_to_services_mapping.get(key)
             # Should never happens since all services are configured, cannot be tested
             if not serv:  # pragma: no cover
+
+                if key.startswith("INJECT_"):
+                    key = key[len("INJECT_") :]
+
                 log.exit(
-                    "Missing variable: {}. Cannot find a service mapping this variable",
+                    "Missing variable: {}: cannot find a service mapping this variable",
                     key,
                 )
 
