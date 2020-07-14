@@ -179,7 +179,7 @@ class Project:
                 log.exit(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
-                    ",".join(projects),
+                    ", ".join(projects),
                 )
             project = projects.pop()
 
