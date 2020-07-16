@@ -50,7 +50,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     }
 
-    @decorators.auth.required()
+    @decorators.auth.require()
     @decorators.marshal_with(MyOutputSchema, code=200)
     def get(self):
 
@@ -60,7 +60,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         data = {}
         return self.response(data)
 
-    @decorators.auth.required()
+    @decorators.auth.require()
     @decorators.use_kwargs(MyInputSchema)
     def post(self, **kwargs):
         """ Update password for current user """
@@ -74,7 +74,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         return self.response(data)
 
-    @decorators.auth.required()
+    @decorators.auth.require()
     @decorators.use_kwargs(MyInputSchema)
     def put(self, uuid, **kwargs):
         """ Update password for current user """
@@ -86,7 +86,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         return self.empty_response()
 
-    @decorators.auth.required()
+    @decorators.auth.require()
     @decorators.use_kwargs(MyInputSchema)
     def patch(self, uuid, **kwargs):
         """ Update profile for current user """
@@ -101,7 +101,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         return self.empty_response()
 
-    @decorators.auth.required()
+    @decorators.auth.require()
     def delete(self, uuid, **kwargs):
         """ Update password for current user """
 

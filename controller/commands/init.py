@@ -31,8 +31,10 @@ def init(
         if not p.exists():
             p.touch()
 
-    if not Configuration.projectrc:
+    if not Configuration.projectrc and not Configuration.host_configuration:
         create_projectrc = True
+
+    log.exit(create_projectrc)
 
     # We have to create the .projectrc twice
     # One generic here with main options and another after the complete
