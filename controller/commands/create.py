@@ -4,7 +4,7 @@ from typing import List
 import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
 from controller.templating import Templating
 
@@ -226,6 +226,7 @@ def create_project(
                 "celery_broker": celery_broker,
                 "celery_backend": celery_backend,
                 "frontend": frontend,
+                "testing": Configuration.testing,
                 "extend": extend,
                 "services": services,
                 "env_variables": env_variables,
@@ -250,10 +251,10 @@ def create_project(
 
 def parse_env_variables(envs):
 
-    env_variables = {}
     if not envs:
-        return env_variables
+        return {}
 
+    env_variables = {}
     for env in envs:
         e = env.split("=")
         if len(e) != 2:

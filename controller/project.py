@@ -26,7 +26,7 @@ class Project:
         # Created in data if missing
         self.data_folders = []
         self.data_files = []
-        # check will raise an errore if these files will be found
+        # check will raise an error if these files will be found
         self.obsolete_files = []
 
     def p_path(self, *args):

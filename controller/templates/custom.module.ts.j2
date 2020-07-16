@@ -17,6 +17,14 @@ const routes: Routes = [
     redirectTo: '/app/profile',
     pathMatch: 'full'
   },
+  {% if testing -%}
+  {
+    path: 'app/sink',
+    component: SinkComponent,
+    canActivate: [AuthGuard],
+    runGuardsAndResolvers: 'always',
+  },
+  {% endif -%}
 /*
   {
     path: 'app/myroute',

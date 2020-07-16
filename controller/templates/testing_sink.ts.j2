@@ -1,0 +1,20 @@
+import { Component } from "@angular/core";
+
+import { NgxSpinnerService } from "ngx-spinner";
+import { ApiService } from "@rapydo/services/api";
+import { AuthService } from "@rapydo/services/auth";
+import { NotificationService } from "@rapydo/services/notification";
+
+@Component({
+  templateUrl: "sink.html",
+})
+export class SinkComponent {
+
+  constructor(
+    private spinner: NgxSpinnerService,
+    private api: ApiService,
+    private auth: AuthService,
+    private notify: NotificationService,
+  ) {
+  }
+}
