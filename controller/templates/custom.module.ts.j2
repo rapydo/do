@@ -5,6 +5,9 @@ import { RapydoModule } from '@rapydo/rapydo.module';
 import { AuthGuard } from '@rapydo/app.auth.guard';
 
 // import { MyComponent } from './components/mycomponent'
+{% if testing -%}
+import { SinkComponent } from '@app/components/sink/sink';
+{% endif -%}
 
 const routes: Routes = [
   {
@@ -41,6 +44,9 @@ const routes: Routes = [
     RouterModule.forChild(routes),
   ],
   declarations: [
+    {% if testing -%}
+    SinkComponent,
+    {% endif -%}
     // MyComponent
   ],
 

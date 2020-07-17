@@ -205,6 +205,16 @@ def create_project(
         else:
             files = [path]
 
+    # Add the Kitchen Sink!
+    if Configuration.testing and frontend == ANGULAR:
+        path = project_scaffold.p_path("frontend", "app", "components", "sink")
+        path.mkdir(parents=True, exist_ok=True)
+
+        files += [
+            path.joinpath("sink.ts"),
+            path.joinpath("sink.html"),
+        ]
+
     for p in files:
 
         template = templating.get_template(
