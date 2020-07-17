@@ -1,4 +1,7 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
+
+import { FormGroup } from "@angular/forms";
+import { FormlyFieldConfig } from "@ngx-formly/core";
 
 import { NgxSpinnerService } from "ngx-spinner";
 import { ApiService } from "@rapydo/services/api";
@@ -8,7 +11,13 @@ import { NotificationService } from "@rapydo/services/notification";
 @Component({
   templateUrl: "sink.html",
 })
-export class SinkComponent {
+export class SinkComponent implements OnInit {
+
+  public form = new FormGroup({});
+  public fields1: FormlyFieldConfig[] = [];
+  public fields2: FormlyFieldConfig[] = [];
+  public model: any = {};
+  public data: any = null;
 
   constructor(
     private spinner: NgxSpinnerService,
@@ -17,4 +26,55 @@ export class SinkComponent {
     private notify: NotificationService,
   ) {
   }
+
+  ngOnInit() {
+    this.fields1 = this.get_fields(null);
+    this.fields2 = this.get_fields(['form-field-horizontal']);
+
+  }
+
+  private get_fields(wrappers) {
+
+    return [
+    {
+        key: "email",
+        type: "input",
+        templateOptions: {
+          type: "email",
+          label: "Username",
+          placeholder: "Your username (email)",
+          addonLeft: {
+            class: "fa fa-envelope",
+          },
+          required: true,
+        },
+        validators: { validation: ["email"] },
+        wrappers: wrappers,
+    },
+    {
+        key: "password",
+        type: "input",
+        templateOptions: {
+          type: "password",
+          label: "Password",
+          placeholder: "Your password",
+          addonLeft: {
+            class: "fa fa-key",
+          },
+          required: true,
+        },
+        wrappers: wrappers,
+    }
+    ];
+  }
+
+    submit() {
+
+        this.data = null;
+        if (!this.form.valid) {
+          return false;
+        }
+
+        this.data = this.model;
+    }
 }

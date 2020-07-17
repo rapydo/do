@@ -7,7 +7,96 @@
         </div>
 
         <div class="card-block">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+          <ul ngbNav #nav="ngbNav" class="nav-tabs">
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-formly</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+
+                  <form [formGroup]="form" (ngSubmit)="submit()">
+                    <formly-form [form]="form" [fields]="fields1" [model]="model">
+                    </formly-form>
+
+                    <button type="submit" class="btn btn-success">
+                      <h5>Submit</h5>
+                    </button>
+
+                  </form>
+
+                  <br>
+
+                  <div *ngIf='data' class='card'>
+                    <div class='card-body'>
+                      {{ data | json }}
+                    </div>
+                  </div>
+
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>horizontal forms</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+
+                  <form [formGroup]="form" (ngSubmit)="submit()">
+                    <formly-form [form]="form" [fields]="fields2" [model]="model">
+                    </formly-form>
+
+                    <button type="submit" class="btn btn-success">
+                      <h5>Submit</h5>
+                    </button>
+                  </form>
+
+                  <br>
+
+                  <div *ngIf='data' class='card'>
+                    <div class='card-body'>
+                      {{ data | json }}
+                    </div>
+                  </div>
+
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-uploadx</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+                  Content
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-datatable</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+                  Content
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+          </ul>
+
+          <div [ngbNavOutlet]="nav"></div>
+
         </div>
       </div>
     </div>
