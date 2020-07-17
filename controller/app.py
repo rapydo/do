@@ -102,6 +102,12 @@ def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
     return value
 
 
+def version_callback(value: bool):
+    if value:
+        typer.echo(f"rapydo version: {__version__}")
+        raise typer.Exit()
+
+
 def controller_cli_options(
     ctx: typer.Context,
     project: str = typer.Option(
@@ -172,6 +178,15 @@ def controller_cli_options(
         help="Exclude project common configuration",
         callback=projectrc_values,
         show_default=False,
+    ),
+    version: bool = typer.Option(
+        False,
+        "--version",
+        "-v",
+        help="Print version information and quit",
+        show_default=False,
+        callback=version_callback,
+        is_eager=True,
     ),
 ):
 

@@ -98,6 +98,9 @@ def exec_command(capfd, command, *asserts):
 def test_failed_create(capfd):
 
     exec_command(
+        capfd, "--version", f"rapydo version: {__version__}",
+    )
+    exec_command(
         capfd, "create first", "Missing authentication service, add --auth option",
     )
 
