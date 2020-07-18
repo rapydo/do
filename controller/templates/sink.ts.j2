@@ -73,7 +73,8 @@ export class SinkComponent implements OnInit {
         key: 'date',
         type: 'datepicker',
         templateOptions: {
-          "type": 'date',
+          type: 'date',
+          placeholder: "date",
           // min: {
           //   year: 2019,
           //   month: 1,
@@ -88,7 +89,48 @@ export class SinkComponent implements OnInit {
           required: false
         },
         wrappers: wrappers,
-      } 
+      },
+      {
+        key: 'radio1',
+        type: 'radio',
+        templateOptions: {
+          type: 'radio',
+          label: 'Radio1',
+          required: false,
+          options: [
+            { 
+              "value": "opt1",
+              "label": "Option1",
+            },
+            { 
+              "value": "opt2",
+              "label": "Option2",
+            },
+          ]
+        }
+      },
+      {
+        key: 'radio2',
+        type: 'radio_with_description',
+        templateOptions: {
+          type: 'radio',
+          label: 'Radio2',
+          required: false,
+          options: [
+            { 
+              "value": "opt3",
+              "label": "Option3",
+              "description": "Description 3"
+            },
+            { 
+              "value": "opt4",
+              "label": "Option4",
+              "description": "Description 4"
+            },
+          ]
+        }
+      }
+
     ];
   }
 
