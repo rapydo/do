@@ -1,5 +1,5 @@
 from restapi import decorators
-from restapi.models import fields, InputSchema, OutputSchema,  # validate
+from restapi.models import fields, InputSchema, Schema,  # validate
 from restapi.rest.definition import EndpointResource
 from restapi.utilities.logs import log
 
@@ -8,7 +8,7 @@ class MyInputSchema(InputSchema):
     myfield = fields.Str()
 
 
-class MyOutputSchema(OutputSchema):
+class MySchema(Schema):
     myfield = fields.Str()
 
 
@@ -51,7 +51,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     }
 
     @decorators.auth.require()
-    @decorators.marshal_with(MyOutputSchema, code=200)
+    @decorators.marshal_with(MySchema, code=200)
     def get(self):
 
         db = self.get_service_instance("{{auth}}")
