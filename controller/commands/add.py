@@ -7,8 +7,6 @@ from controller import log
 from controller.app import Application, Configuration
 from controller.templating import Templating
 
-templating = Templating()
-
 
 class ElementTypes(str, Enum):
     endpoint = "endpoint"
@@ -40,7 +38,7 @@ def add(
     fn(Application.project_scaffold, name, Application.data.services, auth)
 
 
-def create_template(template_name, target_path, name, services, auth):
+def create_template(templating, template_name, target_path, name, services, auth):
 
     if target_path.exists():
         log.exit("{} already exists", target_path)
@@ -56,7 +54,8 @@ def create_endpoint(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("backend", "apis")
     path = path.joinpath(f"{name}.py")
 
-    create_template("endpoint_template.py", path, name, services, auth)
+    templating = Templating()
+    create_template(templating, "endpoint_template.py", path, name, services, auth)
 
     log.info("Endpoint created: {}", path)
 
@@ -65,7 +64,8 @@ def create_task(project_scaffold, name, services, auth):
     path = project_scaffold.p_path("backend", "tasks")
     path = path.joinpath(f"{name}.py")
 
-    create_template("task_template.py", path, name, services, auth)
+    templating = Templating()
+    create_template(templating, "task_template.py", path, name, services, auth)
 
     log.info("Task created: {}", path)
 
@@ -75,10 +75,11 @@ def create_component(project_scaffold, name, services, auth):
     path.mkdir(parents=True, exist_ok=True)
 
     cpath = path.joinpath(f"{name}.ts")
-    create_template("component_template.ts", cpath, name, services, auth)
+    templating = Templating()
+    create_template(templating, "component_template.ts", cpath, name, services, auth)
 
     hpath = path.joinpath(f"{name}.html")
-    create_template("component_template.html", hpath, name, services, auth)
+    create_template(templating, "component_template.html", hpath, name, services, auth)
 
     log.info("Component created: {}", path)
 
@@ -125,7 +126,8 @@ def create_service(project_scaffold, name, services, auth):
 
     path = path.joinpath(f"{name}.ts")
 
-    create_template("service_template.ts", path, name, services, auth)
+    templating = Templating()
+    create_template(templating, "service_template.ts", path, name, services, auth)
 
     log.info("Service created: {}", path)
 
