@@ -88,7 +88,6 @@ variables:
     ACTIVATE_REDIS: 0
 
     ACTIVATE_ICAT: 0
-    ACTIVATE_IRODS: 0
     ACTIVATE_CELERY: 0
     ACTIVATE_CELERYUI: 0
     ACTIVATE_CELERYBEAT: 0
@@ -123,11 +122,10 @@ variables:
     GUNICORN_WORKERS: 1 # total number of workers. if empty this parameter will not be used
     GUNICORN_WORKERS_PER_CORE: 2 # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
     GUNICORN_MAX_NUM_WORKERS: 24
-    # in backendirods it is:
-    # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
-    # DB_SUBNET: 172.1.0.0
+
     FRONTEND_BUILD_MODE: angular # or angular-test
-    BACKEND_BUILD_MODE: backend # or backendirods
+    BACKEND_BUILD_MODE: backend
+
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
@@ -156,22 +154,6 @@ variables:
     NEO4J_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     NEO4J_WEB_INTERFACE_PORT: 7474 # changed to 7173 in production mode
     NEO4J_SSL_PATH: /ssl_no_used # changed to /ssl in production mode
-
-    IRODS_ENABLE_CONNECTOR: True
-    IRODS_HOST: rodserver.dockerized.io
-    IRODS_PORT: 1247
-    IRODS_DB: ICAT
-    IRODS_AUTHSCHEME: # to be auto-detected
-    # DN of your iRODS host with GSI plugin installed
-    IRODS_DN:
-    IRODS_USER: irods
-    IRODS_DEFAULT_ADMIN_USER: rodsminer
-    IRODS_ZONE: tempZone
-    IRODS_HOME: home
-    IRODS_ANONYMOUS: 0
-    IRODS_GUEST_USER: guest
-    # NOTE: this must match ALCHEMY_PASSWORD when running in development mode
-    IRODS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     MONGO_ENABLE_CONNECTOR: True
     MONGO_HOST: mongo.dockerized.io

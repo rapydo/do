@@ -304,8 +304,6 @@ Verify that you are in the right folder, now you are in: {}
         "hmac",
         "inspect",
         "io",
-        "irods",
-        "iRODSPickleSession",
         "json",
         "jwt",
         "logging",

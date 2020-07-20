@@ -1180,7 +1180,6 @@ def test_services_activation(capfd):
         "mongo",
         "rabbit",
         "redis",
-        "irods",
         "celery",
         "pushpin",
         "ftp",
@@ -1213,8 +1212,6 @@ def test_services_activation(capfd):
         )
         if service == "mysql":
             service = ["mariadb"]
-        elif service == "irods":
-            service = ["icat"]
         elif service == "celery":
             service = ["celery", "celeryui", "rabbit"]
         else:

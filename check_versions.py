@@ -279,7 +279,7 @@ def check_versions(skip_angular=False):
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ["talib", "react", "icat"]:
+        if service in ["react"]:
             continue
 
         service_dependencies = dependencies[service]
@@ -326,13 +326,7 @@ def check_versions(skip_angular=False):
                 for d in deps:
 
                     skipped = False
-                    if d == "b2safe/server:icat":
-                        skipped = True
-                    elif d == "node:carbon":
-                        skipped = True
-                    elif re.match(r"^git\+https://github\.com.*@master$", d):
-                        skipped = True
-                    elif d == "docker:dind":
+                    if re.match(r"^git\+https://github\.com.*@master$", d):
                         skipped = True
                     elif d.endswith(":latest"):
                         skipped = True
@@ -365,12 +359,6 @@ def check_versions(skip_angular=False):
         # print(service)
 
     pp(filtered_dependencies)
-
-    log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
-    log.info(
-        "oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required"
-    )
-    log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
 
 
 if __name__ == "__main__":

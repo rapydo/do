@@ -76,7 +76,6 @@ vars_to_services_mapping = {
     "ALCHEMY_USER": ["postgres", "mariadb"],
     "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
     "NEO4J_PASSWORD": ["neo4j"],
-    "IRODS_ANONYMOUS": ["icat"],
     "AUTH_DEFAULT_PASSWORD": ["backend"],
     "AUTH_DEFAULT_USERNAME": ["backend"],
     "SMTP_PORT": ["backend"],
@@ -85,8 +84,6 @@ vars_to_services_mapping = {
     "SMTP_HOST": ["backend"],
     "SMTP_USERNAME": ["backend"],
     "SMTP_PASSWORD": ["backend"],
-    "IRODS_PASSWORD": ["icat"],
-    "IRODS_USER": ["icat"],
 }
 
 

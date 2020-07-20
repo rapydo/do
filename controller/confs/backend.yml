@@ -184,19 +184,8 @@ services:
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      IRODS_ENABLE: ${ACTIVATE_IRODS}
-      IRODS_HOST: ${IRODS_HOST}
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_HOME: ${IRODS_HOME}
-      IRODS_DN: ${IRODS_DN}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
-      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
-      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
-
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
+      SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ADMIN: ${SMTP_ADMIN}
       SMTP_NOREPLY: ${SMTP_NOREPLY}
       SMTP_HOST: ${SMTP_HOST}
@@ -463,18 +452,6 @@ services:
       PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
-
-      IRODS_ENABLE: ${ACTIVATE_IRODS}
-      IRODS_HOST: ${IRODS_HOST}
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_HOME: ${IRODS_HOME}
-      IRODS_DN: ${IRODS_DN}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
-      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
-      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
 
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
       SMTP_ENABLE: ${ACTIVATE_SMTP}
@@ -768,44 +745,6 @@ services:
       ADDED_FLAGS: -d -d
     networks:
       ftp_net:
-
-  ######################################################
-  ###  iRODS iCAT server (usually for EUDAT B2safe)  ###
-  ######################################################
-  icat:
-    # restart: no
-    # B2safe instance on irods
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/icat
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/icat:${RAPYDO_VERSION}
-    hostname: ${IRODS_HOST}
-    # command: sleep infinity
-    environment:
-      ACTIVATE: ${ACTIVATE_ICAT}
-      CURRENT_UID: ${CURRENT_UID}
-      CURRENT_GID: ${CURRENT_GID}
-      POSTGRES_USER: ${ALCHEMY_USER}
-      POSTGRES_PASSWORD: ${ALCHEMY_PASSWORD}
-      POSTGRES_HOST: ${ALCHEMY_HOST}
-      IRODS_HOST: "${IRODS_HOST}"
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_DB: "${IRODS_DB}"
-
-      IRODS_ANONYMOUS: ${IRODS_ANONYMOUS}
-    networks:
-      app_net:
-        aliases:
-          - ${IRODS_HOST}
-      db_net:
-    depends_on:
-      - postgres
 
   pushpin:
     restart: always

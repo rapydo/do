@@ -121,7 +121,6 @@ def create_project(
     enable_mongo = auth == "mongo" or "mongo" in services
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
-    enable_irods = "irods" in services or "icat" in services
     enable_celery = "celery" in services
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
@@ -229,7 +228,6 @@ def create_project(
                 "enable_mongo": enable_mongo,
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,
-                "enable_irods": enable_irods,
                 "enable_celery": enable_celery,
                 "enable_pushpin": enable_pushpin,
                 "enable_ftp": enable_ftp,
