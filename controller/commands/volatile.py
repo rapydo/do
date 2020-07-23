@@ -1,5 +1,6 @@
 import typer
 
+from controller import log
 from controller.app import Application
 from controller.compose import Compose
 
@@ -26,6 +27,13 @@ def volatile(
 ):
     Application.controller.controller_init()
 
+    if user:
+        log.warning(
+            "Please remember that users in volatile containers are not mapped "
+            "on current uid and gid. "
+            "You should avoid to write or modify files on volumes"
+        )
+
     """ One command container (NOT executing on a running one) """
     dc = Compose(files=Application.data.files)
-    dc.create_volatile_container(service, command, user=user)
+    dc.create_volatile_container(service, command=command, user=user)

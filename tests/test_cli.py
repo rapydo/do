@@ -874,6 +874,22 @@ def test_all(capfd):
         capfd, "volatile backend --command hostname", "backend-server",
     )
 
+    exec_command(
+        capfd, "volatile backend --command whoami", "root",
+    )
+    exec_command(
+        capfd,
+        "volatile backend -u developer --command whoami",
+        "Please remember that users in volatile containers are not mapped on current ",
+        "developer",
+    )
+    exec_command(
+        capfd,
+        "volatile backend -u invalid --command whoami",
+        "Error response from daemon: unable to find user invalid:",
+        "no matching entries in passwd file",
+    )
+
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(4)
     exec_command(

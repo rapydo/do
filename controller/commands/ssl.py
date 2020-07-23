@@ -86,6 +86,6 @@ def ssl(
     dc = Compose(files=Application.data.files)
 
     if volatile:
-        dc.create_volatile_container(service, command)
+        dc.create_volatile_container(service, command=command)
     else:
         dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
