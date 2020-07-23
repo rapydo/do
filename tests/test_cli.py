@@ -1368,8 +1368,18 @@ def test_lastest(capfd):
     exec_command(
         capfd,
         "-p latest check -i main --no-git --no-builds",
-        "You are not in the main folder",
-        "Checks completed",
+        "You are not in the main folder, please change your working folder",
+        "Found a valid parent folder:",
+        "Suggested command: cd ..",
+    )
+
+    os.chdir("latest")
+    exec_command(
+        capfd,
+        "-p latest check -i main --no-git --no-builds",
+        "You are not in the main folder, please change your working folder",
+        "Found a valid parent folder:",
+        "Suggested command: cd ../..",
     )
 
     # Tests from outside the folder

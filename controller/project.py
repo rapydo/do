@@ -205,35 +205,43 @@ class Project:
 
         return project
 
-    def find_main_folder(self):
-        first_level_error = self.inspect_main_folder()
+    def check_main_folder(self):
+        folder = Path(os.getcwd())
+        first_level_error = self.inspect_main_folder(folder)
+        # No error raised: the current folder is a valid rapydo root
         if first_level_error is None:
-            return first_level_error
-        cwd = os.getcwd()
+            return None
+
+        # Errors on the current folder, let's verify parents
         num_iterations = 0
-        while cwd != "/" and num_iterations < 10:
+        while str(folder) != "/" and num_iterations < 10:
+            folder = folder.parent
             num_iterations += 1
-            # TODO: use utils.path here
-            os.chdir("..")
-            cwd = os.getcwd()
-            if self.inspect_main_folder() is not None:
+            # Errors at this level, let's continue to verify parents
+            if self.inspect_main_folder(folder) is not None:
                 continue
             # You found a rapydo folder among your parents!
-            log.warning(
-                "You are not in the main folder, working dir changed to {}", cwd,
+            # Let's suggest to change dir
+
+            # This is ../../etc
+            relative_path = "/".join([".."] * num_iterations)
+
+            return (
+                "You are not in the main folder, please change your working folder"
+                f"\nFound a valid parent folder: {folder}"
+                f"\nSuggested command: cd {relative_path}"
             )
-            first_level_error = None
-            break
+
         return first_level_error
 
-    def inspect_main_folder(self):
+    def inspect_main_folder(self, folder):
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
         on file existence. Further checks are performed in the following steps
         """
 
-        r = gitter.get_repo(".")
+        r = gitter.get_repo(str(folder))
         if r is None or gitter.get_origin(r) is None:
             return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
@@ -243,7 +251,7 @@ Verify that you are in the right folder, now you are in: {}
             )
 
         for fpath in self.expected_main_folders:
-            if not fpath.is_dir():
+            if not folder.joinpath(fpath).is_dir():
 
                 return """Folder not found: {}
 \nPlease note that this command only works from inside a rapydo-like repository

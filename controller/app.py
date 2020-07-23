@@ -270,12 +270,10 @@ class Application:
             Application.check_installed_software()
             return True
 
-        current_folder = os.getcwd()
-        err = Application.project_scaffold.find_main_folder()
+        main_folder_error = Application.project_scaffold.check_main_folder()
 
-        if err is not None:
-            os.chdir(current_folder)
-            log.exit(err)
+        if main_folder_error:
+            log.exit(main_folder_error)
 
         if not Configuration.print_version:
             Application.check_installed_software()
