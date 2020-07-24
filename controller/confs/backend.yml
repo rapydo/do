@@ -305,6 +305,7 @@ services:
     image: rapydo/postgres:${RAPYDO_VERSION}
     volumes:
       - sqldata:/var/lib/postgresql
+      - ${VANILLA_DIR}/data/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
@@ -346,6 +347,7 @@ services:
       - graphdata:/data
       # it is used to enable SSL in production mode
       - letsencrypt_certs:${NEO4J_SSL_PATH}
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:
         aliases:

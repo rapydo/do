@@ -12,10 +12,20 @@ class Services(str, Enum):
 
 
 @Application.app.command(help="Execute a backup of one service")
-def backup(service: Services = typer.Argument(..., help="Service name")):
+def backup(
+    service: Services = typer.Argument(..., help="Service name"),
+    force: bool = typer.Option(
+        False, "--force", help="Force the backup operation", show_default=False,
+    ),
+):
     Application.controller.controller_init()
 
     if service == Services.neo4j:
+        if not force:
+            log.exit(
+                "Neo4j backup will stop the container, if running. "
+                "If you want to continue add --force flag"
+            )
         log.warning("Backup on {} is not implemented", service)
 
     if service == Services.postgres:

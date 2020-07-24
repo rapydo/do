@@ -812,8 +812,14 @@ def test_all(capfd):
     exec_command(capfd, "verify neo4j", "Service neo4j not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
-    exec_command(capfd, "backup neo4j", "Backup on neo4j is not implemented")
-    exec_command(capfd, "backup sqlalchemy", "Backup on sqlalchemy is not implemented")
+    exec_command(
+        capfd,
+        "backup neo4j",
+        "Neo4j backup will stop the container, if running. "
+        "If you want to continue add --force flag",
+    )
+    exec_command(capfd, "backup neo4j --force", "Backup on neo4j is not implemented")
+    exec_command(capfd, "backup postgres", "Backup on postgres is not implemented")
     exec_command(
         capfd,
         "backup invalid",

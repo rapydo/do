@@ -77,6 +77,7 @@ class Project:
         self.recommended_files.append(Path("pyproject.toml"))
         self.recommended_files.append(Path(".flake8"))
         self.data_folders.extend([DATA.joinpath("logs")])
+        self.data_folders.extend([DATA.joinpath("backup")])
 
         # Deprecated since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
