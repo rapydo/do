@@ -47,7 +47,7 @@ setup(
         # "PyYAML==3.13",
         "plumbum",
         "glom",
-        "gitpython==3.0.8",
+        "gitpython==3.1.7",
         "pip>=10.0.0"
 
     ],
