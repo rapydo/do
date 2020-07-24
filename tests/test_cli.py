@@ -818,7 +818,12 @@ def test_all(capfd):
         "Neo4j backup will stop the container, if running. "
         "If you want to continue add --force flag",
     )
-    exec_command(capfd, "backup neo4j --force", "Backup on neo4j is not implemented")
+    exec_command(
+        capfd,
+        "backup neo4j --force",
+        "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
     exec_command(capfd, "backup postgres", "Backup on postgres is not implemented")
     exec_command(
         capfd,

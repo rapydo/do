@@ -5,10 +5,13 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 import os
+import re
 import shlex
+from contextlib import redirect_stdout
+from io import StringIO
 
-import compose.cli.errors as clierrors
-import compose.errors as cerrors
+from compose import errors as cerrors
+from compose.cli import errors as clierrors
 from compose.cli.command import (
     get_config_from_options,
     get_project_name,
@@ -204,3 +207,32 @@ class Compose:
                 " ".join(shell_args),
             )
         return self.command("exec_command", options)
+
+    def get_running_containers(self, prefix):
+        with StringIO() as buf, redirect_stdout(buf):
+            self.command("ps", {"--quiet": False, "--services": False, "--all": False})
+            output = buf.getvalue().split("\n")
+
+            containers = set()
+            for row in output:
+                if row == "":
+                    continue
+                if row.startswith(" "):
+                    continue
+                if row.startswith("---"):
+                    continue
+                # row is:
+                # Name   Command   State   Ports
+                # Split on two or more spaces
+                row = re.split(r"\s\s+", row)
+                if row[2] != "Up":
+                    continue
+                row = row[0]
+                # Removed the prefix (i.e. project name)
+                row = row[1 + len(prefix) :]
+                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+                row = row[0 : row.index("_")]
+
+                containers.add(row)
+
+            return containers

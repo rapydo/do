@@ -7,4 +7,4 @@ def status():
     Application.controller.controller_init()
 
     dc = Compose(files=Application.data.files)
-    dc.command("ps", {"-q": None, "--services": None, "--quiet": False, "--all": False})
+    dc.command("ps", {"--quiet": False, "--services": None, "--all": False})
