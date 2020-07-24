@@ -48,7 +48,7 @@ def exec_command(capfd, command, *asserts):
     with capfd.disabled():
         print("\n")
         print("_____________________________________________")
-        print(command)
+        print(f"rapydo {command}")
 
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()
