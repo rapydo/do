@@ -181,7 +181,7 @@ def test_failed_create(capfd):
 def test_create(capfd):
     # Let's create a project and init git
     create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit --add-optionals --current"
+    create_command += " --service rabbit --service neo4j --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
     exec_command(
         capfd, create_command, "Project first successfully created",
@@ -754,6 +754,9 @@ def test_all(capfd):
     exec_command(
         capfd, "shell postgres --command whoami", "postgres",
     )
+    exec_command(
+        capfd, "shell neo4j --command whoami", "neo4j",
+    )
 
     exec_command(
         capfd,
@@ -808,14 +811,14 @@ def test_all(capfd):
         "Stopped by keyboard",
     )
 
-    # Template project is based on sql
-    exec_command(capfd, "verify neo4j", "Service neo4j not detected")
+    exec_command(capfd, "verify invalid", "Service invalid not detected")
+    exec_command(capfd, "verify redis", "Service redis not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
     exec_command(
         capfd,
         "backup neo4j",
-        "Neo4j backup will stop the container, if running. "
+        "Neo4j is running and the backup will temporary stop it. "
         "If you want to continue add --force flag",
     )
     exec_command(
@@ -840,6 +843,12 @@ def test_all(capfd):
         capfd, "stop", "Stack stopped",
     )
 
+    exec_command(
+        capfd,
+        "backup neo4j",
+        "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
     exec_command(
         capfd,
         "backup postgres",

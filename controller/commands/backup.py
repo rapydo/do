@@ -36,9 +36,9 @@ def backup(
 
     now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     if service == Services.neo4j:
-        if not force:
+        if container_is_running and not force:
             log.exit(
-                "Neo4j backup will stop the container, if running. "
+                "Neo4j is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
@@ -68,7 +68,7 @@ def backup(
         # This double step is required because postgres user is uid 70
         # It is not fixed with host uid as the other services
         tmp_backup_path = f"/tmp/{now}.sql"
-        command = f"pg_dumpall -f {tmp_backup_path}"
+        command = f"pg_dumpall -U sqluser -f {tmp_backup_path}"
         # Creating backup on a tmp folder as postgres user
         dc.exec_command(service, command=command, user="postgres", disable_tty=True)
 
