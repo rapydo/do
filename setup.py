@@ -38,7 +38,7 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "gitpython==3.1.0",
+        "gitpython==3.1.7",
         "PyYAML==5.3.1",
         "pip>=10.0.0"
 
