@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
@@ -26,18 +26,18 @@ def backup(
     backup_dir = Path("data").joinpath("backup")
     service = service.value
 
+    options = {"SERVICE": [service]}
+    dc = Compose(files=Application.data.files)
+
+    running_containers = dc.get_running_containers(Configuration.project)
+    container_is_running = service in running_containers
+
     if service == Services.neo4j:
         if not force:
             log.exit(
                 "Neo4j backup will stop the container, if running. "
                 "If you want to continue add --force flag"
             )
-
-        options = {"SERVICE": [service]}
-        dc = Compose(files=Application.data.files)
-
-        running_containers = dc.get_running_containers("imc")
-        container_is_running = service in running_containers
 
         if container_is_running:
             dc.command("stop", options)
@@ -56,4 +56,10 @@ def backup(
             dc.start_containers([service], detach=True)
 
     if service == Services.postgres:
+
+        if not container_is_running:
+            log.exit(
+                "This backup requires {} running, please start your stack", service
+            )
+
         log.warning("Backup on {} is not implemented", service)

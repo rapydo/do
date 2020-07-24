@@ -836,6 +836,12 @@ def test_all(capfd):
     )
 
     exec_command(
+        capfd,
+        "backup postgres",
+        "This backup requires postgres running, please start your stack",
+    )
+
+    exec_command(
         capfd, "restart", "Stack restarted",
     )
 
