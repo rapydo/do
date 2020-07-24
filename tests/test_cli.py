@@ -814,7 +814,11 @@ def test_all(capfd):
 
     exec_command(capfd, "backup neo4j", "Backup on neo4j is not implemented")
     exec_command(capfd, "backup sqlalchemy", "Backup on sqlalchemy is not implemented")
-    exec_command(capfd, "backup invalid", "Backup on invalid is not implemented")
+    exec_command(
+        capfd,
+        "backup invalid",
+        "invalid choice: invalid. (choose from neo4j, postgres)",
+    )
 
     exec_command(
         capfd, "stop", "Stack stopped",
