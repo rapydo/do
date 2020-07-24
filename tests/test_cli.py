@@ -207,7 +207,7 @@ def test_create(capfd):
     )
 
     create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit"
+    create_command += " --service rabbit --service neo4j"
     create_command += " --current --force"
     exec_command(
         capfd,
@@ -218,7 +218,7 @@ def test_create(capfd):
 
     # this is the last version that is created
     create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit"
+    create_command += " --service rabbit --service neo4j"
     create_command += " --current --force"
     create_command += " --env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
     exec_command(
