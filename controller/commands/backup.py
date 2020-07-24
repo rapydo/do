@@ -23,7 +23,6 @@ def backup(
 ):
     Application.controller.controller_init()
 
-    backup_dir = Path("data").joinpath("backup")
     service = service.value
 
     options = {"SERVICE": [service]}
@@ -32,6 +31,10 @@ def backup(
     running_containers = dc.get_running_containers(Configuration.project)
     container_is_running = service in running_containers
 
+    backup_dir = Path("data").joinpath("backup")
+    backup_dir.joinpath(service).mkdir(parents=True, exist_ok=True)
+
+    now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     if service == Services.neo4j:
         if not force:
             log.exit(
@@ -42,12 +45,10 @@ def backup(
         if container_is_running:
             dc.command("stop", options)
 
-        backup_dir.joinpath(service).mkdir(parents=True, exist_ok=True)
-
-        log.info("Starting backup on {}...", service)
-        now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
         backup_path = f"/backup/{service}/{now}.tar.gz"
         command = f"tar -zcf {backup_path} /data"
+
+        log.info("Starting backup on {}...", service)
         dc.create_volatile_container(service, command=command)
 
         log.info("Backup completed: data{}", backup_path)
@@ -62,4 +63,18 @@ def backup(
                 "This backup requires {} running, please start your stack", service
             )
 
-        log.warning("Backup on {} is not implemented", service)
+        log.info("Starting backup on {}...", service)
+
+        # This double step is required because postgres user is uid 70
+        # It is not fixed with host uid as the other services
+        tmp_backup_path = f"/tmp/{now}.sql"
+        command = f"pg_dumpall -f {tmp_backup_path}"
+        # Creating backup on a tmp folder as postgres user
+        dc.exec_command(service, command=command, user="postgres", disable_tty=True)
+
+        # Moving backup from /tmp to /backup as root user
+        backup_path = f"/backup/{service}/{now}.sql"
+        command = f"mv {tmp_backup_path} {backup_path}"
+        dc.exec_command(service, command=command, disable_tty=True)
+
+        log.info("Backup completed: data{}", backup_path)

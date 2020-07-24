@@ -824,7 +824,12 @@ def test_all(capfd):
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
-    exec_command(capfd, "backup postgres", "Backup on postgres is not implemented")
+    exec_command(
+        capfd,
+        "backup postgres",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
     exec_command(
         capfd,
         "backup invalid",
