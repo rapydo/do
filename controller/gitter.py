@@ -242,7 +242,7 @@ def update(path, gitobj):
         if remote.name == "origin":
             try:
                 branch = gitobj.active_branch
-                log.info("Updating {} {} (branch {})", remote, path, branch)
+                log.info("Updating {} {}@{}", remote, path, branch)
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)

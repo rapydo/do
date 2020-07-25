@@ -18,7 +18,13 @@ class Services(str, Enum):
 def backup(
     service: Services = typer.Argument(..., help="Service name"),
     force: bool = typer.Option(
-        False, "--force", help="Force the backup operation", show_default=False,
+        False, "--force", help="Force the backup procedure", show_default=False,
+    ),
+    restart_backend: bool = typer.Option(
+        False,
+        "--restart-backend",
+        help="Restart backup container once completed the backup",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
@@ -56,11 +62,16 @@ def backup(
         if container_is_running:
             dc.start_containers([service], detach=True)
 
+        if restart_backend:
+
+            dc.command("restart", {"SERVICE": ["backend"]})
+
     if service == Services.postgres:
 
         if not container_is_running:
             log.exit(
-                "This backup requires {} running, please start your stack", service
+                "The backup procedure requires {} running, please start your stack",
+                service,
             )
 
         log.info("Starting backup on {}...", service)

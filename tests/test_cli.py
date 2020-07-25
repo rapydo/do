@@ -823,7 +823,7 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "backup neo4j --force",
+        "backup neo4j --force --restart-backend",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
@@ -852,7 +852,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "backup postgres",
-        "This backup requires postgres running, please start your stack",
+        "The backup procedure requires postgres running, please start your stack",
     )
 
     exec_command(
