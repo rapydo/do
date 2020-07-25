@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import List
 
 import typer
 
@@ -20,11 +21,11 @@ def backup(
     force: bool = typer.Option(
         False, "--force", help="Force the backup procedure", show_default=False,
     ),
-    restart_backend: bool = typer.Option(
-        False,
-        "--restart-backend",
-        help="Restart backup container once completed the backup",
-        show_default=False,
+    restart: List[str] = typer.Option(
+        "",
+        "--restart",
+        help="Service to be restarted once completed the backup (multiple allowed)",
+        autocompletion=Application.autocomplete_service,
     ),
 ):
     Application.controller.controller_init()
@@ -62,10 +63,6 @@ def backup(
         if container_is_running:
             dc.start_containers([service], detach=True)
 
-        if restart_backend:
-
-            dc.command("restart", {"SERVICE": ["backend"]})
-
     if service == Services.postgres:
 
         if not container_is_running:
@@ -89,3 +86,6 @@ def backup(
         dc.exec_command(service, command=command, disable_tty=True)
 
         log.info("Backup completed: data{}", backup_path)
+
+    if restart:
+        dc.command("restart", {"SERVICE": restart})

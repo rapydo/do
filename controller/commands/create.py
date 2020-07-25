@@ -23,7 +23,7 @@ def create(
         "",
         "--service",
         "-s",
-        help="Comma separated list of services to be enabled",
+        help="Service to be enabled (multiple is enabled)",
         autocompletion=Application.autocomplete_service,
     ),
     origin_url: str = typer.Option(

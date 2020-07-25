@@ -823,7 +823,7 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "backup neo4j --force --restart-backend",
+        "backup neo4j --force --restart backend --restart rabbit",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
