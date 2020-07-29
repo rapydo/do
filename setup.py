@@ -50,7 +50,7 @@ setup(
         "jinja2",
         "plumbum",
         "glom",
-        "gitpython==3.0.8",
+        "gitpython==3.1.7",
 
     ],
     keywords=['http', 'api', 'rest', 'web', 'backend', 'rapydo'],
