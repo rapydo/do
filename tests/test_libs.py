@@ -80,6 +80,8 @@ def test_all(capfd):
     assert len(values) == 0
     values = app.autocomplete_submodule("")
     assert len(values) == 0
+    values = app.autocomplete_interfaces("")
+    assert len(values) == 0
 
     if os.getenv("STAGE") == "no-docker":
         log.warning("Skipping test libs/all: docker is not enabled")
