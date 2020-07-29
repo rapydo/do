@@ -11,7 +11,12 @@ from controller.compose import Compose
 
 @Application.app.command(help="Execute predefined interfaces to services")
 def interfaces(
-    service: str = typer.Argument("list", help="Service name", show_default=False),
+    service: str = typer.Argument(
+        "list",
+        help="Service name",
+        show_default=False,
+        autocompletion=Application.autocomplete_interfaces,
+    ),
     detach: bool = typer.Option(
         False,
         "--detach",
@@ -29,10 +34,8 @@ def interfaces(
 
     if service == "list":
         print("List of available interfaces:")
-        for s in Application.data.compose_config:
-            name = s.get("name", "")
-            if name.endswith("ui"):
-                print(" - {}".format(name[0:-2]))
+        for service in Application.controller.get_available_interfaces():
+            print(f" - {service}")
         return True
 
     service = service + "ui"

@@ -28,10 +28,11 @@ class Packages:
             )
 
         try:
-            sudo = not user
             # sudo does not work on travis
             if Configuration.testing:
                 sudo = False
+            else:
+                sudo = not user
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
                 # --user does not work on travis:

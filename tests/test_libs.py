@@ -54,6 +54,25 @@ def test_all(capfd):
     assert len(values) >= 1
     assert "main" not in values
 
+    values = app.autocomplete_interfaces("")
+    assert len(values) > 0
+    assert "swagger" in values
+    assert "sqlalchemy" in values
+    assert "mongo" in values
+    assert "celery" in values
+    values = app.autocomplete_interfaces("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_interfaces("s")
+    assert len(values) >= 1
+    assert "swagger" in values
+    assert "sqlalchemy" in values
+    assert "celery" not in values
+    values = app.autocomplete_interfaces("c")
+    assert len(values) >= 1
+    assert "swagger" not in values
+    assert "sqlalchemy" not in values
+    assert "celery" in values
+
     os.unlink(".rapydo")
     values = app.autocomplete_service("")
     assert len(values) == 0

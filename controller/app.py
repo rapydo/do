@@ -708,6 +708,7 @@ class Application:
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
             "allservices": list(self.services_dict.keys()),
+            "interfaces": self.get_available_interfaces(),
         }
 
         with open(DATAFILE, "w+") as outfile:
@@ -727,6 +728,24 @@ class Application:
         if not d:
             return []
         values = d.get("services", [])
+        if not incomplete:
+            return values
+        return [x for x in values if x.startswith(incomplete)]
+
+    def get_available_interfaces(self):
+        available_interfaces = list()
+        for s in self.compose_config:
+            name = s.get("name", "")
+            if name.endswith("ui"):
+                available_interfaces.append(name[0:-2])
+        return available_interfaces
+
+    @staticmethod
+    def autocomplete_interfaces(incomplete: str):
+        d = Application.parse_datafile()
+        if not d:
+            return []
+        values = d.get("interfaces", [])
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
