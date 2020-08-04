@@ -16,6 +16,7 @@ name_priorities = [
     "celeryui",
     "celery-beat",
     "maintenance",
+    "bot",
 ]
 
 

@@ -164,6 +164,9 @@ def get_default_command(service):
     if service == "backend":
         return "restapi launch"
 
+    if service == "bot":
+        return "restapi bot"
+
     if service == "neo4j":
         return "bin/cypher-shell"
 

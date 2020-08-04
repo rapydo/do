@@ -623,7 +623,7 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
-    command: restapi bot
+    entrypoint: docker-entrypoint-bot
     hostname: telegram-bot
     privileged: ${DOCKER_PRIVILEGED_MODE}
     environment:
