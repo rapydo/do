@@ -653,6 +653,7 @@ class Application:
             pass
 
         env = glom(Configuration.specs, "variables.env", default={})
+
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
         env["VANILLA_DIR"] = Path().cwd()
@@ -686,6 +687,11 @@ class Application:
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
 
+        for e in env:
+            env_value = os.environ.get(e)
+            if env_value is None:
+                continue
+            env[e] = env_value
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
                 if value is None:
