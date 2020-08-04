@@ -124,6 +124,7 @@ def create_project(
     enable_celery = "celery" in services
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
+    enable_bot = "bot" in services
 
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
@@ -231,6 +232,7 @@ def create_project(
                 "enable_celery": enable_celery,
                 "enable_pushpin": enable_pushpin,
                 "enable_ftp": enable_ftp,
+                "enable_bot": enable_bot,
                 "celery_broker": celery_broker,
                 "celery_backend": celery_backend,
                 "frontend": frontend,

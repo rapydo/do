@@ -55,6 +55,9 @@ variables:
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1
     {% endif -%}
+    {% if enable_bot -%}
+    ACTIVATE_TELEGRAM: 1
+    {% endif -%}
     {% if celery_broker -%}
     CELERY_BROKER: {{ celery_broker }}
     {% endif -%}

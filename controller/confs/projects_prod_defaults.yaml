@@ -18,6 +18,7 @@ variables:
     RABBITMQ_SSL_ENABLED: True # it is used by Celery
 
     CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
+    TELEGRAM_WORKERS: 4
 
     NEO4J_WEB_INTERFACE_PORT: 7473
     NEO4J_SSL_PATH: /ssl
