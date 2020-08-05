@@ -811,6 +811,19 @@ def test_all(capfd):
         "Stopped by keyboard",
     )
 
+    # We modified projectrc to contain: DEFAULT_SCALE_RABBIT: 3
+    with open(".env") as env:
+        content = [line.rstrip("\n") for line in env]
+    assert "DEFAULT_SCALE_RABBIT=3" in content
+
+    # Now we set an env varable to change this value:
+    os.environ["DEFAULT_SCALE_RABBIT"] = "2"
+    exec_command(capfd, "check -i main")
+    with open(".env") as env:
+        content = [line.rstrip("\n") for line in env]
+    assert "DEFAULT_SCALE_RABBIT=3" not in content
+    assert "DEFAULT_SCALE_RABBIT=2" in content
+
     exec_command(capfd, "verify invalid", "Service invalid not detected")
     exec_command(capfd, "verify redis", "Service redis not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
