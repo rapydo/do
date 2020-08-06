@@ -12,7 +12,7 @@ def verify(
 ):
     Application.controller.controller_init()
 
-    """ Verify one service connection (inside backend) """
+    # Verify one service connection (inside backend)
     dc = Compose(files=Application.data.files)
     command = f"restapi verify --services {service}"
 

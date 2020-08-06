@@ -269,48 +269,6 @@ def test_all(capfd):
         capfd, "init", "Project initialized",
     )
 
-    # Manipulate .projectrc to inject invalid options
-    # No longer supported after the migration to Typer:
-    """
-    shutil.copy(".projectrc", ".projectrc.bak")
-
-    with open(".projectrc", "a") as f:
-        f.write("\ninvalid-opt: invalid\n")
-
-    exec_command(
-        capfd, "check", "Unknown parameter invalid-opt found in .projectrc"
-    )
-    shutil.copy(".projectrc.bak", ".projectrc")
-
-    with open(".projectrc", "a") as f:
-        f.write("\ninvalid:\n")
-        f.write("  invalid-command: invalid\n")
-    exec_command(capfd, "check", "Unknown command invalid found in .projectrc")
-    shutil.copy(".projectrc.bak", ".projectrc")
-
-    with open(".projectrc", "a") as f:
-        f.write("\ncheck:\n")
-        f.write("  invalid-opt: invalid\n")
-    exec_command(
-        capfd, "check", "Unknown parameter check/invalid-opt found in .projectrc"
-    )
-    shutil.copy(".projectrc.bak", ".projectrc")
-
-    with open(".projectrc", "a") as f:
-        f.write("\ncheck:\n")
-        f.write("  ignore-submodule: main\n")
-        f.write("  no-git: True\n")
-        f.write("  no-builds: True\n")
-    exec_command(
-        capfd,
-        "check",
-        "Skipping git checks",
-        "Skipping builds checks",
-        "Checks completed",
-    )
-    shutil.copy(".projectrc.bak", ".projectrc")
-    """
-
     r = gitter.get_repo("submodules/http-api")
     gitter.switch_branch(r, "0.7.3")
     exec_command(

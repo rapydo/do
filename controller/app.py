@@ -298,7 +298,7 @@ class Application:
             or Configuration.check
             or Configuration.install
         ):
-            self.check_internet_connection()
+            Application.check_internet_connection()
 
         if Configuration.install:
             self.read_specs()
@@ -501,7 +501,8 @@ class Application:
 
             log.exit(msg)
 
-    def check_internet_connection(self):
+    @staticmethod
+    def check_internet_connection():
         """ Check if connected to internet """
 
         try:
@@ -510,7 +511,8 @@ class Application:
         except requests.ConnectionError:  # pragma: no cover
             log.exit("Internet connection is unavailable")
 
-    def working_clone(self, name, repo, from_path=None):
+    @staticmethod
+    def working_clone(name, repo, from_path=None):
 
         # substitute values starting with '$$'
         myvars = {
@@ -562,7 +564,9 @@ class Application:
         Application.gits["main"] = gitter.get_repo(".")
 
         for name, repo in repos.items():
-            Application.gits[name] = self.working_clone(name, repo, from_path=from_path)
+            Application.gits[name] = Application.working_clone(
+                name, repo, from_path=from_path
+            )
 
     def set_active_services(self):
         self.services_dict, self.active_services = services.find_active(
