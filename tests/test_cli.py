@@ -1147,6 +1147,7 @@ RUN mkdir xyz
 
     # Let's test builds with running containers
     exec_command(capfd, "-s rabbit start")
+    exec_command(capfd, "-s rabbit status")
 
     you_asked = f"You asked to build testbuild/rabbit:{__version__}"
     but_running = "but the following containers are running: rabbit"
