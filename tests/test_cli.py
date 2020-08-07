@@ -973,9 +973,9 @@ def test_all(capfd):
         capfd, "dhparam", "No container found for proxy_1",
     )
 
-    ####################
-    # ### TEST BUILD ###
-    ####################
+
+def test_builds(capfd):
+    os.remove(".projectrc")
 
     create_command = "create testbuild --auth postgres --frontend angular"
     create_command += " --service rabbit --add-optionals --current"
@@ -1147,8 +1147,6 @@ RUN mkdir xyz
 
     # Let's test builds with running containers
     exec_command(capfd, "-s rabbit start")
-    exec_command(capfd, "-s rabbit status")
-    exec_command(capfd, "-s rabbit logs")
 
     you_asked = f"You asked to build testbuild/rabbit:{__version__}"
     but_running = "but the following containers are running: rabbit"
