@@ -54,10 +54,7 @@ def exec_command(capfd, command, *asserts, input_text=None):
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = OrderedDict()
-    if input_text:
-        result = runner.invoke(controller.app, command, input=input_text)
-    else:
-        result = runner.invoke(controller.app, command)
+    result = runner.invoke(controller.app, command, input=input_text)
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
@@ -1153,11 +1150,101 @@ RUN mkdir xyz
         capfd, "-p first init --force", "Project initialized",
     )
 
-    # Here you should test build with running
-    # rapydo -s rabbit start
-    # rapydo -s rabbit build
-    # rapydo -s rabbit build --yes
-    # rapydo -s rabbit remove
+    # Let's test builds with running containers
+    exec_command(capfd, "-s rabbit start")
+
+    you_asked = f"You asked to build testbuild/rabbit:{__version__}"
+    but_running = "but the following containers are running: rabbit"
+    do_you_want_to = "Do you want to continue? y/n:"
+
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Unknown response invalid, respond yes or no",
+        "Build aborted",
+        input_text="invalid\nno\n",
+    )
+
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Build aborted",
+        input_text="no\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Build aborted",
+        input_text="n\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Build aborted",
+        input_text="N\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Build aborted",
+        input_text="NO\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Successfully built",
+        input_text="y\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Successfully built",
+        input_text="yes\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Successfully built",
+        input_text="Y\n",
+    )
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        you_asked,
+        but_running,
+        do_you_want_to,
+        "Successfully built",
+        input_text="YES\n",
+    )
+    exec_command(
+        capfd, "-s rabbit build --yes", "Successfully built",
+    )
+
+    exec_command(capfd, "remove")
 
 
 def test_extend(capfd):
