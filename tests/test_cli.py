@@ -43,7 +43,7 @@ def mock_KeyboardInterrupt(signum, frame):
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd, command, *asserts):
+def exec_command(capfd, command, *asserts, input_text=None):
 
     with capfd.disabled():
         print("\n")
@@ -54,7 +54,10 @@ def exec_command(capfd, command, *asserts):
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = OrderedDict()
-    result = runner.invoke(controller.app, command)
+    if input_text:
+        result = runner.invoke(controller.app, command, input=input_text)
+    else:
+        result = runner.invoke(controller.app, command)
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
@@ -1149,6 +1152,12 @@ RUN mkdir xyz
     exec_command(
         capfd, "-p first init --force", "Project initialized",
     )
+
+    # Here you should test build with running
+    # rapydo -s rabbit start
+    # rapydo -s rabbit build
+    # rapydo -s rabbit build --yes
+    # rapydo -s rabbit remove
 
 
 def test_extend(capfd):
