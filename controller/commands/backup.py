@@ -80,9 +80,17 @@ def backup(
         # Creating backup on a tmp folder as postgres user
         dc.exec_command(service, command=command, user="postgres", disable_tty=True)
 
-        # Moving backup from /tmp to /backup as root user
-        backup_path = f"/backup/{service}/{now}.sql"
-        command = f"mv {tmp_backup_path} {backup_path}"
+        # Compress the sql with best compression ratio
+        command = f"gzip -9 {tmp_backup_path}"
+        dc.exec_command(service, command=command, user="postgres", disable_tty=True)
+
+        # Verify the gz integrity
+        command = f"gzip -t {tmp_backup_path}.gz"
+        dc.exec_command(service, command=command, user="postgres", disable_tty=True)
+
+        # Move the backup from /tmp to /backup (as root user)
+        backup_path = f"/backup/{service}/{now}.sql.gz"
+        command = f"mv {tmp_backup_path}.gz {backup_path}"
         dc.exec_command(service, command=command, disable_tty=True)
 
         log.info("Backup completed: data{}", backup_path)
