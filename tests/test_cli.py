@@ -1145,11 +1145,6 @@ RUN mkdir xyz
         "Removed redundant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
 
-    # Restore the default project
-    exec_command(
-        capfd, "-p first init --force", "Project initialized",
-    )
-
     # Let's test builds with running containers
     exec_command(capfd, "-s rabbit start")
 
@@ -1245,6 +1240,11 @@ RUN mkdir xyz
     )
 
     exec_command(capfd, "remove")
+
+    # Restore the default project
+    exec_command(
+        capfd, "-p first init --force", "Project initialized",
+    )
 
 
 def test_extend(capfd):
