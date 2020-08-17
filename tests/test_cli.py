@@ -1486,7 +1486,7 @@ def test_lastest(capfd):
     exec_command(
         capfd,
         "-p latest check -i main --no-git --no-builds",
-        "You are not in the main folder, please change your working folder",
+        "You are not in the main folder, please change your working dir",
         "Found a valid parent folder:",
         "Suggested command: cd ..",
     )
@@ -1495,7 +1495,7 @@ def test_lastest(capfd):
     exec_command(
         capfd,
         "-p latest check -i main --no-git --no-builds",
-        "You are not in the main folder, please change your working folder",
+        "You are not in the main folder, please change your working dir",
         "Found a valid parent folder:",
         "Suggested command: cd ../..",
     )

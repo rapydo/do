@@ -228,7 +228,7 @@ class Project:
             relative_path = "/".join([".."] * num_iterations)
 
             return (
-                "You are not in the main folder, please change your working folder"
+                "You are not in the main folder, please change your working dir"
                 f"\nFound a valid parent folder: {folder}"
                 f"\nSuggested command: cd {relative_path}"
             )
