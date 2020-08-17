@@ -1,45 +1,65 @@
 import os
+from typing import List
+
+import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
+from controller.app import Application, Configuration
 from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
 from controller.templating import Templating
 
 
-def parse_env_variables(envs):
-
-    env_variables = {}
-    if not envs:
-        return env_variables
-
-    for e in envs.split(","):
-        e = e.split("=")
-        if len(e) != 2:
-            log.exit("Invalid envs format, expected: K1=V1,K2=V2,...")
-        k = e[0].upper()
-        v = e[1]
-        env_variables[k] = v
-
-    return env_variables
-
-
-def __call__(args, **kwargs):
-
-    project_name = args.get("name")
-    force = args.get("force", False)
-    force_current = args.get("current", False)
-    auto = not args.get("no_auto", False)
-    auth = args.get("auth")
-    frontend = args.get("frontend")
-    extend = args.get("extend")
-    origin_url = args.get("origin_url")
-    services = args.get("services", "").split(",")
-    envs = args.get("env")
-    add_optionals = args.get("add_optionals", False)
+@Application.app.command(help="Create a new rapydo project")
+def create(
+    project_name: str = typer.Argument(..., help="Name of your project"),
+    auth: str = typer.Option(
+        None, "--auth", help="Auth service to enable (sql, neo4j, mongo)"
+    ),
+    frontend: str = typer.Option(
+        None, "--frontend", help="Frontend framework to enable (no, angular)"
+    ),
+    extend: str = typer.Option(None, "--extend", help="Extend from another project"),
+    services: List[str] = typer.Option(
+        "",
+        "--service",
+        "-s",
+        help="Service to be enabled (multiple is enabled)",
+        autocompletion=Application.autocomplete_service,
+    ),
+    origin_url: str = typer.Option(
+        None, "--origin-url", help="Set the git origin url for the project"
+    ),
+    envs: List[str] = typer.Option(
+        None,
+        "--env",
+        "-e",
+        help="Command separated list of ENV=VALUE to be added in project_configuration",
+    ),
+    force_current: bool = typer.Option(
+        False, "--current", help="Force creation in current folder", show_default=False,
+    ),
+    force: bool = typer.Option(
+        False, "--force", help="Force files overwriting", show_default=False,
+    ),
+    auto: bool = typer.Option(
+        True,
+        "--no-auto",
+        help="Disable automatic project creation",
+        show_default=False,
+    ),
+    add_optionals: bool = typer.Option(
+        False,
+        "--add-optionals",
+        help="Include all optionals files (html templates and customizers)",
+        show_default=False,
+    ),
+):
+    Application.controller.controller_init()
 
     if extend is not None:
         if project_name == extend:
             log.exit("A project cannot extend itself")
-        if not os.path.isdir(os.path.join(PROJECT_DIR, extend)):
+        if not PROJECT_DIR.joinpath(extend).is_dir():
             log.exit("Invalid extend value: project {} not found", extend)
 
     if auth is None:
@@ -47,7 +67,7 @@ def __call__(args, **kwargs):
     if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
         log.exit("Invalid authentication service: {}", auth)
 
-    create(
+    create_project(
         project_name=project_name,
         auth=auth,
         frontend=frontend,
@@ -80,7 +100,7 @@ def __call__(args, **kwargs):
     print("rapydo start")
 
 
-def create(
+def create_project(
     project_name,
     auth,
     frontend,
@@ -101,10 +121,10 @@ def create(
     enable_mongo = auth == "mongo" or "mongo" in services
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
-    enable_irods = "irods" in services or "icat" in services
     enable_celery = "celery" in services
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
+    enable_bot = "bot" in services
 
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
@@ -166,13 +186,13 @@ def create(
         folders += project_scaffold.optionals_folders
 
     for f in folders:
-        if os.path.exists(f):
+        if f.exists():
             log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
             log.exit("\nmkdir -p {}", f)
 
-        os.makedirs(f)
+        f.mkdir(parents=True, exist_ok=True)
 
     files = project_scaffold.expected_files
     if add_optionals:
@@ -185,11 +205,20 @@ def create(
         else:
             files = [path]
 
+    # Add the Kitchen Sink!
+    if Configuration.testing and frontend == ANGULAR:
+        path = project_scaffold.p_path("frontend", "app", "components", "sink")
+        path.mkdir(parents=True, exist_ok=True)
+
+        files += [
+            path.joinpath("sink.ts"),
+            path.joinpath("sink.html"),
+        ]
+
     for p in files:
 
-        fname = os.path.basename(p)
         template = templating.get_template(
-            fname,
+            p.name,
             {
                 "version": __version__,
                 "project": project_name,
@@ -200,13 +229,14 @@ def create(
                 "enable_mongo": enable_mongo,
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,
-                "enable_irods": enable_irods,
                 "enable_celery": enable_celery,
                 "enable_pushpin": enable_pushpin,
                 "enable_ftp": enable_ftp,
+                "enable_bot": enable_bot,
                 "celery_broker": celery_broker,
                 "celery_backend": celery_backend,
                 "frontend": frontend,
+                "testing": Configuration.testing,
                 "extend": extend,
                 "services": services,
                 "env_variables": env_variables,
@@ -215,15 +245,32 @@ def create(
 
         # automatic creation
         if auto:
-            if os.path.exists(p) and not force:
+            if p.exists() and not force:
                 log.info("Project file already exists: {}", p)
             else:
                 templating.save_template(p, template, force=force)
             continue
 
         # manual creation
-        if os.path.exists(p):
+        if p.exists():
             log.info("Project file already exists: {}", p)
         else:
-            print("\n{}".format(template))
+            print(f"\n{template}")
             log.exit(p)
+
+
+def parse_env_variables(envs):
+
+    if not envs:
+        return {}
+
+    env_variables = {}
+    for env in envs:
+        e = env.split("=")
+        if len(e) != 2:
+            log.exit("Invalid env {}, expected: K1=V1", env)
+        k = e[0].upper()
+        v = e[1]
+        env_variables[k] = v
+
+    return env_variables

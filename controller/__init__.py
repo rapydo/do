@@ -1,20 +1,17 @@
 import os
 import sys
+from pathlib import Path
 
 from loguru import logger as log
 
-__version__ = "0.7.4"
+__version__ = "0.7.5"
 
-
-# NOTE: telling the app if testing or not
-# http://j.mp/2uifoza
-TESTING = hasattr(sys, "_called_from_test") or os.getenv("TESTING", "0") == "1"
-
-LOGS_FOLDER = os.path.join("data", "logs")
+DATA_FOLDER = Path("data")
+LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
 
 LOGS_FILE = None
-if os.path.isdir(LOGS_FOLDER):
-    LOGS_FILE = os.path.join(LOGS_FOLDER, "rapydo-controller.log")
+if LOGS_FOLDER.is_dir():
+    LOGS_FILE = LOGS_FOLDER.joinpath("rapydo-controller.log")
 
 log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
@@ -36,14 +33,17 @@ log.exit = exit_msg
 
 log.remove()
 
-if TESTING:
-    log.add(sys.stdout, colorize=False, format="{message}")
+if os.getenv("TESTING", "0") == "1":
+    fmt = "{message}"
+    colorize = False
 else:  # pragma: no cover
-    log.add(
-        sys.stderr,
-        colorize=True,
-        format="<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> [<level>{level}</level> <fg #666>{name}:{line}</fg #666>] <fg #FFF>{message}</fg #FFF>",
-    )
+    fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
+    fmt += "[<level>{level}</level> "
+    fmt += "<fg #666>{name}:{line}</fg #666>] "
+    fmt += "<fg #FFF>{message}</fg #FFF>"
+    colorize = True
+
+log.add(sys.stderr, colorize=colorize, format=fmt)
 
 if LOGS_FILE is not None:
     try:
@@ -52,14 +52,16 @@ if LOGS_FILE is not None:
         log.error(e)
         LOGS_FILE = None
 
-COMPOSE_ENVIRONMENT_FILE = ".env"
-SUBMODULES_DIR = "submodules"
-PROJECT_DIR = "projects"
-TEMPLATE_DIR = "templates"
-# CONFS_DIR = os.path.join(SUBMODULES_DIR, 'do', 'controller', 'confs')
-CONFS_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), "confs")
+COMPOSE_ENVIRONMENT_FILE = Path(".env")
+SUBMODULES_DIR = Path("submodules")
+PROJECT_DIR = Path("projects")
+TEMPLATE_DIR = Path("templates")
+
+CONFS_DIR = Path(__file__).resolve().parent.joinpath("confs")
+
 PLACEHOLDER = "**PLACEHOLDER**"
-PROJECTRC = ".projectrc"
-PROJECTRC_ALTERNATIVE = ".project.yml"
+PROJECTRC = Path(".projectrc")
+# PROJECTRC_ALTERNATIVE = ".project.yml"
+DATAFILE = Path(".rapydo")
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = "confs"

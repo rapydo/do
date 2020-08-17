@@ -3,21 +3,16 @@ variables:
     # IMPORTANT: if you change online_urls here, remember to also fix in develop
     http-api:
       online_url: https://github.com/rapydo/http-api.git
-      if: true
     build-templates:
       online_url: https://github.com/rapydo/build-templates.git
-      if: true
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
       if: $$angular
-      path: frontend
     rapydo-react:
       online_url: https://github.com/rapydo/rapydo-react.git
       if: $$react
-      path: frontend
     do:
       online_url: https://github.com/rapydo/do.git
-      if: true
 
   roles:
     normal_user: User
@@ -93,12 +88,13 @@ variables:
     ACTIVATE_REDIS: 0
 
     ACTIVATE_ICAT: 0
-    ACTIVATE_IRODS: 0
     ACTIVATE_CELERY: 0
     ACTIVATE_CELERYUI: 0
     ACTIVATE_CELERYBEAT: 0
     ACTIVATE_FTP: 0
     ACTIVATE_PUSHPIN: 0
+    ACTIVATE_SMTP: 1
+    ACTIVATE_TELEGRAM: 0
 
     ACTIVATE_SWAGGERUI: 0
     ACTIVATE_SQLALCHEMYUI: 0
@@ -109,14 +105,12 @@ variables:
     RUN_SCHEMATHESIS: 1
     MAX_LOGS_LENGTH: 200
 
-    APP_MODE: debug
+    APP_MODE: development
     FLASK_HOST: apiserver.dockerized.io
     API_MAIN_ENDPOINT: status
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
     PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
-    # WSGI_SERVER: UWSGI
-    WSGI_SERVER: GUNICORN
     # from GUNICORN docs:
     # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
     # the formula is based on the assumption that for a given core, one worker will be
@@ -129,11 +123,10 @@ variables:
     GUNICORN_WORKERS: 1 # total number of workers. if empty this parameter will not be used
     GUNICORN_WORKERS_PER_CORE: 2 # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
     GUNICORN_MAX_NUM_WORKERS: 24
-    # in backendirods it is:
-    # PYTHON_PATH: /usr/local/lib/python3.6/dist-packages/
-    # DB_SUBNET: 172.1.0.0
+
     FRONTEND_BUILD_MODE: angular # or angular-test
-    BACKEND_BUILD_MODE: backend # or backendirods
+    BACKEND_BUILD_MODE: backend
+
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
@@ -162,22 +155,6 @@ variables:
     NEO4J_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     NEO4J_WEB_INTERFACE_PORT: 7474 # changed to 7173 in production mode
     NEO4J_SSL_PATH: /ssl_no_used # changed to /ssl in production mode
-
-    IRODS_ENABLE_CONNECTOR: True
-    IRODS_HOST: rodserver.dockerized.io
-    IRODS_PORT: 1247
-    IRODS_DB: ICAT
-    IRODS_AUTHSCHEME: # to be auto-detected
-    # DN of your iRODS host with GSI plugin installed
-    IRODS_DN:
-    IRODS_USER: irods
-    IRODS_DEFAULT_ADMIN_USER: rodsminer
-    IRODS_ZONE: tempZone
-    IRODS_HOME: home
-    IRODS_ANONYMOUS: 0
-    IRODS_GUEST_USER: guest
-    # NOTE: this must match ALCHEMY_PASSWORD when running in development mode
-    IRODS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     MONGO_ENABLE_CONNECTOR: True
     MONGO_HOST: mongo.dockerized.io
@@ -239,6 +216,7 @@ variables:
     SET_CSP_FONT_SRC:
     CORS_ALLOW_ALL_ORIGINS: 1
 
+    SMTP_ENABLE_CONNECTOR: True
     SMTP_ADMIN:
     SMTP_NOREPLY:
     SMTP_HOST:
@@ -248,6 +226,7 @@ variables:
 
     ALLOW_PASSWORD_RESET: "false"
     ALLOW_REGISTRATION: "false"
+    ALLOW_TERMS_OF_USE: "false"
     REGISTRATION_NOTIFICATIONS: true
     SENTRY_URL:
     GA_TRACKING_CODE:
@@ -268,6 +247,15 @@ variables:
     ALLOW_ACCESS_TOKEN_PARAMETER: False
     # AUTH_SECOND_FACTOR_AUTHENTICATION: TOTP
     DEFAULT_DHLEN: 2048
+
+    TELEGRAM_API_KEY: "**PLACEHOLDER**"
+    TELEGRAM_ADMINS: "**PLACEHOLDER**"
+    TELEGRAM_USERS:
+    TELEGRAM_WORKERS: 1
+    TELEGRAM_APP_HASH:
+    TELEGRAM_APP_ID:
+    TELEGRAM_BOTNAME:
+    TELETHON_SESSION:
 
     AUTH_DEFAULT_USERNAME: "user@nomail.org"
     AUTH_DEFAULT_PASSWORD: "test"

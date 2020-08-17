@@ -3,9 +3,12 @@ import json
 import os
 import re
 from glob import glob
+from pathlib import Path
 
 import click
+import requests
 import yaml
+from bs4 import BeautifulSoup
 from loguru import logger as log
 from prettyprinter import pprint as pp
 
@@ -19,7 +22,7 @@ def load_yaml_file(filepath):
 
     log.debug("Reading file {}", filepath)
 
-    if filepath is None or not os.path.exists(filepath):
+    if filepath is None or not filepath.exists():
         log.warning("Failed to read YAML file {}: File does not exist", filepath)
         return {}
 
@@ -50,13 +53,42 @@ def check_updates(category, lib):
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        print(f"https://pypi.org/project/{token[0]}/{token[1]}")
+        if "[" in token[0]:
+            token[0] = token[0].split("[")[0]
+
+        # url = f"https://pypi.org/project/{token[0]}/{token[1]}"
+        url = f"https://pypi.org/project/{token[0]}"
+        latest = parse_pypi(url, token[0])
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> {latest}")
+            print(url)
+            print("")
+
     elif category in ["compose", "Dockerfile"]:
         token = lib.split(":")
         print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
-    elif category in ["package.json", "npm"]:
-        token = lib.split(":")
-        print(f"https://www.npmjs.com/package/{token[0]}")
+    elif category in ["package.json", "dev-package.json", "npm"]:
+        lib = lib.strip()
+        if ":" in lib:
+            token = lib.split(":")
+        elif "@" in lib:
+            if lib[0] == "@":
+                token = lib[1:].split("@")
+                token[0] = f"@{token[0]}"
+            else:
+                token = lib.split("@")
+        else:
+            token = [lib, ""]
+
+        url = f"https://www.npmjs.com/package/{token[0]}"
+        latest = parse_npm(url, token[0])
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> {latest}")
+            print(url)
+            print("")
+
     elif category in ["ACME"]:
         token = lib.split(":")
         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
@@ -64,6 +96,26 @@ def check_updates(category, lib):
         print(lib)
     else:
         log.critical("{}: {}", category, lib)
+
+
+def parse_npm(url, lib):
+
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, "html5lib")
+    span = soup.find("span", attrs={"title": lib})
+    return span.next_element.next_element.text.split("\xa0")[0]
+
+
+def parse_pypi(url, lib):
+
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, "html5lib")
+    span = soup.find("h1", attrs={"class": "package-header__name"})
+
+    if span is None:
+        log.critical("Cannot find pip-command for {}", lib)
+
+    return span.text.strip().replace(f"{lib} ", "").strip()
 
 
 def parseDockerfile(d, dependencies, skip_angular):
@@ -127,6 +179,9 @@ def parseRequirements(d, dependencies):
 
 
 def parsePackageJson(package_json, dependencies):
+    if not package_json.exists():
+        return dependencies
+
     with open(package_json) as f:
         package = json.load(f)
         package_dependencies = package.get("dependencies", {})
@@ -134,6 +189,7 @@ def parsePackageJson(package_json, dependencies):
 
         dependencies.setdefault("angular", {})
         dependencies["angular"].setdefault("package.json", [])
+        dependencies["angular"].setdefault("dev-package.json", [])
 
         for dep in package_dependencies:
             ver = package_dependencies[dep]
@@ -142,12 +198,16 @@ def parsePackageJson(package_json, dependencies):
         for dep in package_devDependencies:
             ver = package_devDependencies[dep]
             lib = f"{dep}:{ver}"
-            dependencies["angular"]["package.json"].append(lib)
+            dependencies["angular"]["dev-package.json"].append(lib)
 
     return dependencies
 
 
 def parsePrecommitConfig(f, dependencies, key):
+
+    if not f.exists():
+        return dependencies
+
     y = load_yaml_file(f)
     for r in y.get("repos"):
         rev = r.get("rev")
@@ -158,6 +218,8 @@ def parsePrecommitConfig(f, dependencies, key):
             u = f"{repo}/releases/tag/{rev}"
         dependencies[key].append(u)
 
+    return dependencies
+
 
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
@@ -165,7 +227,7 @@ def check_versions(skip_angular=False):
 
     dependencies = {}
 
-    backend = load_yaml_file("controller/confs/backend.yml")
+    backend = load_yaml_file(Path("controller/confs/backend.yml"))
     services = backend.get("services", {})
     for service in services:
         definition = services.get(service)
@@ -189,29 +251,35 @@ def check_versions(skip_angular=False):
 
     if not skip_angular:
 
-        if os.path.exists("../frontend/src/package.json"):
-            package_json = "../frontend/src/package.json"
-            dependencies = parsePackageJson(package_json, dependencies)
-        elif os.path.exists("../rapydo-angular/src/package.json"):
-            package_json = "../rapydo-angular/src/package.json"
-            dependencies = parsePackageJson(package_json, dependencies)
+        dependencies = parsePackageJson(
+            Path("../rapydo-angular/src/package.json"), dependencies
+        )
 
     controller = distutils.core.run_setup("../do/setup.py")
     http_api = distutils.core.run_setup("../http-api/setup.py")
 
     dependencies["controller"] = controller.install_requires
     dependencies["http-api"] = http_api.install_requires
+    dependencies.setdefault("rapydo-angular", [])
 
-    if os.path.exists(f := "../do/.pre-commit-config.yaml"):
-        dependencies = parsePrecommitConfig(f, dependencies, "controller")
+    dependencies = parsePrecommitConfig(
+        Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
+    )
 
-    if os.path.exists(f := "../http-api/.pre-commit-config.yaml"):
-        dependencies = parsePrecommitConfig(f, dependencies, "http-api")
+    dependencies = parsePrecommitConfig(
+        Path("../http-api/.pre-commit-config.yaml"), dependencies, "http-api"
+    )
+
+    dependencies = parsePrecommitConfig(
+        Path("../rapydo-angular/.pre-commit-config.yaml"),
+        dependencies,
+        "rapydo-angular",
+    )
 
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ["talib", "react", "icat"]:
+        if service in ["react"]:
             continue
 
         service_dependencies = dependencies[service]
@@ -258,13 +326,7 @@ def check_versions(skip_angular=False):
                 for d in deps:
 
                     skipped = False
-                    if d == "b2safe/server:icat":
-                        skipped = True
-                    elif d == "node:carbon":
-                        skipped = True
-                    elif re.match(r"^git\+https://github\.com.*@master$", d):
-                        skipped = True
-                    elif d == "docker:dind":
+                    if re.match(r"^git\+https://github\.com.*@master$", d):
                         skipped = True
                     elif d.endswith(":latest"):
                         skipped = True
@@ -297,12 +359,6 @@ def check_versions(skip_angular=False):
         # print(service)
 
     pp(filtered_dependencies)
-
-    log.info("Very hard to upgrade ubuntu:16.04 from backendirods and icat")
-    log.info(
-        "oauthlib/requests-oauthlib are blocked by Flask-OAuthlib. Migration to authlib is required"
-    )
-    log.info("gssapi: versions >1.5.1 does not work and requires some effort...")
 
 
 if __name__ == "__main__":

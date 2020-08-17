@@ -19,7 +19,7 @@ def execute_command(command, parameters):
         log.verbose("Executing command {} {}", command, parameters)
         return command(parameters)
     except CommandNotFound:
-        raise ExecutionException("Command not found: {}".format(command))
+        raise ExecutionException(f"Command not found: {command}")
 
     except ProcessExecutionError:
         raise ExecutionException(

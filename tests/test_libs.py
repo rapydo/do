@@ -1,10 +1,12 @@
 import os
 import tempfile
 from distutils.version import LooseVersion
+from pathlib import Path
 
 import pytest
 
 from controller import __version__, gitter, log
+from controller.app import Application
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
@@ -16,6 +18,70 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 
 
 def test_all(capfd):
+
+    app = Application()
+
+    values = app.autocomplete_service("")
+    assert len(values) > 0
+    assert "backend" in values
+    values = app.autocomplete_service("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_service("b")
+    assert len(values) >= 1
+    assert "backend" in values
+
+    values = app.autocomplete_allservice("")
+    assert len(values) > 0
+    assert "backend" in values
+    values = app.autocomplete_allservice("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_allservice("b")
+    assert len(values) >= 1
+    assert "backend" in values
+    values = app.autocomplete_allservice("c")
+    assert len(values) >= 1
+    assert "backend" not in values
+
+    values = app.autocomplete_submodule("")
+    assert len(values) > 0
+    assert "main" in values
+    values = app.autocomplete_submodule("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_submodule("m")
+    assert len(values) >= 1
+    assert "main" in values
+    values = app.autocomplete_submodule("d")
+    assert len(values) >= 1
+    assert "main" not in values
+
+    values = app.autocomplete_interfaces("")
+    assert len(values) > 0
+    assert "swagger" in values
+    assert "sqlalchemy" in values
+    assert "mongo" in values
+    assert "celery" in values
+    values = app.autocomplete_interfaces("invalid")
+    assert len(values) == 0
+    values = app.autocomplete_interfaces("s")
+    assert len(values) >= 1
+    assert "swagger" in values
+    assert "sqlalchemy" in values
+    assert "celery" not in values
+    values = app.autocomplete_interfaces("c")
+    assert len(values) >= 1
+    assert "swagger" not in values
+    assert "sqlalchemy" not in values
+    assert "celery" in values
+
+    os.unlink(".rapydo")
+    values = app.autocomplete_service("")
+    assert len(values) == 0
+    values = app.autocomplete_allservice("")
+    assert len(values) == 0
+    values = app.autocomplete_submodule("")
+    assert len(values) == 0
+    values = app.autocomplete_interfaces("")
+    assert len(values) == 0
 
     if os.getenv("STAGE") == "no-docker":
         log.warning("Skipping test libs/all: docker is not enabled")
@@ -69,23 +135,35 @@ def test_all(capfd):
     try:
         load_yaml_file("invalid", "path")
         pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    try:
+        load_yaml_file(Path("invalid"), "path")
+        pytest.fail("No exception raised")
+    except AttributeError:
+        pass
+
+    try:
+        load_yaml_file(Path("invalid"), Path("path"))
+        pytest.fail("No exception raised")
     except SystemExit:
         pass
 
-    y = load_yaml_file("invalid", "path", is_optional=True)
+    y = load_yaml_file(Path("invalid"), Path("path"), is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
     try:
-        load_yaml_file("invalid", "projects")
+        load_yaml_file(Path("invalid"), Path("projects"))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
-        load_yaml_file("pyproject.toml", ".")
+        load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
@@ -93,7 +171,7 @@ def test_all(capfd):
     # File is empty
     f = tempfile.NamedTemporaryFile()
     try:
-        load_yaml_file(f.name, ".")
+        load_yaml_file(Path(f.name), Path(os.curdir))
         pytest.fail("No exception raised")
     except SystemExit:
         pass
@@ -152,6 +230,7 @@ def test_all(capfd):
 
     assert services.get_default_command("invalid") == "bash"
     assert services.get_default_command("backend") == "restapi launch"
+    assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
@@ -213,6 +292,9 @@ def test_all(capfd):
     assert isinstance(cmd[1], list)
     assert len(cmd[1]) == 1
     assert cmd[1][0] == "b c"
+
+    assert Packages.import_package("invalid") is None
+    assert Packages.package_version("invalid") is None
 
     assert Packages.get_bin_version("invalid") is None
 

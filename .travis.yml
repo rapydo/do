@@ -11,17 +11,15 @@ script:
   - cd rapydo_tests
   - mkdir -p data/logs
   - export LOGURU_LEVEL=DEBUG
+  - export TESTING=1
   - py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
-  - bash <(curl -s https://codecov.io/bash) -y codecov.yml -R ../
+  - cp ../codecov.yml .
+  - bash <(curl -s https://codecov.io/bash) -R ../
 
 jobs:
   include:
     - stage: test
-      python: 3.5
-      dist: bionic
-      env:
-        - STAGE=UBUNTU_18.04 # only used as information on the web interface
-    - python: 3.6
+      python: 3.6
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
@@ -33,10 +31,6 @@ jobs:
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
-    - python: 3.5
-      dist: xenial
-      env:
-        - STAGE=UBUNTU_16.04 # only used as information on the web interface
     - python: 3.8
       dist: xenial
       env:

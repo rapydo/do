@@ -32,10 +32,6 @@ project_configuration:
       RABBITMQ_USER: {{ 'RANDOM'| username }}
       RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
       {% endif -%}
-      {% if service == 'icat' -%}
-      IRODS_USER: irods
-      IRODS_PASSWORD: {{ 'RANDOM'| password }}
-      {% endif -%}
       {% endfor %}{% endif -%}
       {% endif -%}
 
@@ -47,12 +43,14 @@ project_configuration:
       SMTP_PASSWORD: {{ 'RANDOM'| password }}
       ALLOW_PASSWORD_RESET: 'true'
       ALLOW_REGISTRATION: 'true'
+      ALLOW_TERMS_OF_USE: 'true'
       AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}+Aa1-nowit'sstrong!
       UPLOAD_PATH: /tmp
       MAX_LOGS_LENGTH: 40
       AUTH_TOKEN_SAVE_FREQUENCY: 1
       FRONTEND_BUILD_MODE: angular-test
+      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
       {% if production -%}
       DEFAULT_DHLEN: 1024
       GUNICORN_WORKERS: 1

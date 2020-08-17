@@ -5,21 +5,22 @@
 # which version of python is this?
 # Retrocompatibility for Python < 3.6
 from distutils.version import LooseVersion
+from importlib import import_module
 
 from sultan.api import Sultan
 
-from controller import TESTING, log
+from controller import log
 from controller.utilities import system
-
-try:
-    import_exc = (ModuleNotFoundError, ImportError)
-except NameError:
-    import_exc = ImportError
 
 
 class Packages:
     @staticmethod
     def install(package, editable=False, user=False, use_pip3=True):
+
+        # Do not import outside, otherwise:
+        # cannot import name 'Configuration' from partially initialized module
+        # most likely due to a circular import
+        from controller.app import Configuration
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
             return Packages.install(
@@ -29,18 +30,19 @@ class Packages:
         try:
             sudo = not user
             # sudo does not work on travis
-            if TESTING:
+            if Configuration.testing:
                 sudo = False
+
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
-                if editable:
-                    command += " --editable"
                 # --user does not work on travis:
                 # Can not perform a '--user' install.
                 # User site-packages are not visible in this virtualenv.
-                if not TESTING and user:  # pragma: no cover
+                if not Configuration.testing and user:  # pragma: no cover
                     command += " --user"
-                command += " {}".format(package)
+                if editable:
+                    command += " --editable"
+                command += f" {package}"
 
                 pip = sultan.pip3 if use_pip3 else sultan.pip
                 result = pip(command).run()
@@ -69,19 +71,15 @@ class Packages:
     @staticmethod
     def import_package(package_name):
 
-        from importlib import import_module
-
         try:
-            package = import_module(package_name)
-        except import_exc:  # pylint:disable=catching-non-exception  # pragma: no cover
+            return import_module(package_name)
+        except (ModuleNotFoundError, ImportError):
             return None
-        else:
-            return package
 
     @staticmethod
     def package_version(package_name):
         package = Packages.import_package(package_name)
-        if package is None:  # pragma: no cover
+        if package is None:
             return None
         return package.__version__
 
@@ -97,7 +95,7 @@ class Packages:
                     version_error = "Minimum supported version for {} is {}".format(
                         package_name, min_version
                     )
-                    version_error += ", found {} ".format(found_version)
+                    version_error += f", found {found_version} "
                     log.exit(version_error)
 
             if max_version is not None:  # pragma: no cover
@@ -105,7 +103,7 @@ class Packages:
                     version_error = "Maximum supported version for {} is {}".format(
                         package_name, max_version
                     )
-                    version_error += ", found {} ".format(found_version)
+                    version_error += f", found {found_version} "
                     log.exit(version_error)
 
             log.debug("{} version: {}", package_name, found_version)
@@ -131,7 +129,7 @@ class Packages:
                 version_error = "Minimum supported version for {} is {}".format(
                     program, min_version,
                 )
-                version_error += ", found {} ".format(found_version)
+                version_error += f", found {found_version} "
                 log.exit(version_error)
 
         if max_version is not None:  # pragma: no cover
@@ -139,7 +137,7 @@ class Packages:
                 version_error = "Maximum supported version for {} is {}".format(
                     program, max_version,
                 )
-                version_error += ", found {} ".format(found_version)
+                version_error += f", found {found_version} "
                 log.exit(version_error)
 
         log.debug("{} version: {}", program, found_version)
@@ -168,7 +166,7 @@ class Packages:
             # Python 3.8.2
             # Docker version 19.03.8, build afacb8b7f0
             # git version 2.25.1
-            # rapydo version 0.7.4
+            # rapydo version 0.7.x
             return output
             # Note that in may other cases it fails...
             # but we are interested in a very small list of programs, so it's ok

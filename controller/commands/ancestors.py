@@ -1,8 +1,40 @@
 import re
 
+import typer
+
+from controller.app import Application
 from controller.utilities import system
 
 # from controller import log
+
+
+@Application.app.command(help="Find all children of a docker image")
+def ancestors(
+    imagetag: str = typer.Argument(..., help="Image tag ID to be inspected"),
+):
+    Application.controller.controller_init()
+
+    img = system.execute_command("docker", ["images", "--all"]).split("\n")
+    img = [re.split(r"\s+", i) for i in img[1:]]
+    images = {}
+    for i in img:
+        if len(i) != 7:
+            continue
+        images[i[2]] = i
+
+    child = imagetag
+    print(f"Finding all children and (grand)+ children of {child}")
+    found = 0
+    while True:
+        children = get_children(child, images)
+        if len(children) == 0:
+            break
+        child = children[0]
+        print("\t".join(images.get(child)))
+        found += 1
+        children = get_children(child, images)
+    if found == 0:
+        print(f"No child found for {child}")
 
 
 def get_children(IMAGE, images):
@@ -27,30 +59,3 @@ def get_children(IMAGE, images):
             if tag != IMAGE:
                 final_output.append(tag)
     return final_output
-
-
-def __call__(args, **kwargs):
-
-    IMAGE = args.get("imagetag")
-
-    img = system.execute_command("docker", ["images", "--all"]).split("\n")
-    img = [re.split(r"\s+", i) for i in img[1:]]
-    images = {}
-    for i in img:
-        if len(i) != 7:
-            continue
-        images[i[2]] = i
-
-    child = IMAGE
-    print("Finding all children and (grand)+ children of {}".format(child))
-    found = 0
-    while True:
-        children = get_children(child, images)
-        if len(children) == 0:
-            break
-        child = children[0]
-        print("\t".join(images.get(child)))
-        found += 1
-        children = get_children(child, images)
-    if found == 0:
-        print("No child found for {}".format(child))

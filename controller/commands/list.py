@@ -1,64 +1,56 @@
 import os
+from enum import Enum
+
+import typer
 
 from controller import COMPOSE_ENVIRONMENT_FILE, gitter, log
+from controller.app import Application
 
 
-def read_env():
-    envfile = os.path.join(os.curdir, COMPOSE_ENVIRONMENT_FILE)
-    env = {}
-    with open(envfile) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split("=")
-            k = line[0].strip()
-            v = line[1].strip()
-            env[k] = v
-    return env
+class ElementTypes(str, Enum):
+    env = "env"
+    services = "services"
+    submodules = "submodules"
 
 
-def __call__(args, active_services, compose_config, gits, **kwargs):
+@Application.app.command("list", help="Print rapydo configurations")
+def list_cmd(
+    element_type: ElementTypes = typer.Argument(
+        ..., help="Type of element to be listed"
+    ),
+):
+    Application.controller.controller_init()
 
-    printed_something = False
-    if args.get("args"):
-        printed_something = True
-        log.info("List of configured rapydo arguments:\n")
-        for var in sorted(args):
-            val = args.get(var)
-            print("{:<20}\t{}".format(var, val))
-
-    if args.get("env"):
-        printed_something = True
+    if element_type == ElementTypes.env:
         log.info("List env variables:\n")
         env = read_env()
         for var in sorted(env):
             val = env.get(var)
-            print("{:<36}\t{}".format(var, val))
+            print(f"{var:<36}\t{val}")
 
-    if args.get("active_services"):
-        printed_something = True
+    if element_type == ElementTypes.services:
         log.info("List of active services:\n")
         print("{:<12} {:<24} {}".format("Name", "Image", "Path"))
 
-        for service in compose_config:
+        for service in Application.data.compose_config:
             name = service.get("name")
-            if name in active_services:
+            if name in Application.data.active_services:
                 image = service.get("image")
                 build = service.get("build")
                 if build is None:
-                    print("{:<12} {:<24}".format(name, image))
+                    print(f"{name:<12} {image:<24}")
                 else:
                     path = build.get("context")
                     path = path.replace(os.getcwd(), "")
                     if path.startswith("/"):
                         path = path[1:]
-                    print("{:<12} {:<24} {}".format(name, image, path))
+                    print(f"{name:<12} {image:<24} {path}")
 
-    if args.get("submodules"):
-        printed_something = True
+    if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")
         print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
-        for name in gits:
-            repo = gits.get(name)
+        for name in Application.gits:
+            repo = Application.gits.get(name)
             if repo is None:
                 continue
             branch = gitter.get_active_branch(repo)
@@ -66,7 +58,16 @@ def __call__(args, active_services, compose_config, gits, **kwargs):
             path = path.replace(os.getcwd(), "")
             if path.startswith("/"):
                 path = path[1:]
-            print("{:<18} {:<18} {}".format(name, branch, path))
+            print(f"{name:<18} {branch:<18} {path}")
 
-    if not printed_something:
-        log.error("Nothing to list, please use rapydo list -h for available options")
+
+def read_env():
+    env = {}
+    with open(COMPOSE_ENVIRONMENT_FILE) as f:
+        lines = f.readlines()
+        for line in lines:
+            line = line.split("=")
+            k = line[0].strip()
+            v = line[1].strip()
+            env[k] = v
+    return env

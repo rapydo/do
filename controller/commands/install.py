@@ -1,46 +1,40 @@
-import os
+import typer
 
 from controller import SUBMODULES_DIR, gitter, log
+from controller.app import Application, Configuration
 from controller.packages import Packages
 
 
-def install_controller_from_pip(version, user):
+@Application.app.command(help="Install specified version of rapydo-controller")
+def install(
+    version: str = typer.Argument("auto", help="Version to be installed"),
+    editable: bool = typer.Option(
+        True, "--no-editable", help="Disable editable mode", show_default=False,
+    ),
+):
+    Application.controller.controller_init()
 
-    log.info("You asked to install rapydo-controller {} from pip", version)
+    if version == "auto":
+        version = Configuration.rapydo_version
+        log.info("Detected version {} to be installed", version)
 
-    package = "rapydo-controller"
-    controller = "{}=={}".format(package, version)
-    installed = Packages.install(controller, user=user)
-    if not installed:  # pragma: no cover
-        log.error("Unable to install controller {} from pip", version)
+    user_mode = not editable
+    if editable:
+        return install_controller_from_folder(
+            Application.gits, version, user_mode, editable
+        )
+
     else:
-        log.info("Controller version {} installed from pip", version)
-
-
-def install_controller_from_git(version, user):
-
-    log.info("You asked to install rapydo-controller {} from git", version)
-
-    package = "rapydo-controller"
-    controller_repository = "do"
-    rapydo_uri = "https://github.com/rapydo"
-    controller = "git+{}/{}.git@{}".format(rapydo_uri, controller_repository, version)
-
-    installed = Packages.install(controller, user=user)
-
-    if not installed:  # pragma: no cover
-        log.error("Unable to install controller {} from git", version)
-    else:
-        log.info("Controller version {} installed from git", version)
-        installed_version = Packages.check_version(package)
-        log.info("Check on installed version: {}", installed_version)
+        return install_controller_from_git(version, user_mode)
 
 
 def install_controller_from_folder(gits, version, user, editable):
 
+    Application.controller.git_submodules()
+
     log.info("You asked to install rapydo-controller {} from local folder", version)
 
-    do_path = os.path.join(SUBMODULES_DIR, "do")
+    do_path = SUBMODULES_DIR.joinpath("do")
 
     do_repo = gits.get("do")
 
@@ -65,25 +59,20 @@ def install_controller_from_folder(gits, version, user, editable):
         log.info("Check on installed version: {}", installed_version)
 
 
-def __call__(args, rapydo_version, gits, **kwargs):
+def install_controller_from_git(version, user):
 
-    version = args.get("version")
-    pip = args.get("pip")
-    editable = args.get("editable")
-    user = args.get("user")
+    log.info("You asked to install rapydo-controller {} from git", version)
 
-    if pip and editable:
-        log.exit("--pip and --editable options are not compatible")
-    if user and editable:
-        log.exit("--user and --editable options are not compatible")
+    package = "rapydo-controller"
+    controller_repository = "do"
+    rapydo_uri = "https://github.com/rapydo"
+    controller = f"git+{rapydo_uri}/{controller_repository}.git@{version}"
 
-    if version == "auto":
-        version = rapydo_version
-        log.info("Detected version {} to be installed", version)
+    installed = Packages.install(controller, user=user)
 
-    if editable:
-        return install_controller_from_folder(gits, version, user, editable)
-    elif pip:
-        return install_controller_from_pip(version, user)
+    if not installed:  # pragma: no cover
+        log.error("Unable to install controller {} from git", version)
     else:
-        return install_controller_from_git(version, user)
+        log.info("Controller version {} installed from git", version)
+        installed_version = Packages.check_version(package)
+        log.info("Check on installed version: {}", installed_version)

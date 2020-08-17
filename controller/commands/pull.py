@@ -1,21 +1,26 @@
 from controller import log
+from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
-def __call__(args, services, base_services, base_files, **kwargs):
+@Application.app.command(help="Pull available images from docker hub")
+def pull():
+    Application.controller.controller_init()
 
-    dc = Compose(files=base_files)
+    dc = Compose(files=Application.data.base_files)
 
     base_services_list = []
-    for s in base_services:
+    for s in Application.data.base_services:
         base_services_list.append(s.get("name"))
 
-    if args.get("services"):
-        for s in services:
+    if Configuration.services_list:
+        for s in Application.data.services:
             if s not in base_services_list:
                 log.exit("Invalid service name: {}", s)
     # List of BASE active services (i.e. remove services not in base)
-    services_intersection = list(set(services).intersection(base_services_list))
+    services_intersection = list(
+        set(Application.data.services).intersection(base_services_list)
+    )
 
     options = {
         "SERVICE": services_intersection,

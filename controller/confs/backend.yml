@@ -99,10 +99,8 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
-      UWSGI_APP: restapi.${PYTHON_MAIN_FILE}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
-      WSGI_SERVER: ${WSGI_SERVER}
       GUNICORN_WORKERS: ${GUNICORN_WORKERS}
       GUNICORN_WORKERS_PER_CORE: ${GUNICORN_WORKERS_PER_CORE}
       GUNICORN_MAX_NUM_WORKERS: ${GUNICORN_MAX_NUM_WORKERS}
@@ -186,24 +184,25 @@ services:
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      IRODS_ENABLE: ${ACTIVATE_IRODS}
-      IRODS_HOST: ${IRODS_HOST}
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_HOME: ${IRODS_HOME}
-      IRODS_DN: ${IRODS_DN}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
-      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
-      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
-
+      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
+      SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ADMIN: ${SMTP_ADMIN}
       SMTP_NOREPLY: ${SMTP_NOREPLY}
       SMTP_HOST: ${SMTP_HOST}
       SMTP_PORT: ${SMTP_PORT}
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
+
+      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
+      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
+      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
+      TELEGRAM_USERS: ${TELEGRAM_USERS}
+      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
+      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
+      TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
+      TELEGRAM_APP_ID: ${TELEGRAM_APP_ID}
+      TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
+      TELETHON_SESSION: ${TELETHON_SESSION}
 
       SENTRY_URL: ${SENTRY_URL}
       RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
@@ -317,6 +316,7 @@ services:
     image: rapydo/postgres:${RAPYDO_VERSION}
     volumes:
       - sqldata:/var/lib/postgresql
+      - ${VANILLA_DIR}/data/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
@@ -331,7 +331,7 @@ services:
   mariadb:
     # restart: always
     restart: on-failure:5
-    image: mariadb:10.5.3
+    image: mariadb:10.5.4
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -358,6 +358,7 @@ services:
       - graphdata:/data
       # it is used to enable SSL in production mode
       - letsencrypt_certs:${NEO4J_SSL_PATH}
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:
         aliases:
@@ -379,7 +380,7 @@ services:
 
   mongodb:
     restart: on-failure:5
-    image: mongo:4.2.6
+    image: mongo:4.2.8
     volumes:
       - mongodata:/data/db
     networks:
@@ -465,18 +466,8 @@ services:
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      IRODS_ENABLE: ${ACTIVATE_IRODS}
-      IRODS_HOST: ${IRODS_HOST}
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_HOME: ${IRODS_HOME}
-      IRODS_DN: ${IRODS_DN}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_AUTHSCHEME: ${IRODS_AUTHSCHEME}
-      IRODS_GUEST_USER: ${IRODS_GUEST_USER}
-      IRODS_DEFAULT_ADMIN_USER: ${IRODS_DEFAULT_ADMIN_USER}
-
+      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
+      SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ADMIN: ${SMTP_ADMIN}
       SMTP_NOREPLY: ${SMTP_NOREPLY}
       SMTP_HOST: ${SMTP_HOST}
@@ -514,7 +505,7 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
-    command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel ${LOG_LEVEL} --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
 
     # user: developer
     working_dir: /code
@@ -623,7 +614,7 @@ services:
 
   redis:
     restart: on-failure:5
-    image: redis:6.0.2
+    image: redis:6.0.5
     command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
@@ -633,6 +624,55 @@ services:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
+
+  bot:
+    restart: on-failure:5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    entrypoint: docker-entrypoint-bot
+    hostname: telegram-bot
+    privileged: ${DOCKER_PRIVILEGED_MODE}
+    environment:
+      ACTIVATE: ${ACTIVATE_TELEGRAM}
+      APP_MODE: ${APP_MODE}
+      LOGURU_LEVEL: ${LOG_LEVEL}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      PYTHON_PATH: ${PYTHON_PATH}
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
+      DOMAIN: ${PROJECT_DOMAIN}
+      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
+      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
+      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
+      TELEGRAM_USERS: ${TELEGRAM_USERS}
+      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
+      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
+      TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
+      TELEGRAM_APP_ID: ${TELEGRAM_APP_ID}
+      TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
+      TELETHON_SESSION: ${TELETHON_SESSION}
+
+    volumes:
+      # configuration files
+      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
+      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      # Vanilla code
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      # From project, if any
+      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
+      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      # submodules
+      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Logs
+      - ${VANILLA_DIR}/data/logs:/logs
+    networks:
+      app_net:
 
   ##########################
   ### SERVICE INTERFACES ###
@@ -719,7 +759,7 @@ services:
 
   swaggerui:
     # restart: no
-    image: swaggerapi/swagger-ui:v3.25.3
+    image: swaggerapi/swagger-ui:v3.28.0
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
     ports:
@@ -767,44 +807,6 @@ services:
       ADDED_FLAGS: -d -d
     networks:
       ftp_net:
-
-  ######################################################
-  ###  iRODS iCAT server (usually for EUDAT B2safe)  ###
-  ######################################################
-  icat:
-    # restart: no
-    # B2safe instance on irods
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/icat
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/icat:${RAPYDO_VERSION}
-    hostname: ${IRODS_HOST}
-    # command: sleep infinity
-    environment:
-      ACTIVATE: ${ACTIVATE_ICAT}
-      CURRENT_UID: ${CURRENT_UID}
-      CURRENT_GID: ${CURRENT_GID}
-      POSTGRES_USER: ${ALCHEMY_USER}
-      POSTGRES_PASSWORD: ${ALCHEMY_PASSWORD}
-      POSTGRES_HOST: ${ALCHEMY_HOST}
-      IRODS_HOST: "${IRODS_HOST}"
-      IRODS_PORT: ${IRODS_PORT}
-      IRODS_ZONE: ${IRODS_ZONE}
-      IRODS_USER: ${IRODS_USER}
-      IRODS_PASSWORD: ${IRODS_PASSWORD}
-      IRODS_DB: "${IRODS_DB}"
-
-      IRODS_ANONYMOUS: ${IRODS_ANONYMOUS}
-    networks:
-      app_net:
-        aliases:
-          - ${IRODS_HOST}
-      db_net:
-    depends_on:
-      - postgres
 
   pushpin:
     restart: always

@@ -2,16 +2,15 @@ version: "3"
 
 services:
   frontend:
-    # image: rapydo/frontend
     build:
-      context: ${SUBMODULE_DIR}/build-templates/frontend
+      context: ${SUBMODULE_DIR}/build-templates/react
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/frontend:${RAPYDO_VERSION}
+    image: rapydo/react:${RAPYDO_VERSION}
     # command: sleep infinity
-    hostname: frontend
+    hostname: react
     # working_dir: /rapydo/
     environment:
       ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
@@ -26,7 +25,7 @@ services:
       BACKEND_HOST: ${PROJECT_DOMAIN}
     volumes:
       - ${PROJECT_DIR}:/app
-      - ${SUBMODULE_DIR}/frontend/:/rapydo
+      - ${SUBMODULE_DIR}/rapydo-react/:/rapydo
       - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/modules
 
   ###############################

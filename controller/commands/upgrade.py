@@ -1,17 +1,26 @@
+from pathlib import Path
+
+import typer
 from glom import glom
 
 from controller import EXTENDED_PROJECT_DISABLED
-from controller.commands.create import create
+from controller.app import Application, Configuration
+from controller.commands.create import create_project
 
-# from controller import log
 
+@Application.app.command(help="Upgrade a project by re-applying the templates")
+def upgrade(
+    path: Path = typer.Option(
+        ..., "--path", help="path of file to be upgraded", show_default=False,
+    ),
+):
+    Application.controller.controller_init()
 
-def __call__(args, project, conf_vars, services, **kwargs):
-
-    path = args.get("path", None)
-    frontend = glom(conf_vars, "env.FRONTEND_FRAMEWORK", default=None)
-    auth = glom(conf_vars, "env.AUTH_SERVICE", default=None)
-    extend = glom(conf_vars, "env.EXTENDED_PROJECT", default=None)
+    frontend = glom(
+        Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=None
+    )
+    auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
+    extend = glom(Configuration.specs, "variables.env.EXTENDED_PROJECT", default=None)
 
     if extend == EXTENDED_PROJECT_DISABLED:
         extend = None
@@ -19,11 +28,11 @@ def __call__(args, project, conf_vars, services, **kwargs):
     force = path is not None
     auto = path is not None
 
-    create(
-        project_name=project,
+    create_project(
+        project_name=Configuration.project,
         auth=auth,
         frontend=frontend,
-        services=services,
+        services=Application.data.services,
         extend=extend,
         force_current=True,
         force=force,

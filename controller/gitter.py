@@ -1,13 +1,13 @@
-import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from urllib.parse import urlparse
 
 import pytz
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from controller import SUBMODULES_DIR, TESTING, log
+from controller import SUBMODULES_DIR, log
 
 
 def get_repo(path):
@@ -54,7 +54,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         return False
 
     if gitobj.active_branch.name == branch_name:
-        path = os.path.basename(gitobj.working_dir)
+        path = Path(gitobj.working_dir).name
         log.info("{} already set on branch {}", path, branch_name)
         return True
 
@@ -67,7 +67,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
     branch_found = False
     for branch in branches:
         if remote:
-            branch_found = branch.name.endswith("/{}".format(branch_name))
+            branch_found = branch.name.endswith(f"/{branch_name}")
         else:
             branch_found = branch.name == branch_name
 
@@ -84,26 +84,24 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         log.error(e)
         return False
 
-    path = os.path.basename(gitobj.working_dir)
+    path = Path(gitobj.working_dir).name
     log.info("Switched branch to {} on {}", branch, path)
     return True
 
 
-def clone(online_url, path, branch, do=False, check=True):
+def clone(url, path, branch, do=False, check=True):
 
-    local_path = os.path.join(os.curdir, SUBMODULES_DIR, path)
+    local_path = SUBMODULES_DIR.joinpath(path)
 
-    if os.path.exists(local_path):
+    if local_path.exists():
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
-        gitobj = Repo.clone_from(url=online_url, to_path=local_path)
-        log.info("Cloned {}@{} as {}", online_url, branch, path)
+        gitobj = Repo.clone_from(url=url, to_path=local_path)
+        log.info("Cloned {}@{} as {}", url, branch, path)
     else:
         log.exit(
-            "Repo {} missing as {}. You should init your project",
-            online_url,
-            local_path,
+            "Repo {} missing as {}. You should init your project", url, local_path,
         )
 
     if do:
@@ -112,7 +110,7 @@ def clone(online_url, path, branch, do=False, check=True):
             log.exit("Cannot switch repo {} to version {}", local_path, branch)
 
     if check:
-        compare_repository(gitobj, branch, online_url=online_url, path=path)
+        compare_repository(gitobj, branch, online_url=url, path=path)
 
     return gitobj
 
@@ -209,9 +207,7 @@ def print_diff(gitobj, unstaged):
     if not changed and not untracked:
         return False
 
-    repo_folder = gitobj.working_dir.replace(os.getcwd(), "")
-    if repo_folder.startswith("/"):
-        repo_folder = repo_folder[1:]
+    repo_folder = str(Path(gitobj.working_dir).relative_to(Path.cwd()))
     if not repo_folder.endswith("/"):
         repo_folder += "/"
     if repo_folder == "/":  # pragma: no cover
@@ -220,12 +216,12 @@ def print_diff(gitobj, unstaged):
     if changed:
         print("\nChanges not staged for commit:")
         for f in unstaged["changed"]:
-            print("\t{}{}".format(repo_folder, f.a_path))
+            print(f"\t{repo_folder}{f.a_path}")
         print("")
     if untracked:
         print("\nUntracked files:")
         for f in unstaged["untracked"]:
-            print("\t{}{}".format(repo_folder, f))
+            print(f"\t{repo_folder}{f}")
         print("")
 
     return True
@@ -246,15 +242,12 @@ def update(path, gitobj):
         if remote.name == "origin":
             try:
                 branch = gitobj.active_branch
-                log.info("Updating {} {} (branch {})", remote, path, branch)
+                log.info("Updating {} {}@{}", remote, path, branch)
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
             except TypeError as e:  # pragma: no cover
-                if TESTING:
-                    log.warning("Unable to update {} repo, {}", path, e)
-                else:
-                    log.exit("Unable to update {} repo, {}", path, e)
+                log.exit("Unable to update {} repo, {}", path, e)
 
 
 def check_unstaged(path, gitobj):
@@ -290,7 +283,7 @@ def check_updates(path, gitobj):
     log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = "{}..origin/{}".format(branch, branch)
+    behind_check = f"{branch}..origin/{branch}"
     commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
 
     try:
@@ -315,7 +308,7 @@ def check_updates(path, gitobj):
                     message = message[0:57] + "..."
                 log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
-    ahead_check = "origin/{}..{}".format(branch, branch)
+    ahead_check = f"origin/{branch}..{branch}"
     commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
     try:
         commits_ahead_list = list(commits_ahead)

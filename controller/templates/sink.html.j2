@@ -1,0 +1,108 @@
+{% raw %}
+
+<div class="container-fluid">
+  <div class="row justify-content-md-center">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4>Kitchen Sink</h4>
+        </div>
+
+        <div class="card-block">
+
+          <ul ngbNav #nav="ngbNav" class="nav-tabs">
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-formly</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+
+                  <form [formGroup]="form" (ngSubmit)="submit()">
+                    <formly-form [form]="form" [fields]="fields1" [model]="model">
+                    </formly-form>
+
+                    <button type="submit" class="btn btn-success">
+                      <h5>Submit</h5>
+                    </button>
+
+                  </form>
+
+                  <br>
+
+                  <div *ngIf='data' class='card'>
+                    <div class='card-body'>
+                      {{ data | json }}
+                    </div>
+                  </div>
+
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>horizontal forms</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+
+                  <form [formGroup]="form" (ngSubmit)="submit()">
+                    <formly-form [form]="form" [fields]="fields2" [model]="model">
+                    </formly-form>
+
+                    <button type="submit" class="btn btn-success">
+                      <h5>Submit</h5>
+                    </button>
+                  </form>
+
+                  <br>
+
+                  <div *ngIf='data' class='card'>
+                    <div class='card-body'>
+                      {{ data | json }}
+                    </div>
+                  </div>
+
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-uploadx</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+                  Content
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>ngx-datatable</a>
+              <ng-template ngbNavContent>
+                <br>
+                <div class='row'>
+                <div class='col-12'>
+                  Content
+                </div>
+                </div>
+              </ng-template>
+            </li>
+
+          </ul>
+
+          <div [ngbNavOutlet]="nav"></div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endraw %}

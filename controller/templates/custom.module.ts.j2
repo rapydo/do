@@ -1,10 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { RapydoModule } from '@rapydo/rapydo.module';
+import { SharedModule } from '@rapydo/shared.module';
 import { AuthGuard } from '@rapydo/app.auth.guard';
 
 // import { MyComponent } from './components/mycomponent'
+{% if testing -%}
+import { SinkComponent } from '@app/components/sink/sink';
+{% endif -%}
 
 const routes: Routes = [
   {
@@ -17,6 +20,14 @@ const routes: Routes = [
     redirectTo: '/app/profile',
     pathMatch: 'full'
   },
+  {% if testing -%}
+  {
+    path: 'app/sink',
+    component: SinkComponent,
+    canActivate: [AuthGuard],
+    runGuardsAndResolvers: 'always',
+  },
+  {% endif -%}
 /*
   {
     path: 'app/myroute',
@@ -29,10 +40,13 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
-    RapydoModule,
+    SharedModule,
     RouterModule.forChild(routes),
   ],
   declarations: [
+    {% if testing -%}
+    SinkComponent,
+    {% endif -%}
     // MyComponent
   ],
 

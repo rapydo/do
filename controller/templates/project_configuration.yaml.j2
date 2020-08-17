@@ -42,12 +42,6 @@ variables:
     {% if enable_redis -%}
     ACTIVATE_REDIS: 1
     {% endif -%}
-    {% if enable_irods -%}
-    ACTIVATE_ICAT: 1
-    ACTIVATE_IRODS: 1
-    BACKEND_BUILD_MODE: backendirods
-    ALCHEMY_DBS: 'ICAT SQL_API'
-    {% endif -%}
     {% if enable_celery -%}
     ACTIVATE_CELERY: 1
     ACTIVATE_CELERYUI: 1
@@ -60,6 +54,9 @@ variables:
     {% endif -%}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1
+    {% endif -%}
+    {% if enable_bot -%}
+    ACTIVATE_TELEGRAM: 1
     {% endif -%}
     {% if celery_broker -%}
     CELERY_BROKER: {{ celery_broker }}

@@ -1,9 +1,10 @@
+from controller.app import Application
 from controller.compose import Compose
 
-# from controller import log
 
+@Application.app.command(help="Show current containers status")
+def status():
+    Application.controller.controller_init()
 
-def __call__(files, **kwargs):
-
-    dc = Compose(files=files)
-    dc.command("ps", {"-q": None, "--services": None, "--quiet": False, "--all": False})
+    dc = Compose(files=Application.data.files)
+    dc.command("ps", {"--quiet": False, "--services": None, "--all": False})

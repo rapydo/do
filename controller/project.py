@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -6,11 +7,14 @@ NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
 REACT = "react"
 
+DATA = Path("data")
+SUBMODULES = Path("submodules")
+
 
 # move here all checks on project (required files, creation functions, templating, etc)
 class Project:
     def __init__(self):
-        self.expected_main_folders = [PROJECT_DIR, "data", "submodules"]
+        self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
         self.expected_folders = []
         self.expected_files = []
@@ -22,11 +26,11 @@ class Project:
         # Created in data if missing
         self.data_folders = []
         self.data_files = []
-        # check will raise an errore if these files will be found
+        # check will raise an error if these files will be found
         self.obsolete_files = []
 
     def p_path(self, *args):
-        return os.path.join(PROJECT_DIR, self.project, *args)
+        return PROJECT_DIR.joinpath(self.project, *args)
 
     def load_project_scaffold(self, project, auth):
         self.project = project
@@ -47,10 +51,10 @@ class Project:
         self.expected_files.append(
             self.p_path("backend", "initialization", "initialization.py")
         )
-        self.expected_files.append(".gitignore")
+        self.expected_files.append(Path(".gitignore"))
 
         if auth is not None:
-            model_file = "{}.py".format(auth)
+            model_file = f"{auth}.py"
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
@@ -68,16 +72,19 @@ class Project:
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
 
-        self.recommended_files.append(".pre-commit-config.yaml")
-        self.recommended_files.append(".isort.cfg")
-        self.recommended_files.append("pyproject.toml")
-        self.recommended_files.append(".flake8")
-        self.data_folders.extend([os.path.join("data", "logs")])
+        self.recommended_files.append(Path(".pre-commit-config.yaml"))
+        self.recommended_files.append(Path(".isort.cfg"))
+        self.recommended_files.append(Path("pyproject.toml"))
+        self.recommended_files.append(Path(".flake8"))
+        self.data_folders.extend([DATA.joinpath("logs")])
+        self.data_folders.extend([DATA.joinpath("backup")])
 
         # Deprecated since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
         # Deprecated since 0.7.4
-        self.obsolete_files.append(os.path.join("submodules", "rapydo-confs"))
+        self.obsolete_files.append(SUBMODULES.joinpath("rapydo-confs"))
+        # Deprecated since 0.7.5
+        self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
 
         return True
 
@@ -115,31 +122,29 @@ class Project:
                 ]
             )
 
-            data_dir = os.path.join("data", self.project, "frontend")
+            frontend_data_dir = DATA.joinpath(self.project, "frontend")
             self.data_folders.extend(
                 [
-                    data_dir,
-                    os.path.join(data_dir, "app"),
-                    os.path.join(data_dir, "courtesy"),
-                    os.path.join(data_dir, "e2e"),
-                    os.path.join(data_dir, "node_modules"),
-                    os.path.join("data", self.project, "karma"),
-                    os.path.join("data", self.project, "cypress"),
+                    frontend_data_dir,
+                    frontend_data_dir.joinpath("app"),
+                    frontend_data_dir.joinpath("courtesy"),
+                    frontend_data_dir.joinpath("node_modules"),
+                    DATA.joinpath(self.project, "karma"),
+                    DATA.joinpath(self.project, "cypress"),
                 ]
             )
 
             self.data_files.extend(
                 [
-                    os.path.join(data_dir, "angular.json"),
-                    os.path.join(data_dir, "browserslist"),
-                    os.path.join(data_dir, "karma.conf.js"),
-                    os.path.join(data_dir, "package.json"),
-                    os.path.join(data_dir, "polyfills.ts"),
-                    os.path.join(data_dir, "tsconfig.app.json"),
-                    os.path.join(data_dir, "tsconfig.json"),
-                    os.path.join(data_dir, "tsconfig.spec.json"),
-                    os.path.join(data_dir, "tslint.json"),
-                    os.path.join(data_dir, "cypress.json"),
+                    frontend_data_dir.joinpath("angular.json"),
+                    frontend_data_dir.joinpath("browserslist"),
+                    frontend_data_dir.joinpath("karma.conf.js"),
+                    frontend_data_dir.joinpath("package.json"),
+                    frontend_data_dir.joinpath("polyfills.ts"),
+                    frontend_data_dir.joinpath("tsconfig.app.json"),
+                    frontend_data_dir.joinpath("tsconfig.json"),
+                    frontend_data_dir.joinpath("tsconfig.spec.json"),
+                    frontend_data_dir.joinpath("cypress.json"),
                 ]
             )
 
@@ -175,7 +180,7 @@ class Project:
                 log.exit(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
-                    ",".join(projects),
+                    ", ".join(projects),
                 )
             project = projects.pop()
 
@@ -186,38 +191,58 @@ class Project:
                 )
             )
 
-        ABS_PROJECT_PATH = os.path.join(PROJECT_DIR, project)
-        return project, ABS_PROJECT_PATH
+        if "_" in project:
+            log.exit(
+                "Wrong project name, _ is not a valid character."
+                "\nPlease consider to rename {} into {}",
+                project,
+                project.replace("_", ""),
+            )
 
-    def find_main_folder(self):
-        first_level_error = self.inspect_main_folder()
+        if project in Project.reserved_project_names:
+            log.exit(
+                "You selected a reserved name, invalid project name: {}", project,
+            )
+
+        return project
+
+    def check_main_folder(self):
+        folder = Path(os.getcwd())
+        first_level_error = self.inspect_main_folder(folder)
+        # No error raised: the current folder is a valid rapydo root
         if first_level_error is None:
-            return first_level_error
-        cwd = os.getcwd()
+            return None
+
+        # Errors on the current folder, let's verify parents
         num_iterations = 0
-        while cwd != "/" and num_iterations < 10:
+        while str(folder) != "/" and num_iterations < 10:
+            folder = folder.parent
             num_iterations += 1
-            # TODO: use utils.path here
-            os.chdir("..")
-            cwd = os.getcwd()
-            if self.inspect_main_folder() is not None:
+            # Errors at this level, let's continue to verify parents
+            if self.inspect_main_folder(folder) is not None:
                 continue
             # You found a rapydo folder among your parents!
-            log.warning(
-                "You are not in the main folder, working dir changed to {}", cwd,
+            # Let's suggest to change dir
+
+            # This is ../../etc
+            relative_path = "/".join([".."] * num_iterations)
+
+            return (
+                "You are not in the main folder, please change your working dir"
+                f"\nFound a valid parent folder: {folder}"
+                f"\nSuggested command: cd {relative_path}"
             )
-            first_level_error = None
-            break
+
         return first_level_error
 
-    def inspect_main_folder(self):
+    def inspect_main_folder(self, folder):
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
         on file existence. Further checks are performed in the following steps
         """
 
-        r = gitter.get_repo(".")
+        r = gitter.get_repo(str(folder))
         if r is None or gitter.get_origin(r) is None:
             return """You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
@@ -227,13 +252,13 @@ Verify that you are in the right folder, now you are in: {}
             )
 
         for fpath in self.expected_main_folders:
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+            if not folder.joinpath(fpath).is_dir():
 
                 return """Folder not found: {}
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {}
                     """.format(
-                    fpath, os.getcwd()
+                    fpath, Path.cwd()
                 )
 
         return None
@@ -241,8 +266,7 @@ Verify that you are in the right folder, now you are in: {}
     def inspect_project_folder(self):
 
         for fpath in self.expected_folders:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isdir(fpath):
+            if not fpath.is_dir():
                 log.exit(
                     "Project {} is invalid: required folder not found {}",
                     self.project,
@@ -250,8 +274,7 @@ Verify that you are in the right folder, now you are in: {}
                 )
 
         for fpath in self.expected_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if not os.path.exists(fpath) or not os.path.isfile(fpath):
+            if not fpath.is_file():
                 log.exit(
                     "Project {} is invalid: required file not found {}",
                     self.project,
@@ -259,8 +282,7 @@ Verify that you are in the right folder, now you are in: {}
                 )
 
         for fpath in self.obsolete_files:
-            # fpath = os.path.join(PROJECT_DIR, self.project, fname)
-            if os.path.exists(fpath):
+            if fpath.exists():
                 log.exit(
                     "Project {} contains an obsolete file or folder: {}",
                     self.project,
@@ -291,8 +313,6 @@ Verify that you are in the right folder, now you are in: {}
         "hmac",
         "inspect",
         "io",
-        "irods",
-        "iRODSPickleSession",
         "json",
         "jwt",
         "logging",

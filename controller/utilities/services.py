@@ -4,6 +4,13 @@ from controller import log
 from controller.project import ANGULAR
 
 
+def get_services(services, default):
+
+    if services:
+        return services.split(",")
+    return default
+
+
 def walk_services(actives, dependecies, index=0):
 
     if index >= len(actives):
@@ -69,7 +76,6 @@ vars_to_services_mapping = {
     "ALCHEMY_USER": ["postgres", "mariadb"],
     "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
     "NEO4J_PASSWORD": ["neo4j"],
-    "IRODS_ANONYMOUS": ["icat"],
     "AUTH_DEFAULT_PASSWORD": ["backend"],
     "AUTH_DEFAULT_USERNAME": ["backend"],
     "SMTP_PORT": ["backend"],
@@ -78,8 +84,8 @@ vars_to_services_mapping = {
     "SMTP_HOST": ["backend"],
     "SMTP_USERNAME": ["backend"],
     "SMTP_PASSWORD": ["backend"],
-    "IRODS_PASSWORD": ["icat"],
-    "IRODS_USER": ["icat"],
+    "TELEGRAM_API_KEY": ["bot"],
+    "TELEGRAM_ADMINS": ["bot"],
 }
 
 
@@ -157,6 +163,9 @@ def get_default_command(service):
 
     if service == "backend":
         return "restapi launch"
+
+    if service == "bot":
+        return "restapi bot"
 
     if service == "neo4j":
         return "bin/cypher-shell"
