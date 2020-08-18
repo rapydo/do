@@ -38,7 +38,7 @@ class Project:
         self.expected_folders.append(self.p_path("confs"))
         self.expected_folders.append(self.p_path("builds"))
         self.expected_folders.append(self.p_path("backend"))
-        self.expected_folders.append(self.p_path("backend", "apis"))
+        self.expected_folders.append(self.p_path("backend", "endpoints"))
         self.expected_folders.append(self.p_path("backend", "models"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
@@ -58,7 +58,7 @@ class Project:
             self.expected_files.append(self.p_path("backend", "models", model_file))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
-        self.optionals_files.append(self.p_path("backend", "apis", "profile.py"))
+        self.optionals_files.append(self.p_path("backend", "endpoints", "profile.py"))
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "activate_account.html")
         )
@@ -79,12 +79,14 @@ class Project:
         self.data_folders.extend([DATA.joinpath("logs")])
         self.data_folders.extend([DATA.joinpath("backup")])
 
-        # Deprecated since 0.7.1
+        # Removed since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
-        # Deprecated since 0.7.4
+        # Removed since 0.7.4
         self.obsolete_files.append(SUBMODULES.joinpath("rapydo-confs"))
-        # Deprecated since 0.7.5
+        # Removed since 0.7.5
         self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
+        # Removed since 0.7.6
+        self.obsolete_files.append(self.p_path("backend", "apis"))
 
         return True
 
