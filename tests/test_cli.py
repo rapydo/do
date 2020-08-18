@@ -308,7 +308,7 @@ def test_all(capfd):
             "Project first is invalid: required file not found .gitignore",
         )
 
-    path = "projects/first/backend/apis/xyz.py"
+    path = "projects/first/backend/endpoints/xyz.py"
     assert not os.path.exists(path)
     exec_command(
         capfd, "add endpoint xyz", f"Endpoint created: {path}",
