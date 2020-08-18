@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-current_version = "0.7.5"
+current_version = "0.7.6"
 
 setup(
     name="rapydo_controller",

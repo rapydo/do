@@ -4,7 +4,7 @@ from pathlib import Path
 
 from loguru import logger as log
 
-__version__ = "0.7.5"
+__version__ = "0.7.6"
 
 DATA_FOLDER = Path("data")
 LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
