@@ -297,7 +297,6 @@ Verify that you are in the right folder, now you are in: {}
         "abc",
         "attr",
         "base64",
-        "bravado_core",
         "celery",
         "click",
         "collections",
