@@ -1,5 +1,5 @@
 from restapi import decorators
-from restapi.models import fields, InputSchema, Schema,  # validate
+from restapi.models import fields, InputSchema, Schema  #,  validate
 from restapi.rest.definition import EndpointResource
 from restapi.utilities.logs import log
 
@@ -76,8 +76,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
     @decorators.auth.require()
     @decorators.use_kwargs(MyInputSchema)
-    @decorators.auth.require()
-    @decorators.use_kwargs(MyInputSchema)
     @decorators.endpoint(
         path="/{{name.replace(" ", "_").lower()}}/<uuid>",
         summary="...",
@@ -99,8 +97,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         return self.empty_response()
 
     @decorators.auth.require()
-    @decorators.auth.require()
-    @decorators.use_kwargs(MyInputSchema)
     @decorators.endpoint(
         path="/{{name.replace(" ", "_").lower()}}/<uuid>",
         summary="...",
