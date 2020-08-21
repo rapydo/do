@@ -34,7 +34,7 @@ setup(
         "GitPython==3.1.7",
         "PyYAML==5.3.1",
         "pip>=10.0.0",
-        "typer[all]==0.3.0",
+        "typer[all]==0.3.2",
     ],
     keywords=["http", "api", "rest", "web", "backend", "rapydo"],
     classifiers=[

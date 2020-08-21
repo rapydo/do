@@ -33,7 +33,7 @@ known_latests = {
         "rabbitmq": "3.8.7",
         "neo4j": "3.5.20",
         "postgres": "12.4-alpine",
-        "nginx": "1.19.2",
+        "nginx": "1.19.2-alpine",
         "ubuntu": "20.04",
         "stilliard/pure-ftpd": "stretch-latest",
     },
