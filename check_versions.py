@@ -2,6 +2,7 @@ import distutils.core
 import json
 import os
 import re
+from datetime import datetime
 from glob import glob
 from pathlib import Path
 
@@ -9,6 +10,7 @@ import click
 import requests
 import yaml
 from bs4 import BeautifulSoup
+from glom import glom
 from loguru import logger as log
 from prettyprinter import pprint as pp
 
@@ -16,6 +18,36 @@ from prettyprinter import pprint as pp
 # this way the script will be allowed to access all required files
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
+
+known_update = "2020-08-21"
+known_latests = {
+    "docker": {
+        "mariadb": "10.5.5",
+        "mongo": "4.4.0",
+        "redis": "6.0.6",
+        "swaggerapi/swagger-ui": "v3.32.4",
+        "adminer": "4.7.7-standalone",
+        "mongo-express": "0.54.0",
+        "fanout/pushpin": "1.30.0",
+        "node": "14.8.0-buster",
+        "rabbitmq": "3.8.7",
+        "neo4j": "3.5.20",
+        "postgres": "12.4-alpine",
+        "nginx": "1.19.2",
+        "ubuntu": "20.04",
+        "stilliard/pure-ftpd": "stretch-latest",
+    },
+    "acme": "2.8.6",
+    # Not used
+    "urls": {"isort": "", "prettier": "", "pyupgrade": "", "black": "", "flake8": ""},
+}
+
+prevent_duplicates = {}
+
+now = datetime.now().strftime("%Y-%m-%d")
+if now != known_update:
+    log.warning("List of known latests is obsolete, ignoring it")
+    known_latests = {}
 
 
 def load_yaml_file(filepath):
@@ -67,7 +99,18 @@ def check_updates(category, lib):
 
     elif category in ["compose", "Dockerfile"]:
         token = lib.split(":")
-        print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
+        latest = glom(known_latests, f"docker.{token[0]}", default="????")
+
+        if latest == "????":
+            log.warning("Unknown latest version for {}", token[0])
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> {latest}")
+            if "/" in token[0]:
+                print(f"https://hub.docker.com/r/{token[0]}?tab=tags")
+            else:
+                print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
+            print("")
     elif category in ["package.json", "dev-package.json", "npm"]:
         lib = lib.strip()
         if ":" in lib:
@@ -91,9 +134,20 @@ def check_updates(category, lib):
 
     elif category in ["ACME"]:
         token = lib.split(":")
-        print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
+
+        latest = glom(known_latests, "acme", default="????")
+
+        if latest == "????":
+            log.warning("Unknown latest version acme.sh")
+
+        if latest != token[1]:
+            print(f"# {token[1]} -> ????")
+            print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
+            print("")
     elif category == "url":
-        print(lib)
+        if lib not in prevent_duplicates:
+            print(lib)
+            prevent_duplicates[lib] = True
     else:
         log.critical("{}: {}", category, lib)
 
@@ -103,6 +157,9 @@ def parse_npm(url, lib):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html5lib")
     span = soup.find("span", attrs={"title": lib})
+    if span is None:
+        log.error("Span not found for: {} ({})", lib, url)
+
     return span.next_element.next_element.text.split("\xa0")[0]
 
 
@@ -223,7 +280,8 @@ def parsePrecommitConfig(f, dependencies, key):
 
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
-def check_versions(skip_angular=False):
+@click.option("--verbose", is_flag=True, default=False)
+def check_versions(skip_angular=False, verbose=False):
 
     dependencies = {}
 
@@ -358,7 +416,8 @@ def check_versions(skip_angular=False):
 
         # print(service)
 
-    pp(filtered_dependencies)
+    if verbose:
+        pp(filtered_dependencies)
 
 
 if __name__ == "__main__":
