@@ -654,7 +654,7 @@ def test_all(capfd):
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo --service backend pull",
+        "Update it with: rapydo --services backend pull",
     )
 
     exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
@@ -1118,7 +1118,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --service rabbit build",
+        "Update it with: rapydo --services rabbit build",
     )
 
     # rabbit images has no longer any child because it is just rebuilt
