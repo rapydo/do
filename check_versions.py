@@ -19,7 +19,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-08-21"
+known_update = "2020-08-22"
 known_latests = {
     "docker": {
         "mariadb": "10.5.5",
@@ -81,7 +81,8 @@ def check_updates(category, lib):
         if "==" in lib:
             token = lib.split("==")
         elif ">=" in lib:
-            token = lib.split(">=")
+            return None
+            # token = lib.split(">=")
         else:
             log.critical("Invalid lib format: {}", lib)
 
@@ -159,6 +160,7 @@ def parse_npm(url, lib):
     span = soup.find("span", attrs={"title": lib})
     if span is None:
         log.error("Span not found for: {} ({})", lib, url)
+        return "unknown"
 
     return span.next_element.next_element.text.split("\xa0")[0]
 

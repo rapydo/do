@@ -20,6 +20,18 @@ jobs:
   include:
     - stage: test
       python: 3.6
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.7
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.8
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.6
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface
