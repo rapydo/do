@@ -629,6 +629,7 @@ services:
         print(e)
 
     # Template project is based on sql
+    """
     exec_command(
         capfd,
         "rapydo verify neo4j",
@@ -639,6 +640,7 @@ services:
         "rapydo verify sqlalchemy",
         'Service sqlalchemy is reachable'
     )
+    """
 
     exec_command(
         capfd,
