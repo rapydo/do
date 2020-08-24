@@ -892,7 +892,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "volatile backend -u invalid --command whoami",
-        "Error response from daemon: linux spec user: unable to find user invalid:",
+        "Error response from daemon:",
+        "unable to find user invalid:",
         "no matching entries in passwd file",
     )
 
