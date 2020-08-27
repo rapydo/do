@@ -208,12 +208,12 @@ class Compose:
             )
         return self.command("exec_command", options)
 
-    def get_running_containers(self, prefix):
+    def get_containers_status(self, prefix):
         with StringIO() as buf, redirect_stdout(buf):
             self.command("ps", {"--quiet": False, "--services": False, "--all": False})
             output = buf.getvalue().split("\n")
 
-            containers = set()
+            containers = {}
             for row in output:
                 if row == "":
                     continue
@@ -225,14 +225,22 @@ class Compose:
                 # Name   Command   State   Ports
                 # Split on two or more spaces
                 row = re.split(r"\s\s+", row)
-                if row[2] != "Up":
-                    continue
+                status = row[2]
                 row = row[0]
                 # Removed the prefix (i.e. project name)
                 row = row[1 + len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
                 row = row[0 : row.index("_")]
 
-                containers.add(row)
+                containers[row] = status
 
             return containers
+
+    def get_running_containers(self, prefix):
+        containers_status = self.get_containers_status(prefix)
+        containers = set()
+        for name, status in containers_status.items():
+            if status != "Up":
+                continue
+            containers.add(name)
+        return containers
