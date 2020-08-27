@@ -227,6 +227,8 @@ class Compose:
                 row = re.split(r"\s\s+", row)
                 status = row[2]
                 row = row[0]
+                if row == "Name":
+                    continue
                 # Removed the prefix (i.e. project name)
                 row = row[1 + len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)

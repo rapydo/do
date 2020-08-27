@@ -32,9 +32,8 @@ def list_cmd(
     if element_type == ElementTypes.services:
         log.info("List of active services:\n")
 
-        # dc = Compose(files=Application.data.files)
-        # containers_status = dc.get_containers_status(Configuration.project)
-        containers_status = {}
+        dc = Compose(files=Application.data.files)
+        containers_status = dc.get_containers_status(Configuration.project)
 
         print("{:<12} {:<8} {:<24} Path".format("Name", "Status", "Image"))
         for service in Application.data.compose_config:
