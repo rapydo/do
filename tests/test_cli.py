@@ -1143,7 +1143,7 @@ RUN mkdir xyz
         capfd,
         "-s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
-        "Removed redundant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
+        "Removed redundant builds from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
 
     # Let's test builds with running containers

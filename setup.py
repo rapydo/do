@@ -5,10 +5,8 @@ current_version = "0.7.6"
 setup(
     name="rapydo_controller",
     version=current_version,
-    author="Paolo D'Onorio De Meo",
-    author_email="p.donorio.de.meo@gmail.com",
     description="Manage and deploy projects based on RAPyDo framework",
-    url="https://github.com/rapydo",
+    url="https://rapydo.github.io/docs",
     license="MIT",
     packages=find_packages(where=".", exclude=["tests*"]),
     package_data={"controller": ["templates/*", "confs/*"]},
