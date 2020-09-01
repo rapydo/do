@@ -13,6 +13,15 @@ class CustomProfile:
         return data
 
     @staticmethod
+    def get_user_editable_fields(request):
+
+        # return custom fields or a part of them
+        # fields = CustomProfile.get_custom_fields(request)
+
+        # or return something else, maybe an empty dict if extra fields are not editable
+        return {}
+
+    @staticmethod
     def get_custom_fields(request):
 
         required = request and request.method == "POST"
