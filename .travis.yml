@@ -3,6 +3,8 @@ language: python
 services:
   - docker
 script:
+  - pip3 install --upgrade pip==20.2.2
+  - pip3 --version
   - pip3 install --upgrade setuptools pytest pytest-cov
   - pip3 install --upgrade --no-cache-dir --editable .
   - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
