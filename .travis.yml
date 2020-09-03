@@ -6,7 +6,6 @@ script:
   - pip3 install --upgrade pip setuptools pytest pytest-cov
   - pip3 install --upgrade --no-cache-dir --editable .
   - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
-  # - git clone -b ${BRANCH} --depth=1 https://github.com/rapydo/tests.git rapydo_tests
   - mkdir rapydo_tests
   - cd rapydo_tests
   - mkdir -p data/logs
