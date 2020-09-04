@@ -308,7 +308,7 @@ def test_all(capfd):
             "Project first is invalid: required file not found .gitignore",
         )
 
-    path = "projects/first/backend/apis/xyz.py"
+    path = "projects/first/backend/endpoints/xyz.py"
     assert not os.path.exists(path)
     exec_command(
         capfd, "add endpoint xyz", f"Endpoint created: {path}",
@@ -654,7 +654,7 @@ def test_all(capfd):
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo --service backend pull",
+        "Update it with: rapydo --services backend pull",
     )
 
     exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
@@ -892,7 +892,8 @@ def test_all(capfd):
     exec_command(
         capfd,
         "volatile backend -u invalid --command whoami",
-        "Error response from daemon: linux spec user: unable to find user invalid:",
+        "Error response from daemon:",
+        "unable to find user invalid:",
         "no matching entries in passwd file",
     )
 
@@ -1117,7 +1118,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --service rabbit build",
+        "Update it with: rapydo --services rabbit build",
     )
 
     # rabbit images has no longer any child because it is just rebuilt
@@ -1142,7 +1143,7 @@ RUN mkdir xyz
         capfd,
         "-s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
-        "Removed redundant services from ['rabbit', 'rabbit2'] -> ['rabbit2']",
+        "Removed redundant builds from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
 
     # Let's test builds with running containers

@@ -47,11 +47,9 @@ class Packages:
                 pip = sultan.pip3 if use_pip3 else sultan.pip
                 result = pip(command).run()
 
-                for r in result.stdout:
+                for r in result.stdout + result.stderr:
                     print(r)
 
-                for r in result.stderr:
-                    print(r)
                 return result.rc == 0
         except BaseException as e:  # pragma: no cover
             log.exit(e)

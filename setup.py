@@ -1,14 +1,12 @@
 from setuptools import find_packages, setup
 
-current_version = "0.7.5"
+current_version = "0.7.6"
 
 setup(
     name="rapydo_controller",
     version=current_version,
-    author="Paolo D'Onorio De Meo",
-    author_email="p.donorio.de.meo@gmail.com",
     description="Manage and deploy projects based on RAPyDo framework",
-    url="https://github.com/rapydo",
+    url="https://rapydo.github.io/docs",
     license="MIT",
     packages=find_packages(where=".", exclude=["tests*"]),
     package_data={"controller": ["templates/*", "confs/*"]},
@@ -34,7 +32,7 @@ setup(
         "GitPython==3.1.7",
         "PyYAML==5.3.1",
         "pip>=10.0.0",
-        "typer[all]==0.3.0",
+        "typer[all]==0.3.2",
     ],
     keywords=["http", "api", "rest", "web", "backend", "rapydo"],
     classifiers=[

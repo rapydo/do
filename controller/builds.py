@@ -187,6 +187,6 @@ def remove_redundant_services(services, builds):
 
     if len(services) != len(non_redundant_services):
         log.info(
-            "Removed redundant services from {} -> {}", services, non_redundant_services
+            "Removed redundant builds from {} -> {}", services, non_redundant_services
         )
     return non_redundant_services

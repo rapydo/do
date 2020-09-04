@@ -3,10 +3,9 @@ language: python
 services:
   - docker
 script:
-  - pip3 install --upgrade setuptools pytest pytest-cov
+  - pip3 install --upgrade pip setuptools pytest pytest-cov
   - pip3 install --upgrade --no-cache-dir --editable .
   - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
-  # - git clone -b ${BRANCH} --depth=1 https://github.com/rapydo/tests.git rapydo_tests
   - mkdir rapydo_tests
   - cd rapydo_tests
   - mkdir -p data/logs
@@ -14,12 +13,24 @@ script:
   - export TESTING=1
   - py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
   - cp ../codecov.yml .
-  - bash <(curl -s https://codecov.io/bash) -R ../
+  - travis_retry bash <(curl -s https://codecov.io/bash) -R ../
 
 jobs:
   include:
     - stage: test
       python: 3.6
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.7
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.8
+      dist: focal
+      env:
+        - STAGE=UBUNTU_20.04 # only used as information on the web interface
+    - python: 3.6
       dist: bionic
       env:
         - STAGE=UBUNTU_18.04 # only used as information on the web interface

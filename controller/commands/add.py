@@ -51,7 +51,7 @@ def create_template(templating, template_name, target_path, name, services, auth
 
 
 def create_endpoint(project_scaffold, name, services, auth):
-    path = project_scaffold.p_path("backend", "apis")
+    path = project_scaffold.p_path("backend", "endpoints")
     path = path.joinpath(f"{name}.py")
 
     templating = Templating()
