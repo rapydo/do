@@ -13,7 +13,7 @@ script:
   - export TESTING=1
   - py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
   - cp ../codecov.yml .
-  - bash <(curl -s https://codecov.io/bash) -R ../
+  - travis_retry bash <(curl -s https://codecov.io/bash) -R ../
 
 jobs:
   include:
