@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
-current_version = "0.7.6"
+version = "0.8"
 
 setup(
     name="rapydo_controller",
-    version=current_version,
+    version=version,
     description="Manage and deploy projects based on RAPyDo framework",
     url="https://rapydo.github.io/docs",
     license="MIT",
