@@ -473,8 +473,7 @@ class Application:
     @staticmethod
     def verify_rapydo_version(rapydo_version=None):
         """
-        If your project requires a specific rapydo version, check if you are
-        the rapydo-controller matching that version
+        Verify if the installed rapydo version matches the current project requirement
         """
 
         if rapydo_version is None:

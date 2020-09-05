@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 version = "0.8"
 
 setup(
-    name="rapydo_controller",
+    name="rapydo",
     version=version,
     description="Manage and deploy projects based on RAPyDo framework",
     url="https://rapydo.github.io/docs",
