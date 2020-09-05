@@ -87,6 +87,8 @@ class Project:
         self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
         # Removed since 0.7.6
         self.obsolete_files.append(self.p_path("backend", "apis"))
+        # Removed since 0.8
+        self.obsolete_files.append(self.p_path("backend", "models", "swagger.yaml"))
 
         return True
 
