@@ -270,11 +270,11 @@ def test_all(capfd):
     )
 
     r = gitter.get_repo("submodules/http-api")
-    gitter.switch_branch(r, "0.7.3")
+    gitter.switch_branch(r, "0.7.6")
     exec_command(
         capfd,
         "check -i main",
-        f"http-api: wrong branch 0.7.3, expected {__version__}",
+        f"http-api: wrong branch 0.7.6, expected {__version__}",
         "You can use rapydo init to fix it",
     )
     exec_command(
@@ -1421,7 +1421,7 @@ def test_install(capfd):
     exec_command(capfd, "install auto")
 
     r = gitter.get_repo("submodules/do")
-    gitter.switch_branch(r, "0.7.3")
+    gitter.switch_branch(r, "0.7.6")
 
     exec_command(
         capfd, "install", f"Controller repository switched to {__version__}",
@@ -1440,7 +1440,7 @@ def test_install(capfd):
     # Read and change the content
     fin = open(pconf)
     data = fin.read()
-    data = data.replace(f"rapydo: {__version__}", "rapydo: 0.7.3")
+    data = data.replace(f'rapydo: "{__version__}"', 'rapydo: "0.7.6"')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -1451,13 +1451,13 @@ def test_install(capfd):
         capfd,
         "version",
         f"This project is not compatible with rapydo version {__version__}",
-        "Please downgrade rapydo to version 0.7.3 or modify this project",
+        "Please downgrade rapydo to version 0.7.6 or modify this project",
     )
 
     # Read and change the content
     fin = open(pconf)
     data = fin.read()
-    data = data.replace("rapydo: 0.7.3", "rapydo: 99.99.99")
+    data = data.replace('rapydo: "0.7.6"', 'rapydo: "99.99.99"')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
