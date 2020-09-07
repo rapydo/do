@@ -145,8 +145,9 @@ class Project:
                     frontend_data_dir.joinpath("karma.conf.js"),
                     frontend_data_dir.joinpath("package.json"),
                     frontend_data_dir.joinpath("polyfills.ts"),
-                    frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.json"),
+                    frontend_data_dir.joinpath("tsconfig.app.json"),
+                    frontend_data_dir.joinpath("tsconfig.typings.json"),
                     frontend_data_dir.joinpath("tsconfig.spec.json"),
                     frontend_data_dir.joinpath("cypress.json"),
                 ]

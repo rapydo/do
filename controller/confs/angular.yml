@@ -76,8 +76,9 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/browserslist:/app/browserslist
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
-      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.json:/app/tsconfig.json
+      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
+      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.typings.json:/app/tsconfig.typings.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
