@@ -848,9 +848,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
-            if gitobj is None:
-                continue
-            gitter.update(name, gitobj)
+            if gitobj:
+                gitter.update(name, gitobj)
 
     @staticmethod
     def git_checks(ignore_submodule):
@@ -859,8 +858,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule:
                 log.debug("Skipping checks on {}", name)
                 continue
-            if gitobj is None:
-                continue
-
-            gitter.check_updates(name, gitobj)
-            gitter.check_unstaged(name, gitobj)
+            if gitobj:
+                gitter.check_updates(name, gitobj)
+                gitter.check_unstaged(name, gitobj)

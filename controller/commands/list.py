@@ -57,14 +57,13 @@ def list_cmd(
         print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
         for name in Application.gits:
             repo = Application.gits.get(name)
-            if repo is None:
-                continue
-            branch = gitter.get_active_branch(repo)
-            path = repo.working_dir
-            path = path.replace(os.getcwd(), "")
-            if path.startswith("/"):
-                path = path[1:]
-            print(f"{name:<18} {branch:<18} {path}")
+            if repo:
+                branch = gitter.get_active_branch(repo)
+                path = repo.working_dir
+                path = path.replace(os.getcwd(), "")
+                if path.startswith("/"):
+                    path = path[1:]
+                print(f"{name:<18} {branch:<18} {path}")
 
 
 def read_env():
