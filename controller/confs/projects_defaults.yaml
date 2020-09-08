@@ -8,9 +8,6 @@ variables:
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
       if: $$angular
-    rapydo-react:
-      online_url: https://github.com/rapydo/rapydo-react.git
-      if: $$react
     do:
       online_url: https://github.com/rapydo/do.git
 
@@ -42,12 +39,6 @@ variables:
       path: $$baseconf
       mandatory: True
       if: $$angular
-    react:
-      file: react.yml
-      base: True
-      path: $$baseconf
-      mandatory: True
-      if: $$react
     extended-commons:
       file: commons.yml
       base: False

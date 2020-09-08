@@ -5,7 +5,6 @@ from controller import PROJECT_DIR, gitter, log
 
 NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
-REACT = "react"
 
 DATA = Path("data")
 SUBMODULES = Path("submodules")

@@ -1,15 +1,15 @@
 from restapi import decorators
-from restapi.models import fields, InputSchema, Schema  #,  validate
+from restapi.models import fields, Schema  #,  validate
 from restapi.rest.definition import EndpointResource
 from restapi.utilities.logs import log
 
 
-class MyInputSchema(InputSchema):
-    myfield = fields.Str()
+class MyInputSchema(Schema):
+    myfield1 = fields.Str()
 
 
-class MySchema(Schema):
-    myfield = fields.Str()
+class MyOutputSchema(Schema):
+    myfield2= fields.Str()
 
 
 class {{name.title().replace(" ", "")}}(EndpointResource):
@@ -18,7 +18,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     labels = ["custom"]
 
     @decorators.auth.require()
-    @decorators.marshal_with(MySchema, code=200)
+    @decorators.marshal_with(MyOutputSchema, code=200)
     @decorators.endpoint(
         path="/{{name.replace(" ", "_").lower()}}",
         summary="...",

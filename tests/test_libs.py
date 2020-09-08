@@ -224,7 +224,6 @@ def test_all(capfd):
     assert services.get_default_user("frontend", "no") is None
     assert services.get_default_user("frontend", "angular") == "node"
     assert services.get_default_user("frontend", "angularjs") is None
-    assert services.get_default_user("frontend", "react") is None
     assert services.get_default_user("postgres", "") == "postgres"
     assert services.get_default_user("neo4j", "") == "neo4j"
 

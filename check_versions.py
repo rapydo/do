@@ -339,8 +339,6 @@ def check_versions(skip_angular=False, verbose=False):
     filtered_dependencies = {}
 
     for service in dependencies:
-        if service in ["react"]:
-            continue
 
         service_dependencies = dependencies[service]
 

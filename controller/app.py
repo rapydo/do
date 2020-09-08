@@ -27,7 +27,7 @@ from controller import (
 from controller.commands import load_commands
 from controller.compose import Compose
 from controller.packages import Packages
-from controller.project import ANGULAR, NO_FRONTEND, REACT, Project
+from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
 
@@ -516,7 +516,6 @@ class Application:
         # substitute values starting with '$$'
         myvars = {
             ANGULAR: Configuration.frontend == ANGULAR,
-            REACT: Configuration.frontend == REACT,
         }
         repo = services.apply_variables(repo, myvars)
 
@@ -587,7 +586,6 @@ class Application:
         myvars = {
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
-            REACT: Configuration.frontend == REACT and Configuration.load_frontend,
             "commons": Configuration.load_commons,
             "extended-commons": self.extended_project is not None
             and Configuration.load_commons,
