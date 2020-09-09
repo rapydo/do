@@ -38,8 +38,7 @@ def shell(
     no_tty: bool = typer.Option(
         False,
         "--no-tty",
-        help="Disable pseudo-tty allocation,"
-        "useful to execute the command from non interactive script",
+        help="Disable pseudo-tty allocation (useful for non-interactive script)",
         show_default=False,
     ),
     detach: bool = typer.Option(
