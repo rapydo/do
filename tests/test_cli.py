@@ -872,7 +872,7 @@ def test_all(capfd):
     # This is because after start --no-detach the container in still in exited status
     exec_command(
         capfd,
-        "volatile backend hostname",
+        "volatile backend --command hostname",
         "Bind for 0.0.0.0:8080 failed: port is already allocated",
     )
 
@@ -881,21 +881,21 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "volatile backend hostname", "backend-server",
+        capfd, "volatile backend --command hostname", "backend-server",
     )
 
     exec_command(
-        capfd, "volatile backend whoami", "root",
+        capfd, "volatile backend --command whoami", "root",
     )
     exec_command(
         capfd,
-        "volatile backend -u developer whoami",
+        "volatile backend -u developer --command whoami",
         "Please remember that users in volatile containers are not mapped on current ",
         "developer",
     )
     exec_command(
         capfd,
-        "volatile backend -u invalid whoami",
+        "volatile backend -u invalid --command whoami",
         "Error response from daemon:",
         "unable to find user invalid:",
         "no matching entries in passwd file",
