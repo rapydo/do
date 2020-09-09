@@ -614,7 +614,7 @@ services:
 
   redis:
     restart: on-failure:5
-    image: redis:6.0.6
+    image: redis:6.0.7
     command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
@@ -759,7 +759,7 @@ services:
 
   swaggerui:
     # restart: no
-    image: swaggerapi/swagger-ui:v3.32.4
+    image: swaggerapi/swagger-ui:v3.32.5
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
     ports:

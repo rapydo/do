@@ -19,25 +19,26 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-08-22"
+known_update = "2020-09-09"
 known_latests = {
     "docker": {
         "mariadb": "10.5.5",
         "mongo": "4.4.0",
-        "redis": "6.0.6",
-        "swaggerapi/swagger-ui": "v3.32.4",
+        "redis": "6.0.7",
         "adminer": "4.7.7-standalone",
         "mongo-express": "0.54.0",
-        "fanout/pushpin": "1.30.0",
-        "node": "14.8.0-buster",
-        "rabbitmq": "3.8.7",
-        "neo4j": "3.5.20",
+        "node": "14.9.0-buster",
+        "rabbitmq": "3.8.8",
+        "neo4j": "3.5.21",
         "postgres": "12.4-alpine",
         "nginx": "1.19.2-alpine",
         "ubuntu": "20.04",
+        "fanout/pushpin": "1.30.0",
+        "swaggerapi/swagger-ui": "v3.32.5",
         "stilliard/pure-ftpd": "stretch-latest",
     },
-    "acme": "2.8.6",
+    # https://github.com/acmesh-official/acme.sh/releases
+    "acme": "2.8.7",
     # Not used
     "urls": {"isort": "", "prettier": "", "pyupgrade": "", "black": "", "flake8": ""},
 }
