@@ -231,6 +231,7 @@ def test_all(capfd):
     assert services.get_default_command("backend") == "restapi launch"
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
+    assert services.get_default_command("postgres") == "psql"
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
     # )

@@ -170,4 +170,7 @@ def get_default_command(service):
     if service == "neo4j":
         return "bin/cypher-shell"
 
+    if service == "postgres":
+        return "psql"
+
     return "bash"
