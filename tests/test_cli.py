@@ -676,7 +676,11 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "shell backend --command hostname", "backend-server",
+        capfd, "shell backend --command hostname", "Deprecated use of --command",
+    )
+
+    exec_command(
+        capfd, "shell backend hostname", "backend-server",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -700,20 +704,20 @@ def test_all(capfd):
 
     # Testing default users
     exec_command(
-        capfd, "shell backend --command whoami", "developer",
+        capfd, "shell backend whoami", "developer",
     )
     exec_command(
-        capfd, "shell frontend --command whoami", "node",
+        capfd, "shell frontend whoami", "node",
     )
     # No default user for rabbit container
     exec_command(
-        capfd, "shell rabbit --command whoami", "root",
+        capfd, "shell rabbit whoami", "root",
     )
     exec_command(
-        capfd, "shell postgres --command whoami", "postgres",
+        capfd, "shell postgres whoami", "postgres",
     )
     exec_command(
-        capfd, "shell neo4j --command whoami", "neo4j",
+        capfd, "shell neo4j whoami", "neo4j",
     )
 
     exec_command(
@@ -853,7 +857,7 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "shell backend --command hostname", "No container found for backend_1",
+        capfd, "shell backend hostname", "No container found for backend_1",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -868,7 +872,7 @@ def test_all(capfd):
     # This is because after start --no-detach the container in still in exited status
     exec_command(
         capfd,
-        "volatile backend --command hostname",
+        "volatile backend hostname",
         "Bind for 0.0.0.0:8080 failed: port is already allocated",
     )
 
@@ -877,21 +881,21 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "volatile backend --command hostname", "backend-server",
+        capfd, "volatile backend hostname", "backend-server",
     )
 
     exec_command(
-        capfd, "volatile backend --command whoami", "root",
+        capfd, "volatile backend whoami", "root",
     )
     exec_command(
         capfd,
-        "volatile backend -u developer --command whoami",
+        "volatile backend -u developer whoami",
         "Please remember that users in volatile containers are not mapped on current ",
         "developer",
     )
     exec_command(
         capfd,
-        "volatile backend -u invalid --command whoami",
+        "volatile backend -u invalid whoami",
         "Error response from daemon:",
         "unable to find user invalid:",
         "no matching entries in passwd file",

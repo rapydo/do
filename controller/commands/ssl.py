@@ -72,7 +72,7 @@ def ssl(
             )
         )
 
-        print(f'rapydo shell {service} --command "nginx -s reload"')
+        print(f'rapydo shell {service} "nginx -s reload"')
         print("")
 
         return
