@@ -43,7 +43,10 @@ def shell(
         show_default=False,
     ),
     detach: bool = typer.Option(
-        False, "--detach", help="Execute command in detach mode", show_default=False,
+        False,
+        "--detach",
+        help="Execute the command in detach mode",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
