@@ -18,7 +18,7 @@ setup(
         ],
     },
     install_requires=[
-        "docker-compose==1.26.2",
+        "docker-compose==1.27.0",
         "docker==4.2.2",
         "dockerfile-parse==1.0.0",
         "python-dateutil",
@@ -29,7 +29,7 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.7",
+        "GitPython==3.1.8",
         "PyYAML==5.3.1",
         "pip>=10.0.0",
         "typer[all]==0.3.2",
