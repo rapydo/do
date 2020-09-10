@@ -111,7 +111,11 @@ def version_callback(value: bool):
 def controller_cli_options(
     ctx: typer.Context,
     project: str = typer.Option(
-        None, "--project", "-p", help="Name of the project", callback=projectrc_values,
+        None,
+        "--project",
+        "-p",
+        help="Name of the project",
+        callback=projectrc_values,
     ),
     services_list: str = typer.Option(
         None,
@@ -335,7 +339,7 @@ class Application:
         if Configuration.initialize:
             return True
 
-        self.git_submodules()
+        Application.git_submodules()
 
         if Configuration.update:
             return True
@@ -555,7 +559,8 @@ class Application:
             check=not Configuration.install,
         )
 
-    def git_submodules(self, from_path=None):
+    @staticmethod
+    def git_submodules(from_path=None):
         """ Check and/or clone git projects """
 
         repos = glom(Configuration.specs, "variables.submodules", default={}).copy()

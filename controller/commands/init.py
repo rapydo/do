@@ -44,7 +44,7 @@ def init(
         if not submodules_path.exists():
             log.exit("Local path not found: {}", submodules_path)
 
-    Application.controller.git_submodules(from_path=submodules_path)
+    Application.git_submodules(from_path=submodules_path)
 
     Application.controller.make_env()
 

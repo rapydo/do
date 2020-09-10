@@ -9,7 +9,10 @@ from controller.packages import Packages
 def install(
     version: str = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
-        True, "--no-editable", help="Disable editable mode", show_default=False,
+        True,
+        "--no-editable",
+        help="Disable editable mode",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
@@ -30,7 +33,7 @@ def install(
 
 def install_controller_from_folder(gits, version, user, editable):
 
-    Application.controller.git_submodules()
+    Application.git_submodules()
 
     log.info("You asked to install rapydo {} from local folder", version)
 
