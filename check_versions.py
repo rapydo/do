@@ -19,7 +19,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-09-09"
+known_update = "2020-09-10"
 known_latests = {
     "docker": {
         "mariadb": "10.5.5",
@@ -40,7 +40,14 @@ known_latests = {
     # https://github.com/acmesh-official/acme.sh/releases
     "acme": "2.8.7",
     # Not used
-    "urls": {"isort": "", "prettier": "", "pyupgrade": "", "black": "", "flake8": ""},
+    "urls": {
+        "seed-isort-config": "v2.2.0",
+        "isort": "5.5.2",
+        "prettier": "2.1.1",
+        "pyupgrade": "v2.7.2",
+        "black": "20.8b1",
+        "flake8": "3.8.3",
+    },
 }
 
 prevent_duplicates = {}
@@ -80,76 +87,82 @@ def check_updates(category, lib):
 
     if category in ["pip", "controller", "http-api"]:
         if "==" in lib:
-            token = lib.split("==")
+            tokens = lib.split("==")
         elif ">=" in lib:
             return None
-            # token = lib.split(">=")
+            # tokens = lib.split(">=")
         else:
             log.critical("Invalid lib format: {}", lib)
 
-        if "[" in token[0]:
-            token[0] = token[0].split("[")[0]
+        if "[" in tokens[0]:
+            tokens[0] = tokens[0].split("[")[0]
 
-        # url = f"https://pypi.org/project/{token[0]}/{token[1]}"
-        url = f"https://pypi.org/project/{token[0]}"
-        latest = parse_pypi(url, token[0])
+        # url = f"https://pypi.org/project/{tokens[0]}/{tokens[1]}"
+        url = f"https://pypi.org/project/{tokens[0]}"
+        latest = parse_pypi(url, tokens[0])
 
-        if latest != token[1]:
-            print(f"# {token[1]} -> {latest}")
+        if latest != tokens[1]:
+            print(f"# {tokens[1]} -> {latest}")
             print(url)
             print("")
 
     elif category in ["compose", "Dockerfile"]:
-        token = lib.split(":")
-        latest = glom(known_latests, f"docker.{token[0]}", default="????")
+        tokens = lib.split(":")
+        latest = glom(known_latests, f"docker.{tokens[0]}", default="????")
 
         if latest == "????":
-            log.warning("Unknown latest version for {}", token[0])
+            log.warning("Unknown latest version for {}", tokens[0])
 
-        if latest != token[1]:
-            print(f"# {token[1]} -> {latest}")
-            if "/" in token[0]:
-                print(f"https://hub.docker.com/r/{token[0]}?tab=tags")
+        if latest != tokens[1]:
+            print(f"# {tokens[1]} -> {latest}")
+            if "/" in tokens[0]:
+                print(f"https://hub.docker.com/r/{tokens[0]}?tab=tags")
             else:
-                print(f"https://hub.docker.com/_/{token[0]}?tab=tags")
+                print(f"https://hub.docker.com/_/{tokens[0]}?tab=tags")
             print("")
     elif category in ["package.json", "dev-package.json", "npm"]:
         lib = lib.strip()
         if ":" in lib:
-            token = lib.split(":")
+            tokens = lib.split(":")
         elif "@" in lib:
             if lib[0] == "@":
-                token = lib[1:].split("@")
-                token[0] = f"@{token[0]}"
+                tokens = lib[1:].split("@")
+                tokens[0] = f"@{tokens[0]}"
             else:
-                token = lib.split("@")
+                tokens = lib.split("@")
         else:
-            token = [lib, ""]
+            tokens = [lib, ""]
 
-        url = f"https://www.npmjs.com/package/{token[0]}"
-        latest = parse_npm(url, token[0])
+        url = f"https://www.npmjs.com/package/{tokens[0]}"
+        latest = parse_npm(url, tokens[0])
 
-        if latest != token[1]:
-            print(f"# {token[1]} -> {latest}")
+        if latest != tokens[1]:
+            print(f"# {tokens[1]} -> {latest}")
             print(url)
             print("")
 
     elif category in ["ACME"]:
-        token = lib.split(":")
+        tokens = lib.split(":")
 
         latest = glom(known_latests, "acme", default="????")
 
         if latest == "????":
             log.warning("Unknown latest version acme.sh")
 
-        if latest != token[1]:
-            print(f"# {token[1]} -> ????")
-            print(f"https://github.com/Neilpang/acme.sh/releases/tag/{token[1]}")
+        if latest != tokens[1]:
+            print(f"# {tokens[1]} -> {latest}")
+            print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
             print("")
     elif category == "url":
         if lib not in prevent_duplicates:
-            print(lib)
+
             prevent_duplicates[lib] = True
+            tokens = lib.split("/")
+            latest = glom(known_latests, f"urls.{tokens[4]}", default="????")
+            if latest != tokens[7]:
+                print(f"# {tokens[7]} -> {latest}")
+                print(lib)
+                print("")
     else:
         log.critical("{}: {}", category, lib)
 
