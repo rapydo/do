@@ -119,6 +119,7 @@ variables:
     BACKEND_BUILD_MODE: backend
 
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
+    FLASK_ENV: development
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URI: ""

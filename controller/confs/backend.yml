@@ -99,6 +99,7 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
+      FLASK_ENV: ${FLASK_ENV}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
       GUNICORN_WORKERS: ${GUNICORN_WORKERS}
