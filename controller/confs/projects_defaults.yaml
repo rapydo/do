@@ -197,8 +197,6 @@ variables:
     # in production mode this will be mapped on port 80
     PROXY_DEV_PORT: 81
     PROXY_PROD_PORT: 443
-    # NGINX_PROD_CONF: production-a2.conf
-    # NGINX_PROD_HEADERS: production-headers.conf
     # LETSENCRYPT_MODE: --staging
     LETSENCRYPT_MODE:
     SET_UNSAFE_EVAL:
