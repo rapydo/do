@@ -194,7 +194,8 @@ variables:
     PUSHPIN_CONTROL_PORT: 5561
 
     PROXY_HOST: myproxy.dockerized.io
-    PROXY_DEV_PORT: 80
+    # in production mode this will be mapped on port 80
+    PROXY_DEV_PORT: 81
     PROXY_PROD_PORT: 443
     # NGINX_PROD_CONF: production-a2.conf
     # NGINX_PROD_HEADERS: production-headers.conf
