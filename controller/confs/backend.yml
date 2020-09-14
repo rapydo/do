@@ -237,7 +237,6 @@ services:
         aliases:
           - ${FLASK_HOST}
 
-  ##############################
   proxy:
     restart: always
     build:
@@ -260,6 +259,7 @@ services:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
     environment:
+      APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
       MODE: ${LETSENCRYPT_MODE}
       ACTIVATE: ${ACTIVATE_PROXY}
