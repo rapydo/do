@@ -451,8 +451,8 @@ class Application:
         Configuration.version = glom(
             Configuration.specs, "project.version", default=None
         )
-        Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=None
+        Configuration.rapydo_version = str(
+            glom(Configuration.specs, "project.rapydo", default=None)
         )
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
