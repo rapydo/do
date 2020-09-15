@@ -98,10 +98,14 @@ def exec_command(capfd, command, *asserts, input_text=None):
 def test_failed_create(capfd):
 
     exec_command(
-        capfd, "--version", f"rapydo version: {__version__}",
+        capfd,
+        "--version",
+        f"rapydo version: {__version__}",
     )
     exec_command(
-        capfd, "create first", "Missing authentication service, add --auth option",
+        capfd,
+        "create first",
+        "Missing authentication service, add --auth option",
     )
 
     with open("data/logs/rapydo-controller.log") as f:
@@ -109,7 +113,9 @@ def test_failed_create(capfd):
         assert logs[-1].endswith("Missing authentication service, add --auth option")
 
     exec_command(
-        capfd, "create first --auth xyz", "Invalid authentication service: xyz",
+        capfd,
+        "create first --auth xyz",
+        "Invalid authentication service: xyz",
     )
 
     exec_command(
@@ -184,7 +190,9 @@ def test_create(capfd):
     create_command += " --service rabbit --service neo4j --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
     exec_command(
-        capfd, create_command, "Project first successfully created",
+        capfd,
+        create_command,
+        "Project first successfully created",
     )
 
     pconf = "projects/first/project_configuration.yaml"
@@ -266,7 +274,9 @@ def test_all(capfd):
         "You should init your project",
     )
     exec_command(
-        capfd, "init", "Project initialized",
+        capfd,
+        "init",
+        "Project initialized",
     )
 
     r = gitter.get_repo("submodules/http-api")
@@ -311,20 +321,28 @@ def test_all(capfd):
     path = "projects/first/backend/endpoints/xyz.py"
     assert not os.path.exists(path)
     exec_command(
-        capfd, "add endpoint xyz", f"Endpoint created: {path}",
+        capfd,
+        "add endpoint xyz",
+        f"Endpoint created: {path}",
     )
     exec_command(
-        capfd, "add endpoint xyz", f"{path} already exists",
+        capfd,
+        "add endpoint xyz",
+        f"{path} already exists",
     )
     assert os.path.isfile(path)
 
     path = "projects/first/backend/tasks/xyz.py"
     assert not os.path.exists(path)
     exec_command(
-        capfd, "add task xyz", f"Task created: {path}",
+        capfd,
+        "add task xyz",
+        f"Task created: {path}",
     )
     exec_command(
-        capfd, "add task xyz", f"{path} already exists",
+        capfd,
+        "add task xyz",
+        f"{path} already exists",
     )
     assert os.path.isfile(path)
 
@@ -343,7 +361,9 @@ def test_all(capfd):
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
     assert os.path.isfile(os.path.join(path, "xyz.html"))
     exec_command(
-        capfd, "add component xyz", f"{path}/xyz.ts already exists",
+        capfd,
+        "add component xyz",
+        f"{path}/xyz.ts already exists",
     )
     shutil.rmtree(path)
     exec_command(
@@ -367,7 +387,9 @@ def test_all(capfd):
     assert os.path.isdir(path)
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
     exec_command(
-        capfd, "add service xyz", f"{path}/xyz.ts already exists",
+        capfd,
+        "add service xyz",
+        f"{path}/xyz.ts already exists",
     )
     os.remove(f"{path}/xyz.ts")
     exec_command(
@@ -386,15 +408,21 @@ def test_all(capfd):
 
     # Basic pull
     exec_command(
-        capfd, "-s xxx pull", "Invalid service name: xxx",
+        capfd,
+        "-s xxx pull",
+        "Invalid service name: xxx",
     )
     exec_command(
-        capfd, "pull", "Base images pulled from docker hub",
+        capfd,
+        "pull",
+        "Base images pulled from docker hub",
     )
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd, "update -i main", "All updated",
+        capfd,
+        "update -i main",
+        "All updated",
     )
 
     open("submodules/do/temp.file", "a").close()
@@ -416,7 +444,9 @@ def test_all(capfd):
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd, "check -i main", "Checks completed",
+        capfd,
+        "check -i main",
+        "Checks completed",
     )
 
     exec_command(
@@ -488,7 +518,9 @@ def test_all(capfd):
         "mycustomvalue",
     )
     exec_command(
-        capfd, "list submodules", "List of submodules:",
+        capfd,
+        "list submodules",
+        "List of submodules:",
     )
 
     exec_command(
@@ -560,7 +592,9 @@ def test_all(capfd):
 
     # docker dump
     exec_command(
-        capfd, "dump", "Config dump: docker-compose.yml",
+        capfd,
+        "dump",
+        "Config dump: docker-compose.yml",
     )
 
     exec_command(capfd, "upgrade")
@@ -595,7 +629,9 @@ def test_all(capfd):
         shutil.rmtree("projects")
 
     exec_command(
-        capfd, "-p first check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "-p first check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
     # Check invalid and reserved project names
@@ -627,11 +663,15 @@ def test_all(capfd):
     assert not os.path.isdir("data/logs")
     # Let's restore .projectrc and data/logs
     exec_command(
-        capfd, "--project first init", "Project initialized",
+        capfd,
+        "--project first init",
+        "Project initialized",
     )
     assert os.path.isdir("data/logs")
     exec_command(
-        capfd, "check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
     # Test dirty repo
@@ -660,12 +700,17 @@ def test_all(capfd):
     exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
 
     exec_command(
-        capfd, "-s invalid start", "No such service: invalid",
+        capfd,
+        "-s invalid start",
+        "No such service: invalid",
     )
 
     # Let's start with the stack
     exec_command(
-        capfd, "start", "docker-compose command: 'up'", "Stack started",
+        capfd,
+        "start",
+        "docker-compose command: 'up'",
+        "Stack started",
     )
 
     exec_command(
@@ -676,11 +721,20 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "shell backend --command hostname", "Deprecated use of --command",
+        capfd,
+        "shell backend --command hostname",
+        "Deprecated use of --command",
+    )
+    exec_command(
+        capfd,
+        "shell backend --command 'hostname --short'",
+        "Deprecated use of --command",
     )
 
     exec_command(
-        capfd, "shell backend hostname", "backend-server",
+        capfd,
+        "shell backend hostname",
+        "backend-server",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -704,20 +758,30 @@ def test_all(capfd):
 
     # Testing default users
     exec_command(
-        capfd, "shell backend whoami", "developer",
+        capfd,
+        "shell backend whoami",
+        "developer",
     )
     exec_command(
-        capfd, "shell frontend whoami", "node",
+        capfd,
+        "shell frontend whoami",
+        "node",
     )
     # No default user for rabbit container
     exec_command(
-        capfd, "shell rabbit whoami", "root",
+        capfd,
+        "shell rabbit whoami",
+        "root",
     )
     exec_command(
-        capfd, "shell postgres whoami", "postgres",
+        capfd,
+        "shell postgres whoami",
+        "postgres",
     )
     exec_command(
-        capfd, "shell neo4j whoami", "neo4j",
+        capfd,
+        "shell neo4j whoami",
+        "neo4j",
     )
 
     exec_command(
@@ -727,7 +791,9 @@ def test_all(capfd):
         "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
     )
     exec_command(
-        capfd, "scale rabbit=x", "Invalid number of replicas: x",
+        capfd,
+        "scale rabbit=x",
+        "Invalid number of replicas: x",
     )
 
     exec_command(
@@ -815,7 +881,9 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "stop", "Stack stopped",
+        capfd,
+        "stop",
+        "Stack stopped",
     )
 
     exec_command(
@@ -831,7 +899,9 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "restart", "Stack restarted",
+        capfd,
+        "restart",
+        "Stack restarted",
     )
 
     exec_command(
@@ -841,23 +911,34 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "-s backend remove --all", "Incompatibile options --all and --service",
+        capfd,
+        "-s backend remove --all",
+        "Incompatibile options --all and --service",
     )
 
     exec_command(
-        capfd, "remove", "docker-compose command: 'stop'", "Stack removed",
+        capfd,
+        "remove",
+        "docker-compose command: 'stop'",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "remove --networks", "Stack removed",
+        capfd,
+        "remove --networks",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "remove --all", "Stack removed",
+        capfd,
+        "remove --all",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "shell backend hostname", "No container found for backend_1",
+        capfd,
+        "shell backend hostname",
+        "No container found for backend_1",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -877,15 +958,21 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "remove --all", "Stack removed",
+        capfd,
+        "remove --all",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "volatile backend --command hostname", "backend-server",
+        capfd,
+        "volatile backend --command hostname",
+        "backend-server",
     )
 
     exec_command(
-        capfd, "volatile backend --command whoami", "root",
+        capfd,
+        "volatile backend --command whoami",
+        "root",
     )
     exec_command(
         capfd,
@@ -934,11 +1021,15 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "--prod -s proxy pull", "Base images pulled from docker hub",
+        capfd,
+        "--prod -s proxy pull",
+        "Base images pulled from docker hub",
     )
 
     exec_command(
-        capfd, "ssl", "No container found for proxy_1",
+        capfd,
+        "ssl",
+        "No container found for proxy_1",
     )
 
     exec_command(
@@ -951,16 +1042,24 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "ssl --force", "No container found for proxy_1",
+        capfd,
+        "ssl --force",
+        "No container found for proxy_1",
     )
     exec_command(
-        capfd, "ssl --chain-file /file", "Invalid chain file (you provided /file)",
+        capfd,
+        "ssl --chain-file /file",
+        "Invalid chain file (you provided /file)",
     )
     exec_command(
-        capfd, "ssl --key-file /file", "Invalid chain file (you provided none)",
+        capfd,
+        "ssl --key-file /file",
+        "Invalid chain file (you provided none)",
     )
     exec_command(
-        capfd, f"ssl --chain-file {pconf}", "Invalid key file (you provided none)",
+        capfd,
+        f"ssl --chain-file {pconf}",
+        "Invalid key file (you provided none)",
     )
     exec_command(
         capfd,
@@ -975,7 +1074,9 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "dhparam", "No container found for proxy_1",
+        capfd,
+        "dhparam",
+        "No container found for proxy_1",
     )
 
 
@@ -985,12 +1086,16 @@ def test_builds(capfd):
     create_command = "create testbuild --auth postgres --frontend angular"
     create_command += " --service rabbit --add-optionals --current"
     exec_command(
-        capfd, create_command, "Project testbuild successfully created",
+        capfd,
+        create_command,
+        "Project testbuild successfully created",
     )
 
     # Restore the default project
     exec_command(
-        capfd, "-p testbuild init --force", "Project initialized",
+        capfd,
+        "-p testbuild init --force",
+        "Project initialized",
     )
 
     # Add a custom image to extend base rabbit image:
@@ -1039,7 +1144,9 @@ services:
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write("FROM ubuntu")
     exec_command(
-        capfd, "-s rabbit build", "No custom images to build",
+        capfd,
+        "-s rabbit build",
+        "No custom images to build",
     )
 
     # Invalid RAPyDo template
@@ -1079,7 +1186,9 @@ RUN mkdir xyz
     )
 
     exec_command(
-        capfd, "ancestors XYZ", "No child found for XYZ",
+        capfd,
+        "ancestors XYZ",
+        "No child found for XYZ",
     )
 
     dock = Dock()
@@ -1241,14 +1350,18 @@ RUN mkdir xyz
         input_text="YES\n",
     )
     exec_command(
-        capfd, "-s rabbit build --yes", "Successfully built",
+        capfd,
+        "-s rabbit build --yes",
+        "Successfully built",
     )
 
     exec_command(capfd, "remove")
 
     # Restore the default project
     exec_command(
-        capfd, "-p first init --force", "Project initialized",
+        capfd,
+        "-p first init --force",
+        "Project initialized",
     )
 
 
@@ -1284,10 +1397,14 @@ def test_extend(capfd):
     )
 
     exec_command(
-        capfd, "-p ext init --force", "Project initialized",
+        capfd,
+        "-p ext init --force",
+        "Project initialized",
     )
     exec_command(
-        capfd, "-p ext check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "-p ext check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
 
@@ -1391,7 +1508,9 @@ def test_rabbit_invalid_characters(capfd):
     create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
     create_command += " --current --force"
     exec_command(
-        capfd, create_command, "Project testinvalid successfully created",
+        capfd,
+        create_command,
+        "Project testinvalid successfully created",
     )
 
     informative = "Some special characters, including £ § ” ’, are not allowed "
@@ -1408,7 +1527,9 @@ def test_rabbit_invalid_characters(capfd):
 
     # Restore the default project
     exec_command(
-        capfd, "-p first init --force", "Project initialized",
+        capfd,
+        "-p first init --force",
+        "Project initialized",
     )
 
 
@@ -1416,7 +1537,9 @@ def test_install(capfd):
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
-            capfd, "install", "missing as submodules/do. You should init your project",
+            capfd,
+            "install",
+            "missing as submodules/do. You should init your project",
         )
 
     # I hope that one day this test will fail! :-)
@@ -1428,7 +1551,9 @@ def test_install(capfd):
     gitter.switch_branch(r, "0.7.6")
 
     exec_command(
-        capfd, "install", f"Controller repository switched to {__version__}",
+        capfd,
+        "install",
+        f"Controller repository switched to {__version__}",
     )
 
     exec_command(capfd, "install")
