@@ -13,11 +13,18 @@ def start(
         help="Disable detach mode and attach to container execution",
         show_default=False,
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Recreate containers even if their configuration/image haven't changed",
+        show_default=False,
+    ),
 ):
     Application.controller.controller_init()
 
     dc = Compose(files=Application.data.files)
 
-    dc.start_containers(Application.data.services, detach=detach)
+    dc.start_containers(Application.data.services, detach=detach, force_recreate=force)
 
     log.info("Stack started")

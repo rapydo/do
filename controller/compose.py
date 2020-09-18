@@ -84,7 +84,7 @@ class Compose:
     @staticmethod
     def split_command(command):
         """
-            Split a command into command + args_array
+        Split a command into command + args_array
         """
         if command is None:
             return (None, [])
@@ -102,14 +102,17 @@ class Compose:
     def start_containers(
         self,
         services,
+        # used by backup
         detach=True,
+        # used by scale
         scale=None,
+        # used by scale
         skip_dependencies=False,
-        abort_on_container_exit=False,
-        no_recreate=False,
+        # used by start
+        force_recreate=False,
     ):
         """
-            Start containers (docker-compose up)
+        Start containers (docker-compose up)
         """
 
         if scale is None:
@@ -122,9 +125,9 @@ class Compose:
             "--build": None,
             "--no-color": False,
             "--remove-orphans": False,
-            "--abort-on-container-exit": abort_on_container_exit,
-            "--no-recreate": no_recreate,
-            "--force-recreate": False,
+            "--abort-on-container-exit": False,
+            "--no-recreate": False,
+            "--force-recreate": force_recreate,
             "--always-recreate-deps": False,
             "--no-build": False,
             "--scale": scale,
@@ -144,7 +147,7 @@ class Compose:
         self, service, command=None, publish=None, detach=False, user=None
     ):
         """
-            Execute a command on a not container
+        Execute a command on a not container
         """
 
         if publish is None:
@@ -183,7 +186,7 @@ class Compose:
         self, service, user=None, command=None, disable_tty=False, detach=False
     ):
         """
-            Execute a command on a running container
+        Execute a command on a running container
         """
         shell_command, shell_args = self.split_command(command)
         options = {
