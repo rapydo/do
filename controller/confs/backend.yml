@@ -373,7 +373,7 @@ services:
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       SECURE_FILE_PERMISSIONS: "yes"
       # NEO4J_dbms_memory_pagecache_size: 2048M
-      # NEO4J_dbms_memory_heap_maxSize: 4096M
+      # NEO4J_dbms_memory_heap_max__size: 4096M
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
     # ports:

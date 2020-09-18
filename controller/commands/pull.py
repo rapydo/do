@@ -39,4 +39,7 @@ def pull(
     }
     dc.command("pull", options)
 
-    log.info("Base images pulled from docker hub")
+    if include_all:
+        log.info("Images pulled from docker hub")
+    else:
+        log.info("Base images pulled from docker hub")

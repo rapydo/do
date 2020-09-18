@@ -1020,10 +1020,12 @@ def test_all(capfd):
         "url=https://localhost/api/specs",
     )
 
+    # --all is useless here... just to include the parameter in any test.
+    # A real test on such parameter would be quite complicated...
     exec_command(
         capfd,
-        "--prod -s proxy pull",
-        "Base images pulled from docker hub",
+        "--prod -s proxy pull --all",
+        "Images pulled from docker hub",
     )
 
     exec_command(
