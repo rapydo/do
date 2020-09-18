@@ -714,7 +714,7 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
-        "start -s backend start --force",
+        "-s backend start --force",
         "docker-compose command: 'up'",
         "Stack started",
     )
