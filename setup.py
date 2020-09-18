@@ -12,10 +12,7 @@ setup(
     package_data={"controller": ["templates/*", "confs/*"]},
     python_requires=">=3.6.0",
     entry_points={
-        "console_scripts": [
-            "rapydo=controller.__main__:main",
-            "do=controller.__main__:main",
-        ],
+        "console_scripts": ["rapydo=controller.__main__:main"],
     },
     install_requires=[
         "docker-compose==1.27.3",
