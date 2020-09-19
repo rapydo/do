@@ -29,33 +29,15 @@ from neomodel import (
     OneOrMore
 )
 
-from neomodel.util import NodeClassRegistry
-
 from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
-
-from restapi.connectors.neo4j.models import User as UserBase
-# from restapi.connectors.neo4j.models import Group as GroupBase
 
 # from restapi.utilities.logs import log
 
 
-# registry = NodeClassRegistry()
-# base_user = frozenset({'User'})
-# for c in registry._NODE_CLASS_REGISTRY:
-#     if c == base_user:
-#         registry._NODE_CLASS_REGISTRY.pop(base_user)
-#         break
-"""
-base_group = frozenset({'Group'})
-for c in registry._NODE_CLASS_REGISTRY:
-    if c == base_group:
-        registry._NODE_CLASS_REGISTRY.pop(base_group)
-        break
-"""
-
 # Extension of User model
-# class User(UserBase):
-#     pass
+class UserCustom(IdentifiedNode):
+    pass
+
 
 {% if not extend -%}
 class RelationTest(StructuredRel):
