@@ -39,12 +39,12 @@ from restapi.connectors.neo4j.models import User as UserBase
 # from restapi.utilities.logs import log
 
 
-registry = NodeClassRegistry()
-base_user = frozenset({'User'})
-for c in registry._NODE_CLASS_REGISTRY:
-    if c == base_user:
-        registry._NODE_CLASS_REGISTRY.pop(base_user)
-        break
+# registry = NodeClassRegistry()
+# base_user = frozenset({'User'})
+# for c in registry._NODE_CLASS_REGISTRY:
+#     if c == base_user:
+#         registry._NODE_CLASS_REGISTRY.pop(base_user)
+#         break
 """
 base_group = frozenset({'Group'})
 for c in registry._NODE_CLASS_REGISTRY:
