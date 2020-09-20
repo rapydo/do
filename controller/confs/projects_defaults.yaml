@@ -147,6 +147,7 @@ variables:
     NEO4J_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     NEO4J_WEB_INTERFACE_PORT: 7474 # changed to 7173 in production mode
     NEO4J_SSL_PATH: /ssl_no_used # changed to /ssl in production mode
+    NEO4J_ALLOW_UPGRADE: false
 
     MONGO_ENABLE_CONNECTOR: True
     MONGO_HOST: mongo.dockerized.io

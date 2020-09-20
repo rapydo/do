@@ -798,6 +798,12 @@ def test_all(capfd):
     )
     exec_command(
         capfd,
+        "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
+        # "Starting first_rabbit_1",
+        # "Creating first_rabbit_2",
+    )
+    exec_command(
+        capfd,
         "scale rabbit=x",
         "Invalid number of replicas: x",
     )
@@ -806,7 +812,7 @@ def test_all(capfd):
         capfd,
         "scale rabbit=2",
         # "Starting first_rabbit_1",
-        # "Creating first_rabbit_2",
+        # "Starting first_rabbit_2",
     )
 
     with open(".projectrc", "a") as f:

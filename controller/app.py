@@ -5,6 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
+from typing import List
 
 import requests
 import typer
@@ -155,6 +156,12 @@ def controller_cli_options(
         envvar="TESTING",
         show_default=False,
     ),
+    environment: List[str] = typer.Option(
+        "",
+        "--env",
+        "-e",
+        help="Temporary change the value of an environment variable",
+    ),
     privileged: bool = typer.Option(
         False,
         "--privileged",
@@ -202,6 +209,7 @@ def controller_cli_options(
     Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
+    Configuration.environment = [e.split("=") for e in environment]
 
     if stack:
         Configuration.stack = stack
@@ -698,6 +706,11 @@ class Application:
             if env_value is None:
                 continue
             env[e] = env_value
+
+        for key, value in Configuration.environment:
+            if key in env:
+                env[key] = value
+
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
                 if value is None:
