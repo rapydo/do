@@ -37,7 +37,7 @@ from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
 
 # Extension of User model
 class UserCustom(IdentifiedNode):
-    pass
+    __abstract_node__ = True
 
 
 {% if not extend -%}
@@ -57,8 +57,16 @@ class JustATest(TimestampedNode):
     p_alias = AliasProperty()
 
     test1 = RelationshipFrom(
-        'User', 'TEST', cardinality=ZeroOrMore, model=RelationTest)
+        'restapi.connectors.neo4j.models.User',
+        'TEST',
+        cardinality=ZeroOrMore,
+        model=RelationTest
+    )
 
     test2 = RelationshipFrom(
-        'User', 'TEST2', cardinality=ZeroOrMore, model=RelationTest)
+        'restapi.connectors.neo4j.models.User',
+        'TEST2',
+        cardinality=ZeroOrMore,
+        model=RelationTest
+    )
 {% endif -%}
