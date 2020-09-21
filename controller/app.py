@@ -708,8 +708,7 @@ class Application:
             env[e] = env_value
 
         for key, value in Configuration.environment:
-            if key in env:
-                env[key] = value
+            env[key] = value
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
