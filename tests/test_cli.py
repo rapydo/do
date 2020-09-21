@@ -705,10 +705,14 @@ def test_all(capfd):
         "No such service: invalid",
     )
 
+    exec_command(capfd, "diagnostic http://localhost", "http schema not supported")
     exec_command(
         capfd,
-        "diagnostic localhost",
-        "Command not implemented on host: localhost",
+        "diagnostic https://nolocalhost",
+        "Host https://nolocalhost is unreacable",
+    )
+    exec_command(
+        capfd, "diagnostic nolocalhost", "Host https://nolocalhost is unreacable"
     )
 
     # Let's start with the stack
@@ -718,6 +722,7 @@ def test_all(capfd):
         "docker-compose command: 'up'",
         "Stack started",
     )
+
     exec_command(
         capfd,
         "-s backend start --force",
