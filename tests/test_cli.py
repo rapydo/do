@@ -705,6 +705,12 @@ def test_all(capfd):
         "No such service: invalid",
     )
 
+    exec_command(
+        capfd,
+        "diagnostic localhost",
+        "Command not implemented on host: localhost",
+    )
+
     # Let's start with the stack
     exec_command(
         capfd,
