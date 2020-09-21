@@ -709,10 +709,10 @@ def test_all(capfd):
     exec_command(
         capfd,
         "diagnostic https://nolocalhost",
-        "Host https://nolocalhost is unreacable",
+        "Host https://nolocalhost is unreachable",
     )
     exec_command(
-        capfd, "diagnostic nolocalhost", "Host https://nolocalhost is unreacable"
+        capfd, "diagnostic nolocalhost", "Host https://nolocalhost is unreachable"
     )
 
     # Let's start with the stack
