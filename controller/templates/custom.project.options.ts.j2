@@ -17,12 +17,30 @@ export class ProjectOptions extends BaseProjectOptions {
         ];
     }
 
+    show_groups(): boolean {
+        return false;
+    }
+
+    custom_user_data(): any[] {
+        return null;
+    }
+
+    cookie_law_text(): string {
+        // return null to enable default text
+        return null;
+    }
+
+    cookie_law_button(): string {
+        // return null to enable default text
+        return null;
+    }
+
     registration_disclaimer(): string {
         return null;
     }
 
     custom_registration_options(): FormlyFieldConfig[] {
-		return [];
+		return null;
 	}
 
     private initTemplates() {
