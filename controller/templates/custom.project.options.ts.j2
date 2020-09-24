@@ -2,10 +2,17 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class ProjectOptions {
+    private terms_of_use: string;
 
-	constructor() {}
+	constructor() {
+        this.initTemplates();
+    }
 
 	public get_option(opt):any {
+
+        if (opt == "privacy_acceptance") {
+          return this.privacy_acceptance();
+        }
 
 /*		if (opt == 'registration') {
 			return this.registration_options()
@@ -14,9 +21,25 @@ export class ProjectOptions {
 		return null;
 	}
 
+  private privacy_acceptance() {
+    return [
+      { label: "Click here to visualize our Terms of Use", text: this.terms_of_use },
+    ];
+  }
+
 /*	
 	private registration_options() {
 		return {}
 	}
 */
+    private initTemplates() {
+        this.terms_of_use = `
+This is a default text, something like a lorem ipsum placeholder. 
+You should never visualize this text in a production environment. <br/>
+If you are reading this text your terms of use are missing in your customization component <br/>
+Please customize this text in your ProjectOptions.get_option (in custom.project.options.ts)<br />
+<br/>
+<br/>
+`;
+    }
 }
