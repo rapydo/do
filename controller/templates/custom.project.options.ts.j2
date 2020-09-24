@@ -1,37 +1,30 @@
 import { Injectable } from '@angular/core';
+import { FormlyFieldConfig } from "@ngx-formly/core";
+import { BaseProjectOptions } from "@rapydo/base.project.options";
 
 @Injectable()
-export class ProjectOptions {
+export class ProjectOptions extends BaseProjectOptions {
     private terms_of_use: string;
 
 	constructor() {
+        super();
         this.initTemplates();
     }
 
-	public get_option(opt):any {
+    privacy_acceptance() {
+        return [
+          { label: "Click here to visualize our Terms of Use", text: this.terms_of_use },
+        ];
+    }
 
-        if (opt == "privacy_acceptance") {
-          return this.privacy_acceptance();
-        }
+    registration_disclaimer(): string {
+        return null;
+    }
 
-/*		if (opt == 'registration') {
-			return this.registration_options()
-		}
-*/
-		return null;
+    custom_registration_options(): FormlyFieldConfig[] {
+		return [];
 	}
 
-  private privacy_acceptance() {
-    return [
-      { label: "Click here to visualize our Terms of Use", text: this.terms_of_use },
-    ];
-  }
-
-/*	
-	private registration_options() {
-		return {}
-	}
-*/
     private initTemplates() {
         this.terms_of_use = `
 This is a default text, something like a lorem ipsum placeholder. 
