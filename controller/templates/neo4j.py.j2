@@ -1,13 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""
-Graph DB abstraction from neo4j server.
-These are custom models!
-
-VERY IMPORTANT!
-Imports and models have to be defined/used AFTER normal Graphdb connection.
-"""
-
 from neomodel import (
     StringProperty,
     IntegerProperty,
@@ -35,8 +25,13 @@ from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
 # from restapi.utilities.logs import log
 
 
-# Extension of User model
+# Extension of core models
+
 class UserCustom(IdentifiedNode):
+    __abstract_node__ = True
+
+
+class GroupCustom(IdentifiedNode):
     __abstract_node__ = True
 
 
