@@ -26,19 +26,17 @@ from controller import log
 
 
 class Compose:
-
-    # def __init__(self, files, options={}):
-    # def __init__(self, files, net=None):
     def __init__(self, files):
         super().__init__()
 
         self.files = files
-        # options.update({'--file': self.files})
+
         self.options = {"--file": self.files}
-        # if net is not None:
-        #     self.options['--net'] = net
 
         self.project_name = get_project_name(os.curdir)
+
+        os.environ["COMPOSE_HTTP_TIMEOUT"] = "120"
+
         log.verbose("Client compose {}: {}", self.project_name, files)
 
     def config(self):
@@ -64,12 +62,11 @@ class Compose:
         try:
             out = method(options=options)
         except SystemExit as e:
-            # NOTE: we check the status here.
-            # System exit is received also when a normal command finished.
-            if e.code == 0:
-                log.verbose("Executed compose {} w/{}", command, options)
-            else:
+            # System exit is always received, also in case of normal execution
+            if e.code > 0:
                 log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
+
+            log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
             log.exit("Failed command execution:\n{}", e)
         except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
