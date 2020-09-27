@@ -36,10 +36,16 @@ def create(
         help="Command separated list of ENV=VALUE to be added in project_configuration",
     ),
     force_current: bool = typer.Option(
-        False, "--current", help="Force creation in current folder", show_default=False,
+        False,
+        "--current",
+        help="Force creation in current folder",
+        show_default=False,
     ),
     force: bool = typer.Option(
-        False, "--force", help="Force files overwriting", show_default=False,
+        False,
+        "--force",
+        help="Force files overwriting",
+        show_default=False,
     ),
     auto: bool = typer.Option(
         True,

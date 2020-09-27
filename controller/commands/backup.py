@@ -19,7 +19,10 @@ class Services(str, Enum):
 def backup(
     service: Services = typer.Argument(..., help="Service name"),
     force: bool = typer.Option(
-        False, "--force", help="Force the backup procedure", show_default=False,
+        False,
+        "--force",
+        help="Force the backup procedure",
+        show_default=False,
     ),
     restart: List[str] = typer.Option(
         "",

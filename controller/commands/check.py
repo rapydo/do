@@ -16,10 +16,17 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 @Application.app.command(help="Verify if current project is compliant to RAPyDo specs")
 def check(
     no_git: bool = typer.Option(
-        False, "--no-git", "-s", help="Skip checks on git commits", show_default=False,
+        False,
+        "--no-git",
+        "-s",
+        help="Skip checks on git commits",
+        show_default=False,
     ),
     no_builds: bool = typer.Option(
-        False, "--no-builds", help="Skip check on docker builds", show_default=False,
+        False,
+        "--no-builds",
+        help="Skip check on docker builds",
+        show_default=False,
     ),
     ignore_submodules: List[str] = typer.Option(
         "",

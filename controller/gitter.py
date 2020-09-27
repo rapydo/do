@@ -101,7 +101,9 @@ def clone(url, path, branch, do=False, check=True):
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
         log.exit(
-            "Repo {} missing as {}. You should init your project", url, local_path,
+            "Repo {} missing as {}. You should init your project",
+            url,
+            local_path,
         )
 
     if do:

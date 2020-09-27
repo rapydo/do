@@ -51,7 +51,9 @@ def read_configuration(
 
     if production:
         base_prod_conf = load_yaml_file(
-            file=PROJECTS_PROD_DEFAULTS_FILE, path=default_file_path, keep_order=True,
+            file=PROJECTS_PROD_DEFAULTS_FILE,
+            path=default_file_path,
+            keep_order=True,
         )
         base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
@@ -163,9 +165,7 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
 
     if filepath is None:
         if not is_optional:
-            log.exit(
-                "Failed to read {}/{}: File does not exist", path, file,
-            )
+            log.exit("Failed to read {}/{}: File does not exist", path, file)
         return {}
 
     with open(filepath) as fh:

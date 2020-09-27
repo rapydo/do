@@ -204,9 +204,7 @@ class Project:
             )
 
         if project in Project.reserved_project_names:
-            log.exit(
-                "You selected a reserved name, invalid project name: {}", project,
-            )
+            log.exit("You selected a reserved name, invalid project name: {}", project)
 
         return project
 

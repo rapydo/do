@@ -125,7 +125,8 @@ class Packages:
         if min_version is not None:  # pragma: no cover
             if LooseVersion(min_version) > LooseVersion(found_version):
                 version_error = "Minimum supported version for {} is {}".format(
-                    program, min_version,
+                    program,
+                    min_version,
                 )
                 version_error += f", found {found_version} "
                 log.exit(version_error)
@@ -133,7 +134,8 @@ class Packages:
         if max_version is not None:  # pragma: no cover
             if LooseVersion(max_version) < LooseVersion(found_version):
                 version_error = "Maximum supported version for {} is {}".format(
-                    program, max_version,
+                    program,
+                    max_version,
                 )
                 version_error += f", found {found_version} "
                 log.exit(version_error)

@@ -8,9 +8,18 @@ from controller.compose import Compose
 @Application.app.command(help="Watch log tails of all or specified containers")
 def logs(
     follow: bool = typer.Option(
-        False, "--follow", "-f", help="Follow logs", show_default=False,
+        False,
+        "--follow",
+        "-f",
+        help="Follow logs",
+        show_default=False,
     ),
-    tail: int = typer.Option("500", "--tail", "-t", help="Number of lines to show",),
+    tail: int = typer.Option(
+        "500",
+        "--tail",
+        "-t",
+        help="Number of lines to show",
+    ),
     service: str = typer.Option(
         None,
         "--service",

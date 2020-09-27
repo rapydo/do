@@ -11,7 +11,10 @@ from controller.commands.create import create_project
 @Application.app.command(help="Upgrade a project by re-applying the templates")
 def upgrade(
     path: Path = typer.Option(
-        ..., "--path", help="path of file to be upgraded", show_default=False,
+        ...,
+        "--path",
+        help="path of file to be upgraded",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
