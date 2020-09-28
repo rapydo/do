@@ -377,6 +377,8 @@ services:
       SECURE_FILE_PERMISSIONS: "yes"
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
+      # Useful in case of corrupted transaction logs
+      # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
     # ports:
     #   - 9090:7474
     #   - 7687:7687
@@ -591,7 +593,6 @@ services:
       # ACTIVATE: ${ACTIVATE_CELERY}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_ENABLE_MANAGEMENT_PLUGIN: ${RABBITMQ_ENABLE_MANAGEMENT_PLUGIN}
       RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
 
       RABBITMQ_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}

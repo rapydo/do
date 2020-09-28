@@ -165,7 +165,6 @@ variables:
     RABBITMQ_VHOST: "/"
     RABBITMQ_USER: "rabbit" # This default is invalidated in production mode
     RABBITMQ_PASSWORD: "D3vMode!" # This default is invalidated in production mode
-    RABBITMQ_ENABLE_MANAGEMENT_PLUGIN: 0
     RABBITMQ_MANAGEMENT_PORT: 15672
     RABBITMQ_ENABLE_SHOVEL_PLUGIN: 0
     RABBITMQ_SSL_CERTFILE:
