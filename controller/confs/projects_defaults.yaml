@@ -139,6 +139,30 @@ variables:
     ALCHEMY_DBS: SQL_API
     ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
 
+    # Have a look at this website for a quick tuning:
+    # https://pgtune.leopard.in.ua
+    POSTGRES_MAX_CONNECTIONS: 50 # default increased to 250 in production mode
+    # Something like 25% of available RAM
+    POSTGRES_SHARED_BUFFERS: 256MB # default increased to 1GB in production mode
+    # 16MB is the default, but if you have a lot of concurrent
+    # connections then a higher value can give better performance
+    POSTGRES_WAL_BUFFERS: 16MB
+    # It does not allocate actual memory but tells the optimizer the amount
+    # of cache available in the kernel. If the value of this is set too low
+    # the query planner can decide not to use some indexes, even if they’d be helpful.
+    # Therefore, setting a large value is always beneficial.
+    # Something like 75% of available RAM
+    POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB # default increased to 3GB in production mode
+    # It is allocated per connection, so high values can cause memory bottlenecks
+    POSTGRES_WORK_MEM: 2MB
+    # Something like 1/16 of RAM
+    POSTGRES_MAINTENANCE_WORK_MEM: 64MB # default increased to 256MB in production mode
+    # 1 is the default value.
+    # Increase to "hundreds" if you have a SSD or a parallel storage
+    POSTGRES_EFFECTIVE_IO_CONCURRENCY: 1
+    # Set as the number of core (and not more). Also used to set max_parallel_workers
+    POSTGRES_MAX_WORKER_PROCESSES: 1 # default increased to 2 in production mode
+
     NEO4J_ENABLE_CONNECTOR: True
     NEO4J_HOST: matrix.dockerized.io
     NEO4J_BOLT_PORT: 7687
