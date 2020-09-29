@@ -91,6 +91,21 @@ export class SinkComponent implements OnInit {
         wrappers: wrappers,
       },
       {
+        key: "url",
+        type: "input",
+        templateOptions: {
+          type: "url",
+          label: "Username",
+          placeholder: "url",
+          addonLeft: {
+            class: "fas fa-globe",
+          },
+          required: true,
+        },
+        validators: { validation: ["url"] },
+        wrappers: wrappers,
+      },
+      {
         key: 'radio1',
         type: 'radio',
         templateOptions: {
