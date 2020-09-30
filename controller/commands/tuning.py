@@ -15,6 +15,7 @@ KB = 1024
 class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
+    backend = "backend"
 
 
 def bytes_to_str(value):
@@ -48,13 +49,14 @@ def tuning(
     log.info("Number of CPU: {}", cpu)
     log.info("Amount of RAM: {}", bytes_to_str(ram))
 
+    log.info("Suggested settings:")
+
     if service == Services.neo4j:
 
         log.critical("Not implemented yet")
 
     if service == Services.postgres:
 
-        log.info("Suggested settings:")
         # Something like 25% of available RAM
         print(f"POSTGRES_SHARED_BUFFERS: {bytes_to_str(ram * 0.25)}")
         # Something like 75% of available RAM
@@ -63,3 +65,6 @@ def tuning(
         print(f"POSTGRES_MAINTENANCE_WORK_MEM: {bytes_to_str(ram * 0.0625)}")
         # Set as the number of core (and not more).
         print(f"POSTGRES_MAX_WORKER_PROCESSES: {cpu}")
+
+    if service == Services.backend:
+        print(f"GUNICORN_MAX_NUM_WORKERS: {1 + 2 * cpu}")
