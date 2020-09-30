@@ -53,8 +53,16 @@ def tuning(
 
     if service == Services.neo4j:
 
-        # Then add options to tests
-        log.critical("Not implemented yet")
+        # Don't allocate more than 31g of heap,
+        # since this will disable pointer compression, also known as "compressed oops",
+        # in the JVM and make less effective use of the heap.
+        # heap = min(ram * 0.4, 31 * GB)
+        # print(f"NEO4J_HEAP_SIZE: {bytes_to_str(heap)}")
+        # print(f"NEO4J_PAGECACHE_SIZE: {bytes_to_str(ram * 0.3)}")
+        log.info("Not implemented, use the following command instead:")
+        print('rapydo volatile neo4j --command "neo4j-admin memrec"')
+        print("Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE")
+        print("Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE")
 
     if service == Services.postgres:
 
