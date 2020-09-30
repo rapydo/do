@@ -879,6 +879,7 @@ def test_all(capfd):
     exec_command(capfd, "verify redis", "Service redis not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
+    # Backup command
     exec_command(
         capfd,
         "backup neo4j",
@@ -919,6 +920,35 @@ def test_all(capfd):
         capfd,
         "backup postgres",
         "The backup procedure requires postgres running, please start your stack",
+    )
+
+    # Restore command
+    exec_command(
+        capfd,
+        "restore neo4j",
+        "",
+    )
+    exec_command(
+        capfd,
+        "restore postgres",
+        "",
+    )
+
+    # Tuning command
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "",
+    )
+    exec_command(
+        capfd,
+        "tuning postgres",
+        "",
+    )
+    exec_command(
+        capfd,
+        "tuning backend",
+        "",
     )
 
     exec_command(
