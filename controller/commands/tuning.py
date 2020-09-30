@@ -46,13 +46,14 @@ def tuning(
     cpu = os.cpu_count()
     ram = virtual_memory().total
 
-    log.info("Number of CPU: {}", cpu)
+    log.info("Number of CPU(s): {}", cpu)
     log.info("Amount of RAM: {}", bytes_to_str(ram))
 
     log.info("Suggested settings:")
 
     if service == Services.neo4j:
 
+        # Then add options to tests
         log.critical("Not implemented yet")
 
     if service == Services.postgres:

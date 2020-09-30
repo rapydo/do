@@ -66,7 +66,7 @@ def restore(
     # walrus!
     backup_path = backup_dir.joinpath(backup_file)
     if not backup_path.exists():
-        log.exit("Invald backup file, {} does not exist", backup_path)
+        log.exit("Invalid backup file, {} does not exist", backup_path)
 
     if service == Services.neo4j:
         if container_is_running and not force:

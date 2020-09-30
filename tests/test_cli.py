@@ -926,29 +926,69 @@ def test_all(capfd):
     exec_command(
         capfd,
         "restore neo4j",
-        "",
+        "Please specify one of the following backup with --from option:",
     )
     exec_command(
         capfd,
         "restore postgres",
-        "",
+        "Please specify one of the following backup with --from option:",
     )
+    exec_command(
+        capfd,
+        "restore neo4j --from invalid",
+        "Invalid backup file, data/backup/neo4j/invalid does not exist",
+    )
+    exec_command(
+        capfd,
+        "restore postgres --from invalid",
+        "Invalid backup file, data/backup/postgres/invalid does not exist",
+    )
+
+    with TemporaryRemovePath("data/backup"):
+        exec_command(
+            capfd,
+            "restore postgres",
+            "No backup found, the following folder does not exist: data/backup/postgres",
+        )
+
+    with TemporaryRemovePath("data/backup/neo4j"):
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, the following folder does not exist: data/backup/neo4j",
+        )
+        exec_command(
+            capfd,
+            "restore postgres",
+            "Please specify one of the following backup with --from option:",
+        )
 
     # Tuning command
     exec_command(
         capfd,
         "tuning neo4j",
-        "",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
     )
     exec_command(
         capfd,
         "tuning postgres",
-        "",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "POSTGRES_SHARED_BUFFERS",
+        "POSTGRES_EFFECTIVE_CACHE_SIZE",
+        "POSTGRES_MAINTENANCE_WORK_MEM",
+        "POSTGRES_MAX_WORKER_PROCESSES",
     )
     exec_command(
         capfd,
         "tuning backend",
-        "",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "GUNICORN_MAX_NUM_WORKERS",
     )
 
     exec_command(
