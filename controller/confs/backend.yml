@@ -381,6 +381,9 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       # Useful in case of corrupted transaction logs
       # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
+      # NEO4J_dbms_recovery_fail__on__missing__files: "false"
+
+
     # ports:
     #   - 9090:7474
     #   - 7687:7687

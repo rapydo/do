@@ -159,6 +159,8 @@ variables:
     POSTGRES_MAINTENANCE_WORK_MEM: 64MB # default increased to 256MB in production mode
     # 1 is the default value.
     # Increase to "hundreds" if you have a SSD or a parallel storage
+    # If you can (i.e. if you have an SSD) you really have to increase this value!
+    # For SSD a good suggestion is around 200
     POSTGRES_EFFECTIVE_IO_CONCURRENCY: 1
     # Set as the number of core (and not more). Also used to set max_parallel_workers
     POSTGRES_MAX_WORKER_PROCESSES: 1 # default increased to 2 in production mode
