@@ -379,8 +379,8 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       NEO4J_dbms_memory_heap_max__size: ${NEO4J_HEAP_SIZE}
-      NEO4J_dbms_memory_pagecache_size: ${NEO4J_HEAP_SIZE}
-      NEO4J_dbms_memory_heap_initial__size: ${NEO4J_PAGECACHE_SIZE}
+      NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
+      NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
       # Useful in case of corrupted transaction logs
       # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
       # NEO4J_dbms_recovery_fail__on__missing__files: "false"
