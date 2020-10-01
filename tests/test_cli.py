@@ -970,8 +970,6 @@ def test_all(capfd):
         "Number of CPU(s): ",
         "Amount of RAM: ",
         "Suggested settings:",
-        "Not implemented, use the following command instead:",
-        'rapydo volatile neo4j --command "neo4j-admin memrec"',
         "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
         "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
     )

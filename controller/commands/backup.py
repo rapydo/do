@@ -35,7 +35,6 @@ def backup(
 
     service = service.value
 
-    options = {"SERVICE": [service]}
     dc = Compose(files=Application.data.files)
 
     running_containers = dc.get_running_containers(Configuration.project)
@@ -53,7 +52,7 @@ def backup(
             )
 
         if container_is_running:
-            dc.command("stop", options)
+            dc.command("stop", {"SERVICE": [service]})
 
         backup_path = f"/backup/{service}/{now}.tar.gz"
         command = f"tar -zcf {backup_path} /data"

@@ -5,7 +5,8 @@ import typer
 from psutil import virtual_memory
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
+from controller.compose import Compose
 
 GB = 1_073_741_824
 MB = 1_048_576
@@ -53,16 +54,31 @@ def tuning(
 
     if service == Services.neo4j:
 
+        dc = Compose(files=Application.data.files)
+
+        running_containers = dc.get_running_containers(Configuration.project)
+        container_is_running = service in running_containers
+
+        command = "neo4j-admin memrec"
+
+        if container_is_running:
+            dc.exec_command(service, command=command, disable_tty=True)
+        else:
+            dc.create_volatile_container(service, command=command)
+
+        # output = temporary_stream.getvalue().split("\\")
+        # print(output)
         # Don't allocate more than 31g of heap,
         # since this will disable pointer compression, also known as "compressed oops",
         # in the JVM and make less effective use of the heap.
         # heap = min(ram * 0.4, 31 * GB)
         # print(f"NEO4J_HEAP_SIZE: {bytes_to_str(heap)}")
         # print(f"NEO4J_PAGECACHE_SIZE: {bytes_to_str(ram * 0.3)}")
-        log.info("Not implemented, use the following command instead:")
-        print('rapydo volatile neo4j --command "neo4j-admin memrec"')
-        print("Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE")
-        print("Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE")
+        log.info("Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE")
+        log.info("Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE")
+        log.info(
+            "Keep enough free memory for lucene indexes (if reported in the output)"
+        )
 
     if service == Services.postgres:
 
