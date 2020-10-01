@@ -57,7 +57,8 @@ def tuning(
         log.info("Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE")
         log.info("Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE")
         log.info(
-            "Keep enough free memory for lucene indexes (if reported in the output)"
+            "Keep enough free memory for lucene indexes "
+            "(check size reported in the output, if any)"
         )
 
     if service == Services.postgres:

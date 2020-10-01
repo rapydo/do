@@ -35,7 +35,7 @@ class Compose:
 
         self.project_name = get_project_name(os.curdir)
 
-        os.environ["COMPOSE_HTTP_TIMEOUT"] = "120"
+        os.environ["COMPOSE_HTTP_TIMEOUT"] = "180"
 
         log.verbose("Client compose {}: {}", self.project_name, files)
 
