@@ -6,6 +6,10 @@ from plumbum.commands.processes import CommandNotFound, ProcessExecutionError
 
 from controller import log
 
+GB = 1_073_741_824
+MB = 1_048_576
+KB = 1024
+
 
 class ExecutionException(BaseException):
     pass
@@ -52,3 +56,20 @@ def get_current_gid():
     except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return 0
+
+
+def bytes_to_str(value):
+
+    if value >= GB:
+        value /= GB
+        unit = "GB"
+    elif value >= MB:
+        value /= MB
+        unit = "MB"
+    elif value >= KB:
+        value /= KB
+        unit = "KB"
+    else:
+        unit = ""
+
+    return f"{int(round(value, 0))}{unit}"

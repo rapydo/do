@@ -131,6 +131,23 @@ def test_all(capfd):
     except BaseException:
         pytest.fail("Unexpected exception raised")
 
+    assert system.bytes_to_str(0) == "0"
+    assert system.bytes_to_str(1) == "1"
+    assert system.bytes_to_str(1023) == "1023"
+    assert system.bytes_to_str(1024) == "1KB"
+    assert system.bytes_to_str(1424) == "1KB"
+    assert system.bytes_to_str(1824) == "2KB"
+    assert system.bytes_to_str(18248) == "18KB"
+    assert system.bytes_to_str(1024 * 1024 - 1) == "1024KB"
+    assert system.bytes_to_str(1024 * 1024) == "1MB"
+    assert system.bytes_to_str(18248377) == "17MB"
+    assert system.bytes_to_str(418248377) == "399MB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 - 1) == "1024MB"
+    assert system.bytes_to_str(1024 * 1024 * 1024) == "1GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 - 1) == "1024GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024) == "1024GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
+
     # Invalid file / path
     try:
         load_yaml_file("invalid", "path")
