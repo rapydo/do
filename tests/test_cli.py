@@ -1048,6 +1048,13 @@ def test_all(capfd):
         "Suggested settings:",
         "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
         "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
+        "Memory settings recommendation from neo4j-admin memrec:",
+        "Based on the above, the following memory settings are recommended:",
+        "dbms.memory.heap.initial_size=",
+        "dbms.memory.heap.max_size=",
+        "dbms.memory.pagecache.size=",
+        "Total size of lucene indexes in all databases:",
+        "Total size of data and native indexes in all databases:",
     )
     exec_command(
         capfd,
@@ -1084,7 +1091,8 @@ def test_all(capfd):
         capfd,
         f"restore postgres {postgres_dump_file}",
         "Starting restore on postgres...",
-        "Done: ",
+        "CREATE DATABASE",
+        "ALTER DATABASE",
         f"Restore from data/backup/postgres/{postgres_dump_file} completed",
     )
 
