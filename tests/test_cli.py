@@ -1091,7 +1091,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        f"restore neo4j {neo4j_dump_file} --force",
+        f"restore neo4j {neo4j_dump_file} --force --restart backend",
         "Starting restore on neo4j...",
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
