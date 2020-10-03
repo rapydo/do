@@ -948,7 +948,15 @@ def test_all(capfd):
         exec_command(
             capfd,
             "restore postgres",
-            "No backup found, the following folder does not exist: data/backup/postgres",
+            "No backup found, the following folder "
+            "does not exist: data/backup/postgres",
+        )
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, the following folder "
+            "does not exist: data/backup/neo4j",
         )
 
     with TemporaryRemovePath("data/backup/neo4j"):
@@ -961,6 +969,31 @@ def test_all(capfd):
             capfd,
             "restore postgres",
             "Please specify one of the following backup:",
+        )
+
+        os.mkdir("data/backup/neo4j")
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, data/backup/neo4j is empty",
+        )
+
+        open("data/backup/neo4j/test.gz", "a").close()
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, data/backup/neo4j is empty",
+        )
+
+        open("data/backup/neo4j/test.dump", "a").close()
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "Please specify one of the following backup:",
+            "test.dump",
         )
 
     # Tuning command
@@ -997,6 +1030,18 @@ def test_all(capfd):
         capfd,
         "restart",
         "Stack restarted",
+    )
+
+    # Here backup to be up and running
+    # (tuning should use the running container instead of a volatile container)
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
+        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
     )
 
     exec_command(
