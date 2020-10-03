@@ -892,6 +892,13 @@ def test_all(capfd):
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
+    # This is to verify that --force restarted neo4j
+    exec_command(
+        capfd,
+        "backup neo4j",
+        "Neo4j is running and the backup will temporary stop it. "
+        "If you want to continue add --force flag",
+    )
     exec_command(
         capfd,
         "backup postgres",
@@ -924,14 +931,13 @@ def test_all(capfd):
 
     # Restore command
     exec_command(
-        capfd,
-        "restore neo4j",
-        "Please specify one of the following backup:",
+        capfd, "restore neo4j", "Please specify one of the following backup:", ".dump"
     )
     exec_command(
         capfd,
         "restore postgres",
         "Please specify one of the following backup:",
+        ".sql.gz",
     )
     exec_command(
         capfd,
@@ -995,6 +1001,35 @@ def test_all(capfd):
             "Please specify one of the following backup:",
             "test.dump",
         )
+
+    files = os.listdir("data/backup/neo4j")
+    files = [f for f in files if f.endswith(".dump")]
+    files.sort()
+    backup_file = files[-1]
+    exec_command(
+        capfd,
+        f"restore neo4j {backup_file}",
+        "Starting restore on neo4j...",
+        "Done: ",
+        f"Restore completed: data/backup/neo4j/{backup_file}",
+    )
+
+    files = os.listdir("data/backup/postgres")
+    files = [f for f in files if f.endswith(".sql.gz")]
+    files.sort()
+    backup_file = files[-1]
+    exec_command(
+        capfd,
+        f"restore postgres {backup_file}",
+        "Starting restore on postgres...",
+        "Done: ",
+        f"Restore completed: data/backup/postgres/{backup_file}",
+    )
+    # Here we should test the restore procedure:
+    # 1) verify some data in the database
+    # 2) remove / modifiche such data
+    # 3) restore the dump
+    # 4) verify data match point 1
 
     # Tuning command
     exec_command(

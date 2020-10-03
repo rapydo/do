@@ -58,17 +58,17 @@ def restore(
         log.exit("No backup found, the following folder does not exist: {}", backup_dir)
 
     if backup_file is None:
-        dirs = os.listdir(backup_dir)
+        files = os.listdir(backup_dir)
 
-        filtered_dirs = [d for d in dirs if d.endswith(expected_ext)]
-        filtered_dirs.sort()
+        filtered_files = [d for d in files if d.endswith(expected_ext)]
+        filtered_files.sort()
 
-        if not len(filtered_dirs):
+        if not len(filtered_files):
             log.exit("No backup found, {} is empty", backup_dir)
 
         log.info("Please specify one of the following backup:")
-        for d in filtered_dirs:
-            print(d)
+        for f in filtered_files:
+            print(f)
 
         return
 
