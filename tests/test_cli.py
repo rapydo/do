@@ -926,21 +926,21 @@ def test_all(capfd):
     exec_command(
         capfd,
         "restore neo4j",
-        "Please specify one of the following backup with --from option:",
+        "Please specify one of the following backup:",
     )
     exec_command(
         capfd,
         "restore postgres",
-        "Please specify one of the following backup with --from option:",
+        "Please specify one of the following backup:",
     )
     exec_command(
         capfd,
-        "restore neo4j --from invalid",
+        "restore neo4j invalid",
         "Invalid backup file, data/backup/neo4j/invalid does not exist",
     )
     exec_command(
         capfd,
-        "restore postgres --from invalid",
+        "restore postgres invalid",
         "Invalid backup file, data/backup/postgres/invalid does not exist",
     )
 
@@ -960,7 +960,7 @@ def test_all(capfd):
         exec_command(
             capfd,
             "restore postgres",
-            "Please specify one of the following backup with --from option:",
+            "Please specify one of the following backup:",
         )
 
     # Tuning command

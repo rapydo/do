@@ -18,9 +18,8 @@ class Services(str, Enum):
 @Application.app.command(help="Restore a backup of one service")
 def restore(
     service: Services = typer.Argument(..., help="Service name"),
-    backup_file: str = typer.Option(
+    backup_file: str = typer.Argument(
         None,
-        "--from",
         help="Specify the backup to be restored",
         show_default=False,
     ),
@@ -56,7 +55,8 @@ def restore(
         if not len(dirs):
             log.exit("No backup found, {} is empty", backup_dir)
 
-        log.info("Please specify one of the following backup with --from option:")
+        log.info("Please specify one of the following backup:")
+        dirs.sort()
         for d in dirs:
 
             print(d)
