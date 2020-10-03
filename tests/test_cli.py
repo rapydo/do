@@ -1002,6 +1002,9 @@ def test_all(capfd):
             "test.dump",
         )
 
+        os.remove("data/backup/neo4j/test.gz")
+        os.remove("data/backup/neo4j/test.dump")
+
     files = os.listdir("data/backup/neo4j")
     files = [f for f in files if f.endswith(".dump")]
     files.sort()
@@ -1025,6 +1028,10 @@ def test_all(capfd):
         "Done: ",
         f"Restore completed: data/backup/postgres/{backup_file}",
     )
+
+    # You should somehow verify output from (or similar):
+    # command = "bin/cypher-shell \"match (u: User) return u.email\""
+
     # Here we should test the restore procedure:
     # 1) verify some data in the database
     # 2) remove / modifiche such data
