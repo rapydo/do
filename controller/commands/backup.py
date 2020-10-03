@@ -54,8 +54,9 @@ def backup(
         if container_is_running:
             dc.command("stop", {"SERVICE": [service]})
 
-        backup_path = f"/backup/{service}/{now}.tar.gz"
-        command = f"tar -zcf {backup_path} /data"
+        backup_path = f"/backup/{service}/{now}.dump"
+
+        command = f"neo4j-admin dump --to={backup_path} --database=neo4j"
 
         log.info("Starting backup on {}...", service)
         dc.create_volatile_container(service, command=command)

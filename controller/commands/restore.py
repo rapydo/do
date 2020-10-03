@@ -46,19 +46,28 @@ def restore(
     running_containers = dc.get_running_containers(Configuration.project)
     container_is_running = service in running_containers
 
+    expected_ext = ""
+
+    if service == Services.neo4j:
+        expected_ext = ".dump"
+    elif service == Services.postgres:
+        expected_ext = ".sql.gz"
+
     backup_dir = Path("data").joinpath("backup").joinpath(service)
     if not backup_dir.exists():
         log.exit("No backup found, the following folder does not exist: {}", backup_dir)
 
     if backup_file is None:
         dirs = os.listdir(backup_dir)
-        if not len(dirs):
+
+        filtered_dirs = [d for d in dirs if d.endswith(expected_ext)]
+        filtered_dirs.sort()
+
+        if not len(filtered_dirs):
             log.exit("No backup found, {} is empty", backup_dir)
 
         log.info("Please specify one of the following backup:")
-        dirs.sort()
-        for d in dirs:
-
+        for d in filtered_dirs:
             print(d)
 
         return
@@ -78,13 +87,15 @@ def restore(
         if container_is_running:
             dc.command("stop", options)
 
-        # backup_path = f"/backup/{service}/{now}.tar.gz"
-        # command = f"tar -zcf {backup_path} /data"
+        backup_path = f"/backup/{service}/{backup_file}"
 
-        # log.info("Starting restore on {}...", service)
-        # dc.create_volatile_container(service, command=command)
+        command = f"neo4j-admin load --from={backup_path} --database=neo4j --force"
 
-        # log.info("Restore completed: data{}", backup_path)
+        log.info("Starting restore on {}...", service)
+
+        dc.create_volatile_container(service, command=command)
+
+        log.info("Restore completed: data{}", backup_path)
 
         if container_is_running:
             dc.start_containers([service], detach=True)
