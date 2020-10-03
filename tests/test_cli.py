@@ -1082,6 +1082,21 @@ def test_all(capfd):
         "Stack restarted",
     )
 
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file}",
+        "Neo4j is running and the restore will temporary stop it.",
+        "If you want to continue add --force flag",
+    )
+
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file} --force",
+        "Starting restore on neo4j...",
+        "Done: ",
+        f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+    )
+
     # Here we should test the restore procedure:
     # 1) verify some data in the database
     # 2) remove / modifiche such data
