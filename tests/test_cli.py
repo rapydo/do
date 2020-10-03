@@ -1005,29 +1005,16 @@ def test_all(capfd):
         os.remove("data/backup/neo4j/test.gz")
         os.remove("data/backup/neo4j/test.dump")
 
+    # Test restore on neo4j (required neo4j to be down)
     files = os.listdir("data/backup/neo4j")
     files = [f for f in files if f.endswith(".dump")]
     files.sort()
-    backup_file = files[-1]
-    exec_command(
-        capfd,
-        f"restore neo4j {backup_file}",
-        "Starting restore on neo4j...",
-        "Done: ",
-        f"Restore completed: data/backup/neo4j/{backup_file}",
-    )
+    neo4j_dump_file = files[-1]
 
     files = os.listdir("data/backup/postgres")
     files = [f for f in files if f.endswith(".sql.gz")]
     files.sort()
-    backup_file = files[-1]
-    exec_command(
-        capfd,
-        f"restore postgres {backup_file}",
-        "Starting restore on postgres...",
-        "Done: ",
-        f"Restore completed: data/backup/postgres/{backup_file}",
-    )
+    postgres_dump_file = files[-1]
 
     # You should somehow verify output from (or similar):
     # command = "bin/cypher-shell \"match (u: User) return u.email\""
@@ -1037,6 +1024,20 @@ def test_all(capfd):
     # 2) remove / modifiche such data
     # 3) restore the dump
     # 4) verify data match point 1
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file}",
+        "Starting restore on neo4j...",
+        "Done: ",
+        f"Restore completed: data/backup/neo4j/{neo4j_dump_file}",
+    )
+
+    # Postgres restore not allowed if container is not running
+    exec_command(
+        capfd,
+        f"restore postgres {postgres_dump_file}",
+        "The restore procedure requires postgres running, please start your stack",
+    )
 
     # Tuning command
     exec_command(
@@ -1074,8 +1075,20 @@ def test_all(capfd):
         "Stack restarted",
     )
 
-    # Here backup to be up and running
-    # (tuning should use the running container instead of a volatile container)
+    # Here we should test the restore procedure:
+    # 1) verify some data in the database
+    # 2) remove / modifiche such data
+    # 3) restore the dump
+    # 4) verify data match point 1
+    exec_command(
+        capfd,
+        f"restore postgres {postgres_dump_file}",
+        "Starting restore on postgres...",
+        "Done: ",
+        f"Restore completed: data/backup/postgres/{postgres_dump_file}",
+    )
+
+    # Test tuning neo4j with container already running
     exec_command(
         capfd,
         "tuning neo4j",
