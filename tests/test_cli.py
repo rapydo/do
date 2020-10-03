@@ -1029,7 +1029,7 @@ def test_all(capfd):
         f"restore neo4j {neo4j_dump_file}",
         "Starting restore on neo4j...",
         "Done: ",
-        f"Restore completed: data/backup/neo4j/{neo4j_dump_file}",
+        f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
     # Postgres restore not allowed if container is not running
@@ -1085,7 +1085,7 @@ def test_all(capfd):
         f"restore postgres {postgres_dump_file}",
         "Starting restore on postgres...",
         "Done: ",
-        f"Restore completed: data/backup/postgres/{postgres_dump_file}",
+        f"Restore from data/backup/postgres/{postgres_dump_file} completed",
     )
 
     # Test tuning neo4j with container already running

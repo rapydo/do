@@ -95,7 +95,7 @@ def restore(
 
         dc.create_volatile_container(service, command=command)
 
-        log.info("Restore completed: data{}", backup_path)
+        log.info("Restore from data{} completed", backup_path)
 
         if container_is_running:
             dc.start_containers([service], detach=True)
@@ -130,7 +130,7 @@ def restore(
         command = f"psql -U sqluser -f {dump_path} postgres"
         dc.exec_command(service, command=command, user="postgres", disable_tty=True)
 
-        log.info("Restore completed from data{}", backup_path)
+        log.info("Restore from data{} completed", backup_path)
 
     if restart:
         dc.command("restart", {"SERVICE": restart})
