@@ -822,6 +822,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             # Should never happens since all services are configured, cannot be tested
             if not serv:  # pragma: no cover
 
+                # with py39 it would be key.removeprefix('INJECT_')
                 if key.startswith("INJECT_"):
                     key = key[len("INJECT_") :]
 
