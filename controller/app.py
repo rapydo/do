@@ -681,8 +681,10 @@ class Application:
 
         if self.extended_project is None:
             env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
+            env["BASE_PROJECT"] = env["COMPOSE_PROJECT_NAME"]
         else:
             env["EXTENDED_PROJECT"] = self.extended_project
+            env["BASE_PROJECT"] = env["EXTENDED_PROJECT"]
 
         env["RAPYDO_VERSION"] = __version__
         env["PROJECT_VERSION"] = Configuration.version
