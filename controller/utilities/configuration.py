@@ -57,7 +57,6 @@ def read_configuration(
         )
         base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
-    log.critical(read_extended)
     if read_extended:
         extended_project = project.get("extends")
     else:
