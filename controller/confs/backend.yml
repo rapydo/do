@@ -215,8 +215,8 @@ services:
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
-      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
-      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
+      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # JWT tokens secret
       - jwt_tokens:${JWT_APP_SECRETS}
       # submodules
@@ -493,8 +493,8 @@ services:
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
-      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
-      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
+      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
@@ -574,8 +574,8 @@ services:
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
-      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
-      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
+      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
@@ -676,8 +676,8 @@ services:
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
-      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
-      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
+      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
@@ -714,8 +714,8 @@ services:
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
-      - ${EXTENDED_PROJECT_PATH}/backend:/code/${EXTENDED_PROJECT}
-      - ${EXTENDED_PROJECT_PATH}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
+      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
+      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # JWT tokens secret and SSL
       # - jwt_tokens:${JWT_APP_SECRETS}
       # it is used to enable SSL in production mode

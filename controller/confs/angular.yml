@@ -72,10 +72,10 @@ services:
       # - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - ${SUBMODULE_DIR}/rapydo-angular/utility:/rapydo
 
-      - ${VANILLA_DIR}/data/${BASE_PROJECT}/frontend:/app
-      - ${VANILLA_DIR}/data/${BASE_PROJECT}/karma:/coverage
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/karma:/coverage
       # Output folder, configured in cypress.json
-      - ${VANILLA_DIR}/data/${BASE_PROJECT}/cypress:/cypress
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
       - ${SUBMODULE_DIR}/rapydo-angular/browserslist:/app/browserslist
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
@@ -87,7 +87,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
-      - ${PROJECT_DIR}/frontend:/app/app/custom
+      - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
@@ -95,11 +95,11 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
-      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+      - ${BASE_PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
 
       - ${VANILLA_DIR}/data/logs:/logs
 
   ###############################
   proxy:
     volumes:
-      - ${VANILLA_DIR}/data/${BASE_PROJECT}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app

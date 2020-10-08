@@ -675,9 +675,9 @@ class Application:
         env["PROJECT_DIR"] = PROJECT_DIR.joinpath(Configuration.project).resolve()
 
         if self.extended_project_path is None:
-            env["EXTENDED_PROJECT_PATH"] = env["PROJECT_DIR"]
+            env["BASE_PROJECT_DIR"] = env["PROJECT_DIR"]
         else:
-            env["EXTENDED_PROJECT_PATH"] = self.extended_project_path.resolve()
+            env["BASE_PROJECT_DIR"] = self.extended_project_path.resolve()
 
         if self.extended_project is None:
             env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
