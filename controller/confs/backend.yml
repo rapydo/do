@@ -378,6 +378,8 @@ services:
       SECURE_FILE_PERMISSIONS: "yes"
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
+      NEO4J_dbms_ssl_policy_client__policy_private__key: /ssl/neo4j.key
+      NEO4J_dbms_ssl_policy_client__policy_public__certificate: /ssl/neo4j.key
       NEO4J_dbms_memory_heap_max__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
