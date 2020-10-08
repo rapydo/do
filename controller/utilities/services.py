@@ -118,6 +118,11 @@ def normalize_placeholder_variable(key):
     if key == "NEO4J_dbms_memory_pagecache_size":
         return "NEO4J_PAGECACHE_SIZE"
 
+    if key == "CYPRESS_AUTH_DEFAULT_USERNAME":
+        return "AUTH_DEFAULT_USERNAME"
+    if key == "CYPRESS_AUTH_DEFAULT_PASSWORD":
+        return "AUTH_DEFAULT_PASSWORD"
+
     return key
 
 

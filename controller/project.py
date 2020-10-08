@@ -10,7 +10,6 @@ DATA = Path("data")
 SUBMODULES = Path("submodules")
 
 
-# move here all checks on project (required files, creation functions, templating, etc)
 class Project:
     def __init__(self):
         self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
@@ -91,7 +90,7 @@ class Project:
 
         return True
 
-    def load_frontend_scaffold(self, frontend):
+    def load_frontend_scaffold(self, frontend, extended_project):
         self.frontend = frontend
 
         if self.frontend is None or self.frontend == NO_FRONTEND:
@@ -109,22 +108,23 @@ class Project:
                 ]
             )
 
-            self.expected_files.extend(
-                [
-                    self.p_path("frontend", "package.json"),
-                    self.p_path("frontend", "css", "style.css"),
-                    self.p_path("frontend", "app", "custom.project.options.ts"),
-                    self.p_path("frontend", "app", "custom.module.ts"),
-                    self.p_path("frontend", "app", "custom.navbar.ts"),
-                    self.p_path("frontend", "app", "custom.footer.ts"),
-                    self.p_path("frontend", "app", "custom.profile.ts"),
-                    self.p_path("frontend", "app", "custom.navbar.links.html"),
-                    self.p_path("frontend", "app", "custom.navbar.brand.html"),
-                    self.p_path("frontend", "app", "custom.footer.html"),
-                    self.p_path("frontend", "app", "custom.profile.html"),
-                    self.p_path("frontend", "app", "types.ts"),
-                ]
-            )
+            if extended_project is None:
+                self.expected_files.extend(
+                    [
+                        self.p_path("frontend", "package.json"),
+                        self.p_path("frontend", "css", "style.css"),
+                        self.p_path("frontend", "app", "custom.project.options.ts"),
+                        self.p_path("frontend", "app", "custom.module.ts"),
+                        self.p_path("frontend", "app", "custom.navbar.ts"),
+                        self.p_path("frontend", "app", "custom.footer.ts"),
+                        self.p_path("frontend", "app", "custom.profile.ts"),
+                        self.p_path("frontend", "app", "custom.navbar.links.html"),
+                        self.p_path("frontend", "app", "custom.navbar.brand.html"),
+                        self.p_path("frontend", "app", "custom.footer.html"),
+                        self.p_path("frontend", "app", "custom.profile.html"),
+                        self.p_path("frontend", "app", "types.ts"),
+                    ]
+                )
 
             frontend_data_dir = DATA.joinpath(self.project, "frontend")
             self.data_folders.extend(

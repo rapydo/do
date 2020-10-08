@@ -325,7 +325,9 @@ class Application:
         self.read_specs()  # read project configuration
 
         # from read_specs
-        Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
+        Application.project_scaffold.load_frontend_scaffold(
+            Configuration.frontend, self.extended_project
+        )
         Application.verify_rapydo_version()
         Application.project_scaffold.inspect_project_folder()
 

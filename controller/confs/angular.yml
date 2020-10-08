@@ -88,6 +88,7 @@ services:
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
+      - ${PROJECT_DIR}/frontend:/app/app/subproject
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
