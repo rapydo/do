@@ -2,7 +2,6 @@ import os
 from enum import Enum
 
 import typer
-from psutil import virtual_memory
 
 from controller import log
 from controller.app import Application, Configuration
@@ -25,7 +24,7 @@ def tuning(
     service = service.value
 
     cpu = os.cpu_count()
-    ram = virtual_memory().total
+    ram = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
 
     log.info("Number of CPU(s): {}", cpu)
     log.info("Amount of RAM: {}", system.bytes_to_str(ram))
