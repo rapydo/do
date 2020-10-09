@@ -37,11 +37,18 @@ def logs(
     else:
         services = Application.data.services
 
+    if len(services) > 1:
+        timestamps = False
+    elif services[0] in "frontend":
+        timestamps = True
+    else:
+        timestamps = False
+
     options = {
         "--follow": follow,
         "--tail": str(tail),
         "--no-color": False,
-        "--timestamps": True,
+        "--timestamps": timestamps,
         "SERVICE": services,
     }
 
