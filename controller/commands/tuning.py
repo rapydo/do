@@ -18,13 +18,18 @@ class Services(str, Enum):
 @Application.app.command(help="Tuning suggestion for a service")
 def tuning(
     service: Services = typer.Argument(..., help="Service name"),
+    cpu: int = typer.Option(None, "--cpu", help="Force the amount of cpus", min=1),
+    ram: int = typer.Option(None, "--ram", help="Force the amount of ram", min=1),
 ):
     Application.controller.controller_init()
 
     service = service.value
 
-    cpu = os.cpu_count()
-    ram = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+    if not cpu:
+        cpu = os.cpu_count()
+
+    if not ram:
+        ram = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
 
     log.info("Number of CPU(s): {}", cpu)
     log.info("Amount of RAM: {}", system.bytes_to_str(ram))
@@ -38,7 +43,7 @@ def tuning(
         running_containers = dc.get_running_containers(Configuration.project)
         container_is_running = service in running_containers
 
-        command = "neo4j-admin memrec"
+        command = f"neo4j-admin memrec --memory {ram}"
 
         if container_is_running:
             dc.exec_command(service, command=command, disable_tty=True)
