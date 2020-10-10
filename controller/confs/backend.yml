@@ -409,7 +409,6 @@ services:
       # Default value (OPTIONAL for bolt and https) bring to WebSocket connection errors
       # failed: WebSocket opening handshake was canceled
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
-      NEO4J_dbms_ssl_policy_http_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
 
 
