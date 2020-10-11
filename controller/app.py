@@ -847,17 +847,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
 
         if len(placeholders) > 0:
-            m = "\n".join(placeholders)
-            tips = "\n\nYou can fix this error by updating the "
-            tips += "project_configuration.yaml file or your local .projectrc file\n"
             log.exit(
-                "The following variables are missing in your configuration:\n\n{}{}",
-                m,
-                tips,
+                "The following variables are missing in your configuration:\n\n{}"
+                "\n\nYou can fix this error by updating the your .projectrc file\n"
+                "\n".join(placeholders),
             )
 
-        else:
-            log.verbose("No placeholder variable to be replaced")
+        log.verbose("No placeholder variable to be replaced")
 
         return missing
 
