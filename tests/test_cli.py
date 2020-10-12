@@ -1028,17 +1028,34 @@ def test_all(capfd):
     # You should somehow verify output from (or similar):
     # command = "bin/cypher-shell \"match (u: User) return u.email\""
 
-    # Here we should test the restore procedure:
+    cypher = "shell neo4j 'bin/cypher-shell"
+    # Here we test the restore procedure:
     # 1) verify some data in the database
-    # 2) remove / modifiche such data
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "User"',
+    )
+    # 2) Modify such data
+    exec_command(capfd, f'{cypher} "match (r: Role) SET r.description = r.name"\'')
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "normal_user"',
+    )
     # 3) restore the dump
-    # 4) verify data match point 1
     exec_command(
         capfd,
         f"restore neo4j {neo4j_dump_file}",
         "Starting restore on neo4j...",
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+    )
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "User"',
     )
 
     # Postgres restore not allowed if container is not running
@@ -1106,21 +1123,22 @@ def test_all(capfd):
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
+    psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
         capfd,
-        "shell postgres 'psql -U sqluser -d SQL_API -c \"select name, description from role\"'",
+        f'{psql} -c "select name, description from role"\'',
         " normal_user | User",
     )
     # 2) Modify such data
     exec_command(
         capfd,
-        "shell postgres 'psql -U sqluser -d SQL_API -c \"update role SET description=name\"'",
+        f'{psql} -c "update role SET description=name"\'',
     )
     exec_command(
         capfd,
-        "shell postgres 'psql -U sqluser -d SQL_API -c \"select name, description from role\"'",
+        f'{psql} -c "select name, description from role"\'',
         " normal_user | normal_user",
     )
     # 3) restore the dump
@@ -1133,10 +1151,10 @@ def test_all(capfd):
         f"Restore from data/backup/postgres/{postgres_dump_file} completed",
     )
 
-    # 4) verify data match point 1
+    # 4) verify data match again point 1 (restore completed)
     exec_command(
         capfd,
-        "shell postgres 'psql -U sqluser -d SQL_API -c \"select name, description from role\"'",
+        f'{psql} -c "select name, description from role"\'',
         " normal_user | User",
     )
 
