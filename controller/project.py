@@ -53,14 +53,13 @@ class Project:
 
         if auth or services:
 
+            models = self.p_path("backend", "models")
             if auth == "sqlalchemy" or "postgres" in services or "mysql" in services:
-                self.expected_files.append(
-                    self.p_path("backend", "models", "sqlalchemy.py")
-                )
+                self.expected_files.append(models.joinpath("sqlalchemy.py"))
             if auth == "neo4j" or "neo4j" in services:
-                self.expected_files.append(self.p_path("backend", "models", "neo4j.py"))
+                self.expected_files.append(models.joinpath("neo4j.py"))
             if auth == "mongo" or "mongo" in services:
-                self.expected_files.append(self.p_path("backend", "models", "mongo.py"))
+                self.expected_files.append(models.joinpath("mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
         self.optionals_files.append(self.p_path("backend", "endpoints", "profile.py"))
