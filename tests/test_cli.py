@@ -1101,20 +1101,18 @@ def test_all(capfd):
     # 1) verify some data in the database
     exec_command(
         capfd,
-        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
-        "name   | surname ",
-        " Default | User",
+        'shell postgres "psql -d SQL_API -c \'select name, description from role"',
+        " normal_user | User",
     )
     # 2) Modify such data
     exec_command(
         capfd,
-        "shell postgres \"psql -d SQL_API -c 'update 'user' SET name=surname'\"",
+        "shell postgres \"psql -d SQL_API -c 'update role SET description=name'\"",
     )
     exec_command(
         capfd,
-        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
-        "name   | surname ",
-        " User | User",
+        'shell postgres "psql -d SQL_API -c \'select name, description from role"',
+        " normal_user | normal_user",
     )
     # 3) restore the dump
     exec_command(
@@ -1129,9 +1127,8 @@ def test_all(capfd):
     # 4) verify data match point 1
     exec_command(
         capfd,
-        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
-        "name   | surname ",
-        " Default | User",
+        'shell postgres "psql -d SQL_API -c \'select name, description from role"',
+        " normal_user | User",
     )
 
     # Test tuning neo4j with container already running
