@@ -879,6 +879,15 @@ def test_all(capfd):
     exec_command(capfd, "verify redis", "Service redis not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
+    # This will initialize postgres
+    exec_command(capfd, "shell backend 'restapi init'")
+    # And this will also initialize neo4j (what a trick!)
+    # Temporary change AUTH_SERVICE from postgres to neo4j
+    exec_command(capfd, "-e AUTH_SERVICE=neo4j -s backend start")
+    exec_command(capfd, "shell backend 'restapi init'")
+    # Restore correct AUTH_SERVICE
+    exec_command(capfd, "-s backend start")
+
     # Backup command
     exec_command(
         capfd,

@@ -30,7 +30,7 @@ class Project:
     def p_path(self, *args):
         return PROJECT_DIR.joinpath(self.project, *args)
 
-    def load_project_scaffold(self, project, auth):
+    def load_project_scaffold(self, project, auth, services=None):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         self.expected_folders.append(self.p_path("confs"))
@@ -51,9 +51,16 @@ class Project:
         )
         self.expected_files.append(Path(".gitignore"))
 
-        if auth is not None:
-            model_file = f"{auth}.py"
-            self.expected_files.append(self.p_path("backend", "models", model_file))
+        if auth or services:
+
+            if auth == "sqlalchemy" or "postgres" in services or "mysql" in services:
+                self.expected_files.append(
+                    self.p_path("backend", "models", "sqlalchemy.py")
+                )
+            if auth == "neo4j" or "neo4j" in services:
+                self.expected_files.append(self.p_path("backend", "models", "neo4j.py"))
+            if auth == "mongo" or "mongo" in services:
+                self.expected_files.append(self.p_path("backend", "models", "mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
         self.optionals_files.append(self.p_path("backend", "endpoints", "profile.py"))

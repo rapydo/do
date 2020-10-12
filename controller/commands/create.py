@@ -174,7 +174,7 @@ def create_project(
 
     env_variables = parse_env_variables(envs)
 
-    project_scaffold.load_project_scaffold(project_name, auth)
+    project_scaffold.load_project_scaffold(project_name, auth, services)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
