@@ -1097,11 +1097,26 @@ def test_all(capfd):
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
-    # Here we should test the restore procedure:
+    # Here we test the restore procedure:
     # 1) verify some data in the database
-    # 2) remove / modifiche such data
+    exec_command(
+        capfd,
+        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
+        "name   | surname ",
+        " Default | User",
+    )
+    # 2) Modify such data
+    exec_command(
+        capfd,
+        "shell postgres \"psql -d SQL_API -c 'update 'user' SET name=surname'\"",
+    )
+    exec_command(
+        capfd,
+        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
+        "name   | surname ",
+        " User | User",
+    )
     # 3) restore the dump
-    # 4) verify data match point 1
     exec_command(
         capfd,
         f"restore postgres {postgres_dump_file}",
@@ -1109,6 +1124,14 @@ def test_all(capfd):
         "CREATE DATABASE",
         "ALTER DATABASE",
         f"Restore from data/backup/postgres/{postgres_dump_file} completed",
+    )
+
+    # 4) verify data match point 1
+    exec_command(
+        capfd,
+        "shell postgres \"psql -d SQL_API -c 'select name, surname from 'user''\"",
+        "name   | surname ",
+        " Default | User",
     )
 
     # Test tuning neo4j with container already running
