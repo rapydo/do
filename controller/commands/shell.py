@@ -32,6 +32,7 @@ def shell(
     default_command: bool = typer.Option(
         False,
         "--default-command",
+        "--default",
         help="Execute the default command configured for the container",
         show_default=False,
     ),
