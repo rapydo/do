@@ -5,6 +5,7 @@ from controller import PROJECT_DIR, gitter, log
 
 NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
+GITKEEP = ".gitkeep"
 
 DATA = Path("data")
 SUBMODULES = Path("submodules")
@@ -26,6 +27,7 @@ class Project:
         self.data_files = []
         # check will raise an error if these files will be found
         self.obsolete_files = []
+        self.suggested_gitkeep = []
 
     def p_path(self, *args):
         return PROJECT_DIR.joinpath(self.project, *args)
@@ -42,6 +44,12 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "tests"))
         self.expected_folders.append(self.p_path("backend", "initialization"))
 
+        self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "tests", GITKEEP))
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
@@ -112,6 +120,10 @@ class Project:
                     self.p_path("frontend", "css"),
                     self.p_path("frontend", "integration"),
                 ]
+            )
+
+            self.suggested_gitkeep.append(
+                self.p_path("frontend", "integration", GITKEEP)
             )
 
             self.expected_files.extend(

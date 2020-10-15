@@ -200,6 +200,9 @@ def create_project(
 
         f.mkdir(parents=True, exist_ok=True)
 
+    for f in project_scaffold.suggested_gitkeep:
+        f.open("a").close()
+
     files = project_scaffold.expected_files
     if add_optionals:
         files += project_scaffold.optionals_files
