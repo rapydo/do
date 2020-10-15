@@ -9,6 +9,10 @@ from controller import log
 from controller.app import Application, Configuration
 from controller.compose import Compose
 
+# 0 1 * * * cd /home/??? && \
+#     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo backup neo4j --force > \
+#         /home/???/data/logs/backup.log 2>&1
+
 
 class Services(str, Enum):
     neo4j = "neo4j"

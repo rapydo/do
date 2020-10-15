@@ -6,6 +6,10 @@ from controller import log
 from controller.app import Application, Configuration
 from controller.compose import Compose
 
+# 0 0 * * 3 cd /home/??? && \
+#     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo ssl --no-tty > \
+#         /home/???/data/logs/ssl.log 2>&1
+
 
 @Application.app.command(help="Issue a SSL certificate with Let's Encrypt")
 def ssl(

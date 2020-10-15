@@ -188,6 +188,11 @@ class Packages:
             "docker", option=["version", "--format", "'{{.Server.Version}}'"]
         )
 
+        if v is None:  # pragma: no cover
+            log.exit(
+                "Cannot verify docker version, is your user not allowed to docker?"
+            )
+
         safe_version = "18.09.2"
         if LooseVersion(safe_version) > LooseVersion(v):
             log.critical(
