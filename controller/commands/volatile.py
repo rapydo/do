@@ -12,11 +12,15 @@ def volatile(
         help="Service name",
         autocompletion=Application.autocomplete_allservice,
     ),
-    command: str = typer.Option(
-        "bash",
+    command: str = typer.Argument(
+        "bash", help="UNIX command to be executed on selected running service"
+    ),
+    # Deprecated since 0.8
+    old_command: str = typer.Option(
+        None,
         "--command",
         "-c",
-        help="UNIX command to be executed",
+        help="[DEPRECATED] UNIX command to be executed",
         show_default=False,
     ),
     user: str = typer.Option(
@@ -28,6 +32,17 @@ def volatile(
     ),
 ):
     Application.controller.controller_init()
+
+    # Deprecated since 0.8
+    if old_command:
+        if " " in old_command:
+            cmd = f'"{old_command}"'
+        else:
+            cmd = old_command
+        log.warning(
+            "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
+        )
+        command = old_command
 
     if user:
         log.warning(

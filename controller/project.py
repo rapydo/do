@@ -50,6 +50,7 @@ class Project:
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tests", GITKEEP))
+
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
