@@ -1,3 +1,4 @@
+from restapi.customizer import BaseCustomizer
 # from restapi.utilities.logs import log
 
 
@@ -12,7 +13,7 @@ class Initializer:
         pass
 
 
-class Customizer:
+class Customizer(BaseCustomizer):
     """
     This class is used to manipulate user information
     - custom_user_properties_pre is executed just before user creation
@@ -21,20 +22,10 @@ class Customizer:
     - custom_user_properties_post is executed just after user creation
                              use this to implement extra operation in user creation
                              e.g. store additional relationships
-    NOTE: to be merged with custom_post_handle_user_input??
-    - custom_post_handle_user_input is used just after user registration
-                                    use this to perform setup operations,
-                                    such as verify default settings
     """
 
     def custom_user_properties_pre(self, properties):
         extra_properties = {}
-        # extra_properties['myfield'] = properties.pop('myfield', None)
+        # if 'myfield' in properties:
+        #     extra_properties['myfield'] = properties['myfield']
         return properties, extra_properties
-
-    def custom_user_properties_post(self, user, properties, extra_properties, db):
-        pass
-
-    def custom_post_handle_user_input(self, auth, user_node, properties):
-
-        return True
