@@ -71,7 +71,6 @@ class Project:
                 self.expected_files.append(models.joinpath("mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
-        self.optionals_files.append(self.p_path("backend", "endpoints", "profile.py"))
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "activate_account.html")
         )
