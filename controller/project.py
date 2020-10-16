@@ -101,6 +101,7 @@ class Project:
         self.obsolete_files.append(self.p_path("backend", "apis"))
         # Removed since 0.8
         self.obsolete_files.append(self.p_path("backend", "models", "swagger.yaml"))
+        self.obsolete_files.append(self.p_path("backend", "endpoints", "profile.py"))
 
         return True
 
