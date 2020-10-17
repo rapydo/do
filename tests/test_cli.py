@@ -3,6 +3,7 @@ import shutil
 import signal
 import tempfile
 from collections import OrderedDict  # can be removed from python 3.7
+from datetime import datetime
 
 from git import Repo
 from typer.testing import CliRunner
@@ -845,11 +846,32 @@ def test_all(capfd):
         # "Stopping and removing first_rabbit_3",
     )
 
+    # Backend logs are never timestamped
     exec_command(
         capfd,
         "logs -s backend --tail 10",
         "docker-compose command: 'logs'",
-        "backend_1",
+        "backend_1       | Development mode",
+    )
+
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%dT")
+
+    # Frontend logs are timestamped
+    exec_command(
+        capfd,
+        "logs -s frontend --tail 10",
+        "docker-compose command: 'logs'",
+        f"frontend_1      | {timestamp}",
+    )
+
+    # With multiple services logs are not timestamped
+    exec_command(
+        capfd,
+        "logs -s frontend,backend --tail 10",
+        "docker-compose command: 'logs'",
+        "backend_1       | Development mode",
+        "frontend_1      | <s>",
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)

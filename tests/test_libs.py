@@ -207,6 +207,8 @@ def test_all(capfd):
     assert shorten("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
     assert shorten("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
     assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
+    assert shorten("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
+    assert shorten("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
     key = "anyother"
     assert shorten(key) == key
 
