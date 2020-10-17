@@ -860,7 +860,7 @@ def test_all(capfd):
     # Frontend logs are timestamped
     exec_command(
         capfd,
-        "logs -s frontend --tail 10 --no-color",
+        "-s frontend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
         f"frontend_1      | {timestamp}",
     )
@@ -868,7 +868,7 @@ def test_all(capfd):
     # With multiple services logs are not timestamped
     exec_command(
         capfd,
-        "logs -s frontend,backend --tail 10 --no-color",
+        "-s frontend,backend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
         "backend_1       | Development mode",
         "frontend_1      | <s>",
