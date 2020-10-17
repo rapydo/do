@@ -28,6 +28,7 @@ def logs(
         show_default=False,
         autocompletion=Application.autocomplete_service,
     ),
+    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
 ):
     Application.controller.controller_init()
 
@@ -47,8 +48,8 @@ def logs(
     options = {
         "--follow": follow,
         "--tail": str(tail),
-        "--no-color": False,
         "--timestamps": timestamps,
+        "--no-color": nocolor,
         "SERVICE": services,
     }
 
