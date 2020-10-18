@@ -1,25 +1,20 @@
-from neomodel import (
-    StringProperty,
-    IntegerProperty,
+from neomodel import (  # UniqueIdProperty
+    AliasProperty,
+    ArrayProperty,
+    BooleanProperty,
     DateProperty,
     DateTimeProperty,
-    JSONProperty,
-    ArrayProperty,
     FloatProperty,
-    BooleanProperty,
-    AliasProperty,
-    # UniqueIdProperty
-
+    IntegerProperty,
+    JSONProperty,
+    OneOrMore,
+    RelationshipFrom,
+    RelationshipTo,
+    StringProperty,
     StructuredNode,
     StructuredRel,
-
-    RelationshipTo,
-    RelationshipFrom,
-
     ZeroOrMore,
-    OneOrMore
 )
-
 from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
 
 # from restapi.utilities.logs import log

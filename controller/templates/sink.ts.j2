@@ -8,13 +8,12 @@ import { ApiService } from "@rapydo/services/api";
 import { AuthService } from "@rapydo/services/auth";
 import { NotificationService } from "@rapydo/services/notification";
 
-import * as moment from 'moment';
+import * as moment from "moment";
 
 @Component({
   templateUrl: "sink.html",
 })
 export class SinkComponent implements OnInit {
-
   public form = new FormGroup({});
   public fields1: FormlyFieldConfig[] = [];
   public fields2: FormlyFieldConfig[] = [];
@@ -25,18 +24,15 @@ export class SinkComponent implements OnInit {
     private spinner: NgxSpinnerService,
     private api: ApiService,
     private auth: AuthService,
-    private notify: NotificationService,
-  ) {
-  }
+    private notify: NotificationService
+  ) {}
 
   ngOnInit() {
     this.fields1 = this.get_fields(null);
-    this.fields2 = this.get_fields(['form-field-horizontal']);
-
+    this.fields2 = this.get_fields(["form-field-horizontal"]);
   }
 
   private get_fields(wrappers) {
-
     let m = moment();
 
     return [
@@ -70,10 +66,10 @@ export class SinkComponent implements OnInit {
         wrappers: wrappers,
       },
       {
-        key: 'date',
-        type: 'datepicker',
+        key: "date",
+        type: "datepicker",
         templateOptions: {
-          type: 'date',
+          type: "date",
           placeholder: "date",
           // min: {
           //   year: 2019,
@@ -85,8 +81,8 @@ export class SinkComponent implements OnInit {
           //   month: 1 + m.month(),
           //   day: m.date()
           // },
-          label: 'Date',
-          required: false
+          label: "Date",
+          required: false,
         },
         wrappers: wrappers,
       },
@@ -106,56 +102,54 @@ export class SinkComponent implements OnInit {
         wrappers: wrappers,
       },
       {
-        key: 'radio1',
-        type: 'radio',
+        key: "radio1",
+        type: "radio",
         templateOptions: {
-          type: 'radio',
-          label: 'Radio1',
+          type: "radio",
+          label: "Radio1",
           required: false,
           options: [
-            { 
-              "value": "opt1",
-              "label": "Option1",
+            {
+              value: "opt1",
+              label: "Option1",
             },
-            { 
-              "value": "opt2",
-              "label": "Option2",
+            {
+              value: "opt2",
+              label: "Option2",
             },
-          ]
-        }
+          ],
+        },
       },
       {
-        key: 'radio2',
-        type: 'radio_with_description',
+        key: "radio2",
+        type: "radio_with_description",
         templateOptions: {
-          type: 'radio',
-          label: 'Radio2',
+          type: "radio",
+          label: "Radio2",
           required: false,
           options: [
-            { 
-              "value": "opt3",
-              "label": "Option3",
-              "description": "Description 3"
+            {
+              value: "opt3",
+              label: "Option3",
+              description: "Description 3",
             },
-            { 
-              "value": "opt4",
-              "label": "Option4",
-              "description": "Description 4"
+            {
+              value: "opt4",
+              label: "Option4",
+              description: "Description 4",
             },
-          ]
-        }
-      }
-
+          ],
+        },
+      },
     ];
   }
 
-    submit() {
-
-        this.data = null;
-        if (!this.form.valid) {
-          return false;
-        }
-
-        this.data = this.model;
+  submit() {
+    this.data = null;
+    if (!this.form.valid) {
+      return false;
     }
+
+    this.data = this.model;
+  }
 }

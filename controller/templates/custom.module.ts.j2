@@ -1,39 +1,39 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
 
-import { SharedModule } from '@rapydo/shared.module';
-import { AuthGuard } from '@rapydo/app.auth.guard';
+import { SharedModule } from "@rapydo/shared.module";
+import { AuthGuard } from "@rapydo/app.auth.guard";
 
-// import { MyComponent } from './components/mycomponent'
+// import { MyComponent } from "./components/mycomponent";
 {% if testing -%}
-import { SinkComponent } from '@app/components/sink/sink';
+import { SinkComponent } from "@app/components/sink/sink";
 {% endif -%}
 
 const routes: Routes = [
   {
-    path: '',
-    redirectTo: '/app/profile',
-    pathMatch: 'full'
+    path: ",
+    redirectTo: "/app/profile",
+    pathMatch: "full"
   },
   {
-    path: 'app',
-    redirectTo: '/app/profile',
-    pathMatch: 'full'
+    path: "app",
+    redirectTo: "/app/profile",
+    pathMatch: "full"
   },
   {% if testing -%}
   {
-    path: 'app/sink',
+    path: "app/sink",
     component: SinkComponent,
     canActivate: [AuthGuard],
-    runGuardsAndResolvers: 'always',
+    runGuardsAndResolvers: "always",
   },
   {% endif -%}
 /*
   {
-    path: 'app/myroute',
+    path: "app/myroute",
     component: MyComponent,
     canActivate: [AuthGuard],
-    runGuardsAndResolvers: 'always',
+    runGuardsAndResolvers: "always",
   },
 */
 ];

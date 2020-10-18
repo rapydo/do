@@ -1,50 +1,48 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 import { FormlyFieldConfig } from "@ngx-formly/core";
 import { BaseProjectOptions } from "@rapydo/base.project.options";
 
 @Injectable()
 export class ProjectOptions extends BaseProjectOptions {
-    private terms_of_use: string;
+  private terms_of_use: string;
 
-	constructor() {
-        super();
-        this.initTemplates();
-    }
+  constructor() {
+    super();
+    this.initTemplates();
+  }
 
-    privacy_statements() {
-        return [
-          { label: "Terms of Use", text: this.terms_of_use },
-        ];
-    }
+  privacy_statements() {
+    return [{ label: "Terms of Use", text: this.terms_of_use }];
+  }
 
-    show_groups(): boolean {
-        return false;
-    }
+  show_groups(): boolean {
+    return false;
+  }
 
-    custom_user_data(): any[] {
-        return null;
-    }
+  custom_user_data(): any[] {
+    return null;
+  }
 
-    cookie_law_text(): string {
-        // return null to enable default text
-        return null;
-    }
+  cookie_law_text(): string {
+    // return null to enable default text
+    return null;
+  }
 
-    cookie_law_button(): string {
-        // return null to enable default text
-        return null;
-    }
+  cookie_law_button(): string {
+    // return null to enable default text
+    return null;
+  }
 
-    registration_disclaimer(): string {
-        return null;
-    }
+  registration_disclaimer(): string {
+    return null;
+  }
 
-    custom_registration_options(): FormlyFieldConfig[] {
-		return null;
-	}
+  custom_registration_options(): FormlyFieldConfig[] {
+    return null;
+  }
 
-    private initTemplates() {
-        this.terms_of_use = `
+  private initTemplates() {
+    this.terms_of_use = `
 This is a default text, something like a lorem ipsum placeholder. 
 You should never visualize this text in a production environment. <br/>
 If you are reading this text your terms of use are missing in your customization component <br/>
@@ -52,5 +50,5 @@ Please customize this text in your ProjectOptions.get_option (in custom.project.
 <br/>
 <br/>
 `;
-    }
+  }
 }
