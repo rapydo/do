@@ -12,27 +12,27 @@ project_configuration:
     env:
       LOG_LEVEL: INFO
       # SMTP_ADMIN: your@email.org
-      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
-      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}
+      AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}
 
       {% if production -%}
       {% if services -%}{% for service in services -%}
-      {% if service == 'postgres' or service == 'mariadb' -%}
+      {% if service == "postgres" or service == "mariadb" -%}
       ALCHEMY_USER: sqluser
-      ALCHEMY_PASSWORD: {{ 'RANDOM'| password }}
+      ALCHEMY_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
-      {% if service == 'neo4j' -%}
-      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
+      {% if service == "neo4j" -%}
+      NEO4J_PASSWORD: {{ "RANDOM"| password }}
       NEO4J_PAGECACHE_SIZE: 1G
       NEO4J_HEAP_SIZE: 1G
       {% endif -%}
-      {% if service == 'celeryui' -%}
-      CELERYUI_PASSWORD: {{ 'RANDOM'| password }}
-      CELERYUI_USER: {{ 'RANDOM'| username }}
+      {% if service == "celeryui" -%}
+      CELERYUI_PASSWORD: {{ "RANDOM"| password }}
+      CELERYUI_USER: {{ "RANDOM"| username }}
       {% endif -%}
-      {% if service == 'rabbit' -%}
-      RABBITMQ_USER: {{ 'RANDOM'| username }}
-      RABBITMQ_PASSWORD: {{ 'RANDOM'| password }}
+      {% if service == "rabbit" -%}
+      RABBITMQ_USER: {{ "RANDOM"| username }}
+      RABBITMQ_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% endfor %}{% endif -%}
       {% endif -%}
@@ -41,18 +41,18 @@ project_configuration:
       SMTP_HOST: mock.mail.service
       SMTP_ADMIN: mock@nomail.org
       SMTP_PORT: 0
-      SMTP_USERNAME: {{ 'RANDOM'| username }}
-      SMTP_PASSWORD: {{ 'RANDOM'| password }}
-      ALLOW_PASSWORD_RESET: 'true'
-      ALLOW_REGISTRATION: 'true'
-      ALLOW_TERMS_OF_USE: 'true'
-      AUTH_DEFAULT_USERNAME: {{ 'RANDOM'| username }}@nomail.org
-      AUTH_DEFAULT_PASSWORD: {{ 'RANDOM'| password }}+Aa1-nowit'sstrong!
+      SMTP_USERNAME: {{ "RANDOM"| username }}
+      SMTP_PASSWORD: {{ "RANDOM"| password }}
+      ALLOW_PASSWORD_RESET: "true"
+      ALLOW_REGISTRATION: "true"
+      ALLOW_TERMS_OF_USE: "true"
+      AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
+      AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}+Aa1-nowit'sstrong!
       UPLOAD_PATH: /tmp
       MAX_LOGS_LENGTH: 40
       AUTH_TOKEN_SAVE_FREQUENCY: 1
       FRONTEND_BUILD_MODE: angular-test
-      NEO4J_PASSWORD: {{ 'RANDOM'| password }}
+      NEO4J_PASSWORD: {{ "RANDOM"| password }}
       {% if production -%}
       DEFAULT_DHLEN: 1024
       GUNICORN_WORKERS: 1

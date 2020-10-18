@@ -4,7 +4,7 @@ from restapi.connectors.sqlalchemy.models import User, db
 
 # Add (inject) attributes to User
 {% if extend -%}
-setattr(User, 'my_custom_field2', db.Column(db.String(255)))
+setattr(User, "my_custom_field2", db.Column(db.String(255)))
 {% else -%}
-setattr(User, 'my_custom_field', db.Column(db.String(255)))
+setattr(User, "my_custom_field", db.Column(db.String(255)))
 {% endif -%}

@@ -47,15 +47,15 @@ class JustATest(TimestampedNode):
     p_alias = AliasProperty()
 
     test1 = RelationshipFrom(
-        'restapi.connectors.neo4j.models.User',
-        'TEST',
+        "restapi.connectors.neo4j.models.User",
+        "TEST",
         cardinality=ZeroOrMore,
         model=RelationTest
     )
 
     test2 = RelationshipFrom(
-        'restapi.connectors.neo4j.models.User',
-        'TEST2',
+        "restapi.connectors.neo4j.models.User",
+        "TEST2",
         cardinality=ZeroOrMore,
         model=RelationTest
     )

@@ -10,7 +10,7 @@ class Initializer:
     """
 
     def __init__(self, services, app=None):
-        # c = services['{{auth_service}}']
+        # c = services["{{auth_service}}""]
         pass
 
 
@@ -31,8 +31,8 @@ class Customizer(BaseCustomizer):
     @staticmethod
     def custom_user_properties_pre(properties):
         extra_properties = {}
-        # if 'myfield' in properties:
-        #     extra_properties['myfield'] = properties['myfield']
+        # if "myfield" in properties:
+        #     extra_properties["myfield"] = properties["myfield"]
         return properties, extra_properties
 
     @staticmethod
@@ -41,7 +41,7 @@ class Customizer(BaseCustomizer):
 
     @staticmethod
     def manipulate_profile(ref, user, data):
-        # data['CustomField'] = user.custom_field
+        # data["CustomField"] = user.custom_field
 
         return data
 
@@ -60,7 +60,7 @@ class Customizer(BaseCustomizer):
         # required = request and request.method == "POST"
         """
         return {
-            'custom_field': fields.Int(
+            "custom_field": fields.Int(
                 required=required,
                 # validate=validate.Range(min=0, max=???),
                 validate=validate.Range(min=0),
