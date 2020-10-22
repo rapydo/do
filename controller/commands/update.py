@@ -21,7 +21,7 @@ def update(
 
     Application.git_update(ignore_submodules)
     # Reading again the configuration, it may change with git updates
-    Application.controller.read_specs()
+    Application.controller.read_specs(read_extended=True)
 
     Application.controller.make_env()
 

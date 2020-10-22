@@ -277,7 +277,7 @@ class Application:
 
         Application.load_projectrc()
 
-    def controller_init(self):
+    def controller_init(self, read_extended=True):
         if Configuration.create:
             Application.check_installed_software()
             return True
@@ -297,7 +297,7 @@ class Application:
         Configuration.ABS_PROJECT_PATH = PROJECT_DIR.joinpath(Configuration.project)
 
         if Configuration.print_version:
-            self.read_specs()
+            self.read_specs(read_extended=True)
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
@@ -313,7 +313,7 @@ class Application:
             Application.check_internet_connection()
 
         if Configuration.install:
-            self.read_specs()
+            self.read_specs(read_extended=False)
             return True
 
         # Auth is not yet available, will be read by read_specs
@@ -322,7 +322,7 @@ class Application:
         )
         Application.preliminary_version_check()
 
-        self.read_specs()  # read project configuration
+        self.read_specs(read_extended=read_extended)  # read project configuration
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
@@ -413,16 +413,10 @@ class Application:
         Packages.check_python_package("requests", min_version="2.6.1")
         Packages.check_python_package("pip", min_version="10.0.0")
 
-    def read_specs(self):
+    def read_specs(self, read_extended=True):
         """ Read project configuration """
 
         try:
-            if Configuration.initialize:
-                read_extended = False
-            elif Configuration.install:
-                read_extended = False
-            else:
-                read_extended = True
 
             confs = configuration.read_configuration(
                 default_file_path=CONFS_DIR,
@@ -656,7 +650,6 @@ class Application:
             PROJECTRC.unlink()
         else:
             log.info("Created default {} file", PROJECTRC)
-        self.read_specs()
 
     def make_env(self):
 
