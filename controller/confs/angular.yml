@@ -15,6 +15,8 @@ services:
     privileged: ${DOCKER_PRIVILEGED_MODE}
     networks:
       app_net:
+        aliases:
+          - frontend.dockerized.io
     environment:
       ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
       CURRENT_UID: ${CURRENT_UID}
@@ -22,6 +24,7 @@ services:
       APP_MODE: ${APP_MODE}
       VERSION: ${PROJECT_VERSION}
       RAPYDO_VERSION: ${RAPYDO_VERSION}
+      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       PROJECT_TITLE: ${PROJECT_TITLE}
       PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
       ENABLE_FOOTER: ${ENABLE_FOOTER}
@@ -61,6 +64,7 @@ services:
       COMMIT_INFO_TIMESTAMP:
       COMMIT_INFO_REMOTE:
 
+
       # DISPLAY: ":0"
 
     volumes:
@@ -76,14 +80,15 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/browserslist:/app/browserslist
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
-      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.json:/app/tsconfig.json
+      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
-      - ${PROJECT_DIR}/frontend:/app/app/custom
+      - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
+      - ${PROJECT_DIR}/frontend:/app/app/subproject
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
@@ -91,7 +96,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
-      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+      - ${BASE_PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
 
       - ${VANILLA_DIR}/data/logs:/logs
 

@@ -5,7 +5,7 @@ import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
 from controller.app import Application, Configuration
-from controller.project import ANGULAR, NO_FRONTEND, Project  # REACT
+from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 
 
@@ -36,10 +36,16 @@ def create(
         help="Command separated list of ENV=VALUE to be added in project_configuration",
     ),
     force_current: bool = typer.Option(
-        False, "--current", help="Force creation in current folder", show_default=False,
+        False,
+        "--current",
+        help="Force creation in current folder",
+        show_default=False,
     ),
     force: bool = typer.Option(
-        False, "--force", help="Force files overwriting", show_default=False,
+        False,
+        "--force",
+        help="Force files overwriting",
+        show_default=False,
     ),
     auto: bool = typer.Option(
         True,
@@ -168,7 +174,7 @@ def create_project(
 
     env_variables = parse_env_variables(envs)
 
-    project_scaffold.load_project_scaffold(project_name, auth)
+    project_scaffold.load_project_scaffold(project_name, auth, services)
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
@@ -193,6 +199,9 @@ def create_project(
             log.exit("\nmkdir -p {}", f)
 
         f.mkdir(parents=True, exist_ok=True)
+
+    for f in project_scaffold.suggested_gitkeep:
+        f.open("a").close()
 
     files = project_scaffold.expected_files
     if add_optionals:

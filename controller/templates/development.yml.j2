@@ -1,12 +1,10 @@
-version: '3'
-#######################
-# Link services inside API
+version: "3"
 
 services:
   backend:
     ports:
       - ${BACKEND_PORT}:${FLASK_DEFAULT_PORT}
-  {% if frontend != 'nofrontend' %}
+  {% if frontend != "nofrontend" %}
   frontend:
     ports:
       - 80:8080

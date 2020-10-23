@@ -2,8 +2,8 @@
 project:
   title: YourProject
   description: "Your project"
-  version: {{ version }}
-  rapydo: {{ version }}
+  version: "{{ version }}"
+  rapydo: "{{ version }}"
   {% if extend -%}
   extends: {{ extend }}
   extends-from: projects
@@ -28,7 +28,7 @@ variables:
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_MYSQL: 1
     ALCHEMY_PORT: 3306
-    ALCHEMY_DBTYPE: 'mysql+pymysql'
+    ALCHEMY_DBTYPE: "mysql+pymysql"
     {% endif -%}
     {% if enable_neo4j -%}
     ACTIVATE_NEO4J: 1

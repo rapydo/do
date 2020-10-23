@@ -11,6 +11,9 @@ def shell(
     service: str = typer.Argument(
         ..., help="Service name", autocompletion=Application.autocomplete_service
     ),
+    command: str = typer.Argument(
+        "bash", help="UNIX command to be executed on selected running service"
+    ),
     user: str = typer.Option(
         None,
         "--user",
@@ -18,31 +21,46 @@ def shell(
         help="User existing in selected service",
         show_default=False,
     ),
-    command: str = typer.Option(
-        "bash",
+    # Deprecated since 0.8
+    old_command: str = typer.Option(
+        None,
         "--command",
         "-c",
-        help="UNIX command to be executed on selected running service",
+        help="[DEPRECATED] UNIX command to be executed on selected running service",
         show_default=False,
     ),
     default_command: bool = typer.Option(
         False,
         "--default-command",
-        help="Execute the default command configured for the container. Not compatible with --command and not implemented for all containers",
+        "--default",
+        help="Execute the default command configured for the container",
         show_default=False,
     ),
     no_tty: bool = typer.Option(
         False,
         "--no-tty",
-        help="Disable pseudo-tty allocation,"
-        "useful to execute the command from non interactive script",
+        help="Disable pseudo-tty allocation (useful for non-interactive script)",
         show_default=False,
     ),
     detach: bool = typer.Option(
-        False, "--detach", help="Execute command in detach mode", show_default=False,
+        False,
+        "--detach",
+        help="Execute the command in detach mode",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
+
+    # Deprecated since 0.8
+    if old_command:
+        if " " in old_command:
+            cmd = f'"{old_command}"'
+        else:
+            cmd = old_command
+        log.warning(
+            "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
+        )
+        command = old_command
 
     dc = Compose(files=Application.data.files)
 

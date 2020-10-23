@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
-current_version = "0.7.6"
+version = "0.8"
 
 setup(
-    name="rapydo_controller",
-    version=current_version,
+    name="rapydo",
+    version=version,
     description="Manage and deploy projects based on RAPyDo framework",
     url="https://rapydo.github.io/docs",
     license="MIT",
@@ -12,14 +12,10 @@ setup(
     package_data={"controller": ["templates/*", "confs/*"]},
     python_requires=">=3.6.0",
     entry_points={
-        "console_scripts": [
-            "rapydo=controller.__main__:main",
-            "do=controller.__main__:main",
-        ],
+        "console_scripts": ["rapydo=controller.__main__:main"],
     },
     install_requires=[
-        "docker-compose==1.26.2",
-        "docker==4.2.2",
+        "docker-compose==1.27.3",
         "dockerfile-parse==1.0.0",
         "python-dateutil",
         "pytz",
@@ -29,7 +25,7 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.7",
+        "GitPython==3.1.8",
         "PyYAML==5.3.1",
         "pip>=10.0.0",
         "typer[all]==0.3.2",

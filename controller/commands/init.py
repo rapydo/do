@@ -39,13 +39,15 @@ def init(
     # conf reading to set services variables
     if create_projectrc:
         Application.controller.create_projectrc()
+        Application.controller.read_specs(read_extended=False)
 
     if submodules_path is not None:
         if not submodules_path.exists():
             log.exit("Local path not found: {}", submodules_path)
 
-    Application.controller.git_submodules(from_path=submodules_path)
+    Application.git_submodules(from_path=submodules_path)
 
+    Application.controller.read_specs(read_extended=True)
     Application.controller.make_env()
 
     # Compose services and variables
@@ -56,6 +58,7 @@ def init(
     # when services are available to set specific configurations
     if create_projectrc:
         Application.controller.create_projectrc()
+        Application.controller.read_specs(read_extended=True)
         Application.controller.make_env()
         # Read again! :-(
     #     Application.controller.read_composers()

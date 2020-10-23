@@ -131,6 +131,23 @@ def test_all(capfd):
     except BaseException:
         pytest.fail("Unexpected exception raised")
 
+    assert system.bytes_to_str(0) == "0"
+    assert system.bytes_to_str(1) == "1"
+    assert system.bytes_to_str(1023) == "1023"
+    assert system.bytes_to_str(1024) == "1KB"
+    assert system.bytes_to_str(1424) == "1KB"
+    assert system.bytes_to_str(1824) == "2KB"
+    assert system.bytes_to_str(18248) == "18KB"
+    assert system.bytes_to_str(1024 * 1024 - 1) == "1024KB"
+    assert system.bytes_to_str(1024 * 1024) == "1MB"
+    assert system.bytes_to_str(18248377) == "17MB"
+    assert system.bytes_to_str(418248377) == "399MB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 - 1) == "1024MB"
+    assert system.bytes_to_str(1024 * 1024 * 1024) == "1GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 - 1) == "1024GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024) == "1024GB"
+    assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
+
     # Invalid file / path
     try:
         load_yaml_file("invalid", "path")
@@ -190,6 +207,8 @@ def test_all(capfd):
     assert shorten("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
     assert shorten("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
     assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
+    assert shorten("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
+    assert shorten("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
     key = "anyother"
     assert shorten(key) == key
 
@@ -224,7 +243,6 @@ def test_all(capfd):
     assert services.get_default_user("frontend", "no") is None
     assert services.get_default_user("frontend", "angular") == "node"
     assert services.get_default_user("frontend", "angularjs") is None
-    assert services.get_default_user("frontend", "react") is None
     assert services.get_default_user("postgres", "") == "postgres"
     assert services.get_default_user("neo4j", "") == "neo4j"
 
@@ -232,6 +250,7 @@ def test_all(capfd):
     assert services.get_default_command("backend") == "restapi launch"
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
+    assert services.get_default_command("postgres") == "psql"
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
     # )

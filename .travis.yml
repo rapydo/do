@@ -3,7 +3,7 @@ language: python
 services:
   - docker
 script:
-  - pip3 install --upgrade pip setuptools pytest pytest-cov
+  - pip3 install --upgrade pip setuptools pytest pytest-cov pytest-timeout
   - pip3 install --upgrade --no-cache-dir --editable .
   - BRANCH=$([  -z "$TRAVIS_PULL_REQUEST_BRANCH" ] && echo "$TRAVIS_BRANCH" || echo "$TRAVIS_PULL_REQUEST_BRANCH")
   - mkdir rapydo_tests
@@ -11,7 +11,7 @@ script:
   - mkdir -p data/logs
   - export LOGURU_LEVEL=DEBUG
   - export TESTING=1
-  - py.test -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
+  - py.test --timeout=300 -s -x --cov-report=xml --cov=controller ../tests || travis_terminate 1;
   - cp ../codecov.yml .
   - travis_retry bash <(curl -s https://codecov.io/bash) -R ../
 

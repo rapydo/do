@@ -1,61 +1,34 @@
-# -*- coding: utf-8 -*-
-
-"""
-Graph DB abstraction from neo4j server.
-These are custom models!
-
-VERY IMPORTANT!
-Imports and models have to be defined/used AFTER normal Graphdb connection.
-"""
-
-from neomodel import (
-    StringProperty,
-    IntegerProperty,
+from neomodel import (  # UniqueIdProperty
+    AliasProperty,
+    ArrayProperty,
+    BooleanProperty,
     DateProperty,
     DateTimeProperty,
-    JSONProperty,
-    ArrayProperty,
     FloatProperty,
-    BooleanProperty,
-    AliasProperty,
-    # UniqueIdProperty
-
-    StructuredRel,
-
-    RelationshipTo,
+    IntegerProperty,
+    JSONProperty,
+    OneOrMore,
     RelationshipFrom,
-
+    RelationshipTo,
+    StringProperty,
+    StructuredNode,
+    StructuredRel,
     ZeroOrMore,
-    OneOrMore
 )
-
-from neomodel.util import NodeClassRegistry
-
 from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
-
-from restapi.connectors.neo4j.models import User as UserBase
-# from restapi.connectors.neo4j.models import Group as GroupBase
 
 # from restapi.utilities.logs import log
 
 
-registry = NodeClassRegistry()
-base_user = frozenset({'User'})
-for c in registry._NODE_CLASS_REGISTRY:
-    if c == base_user:
-        registry._NODE_CLASS_REGISTRY.pop(base_user)
-        break
-"""
-base_group = frozenset({'Group'})
-for c in registry._NODE_CLASS_REGISTRY:
-    if c == base_group:
-        registry._NODE_CLASS_REGISTRY.pop(base_group)
-        break
-"""
+# Extension of core models
 
-# Extension of User model
-class User(UserBase):
-    pass
+class UserCustom(IdentifiedNode):
+    __abstract_node__ = True
+
+
+class GroupCustom(IdentifiedNode):
+    __abstract_node__ = True
+
 
 {% if not extend -%}
 class RelationTest(StructuredRel):
@@ -74,8 +47,16 @@ class JustATest(TimestampedNode):
     p_alias = AliasProperty()
 
     test1 = RelationshipFrom(
-        'User', 'TEST', cardinality=ZeroOrMore, model=RelationTest)
+        "restapi.connectors.neo4j.models.User",
+        "TEST",
+        cardinality=ZeroOrMore,
+        model=RelationTest
+    )
 
     test2 = RelationshipFrom(
-        'User', 'TEST2', cardinality=ZeroOrMore, model=RelationTest)
+        "restapi.connectors.neo4j.models.User",
+        "TEST2",
+        cardinality=ZeroOrMore,
+        model=RelationTest
+    )
 {% endif -%}

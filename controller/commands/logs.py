@@ -8,9 +8,18 @@ from controller.compose import Compose
 @Application.app.command(help="Watch log tails of all or specified containers")
 def logs(
     follow: bool = typer.Option(
-        False, "--follow", "-f", help="Follow logs", show_default=False,
+        False,
+        "--follow",
+        "-f",
+        help="Follow logs",
+        show_default=False,
     ),
-    tail: int = typer.Option("500", "--tail", "-t", help="Number of lines to show",),
+    tail: int = typer.Option(
+        "500",
+        "--tail",
+        "-t",
+        help="Number of lines to show",
+    ),
     service: str = typer.Option(
         None,
         "--service",
@@ -19,6 +28,7 @@ def logs(
         show_default=False,
         autocompletion=Application.autocomplete_service,
     ),
+    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
 ):
     Application.controller.controller_init()
 
@@ -28,11 +38,18 @@ def logs(
     else:
         services = Application.data.services
 
+    if len(services) > 1:
+        timestamps = False
+    elif services[0] in "frontend":
+        timestamps = True
+    else:
+        timestamps = False
+
     options = {
         "--follow": follow,
         "--tail": str(tail),
-        "--no-color": False,
-        "--timestamps": True,
+        "--timestamps": timestamps,
+        "--no-color": nocolor,
         "SERVICE": services,
     }
 

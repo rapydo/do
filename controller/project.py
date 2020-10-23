@@ -5,13 +5,12 @@ from controller import PROJECT_DIR, gitter, log
 
 NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
-REACT = "react"
+GITKEEP = ".gitkeep"
 
 DATA = Path("data")
 SUBMODULES = Path("submodules")
 
 
-# move here all checks on project (required files, creation functions, templating, etc)
 class Project:
     def __init__(self):
         self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
@@ -28,11 +27,12 @@ class Project:
         self.data_files = []
         # check will raise an error if these files will be found
         self.obsolete_files = []
+        self.suggested_gitkeep = []
 
     def p_path(self, *args):
         return PROJECT_DIR.joinpath(self.project, *args)
 
-    def load_project_scaffold(self, project, auth):
+    def load_project_scaffold(self, project, auth, services=None):
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         self.expected_folders.append(self.p_path("confs"))
@@ -44,6 +44,13 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "tests"))
         self.expected_folders.append(self.p_path("backend", "initialization"))
 
+        self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "tests", GITKEEP))
+
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
@@ -53,12 +60,17 @@ class Project:
         )
         self.expected_files.append(Path(".gitignore"))
 
-        if auth is not None:
-            model_file = f"{auth}.py"
-            self.expected_files.append(self.p_path("backend", "models", model_file))
+        if auth or services:
+
+            models = self.p_path("backend", "models")
+            if auth == "sqlalchemy" or "postgres" in services or "mysql" in services:
+                self.expected_files.append(models.joinpath("sqlalchemy.py"))
+            if auth == "neo4j" or "neo4j" in services:
+                self.expected_files.append(models.joinpath("neo4j.py"))
+            if auth == "mongo" or "mongo" in services:
+                self.expected_files.append(models.joinpath("mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
-        self.optionals_files.append(self.p_path("backend", "endpoints", "profile.py"))
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "activate_account.html")
         )
@@ -87,6 +99,9 @@ class Project:
         self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
         # Removed since 0.7.6
         self.obsolete_files.append(self.p_path("backend", "apis"))
+        # Removed since 0.8
+        self.obsolete_files.append(self.p_path("backend", "models", "swagger.yaml"))
+        self.obsolete_files.append(self.p_path("backend", "endpoints", "profile.py"))
 
         return True
 
@@ -108,19 +123,24 @@ class Project:
                 ]
             )
 
+            self.suggested_gitkeep.append(
+                self.p_path("frontend", "integration", GITKEEP)
+            )
+
             self.expected_files.extend(
                 [
                     self.p_path("frontend", "package.json"),
+                    self.p_path("frontend", "css", "style.css"),
                     self.p_path("frontend", "app", "custom.project.options.ts"),
                     self.p_path("frontend", "app", "custom.module.ts"),
                     self.p_path("frontend", "app", "custom.navbar.ts"),
                     self.p_path("frontend", "app", "custom.footer.ts"),
                     self.p_path("frontend", "app", "custom.profile.ts"),
-                    self.p_path("frontend", "css", "style.css"),
                     self.p_path("frontend", "app", "custom.navbar.links.html"),
                     self.p_path("frontend", "app", "custom.navbar.brand.html"),
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
+                    self.p_path("frontend", "app", "types.ts"),
                 ]
             )
 
@@ -143,8 +163,8 @@ class Project:
                     frontend_data_dir.joinpath("karma.conf.js"),
                     frontend_data_dir.joinpath("package.json"),
                     frontend_data_dir.joinpath("polyfills.ts"),
-                    frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.json"),
+                    frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.spec.json"),
                     frontend_data_dir.joinpath("cypress.json"),
                 ]
@@ -202,9 +222,7 @@ class Project:
             )
 
         if project in Project.reserved_project_names:
-            log.exit(
-                "You selected a reserved name, invalid project name: {}", project,
-            )
+            log.exit("You selected a reserved name, invalid project name: {}", project)
 
         return project
 

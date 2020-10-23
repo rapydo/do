@@ -9,6 +9,10 @@ from controller import log
 from controller.app import Application, Configuration
 from controller.compose import Compose
 
+# 0 1 * * * cd /home/??? && \
+#     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo backup neo4j --force > \
+#         /home/???/data/logs/backup.log 2>&1
+
 
 class Services(str, Enum):
     neo4j = "neo4j"
@@ -19,7 +23,10 @@ class Services(str, Enum):
 def backup(
     service: Services = typer.Argument(..., help="Service name"),
     force: bool = typer.Option(
-        False, "--force", help="Force the backup procedure", show_default=False,
+        False,
+        "--force",
+        help="Force the backup procedure",
+        show_default=False,
     ),
     restart: List[str] = typer.Option(
         "",
@@ -32,7 +39,6 @@ def backup(
 
     service = service.value
 
-    options = {"SERVICE": [service]}
     dc = Compose(files=Application.data.files)
 
     running_containers = dc.get_running_containers(Configuration.project)
@@ -50,10 +56,11 @@ def backup(
             )
 
         if container_is_running:
-            dc.command("stop", options)
+            dc.command("stop", {"SERVICE": [service]})
 
-        backup_path = f"/backup/{service}/{now}.tar.gz"
-        command = f"tar -zcf {backup_path} /data"
+        backup_path = f"/backup/{service}/{now}.dump"
+
+        command = f"neo4j-admin dump --to={backup_path} --database=neo4j"
 
         log.info("Starting backup on {}...", service)
         dc.create_volatile_container(service, command=command)
@@ -76,7 +83,7 @@ def backup(
         # This double step is required because postgres user is uid 70
         # It is not fixed with host uid as the other services
         tmp_backup_path = f"/tmp/{now}.sql"
-        command = f"pg_dumpall -U sqluser -f {tmp_backup_path}"
+        command = f"pg_dumpall --clean -U sqluser -f {tmp_backup_path}"
         # Creating backup on a tmp folder as postgres user
         dc.exec_command(service, command=command, user="postgres", disable_tty=True)
 

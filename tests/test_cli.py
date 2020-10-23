@@ -3,6 +3,7 @@ import shutil
 import signal
 import tempfile
 from collections import OrderedDict  # can be removed from python 3.7
+from datetime import datetime
 
 from git import Repo
 from typer.testing import CliRunner
@@ -98,10 +99,14 @@ def exec_command(capfd, command, *asserts, input_text=None):
 def test_failed_create(capfd):
 
     exec_command(
-        capfd, "--version", f"rapydo version: {__version__}",
+        capfd,
+        "--version",
+        f"rapydo version: {__version__}",
     )
     exec_command(
-        capfd, "create first", "Missing authentication service, add --auth option",
+        capfd,
+        "create first",
+        "Missing authentication service, add --auth option",
     )
 
     with open("data/logs/rapydo-controller.log") as f:
@@ -109,7 +114,9 @@ def test_failed_create(capfd):
         assert logs[-1].endswith("Missing authentication service, add --auth option")
 
     exec_command(
-        capfd, "create first --auth xyz", "Invalid authentication service: xyz",
+        capfd,
+        "create first --auth xyz",
+        "Invalid authentication service: xyz",
     )
 
     exec_command(
@@ -184,7 +191,9 @@ def test_create(capfd):
     create_command += " --service rabbit --service neo4j --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
     exec_command(
-        capfd, create_command, "Project first successfully created",
+        capfd,
+        create_command,
+        "Project first successfully created",
     )
 
     pconf = "projects/first/project_configuration.yaml"
@@ -266,15 +275,17 @@ def test_all(capfd):
         "You should init your project",
     )
     exec_command(
-        capfd, "init", "Project initialized",
+        capfd,
+        "init",
+        "Project initialized",
     )
 
     r = gitter.get_repo("submodules/http-api")
-    gitter.switch_branch(r, "0.7.3")
+    gitter.switch_branch(r, "0.7.6")
     exec_command(
         capfd,
         "check -i main",
-        f"http-api: wrong branch 0.7.3, expected {__version__}",
+        f"http-api: wrong branch 0.7.6, expected {__version__}",
         "You can use rapydo init to fix it",
     )
     exec_command(
@@ -311,20 +322,28 @@ def test_all(capfd):
     path = "projects/first/backend/endpoints/xyz.py"
     assert not os.path.exists(path)
     exec_command(
-        capfd, "add endpoint xyz", f"Endpoint created: {path}",
+        capfd,
+        "add endpoint xyz",
+        f"Endpoint created: {path}",
     )
     exec_command(
-        capfd, "add endpoint xyz", f"{path} already exists",
+        capfd,
+        "add endpoint xyz",
+        f"{path} already exists",
     )
     assert os.path.isfile(path)
 
     path = "projects/first/backend/tasks/xyz.py"
     assert not os.path.exists(path)
     exec_command(
-        capfd, "add task xyz", f"Task created: {path}",
+        capfd,
+        "add task xyz",
+        f"Task created: {path}",
     )
     exec_command(
-        capfd, "add task xyz", f"{path} already exists",
+        capfd,
+        "add task xyz",
+        f"{path} already exists",
     )
     assert os.path.isfile(path)
 
@@ -343,7 +362,9 @@ def test_all(capfd):
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
     assert os.path.isfile(os.path.join(path, "xyz.html"))
     exec_command(
-        capfd, "add component xyz", f"{path}/xyz.ts already exists",
+        capfd,
+        "add component xyz",
+        f"{path}/xyz.ts already exists",
     )
     shutil.rmtree(path)
     exec_command(
@@ -367,7 +388,9 @@ def test_all(capfd):
     assert os.path.isdir(path)
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
     exec_command(
-        capfd, "add service xyz", f"{path}/xyz.ts already exists",
+        capfd,
+        "add service xyz",
+        f"{path}/xyz.ts already exists",
     )
     os.remove(f"{path}/xyz.ts")
     exec_command(
@@ -386,15 +409,21 @@ def test_all(capfd):
 
     # Basic pull
     exec_command(
-        capfd, "-s xxx pull", "Invalid service name: xxx",
+        capfd,
+        "-s xxx pull",
+        "Invalid service name: xxx",
     )
     exec_command(
-        capfd, "pull", "Base images pulled from docker hub",
+        capfd,
+        "pull",
+        "Base images pulled from docker hub",
     )
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd, "update -i main", "All updated",
+        capfd,
+        "update -i main",
+        "All updated",
     )
 
     open("submodules/do/temp.file", "a").close()
@@ -416,7 +445,9 @@ def test_all(capfd):
 
     # Skipping main because we are on a fake git repository
     exec_command(
-        capfd, "check -i main", "Checks completed",
+        capfd,
+        "check -i main",
+        "Checks completed",
     )
 
     exec_command(
@@ -488,7 +519,9 @@ def test_all(capfd):
         "mycustomvalue",
     )
     exec_command(
-        capfd, "list submodules", "List of submodules:",
+        capfd,
+        "list submodules",
+        "List of submodules:",
     )
 
     exec_command(
@@ -560,7 +593,9 @@ def test_all(capfd):
 
     # docker dump
     exec_command(
-        capfd, "dump", "Config dump: docker-compose.yml",
+        capfd,
+        "dump",
+        "Config dump: docker-compose.yml",
     )
 
     exec_command(capfd, "upgrade")
@@ -595,7 +630,9 @@ def test_all(capfd):
         shutil.rmtree("projects")
 
     exec_command(
-        capfd, "-p first check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "-p first check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
     # Check invalid and reserved project names
@@ -627,11 +664,15 @@ def test_all(capfd):
     assert not os.path.isdir("data/logs")
     # Let's restore .projectrc and data/logs
     exec_command(
-        capfd, "--project first init", "Project initialized",
+        capfd,
+        "--project first init",
+        "Project initialized",
     )
     assert os.path.isdir("data/logs")
     exec_command(
-        capfd, "check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
     # Test dirty repo
@@ -660,12 +701,34 @@ def test_all(capfd):
     exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
 
     exec_command(
-        capfd, "-s invalid start", "No such service: invalid",
+        capfd,
+        "-s invalid start",
+        "No such service: invalid",
+    )
+
+    exec_command(capfd, "diagnostic http://localhost", "http schema not supported")
+    exec_command(
+        capfd,
+        "diagnostic https://nolocalhost",
+        "Host https://nolocalhost is unreachable",
+    )
+    exec_command(
+        capfd, "diagnostic nolocalhost", "Host https://nolocalhost is unreachable"
     )
 
     # Let's start with the stack
     exec_command(
-        capfd, "start", "docker-compose command: 'up'", "Stack started",
+        capfd,
+        "start",
+        "docker-compose command: 'up'",
+        "Stack started",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend start --force",
+        "docker-compose command: 'up'",
+        "Stack started",
     )
 
     exec_command(
@@ -676,7 +739,20 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "shell backend --command hostname", "backend-server",
+        capfd,
+        "shell backend --command hostname",
+        "Deprecated use of --command",
+    )
+    exec_command(
+        capfd,
+        "shell backend --command 'hostname --short'",
+        "Deprecated use of --command",
+    )
+
+    exec_command(
+        capfd,
+        "shell backend hostname",
+        "backend-server",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -700,20 +776,30 @@ def test_all(capfd):
 
     # Testing default users
     exec_command(
-        capfd, "shell backend --command whoami", "developer",
+        capfd,
+        "shell backend whoami",
+        "developer",
     )
     exec_command(
-        capfd, "shell frontend --command whoami", "node",
+        capfd,
+        "shell frontend whoami",
+        "node",
     )
     # No default user for rabbit container
     exec_command(
-        capfd, "shell rabbit --command whoami", "root",
+        capfd,
+        "shell rabbit whoami",
+        "root",
     )
     exec_command(
-        capfd, "shell postgres --command whoami", "postgres",
+        capfd,
+        "shell postgres whoami",
+        "postgres",
     )
     exec_command(
-        capfd, "shell neo4j --command whoami", "neo4j",
+        capfd,
+        "shell neo4j whoami",
+        "neo4j",
     )
 
     exec_command(
@@ -723,14 +809,22 @@ def test_all(capfd):
         "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
     )
     exec_command(
-        capfd, "scale rabbit=x", "Invalid number of replicas: x",
+        capfd,
+        "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
+        # "Starting first_rabbit_1",
+        # "Creating first_rabbit_2",
+    )
+    exec_command(
+        capfd,
+        "scale rabbit=x",
+        "Invalid number of replicas: x",
     )
 
     exec_command(
         capfd,
         "scale rabbit=2",
         # "Starting first_rabbit_1",
-        # "Creating first_rabbit_2",
+        # "Starting first_rabbit_2",
     )
 
     with open(".projectrc", "a") as f:
@@ -752,11 +846,32 @@ def test_all(capfd):
         # "Stopping and removing first_rabbit_3",
     )
 
+    # Backend logs are never timestamped
     exec_command(
         capfd,
-        "logs -s backend --tail 10",
+        "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1",
+        "backend_1       | Development mode",
+    )
+
+    now = datetime.now()
+    timestamp = now.strftime("%Y-%m-%dT")
+
+    # Frontend logs are timestamped
+    exec_command(
+        capfd,
+        "-s frontend logs --tail 10 --no-color",
+        "docker-compose command: 'logs'",
+        f"frontend_1      | {timestamp}",
+    )
+
+    # With multiple services logs are not timestamped
+    exec_command(
+        capfd,
+        "-s frontend,backend logs --tail 10 --no-color",
+        "docker-compose command: 'logs'",
+        "backend_1       | Development mode",
+        "frontend_1      | Converting TS Interfaces to JSON Schemas...",
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
@@ -786,6 +901,16 @@ def test_all(capfd):
     exec_command(capfd, "verify redis", "Service redis not detected")
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
+    # This will initialize postgres
+    exec_command(capfd, "shell backend 'restapi init'")
+    # And this will also initialize neo4j (what a trick!)
+    # Temporary change AUTH_SERVICE from postgres to neo4j
+    exec_command(capfd, "-e AUTH_SERVICE=neo4j -s backend start")
+    exec_command(capfd, "shell backend 'restapi init'")
+    # Restore correct AUTH_SERVICE
+    exec_command(capfd, "-s backend start")
+
+    # Backup command
     exec_command(
         capfd,
         "backup neo4j",
@@ -797,6 +922,13 @@ def test_all(capfd):
         "backup neo4j --force --restart backend --restart rabbit",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
+    )
+    # This is to verify that --force restarted neo4j
+    exec_command(
+        capfd,
+        "backup neo4j",
+        "Neo4j is running and the backup will temporary stop it. "
+        "If you want to continue add --force flag",
     )
     exec_command(
         capfd,
@@ -811,7 +943,9 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "stop", "Stack stopped",
+        capfd,
+        "stop",
+        "Stack stopped",
     )
 
     exec_command(
@@ -826,8 +960,235 @@ def test_all(capfd):
         "The backup procedure requires postgres running, please start your stack",
     )
 
+    # Restore command
     exec_command(
-        capfd, "restart", "Stack restarted",
+        capfd, "restore neo4j", "Please specify one of the following backup:", ".dump"
+    )
+    exec_command(
+        capfd,
+        "restore postgres",
+        "Please specify one of the following backup:",
+        ".sql.gz",
+    )
+    exec_command(
+        capfd,
+        "restore neo4j invalid",
+        "Invalid backup file, data/backup/neo4j/invalid does not exist",
+    )
+    exec_command(
+        capfd,
+        "restore postgres invalid",
+        "Invalid backup file, data/backup/postgres/invalid does not exist",
+    )
+
+    with TemporaryRemovePath("data/backup"):
+        exec_command(
+            capfd,
+            "restore postgres",
+            "No backup found, the following folder "
+            "does not exist: data/backup/postgres",
+        )
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, the following folder "
+            "does not exist: data/backup/neo4j",
+        )
+
+    with TemporaryRemovePath("data/backup/neo4j"):
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, the following folder does not exist: data/backup/neo4j",
+        )
+        exec_command(
+            capfd,
+            "restore postgres",
+            "Please specify one of the following backup:",
+        )
+
+        os.mkdir("data/backup/neo4j")
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, data/backup/neo4j is empty",
+        )
+
+        open("data/backup/neo4j/test.gz", "a").close()
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "No backup found, data/backup/neo4j is empty",
+        )
+
+        open("data/backup/neo4j/test.dump", "a").close()
+
+        exec_command(
+            capfd,
+            "restore neo4j",
+            "Please specify one of the following backup:",
+            "test.dump",
+        )
+
+        os.remove("data/backup/neo4j/test.gz")
+        os.remove("data/backup/neo4j/test.dump")
+
+    # Test restore on neo4j (required neo4j to be down)
+    files = os.listdir("data/backup/neo4j")
+    files = [f for f in files if f.endswith(".dump")]
+    files.sort()
+    neo4j_dump_file = files[-1]
+
+    files = os.listdir("data/backup/postgres")
+    files = [f for f in files if f.endswith(".sql.gz")]
+    files.sort()
+    postgres_dump_file = files[-1]
+
+    # You should somehow verify output from (or similar):
+    # command = "bin/cypher-shell \"match (u: User) return u.email\""
+
+    cypher = "shell neo4j 'bin/cypher-shell"
+    # Here we test the restore procedure:
+    # 1) verify some data in the database
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "User"',
+    )
+    # 2) Modify such data
+    exec_command(capfd, f'{cypher} "match (r: Role) SET r.description = r.name"\'')
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "normal_user"',
+    )
+    # 3) restore the dump
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file}",
+        "Starting restore on neo4j...",
+        "Done: ",
+        f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+    )
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\''
+        ' "normal_user" | "User"',
+    )
+
+    # Postgres restore not allowed if container is not running
+    exec_command(
+        capfd,
+        f"restore postgres {postgres_dump_file}",
+        "The restore procedure requires postgres running, please start your stack",
+    )
+
+    # Tuning command
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
+        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
+        "Memory settings recommendation from neo4j-admin memrec:",
+        "Based on the above, the following memory settings are recommended:",
+        "dbms.memory.heap.initial_size=",
+        "dbms.memory.heap.max_size=",
+        "dbms.memory.pagecache.size=",
+        "Total size of lucene indexes in all databases:",
+        "Total size of data and native indexes in all databases:",
+    )
+    exec_command(
+        capfd,
+        "tuning postgres",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "POSTGRES_SHARED_BUFFERS",
+        "POSTGRES_EFFECTIVE_CACHE_SIZE",
+        "POSTGRES_MAINTENANCE_WORK_MEM",
+        "POSTGRES_MAX_WORKER_PROCESSES",
+    )
+    exec_command(
+        capfd,
+        "tuning backend",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "GUNICORN_MAX_NUM_WORKERS",
+    )
+
+    exec_command(
+        capfd,
+        "restart",
+        "Stack restarted",
+    )
+
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file}",
+        "Neo4j is running and the restore will temporary stop it.",
+        "If you want to continue add --force flag",
+    )
+
+    exec_command(
+        capfd,
+        f"restore neo4j {neo4j_dump_file} --force --restart backend",
+        "Starting restore on neo4j...",
+        "Done: ",
+        f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+    )
+
+    psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
+    # Here we test the restore procedure:
+    # 1) verify some data in the database
+    exec_command(
+        capfd,
+        f'{psql} "select name, description from role"\'',
+        " normal_user | User",
+    )
+    # 2) Modify such data
+    exec_command(
+        capfd,
+        f'{psql} "update role SET description=name"\'',
+    )
+    exec_command(
+        capfd,
+        f'{psql} "select name, description from role"\'',
+        " normal_user | normal_user",
+    )
+    # 3) restore the dump
+    exec_command(
+        capfd,
+        f"restore postgres {postgres_dump_file}",
+        "Starting restore on postgres...",
+        "CREATE DATABASE",
+        "ALTER DATABASE",
+        f"Restore from data/backup/postgres/{postgres_dump_file} completed",
+    )
+
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        f'{psql} "select name, description from role"\'',
+        " normal_user | User",
+    )
+
+    # Test tuning neo4j with container already running
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
+        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
     )
 
     exec_command(
@@ -837,23 +1198,34 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "-s backend remove --all", "Incompatibile options --all and --service",
+        capfd,
+        "-s backend remove --all",
+        "Incompatibile options --all and --service",
     )
 
     exec_command(
-        capfd, "remove", "docker-compose command: 'stop'", "Stack removed",
+        capfd,
+        "remove",
+        "docker-compose command: 'stop'",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "remove --networks", "Stack removed",
+        capfd,
+        "remove --networks",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "remove --all", "Stack removed",
+        capfd,
+        "remove --all",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "shell backend --command hostname", "No container found for backend_1",
+        capfd,
+        "shell backend hostname",
+        "No container found for backend_1",
     )
 
     signal.signal(signal.SIGALRM, handler)
@@ -868,30 +1240,47 @@ def test_all(capfd):
     # This is because after start --no-detach the container in still in exited status
     exec_command(
         capfd,
-        "volatile backend --command hostname",
+        "volatile backend hostname",
         "Bind for 0.0.0.0:8080 failed: port is already allocated",
     )
 
     exec_command(
-        capfd, "remove --all", "Stack removed",
+        capfd,
+        "remove --all",
+        "Stack removed",
     )
 
     exec_command(
-        capfd, "volatile backend --command hostname", "backend-server",
-    )
-
-    exec_command(
-        capfd, "volatile backend --command whoami", "root",
+        capfd,
+        "volatile backend --command hostname",
+        "Deprecated use of --command",
     )
     exec_command(
         capfd,
-        "volatile backend -u developer --command whoami",
+        "volatile backend --command 'hostname --short'",
+        "Deprecated use of --command",
+    )
+
+    exec_command(
+        capfd,
+        "volatile backend hostname",
+        "backend-server",
+    )
+
+    exec_command(
+        capfd,
+        "volatile backend whoami",
+        "root",
+    )
+    exec_command(
+        capfd,
+        "volatile backend -u developer whoami",
         "Please remember that users in volatile containers are not mapped on current ",
         "developer",
     )
     exec_command(
         capfd,
-        "volatile backend -u invalid --command whoami",
+        "volatile backend -u invalid whoami",
         "Error response from daemon:",
         "unable to find user invalid:",
         "no matching entries in passwd file",
@@ -929,12 +1318,18 @@ def test_all(capfd):
         "url=https://localhost/api/specs",
     )
 
+    # --all is useless here... just to include the parameter in any test.
+    # A real test on such parameter would be quite complicated...
     exec_command(
-        capfd, "--prod -s proxy pull", "Base images pulled from docker hub",
+        capfd,
+        "--prod -s proxy pull --all",
+        "Images pulled from docker hub",
     )
 
     exec_command(
-        capfd, "ssl", "No container found for proxy_1",
+        capfd,
+        "ssl",
+        "No container found for proxy_1",
     )
 
     exec_command(
@@ -947,16 +1342,24 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "ssl --force", "No container found for proxy_1",
+        capfd,
+        "ssl --force",
+        "No container found for proxy_1",
     )
     exec_command(
-        capfd, "ssl --chain-file /file", "Invalid chain file (you provided /file)",
+        capfd,
+        "ssl --chain-file /file",
+        "Invalid chain file (you provided /file)",
     )
     exec_command(
-        capfd, "ssl --key-file /file", "Invalid chain file (you provided none)",
+        capfd,
+        "ssl --key-file /file",
+        "Invalid chain file (you provided none)",
     )
     exec_command(
-        capfd, f"ssl --chain-file {pconf}", "Invalid key file (you provided none)",
+        capfd,
+        f"ssl --chain-file {pconf}",
+        "Invalid key file (you provided none)",
     )
     exec_command(
         capfd,
@@ -971,7 +1374,9 @@ def test_all(capfd):
     )
 
     exec_command(
-        capfd, "dhparam", "No container found for proxy_1",
+        capfd,
+        "dhparam",
+        "No container found for proxy_1",
     )
 
 
@@ -981,12 +1386,16 @@ def test_builds(capfd):
     create_command = "create testbuild --auth postgres --frontend angular"
     create_command += " --service rabbit --add-optionals --current"
     exec_command(
-        capfd, create_command, "Project testbuild successfully created",
+        capfd,
+        create_command,
+        "Project testbuild successfully created",
     )
 
     # Restore the default project
     exec_command(
-        capfd, "-p testbuild init --force", "Project initialized",
+        capfd,
+        "-p testbuild init --force",
+        "Project initialized",
     )
 
     # Add a custom image to extend base rabbit image:
@@ -1035,7 +1444,9 @@ services:
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write("FROM ubuntu")
     exec_command(
-        capfd, "-s rabbit build", "No custom images to build",
+        capfd,
+        "-s rabbit build",
+        "No custom images to build",
     )
 
     # Invalid RAPyDo template
@@ -1075,7 +1486,9 @@ RUN mkdir xyz
     )
 
     exec_command(
-        capfd, "ancestors XYZ", "No child found for XYZ",
+        capfd,
+        "ancestors XYZ",
+        "No child found for XYZ",
     )
 
     dock = Dock()
@@ -1237,14 +1650,18 @@ RUN mkdir xyz
         input_text="YES\n",
     )
     exec_command(
-        capfd, "-s rabbit build --yes", "Successfully built",
+        capfd,
+        "-s rabbit build --yes",
+        "Successfully built",
     )
 
     exec_command(capfd, "remove")
 
     # Restore the default project
     exec_command(
-        capfd, "-p first init --force", "Project initialized",
+        capfd,
+        "-p first init --force",
+        "Project initialized",
     )
 
 
@@ -1280,10 +1697,14 @@ def test_extend(capfd):
     )
 
     exec_command(
-        capfd, "-p ext init --force", "Project initialized",
+        capfd,
+        "-p ext init --force",
+        "Project initialized",
     )
     exec_command(
-        capfd, "-p ext check -i main --no-git --no-builds", "Checks completed",
+        capfd,
+        "-p ext check -i main --no-git --no-builds",
+        "Checks completed",
     )
 
 
@@ -1387,7 +1808,9 @@ def test_rabbit_invalid_characters(capfd):
     create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
     create_command += " --current --force"
     exec_command(
-        capfd, create_command, "Project testinvalid successfully created",
+        capfd,
+        create_command,
+        "Project testinvalid successfully created",
     )
 
     informative = "Some special characters, including £ § ” ’, are not allowed "
@@ -1404,7 +1827,9 @@ def test_rabbit_invalid_characters(capfd):
 
     # Restore the default project
     exec_command(
-        capfd, "-p first init --force", "Project initialized",
+        capfd,
+        "-p first init --force",
+        "Project initialized",
     )
 
 
@@ -1412,7 +1837,9 @@ def test_install(capfd):
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
-            capfd, "install", "missing as submodules/do. You should init your project",
+            capfd,
+            "install",
+            "missing as submodules/do. You should init your project",
         )
 
     # I hope that one day this test will fail! :-)
@@ -1421,10 +1848,12 @@ def test_install(capfd):
     exec_command(capfd, "install auto")
 
     r = gitter.get_repo("submodules/do")
-    gitter.switch_branch(r, "0.7.3")
+    gitter.switch_branch(r, "0.7.6")
 
     exec_command(
-        capfd, "install", f"Controller repository switched to {__version__}",
+        capfd,
+        "install",
+        f"Controller repository switched to {__version__}",
     )
 
     exec_command(capfd, "install")
@@ -1440,7 +1869,7 @@ def test_install(capfd):
     # Read and change the content
     fin = open(pconf)
     data = fin.read()
-    data = data.replace(f"rapydo: {__version__}", "rapydo: 0.7.3")
+    data = data.replace(f'rapydo: "{__version__}"', 'rapydo: "0.7.6"')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")
@@ -1451,13 +1880,13 @@ def test_install(capfd):
         capfd,
         "version",
         f"This project is not compatible with rapydo version {__version__}",
-        "Please downgrade rapydo to version 0.7.3 or modify this project",
+        "Please downgrade rapydo to version 0.7.6 or modify this project",
     )
 
     # Read and change the content
     fin = open(pconf)
     data = fin.read()
-    data = data.replace("rapydo: 0.7.3", "rapydo: 99.99.99")
+    data = data.replace('rapydo: "0.7.6"', 'rapydo: "99.99.99"')
     fin.close()
     # Write the new content
     fin = open(pconf, "wt")

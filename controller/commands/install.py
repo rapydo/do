@@ -5,11 +5,14 @@ from controller.app import Application, Configuration
 from controller.packages import Packages
 
 
-@Application.app.command(help="Install specified version of rapydo-controller")
+@Application.app.command(help="Install specified version of rapydo")
 def install(
     version: str = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
-        True, "--no-editable", help="Disable editable mode", show_default=False,
+        True,
+        "--no-editable",
+        help="Disable editable mode",
+        show_default=False,
     ),
 ):
     Application.controller.controller_init()
@@ -30,9 +33,9 @@ def install(
 
 def install_controller_from_folder(gits, version, user, editable):
 
-    Application.controller.git_submodules()
+    Application.git_submodules()
 
-    log.info("You asked to install rapydo-controller {} from local folder", version)
+    log.info("You asked to install rapydo {} from local folder", version)
 
     do_path = SUBMODULES_DIR.joinpath("do")
 
@@ -55,15 +58,15 @@ def install_controller_from_folder(gits, version, user, editable):
         log.error("Unable to install controller {} from local folder", version)
     else:
         log.info("Controller version {} installed from local folder", version)
-        installed_version = Packages.check_version("rapydo-controller")
+        installed_version = Packages.check_version("rapydo")
         log.info("Check on installed version: {}", installed_version)
 
 
 def install_controller_from_git(version, user):
 
-    log.info("You asked to install rapydo-controller {} from git", version)
+    log.info("You asked to install rapydo {} from git", version)
 
-    package = "rapydo-controller"
+    package = "rapydo"
     controller_repository = "do"
     rapydo_uri = "https://github.com/rapydo"
     controller = f"git+{rapydo_uri}/{controller_repository}.git@{version}"

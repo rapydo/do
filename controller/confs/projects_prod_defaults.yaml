@@ -2,6 +2,9 @@ variables:
   env:
     ACTIVATE_PROXY: 1
     APP_MODE: production
+    FLASK_ENV: production
+    # in development mode this is mapped on port 81
+    PROXY_DEV_PORT: 80
     # used to reach the backend from outer network
     # in production it match the with proxy ssl port (${PROXY_PROD_PORT})
     BACKEND_API_PORT: 443
@@ -20,8 +23,17 @@ variables:
     CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     TELEGRAM_WORKERS: 4
 
+    POSTGRES_MAX_CONNECTIONS: 250
+    POSTGRES_SHARED_BUFFERS: 1GB
+    POSTGRES_EFFECTIVE_CACHE_SIZE: 3GB
+    POSTGRES_MAINTENANCE_WORK_MEM: 256MB
+    POSTGRES_MAX_WORKER_PROCESSES: 2
+
     NEO4J_WEB_INTERFACE_PORT: 7473
-    NEO4J_SSL_PATH: /ssl
+    NEO4J_SSL_ENABLED: true
+    NEO4J_BOLT_TLS_LEVEL: "OPTIONAL"
+    NEO4J_HEAP_SIZE: "**PLACEHOLDER**"
+    NEO4J_PAGECACHE_SIZE: "**PLACEHOLDER**"
 
     AUTH_DEFAULT_USERNAME: "**PLACEHOLDER**"
     AUTH_DEFAULT_PASSWORD: "**PLACEHOLDER**"

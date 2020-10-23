@@ -76,6 +76,8 @@ vars_to_services_mapping = {
     "ALCHEMY_USER": ["postgres", "mariadb"],
     "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
     "NEO4J_PASSWORD": ["neo4j"],
+    "NEO4J_HEAP_SIZE": ["neo4j"],
+    "NEO4J_PAGECACHE_SIZE": ["neo4j"],
     "AUTH_DEFAULT_PASSWORD": ["backend"],
     "AUTH_DEFAULT_USERNAME": ["backend"],
     "SMTP_PORT": ["backend"],
@@ -107,6 +109,19 @@ def normalize_placeholder_variable(key):
         return "RABBITMQ_USER"
     if key == "RABBITMQ_DEFAULT_PASS":
         return "RABBITMQ_PASSWORD"
+
+    if key == "NEO4J_dbms_memory_heap_max__size":
+        return "NEO4J_HEAP_SIZE"
+    if key == "NEO4J_dbms_memory_heap_initial__size":
+        return "NEO4J_HEAP_SIZE"
+
+    if key == "NEO4J_dbms_memory_pagecache_size":
+        return "NEO4J_PAGECACHE_SIZE"
+
+    if key == "CYPRESS_AUTH_DEFAULT_USERNAME":
+        return "AUTH_DEFAULT_USERNAME"
+    if key == "CYPRESS_AUTH_DEFAULT_PASSWORD":
+        return "AUTH_DEFAULT_PASSWORD"
 
     return key
 
@@ -169,5 +184,8 @@ def get_default_command(service):
 
     if service == "neo4j":
         return "bin/cypher-shell"
+
+    if service == "postgres":
+        return "psql"
 
     return "bash"

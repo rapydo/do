@@ -66,7 +66,8 @@ def find_templates_build(base_services):
                     templates[template_image]["service"] = template_name
                 else:
                     templates[template_image]["service"] = name_priority(
-                        templates[template_image]["service"], template_name,
+                        templates[template_image]["service"],
+                        template_name,
                     )
                 templates[template_image]["services"].append(template_name)
 

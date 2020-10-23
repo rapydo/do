@@ -5,6 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
+from typing import List
 
 import requests
 import typer
@@ -27,7 +28,7 @@ from controller import (
 from controller.commands import load_commands
 from controller.compose import Compose
 from controller.packages import Packages
-from controller.project import ANGULAR, NO_FRONTEND, REACT, Project
+from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
 
@@ -111,7 +112,11 @@ def version_callback(value: bool):
 def controller_cli_options(
     ctx: typer.Context,
     project: str = typer.Option(
-        None, "--project", "-p", help="Name of the project", callback=projectrc_values,
+        None,
+        "--project",
+        "-p",
+        help="Name of the project",
+        callback=projectrc_values,
     ),
     services_list: str = typer.Option(
         None,
@@ -150,6 +155,12 @@ def controller_cli_options(
         callback=projectrc_values,
         envvar="TESTING",
         show_default=False,
+    ),
+    environment: List[str] = typer.Option(
+        "",
+        "--env",
+        "-e",
+        help="Temporary change the value of an environment variable",
     ),
     privileged: bool = typer.Option(
         False,
@@ -198,6 +209,7 @@ def controller_cli_options(
     Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
+    Configuration.environment = [e.split("=") for e in environment]
 
     if stack:
         Configuration.stack = stack
@@ -265,7 +277,7 @@ class Application:
 
         Application.load_projectrc()
 
-    def controller_init(self):
+    def controller_init(self, read_extended=True):
         if Configuration.create:
             Application.check_installed_software()
             return True
@@ -285,7 +297,7 @@ class Application:
         Configuration.ABS_PROJECT_PATH = PROJECT_DIR.joinpath(Configuration.project)
 
         if Configuration.print_version:
-            self.read_specs()
+            self.read_specs(read_extended=True)
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
@@ -301,7 +313,7 @@ class Application:
             Application.check_internet_connection()
 
         if Configuration.install:
-            self.read_specs()
+            self.read_specs(read_extended=False)
             return True
 
         # Auth is not yet available, will be read by read_specs
@@ -310,7 +322,7 @@ class Application:
         )
         Application.preliminary_version_check()
 
-        self.read_specs()  # read project configuration
+        self.read_specs(read_extended=read_extended)  # read project configuration
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
@@ -335,7 +347,7 @@ class Application:
         if Configuration.initialize:
             return True
 
-        self.git_submodules()
+        Application.git_submodules()
 
         if Configuration.update:
             return True
@@ -401,16 +413,10 @@ class Application:
         Packages.check_python_package("requests", min_version="2.6.1")
         Packages.check_python_package("pip", min_version="10.0.0")
 
-    def read_specs(self):
+    def read_specs(self, read_extended=True):
         """ Read project configuration """
 
         try:
-            if Configuration.initialize:
-                read_extended = False
-            elif Configuration.install:
-                read_extended = False
-            else:
-                read_extended = True
 
             confs = configuration.read_configuration(
                 default_file_path=CONFS_DIR,
@@ -447,8 +453,8 @@ class Application:
         Configuration.version = glom(
             Configuration.specs, "project.version", default=None
         )
-        Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=None
+        Configuration.rapydo_version = str(
+            glom(Configuration.specs, "project.rapydo", default=None)
         )
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
@@ -473,8 +479,7 @@ class Application:
     @staticmethod
     def verify_rapydo_version(rapydo_version=None):
         """
-        If your project requires a specific rapydo version, check if you are
-        the rapydo-controller matching that version
+        Verify if the installed rapydo version matches the current project requirement
         """
 
         if rapydo_version is None:
@@ -517,7 +522,6 @@ class Application:
         # substitute values starting with '$$'
         myvars = {
             ANGULAR: Configuration.frontend == ANGULAR,
-            REACT: Configuration.frontend == REACT,
         }
         repo = services.apply_variables(repo, myvars)
 
@@ -557,7 +561,8 @@ class Application:
             check=not Configuration.install,
         )
 
-    def git_submodules(self, from_path=None):
+    @staticmethod
+    def git_submodules(from_path=None):
         """ Check and/or clone git projects """
 
         repos = glom(Configuration.specs, "variables.submodules", default={}).copy()
@@ -588,7 +593,6 @@ class Application:
         myvars = {
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
-            REACT: Configuration.frontend == REACT and Configuration.load_frontend,
             "commons": Configuration.load_commons,
             "extended-commons": self.extended_project is not None
             and Configuration.load_commons,
@@ -646,7 +650,6 @@ class Application:
             PROJECTRC.unlink()
         else:
             log.info("Created default {} file", PROJECTRC)
-        self.read_specs()
 
     def make_env(self):
 
@@ -665,14 +668,16 @@ class Application:
         env["PROJECT_DIR"] = PROJECT_DIR.joinpath(Configuration.project).resolve()
 
         if self.extended_project_path is None:
-            env["EXTENDED_PROJECT_PATH"] = env["PROJECT_DIR"]
+            env["BASE_PROJECT_DIR"] = env["PROJECT_DIR"]
         else:
-            env["EXTENDED_PROJECT_PATH"] = self.extended_project_path.resolve()
+            env["BASE_PROJECT_DIR"] = self.extended_project_path.resolve()
 
         if self.extended_project is None:
             env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
+            env["BASE_PROJECT"] = env["COMPOSE_PROJECT_NAME"]
         else:
             env["EXTENDED_PROJECT"] = self.extended_project
+            env["BASE_PROJECT"] = env["EXTENDED_PROJECT"]
 
         env["RAPYDO_VERSION"] = __version__
         env["PROJECT_VERSION"] = Configuration.version
@@ -696,6 +701,10 @@ class Application:
             if env_value is None:
                 continue
             env[e] = env_value
+
+        for key, value in Configuration.environment:
+            env[key] = value
+
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
                 if value is None:
@@ -808,6 +817,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             # Should never happens since all services are configured, cannot be tested
             if not serv:  # pragma: no cover
 
+                # with py39 it would be key.removeprefix('INJECT_')
                 if key.startswith("INJECT_"):
                     key = key[len("INJECT_") :]
 
@@ -830,17 +840,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
 
         if len(placeholders) > 0:
-            m = "\n".join(placeholders)
-            tips = "\n\nYou can fix this error by updating the "
-            tips += "project_configuration.yaml file or your local .projectrc file\n"
             log.exit(
-                "The following variables are missing in your configuration:\n\n{}{}",
-                m,
-                tips,
+                "The following variables are missing in your configuration:\n\n{}"
+                "\n\nYou can fix this error by updating the your .projectrc file\n",
+                "\n".join(placeholders),
             )
 
-        else:
-            log.verbose("No placeholder variable to be replaced")
+        log.verbose("No placeholder variable to be replaced")
 
         return missing
 
@@ -851,9 +857,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
-            if gitobj is None:
-                continue
-            gitter.update(name, gitobj)
+            if gitobj:
+                gitter.update(name, gitobj)
 
     @staticmethod
     def git_checks(ignore_submodule):
@@ -862,8 +867,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule:
                 log.debug("Skipping checks on {}", name)
                 continue
-            if gitobj is None:
-                continue
-
-            gitter.check_updates(name, gitobj)
-            gitter.check_unstaged(name, gitobj)
+            if gitobj:
+                gitter.check_updates(name, gitobj)
+                gitter.check_unstaged(name, gitobj)
