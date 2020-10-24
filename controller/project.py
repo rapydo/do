@@ -131,7 +131,7 @@ class Project:
                 [
                     self.p_path("frontend", "package.json"),
                     self.p_path("frontend", "css", "style.css"),
-                    self.p_path("frontend", "app", "custom.project.options.ts"),
+                    self.p_path("frontend", "app", "customization.ts"),
                     self.p_path("frontend", "app", "custom.module.ts"),
                     self.p_path("frontend", "app", "custom.navbar.ts"),
                     self.p_path("frontend", "app", "custom.footer.ts"),
@@ -183,6 +183,7 @@ class Project:
                     self.p_path("frontend", "app", "app.home.html"),
                     self.p_path("frontend", "app", "custom.declarations.ts"),
                     self.p_path("frontend", "app", "custom.routes.ts"),
+                    self.p_path("frontend", "app", "custom.project.options.ts"),
                 ]
             )
 
