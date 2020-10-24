@@ -42,7 +42,6 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "models"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
-        self.expected_folders.append(self.p_path("backend", "initialization"))
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
@@ -55,9 +54,8 @@ class Project:
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
-        self.expected_files.append(
-            self.p_path("backend", "initialization", "initialization.py")
-        )
+        self.expected_files.append(self.p_path("backend", "initialization.py"))
+        self.expected_files.append(self.p_path("backend", "customization.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
 
@@ -103,7 +101,8 @@ class Project:
         # Removed since 0.8
         self.obsolete_files.append(self.p_path("backend", "models", "swagger.yaml"))
         self.obsolete_files.append(self.p_path("backend", "endpoints", "profile.py"))
-
+        # Removed since 0.9
+        self.obsolete_files.append(self.p_path("backend", "initialization"))
         return True
 
     def load_frontend_scaffold(self, frontend):
