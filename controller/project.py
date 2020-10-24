@@ -59,6 +59,7 @@ class Project:
             self.p_path("backend", "initialization", "initialization.py")
         )
         self.expected_files.append(Path(".gitignore"))
+        self.expected_files.append(Path(".gitattributes"))
 
         if auth or services:
 
