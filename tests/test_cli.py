@@ -871,7 +871,7 @@ def test_all(capfd):
         "-s frontend,backend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
         "backend_1       | Development mode",
-        "frontend_1      | Converting TS Interfaces to JSON Schemas...",
+        "frontend_1      | Merging files...",
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
