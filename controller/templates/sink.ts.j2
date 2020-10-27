@@ -28,6 +28,8 @@ export class SinkComponent implements OnInit {
 
   private get_fields(wrappers) {
 
+    const now = new Date();
+
     const schema: Schema[] = [
       {
         label: "Username",
@@ -49,8 +51,8 @@ export class SinkComponent implements OnInit {
         key: "date",
         required: false,
         type: SchemaType.DATE,
-        // min: ??,
-        // max: ??
+        min: new Date().setFullYear(now.getFullYear() - 1),
+        max: new Date().setFullYear(now.getFullYear() + 1),
       },
       {
         label: "URL",
