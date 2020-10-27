@@ -1146,13 +1146,6 @@ def test_all(capfd):
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
-    # 4) verify data match again point 1 (restore completed)
-    exec_command(
-        capfd,
-        f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' "normal_user"       | "User"',
-    )
-
     psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
     # Here we test the restore procedure:
     # 1) verify some data in the database
@@ -1186,6 +1179,14 @@ def test_all(capfd):
         capfd,
         f'{psql} "select name, description from role"\'',
         " normal_user       | User",
+    )
+
+    # This is postponed from one hundred lines above
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\'',
+        ' "normal_user"       | "User"',
     )
 
     # Test tuning neo4j with container already running
