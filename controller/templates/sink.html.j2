@@ -23,16 +23,19 @@
                       >
                       </formly-form>
 
+                      <br />
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <br />
+
                       <button type="submit" class="btn btn-success">
                         <h5>Submit</h5>
                       </button>
                     </form>
 
-                    <br />
-
-                    <div *ngIf="data" class="card">
-                      <div class="card-body">{{ data | json }}</div>
-                    </div>
                   </div>
                 </div>
               </ng-template>
