@@ -52,6 +52,10 @@
                       >
                       </formly-form>
 
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
                       <button type="submit" class="btn btn-success">
                         <h5>Submit</h5>
                       </button>
@@ -59,9 +63,6 @@
 
                     <br />
 
-                    <div *ngIf="data" class="card">
-                      <div class="card-body">{{ data | json }}</div>
-                    </div>
                   </div>
                 </div>
               </ng-template>
