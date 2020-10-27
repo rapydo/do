@@ -954,6 +954,9 @@ def test_all(capfd):
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
+
+    exec_command(capfd, "-s neo4j start")
+
     exec_command(
         capfd,
         "backup postgres",
@@ -1053,7 +1056,6 @@ def test_all(capfd):
     cypher = "shell neo4j 'bin/cypher-shell"
     # Here we test the restore procedure:
     # 1) verify some data in the database
-    exec_command(capfd, "-s neo4j start")
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
