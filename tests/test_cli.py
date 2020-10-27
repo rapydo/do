@@ -1059,14 +1059,14 @@ def test_all(capfd):
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' "normal_user" | "User"',
+        ' "normal_user"       | "User"',
     )
     # 2) Modify such data
     exec_command(capfd, f'{cypher} "match (r: Role) SET r.description = r.name"\'')
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' "normal_user" | "normal_user"',
+        ' "normal_user"       | "normal_user"',
     )
     # 3) restore the dump
     exec_command(
@@ -1080,7 +1080,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' "normal_user" | "User"',
+        ' "normal_user"       | "User"',
     )
 
     # Postgres restore not allowed if container is not running
