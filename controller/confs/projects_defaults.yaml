@@ -14,6 +14,7 @@ variables:
   roles:
     normal_user: User
     staff_user: Staff
+    group_coordinator: Coordinator
     admin_root: Admin
     default: normal_user
     # Roles allowed for non-admin users (e.g. coordinator allowed to create users)
