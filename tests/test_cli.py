@@ -1068,6 +1068,7 @@ def test_all(capfd):
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
         ' "normal_user"       | "normal_user"',
     )
+    exec_command(capfd, "-s neo4j remove")
     # 3) restore the dump
     exec_command(
         capfd,
@@ -1076,12 +1077,9 @@ def test_all(capfd):
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
+    exec_command(capfd, "-s neo4j start")
     # 4) verify data match again point 1 (restore completed)
-    exec_command(
-        capfd,
-        f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' "normal_user"       | "User"',
-    )
+    # postponed because neo4j needs time to start...
 
     # Postgres restore not allowed if container is not running
     exec_command(
@@ -1146,6 +1144,13 @@ def test_all(capfd):
         "Starting restore on neo4j...",
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+    )
+
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\'',
+        ' "normal_user"       | "User"',
     )
 
     psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
