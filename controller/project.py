@@ -318,7 +318,7 @@ Verify that you are in the right folder, now you are in: {}
                     fpath,
                 )
 
-        for fpath in self.expected_files:
+        for fpath in self.expected_files + self.raw_files:
             if not fpath.is_file():
                 log.exit(
                     "Project {} is invalid: required file not found {}",
