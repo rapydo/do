@@ -2,6 +2,7 @@ import distutils.core
 import json
 import os
 import re
+import time
 from datetime import datetime
 from glob import glob
 from pathlib import Path
@@ -19,23 +20,35 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-09-10"
+known_update = "2020-10-29"
 known_latests = {
+    # https://hub.docker.com/_/neo4j?tab=tags
+    # https://hub.docker.com/_/postgres?tab=tags
+    # https://hub.docker.com/_/mariadb?tab=tags
+    # https://hub.docker.com/_/mongo?tab=tags
+    # https://hub.docker.com/_/redis?tab=tags
+    # https://hub.docker.com/_/nginx?tab=tags
+    # https://hub.docker.com/_/node?tab=tags
+    # https://hub.docker.com/_/rabbitmq?tab=tags
+    # https://hub.docker.com/_/adminer?tab=tags
+    # https://hub.docker.com/_/mongo-express?tab=tags
+    # https://hub.docker.com/r/fanout/pushpin/tags
+    # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "mariadb": "10.5.5",
-        "mongo": "4.4.0",
-        "redis": "6.0.7",
+        "neo4j": "4.1.3",
+        "postgres": "13.0-alpine",
+        "mariadb": "10.5.6",
+        "mongo": "4.4.1",
+        "redis": "6.0.9",
+        "nginx": "1.19.3-alpine",
+        "node": "14.15.0-buster",
+        "rabbitmq": "3.8.9-management",
         "adminer": "4.7.7-standalone",
         "mongo-express": "0.54.0",
-        "node": "14.9.0-buster",
-        "rabbitmq": "3.8.8",
-        "neo4j": "3.5.21",
-        "postgres": "12.4-alpine",
-        "nginx": "1.19.2-alpine",
-        "ubuntu": "20.04",
         "fanout/pushpin": "1.30.0",
-        "swaggerapi/swagger-ui": "v3.32.5",
+        "swaggerapi/swagger-ui": "v3.36.0",
         "stilliard/pure-ftpd": "stretch-latest",
+        "ubuntu": "20.04",
     },
     # https://github.com/acmesh-official/acme.sh/releases
     "acme": "2.8.7",
@@ -134,6 +147,7 @@ def check_updates(category, lib):
             tokens = [lib, ""]
 
         url = f"https://www.npmjs.com/package/{tokens[0]}"
+        time.sleep(1)
         latest = parse_npm(url, tokens[0])
 
         if latest != tokens[1]:
@@ -174,6 +188,7 @@ def parse_npm(url, lib):
     span = soup.find("span", attrs={"title": lib})
     if span is None:
         log.error("Span not found for: {} ({})", lib, url)
+        print(page.content)
         return "unknown"
 
     return span.next_element.next_element.text.split("\xa0")[0]

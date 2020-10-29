@@ -334,7 +334,7 @@ services:
   mariadb:
     # restart: always
     restart: on-failure:5
-    image: mariadb:10.5.5
+    image: mariadb:10.5.6
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -651,7 +651,7 @@ services:
 
   redis:
     restart: on-failure:5
-    image: redis:6.0.7
+    image: redis:6.0.9
     command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
@@ -796,7 +796,7 @@ services:
 
   swaggerui:
     # restart: no
-    image: swaggerapi/swagger-ui:v3.32.5
+    image: swaggerapi/swagger-ui:v3.36.0
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
     ports:
