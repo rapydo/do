@@ -41,9 +41,8 @@ class Compose:
 
     def config(self):
         compose_output_tuple = get_config_from_options(".", self.options)
-        # NOTE: for compatibility with docker-compose > 1.13
-        # services is always the second element
-        return compose_output_tuple[1]
+        # NOTE: compose_output_tuple is a namedtuple
+        return compose_output_tuple.services
 
     def command(self, command, options):
 
