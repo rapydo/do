@@ -1,4 +1,5 @@
 import os
+import shutil
 from typing import List
 
 import typer
@@ -265,6 +266,22 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
+            log.exit(p)
+
+    for p in project_scaffold.raw_files:
+        # automatic creation
+        if auto:
+            if p.exists() and not force:
+                log.info("Project file already exists: {}", p)
+            else:
+                shutil.copyfile(templating.template_dir.joinpath(p.name), p)
+            continue
+
+        # manual creation
+        if p.exists():
+            log.info("Project file already exists: {}", p)
+        else:
+            # print(f"\n{template}")
             log.exit(p)
 
 

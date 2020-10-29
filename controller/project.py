@@ -17,6 +17,8 @@ class Project:
         # Will be verifed by check and added by create
         self.expected_folders = []
         self.expected_files = []
+        # Copied as they are, no templating (used for binary files, like images)
+        self.raw_files = []
         # Not verified, added by create if --add-optionals
         self.optionals_folders = []
         self.optionals_files = []
@@ -143,6 +145,10 @@ class Project:
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
                     self.p_path("frontend", "app", "types.ts"),
+                ]
+            )
+            self.raw_files.extend(
+                [
                     # Generated with https://realfavicongenerator.net
                     self.p_path(
                         "frontend", "assets", "favicon", "android-chrome-192x192.png"
