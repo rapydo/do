@@ -120,6 +120,8 @@ class Project:
                     self.p_path("frontend", "app"),
                     self.p_path("frontend", "css"),
                     self.p_path("frontend", "integration"),
+                    self.p_path("frontend", "assets"),
+                    self.p_path("frontend", "assets", "favicon"),
                 ]
             )
 
@@ -141,6 +143,22 @@ class Project:
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
                     self.p_path("frontend", "app", "types.ts"),
+                    # Generated with https://realfavicongenerator.net
+                    self.p_path(
+                        "frontend", "assets", "favicon", "android-chrome-192x192.png"
+                    ),
+                    self.p_path("frontend", "assets", "favicon", "browserconfig.xml"),
+                    self.p_path("frontend", "assets", "favicon", "favicon-32x32.png"),
+                    self.p_path("frontend", "assets", "favicon", "mstile-150x150.png"),
+                    self.p_path(
+                        "frontend", "assets", "favicon", "safari-pinned-tab.svg"
+                    ),
+                    self.p_path(
+                        "frontend", "assets", "favicon", "apple-touch-icon.png"
+                    ),
+                    self.p_path("frontend", "assets", "favicon", "favicon-16x16.png"),
+                    self.p_path("frontend", "assets", "favicon", "favicon.ico"),
+                    self.p_path("frontend", "assets", "favicon", "site.webmanifest"),
                 ]
             )
 
