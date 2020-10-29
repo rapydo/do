@@ -15,7 +15,7 @@ setup(
         "console_scripts": ["rapydo=controller.__main__:main"],
     },
     install_requires=[
-        "docker-compose==1.27.3",
+        "docker-compose==1.27.4",
         "dockerfile-parse==1.0.0",
         "python-dateutil",
         "pytz",
@@ -25,7 +25,7 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.8",
+        "GitPython==3.1.11",
         "PyYAML==5.3.1",
         "pip>=10.0.0",
         "typer[all]==0.3.2",

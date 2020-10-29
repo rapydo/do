@@ -147,7 +147,7 @@ def check_updates(category, lib):
             tokens = [lib, ""]
 
         url = f"https://www.npmjs.com/package/{tokens[0]}"
-        time.sleep(1)
+        time.sleep(2)
         latest = parse_npm(url, tokens[0])
 
         if latest != tokens[1]:
