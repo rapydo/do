@@ -1059,14 +1059,14 @@ def test_all(capfd):
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' normal_user"       | "User"',
+        '"normal_user" | "User"',
     )
     # 2) Modify such data
     exec_command(capfd, f'{cypher} "match (r: Role) SET r.description = r.name"\'')
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' normal_user"       | "normal_user"',
+        '"normal_user" | "normal_user"',
     )
     exec_command(capfd, "-s neo4j remove")
     # 3) restore the dump
@@ -1186,7 +1186,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
-        ' normal_user"       | "User"',
+        '"normal_user" | "User"',
     )
 
     # Test tuning neo4j with container already running
