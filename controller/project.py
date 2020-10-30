@@ -105,6 +105,7 @@ class Project:
         self.obsolete_files.append(self.p_path("backend", "endpoints", "profile.py"))
         # Removed since 0.9
         self.obsolete_files.append(self.p_path("backend", "initialization"))
+        self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico")),
         return True
 
     def load_frontend_scaffold(self, frontend):

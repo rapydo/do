@@ -96,7 +96,7 @@ def load_yaml_file(filepath):
             return {}
 
 
-def check_updates(category, lib):
+def check_updates(category, lib, npm_timeout):
 
     if category in ["pip", "controller", "http-api"]:
         if "==" in lib:
@@ -147,7 +147,7 @@ def check_updates(category, lib):
             tokens = [lib, ""]
 
         url = f"https://www.npmjs.com/package/{tokens[0]}"
-        time.sleep(2)
+        time.sleep(npm_timeout)
         latest = parse_npm(url, tokens[0])
 
         if latest != tokens[1]:
@@ -188,7 +188,6 @@ def parse_npm(url, lib):
     span = soup.find("span", attrs={"title": lib})
     if span is None:
         log.error("Span not found for: {} ({})", lib, url)
-        print(page.content)
         return "unknown"
 
     return span.next_element.next_element.text.split("\xa0")[0]
@@ -311,8 +310,9 @@ def parsePrecommitConfig(f, dependencies, key):
 
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
+@click.option("--npm-timeout", default=1)
 @click.option("--verbose", is_flag=True, default=False)
-def check_versions(skip_angular=False, verbose=False):
+def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
 
     dependencies = {}
 
@@ -380,16 +380,16 @@ def check_versions(skip_angular=False, verbose=False):
                 # repos from pre-commit (github)
                 if "/releases/tag/" in d:
                     filtered_dependencies[service].append(d)
-                    check_updates("url", d)
+                    check_updates("url", d, npm_timeout)
                 # repos from pre-commit (gitlab)
                 elif "/tags/" in d:
                     filtered_dependencies[service].append(d)
-                    check_updates("url", d)
+                    check_updates("url", d, npm_timeout)
                 elif "==" not in d and ">=" not in d:
                     skipped = True
                 else:
                     filtered_dependencies[service].append(d)
-                    check_updates(service, d)
+                    check_updates(service, d, npm_timeout)
 
                 if skipped:
                     log.debug("Filtering out {}", d)
@@ -421,13 +421,13 @@ def check_versions(skip_angular=False, verbose=False):
 
                         if was_str:
                             filtered_dependencies[service][category] = d
-                            check_updates(category, d)
+                            check_updates(category, d, npm_timeout)
                         else:
                             filtered_dependencies[service][category].append(d)
-                            check_updates(category, d)
+                            check_updates(category, d, npm_timeout)
                     elif "@" in d:
                         filtered_dependencies[service][category].append(d)
-                        check_updates(category, d)
+                        check_updates(category, d, npm_timeout)
                     else:
                         skipped = True
 

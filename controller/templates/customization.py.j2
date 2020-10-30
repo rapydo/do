@@ -4,21 +4,14 @@ from restapi.customizer import BaseCustomizer
 
 
 class Customizer(BaseCustomizer):
-    """
-    This class is used to manipulate user information
-    - custom_user_properties_pre is executed just before user creation
-                             use this to removed or manipulate input properties
-                             before sending to the database
-    - custom_user_properties_post is executed just after user creation
-                             use this to implement extra operation in user creation
-                             e.g. store additional relationships
-    - manipulate_profile
-    - get_user_editable_fields
-    - get_custom_fields
-    """
 
     @staticmethod
     def custom_user_properties_pre(properties):
+        """
+            executed just before user creation
+            use this method to removed or manipulate input properties
+            before sending to the database
+        """
         extra_properties = {}
         # if "myfield" in properties:
         #     extra_properties["myfield"] = properties["myfield"]
@@ -26,40 +19,51 @@ class Customizer(BaseCustomizer):
 
     @staticmethod
     def custom_user_properties_post(user, properties, extra_properties, db):
+        """
+            executed just after user creation
+            use this method to implement extra operation needed to create a user
+            e.g. store additional relationships
+        """
         pass
 
     @staticmethod
     def manipulate_profile(ref, user, data):
+        """
+            execute before sending data from the profile endpoint
+            use this method to add additonal information to the user profile
+        """
         # data["CustomField"] = user.custom_field
 
         return data
 
     @staticmethod
-    def get_user_editable_fields(request):
-
-        # return custom fields or a part of them
-        # fields = Customizer.get_custom_input_fields(request)
-
-        # or return something else, maybe an empty dict if extra fields are not editable
-        return {}
-
-    @staticmethod
-    def get_custom_input_fields(request):
+    def get_custom_input_fields(request, scope):
 
         # required = request and request.method == "POST"
         """
-        return {
-            "custom_field": fields.Int(
-                required=required,
-                # validate=validate.Range(min=0, max=???),
-                validate=validate.Range(min=0),
-                label="CustomField",
-                description="This is a custom field"
-            )
-        }
+        if scope == BaseCustomizer.ADMIN:
+            return {
+                'custom_field': fields.Int(
+                    required=required,
+                    # validate=validate.Range(min=0, max=???),
+                    validate=validate.Range(min=0),
+                    label="CustomField",
+                    description="This is a custom field"
+                )
+            }
+        # these are editable fields in profile
+        if scope == BaseCustomizer.PROFILE:
+            return {}
+
+        # these are additional fields in registration form
+        if scope == BaseCustomizer.REGISTRATION:
+            return {}
         """
         return {}
 
     @staticmethod
     def get_custom_output_fields(request):
-        return Customizer.get_custom_input_fields(request)
+        """
+            this method is used to extend the output model of admin users
+        """
+        return Customizer.get_custom_input_fields(request, scope=BaseCustomizer.ADMIN)
