@@ -2,6 +2,7 @@ import os
 import tempfile
 from distutils.version import LooseVersion
 from pathlib import Path
+from typing import Dict
 
 import pytest
 
@@ -213,7 +214,7 @@ def test_all(capfd):
     assert shorten(key) == key
 
     shorten = services.get_celerybeat_scheduler
-    env = {}
+    env: Dict[str, str] = {}
     assert shorten(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required

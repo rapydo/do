@@ -127,10 +127,10 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def get_build_timestamp(build, as_date=False):
+def get_build_timestamp(build, as_date: bool = False):
 
     # timestamp is like: 2017-09-22T07:10:35.822772835Z
-    timestamp = build.get("timestamp") or 0
+    timestamp = build.get("timestamp") or "0"
 
     d = dateutil.parser.parse(timestamp)
     if as_date:

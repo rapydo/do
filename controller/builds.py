@@ -36,6 +36,7 @@ def name_priority(name1, name2):
 
 def find_templates_build(base_services):
 
+    # From python 3.8 could be converted in a TypedDict
     templates = {}
     from controller.dockerizing import Dock
 

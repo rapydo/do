@@ -69,10 +69,9 @@ def list_cmd(
 def read_env():
     env = {}
     with open(COMPOSE_ENVIRONMENT_FILE) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split("=")
-            k = line[0].strip()
-            v = line[1].strip()
+        for line in f.readlines():
+            tokens = line.split("=")
+            k = tokens[0].strip()
+            v = tokens[1].strip()
             env[k] = v
     return env

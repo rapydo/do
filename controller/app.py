@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Dict, List, MutableMapping, Optional, Union
+from typing import Any, Dict, List, MutableMapping, Optional
 
 import requests
 import typer
@@ -38,7 +38,7 @@ BASE_UID = 1000
 
 
 class Configuration:
-    projectrc: Dict[str, Union[str, Dict[str, str]]] = {}
+    projectrc: Dict[str, str] = {}
     # To be better charactirized. This is a:
     # {'variables': 'env': Dict[str, str]}
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
@@ -59,6 +59,7 @@ class Configuration:
     load_frontend = False
     load_commons = False
 
+    version: Optional[str] = None
     rapydo_version: Optional[str] = None
     project_title: Optional[str] = None
     project_description: Optional[str] = None
@@ -70,7 +71,8 @@ class Configuration:
     print_version: bool = False
     create: bool = False
 
-    ABS_PROJECT_PATH: Optional[Path] = None
+    # It will be replaced with PROJECT_DIR/project
+    ABS_PROJECT_PATH: Path = PROJECT_DIR
 
     @staticmethod
     def set_action(action: Optional[str]) -> None:
@@ -227,7 +229,7 @@ class CommandsData:
         base_files=None,
         services=None,
         services_list=None,
-        active_services=None,
+        active_services: List[str] = None,
         base_services=None,
         compose_config=None,
         services_dict=None,
@@ -236,10 +238,10 @@ class CommandsData:
         self.base_files = base_files
         self.services = services
         self.services_list = services_list
-        self.active_services = active_services
+        self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
-        self.services_dict = services_dict
+        self.services_dict: Dict[str, Any] = services_dict or {}
 
 
 class Application:
@@ -260,13 +262,13 @@ class Application:
 
         Application.controller = self
 
-        self.active_services = None
+        self.active_services: List[str] = []
         self.files = None
         self.base_files = None
         self.services = None
         self.enabled_services = None
         self.base_services = None
-        self.services_dict = None
+        self.services_dict = {}
         self.compose_config = None
 
         load_commands()
@@ -382,13 +384,16 @@ class Application:
 
     @staticmethod
     def load_projectrc():
-        Configuration.projectrc = configuration.load_yaml_file(
+
+        projectrc_yaml = configuration.load_yaml_file(
             PROJECTRC, path=Path(), is_optional=True
         )
 
-        Configuration.host_configuration = Configuration.projectrc.pop(
+        Configuration.host_configuration = projectrc_yaml.pop(
             "project_configuration", {}
         )
+
+        Configuration.projectrc = projectrc_yaml
 
     @staticmethod
     def checked(message, *args, **kws):
@@ -454,9 +459,10 @@ class Application:
         Configuration.version = glom(
             Configuration.specs, "project.version", default=None
         )
-        Configuration.rapydo_version = str(
-            glom(Configuration.specs, "project.rapydo", default=None)
+        Configuration.rapydo_version = glom(
+            Configuration.specs, "project.rapydo", default=None
         )
+
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
         )
@@ -465,6 +471,8 @@ class Application:
             Application.exit(
                 "RAPyDo version not found in your project_configuration file"
             )
+
+        Configuration.rapydo_version = str(Configuration.rapydo_version)
 
     @staticmethod
     def preliminary_version_check():
@@ -646,7 +654,7 @@ class Application:
 
         Application.load_projectrc()
 
-        if self.active_services is None:
+        if self.files is None:
             log.debug("Created temporary default {} file", PROJECTRC)
             PROJECTRC.unlink()
         else:
@@ -750,10 +758,11 @@ class Application:
 
     def get_available_interfaces(self):
         available_interfaces = list()
-        for s in self.compose_config:
-            name = s.get("name", "")
-            if name.endswith("ui"):
-                available_interfaces.append(name[0:-2])
+        if self.compose_config:
+            for s in self.compose_config:
+                name = s.get("name", "")
+                if name.endswith("ui"):
+                    available_interfaces.append(name[0:-2])
         return available_interfaces
 
     @staticmethod
@@ -802,18 +811,29 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         for service_name in self.active_services:
             service = self.services_dict.get(service_name)
 
-            for key, value in service.get("environment", {}).items():
-                if PLACEHOLDER in str(value):
-                    key = services.normalize_placeholder_variable(key)
-                    missing.add(key)
+            if service:
+                for key, value in service.get("environment", {}).items():
+                    if PLACEHOLDER in str(value):
+                        key = services.normalize_placeholder_variable(key)
+                        missing.add(key)
 
         placeholders = []
         for key in missing:
 
             serv = services.vars_to_services_mapping.get(key)
-            # Should never happens since all services are configured, cannot be tested
-            if not serv:  # pragma: no cover
 
+            if serv:
+                active_serv = []
+                for i in serv:
+                    if i in self.active_services:
+                        active_serv.append(i)
+
+                if active_serv:
+                    placeholders.append(
+                        "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
+                    )
+            # Should never happens since all services are configured, cannot be tested
+            else:  # pragma: no cover
                 # with py39 it would be key.removeprefix('INJECT_')
                 if key.startswith("INJECT_"):
                     key = key[len("INJECT_") :]
@@ -821,16 +841,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 Application.exit(
                     "Missing variable: {}: cannot find a service mapping this variable",
                     key,
-                )
-
-            active_serv = []
-            for i in serv:
-                if i in self.active_services:
-                    active_serv.append(i)
-
-            if active_serv:
-                placeholders.append(
-                    "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
                 )
 
         if len(placeholders) > 0:
