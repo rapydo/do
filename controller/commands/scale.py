@@ -22,14 +22,16 @@ def scale(scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA"
             hints = "You can also set a {} variable in your .projectrc file".format(
                 scale_var
             )
-            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints)
+            Application.exit(
+                "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints
+            )
         service = scaling
         scaling = f"{service}={nreplicas}"
     else:
         service, nreplicas = options
 
     if isinstance(nreplicas, str) and not nreplicas.isnumeric():
-        log.exit("Invalid number of replicas: {}", nreplicas)
+        Application.exit("Invalid number of replicas: {}", nreplicas)
 
     dc = Compose(files=Application.data.files)
     dc.start_containers([service], scale=[scaling], skip_dependencies=True)

@@ -52,7 +52,7 @@ def install_controller_from_folder(gits, version, user, editable):
     elif gitter.switch_branch(do_repo, version):
         log.info("Controller repository switched to {}", version)
     else:
-        log.exit("Invalid version")
+        Application.exit("Invalid version")
 
     installed = Packages.install(do_path, editable=editable, user=user)
 

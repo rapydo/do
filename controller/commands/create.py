@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 import typer
 
@@ -38,7 +38,7 @@ def create(
         help="Service to be enabled (multiple is enabled)",
         autocompletion=Application.autocomplete_service,
     ),
-    origin_url: str = typer.Option(
+    origin_url: Optional[str] = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"
     ),
     envs: List[str] = typer.Option(
@@ -76,11 +76,13 @@ def create(
 
     if extend is not None:
         if project_name == extend:
-            log.exit("A project cannot extend itself")
+            Application.exit("A project cannot extend itself")
+
         if not PROJECT_DIR.joinpath(extend).is_dir():
-            log.exit("Invalid extend value: project {} not found", extend)
+            Application.exit("Invalid extend value: project {} not found", extend)
 
     auth = auth.value
+    frontend = frontend.value
 
     create_project(
         project_name=project_name,
@@ -150,7 +152,7 @@ def create_project(
     if not force_current:
         dirs = os.listdir(".")
         if dirs and dirs != [".git"]:
-            log.exit(
+            Application.exit(
                 "Current folder is not empty, cannot create a new project here.\n"
                 "Found: {}\n"
                 "Use --current to force the creation here",
@@ -184,10 +186,12 @@ def create_project(
         project_scaffold.load_frontend_scaffold(frontend)
 
     if "_" in project_name:
-        log.exit("Wrong project name, _ is not a valid character")
+        Application.exit("Wrong project name, _ is not a valid character")
 
     if project_name in project_scaffold.reserved_project_names:
-        log.exit("You selected a reserved name, invalid project name: {}", project_name)
+        Application.exit(
+            "You selected a reserved name, invalid project name: {}", project_name
+        )
 
     templating = Templating()
 
@@ -201,7 +205,7 @@ def create_project(
             log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
-            log.exit("\nmkdir -p {}", f)
+            Application.exit("\nmkdir -p {}", f)
 
         f.mkdir(parents=True, exist_ok=True)
 
@@ -215,7 +219,7 @@ def create_project(
 
     if path:
         if path not in files:
-            log.exit("Invalid path, cannot upgrade {}", path)
+            Application.exit("Invalid path, cannot upgrade {}", path)
         else:
             files = [path]
 
@@ -270,7 +274,7 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
-            log.exit(p)
+            Application.exit(p)
 
     for p in project_scaffold.raw_files:
         # automatic creation
@@ -286,7 +290,7 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             # print(f"\n{template}")
-            log.exit(p)
+            Application.exit(p)
 
 
 def parse_env_variables(envs):
@@ -298,7 +302,7 @@ def parse_env_variables(envs):
     for env in envs:
         e = env.split("=")
         if len(e) != 2:
-            log.exit("Invalid env {}, expected: K1=V1", env)
+            Application.exit("Invalid env {}, expected: K1=V1", env)
         k = e[0].upper()
         v = e[1]
         env_variables[k] = v

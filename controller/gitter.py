@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 from urllib.parse import urlparse
 
 import pytz
@@ -23,14 +24,16 @@ def init(path):
     return Repo.init(path)
 
 
-def get_origin(gitobj):
+def get_origin(gitobj: Repo) -> Optional[str]:
     try:
         if gitobj is None:
             return None
 
         if len(gitobj.remotes) == 0:
             return None
-        return gitobj.remotes.origin.url
+
+        url: str = gitobj.remotes.origin.url
+        return url
     except AttributeError:
         return None
 
@@ -100,16 +103,18 @@ def clone(url, path, branch, do=False, check=True):
         gitobj = Repo.clone_from(url=url, to_path=local_path)
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
-        log.exit(
+        log.critical(
             "Repo {} missing as {}. You should init your project",
             url,
             local_path,
         )
+        sys.exit(1)
 
     if do:
         ret = switch_branch(gitobj, branch)
         if not ret:  # pragma: no cover
-            log.exit("Cannot switch repo {} to version {}", local_path, branch)
+            log.critical("Cannot switch repo {} to version {}", local_path, branch)
+            sys.exit(1)
 
     if check:
         compare_repository(gitobj, branch, online_url=url, path=path)
@@ -143,7 +148,7 @@ def compare_repository(gitobj, branch, online_url, path=None):
             url_match = True
 
         if not url_match:
-            log.exit(
+            log.critical(
                 """Unmatched local remote
 Found: {}\nExpected: {}
 Suggestion: remove {} and execute the init command
@@ -152,17 +157,19 @@ Suggestion: remove {} and execute the init command
                 online_url,
                 gitobj.working_dir,
             )
+            sys.exit(1)
 
     active_branch = get_active_branch(gitobj)
 
     if active_branch is not None:
         if branch != active_branch:
-            log.exit(
+            log.critical(
                 "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
                 path,
                 active_branch,
                 branch,
             )
+            sys.exit(1)
     return True
 
 
@@ -180,7 +187,9 @@ def check_file_younger_than(gitobj, filename, timestamp):
     try:
         commits = gitobj.blame(rev="HEAD", file=filename)
     except GitCommandError as e:  # pragma: no cover
-        log.exit("Failed 'blame' operation on {}.\n{}", filename, e)
+        log.critical("Failed 'blame' operation on {}.\n{}", filename, e)
+        sys.exit(1)
+
     dates = []
     for commit in commits:
         current_blame = gitobj.commit(rev=str(commit[0]))
@@ -249,7 +258,8 @@ def update(path, gitobj):
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
             except TypeError as e:  # pragma: no cover
-                log.exit("Unable to update {} repo, {}", path, e)
+                log.critical("Unable to update {} repo, {}", path, e)
+                sys.exit(1)
 
 
 def check_unstaged(path, gitobj):
@@ -265,11 +275,11 @@ def fetch(path, gitobj):
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
-            log.verbose("Fetching {} on {}", remote, path)
             try:
                 remote.fetch()
             except GitCommandError as e:  # pragma: no cover
-                log.exit(e)
+                log.critical(e)
+                sys.exit(1)
 
 
 def check_updates(path, gitobj):
@@ -282,7 +292,6 @@ def check_updates(path, gitobj):
         return False
 
     max_remote = 20
-    log.verbose("Inspecting {}/{}", path, branch)
 
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
     behind_check = f"{branch}..origin/{branch}"

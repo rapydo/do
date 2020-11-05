@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Optional
 
 import typer
 from glom import glom
@@ -23,7 +24,7 @@ def interfaces(
         help="Detached mode to run the container in background",
         show_default=False,
     ),
-    port: int = typer.Option(
+    port: Optional[int] = typer.Option(
         None,
         "--port",
         "-p",
@@ -42,18 +43,18 @@ def interfaces(
 
     if not container_service_exists(Application.data.services_dict, service):
         suggest = "You can use rapydo interfaces list to get available interfaces"
-        log.exit("Container '{}' is not defined\n{}", service, suggest)
+        Application.exit("Container '{}' is not defined\n{}", service, suggest)
 
     info = container_info(Application.data.services_dict, service)
     try:
         current_ports = info.get("ports", []).pop(0)
     except IndexError:  # pragma: no cover
-        log.exit("No default port found?")
+        Application.exit("No default port found?")
 
     # cannot set current_ports.published as default in get
     # because since port is in args... but can be None
     if port is None:
-        port = str(current_ports.published)
+        port = current_ports.published
 
     publish = [f"{port}:{current_ports.target}"]
 

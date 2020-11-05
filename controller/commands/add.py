@@ -1,11 +1,12 @@
 from enum import Enum
-from typing import Callable
+from typing import Any, Callable
 
 import typer
 from glom import glom
 
 from controller import log
 from controller.app import Application, Configuration
+from controller.project import Project
 from controller.templating import Templating
 
 
@@ -16,7 +17,7 @@ class ElementTypes(str, Enum):
     service = "service"
 
 
-def get_function(element: ElementTypes) -> Callable:
+def get_function(element: ElementTypes) -> Callable[[Project, str, Any, str], None]:
 
     if element == "endpoint":
         return create_endpoint
@@ -54,7 +55,7 @@ def add(
 def create_template(templating, template_name, target_path, name, services, auth):
 
     if target_path.exists():
-        log.exit("{} already exists", target_path)
+        Application.exit("{} already exists", target_path)
 
     template = templating.get_template(
         template_name, {"name": name, "services": services, "auth": auth}
@@ -63,7 +64,9 @@ def create_template(templating, template_name, target_path, name, services, auth
     templating.save_template(target_path, template, force=False)
 
 
-def create_endpoint(project_scaffold, name, services, auth):
+def create_endpoint(
+    project_scaffold: Project, name: str, services: Any, auth: str
+) -> None:
     path = project_scaffold.p_path("backend", "endpoints")
     path = path.joinpath(f"{name}.py")
 
@@ -73,7 +76,7 @@ def create_endpoint(project_scaffold, name, services, auth):
     log.info("Endpoint created: {}", path)
 
 
-def create_task(project_scaffold, name, services, auth):
+def create_task(project_scaffold: Project, name: str, services: Any, auth: str) -> None:
     path = project_scaffold.p_path("backend", "tasks")
     path = path.joinpath(f"{name}.py")
 
@@ -83,7 +86,9 @@ def create_task(project_scaffold, name, services, auth):
     log.info("Task created: {}", path)
 
 
-def create_component(project_scaffold, name, services, auth):
+def create_component(
+    project_scaffold: Project, name: str, services: Any, auth: str
+) -> None:
     path = project_scaffold.p_path("frontend", "app", "components", name)
     path.mkdir(parents=True, exist_ok=True)
 
@@ -133,7 +138,9 @@ def create_component(project_scaffold, name, services, auth):
         f.write("\n")
 
 
-def create_service(project_scaffold, name, services, auth):
+def create_service(
+    project_scaffold: Project, name: str, services: Any, auth: str
+) -> None:
     path = project_scaffold.p_path("frontend", "app", "services")
     path.mkdir(parents=True, exist_ok=True)
 

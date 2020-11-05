@@ -31,7 +31,7 @@ def remove(
 
             opt = "--networks" if rm_networks else "--all"
 
-            log.exit(
+            Application.exit(
                 "Incompatibile options {opt} and --service\n"
                 + "rapydo remove {opt} is ALWAYS applied to EVERY container of the "
                 + "stack due to the underlying docker-compose implementation. "

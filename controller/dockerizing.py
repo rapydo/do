@@ -1,3 +1,5 @@
+import sys
+
 import docker
 import requests
 from docker.errors import APIError
@@ -13,7 +15,8 @@ class Dock:
         super().__init__()
 
         if not self.is_daemon_alive():  # pragma: no cover
-            log.exit("Docker daemon not reachable")
+            log.critical("Docker daemon not reachable")
+            sys.exit(1)
 
     def is_daemon_alive(self):
 

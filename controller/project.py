@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 
 from controller import PROJECT_DIR, gitter, log
@@ -222,33 +223,41 @@ class Project:
         if project is None:
 
             if len(projects) == 0:
-                log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
+                log.critical("No project found ({} folder is empty?)", PROJECT_DIR)
+                sys.exit(1)
 
             if len(projects) > 1:
-                log.exit(
+                log.critical(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
                     ", ".join(projects),
                 )
+                sys.exit(1)
+
             project = projects.pop()
 
         elif project not in projects:
-            log.exit(
-                "Wrong project {}\nSelect one of the following: {}\n".format(
-                    project, ", ".join(projects)
-                )
+            log.critical(
+                "Wrong project {}\nSelect one of the following: {}\n",
+                project,
+                ", ".join(projects),
             )
+            sys.exit(1)
 
         if "_" in project:
-            log.exit(
+            log.critical(
                 "Wrong project name, _ is not a valid character."
                 "\nPlease consider to rename {} into {}",
                 project,
                 project.replace("_", ""),
             )
+            sys.exit(1)
 
         if project in Project.reserved_project_names:
-            log.exit("You selected a reserved name, invalid project name: {}", project)
+            log.critical(
+                "You selected a reserved name, invalid project name: {}", project
+            )
+            sys.exit(1)
 
         return project
 
@@ -313,27 +322,30 @@ Verify that you are in the right folder, now you are in: {}
 
         for fpath in self.expected_folders:
             if not fpath.is_dir():
-                log.exit(
+                log.critical(
                     "Project {} is invalid: required folder not found {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
         for fpath in self.expected_files + self.raw_files:
             if not fpath.is_file():
-                log.exit(
+                log.critical(
                     "Project {} is invalid: required file not found {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
         for fpath in self.obsolete_files:
             if fpath.exists():
-                log.exit(
+                log.critical(
                     "Project {} contains an obsolete file or folder: {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
     # issues/57
     # I'm temporary here... to be decided how to handle me

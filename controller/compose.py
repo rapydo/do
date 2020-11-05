@@ -7,6 +7,7 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 import os
 import re
 import shlex
+import sys
 from contextlib import redirect_stdout
 from io import StringIO
 
@@ -37,7 +38,7 @@ class Compose:
 
         os.environ["COMPOSE_HTTP_TIMEOUT"] = "180"
 
-        log.verbose("Client compose {}: {}", self.project_name, files)
+        log.debug("Client compose {}: {}", self.project_name, files)
 
     def config(self):
         compose_output_tuple = get_config_from_options(".", self.options)
@@ -63,17 +64,18 @@ class Compose:
         except SystemExit as e:
             # System exit is always received, also in case of normal execution
             if e.code > 0:
-                log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
+                log.critical("Compose received: system.exit({})", e.code)
+                sys.exit(e.code)
 
-            log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
-            log.exit("Failed command execution:\n{}", e)
+            log.critical("Failed command execution:\n{}", e)
+            sys.exit(1)
         except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
-            log.exit("Failed docker container:\n{}", e)
+            log.critical("Failed docker container:\n{}", e)
+            sys.exit(1)
         except (ProjectError, NoSuchService) as e:
-            log.exit(e)
-        else:
-            log.verbose("Executed compose {} w/{}", command, options)
+            log.critical(e)
+            sys.exit(1)
 
         return out
 
@@ -132,12 +134,13 @@ class Compose:
         try:
             return self.command("up", options)
         except NetworkConfigChangedError as e:  # pragma: no cover
-            log.exit(
+            log.critical(
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
                 "you can use rapydo remove --networks or docker system prune",
             )
+            sys.exit(1)
 
     def create_volatile_container(
         self, service, command=None, publish=None, detach=False, user=None

@@ -2,6 +2,7 @@ import distutils.core
 import json
 import os
 import re
+import sys
 import time
 from datetime import datetime
 from glob import glob
@@ -85,8 +86,9 @@ def load_yaml_file(filepath):
 
             docs = list(loader)
 
-            if len(docs) == 0:
-                log.exit("YAML file is empty: {}", filepath)
+            if not docs:
+                log.critical("YAML file is empty: {}", filepath)
+                sys.exit(1)
 
             return docs[0]
 

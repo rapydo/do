@@ -2,8 +2,7 @@
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
 
-# which version of python is this?
-# Retrocompatibility for Python < 3.6
+import sys
 from distutils.version import LooseVersion
 from importlib import import_module
 
@@ -52,7 +51,8 @@ class Packages:
 
                 return result.rc == 0
         except BaseException as e:  # pragma: no cover
-            log.exit(e)
+            log.critical(e)
+            sys.exit(1)
 
     @staticmethod
     def import_package(package_name):
@@ -74,7 +74,11 @@ class Packages:
 
         found_version = Packages.package_version(package_name)
         if found_version is None:  # pragma: no cover
-            log.exit("Could not find the following python package: {}", package_name)
+            log.critical(
+                "Could not find the following python package: {}", package_name
+            )
+            sys.exit(1)
+
         try:
             if min_version is not None:  # pragma: no cover
                 if LooseVersion(min_version) > LooseVersion(found_version):
@@ -82,7 +86,8 @@ class Packages:
                         package_name, min_version
                     )
                     version_error += f", found {found_version} "
-                    log.exit(version_error)
+                    log.critical(version_error)
+                    sys.exit(1)
 
             if max_version is not None:  # pragma: no cover
                 if LooseVersion(max_version) < LooseVersion(found_version):
@@ -90,7 +95,8 @@ class Packages:
                         package_name, max_version
                     )
                     version_error += f", found {found_version} "
-                    log.exit(version_error)
+                    log.critical(version_error)
+                    sys.exit(1)
 
             log.debug("{} version: {}", package_name, found_version)
             return found_version
@@ -108,7 +114,8 @@ class Packages:
             if program == "docker":
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.exit("Missing requirement: {} not found.{}", program, hints)
+            log.critical("Missing requirement: {} not found.{}", program, hints)
+            sys.exit(1)
 
         if min_version is not None:  # pragma: no cover
             if LooseVersion(min_version) > LooseVersion(found_version):
@@ -117,7 +124,8 @@ class Packages:
                     min_version,
                 )
                 version_error += f", found {found_version} "
-                log.exit(version_error)
+                log.critical(version_error)
+                sys.exit(1)
 
         if max_version is not None:  # pragma: no cover
             if LooseVersion(max_version) < LooseVersion(found_version):
@@ -126,7 +134,8 @@ class Packages:
                     max_version,
                 )
                 version_error += f", found {found_version} "
-                log.exit(version_error)
+                log.critical(version_error)
+                sys.exit(1)
 
         log.debug("{} version: {}", program, found_version)
         return found_version
@@ -177,9 +186,10 @@ class Packages:
         )
 
         if v is None:  # pragma: no cover
-            log.exit(
+            log.critical(
                 "Cannot verify docker version, is your user not allowed to docker?"
             )
+            sys.exit(1)
 
         safe_version = "18.09.2"
         if LooseVersion(safe_version) > LooseVersion(v):

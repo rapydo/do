@@ -65,11 +65,6 @@ def check(
             if not any(
                 x in Application.data.active_services for x in build["services"]
             ):  # pragma: no cover
-                log.verbose(
-                    "Checks skipped: template {} not enabled (service list = {})",
-                    image_tag,
-                    build["services"],
-                )
                 continue
 
             # Check if some recent commit modified the Dockerfile
@@ -85,7 +80,7 @@ def check(
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
 
-                    log.exit(
+                    Application.exit(
                         "Missing template build for {} ({})\n{}",
                         from_build["services"],
                         from_img,
@@ -155,7 +150,7 @@ def build_is_obsolete(build, gits):
     elif path.startswith(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
-        log.exit("Unable to find git repo {}", path)
+        Application.exit("Unable to find git repo {}", path)
 
     build_timestamp = get_build_timestamp(build)
 

@@ -1,3 +1,5 @@
+import sys
+
 from glom import glom
 
 from controller import log
@@ -49,8 +51,8 @@ def find_active(services):
         if is_active:
             base_actives.append(name)
 
-    log.verbose("Base active services = {}", base_actives)
-    log.verbose("Services dependencies = {}", dependencies)
+    log.debug("Base active services = {}", base_actives)
+    log.debug("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
     return all_services, active_services
 
@@ -149,11 +151,12 @@ def check_rabbit_password(pwd):
     invalid_rabbit_characters = ["£", "§", "”", "’"]
     if any([c in pwd for c in invalid_rabbit_characters]):
         log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
-        log.exit(
+        log.critical(
             "Some special characters, including {}, are not allowed "
             "because make RabbitMQ crash at startup",
             " ".join(invalid_rabbit_characters),
         )
+        sys.exit(1)
 
 
 def get_default_user(service, frontend):

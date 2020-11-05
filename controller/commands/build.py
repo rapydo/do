@@ -111,7 +111,7 @@ def build(
             while True:
                 response = typer.prompt("Do you want to continue? y/n")
                 if response.lower() in ["n", "no"]:
-                    log.exit("Build aborted")
+                    Application.exit("Build aborted")
 
                 if response.lower() in ["y", "yes"]:
                     break

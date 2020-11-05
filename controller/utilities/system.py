@@ -20,7 +20,7 @@ def execute_command(command, parameters):
 
         # Pattern in plumbum library for executing a shell command
         command = local[command]
-        log.verbose("Executing command {} {}", command, parameters)
+        log.debug("Executing command {} {}", command, parameters)
         return command(parameters)
     except CommandNotFound:
         raise ExecutionException(f"Command not found: {command}")

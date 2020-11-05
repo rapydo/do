@@ -28,7 +28,7 @@ def pull(
         if Configuration.services_list:
             for s in Application.data.services:
                 if s not in base_services_list:
-                    log.exit("Invalid service name: {}", s)
+                    Application.exit("Invalid service name: {}", s)
         # List of BASE active services (i.e. remove services not in base)
         services_intersection = list(
             set(Application.data.services).intersection(base_services_list)

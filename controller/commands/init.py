@@ -43,7 +43,7 @@ def init(
 
     if submodules_path is not None:
         if not submodules_path.exists():
-            log.exit("Local path not found: {}", submodules_path)
+            Application.exit("Local path not found: {}", submodules_path)
 
     Application.git_submodules(from_path=submodules_path)
 

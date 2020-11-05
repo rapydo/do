@@ -13,23 +13,8 @@ LOGS_FILE = None
 if LOGS_FOLDER.is_dir():
     LOGS_FILE = LOGS_FOLDER.joinpath("rapydo-controller.log")
 
-log.level("VERBOSE", no=1, color="<fg #666>")
+# log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
-
-
-def verbose(*args, **kwargs):
-    log.log("VERBOSE", *args, **kwargs)
-
-
-def exit_msg(message="", *args, **kwargs):
-    error_code = abs(int(kwargs.pop("error_code", 1)))
-    if message:
-        log.critical(message, *args, **kwargs)
-    sys.exit(error_code)
-
-
-log.verbose = verbose
-log.exit = exit_msg
 
 log.remove()
 

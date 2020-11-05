@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 
 import typer
 
@@ -31,13 +32,13 @@ def ssl(
         help="Disable pseudo-tty allocation (e.g. to execute from a cronjob)",
         show_default=False,
     ),
-    chain_file: Path = typer.Option(
+    chain_file: Optional[Path] = typer.Option(
         None,
         "--chain-file",
         help="Path to existing chain file (.pem format)",
         show_default=False,
     ),
-    key_file: Path = typer.Option(
+    key_file: Optional[Path] = typer.Option(
         None,
         "--key-file",
         help="Path to existing key file (.pem format)",
@@ -48,14 +49,14 @@ def ssl(
 
     if chain_file is not None or key_file is not None:
         if chain_file is None:
-            log.exit("Invalid chain file (you provided none)")
+            Application.exit("Invalid chain file (you provided none)")
         elif not chain_file.exists():
-            log.exit("Invalid chain file (you provided {})", chain_file)
+            Application.exit("Invalid chain file (you provided {})", chain_file)
 
         if key_file is None:
-            log.exit("Invalid key file (you provided none)")
+            Application.exit("Invalid key file (you provided none)")
         elif not key_file.exists():
-            log.exit("Invalid key file (you provided {})", key_file)
+            Application.exit("Invalid key file (you provided {})", key_file)
 
     service = "proxy"
 
