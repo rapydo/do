@@ -28,3 +28,33 @@ repos:
     rev: v0.790
     hooks:
       - id: mypy
+        additional_dependencies:
+          [
+            "docker-compose==1.27.4",
+            "dockerfile-parse==1.0.0",
+            "python-dateutil",
+            "pytz",
+            "loguru",
+            "prettyprinter",
+            "jinja2",
+            "sultan==0.9.1",
+            "plumbum",
+            "glom",
+            "GitPython==3.1.11",
+            "PyYAML==5.3.1",
+            "pip>=10.0.0",
+            "typer[all]==0.3.2",
+          ]
+        args: [
+            "--ignore-missing-imports",
+            # This flag disallows usage of generic types that do not specify explicit type parameters.
+            # Moreover, built-in collections (such as list and dict)
+            # become disallowed as you should use their aliases from the typing module
+            # (such as List[int] and Dict[str, str]).
+            "--disallow-any-generics",
+            # "--check-untyped-defs",
+            "--warn-redundant-casts",
+            "--warn-unused-ignores",
+            "--warn-return-any",
+            "--warn-unreachable",
+          ]

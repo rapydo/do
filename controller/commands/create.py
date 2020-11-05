@@ -1,5 +1,6 @@
 import os
 import shutil
+from enum import Enum
 from typing import List
 
 import typer
@@ -10,14 +11,24 @@ from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 
 
+class AuthTypes(str, Enum):
+    postgres = "postgres"
+    mysql = "mysql"
+    neo4j = "neo4j"
+    mongo = "mongo"
+
+
+class FrontendTypes(str, Enum):
+    no = "no"
+    angular = "angular"
+
+
 @Application.app.command(help="Create a new rapydo project")
 def create(
     project_name: str = typer.Argument(..., help="Name of your project"),
-    auth: str = typer.Option(
-        None, "--auth", help="Auth service to enable (sql, neo4j, mongo)"
-    ),
-    frontend: str = typer.Option(
-        None, "--frontend", help="Frontend framework to enable (no, angular)"
+    auth: AuthTypes = typer.Option(..., "--auth", help="Auth service to enable"),
+    frontend: FrontendTypes = typer.Option(
+        ..., "--frontend", help="Frontend framework to enable"
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
     services: List[str] = typer.Option(
@@ -69,10 +80,7 @@ def create(
         if not PROJECT_DIR.joinpath(extend).is_dir():
             log.exit("Invalid extend value: project {} not found", extend)
 
-    if auth is None:
-        log.exit("Missing authentication service, add --auth option")
-    if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
-        log.exit("Invalid authentication service: {}", auth)
+    auth = auth.value
 
     create_project(
         project_name=project_name,
@@ -136,12 +144,8 @@ def create_project(
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
 
-    if frontend is None:
-        log.exit("Missing frontend framework, add --frontend option")
-    if not frontend or frontend == "no":
+    if frontend == "no":
         frontend = NO_FRONTEND
-    if frontend not in [NO_FRONTEND, ANGULAR]:
-        log.exit("Invalid frontend framework: {}", frontend)
 
     if not force_current:
         dirs = os.listdir(".")

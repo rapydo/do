@@ -106,29 +106,25 @@ def test_failed_create(capfd):
     exec_command(
         capfd,
         "create first",
-        "Missing authentication service, add --auth option",
+        "Missing option '--auth'",
     )
-
-    with open("data/logs/rapydo-controller.log") as f:
-        logs = f.read().splitlines()
-        assert logs[-1].endswith("Missing authentication service, add --auth option")
 
     exec_command(
         capfd,
         "create first --auth xyz",
-        "Invalid authentication service: xyz",
+        "Invalid value for '--auth'",
     )
 
     exec_command(
         capfd,
         "create first --auth postgres",
-        "Missing frontend framework, add --frontend option",
+        "Missing option '--frontend'.",
     )
 
     exec_command(
         capfd,
         "create first --auth postgres --frontend xyz",
-        "Invalid frontend framework: xyz",
+        "Invalid value for '--frontend'",
     )
 
     exec_command(
@@ -138,6 +134,10 @@ def test_failed_create(capfd):
         "Found: ",
         "Use --current to force the creation here",
     )
+
+    with open("data/logs/rapydo-controller.log") as f:
+        logs = f.read().splitlines()
+        assert logs[-1].endswith("Use --current to force the creation here")
 
     # Please note that --current is required because data folder is already created
     # to be able to tests logs
