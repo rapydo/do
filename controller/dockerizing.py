@@ -11,11 +11,11 @@ class Dock:
     def __init__(self):
         super().__init__()
 
+        self.client = docker.from_env()
+
         if not self.is_daemon_alive():  # pragma: no cover
             log.critical("Docker daemon not reachable")
             sys.exit(1)
-
-        self.client = docker.from_env()
 
     def is_daemon_alive(self):
 
