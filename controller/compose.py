@@ -226,17 +226,20 @@ class Compose:
                 # row is:
                 # Name   Command   State   Ports
                 # Split on two or more spaces
-                row = re.split(r"\s\s+", row)
-                status = row[2]
-                row = row[0]
-                if row == "Name":
-                    continue
-                # Removed the prefix (i.e. project name)
-                row = row[1 + len(prefix) :]
-                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                row = row[0 : row.index("_")]
+                row_tokens = re.split(r"\s\s+", row)
 
-                containers[row] = status
+                if row_tokens[0] == "Name":
+                    continue
+
+                status = row_tokens[2]
+                name = row_tokens[0]
+
+                # Removed the prefix (i.e. project name)
+                name = name[1 + len(prefix) :]
+                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+                name = name[0 : name.index("_")]
+
+                containers[name] = status
 
             return containers
 

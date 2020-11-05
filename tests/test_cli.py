@@ -1760,17 +1760,17 @@ def test_services_activation(capfd):
             "Project testservices successfully created",
         )
         if service == "mysql":
-            service = ["mariadb"]
+            services = ["mariadb"]
         elif service == "celery":
-            service = ["celery", "celeryui", "rabbit"]
+            services = ["celery", "celeryui", "rabbit"]
         else:
-            service = [service]
+            services = [service]
 
         exec_command(
             capfd,
             "-p testservices list services",
             "List of active services:",
-            *service,
+            *services,
         )
 
 

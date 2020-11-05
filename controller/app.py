@@ -60,6 +60,8 @@ class Configuration:
     load_commons = False
 
     rapydo_version: Optional[str] = None
+    project_title: Optional[str] = None
+    project_description: Optional[str] = None
 
     initialize: bool = False
     update: bool = False
@@ -67,6 +69,8 @@ class Configuration:
     install: bool = False
     print_version: bool = False
     create: bool = False
+
+    ABS_PROJECT_PATH: Optional[Path] = None
 
     @staticmethod
     def set_action(action: Optional[str]) -> None:

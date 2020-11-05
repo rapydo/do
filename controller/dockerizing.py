@@ -8,9 +8,6 @@ from controller import log
 
 
 class Dock:
-
-    client = None
-
     def __init__(self):
         super().__init__()
 
@@ -18,10 +15,9 @@ class Dock:
             log.critical("Docker daemon not reachable")
             sys.exit(1)
 
-    def is_daemon_alive(self):
+        self.client = docker.from_env()
 
-        if self.client is None:
-            self.client = docker.from_env()
+    def is_daemon_alive(self):
 
         try:
             return self.client.ping()

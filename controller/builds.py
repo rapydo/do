@@ -6,6 +6,7 @@ Parse dockerfiles and check for builds
 """
 
 import sys
+from typing import Dict, List
 
 from dockerfile_parse import DockerfileParser
 
@@ -159,7 +160,7 @@ def remove_redundant_services(services, builds):
             flat_builds[s] = b
 
     # Group requested services by builds
-    requested_builds = {}
+    requested_builds: Dict[str, List[str]] = {}
     for service in services:
         build_name = flat_builds.get(service)
         # this service is not built from a rapydo image

@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 from glob import glob
 from pathlib import Path
+from typing import Any, Dict, List
 
 import click
 import requests
@@ -21,7 +22,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-10-29"
+known_update = "2020-11-05"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -100,7 +101,7 @@ def load_yaml_file(filepath):
 
 def check_updates(category, lib, npm_timeout):
 
-    if category in ["pip", "controller", "http-api"]:
+    if category == "pip":
         if "==" in lib:
             tokens = lib.split("==")
         elif ">=" in lib:
@@ -108,6 +109,7 @@ def check_updates(category, lib, npm_timeout):
             # tokens = lib.split(">=")
         else:
             log.critical("Invalid lib format: {}", lib)
+            sys.exit(1)
 
         if "[" in tokens[0]:
             tokens[0] = tokens[0].split("[")[0]
@@ -207,7 +209,11 @@ def parse_pypi(url, lib):
     return span.text.strip().replace(f"{lib} ", "").strip()
 
 
-def parseDockerfile(d, dependencies, skip_angular):
+def parseDockerfile(
+    d: str,
+    dependencies: Dict[str, Dict[str, List[str]]],
+    skip_angular: bool,
+):
     with open(d) as f:
         service = d.replace("../build-templates/", "")
         service = service.replace("/Dockerfile", "")
@@ -221,7 +227,7 @@ def parseDockerfile(d, dependencies, skip_angular):
             if "FROM" in line:
                 line = line.replace("FROM", "").strip()
 
-                dependencies[service]["Dockerfile"] = line
+                dependencies[service]["Dockerfile"] = [line]
             elif not skip_angular and (
                 "RUN npm install" in line
                 or "RUN yarn add" in line
@@ -248,7 +254,7 @@ def parseDockerfile(d, dependencies, skip_angular):
                 line = line.replace("ENV ACMEV", "").strip()
                 line = line.replace('"', "").strip()
 
-                dependencies[service]["ACME"] = f"ACME:{line}"
+                dependencies[service]["ACME"] = [f"ACME:{line}"]
 
     return dependencies
 
@@ -292,8 +298,12 @@ def parsePackageJson(package_json, dependencies):
     return dependencies
 
 
-def parsePrecommitConfig(f, dependencies, key):
+def parsePrecommitConfig(
+    f: Path, dependencies: Dict[str, Dict[str, List[str]]], key: str
+) -> Dict[str, Dict[str, List[str]]]:
 
+    dependencies.setdefault("precommit", {})
+    dependencies["precommit"].setdefault(key, [])
     if not f.exists():
         return dependencies
 
@@ -305,7 +315,7 @@ def parsePrecommitConfig(f, dependencies, key):
             u = f"{repo}/-/tags/{rev}"
         else:
             u = f"{repo}/releases/tag/{rev}"
-        dependencies[key].append(u)
+        dependencies["precommit"][key].append(u)
 
     return dependencies
 
@@ -314,9 +324,11 @@ def parsePrecommitConfig(f, dependencies, key):
 @click.option("--skip-angular", is_flag=True, default=False)
 @click.option("--npm-timeout", default=1)
 @click.option("--verbose", is_flag=True, default=False)
-def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
+def check_versions(
+    skip_angular: bool = False, npm_timeout: int = 1, verbose: bool = False
+):
 
-    dependencies = {}
+    dependencies: Dict[str, Dict[str, List[str]]] = {}
 
     backend = load_yaml_file(Path("controller/confs/backend.yml"))
     services = backend.get("services", {})
@@ -328,7 +340,7 @@ def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
             continue
         dependencies.setdefault(service, {})
 
-        dependencies[service]["compose"] = image
+        dependencies[service]["compose"] = [image]
 
     for d in glob("../build-templates/*/Dockerfile"):
         if "not_used_anymore_" in d:
@@ -346,19 +358,23 @@ def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
             Path("../rapydo-angular/src/package.json"), dependencies
         )
 
-    controller = distutils.core.run_setup("../do/setup.py")
-    http_api = distutils.core.run_setup("../http-api/setup.py")
+    controller: Any = distutils.core.run_setup("../do/setup.py")
+    http_api: Any = distutils.core.run_setup("../http-api/setup.py")
 
-    dependencies["controller"] = controller.install_requires
-    dependencies["http-api"] = http_api.install_requires
-    dependencies.setdefault("rapydo-angular", [])
+    dependencies["controller"] = {}
+    dependencies["controller"]["pip"] = controller.install_requires
+
+    dependencies["http-api"] = {}
+    dependencies["http-api"]["pip"] = http_api.install_requires
 
     dependencies = parsePrecommitConfig(
         Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
     )
 
     dependencies = parsePrecommitConfig(
-        Path("../http-api/.pre-commit-config.yaml"), dependencies, "http-api"
+        Path("../http-api/.pre-commit-config.yaml"),
+        dependencies,
+        "http-api",
     )
 
     dependencies = parsePrecommitConfig(
@@ -367,52 +383,39 @@ def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
         "rapydo-angular",
     )
 
-    filtered_dependencies = {}
+    filtered_dependencies: Dict[str, Dict[str, List[str]]] = {}
 
-    for service in dependencies:
+    for service, categories in dependencies.items():
 
-        service_dependencies = dependencies[service]
+        filtered_dependencies.setdefault(service, {})
 
-        if isinstance(service_dependencies, list):
-            filtered_dependencies[service] = []
+        for category, deps in categories.items():
 
-            for d in service_dependencies:
+            for d in deps:
 
-                skipped = False
-                # repos from pre-commit (github)
-                if "/releases/tag/" in d:
-                    filtered_dependencies[service].append(d)
-                    check_updates("url", d, npm_timeout)
-                # repos from pre-commit (gitlab)
-                elif "/tags/" in d:
-                    filtered_dependencies[service].append(d)
-                    check_updates("url", d, npm_timeout)
-                elif "==" not in d and ">=" not in d:
-                    skipped = True
+                filtered_dependencies[service][category] = []
+
+                if service == "precommit":
+
+                    skipped = False
+                    # repos from pre-commit (github)
+                    if "/releases/tag/" in d:
+                        filtered_dependencies[service][category].append(d)
+                        check_updates("url", d, npm_timeout)
+                    # repos from pre-commit (gitlab)
+                    elif "/tags/" in d:
+                        filtered_dependencies[service][category].append(d)
+                        check_updates("url", d, npm_timeout)
+                    elif "==" not in d and ">=" not in d:
+                        skipped = True
+                    else:
+                        filtered_dependencies[service][category].append(d)
+                        check_updates(service, d, npm_timeout)
+
+                    if skipped:
+                        log.debug("Filtering out {}", d)
+
                 else:
-                    filtered_dependencies[service].append(d)
-                    check_updates(service, d, npm_timeout)
-
-                if skipped:
-                    log.debug("Filtering out {}", d)
-
-            if len(filtered_dependencies[service]) == 0:
-                log.debug("Removing empty list: {}", service)
-                del filtered_dependencies[service]
-
-        elif isinstance(service_dependencies, dict):
-            for category in service_dependencies:
-                filtered_dependencies.setdefault(service, {})
-                deps = service_dependencies[category]
-
-                was_str = False
-                if isinstance(deps, str):
-                    deps = [deps]
-                    was_str = True
-                else:
-                    filtered_dependencies[service][category] = []
-
-                for d in deps:
 
                     skipped = False
                     if re.match(r"^git\+https://github\.com.*@master$", d):
@@ -420,13 +423,8 @@ def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
                     elif d.endswith(":latest"):
                         skipped = True
                     elif "==" in d or ":" in d:
-
-                        if was_str:
-                            filtered_dependencies[service][category] = d
-                            check_updates(category, d, npm_timeout)
-                        else:
-                            filtered_dependencies[service][category].append(d)
-                            check_updates(category, d, npm_timeout)
+                        filtered_dependencies[service][category].append(d)
+                        check_updates(category, d, npm_timeout)
                     elif "@" in d:
                         filtered_dependencies[service][category].append(d)
                         check_updates(category, d, npm_timeout)
@@ -435,15 +433,14 @@ def check_versions(skip_angular=False, npm_timeout=1, verbose=False):
 
                     if skipped:
                         log.debug("Filtering out {}", d)
-                if category in filtered_dependencies[service]:
-                    if len(filtered_dependencies[service][category]) == 0:
-                        log.debug("Removing empty list: {}.{}", service, category)
-                        del filtered_dependencies[service][category]
-                if len(filtered_dependencies[service]) == 0:
-                    log.debug("Removing empty list: {}", service)
-                    del filtered_dependencies[service]
-        else:
-            log.warning("Unknown dependencies type: {}", type(service_dependencies))
+
+            if len(filtered_dependencies[service][category]) == 0:
+                log.debug("Removing empty list: {}", service)
+                del filtered_dependencies[service][category]
+
+        if len(filtered_dependencies[service]) == 0:
+            log.debug("Removing empty list: {}", service)
+            del filtered_dependencies[service]
 
         # print(service)
 

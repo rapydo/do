@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import Any, Callable
+from pathlib import Path
+from typing import Any, Callable, Dict
 
 import typer
 from glom import glom
@@ -52,7 +53,14 @@ def add(
     fn(Application.project_scaffold, name, Application.data.services, auth)
 
 
-def create_template(templating, template_name, target_path, name, services, auth):
+def create_template(
+    templating: Templating,
+    template_name: str,
+    target_path: Path,
+    name: str,
+    services: Dict[str, str],
+    auth: str,
+) -> None:
 
     if target_path.exists():
         Application.exit("{} already exists", target_path)

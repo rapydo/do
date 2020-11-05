@@ -52,7 +52,9 @@ repos:
             # become disallowed as you should use their aliases from the typing module
             # (such as List[int] and Dict[str, str]).
             "--disallow-any-generics",
-            # "--check-untyped-defs",
+            # This flag type checks the body of every function, regardless of whether it has type annotations.
+            # (By default the bodies of functions without annotations are not type checked.)
+            "--check-untyped-defs",
             "--warn-redundant-casts",
             "--warn-unused-ignores",
             "--warn-return-any",
