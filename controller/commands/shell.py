@@ -49,7 +49,7 @@ def shell(
         show_default=False,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     # Deprecated since 0.8
     if old_command:

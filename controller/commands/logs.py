@@ -30,7 +30,7 @@ def logs(
     ),
     nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     # if provided, use specific service instead of general services opt
     if service:

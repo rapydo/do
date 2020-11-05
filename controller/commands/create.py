@@ -61,7 +61,7 @@ def create(
         show_default=False,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if extend is not None:
         if project_name == extend:

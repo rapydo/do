@@ -1,3 +1,5 @@
+from typing import Optional
+
 import typer
 
 from controller import SUBMODULES_DIR, gitter, log
@@ -7,7 +9,7 @@ from controller.packages import Packages
 
 @Application.app.command(help="Install specified version of rapydo")
 def install(
-    version: str = typer.Argument("auto", help="Version to be installed"),
+    version: Optional[str] = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
         True,
         "--no-editable",
@@ -15,7 +17,7 @@ def install(
         show_default=False,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if version == "auto":
         version = Configuration.rapydo_version

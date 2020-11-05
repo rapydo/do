@@ -35,7 +35,7 @@ def backup(
         autocompletion=Application.autocomplete_service,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     service = service.value
 

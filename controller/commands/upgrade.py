@@ -17,7 +17,7 @@ def upgrade(
         show_default=False,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     frontend = glom(
         Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=None

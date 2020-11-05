@@ -11,7 +11,7 @@ SERVER_IS_ALIVE = '"Server is alive"'
 def diagnostic(
     host: str = typer.Argument(..., help="Host to be verified")
 ):  # pragma: no cover
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if "://" in host:
         tokens = host.split("://")

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Callable
 
 import typer
 from glom import glom
@@ -15,6 +16,24 @@ class ElementTypes(str, Enum):
     service = "service"
 
 
+def get_function(element: ElementTypes) -> Callable:
+
+    if "endpoint":
+        return create_endpoint
+
+    if "task":
+        return create_task
+
+    if "component":
+        return create_component
+
+    if "service":
+        return create_service
+
+    # Can't be reached
+    return create_service  # pragma: no cover
+
+
 @Application.app.command(help="Add a new element")
 def add(
     element_type: ElementTypes = typer.Argument(
@@ -23,17 +42,11 @@ def add(
     name: str = typer.Argument(..., help="Name to be assigned to the new element"),
 ):
 
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
-    functions = {
-        "endpoint": create_endpoint,
-        "task": create_task,
-        "component": create_component,
-        "service": create_service,
-    }
     auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
 
-    fn = functions.get(element_type)
+    fn = get_function(element_type)
 
     fn(Application.project_scaffold, name, Application.data.services, auth)
 

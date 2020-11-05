@@ -21,7 +21,7 @@ def init(
         help="Link all submodules in an existing folder instead of download them",
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     for p in Application.project_scaffold.data_folders:
         if not p.exists():
@@ -38,8 +38,8 @@ def init(
     # One generic here with main options and another after the complete
     # conf reading to set services variables
     if create_projectrc:
-        Application.controller.create_projectrc()
-        Application.controller.read_specs(read_extended=False)
+        Application.get_controller().create_projectrc()
+        Application.get_controller().read_specs(read_extended=False)
 
     if submodules_path is not None:
         if not submodules_path.exists():
@@ -47,22 +47,22 @@ def init(
 
     Application.git_submodules(from_path=submodules_path)
 
-    Application.controller.read_specs(read_extended=True)
-    Application.controller.make_env()
+    Application.get_controller().read_specs(read_extended=True)
+    Application.get_controller().make_env()
 
     # Compose services and variables
-    Application.controller.read_composers()
-    Application.controller.set_active_services()
+    Application.get_controller().read_composers()
+    Application.get_controller().set_active_services()
     # We have to create the .projectrc twice
     # One generic with main options and another here
     # when services are available to set specific configurations
     if create_projectrc:
-        Application.controller.create_projectrc()
-        Application.controller.read_specs(read_extended=True)
-        Application.controller.make_env()
+        Application.get_controller().create_projectrc()
+        Application.get_controller().read_specs(read_extended=True)
+        Application.get_controller().make_env()
         # Read again! :-(
-    #     Application.controller.read_composers()
-    #     Application.controller.set_active_services()
+    #     Application.get_controller().read_composers()
+    #     Application.get_controller().set_active_services()
 
-    # Application.controller.check_placeholders()
+    # Application.get_controller().check_placeholders()
     log.info("Project initialized")

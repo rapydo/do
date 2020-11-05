@@ -12,7 +12,7 @@ from controller.utilities import system
 def ancestors(
     imagetag: str = typer.Argument(..., help="Image tag ID to be inspected"),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     img = system.execute_command("docker", ["images", "--all"]).split("\n")
     img = [re.split(r"\s+", i) for i in img[1:]]
@@ -30,7 +30,7 @@ def ancestors(
         if len(children) == 0:
             break
         child = children[0]
-        print("\t".join(images.get(child)))
+        print("\t".join(images.get(child, "N/A")))
         found += 1
         children = get_children(child, images)
     if found == 0:

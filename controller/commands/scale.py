@@ -10,7 +10,7 @@ from controller.compose import Compose
 
 @Application.app.command(help="Scale the number of containers for one service")
 def scale(scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     options = scaling.split("=")
     if len(options) != 2:

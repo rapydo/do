@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Optional, Union
 
 import requests
 import typer
@@ -63,20 +63,28 @@ BASE_UID = 1000
 
 
 class Configuration:
-    projectrc = {}
-    host_configuration = {}
+    projectrc: Dict[str, Union[str, Dict]] = {}
+    # To be better charactirized. This is a:
+    # {'variables': 'env': Dict[str, str]}
+    host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
+    specs: OrderedDict = OrderedDict()
+    services_list: str
+    environment: Dict[str, str]
+
     action = None
 
     production = False
     testing = False
     privileged = False
-    project = None
+    project: str = ""
     frontend = None
-    hostname = None
-    stack = None
+    hostname: str = ""
+    stack: str = ""
     load_backend = False
     load_frontend = False
     load_commons = False
+
+    rapydo_version: Optional[str] = None
 
     def set_action(action):
         Configuration.action = action
@@ -209,7 +217,10 @@ def controller_cli_options(
     Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
-    Configuration.environment = [e.split("=") for e in environment]
+    Configuration.environment = {}
+    for e in environment:
+        key, value = e.split("=")
+        Configuration.environment[key] = value
 
     if stack:
         Configuration.stack = stack
@@ -246,13 +257,21 @@ class CommandsData:
 
 class Application:
 
-    # typer app
-    app = None
+    # Typer app
+    # Register callback with CLI options and basic initialization/checks
+    app = typer.Typer(
+        callback=controller_cli_options,
+        context_settings={"help_option_names": ["--help", "-h"]},
+    )
     # controller app
     controller = None
     project_scaffold = Project()
     data = CommandsData()
-    gits = OrderedDict()
+    gits: OrderedDict = OrderedDict()
+
+    @staticmethod
+    def get_controller():
+        return Application.controller
 
     def __init__(self):
 
@@ -266,12 +285,6 @@ class Application:
         self.base_services = None
         self.services_dict = None
         self.compose_config = None
-
-        # Register callback with CLI options and basic initialization/checks
-        Application.app = typer.Typer(
-            callback=controller_cli_options,
-            context_settings={"help_option_names": ["--help", "-h"]},
-        )
 
         load_commands()
 
@@ -380,6 +393,7 @@ class Application:
         Configuration.projectrc = configuration.load_yaml_file(
             PROJECTRC, path=Path(), is_optional=True
         )
+
         Configuration.host_configuration = Configuration.projectrc.pop(
             "project_configuration", {}
         )
@@ -702,8 +716,7 @@ class Application:
                 continue
             env[e] = env_value
 
-        for key, value in Configuration.environment:
-            env[key] = value
+        env.update(Configuration.environment)
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):

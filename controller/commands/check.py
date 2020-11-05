@@ -37,7 +37,7 @@ def check(
         autocompletion=Application.autocomplete_submodule,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if no_git:
         log.info("Skipping git checks")

@@ -30,11 +30,11 @@ def interfaces(
         help="port to be associated to the current service interface",
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if service == "list":
         print("List of available interfaces:")
-        for service in Application.controller.get_available_interfaces():
+        for service in Application.get_controller().get_available_interfaces():
             print(f" - {service}")
         return True
 

@@ -20,7 +20,7 @@ def list_cmd(
         ..., help="Type of element to be listed"
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     if element_type == ElementTypes.env:
         log.info("List env variables:\n")

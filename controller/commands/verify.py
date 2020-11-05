@@ -10,7 +10,7 @@ def verify(
         ..., help="Service name", autocompletion=Application.autocomplete_service
     )
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     # Verify one service connection (inside backend)
     dc = Compose(files=Application.data.files)

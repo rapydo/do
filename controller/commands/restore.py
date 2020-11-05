@@ -36,7 +36,7 @@ def restore(
         autocompletion=Application.autocomplete_service,
     ),
 ):
-    Application.controller.controller_init()
+    Application.get_controller().controller_init()
 
     service = service.value
 
@@ -73,9 +73,9 @@ def restore(
         return
 
     # walrus!
-    backup_path = backup_dir.joinpath(backup_file)
-    if not backup_path.exists():
-        log.exit("Invalid backup file, {} does not exist", backup_path)
+    backup_host_path = backup_dir.joinpath(backup_file)
+    if not backup_host_path.exists():
+        log.exit("Invalid backup file, {} does not exist", backup_host_path)
 
     if service == Services.neo4j:
         if container_is_running and not force:
