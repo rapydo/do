@@ -18,16 +18,16 @@ class ElementTypes(str, Enum):
 
 def get_function(element: ElementTypes) -> Callable:
 
-    if "endpoint":
+    if element == "endpoint":
         return create_endpoint
 
-    if "task":
+    if element == "task":
         return create_task
 
-    if "component":
+    if element == "component":
         return create_component
 
-    if "service":
+    if element == "service":
         return create_service
 
     # Can't be reached
