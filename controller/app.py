@@ -9,7 +9,6 @@ from typing import Any, Dict, List, MutableMapping, Optional
 
 import requests
 import typer
-from git import Repo
 from glom import glom
 
 from controller import (
@@ -32,6 +31,8 @@ from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
+
+DataFileStub = Dict[str, List[str]]
 
 ROOT_UID = 0
 BASE_UID = 1000
@@ -731,7 +732,7 @@ class Application:
         except FileNotFoundError:
             pass
 
-        data = {
+        data: DataFileStub = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
             "allservices": list(self.services_dict.keys()),
@@ -742,18 +743,19 @@ class Application:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile() -> Dict[str, List[str]]:
+    def parse_datafile() -> DataFileStub:
+        output: DataFileStub = {}
         try:
             with open(DATAFILE) as json_file:
                 datafile = json.load(json_file)
-                output = {}
                 # This is needed to let mypy understand the correct type
+                output["submodules"] = datafile.get("submodules")
                 output["services"] = datafile.get("services")
                 output["interfaces"] = datafile.get("interfaces")
                 output["allservices"] = datafile.get("allservices")
                 return output
         except FileNotFoundError:
-            return {}
+            return output
 
     @staticmethod
     def autocomplete_service(incomplete: str) -> List[str]:
