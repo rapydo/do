@@ -30,7 +30,7 @@ def interfaces(
         "-p",
         help="port to be associated to the current service interface",
     ),
-):
+) -> bool:
     Application.get_controller().controller_init()
 
     if service == "list":

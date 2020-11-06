@@ -42,7 +42,7 @@ def add(
         ..., help="Type of element to be created"
     ),
     name: str = typer.Argument(..., help="Name to be assigned to the new element"),
-):
+) -> None:
 
     Application.get_controller().controller_init()
 

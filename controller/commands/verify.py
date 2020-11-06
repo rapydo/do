@@ -1,3 +1,5 @@
+from typing import Any
+
 import typer
 
 from controller.app import Application
@@ -9,7 +11,7 @@ def verify(
     service: str = typer.Argument(
         ..., help="Service name", autocompletion=Application.autocomplete_service
     )
-):
+) -> Any:
     Application.get_controller().controller_init()
 
     # Verify one service connection (inside backend)

@@ -34,7 +34,7 @@ def backup(
         help="Service to be restarted once completed the backup (multiple allowed)",
         autocompletion=Application.autocomplete_service,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     service = service.value

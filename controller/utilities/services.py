@@ -1,4 +1,5 @@
 import sys
+from typing import List, Optional
 
 from glom import glom
 
@@ -6,7 +7,7 @@ from controller import log
 from controller.project import ANGULAR
 
 
-def get_services(services, default):
+def get_services(services: Optional[str], default: List[str]) -> List[str]:
 
     if services:
         return services.split(",")

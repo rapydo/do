@@ -20,7 +20,7 @@ def init(
         "--submodules-path",
         help="Link all submodules in an existing folder instead of download them",
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     for p in Application.project_scaffold.data_folders:

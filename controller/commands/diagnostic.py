@@ -10,7 +10,7 @@ SERVER_IS_ALIVE = '"Server is alive"'
 @Application.app.command(help="Execute diagnostic tools against a host")
 def diagnostic(
     host: str = typer.Argument(..., help="Host to be verified")
-):  # pragma: no cover
+) -> None:  # pragma: no cover
     Application.get_controller().controller_init()
 
     if "://" in host:

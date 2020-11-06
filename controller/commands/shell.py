@@ -1,3 +1,5 @@
+from typing import Any
+
 import typer
 
 from controller import log
@@ -48,7 +50,7 @@ def shell(
         help="Execute the command in detach mode",
         show_default=False,
     ),
-):
+) -> Any:
     Application.get_controller().controller_init()
 
     # Deprecated since 0.8

@@ -27,7 +27,7 @@ def build(
         help="assume 'yes' as answer to all prompts and run non-interactively",
         show_default=False,
     ),
-):
+) -> bool:
     Application.get_controller().controller_init()
 
     builds, template_builds, overriding_imgs = locate_builds(

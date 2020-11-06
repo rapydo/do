@@ -20,7 +20,7 @@ def remove(
         help="Also remove networks and persistent data stored in docker volumes",
         show_default=False,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     dc = Compose(files=Application.data.files)

@@ -16,7 +16,7 @@ def update(
         show_default=False,
         autocompletion=Application.autocomplete_submodule,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     Application.git_update(ignore_submodules)

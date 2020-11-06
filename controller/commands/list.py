@@ -19,7 +19,7 @@ def list_cmd(
     element_type: ElementTypes = typer.Argument(
         ..., help="Type of element to be listed"
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     if element_type == ElementTypes.env:

@@ -20,7 +20,7 @@ def tuning(
     service: Services = typer.Argument(..., help="Service name"),
     cpu: int = typer.Option(None, "--cpu", help="Force the amount of cpus", min=1),
     ram: int = typer.Option(None, "--ram", help="Force the amount of ram", min=1),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     service = service.value

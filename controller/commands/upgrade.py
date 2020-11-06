@@ -16,7 +16,7 @@ def upgrade(
         help="path of file to be upgraded",
         show_default=False,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     frontend = glom(

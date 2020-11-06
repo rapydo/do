@@ -29,7 +29,7 @@ def logs(
         autocompletion=Application.autocomplete_service,
     ),
     nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     # if provided, use specific service instead of general services opt

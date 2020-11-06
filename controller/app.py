@@ -85,9 +85,11 @@ class Configuration:
         Configuration.create = Configuration.action == "create"
 
 
-def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
+def projectrc_values(
+    ctx: typer.Context, param: typer.CallbackParam, value: str
+) -> Optional[str]:
     if ctx.resilient_parsing:  # pragma: no cover
-        return
+        return None
 
     if value != param.get_default(ctx):
         return value
@@ -100,7 +102,7 @@ def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
     return value
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
     if value:
         typer.echo(f"rapydo version: {__version__}")
         raise typer.Exit()
@@ -196,7 +198,7 @@ def controller_cli_options(
         callback=version_callback,
         is_eager=True,
     ),
-):
+) -> None:
 
     Configuration.set_action(ctx.invoked_subcommand)
 
@@ -225,14 +227,14 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files=None,
-        base_files=None,
-        services=None,
-        services_list=None,
-        active_services: List[str] = None,
-        base_services=None,
-        compose_config=None,
-        services_dict=None,
+        files: List[str] = [],
+        base_files: List[str] = [],
+        services: List[str] = [],
+        services_list: Any = None,
+        active_services: List[str] = [],
+        base_services: List[Any] = [],
+        compose_config: List[Any] = [],
+        services_dict: Any = None,
     ):
         self.files = files
         self.base_files = base_files
@@ -256,20 +258,21 @@ class Application:
     controller = None
     project_scaffold = Project()
     data = CommandsData()
-    gits: MutableMapping[str, Repo] = OrderedDict()
+    # This Any should be Repo, but GitPython is lacking typings
+    gits: MutableMapping[str, Any] = OrderedDict()
 
     def __init__(self):
 
         Application.controller = self
 
         self.active_services: List[str] = []
-        self.files = None
-        self.base_files = None
+        self.files: List[str] = []
+        self.base_files: List[str] = []
         self.services = None
-        self.enabled_services = None
-        self.base_services = None
+        self.enabled_services: List[str] = []
+        self.base_services: List[Any] = []
+        self.compose_config: List[Any] = []
         self.services_dict = {}
-        self.compose_config = None
 
         load_commands()
 
@@ -654,7 +657,7 @@ class Application:
 
         Application.load_projectrc()
 
-        if self.files is None:
+        if not self.files:
             log.debug("Created temporary default {} file", PROJECTRC)
             PROJECTRC.unlink()
         else:
@@ -739,15 +742,21 @@ class Application:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile():
+    def parse_datafile() -> Dict[str, List[str]]:
         try:
             with open(DATAFILE) as json_file:
-                return json.load(json_file)
+                datafile = json.load(json_file)
+                output = {}
+                # This is needed to let mypy understand the correct type
+                output["services"] = datafile.get("services")
+                output["interfaces"] = datafile.get("interfaces")
+                output["allservices"] = datafile.get("allservices")
+                return output
         except FileNotFoundError:
             return {}
 
     @staticmethod
-    def autocomplete_service(incomplete: str):
+    def autocomplete_service(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -766,7 +775,7 @@ class Application:
         return available_interfaces
 
     @staticmethod
-    def autocomplete_interfaces(incomplete: str):
+    def autocomplete_interfaces(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -776,7 +785,7 @@ class Application:
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_allservice(incomplete: str):
+    def autocomplete_allservice(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -786,7 +795,7 @@ class Application:
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_submodule(incomplete: str):
+    def autocomplete_submodule(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []

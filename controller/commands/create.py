@@ -71,7 +71,7 @@ def create(
         help="Include all optionals files (html templates and customizers)",
         show_default=False,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     if extend is not None:

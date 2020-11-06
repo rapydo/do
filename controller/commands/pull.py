@@ -13,7 +13,7 @@ def pull(
         help="Include both core and custom images",
         show_default=False,
     )
-):
+) -> None:
     Application.get_controller().controller_init()
 
     if include_all:

@@ -56,7 +56,6 @@ known_latests = {
     "acme": "2.8.7",
     # Not used
     "urls": {
-        "seed-isort-config": "v2.2.0",
         "isort": "5.5.2",
         "prettier": "2.1.1",
         "pyupgrade": "v2.7.2",
@@ -213,7 +212,7 @@ def parseDockerfile(
     d: str,
     dependencies: Dict[str, Dict[str, List[str]]],
     skip_angular: bool,
-):
+) -> Dict[str, Dict[str, List[str]]]:
     with open(d) as f:
         service = d.replace("../build-templates/", "")
         service = service.replace("/Dockerfile", "")
@@ -326,7 +325,7 @@ def parsePrecommitConfig(
 @click.option("--verbose", is_flag=True, default=False)
 def check_versions(
     skip_angular: bool = False, npm_timeout: int = 1, verbose: bool = False
-):
+) -> None:
 
     dependencies: Dict[str, Dict[str, List[str]]] = {}
 

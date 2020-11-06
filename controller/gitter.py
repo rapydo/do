@@ -24,7 +24,7 @@ def init(path):
     return Repo.init(path)
 
 
-def get_origin(gitobj: Repo) -> Optional[str]:
+def get_origin(gitobj):
     try:
         if gitobj is None:
             return None

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import dateutil.parser
 import typer
@@ -36,7 +36,7 @@ def check(
         show_default=False,
         autocompletion=Application.autocomplete_submodule,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     if no_git:
@@ -92,8 +92,8 @@ def check(
                 if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
-                from_timestamp = get_build_timestamp(from_build, as_date=True)
-                build_timestamp = get_build_timestamp(build, as_date=True)
+                from_timestamp = get_build_date(from_build)
+                build_timestamp = get_build_date(build)
 
                 if from_timestamp > build_timestamp:
                     b = build_timestamp.strftime(DATE_FORMAT)
@@ -127,15 +127,17 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def get_build_timestamp(build, as_date: bool = False):
+def get_build_date(build: Dict[str, str]) -> datetime:
 
     # timestamp is like: 2017-09-22T07:10:35.822772835Z
     timestamp = build.get("timestamp") or "0"
 
-    d = dateutil.parser.parse(timestamp)
-    if as_date:
-        return d
+    return dateutil.parser.parse(timestamp)
 
+
+def get_build_timestamp(build: Dict[str, str]) -> float:
+
+    d = get_build_date(build)
     return d.timestamp()
 
 

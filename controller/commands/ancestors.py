@@ -11,7 +11,7 @@ from controller.utilities import system
 @Application.app.command(help="Find all children of a docker image")
 def ancestors(
     imagetag: str = typer.Argument(..., help="Image tag ID to be inspected"),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     img = system.execute_command("docker", ["images", "--all"]).split("\n")

@@ -44,7 +44,7 @@ def ssl(
         help="Path to existing key file (.pem format)",
         show_default=False,
     ),
-):
+) -> None:
     Application.get_controller().controller_init()
 
     if chain_file is not None or key_file is not None:

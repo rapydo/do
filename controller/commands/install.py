@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -16,7 +16,7 @@ def install(
         help="Disable editable mode",
         show_default=False,
     ),
-):
+) -> Any:
     Application.get_controller().controller_init()
 
     if version == "auto":
