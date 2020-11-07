@@ -105,7 +105,7 @@ class Templating:
         os.rename(filename, backup_filename)
         log.info("A backup of {} is saved as {}", filename, backup_filename)
 
-    def file_changed(self, filename):
+    def file_changed(self, filename: str) -> bool:
 
         template = self.get_template_name(filename)
         return not cmp(
