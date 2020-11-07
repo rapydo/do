@@ -275,21 +275,22 @@ def create_project(
             print(f"\n{template}")
             Application.exit(p)
 
-    for p in project_scaffold.raw_files:
-        # automatic creation
-        if auto:
-            if p.exists() and not force:
+    if not path:
+        for p in project_scaffold.raw_files:
+            # automatic creation
+            if auto:
+                if p.exists() and not force:
+                    log.info("Project file already exists: {}", p)
+                else:
+                    shutil.copyfile(templating.template_dir.joinpath(p.name), p)
+                continue
+
+            # manual creation
+            if p.exists():
                 log.info("Project file already exists: {}", p)
             else:
-                shutil.copyfile(templating.template_dir.joinpath(p.name), p)
-            continue
-
-        # manual creation
-        if p.exists():
-            log.info("Project file already exists: {}", p)
-        else:
-            # print(f"\n{template}")
-            Application.exit(p)
+                # print(f"\n{template}")
+                Application.exit(p)
 
 
 def parse_env_variables(envs):
