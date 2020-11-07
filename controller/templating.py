@@ -2,6 +2,7 @@ import os
 import random
 import string
 import sys
+from filecmp import cmp
 from pathlib import Path
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
@@ -53,12 +54,18 @@ class Templating:
         self.env.filters["password"] = password
         self.env.filters["username"] = username
 
+    def get_template_name(self, filename):
+        # Convert Path to string...
+        filename = str(filename)
+        if filename.startswith("."):
+            filename = filename[1:]
+
+        return f"{filename}.j2"
+
     def get_template(self, filename, data):
         try:
-            if filename.startswith("."):
-                filename = filename[1:]
-
-            template = self.env.get_template(f"{filename}.j2")
+            template_name = self.get_template_name(filename)
+            template = self.env.get_template(template_name)
             content = template.render(**data)
             # from jinja2.meta import find_undeclared_variables
             # ast = self.env.parse(content)
@@ -96,3 +103,10 @@ class Templating:
         backup_filename = f"{filename}.bak"
         os.rename(filename, backup_filename)
         log.info("A backup of {} is saved as {}", filename, backup_filename)
+
+    def file_changed(self, filename):
+
+        template = self.get_template_name(filename)
+        return not cmp(
+            filename, os.path.join(self.template_dir, template), shallow=True
+        )

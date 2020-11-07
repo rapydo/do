@@ -6,9 +6,11 @@ import dateutil.parser
 import typer
 
 from controller import gitter, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
+from controller.project import Project
+from controller.templating import Templating
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -99,6 +101,11 @@ def check(
                     b = build_timestamp.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
                     print_obsolete(image_tag, b, c, build.get("service"), from_img)
+
+    templating = Templating()
+    for f in Application.project_scaffold.fixed_files:
+        if templating.file_changed(f):
+            log.warning("{f} changed, please execute rapydo upgrade --path {f}", f=f)
 
     log.info("Checks completed")
 

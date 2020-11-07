@@ -20,11 +20,11 @@ class Project:
         self.expected_files = []
         # Copied as they are, no templating (used for binary files, like images)
         self.raw_files = []
+        # Intended to be immutable, check will raise warning when differs
+        self.fixed_files = []
         # Not verified, added by create if --add-optionals
         self.optionals_folders = []
         self.optionals_files = []
-        # Now verified by create, added by create if missing
-        self.recommended_files = []
         # Created in data if missing
         self.data_folders = []
         self.data_files = []
@@ -61,6 +61,14 @@ class Project:
         self.expected_files.append(self.p_path("backend", "customization.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
+        self.expected_files.append(Path(".pre-commit-config.yaml"))
+        self.expected_files.append(Path(".isort.cfg"))
+        self.expected_files.append(Path("pyproject.toml"))
+        self.expected_files.append(Path(".flake8"))
+
+        self.fixed_files.append(Path(".gitattributes"))
+        self.fixed_files.append(Path(".pre-commit-config.yaml"))
+        self.fixed_files.append(Path("pyproject.toml"))
 
         if auth or services:
 
@@ -86,10 +94,6 @@ class Project:
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
 
-        self.recommended_files.append(Path(".pre-commit-config.yaml"))
-        self.recommended_files.append(Path(".isort.cfg"))
-        self.recommended_files.append(Path("pyproject.toml"))
-        self.recommended_files.append(Path(".flake8"))
         self.data_folders.extend([DATA.joinpath("logs")])
         self.data_folders.extend([DATA.joinpath("backup")])
 

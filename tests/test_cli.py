@@ -698,6 +698,17 @@ def test_all(capfd):
         "Update it with: rapydo --services backend pull",
     )
 
+    with open(".pre-commit-config.yaml", "a") as a_file:
+        a_file.write("\n")
+        a_file.write("# new line")
+
+    exec_command(
+        capfd,
+        "check -i main",
+        ".pre-commit-config.yaml changed, "
+        "please execute rapydo upgrade --path .pre-commit-config.yaml",
+    )
+
     exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
 
     exec_command(

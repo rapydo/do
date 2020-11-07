@@ -215,7 +215,6 @@ def create_project(
     files = project_scaffold.expected_files
     if add_optionals:
         files += project_scaffold.optionals_files
-    files += project_scaffold.recommended_files
 
     if path:
         if path not in files:
