@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import List
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -14,23 +15,23 @@ SUBMODULES = Path("submodules")
 
 class Project:
     def __init__(self):
-        self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
+        self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
-        self.expected_folders = []
-        self.expected_files = []
+        self.expected_folders: List[Path] = []
+        self.expected_files: List[Path] = []
         # Copied as they are, no templating (used for binary files, like images)
-        self.raw_files = []
+        self.raw_files: List[Path] = []
         # Intended to be immutable, check will raise warning when differs
-        self.fixed_files = []
+        self.fixed_files: List[Path] = []
         # Not verified, added by create if --add-optionals
-        self.optionals_folders = []
-        self.optionals_files = []
+        self.optionals_folders: List[Path] = []
+        self.optionals_files: List[Path] = []
         # Created in data if missing
-        self.data_folders = []
-        self.data_files = []
+        self.data_folders: List[Path] = []
+        self.data_files: List[Path] = []
         # check will raise an error if these files will be found
-        self.obsolete_files = []
-        self.suggested_gitkeep = []
+        self.obsolete_files: List[Path] = []
+        self.suggested_gitkeep: List[Path] = []
 
     def p_path(self, *args):
         return PROJECT_DIR.joinpath(self.project, *args)
