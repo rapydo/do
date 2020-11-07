@@ -54,9 +54,9 @@ class Templating:
         self.env.filters["password"] = password
         self.env.filters["username"] = username
 
-    def get_template_name(self, filename):
-        # Convert Path to string...
-        filename = str(filename)
+    @staticmethod
+    def get_template_name(filename: str) -> str:
+
         if filename.startswith("."):
             filename = filename[1:]
 

@@ -6,10 +6,9 @@ import dateutil.parser
 import typer
 
 from controller import gitter, log
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
-from controller.project import Project
 from controller.templating import Templating
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
