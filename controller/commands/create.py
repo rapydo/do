@@ -222,7 +222,7 @@ def create_project(
         else:
             files = [path]
 
-    # Add the Kitchen Sink!
+    # Add the Kitchen Sink, used for the integration tests with cypress
     if Configuration.testing and frontend == ANGULAR:
         path = project_scaffold.p_path("frontend", "app", "components", "sink")
         path.mkdir(parents=True, exist_ok=True)
@@ -275,7 +275,9 @@ def create_project(
             print(f"\n{template}")
             Application.exit(p)
 
+    log.critical("path = {}", path)
     if not path:
+        log.critical("Copying raw_files")
         for p in project_scaffold.raw_files:
             # automatic creation
             if auto:
@@ -291,6 +293,9 @@ def create_project(
             else:
                 # print(f"\n{template}")
                 Application.exit(p)
+
+    else:
+        log.critical("Skipping raw_files")
 
 
 def parse_env_variables(envs):
