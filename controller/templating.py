@@ -4,6 +4,7 @@ import string
 import sys
 from filecmp import cmp
 from pathlib import Path
+from typing import Any, Dict
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
@@ -62,7 +63,7 @@ class Templating:
 
         return f"{filename}.j2"
 
-    def get_template(self, filename, data):
+    def get_template(self, filename: str, data: Dict[str, Any]) -> str:
         try:
             template_name = self.get_template_name(filename)
             template = self.env.get_template(template_name)
