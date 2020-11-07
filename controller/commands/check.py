@@ -103,7 +103,7 @@ def check(
 
     templating = Templating()
     for f in Application.project_scaffold.fixed_files:
-        if templating.file_changed(f):
+        if templating.file_changed(str(f)):
             log.warning("{f} changed, please execute rapydo upgrade --path {f}", f=f)
 
     log.info("Checks completed")
