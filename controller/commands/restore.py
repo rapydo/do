@@ -70,7 +70,7 @@ def restore(
 
         log.info("Please specify one of the following backup:")
         for f in filtered_files:
-            print(f)
+            print(f"- {f}")
 
         return
 
