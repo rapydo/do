@@ -291,7 +291,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "init",
-        f"Switched branch to origin/{__version__} on http-api",
+        f"Switched http-api branch from 0.7.6 to {__version__}",
         f"build-templates already set on branch {__version__}",
         f"do already set on branch {__version__}",
     )

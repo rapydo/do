@@ -81,11 +81,18 @@ def check(
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
 
-                    Application.exit(
+                    # This is no longer an errore because custom images may be pulled
+                    # from the docker hub. In that case template images are not required
+                    # Application.exit(
+                    #     "Missing template build for {} ({})\n{}",
+                    #     from_build["services"],
+                    #     from_img,
+                    #     "Suggestion: execute the pull command",
+                    # )
+                    log.warning(
                         "Missing template build for {} ({})\n{}",
                         from_build["services"],
                         from_img,
-                        "Suggestion: execute the pull command",
                     )
 
                 # Verify if template build is obsolete or not

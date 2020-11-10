@@ -56,7 +56,8 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         log.error("Unable to switch to a none branch")
         return False
 
-    if gitobj.active_branch.name == branch_name:
+    current_branch = gitobj.active_branch.name
+    if current_branch == branch_name:
         path = Path(gitobj.working_dir).name
         log.info("{} already set on branch {}", path, branch_name)
         return True
@@ -88,7 +89,7 @@ def switch_branch(gitobj, branch_name="master", remote=True):
         return False
 
     path = Path(gitobj.working_dir).name
-    log.info("Switched branch to {} on {}", branch, path)
+    log.info("Switched {} branch from {} to {}", path, current_branch, branch_name)
     return True
 
 
