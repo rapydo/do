@@ -858,6 +858,15 @@ def test_all(capfd):
     )
 
     # Backend logs are never timestamped
+
+    exec_command(
+        capfd,
+        "logs -s backend --tail 10 --no-color",
+        "docker-compose command: 'logs'",
+        "backend_1       | Development mode",
+        "Found no cronjob to be enabled, skipping crontab setup",
+    )
+
     exec_command(
         capfd,
         "logs -s backend --tail 10 --no-color",
