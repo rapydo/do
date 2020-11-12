@@ -730,14 +730,14 @@ def test_all(capfd):
     # Let's start with the stack
     exec_command(
         capfd,
-        "start",
+        "-e CRONTAB_ENABLE=1 start",
         "docker-compose command: 'up'",
         "Stack started",
     )
 
     exec_command(
         capfd,
-        "-s backend start --force",
+        "-s backend -e CRONTAB_ENABLE=1 start --force",
         "docker-compose command: 'up'",
         "Stack started",
     )
