@@ -49,6 +49,7 @@ class Project:
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath("cron", "backend", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
@@ -95,8 +96,14 @@ class Project:
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
 
-        self.data_folders.extend([DATA.joinpath("logs")])
-        self.data_folders.extend([DATA.joinpath("backup")])
+        self.data_folders.extend(
+            [
+                DATA.joinpath("logs"),
+                DATA.joinpath("backup"),
+                DATA.joinpath("cron"),
+                DATA.joinpath("cron", "backend"),
+            ]
+        )
 
         # Removed since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))

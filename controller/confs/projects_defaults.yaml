@@ -91,8 +91,6 @@ variables:
     ACTIVATE_SQLALCHEMYUI: 0
     ACTIVATE_MONGOUI: 0
 
-    ACTIVATE_RESTCLIENT: 0
-
     RUN_SCHEMATHESIS: 1
     MAX_LOGS_LENGTH: 200
 
@@ -114,6 +112,7 @@ variables:
     GUNICORN_WORKERS: 1 # total number of workers. if empty this parameter will not be used
     GUNICORN_WORKERS_PER_CORE: 2 # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
     GUNICORN_MAX_NUM_WORKERS: 24
+    CRONTAB_ENABLE: 0
 
     FRONTEND_BUILD_MODE: angular # or angular-test
     BACKEND_BUILD_MODE: backend

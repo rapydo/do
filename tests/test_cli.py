@@ -863,6 +863,8 @@ def test_all(capfd):
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
         "backend_1       | Development mode",
+        "backend_1       | Enabling cron...",
+        "backend_1       | Cron enabled",
     )
 
     now = datetime.now()

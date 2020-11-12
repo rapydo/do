@@ -1,8 +1,9 @@
 from restapi import decorators
+from restapi.connectors import {{auth}}
 from restapi.models import Schema, fields  # ,  validate
 from restapi.rest.definition import EndpointResource
 from restapi.utilities.logs import log
-from restapi.connectors import {{auth}}
+# from restapi.services.authentication import Role
 
 class MyInputSchema(Schema):
     myfield1 = fields.Str()
@@ -44,7 +45,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def post(self, **kwargs):
-        """ Update password for current user """
 
         db = {{auth}}.get_instance()
         # user = self.get_user()
@@ -65,7 +65,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def put(self, uuid, **kwargs):
-        """ Update password for current user """
 
         db = {{auth}}.get_instance()
         # user = self.get_user()
@@ -104,7 +103,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def delete(self, uuid, **kwargs):
-        """ Update password for current user """
 
         db = {{auth}}.get_instance()
         log.info("Deleted")

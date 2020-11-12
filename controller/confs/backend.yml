@@ -98,6 +98,7 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
+      CRONTAB_ENABLE: ${CRONTAB_ENABLE}
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
       FLASK_ENV: ${FLASK_ENV}
       # used by gunicorn
@@ -240,6 +241,8 @@ services:
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
       # Logs
       - ${VANILLA_DIR}/data/logs:/logs
+      # Crontabs (only used if enabled)
+      - ${VANILLA_DIR}/data/cron/backend:/etc/cron.rapydo
     networks:
       app_net:
         aliases:
