@@ -242,7 +242,7 @@ services:
       # Logs
       - ${VANILLA_DIR}/data/logs:/logs
       # Crontabs (only used if enabled)
-      - ${VANILLA_DIR}/data/cron/backend:/etc/cron.rapydo
+      - ${PROJECT_DIR}/cron:/etc/cron.rapydo
     networks:
       app_net:
         aliases:

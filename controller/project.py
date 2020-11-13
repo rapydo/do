@@ -46,10 +46,11 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "models"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
+        self.expected_folders.append(self.p_path("backend", "cron"))
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
-        self.suggested_gitkeep.append(DATA.joinpath("cron", "backend", GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "cron", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
@@ -100,8 +101,6 @@ class Project:
             [
                 DATA.joinpath("logs"),
                 DATA.joinpath("backup"),
-                DATA.joinpath("cron"),
-                DATA.joinpath("cron", "backend"),
             ]
         )
 
