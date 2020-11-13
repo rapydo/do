@@ -867,13 +867,17 @@ def test_all(capfd):
         "Found no cronjob to be enabled, skipping crontab setup",
     )
 
+    # 1 create a cron script
+    with open("data/cron/backend/hello-world", "w+") as f:
+        f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1")
+        f.write("")
+
+    # After the restart the cron enabled will be tested again
+    # Test is below to wait the container restart
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --no-color",
-        "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
-        "backend_1       | Enabling cron...",
-        "backend_1       | Cron enabled",
+        "-s backend restart",
+        "Stack restarted",
     )
 
     now = datetime.now()
@@ -904,6 +908,18 @@ def test_all(capfd):
         "-s backend logs --tail 10 --follow",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
+    )
+
+    # Test again the cron enabling
+    exec_command(
+        capfd,
+        "logs -s backend --tail 10 --no-color",
+        "docker-compose command: 'logs'",
+        "backend_1       | Development mode",
+        "backend_1       | Enabling cron...",
+        "backend_1       | Cron enabled",
+        # this is the output of crontab -l that verifies the cronjob installation
+        "* * * * * echo 'Hello world'",
     )
 
     # We modified projectrc to contain: DEFAULT_SCALE_RABBIT: 3
