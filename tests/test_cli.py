@@ -867,8 +867,7 @@ def test_all(capfd):
         "Found no cronjob to be enabled, skipping crontab setup",
     )
 
-    # 1 create a cron script
-    with open("data/cron/backend/hello-world", "w+") as f:
+    with open("data/cron/backend/hello-world.cron", "w+") as f:
         f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1")
         f.write("")
 
