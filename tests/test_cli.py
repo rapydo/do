@@ -868,8 +868,8 @@ def test_all(capfd):
     )
 
     with open("data/cron/backend/hello-world.cron", "w+") as f:
-        f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1")
-        f.write("")
+        f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1\n")
+        f.write("\n")
 
     # After the restart the cron enabled will be tested again
     # Test is below to wait the container restart
