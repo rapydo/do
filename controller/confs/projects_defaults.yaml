@@ -96,7 +96,6 @@ variables:
 
     APP_MODE: development
     FLASK_HOST: apiserver.dockerized.io
-    API_MAIN_ENDPOINT: status
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
     PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
@@ -113,6 +112,11 @@ variables:
     GUNICORN_WORKERS_PER_CORE: 2 # GUNICORN_WORKERS will be calculated as numcore * GUNICORN_WORKERS_PER_CORE
     GUNICORN_MAX_NUM_WORKERS: 24
     CRONTAB_ENABLE: 0
+    GZIP_COMPRESSION_ENABLE: 1
+    # Enabled gzip compresion for responses with size in bytes >= this threshold
+    GZIP_COMPRESSION_THRESHOLD: 1500
+    # From 1 to 9, best tradeoffs seem to be 3 (faster) and 7 (better compression)
+    GZIP_COMPRESSION_LEVEL: 3
 
     FRONTEND_BUILD_MODE: angular # or angular-test
     BACKEND_BUILD_MODE: backend
