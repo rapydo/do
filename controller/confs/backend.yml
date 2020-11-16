@@ -283,6 +283,7 @@ services:
     environment:
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
+      DOMAIN_ALIASES: ${DOMAIN_ALIASES}
       MODE: ${LETSENCRYPT_MODE}
       ACTIVATE: ${ACTIVATE_PROXY}
       CURRENT_UID: ${CURRENT_UID}
@@ -841,8 +842,15 @@ services:
       - 7777:8080
 
   sqlalchemyui:
-    # restart: no
     image: adminer:4.7.7-standalone
+    # restart: no
+    # build:
+    #   context: ${SUBMODULE_DIR}/build-templates/adminer
+    #   args:
+    #     RAPYDO_VERSION: ${RAPYDO_VERSION}
+    #     CURRENT_UID: ${CURRENT_UID}
+    #     CURRENT_GID: ${CURRENT_GID}
+    # image: rapydo/adminer:${RAPYDO_VERSION}
     networks:
       db_net:
     environment:
@@ -850,6 +858,7 @@ services:
       # https://github.com/vrana/adminer/tree/master/designs
       # ADMINER_DESIGN: brade
     ports:
+      # - 7777:80
       - 7777:8080
 
   mongoui:

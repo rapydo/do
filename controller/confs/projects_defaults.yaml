@@ -132,6 +132,27 @@ variables:
     JWT_APP_SECRETS: /jwt_tokens
     UPLOAD_PATH: /uploads
 
+    PROXY_HOST: myproxy.dockerized.io
+    # in production mode this will be mapped on port 80
+    PROXY_DEV_PORT: 81
+    PROXY_PROD_PORT: 443
+    # LETSENCRYPT_MODE: --staging
+    LETSENCRYPT_MODE:
+    DOMAIN_ALIASES:
+    SET_UNSAFE_EVAL:
+    # SET_UNSAFE_EVAL: "unsafe-eval"
+    # Still required by:
+    #  - ngx-formly/bootstrap addonLeft/addonRight (https://github.com/ngx-formly/ngx-formly/issues/2496)
+    #  - cookie-law
+    #  - ngx-datatable (for sure in headers)
+    # SET_STYLE_UNSAFE_INLINE:
+    SET_STYLE_UNSAFE_INLINE: "unsafe-inline"
+    SET_CSP_SCRIPT_SRC:
+    # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
+    SET_CSP_IMG_SRC:
+    SET_CSP_FONT_SRC:
+    CORS_ALLOW_ALL_ORIGINS: 1
+
     ALCHEMY_ENABLE_CONNECTOR: True
     ALCHEMY_EXPIRATION_TIME: 7200
     ALCHEMY_VERIFICATION_TIME: 900
@@ -236,26 +257,6 @@ variables:
     PUSHPIN_HOST: pushpin.dockerized.io
     PUSHPIN_PORT: 7999
     PUSHPIN_CONTROL_PORT: 5561
-
-    PROXY_HOST: myproxy.dockerized.io
-    # in production mode this will be mapped on port 80
-    PROXY_DEV_PORT: 81
-    PROXY_PROD_PORT: 443
-    # LETSENCRYPT_MODE: --staging
-    LETSENCRYPT_MODE:
-    SET_UNSAFE_EVAL:
-    # SET_UNSAFE_EVAL: "unsafe-eval"
-    # Still required by:
-    #  - ngx-formly/bootstrap addonLeft/addonRight (https://github.com/ngx-formly/ngx-formly/issues/2496)
-    #  - cookie-law
-    #  - ngx-datatable (for sure in headers)
-    # SET_STYLE_UNSAFE_INLINE:
-    SET_STYLE_UNSAFE_INLINE: "unsafe-inline"
-    SET_CSP_SCRIPT_SRC:
-    # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
-    SET_CSP_IMG_SRC:
-    SET_CSP_FONT_SRC:
-    CORS_ALLOW_ALL_ORIGINS: 1
 
     SMTP_ENABLE_CONNECTOR: True
     SMTP_EXPIRATION_TIME: 7200
