@@ -46,10 +46,6 @@ jobs:
       dist: xenial
       env:
         - STAGE=UBUNTU_16.04 # only used as information on the web interface
-    - python: 3.6
-      dist: trusty
-      env:
-        - STAGE=UBUNTU_14.04 # only used as information on the web interface
   #   os: osx
   #     services:
   #       - docker
