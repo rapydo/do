@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import yaml
 
@@ -15,10 +16,10 @@ def dump():
     # 1. base dump
     # NOTE: can't figure it out why, but 'dc' on config can't use files
     # so I've used plumbum
-    params = []
+    params: List[str] = []
     for file in Application.data.files:
         params.append("-f")
-        params.append(file)
+        params.append(str(file))
     params.append("config")
     yaml_string = system.execute_command("docker-compose", parameters=params)
 

@@ -1,5 +1,6 @@
 import os
 import pwd
+from typing import List
 
 from plumbum import local
 from plumbum.commands.processes import CommandNotFound, ProcessExecutionError
@@ -15,13 +16,13 @@ class ExecutionException(BaseException):
     pass
 
 
-def execute_command(command, parameters):
+def execute_command(command: str, parameters: List[str]) -> str:
     try:
 
         # Pattern in plumbum library for executing a shell command
-        command = local[command]
+        local_command = local[command]
         log.debug("Executing command {} {}", command, parameters)
-        return command(parameters)
+        return str(local_command(parameters))
     except CommandNotFound:
         raise ExecutionException(f"Command not found: {command}")
 
@@ -31,7 +32,7 @@ def execute_command(command, parameters):
         )
 
 
-def get_username(uid):
+def get_username(uid: int) -> str:
     try:
         return pwd.getpwuid(uid).pw_name
     # Can fail on Windows
@@ -40,7 +41,7 @@ def get_username(uid):
         return str(uid)
 
 
-def get_current_uid():
+def get_current_uid() -> int:
     try:
         return os.getuid()
     # Can fail on Windows
@@ -49,7 +50,7 @@ def get_current_uid():
         return 0
 
 
-def get_current_gid():
+def get_current_gid() -> int:
     try:
         return os.getgid()
     # Can fail on Windows
@@ -58,7 +59,7 @@ def get_current_gid():
         return 0
 
 
-def bytes_to_str(value):
+def bytes_to_str(value: float) -> str:
 
     if value >= GB:
         value /= GB

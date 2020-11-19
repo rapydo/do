@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 import typer
 
@@ -16,7 +16,7 @@ def shell(
     command: str = typer.Argument(
         "bash", help="UNIX command to be executed on selected running service"
     ),
-    user: str = typer.Option(
+    user: Optional[str] = typer.Option(
         None,
         "--user",
         "-u",

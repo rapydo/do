@@ -1,5 +1,6 @@
 import sys
-from typing import List, Optional
+from collections import OrderedDict
+from typing import Any, Dict, List, Optional, Tuple
 
 from glom import glom
 
@@ -14,7 +15,9 @@ def get_services(services: Optional[str], default: List[str]) -> List[str]:
     return default
 
 
-def walk_services(actives, dependecies, index=0):
+def walk_services(
+    actives: List[str], dependecies: Dict[str, List[str]], index: int = 0
+) -> List[str]:
 
     if index >= len(actives):
         return actives
@@ -31,15 +34,15 @@ def walk_services(actives, dependecies, index=0):
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services):
+def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
     """
 
-    dependencies = {}
-    all_services = {}
-    base_actives = []
+    dependencies: Dict[str, List[str]] = {}
+    all_services: Dict[str, List[Any]] = {}
+    base_actives: List[str] = []
 
     for service in services:
 
@@ -58,9 +61,11 @@ def find_active(services):
     return all_services, active_services
 
 
-def apply_variables(dictionary, variables):
+def apply_variables(
+    dictionary: "OrderedDict[str, Any]", variables: Dict[str, Any]
+) -> Dict[str, Any]:
 
-    new_dict = {}
+    new_dict: Dict[str, Any] = {}
     for key, value in dictionary.items():
         if isinstance(value, str) and value.startswith("$$"):
             value = variables.get(value.lstrip("$"), None)
@@ -71,7 +76,7 @@ def apply_variables(dictionary, variables):
     return new_dict
 
 
-vars_to_services_mapping = {
+vars_to_services_mapping: Dict[str, List[str]] = {
     "CELERYUI_USER": ["celeryui"],
     "CELERYUI_PASSWORD": ["celeryui"],
     "RABBITMQ_USER": ["rabbit"],
@@ -94,7 +99,7 @@ vars_to_services_mapping = {
 }
 
 
-def normalize_placeholder_variable(key):
+def normalize_placeholder_variable(key: str) -> str:
     if key == "NEO4J_AUTH":
         return "NEO4J_PASSWORD"
 
@@ -129,7 +134,7 @@ def normalize_placeholder_variable(key):
     return key
 
 
-def get_celerybeat_scheduler(env):
+def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
 
     if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
         return "Unknown"
@@ -148,7 +153,7 @@ def get_celerybeat_scheduler(env):
     return "Unknown"
 
 
-def check_rabbit_password(pwd):
+def check_rabbit_password(pwd: str) -> None:
     invalid_rabbit_characters = ["£", "§", "”", "’"]
     if any([c in pwd for c in invalid_rabbit_characters]):
         log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
@@ -160,7 +165,7 @@ def check_rabbit_password(pwd):
         sys.exit(1)
 
 
-def get_default_user(service, frontend):
+def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
 
     if service in ["backend", "celery", "celeryui", "celery-beat"]:
         return "developer"
@@ -178,7 +183,7 @@ def get_default_user(service, frontend):
     return None
 
 
-def get_default_command(service):
+def get_default_command(service: str) -> str:
 
     if service == "backend":
         return "restapi launch"

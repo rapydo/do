@@ -1,24 +1,27 @@
 import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
 from controller import log
 
-PROJECTS_DEFAULTS_FILE = "projects_defaults.yaml"
-PROJECTS_PROD_DEFAULTS_FILE = "projects_prod_defaults.yaml"
-PROJECT_CONF_FILENAME = "project_configuration.yaml"
+PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
+PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
+PROJECT_CONF_FILENAME = Path("project_configuration.yaml")
+
+Configuration = Dict[str, Any]
 
 
 def read_configuration(
-    default_file_path,
-    base_project_path,
-    projects_path,
-    submodules_path,
-    read_extended=True,
-    production=False,
-):
+    default_file_path: Path,
+    base_project_path: Path,
+    projects_path: Path,
+    submodules_path: Path,
+    read_extended: bool = True,
+    production: bool = False,
+) -> Tuple[Configuration, Optional[Path], Optional[Path]]:
     """
     Read default configuration
     """
@@ -101,7 +104,9 @@ def read_configuration(
     )
 
 
-def mix_configuration(base, custom):
+def mix_configuration(
+    base: Optional[Configuration], custom: Optional[Configuration]
+) -> Configuration:
     if base is None:
         base = {}
 
@@ -150,7 +155,7 @@ def construct_mapping(loader, node):
     return OrderedDict(loader.construct_pairs(node))
 
 
-def get_yaml_path(file, path):
+def get_yaml_path(file: Path, path: Path) -> Optional[Path]:
 
     filepath = path.joinpath(file)
 
@@ -159,7 +164,9 @@ def get_yaml_path(file, path):
     return filepath
 
 
-def load_yaml_file(file, path, keep_order=False, is_optional=False):
+def load_yaml_file(
+    file: Path, path: Path, keep_order: bool = False, is_optional: bool = False
+) -> Configuration:
     """
     Import any data from a YAML file.
     """
@@ -189,7 +196,9 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
                 log.critical("YAML file is empty: {}", filepath)
                 sys.exit(1)
 
-            return docs[0]
+            # Return value of yaml.load_all is un-annotated and considered as Any
+            # But we known that it is a Dict Configuration-compliant
+            return docs[0]  # type: ignore
 
         except Exception as e:
             # # IF dealing with a strange exception string (escaped)
@@ -200,10 +209,12 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
             sys.exit(1)
 
 
-def read_composer_yamls(composers):
+def read_composer_yamls(
+    composers: "OrderedDict[str, Dict[str, Any]]",
+) -> Tuple[List[Path], List[Path]]:
 
-    base_files = []
-    all_files = []
+    base_files: List[Path] = []
+    all_files: List[Path] = []
 
     # YAML CHECK UP
     for name, composer in composers.items():
@@ -215,18 +226,20 @@ def read_composer_yamls(composers):
         base = composer.pop("base", False)
 
         try:
-            f = composer.get("file")
-            p = composer.get("path")
+            f = Path(str(composer.get("file")))
+            p = Path(str(composer.get("path")))
             compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
 
             if compose.get("services") is None or len(compose.get("services", {})) < 1:
                 continue
 
             filepath = get_yaml_path(file=f, path=p)
-            all_files.append(filepath)
 
-            if base:
-                base_files.append(filepath)
+            if filepath:
+                all_files.append(filepath)
+
+                if base:
+                    base_files.append(filepath)
 
         except KeyError as e:  # pragma: no cover
 

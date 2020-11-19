@@ -121,11 +121,11 @@ def test_all(capfd):
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
-    out = system.execute_command("echo", "Hello World")
+    out = system.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
     try:
-        assert system.execute_command("ls", "doesnotexistforsure")
+        assert system.execute_command("ls", ["doesnotexistforsure"])
         pytest.fail("ExecutionException not raised!")
     except system.ExecutionException:
         pass
@@ -150,18 +150,6 @@ def test_all(capfd):
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
 
     # Invalid file / path
-    try:
-        load_yaml_file("invalid", "path")
-        pytest.fail("No exception raised")
-    except AttributeError:
-        pass
-
-    try:
-        load_yaml_file(Path("invalid"), "path")
-        pytest.fail("No exception raised")
-    except AttributeError:
-        pass
-
     try:
         load_yaml_file(Path("invalid"), Path("path"))
         pytest.fail("No exception raised")
@@ -200,40 +188,40 @@ def test_all(capfd):
     assert isinstance(y, dict)
     assert len(y) == 0
 
-    shorten = services.normalize_placeholder_variable
-    assert shorten("NEO4J_AUTH") == "NEO4J_PASSWORD"
-    assert shorten("POSTGRES_USER") == "ALCHEMY_USER"
-    assert shorten("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
-    assert shorten("MYSQL_USER") == "ALCHEMY_USER"
-    assert shorten("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
-    assert shorten("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
-    assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
-    assert shorten("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
-    assert shorten("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
+    short1 = services.normalize_placeholder_variable
+    assert short1("NEO4J_AUTH") == "NEO4J_PASSWORD"
+    assert short1("POSTGRES_USER") == "ALCHEMY_USER"
+    assert short1("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert short1("MYSQL_USER") == "ALCHEMY_USER"
+    assert short1("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert short1("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
+    assert short1("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
+    assert short1("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
+    assert short1("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
     key = "anyother"
-    assert shorten(key) == key
+    assert short1(key) == key
 
-    shorten = services.get_celerybeat_scheduler
+    short2 = services.get_celerybeat_scheduler
     env: Dict[str, str] = {}
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required
     env["ACTIVATE_CELERYBEAT"] = "0"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["CELERY_BACKEND"] = "??"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     # This is valid, but ACTIVATE_CELERYBEAT is still missing
     env["CELERY_BACKEND"] = "MONGODB"
     env["ACTIVATE_CELERYBEAT"] = "0"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert shorten(env) == "celerybeatmongo.schedulers.MongoScheduler"
+    assert short2(env) == "celerybeatmongo.schedulers.MongoScheduler"
     env["CELERY_BACKEND"] = "REDIS"
-    assert shorten(env) == "redbeat.RedBeatScheduler"
+    assert short2(env) == "redbeat.RedBeatScheduler"
     env["CELERY_BACKEND"] = "INVALID"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
 
     assert services.get_default_user("invalid", "angular") is None
     assert services.get_default_user("backend", "") == "developer"

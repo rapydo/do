@@ -228,8 +228,8 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files: List[str] = [],
-        base_files: List[str] = [],
+        files: List[Path] = [],
+        base_files: List[Path] = [],
         services: List[str] = [],
         services_list: Any = None,
         active_services: List[str] = [],
@@ -267,8 +267,8 @@ class Application:
         Application.controller = self
 
         self.active_services: List[str] = []
-        self.files: List[str] = []
-        self.base_files: List[str] = []
+        self.files: List[Path] = []
+        self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
         self.base_services: List[Any] = []

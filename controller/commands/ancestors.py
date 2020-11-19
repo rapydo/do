@@ -14,8 +14,8 @@ def ancestors(
 ) -> None:
     Application.get_controller().controller_init()
 
-    img = system.execute_command("docker", ["images", "--all"]).split("\n")
-    img = [re.split(r"\s+", i) for i in img[1:]]
+    all_images = system.execute_command("docker", ["images", "--all"]).split("\n")
+    img = [re.split(r"\s+", i) for i in all_images[1:]]
     images = {}
     for i in img:
         if len(i) != 7:
