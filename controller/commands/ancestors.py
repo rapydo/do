@@ -1,4 +1,5 @@
 import re
+from typing import Dict, List
 
 import typer
 
@@ -37,7 +38,7 @@ def ancestors(
         print(f"No child found for {child}")
 
 
-def get_children(IMAGE, images):
+def get_children(IMAGE: str, images: Dict[str, List[str]]) -> List[str]:
 
     parameters = [
         "inspect",
