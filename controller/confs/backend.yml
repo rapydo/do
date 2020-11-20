@@ -842,24 +842,29 @@ services:
       - 7777:8080
 
   sqlalchemyui:
-    image: adminer:4.7.7-standalone
+    # image: adminer:4.7.7-standalone
     # restart: no
-    # build:
-    #   context: ${SUBMODULE_DIR}/build-templates/adminer
-    #   args:
-    #     RAPYDO_VERSION: ${RAPYDO_VERSION}
-    #     CURRENT_UID: ${CURRENT_UID}
-    #     CURRENT_GID: ${CURRENT_GID}
-    # image: rapydo/adminer:${RAPYDO_VERSION}
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/adminer
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/adminer:${RAPYDO_VERSION}
+    # user: adminer
     networks:
       db_net:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
+      APP_MODE: ${APP_MODE}
       # https://github.com/vrana/adminer/tree/master/designs
       # ADMINER_DESIGN: brade
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      # - 7777:80
-      - 7777:8080
+      # - 7777:8080
+      - 7777:80
 
   mongoui:
     # restart: no
