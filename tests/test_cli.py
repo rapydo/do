@@ -1360,7 +1360,7 @@ def test_all(capfd):
         capfd,
         "--prod interfaces swagger --port 124 --detach",
         "You can access swaggerui web page here:",
-        "http://localhost:124?docExpansion=list&",
+        "https://localhost:124?docExpansion=list&",
         "url=https://localhost/api/specs",
     )
 

@@ -868,11 +868,13 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
       APP_MODE: ${APP_MODE}
+      # https://github.com/vrana/adminer/tree/master/designs
+      # some choices: brade, ng9, pepa-linha
+      ADMINER_DESIGN: pepa-linha
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      # - 7777:8080
       - 7777:80
 
   mongoui:
