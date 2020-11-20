@@ -75,7 +75,7 @@ class Compose:
             log.critical("Failed docker container:\n{}", e)
             sys.exit(1)
         except ShutdownException as e:  # pragma: no cover
-            log.info(e)
+            log.info("ShutdownException {}", e)
             sys.exit(1)
         except (ProjectError, NoSuchService) as e:
             log.critical(e)

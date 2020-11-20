@@ -61,11 +61,13 @@ def interfaces(
     url = None
     if service == "swaggerui":
         BACKEND_PORT = glom(Configuration.specs, "variables.env.BACKEND_PORT")
+        swagger_host = f"{Configuration.hostname}:{port}"
         if Configuration.production:
             spec = f"https://{Configuration.hostname}/api/specs"
+            url = f"https://{swagger_host}?docExpansion=list&url={spec}"
         else:
             spec = f"http://{Configuration.hostname}:{BACKEND_PORT}/api/specs"
-        url = f"http://{Configuration.hostname}:{port}?docExpansion=list&url={spec}"
+            url = f"http://{swagger_host}?docExpansion=list&url={spec}"
 
     if url is not None:
         log.info("You can access {} web page here:\n\n{}\n", service, url)

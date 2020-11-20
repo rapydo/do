@@ -835,11 +835,22 @@ services:
 
   swaggerui:
     # restart: no
-    image: swaggerapi/swagger-ui:v3.36.0
+    # image: swaggerapi/swagger-ui:v3.36.0
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/swaggerui
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/swaggerui:${RAPYDO_VERSION}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
+      APP_MODE: ${APP_MODE}
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      - 7777:8080
+      - 7777:80
 
   sqlalchemyui:
     # image: adminer:4.7.7-standalone
@@ -857,8 +868,6 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
       APP_MODE: ${APP_MODE}
-      # https://github.com/vrana/adminer/tree/master/designs
-      # ADMINER_DESIGN: brade
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
