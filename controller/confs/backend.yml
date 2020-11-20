@@ -846,6 +846,7 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
+      DOMAIN: ${PROJECT_DOMAIN}
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
