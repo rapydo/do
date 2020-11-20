@@ -72,27 +72,29 @@ def interfaces(
     else:
         log.info("Launching interface: {}", service)
 
-    from contextlib import contextmanager
+    # from contextlib import contextmanager
 
-    @contextmanager
-    def suppress_stdout():
-        """
-        http://thesmithfam.org/blog/2012/10/25/
-        temporarily-suppress-console-output-in-python/
-        """
-        with open(os.devnull, "w") as devnull:
-            old_stdout = sys.stdout
-            sys.stdout = devnull
-            try:
-                yield
-            finally:
-                sys.stdout = old_stdout
+    # @contextmanager
+    # def suppress_stdout():
+    #     """
+    #     http://thesmithfam.org/blog/2012/10/25/
+    #     temporarily-suppress-console-output-in-python/
+    #     """
+    #     with open(os.devnull, "w") as devnull:
+    #         old_stdout = sys.stdout
+    #         sys.stdout = devnull
+    #         try:
+    #             yield
+    #         finally:
+    #             sys.stdout = old_stdout
 
     dc = Compose(files=Application.data.files)
 
-    with suppress_stdout():
-        # NOTE: this is suppressing also image build...
-        dc.create_volatile_container(service, publish=publish, detach=detach)
+    # with suppress_stdout():
+    #     # NOTE: this is suppressing also image build...
+    dc.command("pull", {"SERVICE": [service]})
+
+    dc.create_volatile_container(service, publish=publish, detach=detach)
 
     return True
 
