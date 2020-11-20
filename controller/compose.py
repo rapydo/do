@@ -19,6 +19,7 @@ from compose.cli.command import (
     project_from_options,
 )
 from compose.cli.main import TopLevelCommand
+from compose.cli.signals import ShutdownException
 from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
@@ -72,6 +73,9 @@ class Compose:
             sys.exit(1)
         except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
             log.critical("Failed docker container:\n{}", e)
+            sys.exit(1)
+        except ShutdownException as e:  # pragma: no cover
+            log.info(e)
             sys.exit(1)
         except (ProjectError, NoSuchService) as e:
             log.critical(e)
