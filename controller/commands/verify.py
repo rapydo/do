@@ -10,7 +10,13 @@ from controller.compose import Compose
 def verify(
     service: str = typer.Argument(
         ..., help="Service name", autocompletion=Application.autocomplete_service
-    )
+    ),
+    no_tty: bool = typer.Option(
+        False,
+        "--no-tty",
+        help="Disable pseudo-tty allocation (useful for non-interactive script)",
+        show_default=False,
+    ),
 ) -> Any:
     Application.get_controller().controller_init()
 
@@ -19,6 +25,6 @@ def verify(
     command = f"restapi verify --services {service}"
 
     try:
-        return dc.exec_command("backend", command=command)
+        return dc.exec_command("backend", command=command, disable_tty=no_tty)
     except SystemExit:
         pass

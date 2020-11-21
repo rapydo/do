@@ -709,7 +709,9 @@ def test_all(capfd):
         "please execute rapydo upgrade --path .pre-commit-config.yaml",
     )
 
-    exec_command(capfd, "verify sqlalchemy", "No container found for backend_1")
+    exec_command(
+        capfd, "verify --no-tty sqlalchemy", "No container found for backend_1"
+    )
 
     exec_command(
         capfd,
@@ -943,9 +945,9 @@ def test_all(capfd):
     assert "DEFAULT_SCALE_RABBIT=3" not in content
     assert "DEFAULT_SCALE_RABBIT=2" in content
 
-    exec_command(capfd, "verify invalid", "Service invalid not detected")
-    exec_command(capfd, "verify redis", "Service redis not detected")
-    exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
+    exec_command(capfd, "verify --no-tty invalid", "Service invalid not detected")
+    exec_command(capfd, "verify --no-tty redis", "Service redis not detected")
+    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
 
     # This will initialize postgres
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
