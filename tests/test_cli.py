@@ -749,20 +749,28 @@ def test_all(capfd):
         # "first_backend_1",
     )
 
+    # Added for GitHub Actions
     exec_command(
         capfd,
-        "shell backend --command hostname",
+        "shell backend hostname",
+        "the input device is not a TTY",
+    )
+
+    # --no-tty is needed on GitHub Actions
+    exec_command(
+        capfd,
+        "shell --no-tty backend --command hostname",
         "Deprecated use of --command",
     )
     exec_command(
         capfd,
-        "shell backend --command 'hostname --short'",
+        "shell --no-tty backend --command 'hostname --short'",
         "Deprecated use of --command",
     )
 
     exec_command(
         capfd,
-        "shell backend hostname",
+        "shell --no-tty backend hostname",
         "backend-server",
     )
 
@@ -770,7 +778,7 @@ def test_all(capfd):
     signal.alarm(2)
     exec_command(
         capfd,
-        "shell backend --default-command",
+        "shell --no-tty backend --default-command",
         # "*** RESTful HTTP API ***",
         # "Serving Flask app",
         "Time is up",
@@ -780,7 +788,7 @@ def test_all(capfd):
     signal.alarm(2)
     exec_command(
         capfd,
-        "shell backend",
+        "shell --no-tty backend",
         # "developer@backend-server:[/code]",
         "Time is up",
     )
@@ -788,28 +796,28 @@ def test_all(capfd):
     # Testing default users
     exec_command(
         capfd,
-        "shell backend whoami",
+        "shell --no-tty backend whoami",
         "developer",
     )
     exec_command(
         capfd,
-        "shell frontend whoami",
+        "shell --no-tty frontend whoami",
         "node",
     )
     # No default user for rabbit container
     exec_command(
         capfd,
-        "shell rabbit whoami",
+        "shell --no-tty rabbit whoami",
         "root",
     )
     exec_command(
         capfd,
-        "shell postgres whoami",
+        "shell --no-tty postgres whoami",
         "postgres",
     )
     exec_command(
         capfd,
-        "shell neo4j whoami",
+        "shell --no-tty neo4j whoami",
         "neo4j",
     )
 
@@ -939,11 +947,11 @@ def test_all(capfd):
     exec_command(capfd, "verify sqlalchemy", "Service sqlalchemy is reachable")
 
     # This will initialize postgres
-    exec_command(capfd, "shell backend 'restapi init'")
+    exec_command(capfd, "shell --no-tty backend 'restapi init'")
     # And this will also initialize neo4j (what a trick!)
     # Temporary change AUTH_SERVICE from postgres to neo4j
     exec_command(capfd, "-e AUTH_SERVICE=neo4j -s backend start")
-    exec_command(capfd, "shell backend 'restapi init'")
+    exec_command(capfd, "shell --no-tty backend 'restapi init'")
     # Restore correct AUTH_SERVICE
     exec_command(capfd, "-s backend start")
 
@@ -1090,7 +1098,7 @@ def test_all(capfd):
     # You should somehow verify output from (or similar):
     # command = "bin/cypher-shell \"match (u: User) return u.email\""
 
-    cypher = "shell neo4j 'bin/cypher-shell"
+    cypher = "shell --no-tty neo4j 'bin/cypher-shell"
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
@@ -1183,7 +1191,7 @@ def test_all(capfd):
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
-    psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
+    psql = "shell --no-tty postgres 'psql -U sqluser -d SQL_API -c"
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
@@ -1270,7 +1278,7 @@ def test_all(capfd):
 
     exec_command(
         capfd,
-        "shell backend hostname",
+        "shell --no-tty backend hostname",
         "No container found for backend_1",
     )
 
