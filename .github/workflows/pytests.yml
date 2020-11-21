@@ -37,10 +37,6 @@ jobs:
           cd rapydo_tests
           mkdir -p data/logs
           py.test --timeout=300 -s -x --cov-report=xml --cov=controller ../tests
-      - name: Send Coverage
-        run: |
-          ls
-          echo "...................."
-          ls ..
-          cp ../codecov.yml .
-          echo "bash <(curl -s https://codecov.io/bash) -R ../"
+      - uses: codecov/codecov-action@v1
+        with:
+          file: ./codecov.yml
