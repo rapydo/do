@@ -38,5 +38,7 @@ jobs:
           mkdir -p data/logs
           py.test --timeout=300 -s -x --cov-report=xml --cov=controller ../tests
       - uses: codecov/codecov-action@v1
+        # echo "bash <(curl -s https://codecov.io/bash) -R ../"
         with:
           file: ./codecov.yml
+          verbose: true
