@@ -40,7 +40,7 @@ jobs:
       - name: Send Coverage
         run: |
           ls
-          echo "....................
+          echo "...................."
           ls ..
           cp ../codecov.yml .
           echo "bash <(curl -s https://codecov.io/bash) -R ../"
