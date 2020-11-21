@@ -8,38 +8,39 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-   
+
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
         python-version: [3.8, 3.7, 3.6]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools pytest pytest-cov pytest-timeout
-        pip install --upgrade --no-cache-dir --editable .
-    - name: Run Tests
-      env:
-        LOGURU_LEVEL: DEBUG
-        TESTING: 1
-        GIT_AUTHOR_EMAIL: tests@rapy.do  # Needed to make git commit (used by tests) to work
-        GIT_AUTHOR_NAME: RAPyDo  # Prevent error: 'Author identity unknown'
-      run: |
-        mkdir rapydo_tests
-        cd rapydo_tests
-        mkdir -p data/logs
-        py.test --timeout=300 -s -x --cov-report=xml --cov=controller ../tests
-    - name: Send Coverage
-      run: |
-        ls
-        echo "....................
-        ls ..
-        cp ../codecov.yml .
-        echo "bash <(curl -s https://codecov.io/bash) -R ../"
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools pytest pytest-cov pytest-timeout
+          pip install --upgrade --no-cache-dir --editable .
+          # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
+          git config --global user.email "tests@rapy.do"
+          git config --global user.name "RAPyDo"
+      - name: Run Tests
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+        run: |
+          mkdir rapydo_tests
+          cd rapydo_tests
+          mkdir -p data/logs
+          py.test --timeout=300 -s -x --cov-report=xml --cov=controller ../tests
+      - name: Send Coverage
+        run: |
+          ls
+          echo "....................
+          ls ..
+          cp ../codecov.yml .
+          echo "bash <(curl -s https://codecov.io/bash) -R ../"
