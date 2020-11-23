@@ -18,7 +18,9 @@ class ElementTypes(str, Enum):
     service = "service"
 
 
-def get_function(element: ElementTypes) -> Callable[[Project, str, Any, str], None]:
+def get_function(
+    element: ElementTypes,
+) -> Callable[[Project, str, Any, str, bool], None]:
 
     if element == "endpoint":
         return create_endpoint
@@ -42,6 +44,12 @@ def add(
         ..., help="Type of element to be created"
     ),
     name: str = typer.Argument(..., help="Name to be assigned to the new element"),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force files overwriting",
+        show_default=False,
+    ),
 ) -> None:
 
     Application.get_controller().controller_init()
@@ -50,7 +58,7 @@ def add(
 
     fn = get_function(element_type)
 
-    fn(Application.project_scaffold, name, Application.data.services, auth)
+    fn(Application.project_scaffold, name, Application.data.services, auth, force)
 
 
 def create_template(
@@ -60,52 +68,61 @@ def create_template(
     name: str,
     services: Dict[str, str],
     auth: str,
+    force: bool,
 ) -> None:
 
-    if target_path.exists():
+    if not force and target_path.exists():
         Application.exit("{} already exists", target_path)
 
     template = templating.get_template(
         template_name, {"name": name, "services": services, "auth": auth}
     )
 
-    templating.save_template(target_path, template, force=False)
+    templating.save_template(target_path, template, force=force)
 
 
 def create_endpoint(
-    project_scaffold: Project, name: str, services: Any, auth: str
+    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
 ) -> None:
     path = project_scaffold.p_path("backend", "endpoints")
     path = path.joinpath(f"{name}.py")
 
     templating = Templating()
-    create_template(templating, "endpoint_template.py", path, name, services, auth)
+    create_template(
+        templating, "endpoint_template.py", path, name, services, auth, force
+    )
 
     log.info("Endpoint created: {}", path)
 
 
-def create_task(project_scaffold: Project, name: str, services: Any, auth: str) -> None:
+def create_task(
+    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
+) -> None:
     path = project_scaffold.p_path("backend", "tasks")
     path = path.joinpath(f"{name}.py")
 
     templating = Templating()
-    create_template(templating, "task_template.py", path, name, services, auth)
+    create_template(templating, "task_template.py", path, name, services, auth, force)
 
     log.info("Task created: {}", path)
 
 
 def create_component(
-    project_scaffold: Project, name: str, services: Any, auth: str
+    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
 ) -> None:
     path = project_scaffold.p_path("frontend", "app", "components", name)
     path.mkdir(parents=True, exist_ok=True)
 
     cpath = path.joinpath(f"{name}.ts")
     templating = Templating()
-    create_template(templating, "component_template.ts", cpath, name, services, auth)
+    create_template(
+        templating, "component_template.ts", cpath, name, services, auth, force
+    )
 
     hpath = path.joinpath(f"{name}.html")
-    create_template(templating, "component_template.html", hpath, name, services, auth)
+    create_template(
+        templating, "component_template.html", hpath, name, services, auth, force
+    )
 
     log.info("Component created: {}", path)
 
@@ -147,7 +164,7 @@ def create_component(
 
 
 def create_service(
-    project_scaffold: Project, name: str, services: Any, auth: str
+    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
 ) -> None:
     path = project_scaffold.p_path("frontend", "app", "services")
     path.mkdir(parents=True, exist_ok=True)
@@ -155,7 +172,9 @@ def create_service(
     path = path.joinpath(f"{name}.ts")
 
     templating = Templating()
-    create_template(templating, "service_template.ts", path, name, services, auth)
+    create_template(
+        templating, "service_template.ts", path, name, services, auth, force
+    )
 
     log.info("Service created: {}", path)
 
