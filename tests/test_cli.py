@@ -331,6 +331,11 @@ def test_all(capfd):
         "add endpoint xyz",
         f"{path} already exists",
     )
+    exec_command(
+        capfd,
+        "add --force endpoint xyz",
+        f"Endpoint created: {path}",
+    )
     assert os.path.isfile(path)
 
     path = "projects/first/backend/tasks/xyz.py"
@@ -344,6 +349,11 @@ def test_all(capfd):
         capfd,
         "add task xyz",
         f"{path} already exists",
+    )
+    exec_command(
+        capfd,
+        "add --force task xyz",
+        f"Task created: {path}",
     )
     assert os.path.isfile(path)
 
@@ -365,6 +375,11 @@ def test_all(capfd):
         capfd,
         "add component xyz",
         f"{path}/xyz.ts already exists",
+    )
+    exec_command(
+        capfd,
+        "add --force component xyz",
+        f"Component created: {path}",
     )
     shutil.rmtree(path)
     exec_command(
@@ -391,6 +406,11 @@ def test_all(capfd):
         capfd,
         "add service xyz",
         f"{path}/xyz.ts already exists",
+    )
+    exec_command(
+        capfd,
+        "add --force service xyz",
+        f"Service created: {path}",
     )
     os.remove(f"{path}/xyz.ts")
     exec_command(

@@ -222,16 +222,6 @@ def create_project(
         else:
             files = [path]
 
-    # Add the Kitchen Sink, used for the integration tests with cypress
-    if Configuration.testing and frontend == ANGULAR:
-        sink_path = project_scaffold.p_path("frontend", "app", "components", "sink")
-        sink_path.mkdir(parents=True, exist_ok=True)
-
-        files += [
-            sink_path.joinpath("sink.ts"),
-            sink_path.joinpath("sink.html"),
-        ]
-
     for p in files:
 
         template = templating.get_template(
