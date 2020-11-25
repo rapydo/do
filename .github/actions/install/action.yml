@@ -1,0 +1,10 @@
+inputs:
+  project:
+    description: "Name of the RAPyDo Project to be configured"
+runs:
+  using: "composite"
+  steps:
+    - run: echo Hello ${{ inputs.project}}
+      shell: bash
+    - run: echo "Nice to meet you!"
+      shell: pwsh
