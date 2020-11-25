@@ -66,6 +66,9 @@ services:
       COMMIT_INFO_TIMESTAMP:
       COMMIT_INFO_REMOTE:
 
+      # Force xterm to allow Cypress to record videos even on --no-tty shells
+      TERM: xterm
+
 
       # DISPLAY: ":0"
 
