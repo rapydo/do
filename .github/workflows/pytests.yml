@@ -37,8 +37,13 @@ jobs:
           cd rapydo_tests
           mkdir -p data/logs
           py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests ../tests
+
+          ls
+
           cd ..
           bash <(curl -s https://codecov.io/bash)
+
+          ls
       # - uses: codecov/codecov-action@v1
       #   with:
       #     file: ./codecov.yml
