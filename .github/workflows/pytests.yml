@@ -37,8 +37,10 @@ jobs:
           cd rapydo_tests
           mkdir -p data/logs
           py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests ../tests
-          cp ../codecov.yml .
-          bash <(curl -s https://codecov.io/bash) -R ../
+          # cp ../codecov.yml .
+          # bash <(curl -s https://codecov.io/bash) -R ../
+          cd ..
+          bash <(curl -s https://codecov.io/bash)
       # - uses: codecov/codecov-action@v1
       #   with:
       #     file: ./codecov.yml
@@ -47,4 +49,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: coverage
-          path: "*.xml"
+          path: coverage.xml
