@@ -40,12 +40,9 @@ jobs:
           mv coverage.xml ..
           cd ..
           bash <(curl -s https://codecov.io/bash)
-      # - uses: codecov/codecov-action@v1
-      #   with:
-      #     file: ./codecov.yml
 
-      - name: Artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: coverage
-          path: coverage.xml
+      # - name: Artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: coverage
+      #     path: coverage.xml

@@ -6,7 +6,7 @@ from typing import Dict
 
 import pytest
 
-from controller import __version__, gitter, log
+from controller import __version__, gitter
 from controller.app import Application
 from controller.compose import Compose
 from controller.packages import Packages
@@ -83,10 +83,6 @@ def test_all(capfd):
     assert len(values) == 0
     values = app.autocomplete_interfaces("")
     assert len(values) == 0
-
-    if os.getenv("STAGE") == "no-docker":
-        log.warning("Skipping test libs/all: docker is not enabled")
-        return True
 
     assert gitter.get_repo("does/not/exist") is None
     do_repo = gitter.get_repo("submodules/do")

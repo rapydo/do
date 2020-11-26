@@ -1,4 +1,5 @@
 ignore:
   - "controller/__main__.py" # cannot be tested
+  - "controller/templates"
 # fixes:
-#   - "tests/::after/"  # move path   e.g., "before/path" => "after/path"
+#   - "before/::after/"  # move path   e.g., "before/path" => "after/path"
