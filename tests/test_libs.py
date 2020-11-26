@@ -126,10 +126,10 @@ def test_all(capfd):
 
     try:
         assert system.execute_command("ls", ["doesnotexistforsure"])
-        pytest.fail("ExecutionException not raised!")
+        pytest.fail("ExecutionException not raised!")  # pragma: no cover
     except system.ExecutionException:
         pass
-    except BaseException:
+    except BaseException:  # pragma: no cover
         pytest.fail("Unexpected exception raised")
 
     assert system.bytes_to_str(0) == "0"
@@ -152,7 +152,7 @@ def test_all(capfd):
     # Invalid file / path
     try:
         load_yaml_file(Path("invalid"), Path("path"))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
@@ -163,14 +163,14 @@ def test_all(capfd):
 
     try:
         load_yaml_file(Path("invalid"), Path("projects"))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
         load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
@@ -178,7 +178,7 @@ def test_all(capfd):
     f = tempfile.NamedTemporaryFile()
     try:
         load_yaml_file(Path(f.name), Path(os.curdir))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
     f.close()
@@ -245,7 +245,7 @@ def test_all(capfd):
     # )
     # try:
     #     Templating()
-    #     pytest.fail("No exception raised")
+    #     pytest.fail("No exception raised")  # pragma: no cover
     # except SystemExit:
     #     pass
 
@@ -257,7 +257,7 @@ def test_all(capfd):
 
     try:
         templating.get_template("invalid", {})
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
