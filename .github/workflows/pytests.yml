@@ -12,11 +12,11 @@ jobs:
 
     strategy:
       matrix:
-        # macos-10.15
-        # windows-2019
-        # windows-2016
         # https://github.com/actions/virtual-environments#available-environments
-        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, macos-11.0]
+        # macos-11.0
+        # macos-10.15
+        # windows-2016
+        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04, windows-2019]
         python-version: [3.8, 3.7, 3.6]
 
     steps:
@@ -33,12 +33,6 @@ jobs:
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
-
-          # Docker not installed by default on macOS
-          # https://github.community/t/is-it-possible-to-install-and-configure-docker-on-macos-runner/16981
-          if [[ "${{ matrix.os}}" == "macos-11.0" ]]; then
-            brew install docker-machine docker;
-          fi
       - name: Run Tests
         env:
           LOGURU_LEVEL: DEBUG
