@@ -11,11 +11,8 @@ class TestApp(BaseTests):
         r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}")
         assert r.status_code == 401
 
-        # get all fields
         r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
         assert r.status_code == 200
-        # content = self.get_content(r)
-        # assert len(content) > 0
 
         schema = self.getDynamicInputSchema(client, "{{name.replace(" ", "_").lower()}}", headers)
         data = self.buildData(schema)
@@ -26,6 +23,14 @@ class TestApp(BaseTests):
         r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
         assert r.status_code == 200
         uuid = self.get_content(r)
+
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
+        assert r.status_code == 409
+
+        r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
+        assert r.status_code == 200
+        content = self.get_content(r)
+        assert len(content) > 0
 
         r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data)
         assert r.status_code == 401
