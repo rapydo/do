@@ -320,12 +320,14 @@ def test_all(capfd):
         )
 
     path = "projects/first/backend/endpoints/xyz.py"
+    test_path = "projects/first/backend/tests/test_endpoints_xyz.py"
     assert not os.path.exists(path)
+    assert not os.path.exists(test_path)
     exec_command(
         capfd,
         "add endpoint xyz --add-tests",
         f"Endpoint created: {path}",
-        "Tests for endpoints not implemented yet",
+        f"Tests scaffold created: {test_path}",
     )
     exec_command(
         capfd,
@@ -338,6 +340,7 @@ def test_all(capfd):
         f"Endpoint created: {path}",
     )
     assert os.path.isfile(path)
+    assert os.path.isfile(test_path)
 
     path = "projects/first/backend/tasks/xyz.py"
     assert not os.path.exists(path)

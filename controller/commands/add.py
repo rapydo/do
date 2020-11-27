@@ -113,7 +113,14 @@ def create_endpoint(
     log.info("Endpoint created: {}", path)
 
     if add_tests:
-        log.warning("Tests for endpoints not implemented yet")
+        path = project_scaffold.p_path("backend", "tests")
+        path = path.joinpath(f"test_endpoints_{name}.py")
+
+        create_template(
+            templating, "endpoint_test_template.py", path, name, services, auth, force
+        )
+
+        log.info("Tests scaffold created: {}", path)
 
 
 def create_task(
