@@ -16,7 +16,6 @@ class ElementTypes(str, Enum):
     task = "task"
     component = "component"
     service = "service"
-    endpoint_test = "endpoint_test"
 
 
 def get_function(
