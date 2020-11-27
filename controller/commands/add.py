@@ -16,11 +16,12 @@ class ElementTypes(str, Enum):
     task = "task"
     component = "component"
     service = "service"
+    endpoint_test = "endpoint_test"
 
 
 def get_function(
     element: ElementTypes,
-) -> Callable[[Project, str, Any, str, bool], None]:
+) -> Callable[[Project, str, Any, str, bool, bool], None]:
 
     if element == "endpoint":
         return create_endpoint
@@ -50,6 +51,12 @@ def add(
         help="Force files overwriting",
         show_default=False,
     ),
+    add_tests: bool = typer.Option(
+        False,
+        "--add-tests",
+        help="Add tests files",
+        show_default=False,
+    ),
 ) -> None:
 
     Application.get_controller().controller_init()
@@ -58,7 +65,14 @@ def add(
 
     fn = get_function(element_type)
 
-    fn(Application.project_scaffold, name, Application.data.services, auth, force)
+    fn(
+        Application.project_scaffold,
+        name,
+        Application.data.services,
+        auth,
+        force,
+        add_tests,
+    )
 
 
 def create_template(
@@ -82,7 +96,12 @@ def create_template(
 
 
 def create_endpoint(
-    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
 ) -> None:
     path = project_scaffold.p_path("backend", "endpoints")
     path = path.joinpath(f"{name}.py")
@@ -94,9 +113,17 @@ def create_endpoint(
 
     log.info("Endpoint created: {}", path)
 
+    if add_tests:
+        log.warning("Tests for endpoints not implemented yet")
+
 
 def create_task(
-    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
 ) -> None:
     path = project_scaffold.p_path("backend", "tasks")
     path = path.joinpath(f"{name}.py")
@@ -106,9 +133,17 @@ def create_task(
 
     log.info("Task created: {}", path)
 
+    if add_tests:
+        log.warning("Tests for tasks not implemented yet")
+
 
 def create_component(
-    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
 ) -> None:
     path = project_scaffold.p_path("frontend", "app", "components", name)
     path.mkdir(parents=True, exist_ok=True)
@@ -162,9 +197,17 @@ def create_component(
             f.write(f"{row}\n")
         f.write("\n")
 
+    if add_tests:
+        log.warning("Tests for components not implemented yet")
+
 
 def create_service(
-    project_scaffold: Project, name: str, services: Any, auth: str, force: bool
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
 ) -> None:
     path = project_scaffold.p_path("frontend", "app", "services")
     path.mkdir(parents=True, exist_ok=True)
@@ -211,3 +254,6 @@ def create_service(
         for row in module:
             f.write(f"{row}\n")
         f.write("\n")
+
+    if add_tests:
+        log.warning("Tests for services not implemented yet")

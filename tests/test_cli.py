@@ -323,8 +323,9 @@ def test_all(capfd):
     assert not os.path.exists(path)
     exec_command(
         capfd,
-        "add endpoint xyz",
+        "add endpoint xyz --add-tests",
         f"Endpoint created: {path}",
+        "Tests for endpoints not implemented yet",
     )
     exec_command(
         capfd,
@@ -342,8 +343,9 @@ def test_all(capfd):
     assert not os.path.exists(path)
     exec_command(
         capfd,
-        "add task xyz",
+        "add task xyz --add-tests",
         f"Task created: {path}",
+        "Tests for tasks not implemented yet",
     )
     exec_command(
         capfd,
@@ -363,10 +365,11 @@ def test_all(capfd):
     assert not os.path.exists(os.path.join(path, "xyz.html"))
     exec_command(
         capfd,
-        "add component xyz",
+        "add component xyz --add-tests",
         "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
         "Added XyzComponent to module declarations",
         f"Component created: {path}",
+        "Tests for components not implemented yet",
     )
     assert os.path.isdir(path)
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
@@ -395,10 +398,11 @@ def test_all(capfd):
     assert not os.path.exists(os.path.join(path, "xyz.ts"))
     exec_command(
         capfd,
-        "add service xyz",
+        "add service xyz --add-tests",
         "Added import { XyzService } from '@app/services/xyz'; to module file",
         "Added XyzService to module declarations",
         f"Service created: {path}",
+        "Tests for services not implemented yet",
     )
     assert os.path.isdir(path)
     assert os.path.isfile(os.path.join(path, "xyz.ts"))

@@ -192,7 +192,9 @@ class Packages:
             sys.exit(1)
 
         safe_version = "18.09.2"
-        if LooseVersion(safe_version) > LooseVersion(v):
+        # On GitHub Actions docker is >safe_version on all available envronments.
+        # This check cannot be tested
+        if LooseVersion(safe_version) > LooseVersion(v):  # pragma: no cover
             log.critical(
                 """Your docker version is vulnerable to CVE-2019-5736
 
