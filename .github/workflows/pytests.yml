@@ -1,0 +1,51 @@
+name: Test
+
+on:
+  push:
+  # schedule:
+  #   - cron: "0 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        # https://github.com/actions/virtual-environments#available-environments
+        os: [ubuntu-20.04, ubuntu-18.04, ubuntu-16.04]
+        python-version: [3.8, 3.7, 3.6]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools pytest pytest-cov pytest-timeout
+          pip install --upgrade --no-cache-dir --editable .
+          # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
+          git config --global user.email "tests@rapy.do"
+          git config --global user.name "RAPyDo"
+      - name: Run Tests
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+        run: |
+          mkdir rapydo_tests
+          cd rapydo_tests
+          mkdir -p data/logs
+          py.test --timeout=300 -s -x --cov-report=xml --cov=../controller --cov=../tests ../tests
+          mv coverage.xml ..
+          cd ..
+          bash <(curl -s https://codecov.io/bash)
+
+      # - name: Artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: coverage
+      #     path: coverage.xml
