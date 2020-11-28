@@ -50,7 +50,7 @@ services:
       CYPRESS_BACKEND_HOST: ${FLASK_HOST}
       CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
       # Temporary added to enable cypress-fail-fast
-      CYPRESS_FAIL_FAST: true
+      CYPRESS_FAIL_FAST: "true"
       # FROM ENV, USED BY CYPRESS TO RECORD RESULTS:
       TRAVIS:
       TRAVIS_BUILD_ID:
