@@ -204,7 +204,20 @@ def create_component(
         f.write("\n")
 
     if add_tests:
-        log.warning("Tests for components not implemented yet")
+        path = project_scaffold.p_path("frontend", "app", "components", name)
+        path = path.joinpath(f"{name}.spec.ts")
+
+        create_template(
+            templating,
+            "component_test_template.spec.ts",
+            path,
+            name,
+            services,
+            auth,
+            force,
+        )
+
+        log.info("Tests scaffold created: {}", path)
 
 
 def create_service(

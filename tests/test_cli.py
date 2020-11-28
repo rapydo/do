@@ -363,6 +363,7 @@ def test_all(capfd):
     assert os.path.isfile(path)
 
     path = "projects/first/frontend/app/components/xyz"
+    test_path = "projects/first/frontend/app/components/xyz/xyz.spec.ts"
     assert not os.path.exists(path)
     assert not os.path.exists(os.path.join(path, "xyz.ts"))
     assert not os.path.exists(os.path.join(path, "xyz.html"))
@@ -372,8 +373,9 @@ def test_all(capfd):
         "Added import { XyzComponent } from '@app/components/xyz/xyz'; to module ",
         "Added XyzComponent to module declarations",
         f"Component created: {path}",
-        "Tests for components not implemented yet",
+        f"Tests scaffold created: {test_path}",
     )
+
     assert os.path.isdir(path)
     assert os.path.isfile(os.path.join(path, "xyz.ts"))
     assert os.path.isfile(os.path.join(path, "xyz.html"))
