@@ -430,10 +430,36 @@ def test_all(capfd):
         f"Service created: {path}",
     )
 
+    path = "projects/first/frontend/integration/app_mypath_my_id.spec.ts"
+    assert not os.path.exists(path)
+    exec_command(
+        capfd,
+        "add integration_test app/mypath/:my_id --add-tests",
+        "Add integration_test does not support --add-tests flag",
+    )
+
+    exec_command(
+        capfd,
+        "add integration_test app/mypath/:my_id",
+        f"Integration test created: {path}",
+    )
+    exec_command(
+        capfd,
+        "add integration_test app/mypath/:my_id",
+        f"{path} already exists",
+    )
+    exec_command(
+        capfd,
+        "add --force integration_test app/mypath/:my_id",
+        f"Integration test created: {path}",
+    )
+    assert os.path.isfile(path)
+
     exec_command(
         capfd,
         "add abc xyz",
-        "invalid choice: abc. (choose from endpoint, task, component, service)",
+        "invalid choice: abc. "  # Note no command
+        "(choose from endpoint, task, component, service, integration_test)",
     )
 
     # Basic pull

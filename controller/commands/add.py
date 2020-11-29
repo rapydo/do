@@ -16,6 +16,7 @@ class ElementTypes(str, Enum):
     task = "task"
     component = "component"
     service = "service"
+    integration_test = "integration_test"
 
 
 def get_function(
@@ -33,6 +34,9 @@ def get_function(
 
     if element == "service":
         return create_service
+
+    if element == "integration_test":
+        return create_integration_test
 
     # Can't be reached
     return create_service  # pragma: no cover
@@ -276,3 +280,37 @@ def create_service(
 
     if add_tests:
         log.warning("Tests for services not implemented yet")
+
+
+def create_integration_test(
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
+) -> None:
+
+    if add_tests:
+        Application.exit("Add integration_test does not support --add-tests flag")
+
+    path = project_scaffold.p_path("frontend", "integration")
+
+    # Expected name is a route-like string, e.g. app/mypath/:my_id
+
+    # Let's replace the name with a path safe version
+    # -> app_mypath_my_id
+    # To be replaced with removeprefix
+    # Initial / always removed... than will be added
+    if name.startswith("/"):
+        name = name[1]
+
+    filename = name.replace("/", "_").replace(":", "")
+    path = path.joinpath(f"{filename}.spec.ts")
+
+    templating = Templating()
+    create_template(
+        templating, "cypress_template.spec.ts", path, f"/{name}", services, auth, force
+    )
+
+    log.info("Integration test created: {}", path)
