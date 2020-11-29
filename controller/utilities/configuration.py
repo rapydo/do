@@ -217,7 +217,7 @@ def read_composer_yamls(
     all_files: List[Path] = []
 
     # YAML CHECK UP
-    for name, composer in composers.items():
+    for composer in composers.values():
 
         if not composer.pop("if", False):
             continue

@@ -1,7 +1,6 @@
 import typer
 from glom import glom
 
-from controller import log
 from controller.app import Application, Configuration
 from controller.compose import Compose
 

@@ -7,7 +7,7 @@ import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
 from controller.app import Application, Configuration
-from controller.project import ANGULAR, NO_FRONTEND, Project
+from controller.project import NO_FRONTEND, Project
 from controller.templating import Templating
 
 
