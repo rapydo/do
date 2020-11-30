@@ -2,9 +2,6 @@ MANIFEST
 README
 # README.rst
 
-# for development
-core
-
 # sublime text
 *.sublime-*
 
@@ -55,6 +52,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+index.txt
 
 # Translations
 *.mo

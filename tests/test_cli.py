@@ -398,6 +398,13 @@ def test_all(capfd):
         f"Component created: {path}",
     )
 
+    exec_command(
+        capfd,
+        "add component sink",
+        "Added route to module declarations",
+        "Added SinkComponent to module declarations",
+    )
+
     path = "projects/first/frontend/app/services"
     assert not os.path.exists(path)
     assert not os.path.exists(os.path.join(path, "xyz.ts"))

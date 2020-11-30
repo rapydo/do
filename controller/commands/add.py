@@ -193,6 +193,21 @@ def create_component(
             log.info("Added {} to module file", import_line)
             break
 
+    # Add route - Only used by Frontend tests
+    if name == "sink":
+        for idx, row in enumerate(module):
+            if row.strip().startswith("const routes: Routes = ["):
+                ROUTE = """
+  {
+    path: "app/sink",
+    component: SinkComponent,
+  },
+
+"""
+                module = module[: idx + 1] + [ROUTE] + module[idx + 1 :]
+                log.info("Added route to module declarations")
+                break
+
     # Add component declaration
     for idx, row in enumerate(module):
         if row.strip().startswith("declarations"):

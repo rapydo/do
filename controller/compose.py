@@ -47,7 +47,7 @@ class Compose:
         # NOTE: compose_output_tuple is a namedtuple
         return compose_output_tuple.services
 
-    def command(self, command: str, options: Dict[str, Optional[Any]]) -> None:
+    def command(self, command: str, options: Dict[str, Any]) -> None:
 
         compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
         method = getattr(compose_handler, command)
