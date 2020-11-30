@@ -288,7 +288,7 @@ class Application:
     def get_controller():
         return Application.controller
 
-    def controller_init(self, read_extended=True):
+    def controller_init(self, read_extended: bool = True) -> bool:
         if Configuration.create:
             Application.check_installed_software()
             return True
