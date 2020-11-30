@@ -158,16 +158,22 @@ def create_component(
     path = project_scaffold.p_path("frontend", "app", "components", name)
     path.mkdir(parents=True, exist_ok=True)
 
+    # Used by Frontend during tests
+    is_sink_special_case = name == "sink"
+
+    if is_sink_special_case:
+        template_ts = "sink.ts"
+        template_html = "sink.html"
+    else:
+        template_ts = "component_template.ts"
+        template_html = "component_template.html"
+
     cpath = path.joinpath(f"{name}.ts")
     templating = Templating()
-    create_template(
-        templating, "component_template.ts", cpath, name, services, auth, force
-    )
+    create_template(templating, template_ts, cpath, name, services, auth, force)
 
     hpath = path.joinpath(f"{name}.html")
-    create_template(
-        templating, "component_template.html", hpath, name, services, auth, force
-    )
+    create_template(templating, template_html, hpath, name, services, auth, force)
 
     log.info("Component created: {}", path)
 
@@ -193,8 +199,8 @@ def create_component(
             log.info("Added {} to module file", import_line)
             break
 
-    # Add route - Only used by Frontend tests
-    if name == "sink":
+    # Add sink route
+    if is_sink_special_case:
         for idx, row in enumerate(module):
             if row.strip().startswith("const routes: Routes = ["):
                 ROUTE = """
