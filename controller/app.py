@@ -256,7 +256,7 @@ class Application:
         context_settings={"help_option_names": ["--help", "-h"]},
     )
     # controller app
-    controller = None
+    controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
     # This Any should be Repo, but GitPython is lacking typings
@@ -285,8 +285,10 @@ class Application:
         sys.exit(1)
 
     @staticmethod
-    def get_controller():
-        return Application.controller
+    def get_controller() -> "Application":
+        if Application.controller:
+            return Application.controller
+        raise AttributeError("Application.controller not initialized")
 
     def controller_init(self, read_extended: bool = True) -> bool:
         if Configuration.create:
