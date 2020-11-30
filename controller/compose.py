@@ -10,6 +10,7 @@ import shlex
 import sys
 from contextlib import redirect_stdout
 from io import StringIO
+from typing import Any, Dict, Optional
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
@@ -46,7 +47,7 @@ class Compose:
         # NOTE: compose_output_tuple is a namedtuple
         return compose_output_tuple.services
 
-    def command(self, command, options):
+    def command(self, command: str, options: Dict[str, Optional[Any]]) -> None:
 
         compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
         method = getattr(compose_handler, command)
@@ -56,12 +57,11 @@ class Compose:
 
         log.debug("docker-compose command: '{}'", command)
 
-        out = None
         # sometimes this import stucks... importing here to avoid unnecessary waits
         from docker.errors import APIError
 
         try:
-            out = method(options=options)
+            method(options=options)
         except SystemExit as e:
             # System exit is always received, also in case of normal execution
             if e.code > 0:
@@ -80,8 +80,6 @@ class Compose:
         except (ProjectError, NoSuchService) as e:
             log.critical(e)
             sys.exit(1)
-
-        return out
 
     @staticmethod
     def split_command(command):

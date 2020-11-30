@@ -41,12 +41,11 @@ repos:
             "typer[all]==0.3.2",
 
             # Extra dependencies
-            # "lxml",
+            "lxml",
             "pytest-stub",
           ]
 
-        args:
-          [
+        args: [
             # -> Type of variable becomes "xyz" due to an unfollowed import
             "--disallow-any-unimported",
 
@@ -80,6 +79,6 @@ repos:
             # This flag reports an error whenever it encounters a
             # partly annotated function definition.
             "--disallow-incomplete-defs",
+            "--txt-report",
+            ".",
           ]
-
-          # "--html-report=.mypy_cache/html",
