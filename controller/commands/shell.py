@@ -50,7 +50,7 @@ def shell(
         help="Execute the command in detach mode",
         show_default=False,
     ),
-) -> Any:
+) -> None:
     Application.get_controller().controller_init()
 
     # Deprecated since 0.8
@@ -74,6 +74,6 @@ def shell(
 
     log.debug("Requested command: {} with user: {}", command, user)
 
-    return dc.exec_command(
+    dc.exec_command(
         service, user=user, command=command, disable_tty=no_tty, detach=detach
     )

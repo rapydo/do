@@ -17,7 +17,7 @@ def verify(
         help="Disable pseudo-tty allocation (useful for non-interactive script)",
         show_default=False,
     ),
-) -> Any:
+) -> None:
     Application.get_controller().controller_init()
 
     # Verify one service connection (inside backend)
@@ -25,6 +25,6 @@ def verify(
     command = f"restapi verify --services {service}"
 
     try:
-        return dc.exec_command("backend", command=command, disable_tty=no_tty)
+        dc.exec_command("backend", command=command, disable_tty=no_tty)
     except SystemExit:
         pass

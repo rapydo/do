@@ -210,7 +210,7 @@ class Compose:
                 shell_command,
                 " ".join(shell_args),
             )
-        return self.command("exec_command", options)
+        self.command("exec_command", options)
 
     def get_containers_status(self, prefix):
         with StringIO() as buf, redirect_stdout(buf):
