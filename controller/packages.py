@@ -187,7 +187,8 @@ class Packages:
 
         if v is None:  # pragma: no cover
             log.critical(
-                "Cannot verify docker version, is your user not allowed to docker?"
+                "Cannot verify docker version, "
+                "is docker running and your user is allowed to use it?"
             )
             sys.exit(1)
 
