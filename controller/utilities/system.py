@@ -28,7 +28,7 @@ def execute_command(command: str, parameters: List[str]) -> str:
 
     except ProcessExecutionError:
         raise ExecutionException(
-            "Cannot execute {} {}".format(command, " ".join(parameters))
+            "Cannot execute command: {} {}".format(command, " ".join(parameters))
         )
 
 
