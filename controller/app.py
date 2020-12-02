@@ -314,7 +314,10 @@ class Application:
             return True
 
         log.debug("You are using RAPyDo version {}", __version__)
-        Application.checked("Selected project: {}", Configuration.project)
+        if Configuration.check:
+            log.info("Selected project: {}", Configuration.project)
+        else:
+            log.debug("Selected project: {}", Configuration.project)
 
         # TODO: give an option to skip things when you are not connected
         if (
@@ -402,16 +405,9 @@ class Application:
         Configuration.projectrc = projectrc_yaml
 
     @staticmethod
-    def checked(message, *args, **kws):
-        if Configuration.check:
-            log.info(message, *args, **kws)
-        # else:
-        #     log.debug(message, *args, **kws)
-
-    @staticmethod
     def check_installed_software():
 
-        Application.checked(
+        log.debug(
             "python version: {}.{}.{}",
             sys.version_info.major,
             sys.version_info.minor,
@@ -529,7 +525,8 @@ class Application:
 
         try:
             requests.get("https://www.google.com")
-            Application.checked("Internet connection is available")
+            if Configuration.check:
+                log.info("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover
             Application.exit("Internet connection is unavailable")
 
@@ -817,8 +814,8 @@ class Application:
 and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
-        else:
-            Application.checked("Active services: {}", self.active_services)
+        elif Configuration.check:
+            log.info("Active services: {}", self.active_services)
 
         missing = set()
         for service_name in self.active_services:
