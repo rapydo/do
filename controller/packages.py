@@ -82,20 +82,22 @@ class Packages:
         try:
             if min_version is not None:  # pragma: no cover
                 if LooseVersion(min_version) > LooseVersion(found_version):
-                    version_error = "Minimum supported version for {} is {}".format(
-                        package_name, min_version
+                    log.critical(
+                        "Minimum supported version for {} is {}, found {}",
+                        package_name,
+                        min_version,
+                        found_version,
                     )
-                    version_error += f", found {found_version} "
-                    log.critical(version_error)
                     sys.exit(1)
 
             if max_version is not None:  # pragma: no cover
                 if LooseVersion(max_version) < LooseVersion(found_version):
-                    version_error = "Maximum supported version for {} is {}".format(
-                        package_name, max_version
+                    log.critical(
+                        "Maximum supported version for {} is {}, found {}",
+                        package_name,
+                        max_version,
+                        found_version,
                     )
-                    version_error += f", found {found_version} "
-                    log.critical(version_error)
                     sys.exit(1)
 
             log.debug("{} version: {}", package_name, found_version)
@@ -104,7 +106,9 @@ class Packages:
             log.error("{}: {}", e, found_version)
 
     @staticmethod
-    def check_program(program, min_version=None, max_version=None):
+    def check_program(
+        program, min_version=None, max_version=None, min_recommended_version=None
+    ):
 
         found_version = Packages.get_bin_version(program)
         # Can't be tested on travis...
@@ -117,24 +121,34 @@ class Packages:
             log.critical("Missing requirement: {} not found.{}", program, hints)
             sys.exit(1)
 
-        if min_version is not None:  # pragma: no cover
-            if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for {} is {}".format(
+        v = LooseVersion(found_version)
+        if min_version is not None:
+            if LooseVersion(min_version) > v:  # pragma: no cover
+                log.critical(
+                    "Minimum supported version for {} is {}, found {}",
                     program,
                     min_version,
+                    found_version,
                 )
-                version_error += f", found {found_version} "
-                log.critical(version_error)
                 sys.exit(1)
 
+        if min_recommended_version is not None:
+            if LooseVersion(min_recommended_version) > v:  # pragma: no cover
+                log.warning(
+                    "Minimum recommended version for {} is {}, found {}",
+                    program,
+                    min_recommended_version,
+                    found_version,
+                )
+
         if max_version is not None:  # pragma: no cover
-            if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for {} is {}".format(
+            if LooseVersion(max_version) < v:
+                log.critical(
+                    "Maximum supported version for {} is {}, found {}",
                     program,
                     max_version,
+                    found_version,
                 )
-                version_error += f", found {found_version} "
-                log.critical(version_error)
                 sys.exit(1)
 
         log.debug("{} version: {}", program, found_version)
