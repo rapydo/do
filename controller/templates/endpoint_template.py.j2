@@ -27,6 +27,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "200": "..."
         }
     )
+    # @decorators.cache(timeout=300)
     def get(self):
 
         db = {{auth}}.get_instance()
