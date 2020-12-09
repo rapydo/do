@@ -264,6 +264,16 @@ class Project:
             )
             sys.exit(1)
 
+        # Projects with - cannot be imported in python
+        # if "-" in project:
+        #     log.critical(
+        #         "Wrong project name, - is not a valid character."
+        #         "\nPlease consider to rename {} into {}",
+        #         project,
+        #         project.replace("-", ""),
+        #     )
+        #     sys.exit(1)
+
         if project in Project.reserved_project_names:
             log.critical(
                 "You selected a reserved name, invalid project name: {}", project

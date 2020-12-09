@@ -290,10 +290,10 @@ class Application:
             return Application.controller
         raise AttributeError("Application.controller not initialized")
 
-    def controller_init(self, read_extended: bool = True) -> bool:
+    def controller_init(self, read_extended: bool = True) -> None:
         if Configuration.create:
             Application.check_installed_software()
-            return True
+            return None
 
         main_folder_error = Application.project_scaffold.check_main_folder()
 
@@ -311,7 +311,7 @@ class Application:
 
         if Configuration.print_version:
             self.read_specs(read_extended=True)
-            return True
+            return None
 
         log.debug("You are using RAPyDo version {}", __version__)
         if Configuration.check:
@@ -330,7 +330,7 @@ class Application:
 
         if Configuration.install:
             self.read_specs(read_extended=False)
-            return True
+            return None
 
         # Auth is not yet available, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
@@ -361,12 +361,12 @@ class Application:
             log.debug("Current group ID: {}", self.current_gid)
 
         if Configuration.initialize:
-            return True
+            return None
 
         Application.git_submodules()
 
         if Configuration.update:
-            return True
+            return None
 
         self.make_env()
 
@@ -389,7 +389,7 @@ class Application:
             services_dict=self.services_dict,
         )
 
-        return True
+        return None
 
     @staticmethod
     def load_projectrc():
@@ -719,6 +719,14 @@ class Application:
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
+
+                # if isinstance(value, str):  # pragma: no
+                #     if value.lower() == 'true':
+                #         log.warning("{}={}, convert to 1?", key, value)
+
+                #     if value.lower() == 'false':
+                #         log.warning("{}={}, convert to 0?", key, value)
+
                 if value is None:
                     value = ""
                 else:
