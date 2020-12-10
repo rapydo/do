@@ -324,7 +324,7 @@ def create_integration_test(
     # To be replaced with removeprefix
     # Initial / always removed... than will be added
     if name.startswith("/"):
-        name = name[1]
+        name = name[1:]
 
     filename = name.replace("/", "_").replace(":", "")
     path = path.joinpath(f"{filename}.spec.ts")
