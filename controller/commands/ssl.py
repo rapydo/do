@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -90,7 +91,12 @@ def ssl(
 
     dc = Compose(files=Application.data.files)
 
-    if volatile:
-        dc.create_volatile_container(service, command=command)
+    try:
+        if volatile:
+            dc.create_volatile_container(service, command=command)
+        else:
+            dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
+    except SystemExit as e:
+        sys.exit(e.code)
     else:
-        dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
+        log.info("Certificate successfully created")
