@@ -1480,6 +1480,15 @@ def test_all(capfd):
         capfd,
         "-s --prod rabbit,neo4j start",
     )
+
+    # Debug !
+    exec_command(capfd, "status")
+
+    # Debug !
+    import time
+
+    time.sleep(20)
+
     exec_command(
         capfd,
         "ssl --volatile",
