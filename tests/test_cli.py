@@ -1478,7 +1478,7 @@ def test_all(capfd):
     # Start neo4j and rabbit to verify certificate creation while services are running
     exec_command(
         capfd,
-        "-s --prod rabbit,neo4j start",
+        "--prod -s rabbit,neo4j start",
     )
 
     # Debug !
