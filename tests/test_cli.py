@@ -1466,12 +1466,6 @@ def test_all(capfd):
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
-    # Start neo4j and rabbit to verify certificate creation while services are running
-    exec_command(
-        capfd,
-        "-s rabbit,neo4j start",
-    )
-
     exec_command(
         capfd,
         "ssl --volatile",
@@ -1479,11 +1473,22 @@ def test_all(capfd):
         "Self signed SSL certificate successfully created",
         # Just to verify that the default does not change
         "Generating DH parameters, 1024 bit long safe prime, generator 2",
+    )
+
+    # Start neo4j and rabbit to verify certificate creation while services are running
+    exec_command(
+        capfd,
+        "-s --prod rabbit,neo4j start",
+    )
+    exec_command(
+        capfd,
+        "ssl --volatile",
+        "Creating a self signed SSL certificate",
+        "Self signed SSL certificate successfully created",
         "Neo4j is running, but it will reload the certificate by itself",
         "RabbitMQ is running, executing command to refresh the certificate",
         "New certificate successfully installed",
     )
-
     # Shutoff services, only started to verify certificate creation
     exec_command(
         capfd,

@@ -112,6 +112,11 @@ def ssl(
             # But RabbitMQ does not. Probably in the future releases this command will
             # No longer be required. To test it after the creation of the new cert:
             #   echo -n | openssl s_client -showcerts -connect hostname:5671
+
+            # Note that this command only works if rabbit is executed in prod mode
+            # Otherwise it will file with the following error:
+            #       Error: unable to perform an operation on node 'rabbit@rabbit'.
+            #       Please see diagnostics information and suggestions below.
             dc.exec_command(
                 "rabbit",
                 command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
