@@ -108,6 +108,10 @@ def ssl(
             log.info(
                 "RabbitMQ is running, executing command to refresh the certificate"
             )
+            # Please note that Erland is able to automatically reload the certificate
+            # But RabbitMQ does not. Probably in the future releases this command will
+            # No longer be required. To test it after the creation of the new cert:
+            #   echo -n | openssl s_client -showcerts -connect hostname:5671
             dc.exec_command(
                 "rabbit",
                 command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
