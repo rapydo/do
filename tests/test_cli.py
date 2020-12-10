@@ -1481,17 +1481,11 @@ def test_all(capfd):
         "--prod -s rabbit,neo4j start",
     )
 
-    # Debug !
-    exec_command(capfd, "status")
-
-    # Debug !
-    import time
-
-    time.sleep(20)
-
     exec_command(
         capfd,
-        "ssl --volatile",
+        # --no-tty is needed on GitHub Actions
+        # to be able to execute commands on the running containers
+        "ssl --volatile --no-tty",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
         "Neo4j is running, but it will reload the certificate by itself",
