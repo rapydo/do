@@ -286,9 +286,9 @@ class Application:
 
     @staticmethod
     def get_controller() -> "Application":
-        if Application.controller:
-            return Application.controller
-        raise AttributeError("Application.controller not initialized")
+        if not Application.controller:  # pragma: no cover
+            raise AttributeError("Application.controller not initialized")
+        return Application.controller
 
     def controller_init(self, read_extended: bool = True) -> None:
         if Configuration.create:

@@ -455,9 +455,10 @@ def test_all(capfd):
         "add integration_test app/mypath/:my_id",
         f"{path} already exists",
     )
+    # Here a little variant, by adding a leading /
     exec_command(
         capfd,
-        "add --force integration_test app/mypath/:my_id",
+        "add --force integration_test /app/mypath/:my_id",
         f"Integration test created: {path}",
     )
     assert os.path.isfile(path)
@@ -1472,6 +1473,9 @@ def test_all(capfd):
         "Self signed SSL certificate successfully created",
         # Just to verify that the default does not change
         "Generating DH parameters, 1024 bit long safe prime, generator 2",
+        "Neo4j is running, but it will reload the certificate by itself",
+        "RabbitMQ is running, executing command to refresh the certificate",
+        "New certificate successfully installed",
     )
 
     exec_command(

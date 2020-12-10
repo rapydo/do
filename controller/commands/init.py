@@ -60,9 +60,6 @@ def init(
         Application.get_controller().create_projectrc()
         Application.get_controller().read_specs(read_extended=True)
         Application.get_controller().make_env()
-        # Read again! :-(
-    #     Application.get_controller().read_composers()
-    #     Application.get_controller().set_active_services()
 
     # Application.get_controller().check_placeholders()
     log.info("Project initialized")

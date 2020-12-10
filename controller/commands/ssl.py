@@ -99,4 +99,19 @@ def ssl(
     except SystemExit as e:
         sys.exit(e.code)
     else:
-        log.info("Certificate successfully created")
+
+        running_containers = dc.get_running_containers(Configuration.project)
+        if "neo4j" in running_containers:
+            log.info("Neo4j is running, but it will reload the certificate by itself")
+
+        if "rabbit" in running_containers:
+            log.info(
+                "RabbitMQ is running, executing command to refresh the certificate"
+            )
+            dc.exec_command(
+                "rabbit",
+                command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
+                disable_tty=no_tty,
+            )
+
+        log.info("New certificate successfully installed")
