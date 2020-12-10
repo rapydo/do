@@ -1438,8 +1438,8 @@ def test_all(capfd):
         "url=https://localhost/api/specs",
     )
 
-    # --all is useless here... just to include the parameter in any test.
-    # A real test on such parameter would be quite complicated...
+    # --all is useless here... added just to include the parameter in some tests.
+    # A true test on such parameter would be quite complicated...
     exec_command(
         capfd,
         "--prod -s proxy pull --all",
@@ -1450,6 +1450,19 @@ def test_all(capfd):
         capfd,
         "ssl",
         "No container found for proxy_1",
+    )
+
+    # Before creating SSL certificates, neo4j and rabbit should not be able to start
+    exec_command(
+        capfd,
+        "volatile neo4j",
+        "SSL mandatory file not found: /ssl/real/fullchain1.pem",
+    )
+
+    exec_command(
+        capfd,
+        "volatile rabbit",
+        "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
     exec_command(

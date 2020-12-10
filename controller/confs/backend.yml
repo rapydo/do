@@ -74,14 +74,8 @@ services:
   ###  MAIN CONTAINER  ###
   ########################
   backend:
-    restart: on-failure:5
-    # TO TEST the failure:
-    # 1. go inside backend
-    # 2. ps aux --forest
-    # 3. kill process 1 and the tree branches
-
-    # restart: always
-    # command: sleep infinity
+    # restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -305,7 +299,7 @@ services:
       - backend
 
   maintenance:
-    restart: always
+    # restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/proxy
       args:
@@ -334,8 +328,7 @@ services:
   ###  DATABASES  ###
   ###################
   postgres:
-    # restart: always
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/postgres
       args:
@@ -360,8 +353,7 @@ services:
           - ${ALCHEMY_HOST}
 
   mariadb:
-    # restart: always
-    restart: on-failure:5
+    restart: always
     image: mariadb:10.5.6
     volumes:
       - mariadb:/var/lib/mysql
@@ -377,7 +369,7 @@ services:
           - ${ALCHEMY_HOST}
 
   neo4j:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/neo4j
       args:
@@ -409,6 +401,8 @@ services:
       # Useful in case of corrupted transaction logs
       # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
       # NEO4J_dbms_recovery_fail__on__missing__files: "false"
+
+      # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
       NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
       NEO4J_dbms_ssl_policy_https_enabled: ${NEO4J_SSL_ENABLED}
       NEO4J_dbms_ssl_policy_bolt_base__directory: /ssl/real
@@ -445,7 +439,7 @@ services:
     #   - 7687:7687
 
   mongodb:
-    restart: on-failure:5
+    restart: always
     image: mongo:4.4.1
     volumes:
       - mongodata:/data/db
@@ -461,7 +455,7 @@ services:
   #########################
 
   celery:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -576,7 +570,7 @@ services:
     #   # - celeryui
 
   celery-beat:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -654,7 +648,7 @@ services:
       worker_net:
 
   rabbit:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/rabbitmq
       args:
@@ -671,6 +665,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
 
+      # If the following variables will ever change, fix the check_ssl.sh script in rabbitmq build
       RABBITMQ_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
       RABBITMQ_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
       RABBITMQ_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
@@ -693,7 +688,7 @@ services:
           - ${RABBITMQ_HOST}
 
   redis:
-    restart: on-failure:5
+    restart: always
     image: redis:6.0.9
     command: redis-server --appendonly yes
     volumes:
@@ -706,7 +701,7 @@ services:
       ACTIVATE: ${ACTIVATE_REDIS}
 
   bot:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -759,7 +754,7 @@ services:
   ##########################
 
   celeryui:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -898,7 +893,7 @@ services:
   ### FTP SERVER  ###
   ###################
   ftp:
-    restart: on-failure:5
+    restart: always
     build: ${SUBMODULE_DIR}/build-templates/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
