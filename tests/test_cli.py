@@ -2,6 +2,7 @@ import os
 import shutil
 import signal
 import tempfile
+import time
 from collections import OrderedDict  # can be removed from python 3.7
 from datetime import datetime
 
@@ -1480,6 +1481,13 @@ def test_all(capfd):
         capfd,
         "--prod -s rabbit,neo4j start",
     )
+
+    # ARGHHH!!! But it is needed because the next command need rabbit already started
+    # And it takes some time to make the server up and running
+    # Otherwise will fail with:
+    # Error: unable to perform an operation on node 'rabbit@rabbit'.
+    # Please see diagnostics information and suggestions below.
+    time.sleep(10)
 
     exec_command(
         capfd,
