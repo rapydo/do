@@ -179,3 +179,134 @@ def test_create(capfd):
         f"Project file already exists: {pconf}",
         "Project first successfully created",
     )
+
+    # Test extended projects
+
+    # base project is --auth postgres --frontend angular
+    # the ext one is --auth neo4j --frontend angular
+    exec_command(
+        capfd,
+        "create base --auth neo4j --frontend no --current",
+        "Project folder already exists: projects",
+        "Project base successfully created",
+    )
+
+    exec_command(
+        capfd,
+        "create new --extend new --auth neo4j --frontend no --current",
+        "A project cannot extend itself",
+    )
+    exec_command(
+        capfd,
+        "create new --extend doesnotexist --auth neo4j --frontend no --current",
+        "Invalid extend value: project doesnotexist not found",
+    )
+
+    create_command = "create ext --extend base"
+    create_command += " --auth neo4j --frontend angular"
+    create_command += " --current --service rabbit"
+    exec_command(
+        capfd,
+        create_command,
+        "Project folder already exists: projects",
+        "Project ext successfully created",
+    )
+
+    exec_command(
+        capfd,
+        "-p ext init --force",
+        "Project initialized",
+    )
+    exec_command(
+        capfd,
+        "-p ext check -i main --no-git --no-builds",
+        "Checks completed",
+    )
+
+    # Test Services Activation
+
+    os.remove(".projectrc")
+
+    # Test services activation from create --service
+    services = [
+        "postgres",
+        "mysql",
+        "neo4j",
+        "mongo",
+        "rabbit",
+        "redis",
+        "celery",
+        "pushpin",
+        "ftp",
+    ]
+    opt = "--frontend no --current --force"
+    for service in services:
+
+        if service == "postgres":
+            auth = "postgres"
+            serv_opt = ""
+        elif service == "mysql":
+            auth = "mysql"
+            serv_opt = ""
+        elif service == "neo4j":
+            auth = "neo4j"
+            serv_opt = ""
+        elif service == "mongo":
+            auth = "mongo"
+            serv_opt = ""
+        else:
+            auth = "postgres"
+            serv_opt = f"--service {service}"
+
+        exec_command(
+            capfd,
+            "create testservices {opt} --auth {auth} {service}".format(
+                opt=opt, auth=auth, service=serv_opt
+            ),
+            "Project testservices successfully created",
+        )
+        if service == "mysql":
+            services = ["mariadb"]
+        elif service == "celery":
+            services = ["celery", "celeryui", "rabbit"]
+        else:
+            services = [service]
+
+        exec_command(
+            capfd,
+            "-p testservices list services",
+            "List of active services:",
+            *services,
+        )
+
+    # Test Celery Activation
+
+    opt = "--frontend no --current --force --auth neo4j"
+    project_configuration = "projects/testcelery/project_configuration.yaml"
+
+    def verify_celery_configuration(services_list, broker, backend):
+
+        services = "--service celery"
+        if services_list:
+            for service in services_list:
+                services += f" --service {service}"
+
+        exec_command(
+            capfd,
+            f"create testcelery {opt} {services}",
+            "Project testcelery successfully created",
+        )
+
+        with open(project_configuration) as f:
+            lines = f.readlines()
+        assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
+        assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
+
+    verify_celery_configuration([], "RABBIT", "RABBIT")
+    verify_celery_configuration(["rabbit"], "RABBIT", "RABBIT")
+    verify_celery_configuration(["redis"], "REDIS", "REDIS")
+    verify_celery_configuration(["mongo"], "RABBIT", "MONGODB")
+    verify_celery_configuration(["rabbit", "redis"], "RABBIT", "REDIS")
+    verify_celery_configuration(["rabbit", "mongo"], "RABBIT", "MONGODB")
+    verify_celery_configuration(["redis", "mongo"], "REDIS", "REDIS")
+    verify_celery_configuration(["rabbit", "redis", "mongo"], "RABBIT", "REDIS")
