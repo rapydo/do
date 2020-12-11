@@ -138,7 +138,8 @@ def test_failed_create(capfd):
         "Use --current to force the creation here",
     )
 
-    with open("data/logs/rapydo-controller.log") as f:
+    print(os.getcwd())
+    with open(f"{os.getcwd()}/data/logs/rapydo-controller.log") as f:
         logs = f.read().splitlines()
         assert logs[-1].endswith("Use --current to force the creation here")
 
