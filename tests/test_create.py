@@ -10,7 +10,7 @@ from controller.templating import Templating
 from tests import TemporaryRemovePath, exec_command
 
 
-def test_failed_create(capfd):
+def test_create(capfd):
 
     exec_command(
         capfd,
@@ -93,9 +93,6 @@ def test_failed_create(capfd):
         "You selected a reserved name, invalid project name: celery",
     )
 
-
-def test_create(capfd):
-    # Let's create a project and init git
     create_command = "create first --auth postgres --frontend angular"
     create_command += " --service rabbit --service neo4j --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
