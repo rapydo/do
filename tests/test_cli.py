@@ -255,7 +255,22 @@ def test_create(capfd):
         "Project first successfully created",
     )
 
+    # Delete a raw file in no-auto mode (i.e. manual creation)
+    favicon = "projects/first/frontend/assets/favicon/favicon.ico"
+    shutil.rmtree(favicon)
+    exec_command(
+        capfd,
+        "create first --auth postgres --frontend angular --no-auto --current",
+        f"File is missing: {favicon}",
+    )
     # here a single and valid project is created (not initialized)
+    exec_command(
+        capfd,
+        "create first --auth postgres --frontend angular --current",
+        "Project folder already exists: projects/first/confs",
+        f"Project file already exists: {pconf}",
+        "Project first successfully created",
+    )
 
 
 def test_all(capfd):
@@ -1190,6 +1205,25 @@ def test_all(capfd):
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
+
+    # Tuning command with neo4j container OFF
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
+        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
+        "Memory settings recommendation from neo4j-admin memrec:",
+        "Based on the above, the following memory settings are recommended:",
+        "dbms.memory.heap.initial_size=",
+        "dbms.memory.heap.max_size=",
+        "dbms.memory.pagecache.size=",
+        "Total size of lucene indexes in all databases:",
+        "Total size of data and native indexes in all databases:",
+    )
+
     exec_command(capfd, "-s neo4j start")
     # 4) verify data match again point 1 (restore completed)
     # postponed because neo4j needs time to start...
@@ -1201,7 +1235,7 @@ def test_all(capfd):
         "The restore procedure requires postgres running, please start your stack",
     )
 
-    # Tuning command
+    # Tuning command with neo4j container ON
     exec_command(
         capfd,
         "tuning neo4j",

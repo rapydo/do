@@ -279,8 +279,8 @@ def create_project(
             if p.exists():
                 log.info("Project file already exists: {}", p)
             else:
-                # print(f"\n{template}")
-                Application.exit(p)
+                # print(f"Missing file: {p}")
+                Application.exit("File is missing: {}", p)
 
 
 def parse_env_variables(envs):
