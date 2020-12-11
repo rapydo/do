@@ -19,11 +19,12 @@ from tests import (
 
 def test_all(capfd):
 
-    origin = "--origin-url https://your_remote_git/your_project.git"
+    git = "--origin-url https://your_remote_git/your_project.git"
     e = "--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
+    s = "--service rabbit --service neo4j"
     exec_command(
         capfd,
-        f"create first --auth postgres --frontend angular --current {origin} {e}",
+        f"create first --auth postgres --frontend angular --current {git} {e} {s}",
         "Project first successfully created",
     )
 
