@@ -36,12 +36,7 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
         run: |
-          # mkdir rapydo_tests
-          # cd rapydo_tests
-          # mkdir -p data/logs
           py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests
-          # mv coverage.xml ..
-          # cd ..
           bash <(curl -s https://codecov.io/bash)
 
       # - name: Artifact

@@ -3,277 +3,31 @@ import shutil
 import signal
 import tempfile
 import time
-from collections import OrderedDict  # can be removed from python 3.7
 from datetime import datetime
 
 from git import Repo
-from typer.testing import CliRunner
 
 from controller import __version__, gitter
-from controller.app import Application
 from controller.dockerizing import Dock
-from controller.project import Project
-from controller.templating import Templating
-
-controller = Application()
-runner = CliRunner()
-
-
-class TemporaryRemovePath:
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.tmp_path = f"{self.path}.bak"
-
-    def __enter__(self):
-
-        os.rename(self.path, self.tmp_path)
-        return self
-
-    def __exit__(self, _type, value, tb):
-        os.rename(self.tmp_path, self.path)
-
-
-class Timeout(Exception):
-    pass
-
-
-def handler(signum, frame):
-    raise Timeout("Time is up")
-
-
-def mock_KeyboardInterrupt(signum, frame):
-    raise KeyboardInterrupt("Time is up")
-
-
-def exec_command(capfd, command, *asserts, input_text=None):
-
-    with capfd.disabled():
-        print("\n")
-        print("_____________________________________________")
-        print(f"rapydo {command}")
-
-    # re-read everytime before invoking a command to cleanup the Configuration class
-    Application.load_projectrc()
-    Application.project_scaffold = Project()
-    Application.gits = OrderedDict()
-    result = runner.invoke(controller.app, command, input=input_text)
-
-    with capfd.disabled():
-        print(f"Exit code: {result.exit_code}")
-        print(result.stdout)
-        print("_____________________________________________")
-
-    captured = capfd.readouterr()
-
-    # Here outputs from inside the containers
-    cout = [x for x in captured.out.replace("\r", "").split("\n") if x.strip()]
-    # Here output from rapydo
-    err = [x for x in captured.err.replace("\r", "").split("\n") if x.strip()]
-    # Here output from other sources, e.g. typer errors o docker-compose output
-    out = [x for x in result.stdout.replace("\r", "").split("\n") if x.strip()]
-    # Here exceptions, e.g. Time is up
-    if result.exception:
-        exc = [
-            x for x in str(result.exception).replace("\r", "").split("\n") if x.strip()
-        ]
-    else:
-        exc = []
-
-    with capfd.disabled():
-        for e in err:
-            print(f"{e}")
-        for o in cout:
-            print(f">> {o}")
-        for o in out:
-            print(f"_ {o}")
-        if result.exception and str(result.exception) != result.exit_code:
-            print("\n!! Exception:")
-            print(result.exception)
-
-    for a in asserts:
-        # Check if the assert is in any line (also as substring) from out or err
-        assert a in out + err or any(a in x for x in out + err + cout + exc)
-
-    return out
-
-
-def test_failed_create(capfd):
-
-    exec_command(
-        capfd,
-        "--version",
-        f"rapydo version: {__version__}",
-    )
-    exec_command(
-        capfd,
-        "create first",
-        "Missing option '--auth'",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth xyz",
-        "Invalid value for '--auth'",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres",
-        "Missing option '--frontend'.",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend xyz",
-        "Invalid value for '--frontend'",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular",
-        "Current folder is not empty, cannot create a new project here.",
-        "Found: ",
-        "Use --current to force the creation here",
-    )
-
-    with open("data/logs/rapydo-controller.log") as f:
-        logs = f.read().splitlines()
-        assert logs[-1].endswith("Use --current to force the creation here")
-
-    # Please note that --current is required because data folder is already created
-    # to be able to tests logs
-
-    exec_command(
-        capfd,
-        "create test_celery --auth postgres --frontend angular --current",
-        "Wrong project name, _ is not a valid character",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --no-auto --current",
-        "mkdir -p projects",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend no --env X --current",
-        "Invalid env X, expected: K1=V1",
-    )
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend no --env X, --current",
-        "Invalid env X,, expected: K1=V1",
-    )
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend no --env X=a,Y=b --current",
-        "Invalid env X=a,Y=b, expected: K1=V1",
-    )
-
-    templating = Templating()
-    with TemporaryRemovePath(templating.template_dir):
-        exec_command(
-            capfd,
-            "create firsts --auth postgres --frontend no --current",
-            "Template folder not found",
-        )
-
-    exec_command(
-        capfd,
-        "create celery --auth postgres --frontend angular --current",
-        "You selected a reserved name, invalid project name: celery",
-    )
-
-
-def test_create(capfd):
-    # Let's create a project and init git
-    create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit --service neo4j --add-optionals --current"
-    create_command += " --origin-url https://your_remote_git/your_project.git"
-    exec_command(
-        capfd,
-        create_command,
-        "Project first successfully created",
-    )
-
-    pconf = "projects/first/project_configuration.yaml"
-    os.remove(pconf)
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --current --no-auto",
-        "Project folder already exists: projects/first/confs",
-        f"{pconf}",
-    )
-
-    create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
-    create_command += " --current --force"
-    exec_command(
-        capfd,
-        create_command,
-        "Project folder already exists: projects/first/confs",
-        "Project first successfully created",
-    )
-
-    create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit --service neo4j"
-    create_command += " --current --force"
-    exec_command(
-        capfd,
-        create_command,
-        "Project folder already exists: projects/first/confs",
-        "Project first successfully created",
-    )
-
-    # this is the last version that is created
-    create_command = "create first --auth postgres --frontend angular"
-    create_command += " --service rabbit --service neo4j"
-    create_command += " --current --force"
-    create_command += " --env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
-    exec_command(
-        capfd,
-        create_command,
-        "Project folder already exists: projects/first/confs",
-        "A backup of {f} is saved as {f}.bak".format(f=pconf),
-        "Project first successfully created",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --current",
-        "Project folder already exists: projects/first/confs",
-        f"Project file already exists: {pconf}",
-        "Project first successfully created",
-    )
-
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --no-auto --current",
-        "Project folder already exists: projects/first/confs",
-        f"Project file already exists: {pconf}",
-        "Project first successfully created",
-    )
-
-    # Delete a raw file in no-auto mode (i.e. manual creation)
-    favicon = "projects/first/frontend/assets/favicon/favicon.ico"
-    os.remove(favicon)
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --no-auto --current",
-        f"File is missing: {favicon}",
-    )
-    # here a single and valid project is created (not initialized)
-    exec_command(
-        capfd,
-        "create first --auth postgres --frontend angular --current",
-        "Project folder already exists: projects/first/confs",
-        f"Project file already exists: {pconf}",
-        "Project first successfully created",
-    )
+from tests import (
+    TemporaryRemovePath,
+    exec_command,
+    mock_KeyboardInterrupt,
+    signal_handler,
+)
 
 
 def test_all(capfd):
+
+    pconf = "projects/first/project_configuration.yaml"
+
+    exec_command(
+        capfd,
+        "create first --auth postgres --frontend angular --current",
+        "Project folder already exists: projects/first/confs",
+        f"Project file already exists: {pconf}",
+        "Project first successfully created",
+    )
 
     exec_command(capfd, "rapydo", "Usage")
 
@@ -855,7 +609,7 @@ def test_all(capfd):
         "backend-server",
     )
 
-    signal.signal(signal.SIGALRM, handler)
+    signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(2)
     exec_command(
         capfd,
@@ -1384,7 +1138,7 @@ def test_all(capfd):
         "No container found for backend_1",
     )
 
-    signal.signal(signal.SIGALRM, handler)
+    signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(4)
     exec_command(
         capfd,
@@ -1442,7 +1196,7 @@ def test_all(capfd):
         "no matching entries in passwd file",
     )
 
-    signal.signal(signal.SIGALRM, handler)
+    signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(4)
     exec_command(
         capfd,
