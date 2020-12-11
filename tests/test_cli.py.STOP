@@ -6,7 +6,7 @@ from datetime import datetime
 
 from git import Repo
 
-from controller import __version__, gitter
+from controller import __version__
 from controller.dockerizing import Dock
 from tests import (
     TemporaryRemovePath,
@@ -41,90 +41,6 @@ def test_all(capfd):
         "Base images pulled from docker hub",
     )
 
-    # Skipping main because we are on a fake git repository
-    exec_command(
-        capfd,
-        "update -i main",
-        "All updated",
-    )
-
-    open("submodules/do/temp.file", "a").close()
-    with open("submodules/do/setup.py", "a") as f:
-        f.write("# added from tests\n")
-
-    exec_command(
-        capfd,
-        "update -i main",
-        "Unable to update do repo, you have unstaged files",
-        "Untracked files:",
-        "submodules/do/temp.file",
-        "Changes not staged for commit:",
-        "submodules/do/setup.py",
-    )
-    os.remove("submodules/do/temp.file")
-    r = gitter.get_repo("submodules/do")
-    r.git().execute(["git", "checkout", "--", "setup.py"])
-
-    # Skipping main because we are on a fake git repository
-    exec_command(
-        capfd,
-        "check -i main",
-        "Checks completed",
-    )
-
-    exec_command(
-        capfd,
-        "--stack invalid check -i main",
-        "Failed to read projects/first/confs/invalid.yml: File does not exist",
-    )
-
-    os.rename("submodules", "submodules.bak")
-    os.mkdir("submodules")
-
-    # This is to re-fill the submodules folder,
-    # these folder will be removed by the next init
-    exec_command(capfd, "init", "Project initialized")
-
-    modules_path = os.path.abspath("submodules.bak")
-
-    with TemporaryRemovePath("submodules.bak/do"):
-        exec_command(
-            capfd,
-            f"init --submodules-path {modules_path}",
-            "Submodule do not found in ",
-        )
-    exec_command(
-        capfd,
-        f"init --submodules-path {modules_path}",
-        "Path submodules/http-api already exists, removing",
-        "Project initialized",
-    )
-
-    assert os.path.islink("submodules/do")
-    assert not os.path.islink("submodules.bak/do")
-
-    # Init again, this time in submodules there are links...
-    # and will be removed as well as the folders
-    exec_command(
-        capfd,
-        f"init --submodules-path {modules_path}",
-        "Path submodules/http-api already exists, removing",
-        "Project initialized",
-    )
-
-    exec_command(
-        capfd,
-        "init --submodules-path invalid/path",
-        "Local path not found: invalid/path",
-    )
-
-    os.mkdir("submodules/rapydo-confs")
-    exec_command(
-        capfd,
-        "check -i main --no-git --no-builds",
-        "Project first contains an obsolete file or folder: submodules/rapydo-confs",
-    )
-    shutil.rmtree("submodules/rapydo-confs")
     # Some tests with list
     exec_command(
         capfd,
