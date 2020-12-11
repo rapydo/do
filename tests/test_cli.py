@@ -20,9 +20,10 @@ from tests import (
 def test_all(capfd):
 
     origin = "--origin-url https://your_remote_git/your_project.git"
+    e = "--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
     exec_command(
         capfd,
-        f"create first --auth postgres --frontend angular --current {origin}",
+        f"create first --auth postgres --frontend angular --current {origin} {e}",
         "Project first successfully created",
     )
 

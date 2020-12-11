@@ -3,10 +3,6 @@ from collections import OrderedDict  # can be removed from python 3.7
 
 from typer.testing import CliRunner
 
-from controller.app import Application
-from controller.project import Project
-
-controller = Application()
 runner = CliRunner()
 
 
@@ -42,6 +38,11 @@ def exec_command(capfd, command, *asserts, input_text=None):
         print("\n")
         print("_____________________________________________")
         print(f"rapydo {command}")
+
+    from controller.app import Application
+    from controller.project import Project
+
+    controller = Application()
 
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()

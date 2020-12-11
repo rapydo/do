@@ -1,6 +1,6 @@
 import os
 
-import pytest
+# import pytest
 from faker import Faker
 
 f = Faker("en_US")
@@ -12,6 +12,6 @@ os.chdir(folder)
 print(f"FOLDER = {folder}")
 
 
-@pytest.fixture
-def fake():
-    return f
+# @pytest.fixture
+# def fake():
+#     return f
