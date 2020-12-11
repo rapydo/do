@@ -1,17 +1,11 @@
 import os
 
-from controller import __version__
 from controller.templating import Templating
 from tests import TemporaryRemovePath, exec_command
 
 
 def test_failed_create(capfd):
 
-    exec_command(
-        capfd,
-        "--version",
-        f"rapydo version: {__version__}",
-    )
     exec_command(
         capfd,
         "create first",
