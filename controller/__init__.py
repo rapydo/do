@@ -6,13 +6,16 @@ from loguru import logger as log
 
 __version__ = "0.9"
 
-DATA_FOLDER = Path("data")
+DATA_FOLDER = Path("data").resolve()
 LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
 
 LOGS_FILE = None
 if LOGS_FOLDER.is_dir():
     LOGS_FILE = LOGS_FOLDER.joinpath("rapydo-controller.log")
 
+print("\n\n")
+print(LOGS_FILE)
+print("\n\n")
 # log.level("VERBOSE", no=1, color="<fg #666>")
 log.level("INFO", color="<green>")
 
