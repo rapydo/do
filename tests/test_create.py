@@ -1,3 +1,9 @@
+"""
+This module will test all the combinations of the create command.
+Other tests that will create projects will assume the command fully working
+and will only use the specific configuration needed by the test itself
+"""
+
 import os
 
 from controller.templating import Templating

@@ -1,3 +1,7 @@
+"""
+This module will test combinations of init and check commands.
+Other module that will initialize projects will consider the init command fully working
+"""
 from controller import __version__, gitter
 from tests import TemporaryRemovePath, create_project, exec_command
 

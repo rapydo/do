@@ -4,19 +4,14 @@ from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Dict
 
+"""
+This module will directly access to functions,
+to verify cases not easly testable through cli commands
+"""
+
 import pytest
 
-from controller import __version__, gitter
-from controller.app import Application
-from controller.compose import Compose
-from controller.packages import Packages
-from controller.templating import Templating
-from controller.utilities import services, system
-from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import create_project
-
-# These tests will directly access to functions, to verify cases
-# not easly testable through cli commands
 
 
 def test_all(capfd):
@@ -26,6 +21,14 @@ def test_all(capfd):
         name="first",
         init=True,
     )
+
+    from controller import __version__, gitter
+    from controller.app import Application
+    from controller.compose import Compose
+    from controller.packages import Packages
+    from controller.templating import Templating
+    from controller.utilities import services, system
+    from controller.utilities.configuration import load_yaml_file, mix_configuration
 
     app = Application()
 

@@ -1,3 +1,7 @@
+"""
+This module will test basic app functionalities, like iteraction with typer
+and the checks of the current folder (git repo and rapydo structure required)
+"""
 import os
 import tempfile
 
