@@ -1,7 +1,6 @@
 import os
 import shutil
 import signal
-import tempfile
 import time
 from datetime import datetime
 
@@ -11,6 +10,7 @@ from controller import __version__, gitter
 from controller.dockerizing import Dock
 from tests import (
     TemporaryRemovePath,
+    create_project,
     exec_command,
     mock_KeyboardInterrupt,
     signal_handler,
@@ -19,19 +19,14 @@ from tests import (
 
 def test_all(capfd):
 
-    git = "--origin-url https://your_remote_git/your_project.git"
-    e = "--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue"
-    s = "--service rabbit --service neo4j"
-    exec_command(
-        capfd,
-        f"create first --auth postgres --frontend angular --current {git} {e} {s}",
-        "Project first successfully created",
-    )
-
-    exec_command(
-        capfd,
-        "init",
-        "Project initialized",
+    create_project(
+        capfd=capfd,
+        name="first",
+        auth="postgres",
+        frontend="angular",
+        services=["rabbit", "neo4j"],
+        extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
+        init=True,
     )
 
     path = "projects/first/backend/endpoints/xyz.py"
@@ -1791,44 +1786,3 @@ RUN mkdir xyz
         f"This project is not compatible with rapydo version {__version__}",
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
-
-    # Some final tests
-    # def test_lastest(capfd):
-
-    exec_command(
-        capfd,
-        "create latest --auth postgres --frontend no --current --force",
-        "Project latest successfully created",
-    )
-
-    folder = os.getcwd()
-    # Tests from a subfolder
-    os.chdir("projects")
-    exec_command(
-        capfd,
-        "-p latest check -i main --no-git --no-builds",
-        "You are not in the main folder, please change your working dir",
-        "Found a valid parent folder:",
-        "Suggested command: cd ..",
-    )
-
-    os.chdir("latest")
-    exec_command(
-        capfd,
-        "-p latest check -i main --no-git --no-builds",
-        "You are not in the main folder, please change your working dir",
-        "Found a valid parent folder:",
-        "Suggested command: cd ../..",
-    )
-
-    # Tests from outside the folder
-    os.chdir(tempfile.gettempdir())
-    exec_command(
-        capfd,
-        "check -i main",
-        "You are not in a git repository",
-        "Please note that this command only works from inside a rapydo-like repository",
-        "Verify that you are in the right folder, now you are in:",
-    )
-
-    os.chdir(folder)

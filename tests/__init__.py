@@ -1,5 +1,6 @@
 import os
 from collections import OrderedDict  # can be removed from python 3.7
+from importlib import reload
 
 from typer.testing import CliRunner
 
@@ -34,6 +35,10 @@ def mock_KeyboardInterrupt(signum, frame):
 
 def exec_command(capfd, command, *asserts, input_text=None):
 
+    import controller
+
+    reload(controller)
+
     with capfd.disabled():
         print("\n")
         print("_____________________________________________")
@@ -42,13 +47,13 @@ def exec_command(capfd, command, *asserts, input_text=None):
     from controller.app import Application
     from controller.project import Project
 
-    controller = Application()
+    ctrl = Application()
 
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = OrderedDict()
-    result = runner.invoke(controller.app, command, input=input_text)
+    result = runner.invoke(ctrl.app, command, input=input_text)
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
@@ -87,3 +92,33 @@ def exec_command(capfd, command, *asserts, input_text=None):
         assert a in out + err or any(a in x for x in out + err + cout + exc)
 
     return out
+
+
+def create_project(
+    capfd,
+    name,
+    auth="postgres",
+    frontend="angular",
+    services=None,
+    extra="",
+    init=False,
+):
+
+    opt = "--current --origin-url https://your_remote_git/your_project.git"
+    s = ""
+    if services:
+        for service in services:
+            s += " --service {service}"
+
+    exec_command(
+        capfd,
+        f"create {name} --auth {auth} --frontend {frontend} {opt} {extra} {s}",
+        f"Project {name} successfully created",
+    )
+
+    if init:
+        exec_command(
+            capfd,
+            "init",
+            "Project initialized",
+        )

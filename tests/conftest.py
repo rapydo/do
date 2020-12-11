@@ -14,6 +14,7 @@ def create_folder():
     os.chdir(folder)
 
     print(f"FOLDER = {folder}")
+    print(f"CWD = {os.getcwd()}")
 
 
 # @pytest.fixture
