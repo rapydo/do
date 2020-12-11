@@ -9,6 +9,13 @@ from datetime import datetime
 from git import Repo
 from typer.testing import CliRunner
 
+from controller import __version__, gitter
+from controller.app import Application
+from controller.dockerizing import Dock
+from controller.project import Project
+from controller.templating import Templating
+
+controller = Application()
 runner = CliRunner()
 
 
@@ -44,11 +51,6 @@ def exec_command(capfd, command, *asserts, input_text=None):
         print("\n")
         print("_____________________________________________")
         print(f"rapydo {command}")
-
-    from controller.app import Application
-    from controller.project import Project
-
-    controller = Application()
 
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()
@@ -96,12 +98,6 @@ def exec_command(capfd, command, *asserts, input_text=None):
 
 
 def test_failed_create(capfd):
-
-    os.makedirs("rapydo_tests/data/logs")
-    os.chdir("rapydo_tests")
-
-    from controller import __version__
-    from controller.templating import Templating
 
     exec_command(
         capfd,
@@ -278,8 +274,6 @@ def test_create(capfd):
 
 
 def test_all(capfd):
-
-    from controller import __version__, gitter
 
     exec_command(capfd, "rapydo", "Usage")
 
@@ -1586,10 +1580,6 @@ def test_all(capfd):
 
 
 def test_builds(capfd):
-
-    from controller import __version__
-    from controller.dockerizing import Dock
-
     os.remove(".projectrc")
 
     create_command = "create testbuild --auth postgres --frontend angular"
@@ -2043,8 +2033,6 @@ def test_rabbit_invalid_characters(capfd):
 
 
 def test_install(capfd):
-
-    from controller import __version__, gitter
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
