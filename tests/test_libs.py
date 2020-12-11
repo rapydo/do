@@ -13,12 +13,19 @@ from controller.packages import Packages
 from controller.templating import Templating
 from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
+from tests import create_project
 
 # These tests will directly access to functions, to verify cases
-# not easly testable through cli commands:
+# not easly testable through cli commands
 
 
 def test_all(capfd):
+
+    create_project(
+        capfd=capfd,
+        name="first",
+        init=True,
+    )
 
     app = Application()
 
