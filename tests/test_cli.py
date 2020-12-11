@@ -28,65 +28,11 @@ def test_all(capfd):
         "Project first successfully created",
     )
 
-    exec_command(capfd, "rapydo", "Usage")
-
-    exec_command(
-        capfd,
-        "--invalid-option create first",
-        "Error: no such option: --invalid-option",
-    )
-
-    # Basic initialization
-    exec_command(
-        capfd,
-        "check -i main",
-        "Repo https://github.com/rapydo/http-api.git missing as submodules/http-api.",
-        "You should init your project",
-    )
     exec_command(
         capfd,
         "init",
         "Project initialized",
     )
-
-    r = gitter.get_repo("submodules/http-api")
-    gitter.switch_branch(r, "0.7.6")
-    exec_command(
-        capfd,
-        "check -i main",
-        f"http-api: wrong branch 0.7.6, expected {__version__}",
-        "You can use rapydo init to fix it",
-    )
-    exec_command(
-        capfd,
-        "init",
-        f"Switched http-api branch from 0.7.6 to {__version__}",
-        f"build-templates already set on branch {__version__}",
-        f"do already set on branch {__version__}",
-    )
-
-    with TemporaryRemovePath("data"):
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            "Folder not found: data",
-            "Please note that this command only works from inside a rapydo-like repo",
-            "Verify that you are in the right folder, now you are in: ",
-        )
-
-    with TemporaryRemovePath("projects/first/builds"):
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            "Project first is invalid: required folder not found projects/first/builds",
-        )
-
-    with TemporaryRemovePath(".gitignore"):
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            "Project first is invalid: required file not found .gitignore",
-        )
 
     path = "projects/first/backend/endpoints/xyz.py"
     test_path = "projects/first/backend/tests/test_endpoints_xyz.py"
@@ -1331,8 +1277,7 @@ def test_all(capfd):
         "No container found for proxy_1",
     )
 
-
-def test_builds(capfd):
+    # def test_builds(capfd):
     os.remove(".projectrc")
 
     create_command = "create testbuild --auth postgres --frontend angular"
@@ -1616,8 +1561,7 @@ RUN mkdir xyz
         "Project initialized",
     )
 
-
-def test_extend(capfd):
+    # def test_extend(capfd):
     # base project is --auth postgres --frontend angular
     # the ext one is --auth neo4j --frontend angular
     exec_command(
@@ -1659,8 +1603,7 @@ def test_extend(capfd):
         "Checks completed",
     )
 
-
-def test_services_activation(capfd):
+    # def test_services_activation(capfd):
 
     os.remove(".projectrc")
 
@@ -1716,8 +1659,7 @@ def test_services_activation(capfd):
             *services,
         )
 
-
-def test_celery_activation(capfd):
+    # def test_celery_activation(capfd):
 
     # Previous test already deleted the .project and no init is execute afterwards
     # => .project does not exist and cannot be removed
@@ -1753,8 +1695,7 @@ def test_celery_activation(capfd):
     test_celery_configuration(["redis", "mongo"], "REDIS", "REDIS")
     test_celery_configuration(["rabbit", "redis", "mongo"], "RABBIT", "REDIS")
 
-
-def test_rabbit_invalid_characters(capfd):
+    # def test_rabbit_invalid_characters(capfd):
 
     create_command = "create testinvalid --auth postgres --frontend angular"
     create_command += " --service rabbit --env RABBITMQ_PASSWORD=invalid£password"
@@ -1784,8 +1725,7 @@ def test_rabbit_invalid_characters(capfd):
         "Project initialized",
     )
 
-
-def test_install(capfd):
+    # def test_install(capfd):
 
     with TemporaryRemovePath("submodules/do"):
         exec_command(
@@ -1852,9 +1792,8 @@ def test_install(capfd):
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
 
-
-# Some final tests
-def test_lastest(capfd):
+    # Some final tests
+    # def test_lastest(capfd):
 
     exec_command(
         capfd,
