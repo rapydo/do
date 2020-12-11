@@ -7,9 +7,9 @@ f = Faker("en_US")
 
 
 @pytest.fixture(autouse=True)
-def create_folder():
+def create_folder() -> None:
 
-    folder = f.file_name(extension="test")
+    folder = f.pystr(min_chars=16, max_chars=16)
     os.makedirs(f"{folder}/data/logs")
     os.chdir(folder)
 

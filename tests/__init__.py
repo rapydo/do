@@ -108,7 +108,7 @@ def create_project(
     s = ""
     if services:
         for service in services:
-            s += " --service {service}"
+            s += f" --service {service}"
 
     exec_command(
         capfd,
