@@ -257,7 +257,7 @@ def test_create(capfd):
 
     # Delete a raw file in no-auto mode (i.e. manual creation)
     favicon = "projects/first/frontend/assets/favicon/favicon.ico"
-    shutil.rmtree(favicon)
+    os.remove(favicon)
     exec_command(
         capfd,
         "create first --auth postgres --frontend angular --no-auto --current",
