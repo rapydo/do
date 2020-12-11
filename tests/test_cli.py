@@ -19,13 +19,9 @@ from tests import (
 
 def test_all(capfd):
 
-    pconf = "projects/first/project_configuration.yaml"
-
     exec_command(
         capfd,
         "create first --auth postgres --frontend angular --current",
-        "Project folder already exists: projects/first/confs",
-        f"Project file already exists: {pconf}",
         "Project first successfully created",
     )
 
