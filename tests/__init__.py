@@ -1,4 +1,5 @@
 import os
+import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 
@@ -40,9 +41,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
     reload(controller)
 
     with capfd.disabled():
-        print("\n")
-        print("_____________________________________________")
-        print(f"rapydo {command}")
+        print("\n", file=sys.stderr)
+        print("_____________________________________________", file=sys.stderr)
+        print(f"rapydo {command}", file=sys.stderr)
 
     from controller.app import Application
     from controller.project import Project
@@ -56,9 +57,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
     result = runner.invoke(ctrl.app, command, input=input_text)
 
     with capfd.disabled():
-        print(f"Exit code: {result.exit_code}")
-        print(result.stdout)
-        print("_____________________________________________")
+        print(f"Exit code: {result.exit_code}", file=sys.stderr)
+        print(result.stdout, file=sys.stderr)
+        print("_____________________________________________", file=sys.stderr)
 
     captured = capfd.readouterr()
 
@@ -78,14 +79,14 @@ def exec_command(capfd, command, *asserts, input_text=None):
 
     with capfd.disabled():
         for e in err:
-            print(f"{e}")
+            print(f"{e}", file=sys.stderr)
         for o in cout:
-            print(f">> {o}")
+            print(f">> {o}", file=sys.stderr)
         for o in out:
-            print(f"_ {o}")
+            print(f"_ {o}", file=sys.stderr)
         if result.exception and str(result.exception) != result.exit_code:
-            print("\n!! Exception:")
-            print(result.exception)
+            print("\n!! Exception:", file=sys.stderr)
+            print(result.exception, file=sys.stderr)
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
