@@ -1,13 +1,13 @@
+"""
+This module will directly access to functions,
+to verify cases not easly testable through cli commands
+"""
+
 import os
 import tempfile
 from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Dict
-
-"""
-This module will directly access to functions,
-to verify cases not easly testable through cli commands
-"""
 
 import pytest
 

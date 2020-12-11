@@ -1,10 +1,8 @@
-from tests import TemporaryRemovePath, create_project, exec_command
-
 """
 This module will test the install command
 """
-
 from controller import __version__, gitter
+from tests import TemporaryRemovePath, create_project, exec_command
 
 
 def test_install(capfd):

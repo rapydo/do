@@ -1,3 +1,7 @@
+"""
+This module list will test the add command, in all its combinations
+"""
+
 import os
 import shutil
 
