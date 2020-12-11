@@ -99,6 +99,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
 
 def test_failed_create(capfd):
 
+    os.mkdir("rapydo_tests/data/logs")
+    os.chdir("rapydo_tests")
+    # os.makedirs("data/logs")
     exec_command(
         capfd,
         "--version",
