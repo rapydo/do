@@ -10,7 +10,7 @@ import shlex
 import sys
 from contextlib import redirect_stdout
 from io import StringIO
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors

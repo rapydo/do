@@ -1,5 +1,3 @@
-from typing import Any
-
 import typer
 
 from controller.app import Application

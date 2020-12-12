@@ -60,8 +60,8 @@ jobs:
           # This works well for all tests... except for install... that is not covered :o
           # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
 
-          mkdir tests
-          cd tests
+          mkdir rapydo_tests
+          cd rapydo_tests
           py.test --timeout=300 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
           cp coverage.xml ..
           cd ..
