@@ -1,0 +1,61 @@
+"""
+This module list will test the interfaces command
+"""
+
+from tests import create_project, exec_command
+
+
+def test_interfaces(capfd):
+
+    create_project(
+        capfd=capfd,
+        name="first",
+        auth="postgres",
+        frontend="no",
+        init=True,
+        pull=False,
+        start=False,
+    )
+
+    exec_command(
+        capfd,
+        "interfaces XYZ",
+        "Container 'XYZui' is not defined",
+        "You can use rapydo interfaces list to get available interfaces",
+    )
+    exec_command(
+        capfd,
+        "interfaces list",
+        "List of available interfaces:",
+        " - mongo",
+        " - sqlalchemy",
+        " - swagger",
+        " - celery",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces sqlalchemy --port XYZ --detach",
+        "Invalid value for '--port' / '-p': XYZ is not a valid integer",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces sqlalchemy --detach",
+        "Launching interface: sqlalchemyui",
+        "docker-compose command: 'run'",
+    )
+    exec_command(
+        capfd,
+        "interfaces sqlalchemy --port 123 --detach",
+        "Launching interface: sqlalchemyui",
+        "docker-compose command: 'run'",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces swagger --port 124 --detach",
+        "You can access swaggerui web page here:",
+        "http://localhost:124?docExpansion=list&",
+        "url=http://localhost:8080/api/specs",
+    )
