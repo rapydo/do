@@ -6,11 +6,11 @@ This module will test the verify command
 from tests import create_project, exec_command
 
 
-def test_verify(capfd):
+def test_verify(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],

@@ -6,11 +6,11 @@ import os
 from tests import TemporaryRemovePath, create_project, exec_command
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         auth="postgres",
         frontend="no",
         init=True,

@@ -42,7 +42,7 @@ jobs:
       - name: Print Logs
         if: failure()
         run: |
-          cat execution.log
+          tail -500 execution.log
       # - name: Artifact
       #   uses: actions/upload-artifact@v1
       #   with:

@@ -5,11 +5,11 @@ This module will test the interfaces command
 from tests import create_project, exec_command
 
 
-def test_interfaces(capfd):
+def test_interfaces(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         auth="postgres",
         frontend="no",
         init=True,

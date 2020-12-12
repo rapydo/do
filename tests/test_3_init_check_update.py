@@ -15,7 +15,7 @@ def test_base(capfd):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name="third",
         auth="postgres",
         frontend="angular",
         init=False,
@@ -61,18 +61,18 @@ def test_base(capfd):
             "Verify that you are in the right folder, now you are in: ",
         )
 
-    with TemporaryRemovePath("projects/first/builds"):
+    with TemporaryRemovePath("projects/third/builds"):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            "Project first is invalid: required folder not found projects/first/builds",
+            "Project third is invalid: required folder not found projects/third/builds",
         )
 
     with TemporaryRemovePath(".gitignore"):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            "Project first is invalid: required file not found .gitignore",
+            "Project third is invalid: required file not found .gitignore",
         )
 
     # Skipping main because we are on a fake git repository
@@ -109,7 +109,7 @@ def test_base(capfd):
     exec_command(
         capfd,
         "--stack invalid check -i main",
-        "Failed to read projects/first/confs/invalid.yml: File does not exist",
+        "Failed to read projects/third/confs/invalid.yml: File does not exist",
     )
 
     os.rename("submodules", "submodules.bak")
@@ -156,7 +156,7 @@ def test_base(capfd):
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",
-        "Project first contains an obsolete file or folder: submodules/rapydo-confs",
+        "Project third contains an obsolete file or folder: submodules/rapydo-confs",
     )
 
     shutil.rmtree("submodules/rapydo-confs")
@@ -192,7 +192,7 @@ def test_base(capfd):
 
     exec_command(
         capfd,
-        "-p first check -i main --no-git --no-builds",
+        "-p third check -i main --no-git --no-builds",
         "Checks completed",
     )
 
@@ -226,7 +226,7 @@ def test_base(capfd):
     # Let's restore .projectrc and data/logs
     exec_command(
         capfd,
-        "--project first init",
+        "--project third init",
         "Project initialized",
     )
     assert os.path.isdir("data/logs")
@@ -241,22 +241,12 @@ def test_base(capfd):
     fin.write("xyz")
     fin.close()
 
-    fin = open("submodules/build-templates/backend/Dockerfile", "a")
-    fin.write("xyz")
-    fin.close()
-    r = Repo("submodules/build-templates")
-    r.git.commit("-a", "-m", "'fake'")
-
     exec_command(
         capfd,
         "check -i main",
         "You have unstaged files on do",
         "Untracked files:",
         "submodules/do/new_file",
-        f"Obsolete image rapydo/backend:{__version__}",
-        "built on ",
-        " but changed on ",
-        "Update it with: rapydo --services backend pull",
     )
 
     with open(".pre-commit-config.yaml", "a") as a_file:

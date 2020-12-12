@@ -6,11 +6,11 @@ This module will test the diagnostic command
 from tests import create_project, exec_command
 
 
-def test_diagnostic(capfd):
+def test_diagnostic(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         auth="postgres",
         frontend="no",
         init=True,

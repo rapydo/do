@@ -5,11 +5,11 @@ This module will test the list command
 from tests import create_project, exec_command
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],

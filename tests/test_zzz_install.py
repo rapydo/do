@@ -5,11 +5,12 @@ from controller import __version__, gitter
 from tests import TemporaryRemovePath, create_project, exec_command
 
 
-def test_install(capfd):
+def test_install(capfd, fake):
 
+    project = fake.word()
     create_project(
         capfd=capfd,
-        name="first",
+        name=project,
         auth="postgres",
         frontend="angular",
         init=True,
@@ -45,7 +46,7 @@ def test_install(capfd):
     exec_command(capfd, "install --no-editable 0.7.2")
 
     # This test will change the required version
-    pconf = "projects/first/project_configuration.yaml"
+    pconf = f"projects/{project}/project_configuration.yaml"
 
     # Read and change the content
     fin = open(pconf)

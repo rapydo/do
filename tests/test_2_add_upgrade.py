@@ -12,7 +12,7 @@ def test_add(capfd):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name="second",
         auth="postgres",
         frontend="angular",
         init=True,
@@ -20,8 +20,8 @@ def test_add(capfd):
         start=False,
     )
 
-    path = "projects/first/backend/endpoints/xyz.py"
-    test_path = "projects/first/backend/tests/test_endpoints_xyz.py"
+    path = "projects/second/backend/endpoints/xyz.py"
+    test_path = "projects/second/backend/tests/test_endpoints_xyz.py"
     assert not os.path.exists(path)
     assert not os.path.exists(test_path)
     exec_command(
@@ -43,7 +43,7 @@ def test_add(capfd):
     assert os.path.isfile(path)
     assert os.path.isfile(test_path)
 
-    path = "projects/first/backend/tasks/xyz.py"
+    path = "projects/second/backend/tasks/xyz.py"
     assert not os.path.exists(path)
     exec_command(
         capfd,
@@ -63,8 +63,8 @@ def test_add(capfd):
     )
     assert os.path.isfile(path)
 
-    path = "projects/first/frontend/app/components/xyz"
-    test_path = "projects/first/frontend/app/components/xyz/xyz.spec.ts"
+    path = "projects/second/frontend/app/components/xyz"
+    test_path = "projects/second/frontend/app/components/xyz/xyz.spec.ts"
     assert not os.path.exists(path)
     assert not os.path.exists(os.path.join(path, "xyz.ts"))
     assert not os.path.exists(os.path.join(path, "xyz.html"))
@@ -106,7 +106,7 @@ def test_add(capfd):
         "Added SinkComponent to module declarations",
     )
 
-    path = "projects/first/frontend/app/services"
+    path = "projects/second/frontend/app/services"
     assert not os.path.exists(path)
     assert not os.path.exists(os.path.join(path, "xyz.ts"))
     exec_command(
@@ -138,7 +138,7 @@ def test_add(capfd):
         f"Service created: {path}",
     )
 
-    path = "projects/first/frontend/integration/app_mypath_my_id.spec.ts"
+    path = "projects/second/frontend/integration/app_mypath_my_id.spec.ts"
     assert not os.path.exists(path)
     exec_command(
         capfd,

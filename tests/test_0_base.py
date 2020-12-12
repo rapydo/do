@@ -9,16 +9,19 @@ from controller import __version__
 from tests import create_project, exec_command
 
 
-def test_base(capfd):
+def test_base(capfd, fake):
+
     exec_command(
         capfd,
         "--version",
         f"rapydo version: {__version__}",
     )
 
+    project = fake.word()
+
     exec_command(
         capfd,
-        "--invalid-option create first",
+        f"--invalid-option create {project}",
         "Error: no such option: --invalid-option",
     )
 
@@ -26,7 +29,7 @@ def test_base(capfd):
 
     create_project(
         capfd=capfd,
-        name="latest",
+        name=project,
         auth="postgres",
         frontend="no",
         init=True,
@@ -46,16 +49,16 @@ def test_base(capfd):
     os.chdir("projects")
     exec_command(
         capfd,
-        "-p latest check -i main --no-git --no-builds",
+        "check -i main --no-git --no-builds",
         "You are not in the main folder, please change your working dir",
         "Found a valid parent folder:",
         "Suggested command: cd ..",
     )
 
-    os.chdir("latest")
+    os.chdir(project)
     exec_command(
         capfd,
-        "-p latest check -i main --no-git --no-builds",
+        "check -i main --no-git --no-builds",
         "You are not in the main folder, please change your working dir",
         "Found a valid parent folder:",
         "Suggested command: cd ../..",

@@ -302,4 +302,21 @@ RUN mkdir xyz
         "Successfully built",
     )
 
+    fin = open("submodules/build-templates/backend/Dockerfile", "a")
+    fin.write("xyz")
+    fin.close()
+    r = Repo("submodules/build-templates")
+    r.git.commit("-a", "-m", "'fake'")
+    exec_command(
+        capfd,
+        "check -i main",
+        "You have unstaged files on do",
+        "Untracked files:",
+        "submodules/do/new_file",
+        f"Obsolete image rapydo/backend:{__version__}",
+        "built on ",
+        " but changed on ",
+        "Update it with: rapydo --services backend pull",
+    )
+
     exec_command(capfd, "remove --all", "Stack removed")

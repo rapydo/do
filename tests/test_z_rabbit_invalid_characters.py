@@ -5,11 +5,11 @@ special characters in the password
 from tests import create_project, exec_command
 
 
-def test_rabbit_invalid_characters(capfd):
+def test_rabbit_invalid_characters(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="testinvalid",
+        name=fake.word(),
         auth="postgres",
         frontend="no",
         services=["rabbit"],
@@ -24,7 +24,7 @@ def test_rabbit_invalid_characters(capfd):
 
     exec_command(
         capfd,
-        "-p testinvalid init --force",
+        "init --force",
         "Not allowed characters found in RABBITMQ_PASSWORD.",
         informative,
     )

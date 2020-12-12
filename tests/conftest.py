@@ -26,6 +26,6 @@ def create_folder() -> None:
     print(f"FOLDER = {folder}")
 
 
-# @pytest.fixture
-# def fake():
-#     return f
+@pytest.fixture
+def fake():
+    return f

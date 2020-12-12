@@ -14,11 +14,11 @@ import pytest
 from tests import create_project
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="first",
+        name=fake.word(),
         init=True,
     )
 

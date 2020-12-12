@@ -6,11 +6,11 @@ import time
 from tests import create_project, exec_command
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name="testbuild",
+        name=fake.word(),
         auth="postgres",
         frontend="no",
         services=["rabbit", "neo4j"],
