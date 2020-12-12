@@ -24,6 +24,7 @@ jobs:
             cronjobs,
             diagnostic,
             dump,
+            install,
             init_check_update,
             interfaces,
             libs,
@@ -34,7 +35,6 @@ jobs:
             start_shell_status_logs_restart_remove,
             verify,
             volatile,
-            z_install,
           ]
         python-version: [3.8, 3.7, 3.6]
 

@@ -1,8 +1,6 @@
 """
 This module will test the verify command
 """
-
-
 from tests import create_project, exec_command, random_project_name
 
 

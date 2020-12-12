@@ -5,13 +5,12 @@ Other module that will initialize projects will consider the init command fully 
 import os
 import shutil
 
-from git import Repo
-
-from controller import __version__, gitter
 from tests import TemporaryRemovePath, create_project, exec_command
 
 
 def test_base(capfd):
+
+    from controller import __version__, gitter
 
     create_project(
         capfd=capfd,

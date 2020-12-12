@@ -1,7 +1,6 @@
 """
 This module will test the volatile command
 """
-
 import signal
 
 from tests import create_project, exec_command, random_project_name, signal_handler
