@@ -7,12 +7,12 @@ from git import Repo
 
 from controller import __version__
 from controller.dockerizing import Dock
-from tests import create_project, exec_command
+from tests import create_project, exec_command, random_project_name
 
 
 def test_all(capfd, fake):
 
-    project2 = fake.word()
+    project2 = random_project_name(fake)
     create_project(
         capfd=capfd,
         name="testbuild",

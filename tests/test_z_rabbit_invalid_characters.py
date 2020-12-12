@@ -2,14 +2,14 @@
 This module will test a verify specific use case where rabbit fails due to some
 special characters in the password
 """
-from tests import create_project, exec_command
+from tests import create_project, exec_command, random_project_name
 
 
 def test_rabbit_invalid_characters(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         auth="postgres",
         frontend="no",
         services=["rabbit"],

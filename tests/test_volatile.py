@@ -4,14 +4,14 @@ This module will test the volatile command
 
 import signal
 
-from tests import create_project, exec_command, signal_handler
+from tests import create_project, exec_command, random_project_name, signal_handler
 
 
 def test_volatile(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         auth="postgres",
         frontend="angular",
         init=True,

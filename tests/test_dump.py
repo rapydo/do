@@ -3,14 +3,14 @@ This module will test the dump command
 """
 
 
-from tests import create_project, exec_command
+from tests import create_project, exec_command, random_project_name
 
 
 def test_dump(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],

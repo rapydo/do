@@ -4,14 +4,14 @@ This module will test the backup and restore commands + tuning neo4j
 import os
 import time
 
-from tests import TemporaryRemovePath, create_project, exec_command
+from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
 
 
 def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         auth="neo4j",
         frontend="no",
         init=True,

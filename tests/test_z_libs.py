@@ -11,14 +11,14 @@ from typing import Dict
 
 import pytest
 
-from tests import create_project
+from tests import create_project, random_project_name
 
 
 def test_all(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         init=True,
     )
 

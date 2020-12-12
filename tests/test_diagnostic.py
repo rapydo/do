@@ -3,14 +3,14 @@ This module will test the diagnostic command
 """
 
 
-from tests import create_project, exec_command
+from tests import create_project, exec_command, random_project_name
 
 
 def test_diagnostic(capfd, fake):
 
     create_project(
         capfd=capfd,
-        name=fake.word(),
+        name=random_project_name(fake),
         auth="postgres",
         frontend="no",
         init=True,

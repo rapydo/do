@@ -2,12 +2,12 @@
 This module will test the install command
 """
 from controller import __version__, gitter
-from tests import TemporaryRemovePath, create_project, exec_command
+from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
 
 
 def test_install(capfd, fake):
 
-    project = fake.word()
+    project = random_project_name(fake)
     create_project(
         capfd=capfd,
         name=project,
