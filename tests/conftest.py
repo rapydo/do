@@ -16,7 +16,9 @@ def create_folder() -> None:
     # back to the main folder
     prefix = "0."
     suffix = ".random.test"
-    if os.getcwd().endswith(suffix):
+
+    # This is not executed on GithuActions because all tests are exeuted in parallel
+    if os.getcwd().endswith(suffix):  # pragma: no cover
         os.chdir("..")
 
     # Create a new folder with a random name
