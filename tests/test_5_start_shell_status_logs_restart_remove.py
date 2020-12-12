@@ -1,5 +1,6 @@
 """
-This module will test the interaction with containers by executing the following commands:
+This module will test the interaction with containers
+by executing the following commands:
 - start (including CRONTABS)
 - status and logs
 - shell
@@ -7,10 +8,7 @@ This module will test the interaction with containers by executing the following
 - remove
 """
 
-import os
-import shutil
 import signal
-import time
 from datetime import datetime
 
 from tests import create_project, exec_command, mock_KeyboardInterrupt, signal_handler
@@ -130,8 +128,17 @@ def test_all(capfd):
         "neo4j",
     )
 
+    exec_command(
+        capfd,
+        "status",
+        "docker-compose command: 'ps'",
+        # "first_backend_1",
+    )
+
     # Backend logs are never timestamped
 
+    # This currently fails with:
+    # I/O operation on closed file.
     exec_command(
         capfd,
         "logs -s backend --tail 10 --no-color",
