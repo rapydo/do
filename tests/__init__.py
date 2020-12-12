@@ -1,4 +1,5 @@
 import os
+import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 
@@ -139,3 +140,4 @@ def create_project(
             "docker-compose command: 'up'",
             "Stack started",
         )
+        time.sleep(5)
