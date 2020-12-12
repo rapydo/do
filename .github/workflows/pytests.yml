@@ -57,7 +57,15 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
         run: |
-          py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
+          # This works well for all tests... except for install... that is not covered :o
+          # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
+
+          mkdir tests
+          cd tests
+          py.test --timeout=300 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          cp coverage.xml ..
+          cd ..
+
           bash <(curl -s https://codecov.io/bash)
 
       # - name: Artifact
