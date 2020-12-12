@@ -3,6 +3,9 @@ This module will test combinations of init, check and update commands.
 Other module that will initialize projects will consider the init command fully working
 """
 import os
+import shutil
+
+from git import Repo
 
 from controller import __version__, gitter
 from tests import TemporaryRemovePath, create_project, exec_command
@@ -156,5 +159,113 @@ def test_base(capfd):
         "Project first contains an obsolete file or folder: submodules/rapydo-confs",
     )
 
-    # There is no need to restore a correct project, since this is the end of this test
-    # shutil.rmtree("submodules/rapydo-confs")
+    shutil.rmtree("submodules/rapydo-confs")
+
+    # Test selection with two projects
+    create_project(
+        capfd=capfd,
+        name="justanother",
+        auth="postgres",
+        frontend="no",
+        init=False,
+        pull=False,
+        start=False,
+    )
+
+    os.remove(".projectrc")
+
+    exec_command(
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Multiple projects found, please use --project to specify one of the following",
+    )
+
+    # Test with zero projects
+    with TemporaryRemovePath("projects"):
+        os.mkdir("projects")
+        exec_command(
+            capfd,
+            "check -i main --no-git --no-builds",
+            "No project found (projects folder is empty?)",
+        )
+        shutil.rmtree("projects")
+
+    exec_command(
+        capfd,
+        "-p first check -i main --no-git --no-builds",
+        "Checks completed",
+    )
+
+    # Check invalid and reserved project names
+    os.makedirs("projects/invalid_character")
+    exec_command(
+        capfd,
+        "-p invalid_character check -i main --no-git --no-builds",
+        "Wrong project name, _ is not a valid character.",
+    )
+    shutil.rmtree("projects/invalid_character")
+
+    os.makedirs("projects/celery")
+    exec_command(
+        capfd,
+        "-p celery check -i main --no-git --no-builds",
+        "You selected a reserved name, invalid project name: celery",
+    )
+    shutil.rmtree("projects/celery")
+
+    exec_command(
+        capfd,
+        "-p fourth check -i main --no-git --no-builds",
+        "Wrong project fourth",
+        "Select one of the following: ",
+    )
+
+    # Test init of data folders
+    shutil.rmtree("data/logs")
+    assert not os.path.isdir("data/logs")
+    # Let's restore .projectrc and data/logs
+    exec_command(
+        capfd,
+        "--project first init",
+        "Project initialized",
+    )
+    assert os.path.isdir("data/logs")
+    exec_command(
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Checks completed",
+    )
+
+    # Test dirty repo
+    fin = open("submodules/do/new_file", "wt+")
+    fin.write("xyz")
+    fin.close()
+
+    fin = open("submodules/build-templates/backend/Dockerfile", "a")
+    fin.write("xyz")
+    fin.close()
+    r = Repo("submodules/build-templates")
+    r.git.commit("-a", "-m", "'fake'")
+
+    exec_command(
+        capfd,
+        "check -i main",
+        "You have unstaged files on do",
+        "Untracked files:",
+        "submodules/do/new_file",
+        f"Obsolete image rapydo/backend:{__version__}",
+        "built on ",
+        " but changed on ",
+        "Update it with: rapydo --services backend pull",
+    )
+
+    with open(".pre-commit-config.yaml", "a") as a_file:
+        a_file.write("\n")
+        a_file.write("# new line")
+
+    exec_command(
+        capfd,
+        "check -i main",
+        ".pre-commit-config.yaml changed, "
+        "please execute rapydo upgrade --path .pre-commit-config.yaml",
+    )

@@ -20,8 +20,20 @@ def test_all(capfd):
 
     exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
 
+    # Just verify correct neo4j startup and introduce some delay.
+    # Without this check, that introduces some extra time the restapi init fails...
+    exec_command(capfd, "-s neo4j logs --tail 5")
+
     # This will initialize neo4j
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
+
+    # Verify the initialization
+    cypher = "shell --no-tty neo4j 'bin/cypher-shell"
+    exec_command(
+        capfd,
+        f'{cypher} "match (r: Role) return r.name, r.description"\'',
+        '"normal_user", "User"',
+    )
 
     # Backup command
     exec_command(
@@ -126,12 +138,6 @@ def test_all(capfd):
     files.sort()
     neo4j_dump_file = files[-1]
 
-    # Warning, DEBUG CODE
-    import time
-
-    time.sleep(20)
-
-    cypher = "shell --no-tty neo4j 'bin/cypher-shell"
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(

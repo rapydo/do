@@ -20,8 +20,20 @@ def test_all(capfd):
 
     exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
 
+    # Just verify correct postgres startup and introduce some delay.
+    # Without this check, that introduces some extra time the restapi init can fails...
+    exec_command(capfd, "-s postgres logs --tail 5")
+
     # This will initialize postgres
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
+
+    # Verify the initialization
+    psql = "shell --no-tty postgres 'psql -U sqluser -d SQL_API -c"
+    exec_command(
+        capfd,
+        f'{psql} "select name, description from role"\'',
+        " normal_user | User",
+    )
 
     exec_command(
         capfd,
@@ -112,7 +124,6 @@ def test_all(capfd):
         "Stack restarted",
     )
 
-    psql = "shell --no-tty postgres 'psql -U sqluser -d SQL_API -c"
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
