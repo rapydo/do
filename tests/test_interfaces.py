@@ -62,12 +62,12 @@ def test_interfaces(capfd, fake):
         "url=http://localhost:8080/api/specs",
     )
 
-    # exec_command(
-    #     capfd,
-    #     "--prod init -f",
-    #     "Created default .projectrc file",
-    #     "Project initialized",
-    # )
+    exec_command(
+        capfd,
+        "--prod init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
 
     exec_command(
         capfd,
