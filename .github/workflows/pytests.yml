@@ -35,7 +35,7 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
         run: |
-          py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests/test_${{ matrix.test }.py
+          py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests/test_${{ matrix.test }}.py
           bash <(curl -s https://codecov.io/bash)
 
       # - name: Artifact
