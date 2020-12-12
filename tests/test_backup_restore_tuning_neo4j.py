@@ -233,6 +233,9 @@ def test_all(capfd, fake):
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
+    # Wait neo4j to completely startup
+    exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
+
     # 4) verify data match again point 1 (restore completed)
     exec_command(
         capfd,
