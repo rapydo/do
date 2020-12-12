@@ -35,6 +35,20 @@ def test_all(capfd):
 
     exec_command(
         capfd,
+        "start",
+        "docker-compose command: 'up'",
+        "Stack started",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend start --force",
+        "docker-compose command: 'up'",
+        "Stack started",
+    )
+
+    exec_command(
+        capfd,
         "status",
         "docker-compose command: 'ps'",
         # "first_backend_1",
@@ -129,13 +143,6 @@ def test_all(capfd):
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
         "backend_1       | Development mode",
-    )
-
-    exec_command(
-        capfd,
-        "-s backend start --force",
-        "docker-compose command: 'up'",
-        "Stack started",
     )
 
     now = datetime.now()
