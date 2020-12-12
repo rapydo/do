@@ -11,10 +11,12 @@ def test_rabbit_invalid_characters(capfd):
         capfd=capfd,
         name="testinvalid",
         auth="postgres",
-        frontend="angular",
+        frontend="no",
         services=["rabbit"],
         extra="--env RABBITMQ_PASSWORD=invalid£password",
         init=False,
+        pull=False,
+        start=False,
     )
 
     informative = "Some special characters, including £ § ” ’, are not allowed "

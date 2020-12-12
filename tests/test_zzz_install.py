@@ -13,6 +13,8 @@ def test_install(capfd):
         auth="postgres",
         frontend="angular",
         init=True,
+        pull=False,
+        start=False,
     )
 
     with TemporaryRemovePath("submodules/do"):

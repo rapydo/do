@@ -25,7 +25,13 @@ def test_base(capfd):
     exec_command(capfd, "rapydo", "Usage")
 
     create_project(
-        capfd=capfd, name="latest", auth="postgres", frontend="no", init=True
+        capfd=capfd,
+        name="latest",
+        auth="postgres",
+        frontend="no",
+        init=True,
+        pull=False,
+        start=False,
     )
 
     folder = os.getcwd()

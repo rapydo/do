@@ -11,7 +11,13 @@ from tests import TemporaryRemovePath, create_project, exec_command
 def test_base(capfd):
 
     create_project(
-        capfd=capfd, name="first", auth="postgres", frontend="angular", init=False
+        capfd=capfd,
+        name="first",
+        auth="postgres",
+        frontend="angular",
+        init=False,
+        pull=False,
+        start=False,
     )
 
     # Basic initialization

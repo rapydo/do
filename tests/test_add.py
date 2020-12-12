@@ -16,6 +16,8 @@ def test_add(capfd):
         auth="postgres",
         frontend="angular",
         init=True,
+        pull=False,
+        start=False,
     )
 
     path = "projects/first/backend/endpoints/xyz.py"
