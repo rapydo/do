@@ -7,8 +7,8 @@ by executing the following commands:
 - restart
 - remove
 """
-
 import signal
+import time
 from datetime import datetime
 
 from tests import create_project, exec_command, mock_KeyboardInterrupt, signal_handler
@@ -134,10 +134,8 @@ def test_all(capfd):
         # "first_backend_1",
     )
 
+    time.sleep(2)
     # Backend logs are never timestamped
-
-    # This currently fails with:
-    # I/O operation on closed file.
     exec_command(
         capfd,
         "logs -s backend --tail 10 --no-color",

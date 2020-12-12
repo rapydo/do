@@ -1,5 +1,7 @@
 ignore:
   - "controller/__main__.py" # cannot be tested
   - "controller/templates"
+  - "setup.py"
+  - "check_versions.py"
 # fixes:
 #   - "before/::after/"  # move path   e.g., "before/path" => "after/path"
