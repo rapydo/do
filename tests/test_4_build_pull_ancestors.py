@@ -10,16 +10,26 @@ from controller.dockerizing import Dock
 from tests import create_project, exec_command
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
 
+    project2 = fake.word()
     create_project(
         capfd=capfd,
         name="testbuild",
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        # --add-optionals ??
         init=True,
+        pull=False,
+        start=False,
+    )
+    create_project(
+        capfd=capfd,
+        name=project2,
+        auth="postgres",
+        frontend="no",
+        services=["rabbit"],
+        init=False,
         pull=False,
         start=False,
     )
@@ -163,12 +173,12 @@ RUN mkdir xyz
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
-    # Please note the use of the first project.
+    # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild
     # This simulate a pull updating a core image making the custom image obsolete
     exec_command(
         capfd,
-        "-p first -s rabbit build --core",
+        f"-p {project2} -s rabbit build --core",
         "Core images built",
         "No custom images to build",
     )
@@ -310,9 +320,6 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "check -i main",
-        "You have unstaged files on do",
-        "Untracked files:",
-        "submodules/do/new_file",
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",

@@ -14,7 +14,6 @@ def test_all(capfd, fake):
         auth="postgres",
         frontend="no",
         services=["rabbit", "neo4j"],
-        # --add-optionals ??
         init=True,
         pull=False,
         start=False,
