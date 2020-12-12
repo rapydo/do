@@ -14,9 +14,16 @@ def test_all(capfd, fake):
         auth="postgres",
         frontend="no",
         services=["rabbit", "neo4j"],
-        init=True,
+        init=False,
         pull=False,
         start=False,
+    )
+
+    exec_command(
+        capfd,
+        "--prod init -f",
+        "Created default .projectrc file",
+        "Project initialized",
     )
 
     exec_command(
