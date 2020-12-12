@@ -16,7 +16,7 @@ def test_volatile(capfd, fake):
         frontend="angular",
         init=True,
         pull=True,
-        start=False,
+        start=True,
     )
 
     exec_command(
