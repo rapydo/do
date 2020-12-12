@@ -126,6 +126,11 @@ def test_all(capfd):
     files.sort()
     neo4j_dump_file = files[-1]
 
+    # Warning, DEBUG CODE
+    import time
+
+    time.sleep(20)
+
     cypher = "shell --no-tty neo4j 'bin/cypher-shell"
     # Here we test the restore procedure:
     # 1) verify some data in the database

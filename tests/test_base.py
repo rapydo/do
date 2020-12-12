@@ -34,6 +34,13 @@ def test_base(capfd):
         start=False,
     )
 
+    exec_command(
+        capfd,
+        "version",
+        f"rapydo: \033[1;32m{__version__}",
+        f"required rapydo: \033[1;32m{__version__}",
+    )
+
     folder = os.getcwd()
     # Tests from a subfolder
     os.chdir("projects")

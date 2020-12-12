@@ -24,66 +24,9 @@ def test_all(capfd):
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],
-        extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
         init=True,
-    )
-
-    # Basic pull
-    exec_command(
-        capfd,
-        "-s xxx pull",
-        "Invalid service name: xxx",
-    )
-    exec_command(
-        capfd,
-        "pull",
-        "Base images pulled from docker hub",
-    )
-
-    # --all is useless here... added just to include the parameter in some tests.
-    # A true test on such parameter would be quite complicated...
-    exec_command(
-        capfd,
-        "-s backend pull --all",
-        "Images pulled from docker hub",
-    )
-
-    # Some tests with list
-    exec_command(
-        capfd,
-        "list",
-        "Missing argument 'ELEMENT_TYPE:[env|services|submodules]'.  Choose from:",
-    )
-    exec_command(
-        capfd,
-        "list env",
-        "List env variables:",
-        "ACTIVATE_ALCHEMY",
-        "CUSTOMVAR1",
-        "CUSTOMVAR2",
-        "mycustomvalue",
-    )
-    exec_command(
-        capfd,
-        "list submodules",
-        "List of submodules:",
-    )
-
-    exec_command(
-        capfd,
-        "list services",
-        "List of active services:",
-        "backend",
-        "frontend",
-        "postgres",
-        "rabbit",
-    )
-
-    exec_command(
-        capfd,
-        "list invalid",
-        "Invalid value for 'ELEMENT_TYPE:[env|services|submodules]': ",
-        "invalid choice: invalid. (choose from env, services, submodules)",
+        pull=True,
+        start=False,
     )
 
     exec_command(
@@ -129,25 +72,12 @@ def test_all(capfd):
         "url=http://localhost:8080/api/specs",
     )
 
-    exec_command(
-        capfd,
-        "version",
-        f"rapydo: \033[1;32m{__version__}",
-        f"required rapydo: \033[1;32m{__version__}",
-    )
-
     # docker dump
     exec_command(
         capfd,
         "dump",
         "Config dump: docker-compose.yml",
     )
-
-    exec_command(capfd, "upgrade")
-    exec_command(
-        capfd, "upgrade --path invalid", "Invalid path, cannot upgrade invalid"
-    )
-    exec_command(capfd, "upgrade --path .gitignore")
 
     # Test selection with two projects
     exec_command(
