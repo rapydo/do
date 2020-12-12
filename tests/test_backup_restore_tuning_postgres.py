@@ -2,6 +2,7 @@
 This module test the backup and restore commands + tuning postgres
 """
 import os
+import time
 
 from tests import TemporaryRemovePath, create_project, exec_command
 
@@ -20,9 +21,8 @@ def test_all(capfd, fake):
 
     exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
 
-    # Just verify correct postgres startup and introduce some delay.
-    # Without this check, that introduces some extra time the restapi init can fails...
-    exec_command(capfd, "-s postgres logs --tail 5")
+    # Just some delay extra delay. restapi init alone not always is enough...
+    # time.sleep(5)
 
     # This will initialize postgres
     exec_command(capfd, "shell --no-tty backend 'restapi init'")

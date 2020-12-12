@@ -2,6 +2,7 @@
 This module will test the backup and restore commands + tuning neo4j
 """
 import os
+import time
 
 from tests import TemporaryRemovePath, create_project, exec_command
 
@@ -20,12 +21,11 @@ def test_all(capfd, fake):
 
     exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
 
-    # Just verify correct neo4j startup and introduce some delay.
-    # Without this check, that introduces some extra time the restapi init fails...
-    exec_command(capfd, "-s neo4j logs --tail 5")
-
     # This will initialize neo4j
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
+
+    # Just some delay extra delay. restapi init alone not always is enough...
+    time.sleep(5)
 
     # Verify the initialization
     cypher = "shell --no-tty neo4j 'bin/cypher-shell"
