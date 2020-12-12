@@ -13,7 +13,7 @@ def test_verify(capfd, fake):
         name=random_project_name(fake),
         auth="postgres",
         frontend="angular",
-        services=["rabbit", "neo4j"],
+        services=["neo4j"],
         init=True,
         pull=True,
         start=False,
@@ -33,7 +33,6 @@ def test_verify(capfd, fake):
     exec_command(capfd, "verify --no-tty invalid", "Service invalid not detected")
     exec_command(capfd, "verify --no-tty redis", "Service redis not detected")
     exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
-    exec_command(capfd, "verify --no-tty rabbit", "Service rabbit is reachable")
     exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
 
     exec_command(capfd, "remove --all", "Stack removed")
