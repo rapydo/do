@@ -8,9 +8,10 @@ from tests import create_project, exec_command, random_project_name
 
 def test_cronjobs(capfd, fake):
 
+    project = random_project_name(fake)
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=project,
         auth="postgres",
         frontend="no",
         init=True,
@@ -36,7 +37,7 @@ def test_cronjobs(capfd, fake):
         "Found no cronjob to be enabled, skipping crontab setup",
     )
 
-    with open("projects/first/backend/cron/hello-world.cron", "w+") as f:
+    with open(f"projects/{project}/backend/cron/hello-world.cron", "w+") as f:
         f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1\n")
         f.write("\n")
 
