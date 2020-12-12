@@ -5,12 +5,11 @@ and the checks of the current folder (git repo and rapydo structure required)
 import os
 import tempfile
 
+from controller import __version__
 from tests import create_project, exec_command, random_project_name
 
 
 def test_base(capfd, fake):
-
-    from controller import __version__
 
     exec_command(
         capfd,

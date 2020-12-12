@@ -11,6 +11,13 @@ from typing import Dict
 
 import pytest
 
+from controller import __version__, gitter
+from controller.app import Application
+from controller.compose import Compose
+from controller.packages import Packages
+from controller.templating import Templating
+from controller.utilities import services, system
+from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import create_project, random_project_name
 
 
@@ -21,14 +28,6 @@ def test_all(capfd, fake):
         name=random_project_name(fake),
         init=True,
     )
-
-    from controller import __version__, gitter
-    from controller.app import Application
-    from controller.compose import Compose
-    from controller.packages import Packages
-    from controller.templating import Templating
-    from controller.utilities import services, system
-    from controller.utilities.configuration import load_yaml_file, mix_configuration
 
     app = Application()
 

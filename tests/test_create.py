@@ -6,12 +6,11 @@ and will only use the specific configuration needed by the test itself
 
 import os
 
+from controller.templating import Templating
 from tests import TemporaryRemovePath, exec_command
 
 
 def test_create(capfd):
-
-    from controller.templating import Templating
 
     exec_command(
         capfd,

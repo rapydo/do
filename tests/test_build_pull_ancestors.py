@@ -5,13 +5,12 @@ import os
 
 from git import Repo
 
+from controller import __version__
+from controller.dockerizing import Dock
 from tests import create_project, exec_command, random_project_name
 
 
 def test_all(capfd, fake):
-
-    from controller import __version__
-    from controller.dockerizing import Dock
 
     project2 = random_project_name(fake)
     create_project(

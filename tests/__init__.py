@@ -36,6 +36,7 @@ def mock_KeyboardInterrupt(signum, frame):
 
 def exec_command(capfd, command, *asserts, input_text=None):
 
+    # This is needed to reload the LOG dir
     import controller
 
     reload(controller)
