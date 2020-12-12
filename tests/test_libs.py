@@ -203,6 +203,10 @@ def test_all(capfd, fake):
     assert short1("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
     assert short1("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
     assert short1("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
+    assert short1("NEO4J_dbms_memory_heap_max__size") == "NEO4J_HEAP_SIZE"
+    assert short1("NEO4J_dbms_memory_heap_initial__size") == "NEO4J_HEAP_SIZE"
+    assert short1("NEO4J_dbms_memory_pagecache_size") == "NEO4J_PAGECACHE_SIZE"
+
     key = "anyother"
     assert short1(key) == key
 
