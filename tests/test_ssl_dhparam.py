@@ -23,7 +23,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "--prod pull",
-        "Images pulled from docker hub",
+        "Base images pulled from docker hub",
     )
 
     exec_command(

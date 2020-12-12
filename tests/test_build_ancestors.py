@@ -27,7 +27,7 @@ def test_all(capfd):
     exec_command(
         capfd,
         "-s rabbit pull",
-        "Images pulled from docker hub",
+        "Base images pulled from docker hub",
     )
 
     # Add a custom image to extend base rabbit image:

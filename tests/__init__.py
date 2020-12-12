@@ -130,7 +130,7 @@ def create_project(
         exec_command(
             capfd,
             "pull --quiet",
-            "Images pulled from docker hub",
+            "Base images pulled from docker hub",
         )
 
     if start:
