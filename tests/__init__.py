@@ -41,9 +41,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
     reload(controller)
 
     with capfd.disabled():
-        print("\n", file=sys.stderr)
-        print("_____________________________________________", file=sys.stderr)
-        print(f"rapydo {command}", file=sys.stderr)
+        print("\n")
+        print("_____________________________________________")
+        print(f"rapydo {command}")
 
     from controller.app import Application
     from controller.project import Project
@@ -57,9 +57,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
     result = runner.invoke(ctrl.app, command, input=input_text)
 
     with capfd.disabled():
-        print(f"Exit code: {result.exit_code}", file=sys.stderr)
-        print(result.stdout, file=sys.stderr)
-        print("_____________________________________________", file=sys.stderr)
+        print(f"Exit code: {result.exit_code}")
+        print(result.stdout)
+        print("_____________________________________________")
 
     captured = capfd.readouterr()
 
@@ -79,14 +79,14 @@ def exec_command(capfd, command, *asserts, input_text=None):
 
     with capfd.disabled():
         for e in err:
-            print(f"{e}", file=sys.stderr)
+            print(f"{e}")
         for o in cout:
-            print(f">> {o}", file=sys.stderr)
+            print(f">> {o}")
         for o in out:
-            print(f"_ {o}", file=sys.stderr)
+            print(f"_ {o}")
         if result.exception and str(result.exception) != result.exit_code:
-            print("\n!! Exception:", file=sys.stderr)
-            print(result.exception, file=sys.stderr)
+            print("\n!! Exception:")
+            print(result.exception)
 
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err

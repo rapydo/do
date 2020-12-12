@@ -14,12 +14,13 @@ def create_folder() -> None:
     # If you are already in a test folder
     # (this is the case starting from the second test)
     # back to the main folder
+    prefix = "0."
     suffix = ".random.test"
     if os.getcwd().endswith(suffix):
         os.chdir("..")
 
     # Create a new folder with a random name
-    folder = f"{f.pystr(min_chars=16, max_chars=16)}{suffix}"
+    folder = f"{prefix}{f.pystr(min_chars=12, max_chars=12)}{suffix}"
     os.makedirs(f"{folder}/data/logs")
     os.chdir(folder)
 

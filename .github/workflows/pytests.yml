@@ -36,13 +36,15 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
         run: |
-          py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests 2>execution.log
+          # py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests 2>execution.log
+          py.test --timeout=300 -s -x --cov-report=xml --cov=controller --cov=tests tests
           bash <(curl -s https://codecov.io/bash)
 
-      - name: Print Logs
-        if: failure()
-        run: |
-          tail -500 execution.log
+      # - name: Print Logs
+      #   if: failure()
+      #   run: |
+      #     tail -500 execution.log
+
       # - name: Artifact
       #   uses: actions/upload-artifact@v1
       #   with:
