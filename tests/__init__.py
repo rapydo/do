@@ -1,5 +1,4 @@
 import os
-import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 
