@@ -14,7 +14,29 @@ jobs:
     strategy:
       matrix:
         python-version: [3.8, 3.7, 3.6]
-        test: [dump, list]
+        test:
+          [
+            add_upgrade,
+            backup_restore_tuning_neo4j,
+            backup_restore_tuning_postgres,
+            base,
+            build_pull_ancestors,
+            create,
+            cronjobs,
+            diagnostic,
+            dump,
+            init_check_update,
+            interfaces,
+            libs,
+            list,
+            rabbit_invalid_characters,
+            scale,
+            ssl_dhparam,
+            start_shell_status_logs_restart_remove,
+            verify,
+            volatile,
+            z_install,
+          ]
 
     steps:
       - uses: actions/checkout@v2
