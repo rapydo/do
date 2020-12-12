@@ -1,5 +1,5 @@
 """
-This module list will test the backup and restore commands + tuning postgres
+This module test the backup and restore commands + tuning postgres
 """
 import os
 

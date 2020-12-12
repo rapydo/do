@@ -1,5 +1,5 @@
 """
-This module list will test the interfaces command
+This module will test the interfaces command
 """
 
 from tests import create_project, exec_command
@@ -16,6 +16,8 @@ def test_interfaces(capfd):
         pull=False,
         start=False,
     )
+
+    exec_command(capfd, "remove --all", "Stack removed")
 
     exec_command(
         capfd,
@@ -59,3 +61,20 @@ def test_interfaces(capfd):
         "http://localhost:124?docExpansion=list&",
         "url=http://localhost:8080/api/specs",
     )
+
+    # exec_command(
+    #     capfd,
+    #     "--prod init -f",
+    #     "Created default .projectrc file",
+    #     "Project initialized",
+    # )
+
+    exec_command(
+        capfd,
+        "--prod interfaces swagger --port 124 --detach",
+        "You can access swaggerui web page here:",
+        "https://localhost:124?docExpansion=list&",
+        "url=https://localhost/api/specs",
+    )
+
+    exec_command(capfd, "remove --all", "Stack removed")

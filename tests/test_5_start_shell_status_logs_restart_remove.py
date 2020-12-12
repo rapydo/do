@@ -1,11 +1,19 @@
+"""
+This module will test the interaction with containers by executing the following commands:
+- start (including CRONTABS)
+- status and logs
+- shell
+- restart
+- remove
+"""
+
 import os
 import shutil
 import signal
 import time
 from datetime import datetime
 
-from tests import create_project, exec_command
-from tests import mock_KeyboardInterrupt, signal_handler
+from tests import create_project, exec_command, mock_KeyboardInterrupt, signal_handler
 
 
 def test_all(capfd):
@@ -21,31 +29,10 @@ def test_all(capfd):
         start=False,
     )
 
-    # docker dump
-    exec_command(
-        capfd,
-        "dump",
-        "Config dump: docker-compose.yml",
-    )
-
-    exec_command(
-        capfd, "verify --no-tty sqlalchemy", "No container found for backend_1"
-    )
-
     exec_command(
         capfd,
         "-s invalid start",
         "No such service: invalid",
-    )
-
-    exec_command(capfd, "diagnostic http://localhost", "http schema not supported")
-    exec_command(
-        capfd,
-        "diagnostic https://nolocalhost",
-        "Host https://nolocalhost is unreachable",
-    )
-    exec_command(
-        capfd, "diagnostic nolocalhost", "Host https://nolocalhost is unreachable"
     )
 
     # Let's start with the stack
@@ -143,50 +130,6 @@ def test_all(capfd):
         "neo4j",
     )
 
-    exec_command(
-        capfd,
-        "scale rabbit",
-        "Please specify how to scale: SERVICE=NUM_REPLICA",
-        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
-    )
-    exec_command(
-        capfd,
-        "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
-        # "Starting first_rabbit_1",
-        # "Creating first_rabbit_2",
-    )
-    exec_command(
-        capfd,
-        "scale rabbit=x",
-        "Invalid number of replicas: x",
-    )
-
-    exec_command(
-        capfd,
-        "scale rabbit=2",
-        # "Starting first_rabbit_1",
-        # "Starting first_rabbit_2",
-    )
-
-    with open(".projectrc", "a") as f:
-        f.write("\n      DEFAULT_SCALE_RABBIT: 3\n")
-
-    exec_command(
-        capfd,
-        "scale rabbit",
-        # "Starting first_rabbit_1",
-        # "Starting first_rabbit_2",
-        # "Creating first_rabbit_3",
-    )
-
-    exec_command(
-        capfd,
-        "scale rabbit=1",
-        # "Starting first_rabbit_1",
-        # "Stopping and removing first_rabbit_2",
-        # "Stopping and removing first_rabbit_3",
-    )
-
     # Backend logs are never timestamped
 
     exec_command(
@@ -251,23 +194,6 @@ def test_all(capfd):
         "* * * * * echo 'Hello world'",
     )
 
-    # We modified projectrc to contain: DEFAULT_SCALE_RABBIT: 3
-    with open(".env") as env:
-        content = [line.rstrip("\n") for line in env]
-    assert "DEFAULT_SCALE_RABBIT=3" in content
-
-    # Now we set an env varable to change this value:
-    os.environ["DEFAULT_SCALE_RABBIT"] = "2"
-    exec_command(capfd, "check -i main")
-    with open(".env") as env:
-        content = [line.rstrip("\n") for line in env]
-    assert "DEFAULT_SCALE_RABBIT=3" not in content
-    assert "DEFAULT_SCALE_RABBIT=2" in content
-
-    exec_command(capfd, "verify --no-tty invalid", "Service invalid not detected")
-    exec_command(capfd, "verify --no-tty redis", "Service redis not detected")
-    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
-
     exec_command(
         capfd,
         "-s backend remove --net",
@@ -293,104 +219,10 @@ def test_all(capfd):
         "Stack removed",
     )
 
-    exec_command(
-        capfd,
-        "remove --all",
-        "Stack removed",
-    )
+    exec_command(capfd, "remove --all", "Stack removed")
 
     exec_command(
         capfd,
         "shell --no-tty backend hostname",
         "No container found for backend_1",
     )
-
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
-    exec_command(
-        capfd,
-        "-s backend start --no-detach",
-        # "REST API backend server is ready to be launched",
-        "Time is up",
-    )
-
-    # This is because after start --no-detach the container in still in exited status
-    exec_command(
-        capfd,
-        "volatile backend hostname",
-        "Bind for 0.0.0.0:8080 failed: port is already allocated",
-    )
-
-    exec_command(
-        capfd,
-        "remove --all",
-        "Stack removed",
-    )
-
-    exec_command(
-        capfd,
-        "volatile backend --command hostname",
-        "Deprecated use of --command",
-    )
-    exec_command(
-        capfd,
-        "volatile backend --command 'hostname --short'",
-        "Deprecated use of --command",
-    )
-
-    exec_command(
-        capfd,
-        "volatile backend hostname",
-        "backend-server",
-    )
-
-    exec_command(
-        capfd,
-        "volatile backend whoami",
-        "root",
-    )
-    exec_command(
-        capfd,
-        "volatile backend -u developer whoami",
-        "Please remember that users in volatile containers are not mapped on current ",
-        "developer",
-    )
-    exec_command(
-        capfd,
-        "volatile backend -u invalid whoami",
-        "Error response from daemon:",
-        "unable to find user invalid:",
-        "no matching entries in passwd file",
-    )
-
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
-    exec_command(
-        capfd,
-        "volatile maintenance",
-        # "Maintenance server is up and waiting for connections",
-        "Time is up",
-    )
-
-    exec_command(
-        capfd,
-        "--prod check -i main --no-git --no-builds",
-        "The following variables are missing in your configuration",
-    )
-
-    exec_command(
-        capfd,
-        "--prod init -f",
-        "Created default .projectrc file",
-        "Project initialized",
-    )
-
-    exec_command(
-        capfd,
-        "--prod interfaces swagger --port 124 --detach",
-        "You can access swaggerui web page here:",
-        "https://localhost:124?docExpansion=list&",
-        "url=https://localhost/api/specs",
-    )
-
-    exec_command(capfd, "remove --all", "Stack removed")

@@ -1,5 +1,5 @@
 """
-This module list will test the ssl and dhparam commands
+This module will test the ssl and dhparam commands
 """
 import time
 

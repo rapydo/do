@@ -1,5 +1,5 @@
 """
-This module list will test the add and upgrade commands
+This module will test the add and upgrade commands
 """
 
 import os

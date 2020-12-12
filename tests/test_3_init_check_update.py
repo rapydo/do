@@ -269,3 +269,23 @@ def test_base(capfd):
         ".pre-commit-config.yaml changed, "
         "please execute rapydo upgrade --path .pre-commit-config.yaml",
     )
+
+    exec_command(
+        capfd,
+        "--prod check -i main --no-git --no-builds",
+        "The following variables are missing in your configuration",
+    )
+
+    exec_command(
+        capfd,
+        "--prod init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
+
+    exec_command(
+        capfd,
+        "--prod check -i main --no-git --no-builds",
+        "Checks completed",
+    )
+    exec_command(capfd, "remove --all", "Stack removed")

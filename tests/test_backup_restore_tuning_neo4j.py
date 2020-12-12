@@ -1,5 +1,5 @@
 """
-This module list will test the backup and restore commands + tuning neo4j
+This module will test the backup and restore commands + tuning neo4j
 """
 import os
 

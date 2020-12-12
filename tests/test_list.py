@@ -1,5 +1,5 @@
 """
-This module list will test the list command
+This module will test the list command
 """
 
 from tests import create_project, exec_command

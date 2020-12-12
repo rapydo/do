@@ -1,5 +1,5 @@
 """
-This module list will test the build and ancestors commands
+This module will test the build and ancestors commands
 """
 import os
 
