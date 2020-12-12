@@ -129,7 +129,7 @@ def create_project(
     if pull:
         exec_command(
             capfd,
-            "pull",
+            "pull --quiet",
             "Images pulled from docker hub",
         )
 

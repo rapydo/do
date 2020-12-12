@@ -12,7 +12,13 @@ def pull(
         "--all",
         help="Include both core and custom images",
         show_default=False,
-    )
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        help="Pull without printing progress information",
+        show_default=False,
+    ),
 ) -> None:
     Application.get_controller().controller_init()
 
@@ -34,9 +40,7 @@ def pull(
             set(Application.data.services).intersection(base_services_list)
         )
 
-    options = {
-        "SERVICE": services_intersection,
-    }
+    options = {"SERVICE": services_intersection, "--quiet": quiet}
     dc.command("pull", options)
 
     if include_all:
