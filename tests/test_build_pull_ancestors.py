@@ -36,7 +36,7 @@ def test_all(capfd, fake):
 
     exec_command(
         capfd,
-        "-s rabbit pull",
+        "-s rabbit pull --quiet",
         "Base images pulled from docker hub",
     )
 
@@ -51,7 +51,7 @@ def test_all(capfd, fake):
     # A true test on such parameter would be quite complicated...
     exec_command(
         capfd,
-        "-s backend pull --all",
+        "-s backend pull --all --quiet",
         "Images pulled from docker hub",
     )
 

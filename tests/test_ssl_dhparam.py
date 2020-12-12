@@ -8,9 +8,10 @@ from tests import create_project, exec_command, random_project_name
 
 def test_all(capfd, fake):
 
+    project = random_project_name(fake)
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=project,
         auth="postgres",
         frontend="no",
         services=["rabbit", "neo4j"],
@@ -18,6 +19,7 @@ def test_all(capfd, fake):
         pull=False,
         start=False,
     )
+    pconf = f"projects/{project}/project_configuration.yaml"
 
     exec_command(
         capfd,
@@ -28,7 +30,7 @@ def test_all(capfd, fake):
 
     exec_command(
         capfd,
-        "--prod pull",
+        "--prod pull --quiet",
         "Base images pulled from docker hub",
     )
 
@@ -108,7 +110,6 @@ def test_all(capfd, fake):
         "Invalid chain file (you provided none)",
     )
 
-    pconf = "projects/first/project_configuration.yaml"
     exec_command(
         capfd,
         f"ssl --chain-file {pconf}",
