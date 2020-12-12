@@ -1,7 +1,7 @@
 """
 This module will test the interaction with containers
 by executing the following commands:
-- start (including CRONTABS)
+- start
 - status and logs
 - shell
 - restart
@@ -31,21 +31,6 @@ def test_all(capfd):
         capfd,
         "-s invalid start",
         "No such service: invalid",
-    )
-
-    # Let's start with the stack
-    exec_command(
-        capfd,
-        "-e CRONTAB_ENABLE=1 start",
-        "docker-compose command: 'up'",
-        "Stack started",
-    )
-
-    exec_command(
-        capfd,
-        "-s backend -e CRONTAB_ENABLE=1 start --force",
-        "docker-compose command: 'up'",
-        "Stack started",
     )
 
     exec_command(
@@ -144,19 +129,13 @@ def test_all(capfd):
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
         "backend_1       | Development mode",
-        "Found no cronjob to be enabled, skipping crontab setup",
     )
 
-    with open("projects/first/backend/cron/hello-world.cron", "w+") as f:
-        f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1\n")
-        f.write("\n")
-
-    # After the restart the cron enabled will be tested again
-    # Test is below to wait the container restart
     exec_command(
         capfd,
-        "-s backend restart",
-        "Stack restarted",
+        "-s backend start --force",
+        "docker-compose command: 'up'",
+        "Stack started",
     )
 
     now = datetime.now()
@@ -187,18 +166,6 @@ def test_all(capfd):
         "-s backend logs --tail 10 --follow",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
-    )
-
-    # Test again the cron enabling
-    exec_command(
-        capfd,
-        "logs -s backend --tail 10 --no-color",
-        "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
-        "backend_1       | Enabling cron...",
-        "backend_1       | Cron enabled",
-        # this is the output of crontab -l that verifies the cronjob installation
-        "* * * * * echo 'Hello world'",
     )
 
     exec_command(
