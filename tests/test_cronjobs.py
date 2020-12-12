@@ -1,7 +1,7 @@
 """
 This module will test the cronjobs installed on the backend container
 """
-
+import time
 
 from tests import create_project, exec_command, random_project_name
 
@@ -24,6 +24,9 @@ def test_cronjobs(capfd, fake):
         "docker-compose command: 'up'",
         "Stack started",
     )
+
+    # Add some delay to wait the container to start
+    time.sleep(5)
 
     exec_command(
         capfd,
