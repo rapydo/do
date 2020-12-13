@@ -1,5 +1,7 @@
 import os
+import sys
 from pathlib import Path
+from typing import List
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -13,21 +15,23 @@ SUBMODULES = Path("submodules")
 
 class Project:
     def __init__(self):
-        self.expected_main_folders = [PROJECT_DIR, DATA, SUBMODULES]
+        self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
-        self.expected_folders = []
-        self.expected_files = []
+        self.expected_folders: List[Path] = []
+        self.expected_files: List[Path] = []
+        # Copied as they are, no templating (used for binary files, like images)
+        self.raw_files: List[Path] = []
+        # Intended to be immutable, check will raise warning when differs
+        self.fixed_files: List[Path] = []
         # Not verified, added by create if --add-optionals
-        self.optionals_folders = []
-        self.optionals_files = []
-        # Now verified by create, added by create if missing
-        self.recommended_files = []
+        self.optionals_folders: List[Path] = []
+        self.optionals_files: List[Path] = []
         # Created in data if missing
-        self.data_folders = []
-        self.data_files = []
+        self.data_folders: List[Path] = []
+        self.data_files: List[Path] = []
         # check will raise an error if these files will be found
-        self.obsolete_files = []
-        self.suggested_gitkeep = []
+        self.obsolete_files: List[Path] = []
+        self.suggested_gitkeep: List[Path] = []
 
     def p_path(self, *args):
         return PROJECT_DIR.joinpath(self.project, *args)
@@ -42,10 +46,11 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "models"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
-        self.expected_folders.append(self.p_path("backend", "initialization"))
+        self.expected_folders.append(self.p_path("backend", "cron"))
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(self.p_path("backend", "cron", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
@@ -55,10 +60,18 @@ class Project:
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
-        self.expected_files.append(
-            self.p_path("backend", "initialization", "initialization.py")
-        )
+        self.expected_files.append(self.p_path("backend", "initialization.py"))
+        self.expected_files.append(self.p_path("backend", "customization.py"))
         self.expected_files.append(Path(".gitignore"))
+        self.expected_files.append(Path(".gitattributes"))
+        self.expected_files.append(Path(".pre-commit-config.yaml"))
+        self.expected_files.append(Path(".isort.cfg"))
+        self.expected_files.append(Path("pyproject.toml"))
+        self.expected_files.append(Path(".flake8"))
+
+        self.fixed_files.append(Path(".gitattributes"))
+        self.fixed_files.append(Path(".pre-commit-config.yaml"))
+        self.fixed_files.append(Path("pyproject.toml"))
 
         if auth or services:
 
@@ -84,12 +97,12 @@ class Project:
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
 
-        self.recommended_files.append(Path(".pre-commit-config.yaml"))
-        self.recommended_files.append(Path(".isort.cfg"))
-        self.recommended_files.append(Path("pyproject.toml"))
-        self.recommended_files.append(Path(".flake8"))
-        self.data_folders.extend([DATA.joinpath("logs")])
-        self.data_folders.extend([DATA.joinpath("backup")])
+        self.data_folders.extend(
+            [
+                DATA.joinpath("logs"),
+                DATA.joinpath("backup"),
+            ]
+        )
 
         # Removed since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
@@ -102,7 +115,9 @@ class Project:
         # Removed since 0.8
         self.obsolete_files.append(self.p_path("backend", "models", "swagger.yaml"))
         self.obsolete_files.append(self.p_path("backend", "endpoints", "profile.py"))
-
+        # Removed since 0.9
+        self.obsolete_files.append(self.p_path("backend", "initialization"))
+        self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
         return True
 
     def load_frontend_scaffold(self, frontend):
@@ -120,6 +135,8 @@ class Project:
                     self.p_path("frontend", "app"),
                     self.p_path("frontend", "css"),
                     self.p_path("frontend", "integration"),
+                    self.p_path("frontend", "assets"),
+                    self.p_path("frontend", "assets", "favicon"),
                 ]
             )
 
@@ -131,7 +148,7 @@ class Project:
                 [
                     self.p_path("frontend", "package.json"),
                     self.p_path("frontend", "css", "style.css"),
-                    self.p_path("frontend", "app", "custom.project.options.ts"),
+                    self.p_path("frontend", "app", "customization.ts"),
                     self.p_path("frontend", "app", "custom.module.ts"),
                     self.p_path("frontend", "app", "custom.navbar.ts"),
                     self.p_path("frontend", "app", "custom.footer.ts"),
@@ -141,6 +158,26 @@ class Project:
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
                     self.p_path("frontend", "app", "types.ts"),
+                ]
+            )
+            self.raw_files.extend(
+                [
+                    # Generated with https://realfavicongenerator.net
+                    self.p_path(
+                        "frontend", "assets", "favicon", "android-chrome-192x192.png"
+                    ),
+                    self.p_path("frontend", "assets", "favicon", "browserconfig.xml"),
+                    self.p_path("frontend", "assets", "favicon", "favicon-32x32.png"),
+                    self.p_path("frontend", "assets", "favicon", "mstile-150x150.png"),
+                    self.p_path(
+                        "frontend", "assets", "favicon", "safari-pinned-tab.svg"
+                    ),
+                    self.p_path(
+                        "frontend", "assets", "favicon", "apple-touch-icon.png"
+                    ),
+                    self.p_path("frontend", "assets", "favicon", "favicon-16x16.png"),
+                    self.p_path("frontend", "assets", "favicon", "favicon.ico"),
+                    self.p_path("frontend", "assets", "favicon", "site.webmanifest"),
                 ]
             )
 
@@ -183,6 +220,7 @@ class Project:
                     self.p_path("frontend", "app", "app.home.html"),
                     self.p_path("frontend", "app", "custom.declarations.ts"),
                     self.p_path("frontend", "app", "custom.routes.ts"),
+                    self.p_path("frontend", "app", "custom.project.options.ts"),
                 ]
             )
 
@@ -196,33 +234,51 @@ class Project:
         if project is None:
 
             if len(projects) == 0:
-                log.exit("No project found ({} folder is empty?)", PROJECT_DIR)
+                log.critical("No project found ({} folder is empty?)", PROJECT_DIR)
+                sys.exit(1)
 
             if len(projects) > 1:
-                log.exit(
+                log.critical(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
                     ", ".join(projects),
                 )
+                sys.exit(1)
+
             project = projects.pop()
 
         elif project not in projects:
-            log.exit(
-                "Wrong project {}\nSelect one of the following: {}\n".format(
-                    project, ", ".join(projects)
-                )
+            log.critical(
+                "Wrong project {}\nSelect one of the following: {}\n",
+                project,
+                ", ".join(projects),
             )
+            sys.exit(1)
 
         if "_" in project:
-            log.exit(
+            log.critical(
                 "Wrong project name, _ is not a valid character."
                 "\nPlease consider to rename {} into {}",
                 project,
                 project.replace("_", ""),
             )
+            sys.exit(1)
+
+        # Projects with - cannot be imported in python
+        # if "-" in project:
+        #     log.critical(
+        #         "Wrong project name, - is not a valid character."
+        #         "\nPlease consider to rename {} into {}",
+        #         project,
+        #         project.replace("-", ""),
+        #     )
+        #     sys.exit(1)
 
         if project in Project.reserved_project_names:
-            log.exit("You selected a reserved name, invalid project name: {}", project)
+            log.critical(
+                "You selected a reserved name, invalid project name: {}", project
+            )
+            sys.exit(1)
 
         return project
 
@@ -287,27 +343,30 @@ Verify that you are in the right folder, now you are in: {}
 
         for fpath in self.expected_folders:
             if not fpath.is_dir():
-                log.exit(
+                log.critical(
                     "Project {} is invalid: required folder not found {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
-        for fpath in self.expected_files:
+        for fpath in self.expected_files + self.raw_files:
             if not fpath.is_file():
-                log.exit(
+                log.critical(
                     "Project {} is invalid: required file not found {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
         for fpath in self.obsolete_files:
             if fpath.exists():
-                log.exit(
+                log.critical(
                     "Project {} contains an obsolete file or folder: {}",
                     self.project,
                     fpath,
                 )
+                sys.exit(1)
 
     # issues/57
     # I'm temporary here... to be decided how to handle me

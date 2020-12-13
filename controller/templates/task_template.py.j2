@@ -1,5 +1,6 @@
 from restapi.connectors.celery import CeleryExt
 from restapi.utilities.logs import log
+from restapi.connectors import {{auth}}
 
 celery_app = CeleryExt.celery_app
 
@@ -8,7 +9,7 @@ celery_app = CeleryExt.celery_app
 def {{name}}(self):
     with celery_app.app.app_context():
 
-        db = celery_app.get_service("{{auth}}")
+        db = {{auth}}.get_instance()
 
         log.info("Task started!")
 

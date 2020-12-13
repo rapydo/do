@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, MutableMapping, Optional
 
 import requests
 import typer
@@ -32,53 +32,51 @@ from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
 
+DataFileStub = Dict[str, List[str]]
+
 ROOT_UID = 0
 BASE_UID = 1000
 
 
-# Old implementation
-# # This is a second level parameter
-# if isinstance(value, dict):
-#     if key not in parse_conf["subcommands"]:
-#         log.exit("Unknown command {} found in {}", key, PROJECTRC)
-#     else:
-#         conf = parse_conf["subcommands"][key]["suboptions"]
-#         for subkey, subvalue in value.items():
-#             if subkey in conf:
-#                 conf[subkey]["default"] = subvalue
-#             else:
-#                 log.exit(
-#                     "Unknown parameter {}/{} found in {}",
-#                     key,
-#                     subkey,
-#                     PROJECTRC,
-#                 )
-# else:
-#     # This is a first level option
-#     if key in parse_conf["options"]:
-#         parse_conf["options"][key]["default"] = value
-#         parse_conf["options"][key]["projectrc"] = True
-#     else:
-#         log.exit("Unknown parameter {} found in {}", key, PROJECTRC)
-
-
 class Configuration:
-    projectrc = {}
-    host_configuration = {}
-    action = None
+    projectrc: Dict[str, str] = {}
+    # To be better charactirized. This is a:
+    # {'variables': 'env': Dict[str, str]}
+    host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
+    specs: MutableMapping[str, str] = OrderedDict()
+    services_list: Optional[str]
+    environment: Dict[str, str]
+
+    action: Optional[str] = None
 
     production = False
     testing = False
     privileged = False
-    project = None
+    project: str = ""
     frontend = None
-    hostname = None
-    stack = None
+    hostname: str = ""
+    stack: str = ""
     load_backend = False
     load_frontend = False
     load_commons = False
 
-    def set_action(action):
+    version: Optional[str] = None
+    rapydo_version: Optional[str] = None
+    project_title: Optional[str] = None
+    project_description: Optional[str] = None
+
+    initialize: bool = False
+    update: bool = False
+    check: bool = False
+    install: bool = False
+    print_version: bool = False
+    create: bool = False
+
+    # It will be replaced with PROJECT_DIR/project
+    ABS_PROJECT_PATH: Path = PROJECT_DIR
+
+    @staticmethod
+    def set_action(action: Optional[str]) -> None:
         Configuration.action = action
         Configuration.initialize = Configuration.action == "init"
         Configuration.update = Configuration.action == "update"
@@ -88,9 +86,11 @@ class Configuration:
         Configuration.create = Configuration.action == "create"
 
 
-def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
+def projectrc_values(
+    ctx: typer.Context, param: typer.CallbackParam, value: str
+) -> Optional[str]:
     if ctx.resilient_parsing:  # pragma: no cover
-        return
+        return None
 
     if value != param.get_default(ctx):
         return value
@@ -103,7 +103,7 @@ def projectrc_values(ctx: typer.Context, param: typer.CallbackParam, value):
     return value
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
     if value:
         typer.echo(f"rapydo version: {__version__}")
         raise typer.Exit()
@@ -118,7 +118,7 @@ def controller_cli_options(
         help="Name of the project",
         callback=projectrc_values,
     ),
-    services_list: str = typer.Option(
+    services_list: Optional[str] = typer.Option(
         None,
         "--services",
         "-s",
@@ -199,7 +199,7 @@ def controller_cli_options(
         callback=version_callback,
         is_eager=True,
     ),
-):
+) -> None:
 
     Configuration.set_action(ctx.invoked_subcommand)
 
@@ -209,7 +209,10 @@ def controller_cli_options(
     Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
-    Configuration.environment = [e.split("=") for e in environment]
+    Configuration.environment = {}
+    for e in environment:
+        key, value = e.split("=")
+        Configuration.environment[key] = value
 
     if stack:
         Configuration.stack = stack
@@ -225,67 +228,77 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files=None,
-        base_files=None,
-        services=None,
-        services_list=None,
-        active_services=None,
-        base_services=None,
-        compose_config=None,
-        services_dict=None,
+        files: List[Path] = [],
+        base_files: List[Path] = [],
+        services: List[str] = [],
+        services_list: Any = None,
+        active_services: List[str] = [],
+        base_services: List[Any] = [],
+        compose_config: List[Any] = [],
+        services_dict: Any = None,
     ):
         self.files = files
         self.base_files = base_files
         self.services = services
         self.services_list = services_list
-        self.active_services = active_services
+        self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
-        self.services_dict = services_dict
+        self.services_dict: Dict[str, Any] = services_dict or {}
 
 
 class Application:
 
-    # typer app
-    app = None
+    # Typer app
+    # Register callback with CLI options and basic initialization/checks
+    app = typer.Typer(
+        callback=controller_cli_options,
+        context_settings={"help_option_names": ["--help", "-h"]},
+    )
     # controller app
-    controller = None
+    controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    gits = OrderedDict()
+    # This Any should be Repo, but GitPython is lacking typings
+    gits: MutableMapping[str, Any] = OrderedDict()
 
     def __init__(self):
 
         Application.controller = self
 
-        self.active_services = None
-        self.files = None
-        self.base_files = None
+        self.active_services: List[str] = []
+        self.files: List[Path] = []
+        self.base_files: List[Path] = []
         self.services = None
-        self.enabled_services = None
-        self.base_services = None
-        self.services_dict = None
-        self.compose_config = None
-
-        # Register callback with CLI options and basic initialization/checks
-        Application.app = typer.Typer(
-            callback=controller_cli_options,
-            context_settings={"help_option_names": ["--help", "-h"]},
-        )
+        self.enabled_services: List[str] = []
+        self.base_services: List[Any] = []
+        self.compose_config: List[Any] = []
+        self.services_dict = {}
 
         load_commands()
 
         Application.load_projectrc()
 
-    def controller_init(self, read_extended=True):
+    @staticmethod
+    def exit(message, *args, **kwargs):
+        log.critical(message, *args, **kwargs)
+        sys.exit(1)
+
+    @staticmethod
+    def get_controller() -> "Application":
+        if not Application.controller:  # pragma: no cover
+            raise AttributeError("Application.controller not initialized")
+        return Application.controller
+
+    def controller_init(self, read_extended: bool = True) -> None:
         if Configuration.create:
             Application.check_installed_software()
-            return True
+            return None
 
         main_folder_error = Application.project_scaffold.check_main_folder()
 
         if main_folder_error:
-            log.exit(main_folder_error)
+            Application.exit(main_folder_error)
 
         if not Configuration.print_version:
             Application.check_installed_software()
@@ -298,10 +311,13 @@ class Application:
 
         if Configuration.print_version:
             self.read_specs(read_extended=True)
-            return True
+            return None
 
         log.debug("You are using RAPyDo version {}", __version__)
-        Application.checked("Selected project: {}", Configuration.project)
+        if Configuration.check:
+            log.info("Selected project: {}", Configuration.project)
+        else:
+            log.debug("Selected project: {}", Configuration.project)
 
         # TODO: give an option to skip things when you are not connected
         if (
@@ -314,7 +330,7 @@ class Application:
 
         if Configuration.install:
             self.read_specs(read_extended=False)
-            return True
+            return None
 
         # Auth is not yet available, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
@@ -345,12 +361,12 @@ class Application:
             log.debug("Current group ID: {}", self.current_gid)
 
         if Configuration.initialize:
-            return True
+            return None
 
         Application.git_submodules()
 
         if Configuration.update:
-            return True
+            return None
 
         self.make_env()
 
@@ -373,28 +389,25 @@ class Application:
             services_dict=self.services_dict,
         )
 
-        return True
+        return None
 
     @staticmethod
     def load_projectrc():
-        Configuration.projectrc = configuration.load_yaml_file(
+
+        projectrc_yaml = configuration.load_yaml_file(
             PROJECTRC, path=Path(), is_optional=True
         )
-        Configuration.host_configuration = Configuration.projectrc.pop(
+
+        Configuration.host_configuration = projectrc_yaml.pop(
             "project_configuration", {}
         )
 
-    @staticmethod
-    def checked(message, *args, **kws):
-        if Configuration.check:
-            log.info(message, *args, **kws)
-        else:
-            log.verbose(message, *args, **kws)
+        Configuration.projectrc = projectrc_yaml
 
     @staticmethod
     def check_installed_software():
 
-        Application.checked(
+        log.debug(
             "python version: {}.{}.{}",
             sys.version_info.major,
             sys.version_info.minor,
@@ -402,7 +415,9 @@ class Application:
         )
 
         # 17.05 added support for multi-stage builds
-        Packages.check_program("docker", min_version="17.05")
+        Packages.check_program(
+            "docker", min_version="17.05", min_recommended_version="19.03.1"
+        )
         Packages.check_program("git")
 
         # Check for CVE-2019-5736 vulnerability
@@ -433,9 +448,7 @@ class Application:
             self.extended_project_path = confs[2]
 
         except AttributeError as e:  # pragma: no cover
-            log.exit(e)
-
-        log.verbose("Configuration loaded")
+            Application.exit(e)
 
         Configuration.frontend = glom(
             Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
@@ -444,24 +457,26 @@ class Application:
         if Configuration.frontend == NO_FRONTEND:
             Configuration.frontend = None
 
-        if Configuration.frontend is not None:
-            log.verbose("Frontend framework: {}", Configuration.frontend)
-
         Configuration.project_title = glom(
             Configuration.specs, "project.title", default="Unknown title"
         )
         Configuration.version = glom(
             Configuration.specs, "project.version", default=None
         )
-        Configuration.rapydo_version = str(
-            glom(Configuration.specs, "project.rapydo", default=None)
+        Configuration.rapydo_version = glom(
+            Configuration.specs, "project.rapydo", default=None
         )
+
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
         )
 
         if Configuration.rapydo_version is None:  # pragma: no cover
-            log.exit("RAPyDo version not found in your project_configuration file")
+            Application.exit(
+                "RAPyDo version not found in your project_configuration file"
+            )
+
+        Configuration.rapydo_version = str(Configuration.rapydo_version)
 
     @staticmethod
     def preliminary_version_check():
@@ -504,7 +519,7 @@ class Application:
                 r, c, action
             )
 
-            log.exit(msg)
+            Application.exit(msg)
 
     @staticmethod
     def check_internet_connection():
@@ -512,9 +527,10 @@ class Application:
 
         try:
             requests.get("https://www.google.com")
-            Application.checked("Internet connection is available")
+            if Configuration.check:
+                log.info("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover
-            log.exit("Internet connection is unavailable")
+            Application.exit("Internet connection is unavailable")
 
     @staticmethod
     def working_clone(name, repo, from_path=None):
@@ -540,7 +556,7 @@ class Application:
 
             local_path = from_path.joinpath(name)
             if not local_path.exists():
-                log.exit("Submodule {} not found in {}", name, local_path)
+                Application.exit("Submodule {} not found in {}", name, local_path)
 
             submodule_path = Path(SUBMODULES_DIR, name)
 
@@ -627,8 +643,6 @@ class Application:
         dc = Compose(files=self.files)
         self.compose_config = dc.config()
 
-        log.verbose("Configuration order:\n{}", self.files)
-
     def create_projectrc(self):
         templating = Templating()
         t = templating.get_template(
@@ -645,7 +659,7 @@ class Application:
 
         Application.load_projectrc()
 
-        if self.active_services is None:
+        if not self.files:
             log.debug("Created temporary default {} file", PROJECTRC)
             PROJECTRC.unlink()
         else:
@@ -655,7 +669,6 @@ class Application:
 
         try:
             COMPOSE_ENVIRONMENT_FILE.unlink()
-            log.verbose("Removed cache of {}", COMPOSE_ENVIRONMENT_FILE)
         except FileNotFoundError:
             pass
 
@@ -702,11 +715,18 @@ class Application:
                 continue
             env[e] = env_value
 
-        for key, value in Configuration.environment:
-            env[key] = value
+        env.update(Configuration.environment)
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
+
+                # if isinstance(value, str):  # pragma: no
+                #     if value.lower() == 'true':
+                #         log.warning("{}={}, convert to 1?", key, value)
+
+                #     if value.lower() == 'false':
+                #         log.warning("{}={}, convert to 0?", key, value)
+
                 if value is None:
                     value = ""
                 else:
@@ -714,16 +734,14 @@ class Application:
                 if " " in value:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
-            log.verbose("Created {} file", COMPOSE_ENVIRONMENT_FILE)
 
     def create_datafile(self):
         try:
             DATAFILE.unlink()
-            log.verbose("Removed data cache")
         except FileNotFoundError:
             pass
 
-        data = {
+        data: DataFileStub = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
             "allservices": list(self.services_dict.keys()),
@@ -734,15 +752,22 @@ class Application:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile():
+    def parse_datafile() -> DataFileStub:
+        output: DataFileStub = {}
         try:
             with open(DATAFILE) as json_file:
-                return json.load(json_file)
+                datafile = json.load(json_file)
+                # This is needed to let mypy understand the correct type
+                output["submodules"] = datafile.get("submodules")
+                output["services"] = datafile.get("services")
+                output["interfaces"] = datafile.get("interfaces")
+                output["allservices"] = datafile.get("allservices")
+                return output
         except FileNotFoundError:
-            return {}
+            return output
 
     @staticmethod
-    def autocomplete_service(incomplete: str):
+    def autocomplete_service(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -753,14 +778,15 @@ class Application:
 
     def get_available_interfaces(self):
         available_interfaces = list()
-        for s in self.compose_config:
-            name = s.get("name", "")
-            if name.endswith("ui"):
-                available_interfaces.append(name[0:-2])
+        if self.compose_config:
+            for s in self.compose_config:
+                name = s.get("name", "")
+                if name.endswith("ui"):
+                    available_interfaces.append(name[0:-2])
         return available_interfaces
 
     @staticmethod
-    def autocomplete_interfaces(incomplete: str):
+    def autocomplete_interfaces(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -770,7 +796,7 @@ class Application:
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_allservice(incomplete: str):
+    def autocomplete_allservice(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -780,7 +806,7 @@ class Application:
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_submodule(incomplete: str):
+    def autocomplete_submodule(incomplete: str) -> List[str]:
         d = Application.parse_datafile()
         if not d:
             return []
@@ -792,61 +818,57 @@ class Application:
     def check_placeholders(self):
 
         if len(self.active_services) == 0:  # pragma: no cover
-            log.exit(
+            Application.exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
 and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
-        else:
-            Application.checked("Active services: {}", self.active_services)
+        elif Configuration.check:
+            log.info("Active services: {}", self.active_services)
 
         missing = set()
         for service_name in self.active_services:
             service = self.services_dict.get(service_name)
 
-            for key, value in service.get("environment", {}).items():
-                if PLACEHOLDER in str(value):
-                    key = services.normalize_placeholder_variable(key)
-                    missing.add(key)
+            if service:
+                for key, value in service.get("environment", {}).items():
+                    if PLACEHOLDER in str(value):
+                        key = services.normalize_placeholder_variable(key)
+                        missing.add(key)
 
         placeholders = []
         for key in missing:
 
             serv = services.vars_to_services_mapping.get(key)
-            # Should never happens since all services are configured, cannot be tested
-            if not serv:  # pragma: no cover
 
+            if serv:
+                active_serv = []
+                for i in serv:
+                    if i in self.active_services:
+                        active_serv.append(i)
+
+                if active_serv:
+                    placeholders.append(
+                        "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
+                    )
+            # Should never happens since all services are configured, cannot be tested
+            else:  # pragma: no cover
                 # with py39 it would be key.removeprefix('INJECT_')
                 if key.startswith("INJECT_"):
                     key = key[len("INJECT_") :]
 
-                log.exit(
+                Application.exit(
                     "Missing variable: {}: cannot find a service mapping this variable",
                     key,
                 )
 
-            active_serv = []
-            for i in serv:
-                if i in self.active_services:
-                    active_serv.append(i)
-            if len(active_serv) > 0:
-                placeholders.append(
-                    "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
-                )
-            else:
-                log.verbose(
-                    "Variable {} is missing, but {} service(s) not active", key, serv
-                )
-
         if len(placeholders) > 0:
-            log.exit(
+            Application.exit(
                 "The following variables are missing in your configuration:\n\n{}"
                 "\n\nYou can fix this error by updating the your .projectrc file\n",
                 "\n".join(placeholders),
             )
-
-        log.verbose("No placeholder variable to be replaced")
 
         return missing
 

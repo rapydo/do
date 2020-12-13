@@ -1,23 +1,27 @@
+import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
 from controller import log
 
-PROJECTS_DEFAULTS_FILE = "projects_defaults.yaml"
-PROJECTS_PROD_DEFAULTS_FILE = "projects_prod_defaults.yaml"
-PROJECT_CONF_FILENAME = "project_configuration.yaml"
+PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
+PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
+PROJECT_CONF_FILENAME = Path("project_configuration.yaml")
+
+Configuration = Dict[str, Any]
 
 
 def read_configuration(
-    default_file_path,
-    base_project_path,
-    projects_path,
-    submodules_path,
-    read_extended=True,
-    production=False,
-):
+    default_file_path: Path,
+    base_project_path: Path,
+    projects_path: Path,
+    submodules_path: Path,
+    read_extended: bool = True,
+    production: bool = False,
+) -> Tuple[Configuration, Optional[Path], Optional[Path]]:
     """
     Read default configuration
     """
@@ -38,12 +42,13 @@ def read_configuration(
         # Can't be tested because it is included in default configuration
         if project.get(key) is None:  # pragma: no cover
 
-            log.exit(
+            log.critical(
                 "Project not configured, missing key '{}' in file {}/{}",
                 key,
                 base_project_path,
                 PROJECT_CONF_FILENAME,
             )
+            sys.exit(1)
 
     base_configuration = load_yaml_file(
         file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
@@ -72,17 +77,20 @@ def read_configuration(
     elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
-            log.exit("Invalid repository name in extends-from, name is empty")
+            log.critical("Invalid repository name in extends-from, name is empty")
+            sys.exit(1)
 
         extend_path = submodules_path.joinpath(
             repository_name, projects_path, extended_project
         )
     else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
-        log.exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
+        log.critical("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
+        sys.exit(1)
 
     if not extend_path.exists():  # pragma: no cover
-        log.exit("From project not found: {}", extend_path)
+        log.critical("From project not found: {}", extend_path)
+        sys.exit(1)
 
     extended_configuration = load_yaml_file(
         file=PROJECT_CONF_FILENAME, path=extend_path, keep_order=True
@@ -96,7 +104,9 @@ def read_configuration(
     )
 
 
-def mix_configuration(base, custom):
+def mix_configuration(
+    base: Optional[Configuration], custom: Optional[Configuration]
+) -> Configuration:
     if base is None:
         base = {}
 
@@ -145,18 +155,18 @@ def construct_mapping(loader, node):
     return OrderedDict(loader.construct_pairs(node))
 
 
-def get_yaml_path(file, path):
+def get_yaml_path(file: Path, path: Path) -> Optional[Path]:
 
     filepath = path.joinpath(file)
-
-    log.verbose("Reading file {}", filepath)
 
     if not filepath.exists():
         return None
     return filepath
 
 
-def load_yaml_file(file, path, keep_order=False, is_optional=False):
+def load_yaml_file(
+    file: Path, path: Path, keep_order: bool = False, is_optional: bool = False
+) -> Configuration:
     """
     Import any data from a YAML file.
     """
@@ -165,7 +175,8 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
 
     if filepath is None:
         if not is_optional:
-            log.exit("Failed to read {}/{}: File does not exist", path, file)
+            log.critical("Failed to read {}/{}: File does not exist", path, file)
+            sys.exit(1)
         return {}
 
     with open(filepath) as fh:
@@ -182,55 +193,57 @@ def load_yaml_file(file, path, keep_order=False, is_optional=False):
             docs = list(loader)
 
             if len(docs) == 0:
-                log.exit("YAML file is empty: {}", filepath)
+                log.critical("YAML file is empty: {}", filepath)
+                sys.exit(1)
 
-            return docs[0]
+            # Return value of yaml.load_all is un-annotated and considered as Any
+            # But we known that it is a Dict Configuration-compliant
+            return docs[0]  # type: ignore
 
         except Exception as e:
             # # IF dealing with a strange exception string (escaped)
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.exit("Failed to read [{}]: {}", filepath, e)
+            log.critical("Failed to read [{}]: {}", filepath, e)
+            sys.exit(1)
 
 
-def read_composer_yamls(composers):
+def read_composer_yamls(
+    composers: "OrderedDict[str, Dict[str, Any]]",
+) -> Tuple[List[Path], List[Path]]:
 
-    base_files = []
-    all_files = []
+    base_files: List[Path] = []
+    all_files: List[Path] = []
 
     # YAML CHECK UP
-    for name, composer in composers.items():
+    for composer in composers.values():
 
         if not composer.pop("if", False):
             continue
-
-        log.verbose("Composer {}", name)
 
         mandatory = composer.pop("mandatory", False)
         base = composer.pop("base", False)
 
         try:
-            f = composer.get("file")
-            p = composer.get("path")
+            f = Path(str(composer.get("file")))
+            p = Path(str(composer.get("path")))
             compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
 
             if compose.get("services") is None or len(compose.get("services", {})) < 1:
-                # if mandatory:
-                #     log.exit("No service defined in file {}", name)
-                # else:
-                #     log.verbose("No service defined in {}, skipping", name)
-                log.verbose("No service defined in {}, skipping", name)
                 continue
 
             filepath = get_yaml_path(file=f, path=p)
-            all_files.append(filepath)
 
-            if base:
-                base_files.append(filepath)
+            if filepath:
+                all_files.append(filepath)
+
+                if base:
+                    base_files.append(filepath)
 
         except KeyError as e:  # pragma: no cover
 
-            log.exit("Error reading {}: {}", filepath, e)
+            log.critical("Error reading {}: {}", filepath, e)
+            sys.exit(1)
 
     return all_files, base_files

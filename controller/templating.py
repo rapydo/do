@@ -1,7 +1,10 @@
 import os
 import random
 import string
+import sys
+from filecmp import cmp
 from pathlib import Path
+from typing import Any, Dict
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
@@ -37,7 +40,8 @@ class Templating:
         self.template_dir = Path(__file__).resolve().parent.joinpath(TEMPLATE_DIR)
 
         if not self.template_dir.is_dir():
-            log.exit("Template folder not found: {}", self.template_dir)
+            log.critical("Template folder not found: {}", self.template_dir)
+            sys.exit(1)
 
         log.debug("Template folder: {}", self.template_dir)
         loader = FileSystemLoader([TEMPLATE_DIR, self.template_dir])
@@ -51,27 +55,36 @@ class Templating:
         self.env.filters["password"] = password
         self.env.filters["username"] = username
 
-    def get_template(self, filename, data):
-        try:
-            if filename.startswith("."):
-                filename = filename[1:]
+    @staticmethod
+    def get_template_name(filename: str) -> str:
 
-            template = self.env.get_template(f"{filename}.j2")
+        if filename.startswith("."):
+            filename = filename[1:]
+
+        return f"{filename}.j2"
+
+    def get_template(self, filename: str, data: Dict[str, Any]) -> str:
+        try:
+            template_name = self.get_template_name(filename)
+            template = self.env.get_template(template_name)
             content = template.render(**data)
             # from jinja2.meta import find_undeclared_variables
             # ast = self.env.parse(content)
             # undefined = find_undeclared_variables(ast)
             # if undefined:
-            #     log.exit(
+            #     log.critical(
             #         'Missing variables in template: {}',
             #         undefined
             #     )
+            # sys.exit(1)
 
             return content
         except TemplateNotFound as e:
-            log.exit("Template {} not found in: {}", str(e), self.template_dir)
+            log.critical("Template {} not found in: {}", str(e), self.template_dir)
+            sys.exit(1)
         except UndefinedError as e:  # pragma: no cover
-            log.exit(e)
+            log.critical(e)
+            sys.exit(1)
 
     def save_template(self, filename, content, force=False):
 
@@ -80,7 +93,8 @@ class Templating:
                 self.make_backup(filename)
             # It is always verified before calling save_template from app, create & add
             else:  # pragma: no cover
-                log.exit("File {} already exists", filename)
+                log.critical("File {} already exists", filename)
+                sys.exit(1)
 
         with open(filename, "w+") as fh:
             fh.write(content)
@@ -90,3 +104,10 @@ class Templating:
         backup_filename = f"{filename}.bak"
         os.rename(filename, backup_filename)
         log.info("A backup of {} is saved as {}", filename, backup_filename)
+
+    def file_changed(self, filename: str) -> bool:
+
+        template = self.get_template_name(filename)
+        return not cmp(
+            filename, os.path.join(self.template_dir, template), shallow=True
+        )

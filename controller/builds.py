@@ -5,6 +5,9 @@ Parse dockerfiles and check for builds
 # https://docker-py.readthedocs.io/en/stable/
 """
 
+import sys
+from typing import Dict, List
+
 from dockerfile_parse import DockerfileParser
 
 from controller import log
@@ -33,6 +36,7 @@ def name_priority(name1, name2):
 
 def find_templates_build(base_services):
 
+    # From python 3.8 could be converted in a TypedDict
     templates = {}
     from controller.dockerizing import Dock
 
@@ -48,28 +52,28 @@ def find_templates_build(base_services):
             template_image = base_service.get("image")
 
             if template_image is None:  # pragma: no cover
-                log.exit(
+                log.critical(
                     "Template builds must have a name, missing for {}".format(
                         template_name
                     )
                 )
+                sys.exit(1)
+
+            if template_image not in templates:
+                templates[template_image] = {
+                    "services": [],
+                    "path": template_build.get("context"),
+                    "timestamp": docker.image_attribute(template_image),
+                }
+
+            if "service" not in templates[template_image]:
+                templates[template_image]["service"] = template_name
             else:
-
-                if template_image not in templates:
-                    templates[template_image] = {
-                        "services": [],
-                        "path": template_build.get("context"),
-                        "timestamp": docker.image_attribute(template_image),
-                    }
-
-                if "service" not in templates[template_image]:
-                    templates[template_image]["service"] = template_name
-                else:
-                    templates[template_image]["service"] = name_priority(
-                        templates[template_image]["service"],
-                        template_name,
-                    )
-                templates[template_image]["services"].append(template_name)
+                templates[template_image]["service"] = name_priority(
+                    templates[template_image]["service"],
+                    template_name,
+                )
+            templates[template_image]["services"].append(template_name)
 
     return templates
 
@@ -90,33 +94,36 @@ def find_templates_override(services, templates):
             try:
                 cont = dfp.content
                 if not cont:
-                    log.exit(
+                    log.critical(
                         "Build failed, is {}/Dockerfile empty?", builder.get("context")
                     )
-                else:
-                    log.verbose("Parsed dockerfile {}", builder.get("context"))
+                    sys.exit(1)
             except FileNotFoundError as e:
-                log.exit(e)
+                log.critical(e)
+                sys.exit(1)
 
             if dfp.baseimage is None:
-                log.exit(
+                log.critical(
                     "No base image found in {}/Dockerfile, unable to build",
                     builder.get("context"),
                 )
+                sys.exit(1)
 
             if not dfp.baseimage.startswith("rapydo/"):
                 continue
 
             if dfp.baseimage not in templates:
-                log.exit(
+                log.critical(
                     "Unable to find {} in this project"
                     "\nPlease inspect the FROM image in {}/Dockerfile",
                     dfp.baseimage,
                     builder.get("context"),
                 )
+                sys.exit(1)
+
             vanilla_img = service.get("image")
             template_img = dfp.baseimage
-            log.verbose("{} overrides {}", vanilla_img, template_img)
+            log.debug("{} overrides {}", vanilla_img, template_img)
             tbuilds[template_img] = templates.get(template_img)
             vbuilds[vanilla_img] = template_img
 
@@ -154,7 +161,7 @@ def remove_redundant_services(services, builds):
             flat_builds[s] = b
 
     # Group requested services by builds
-    requested_builds = {}
+    requested_builds: Dict[str, List[str]] = {}
     for service in services:
         build_name = flat_builds.get(service)
         # this service is not built from a rapydo image

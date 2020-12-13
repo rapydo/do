@@ -1,4 +1,5 @@
 import re
+from typing import Dict, List
 
 import typer
 
@@ -11,11 +12,11 @@ from controller.utilities import system
 @Application.app.command(help="Find all children of a docker image")
 def ancestors(
     imagetag: str = typer.Argument(..., help="Image tag ID to be inspected"),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
-    img = system.execute_command("docker", ["images", "--all"]).split("\n")
-    img = [re.split(r"\s+", i) for i in img[1:]]
+    all_images = system.execute_command("docker", ["images", "--all"]).split("\n")
+    img = [re.split(r"\s+", i) for i in all_images[1:]]
     images = {}
     for i in img:
         if len(i) != 7:
@@ -30,14 +31,14 @@ def ancestors(
         if len(children) == 0:
             break
         child = children[0]
-        print("\t".join(images.get(child)))
+        print("\t".join(images.get(child, "N/A")))
         found += 1
         children = get_children(child, images)
     if found == 0:
         print(f"No child found for {child}")
 
 
-def get_children(IMAGE, images):
+def get_children(IMAGE: str, images: Dict[str, List[str]]) -> List[str]:
 
     parameters = [
         "inspect",

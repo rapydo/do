@@ -20,13 +20,13 @@ def tuning(
     service: Services = typer.Argument(..., help="Service name"),
     cpu: int = typer.Option(None, "--cpu", help="Force the amount of cpus", min=1),
     ram: int = typer.Option(None, "--ram", help="Force the amount of ram", min=1),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     service = service.value
 
     if not cpu:
-        cpu = os.cpu_count()
+        cpu = os.cpu_count() or 1
 
     if not ram:
         ram = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")

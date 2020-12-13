@@ -1,7 +1,6 @@
 import typer
 from glom import glom
 
-from controller import log
 from controller.app import Application, Configuration
 from controller.compose import Compose
 
@@ -9,8 +8,10 @@ from controller.compose import Compose
 
 
 @Application.app.command(help="Scale the number of containers for one service")
-def scale(scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")):
-    Application.controller.controller_init()
+def scale(
+    scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
+) -> None:
+    Application.get_controller().controller_init()
 
     options = scaling.split("=")
     if len(options) != 2:
@@ -22,14 +23,16 @@ def scale(scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA"
             hints = "You can also set a {} variable in your .projectrc file".format(
                 scale_var
             )
-            log.exit("Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints)
+            Application.exit(
+                "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints
+            )
         service = scaling
         scaling = f"{service}={nreplicas}"
     else:
         service, nreplicas = options
 
     if isinstance(nreplicas, str) and not nreplicas.isnumeric():
-        log.exit("Invalid number of replicas: {}", nreplicas)
+        Application.exit("Invalid number of replicas: {}", nreplicas)
 
     dc = Compose(files=Application.data.files)
     dc.start_containers([service], scale=[scaling], skip_dependencies=True)

@@ -1,23 +1,33 @@
+"""
+This module will directly access to functions,
+to verify cases not easly testable through cli commands
+"""
+
 import os
 import tempfile
 from distutils.version import LooseVersion
 from pathlib import Path
+from typing import Dict
 
 import pytest
 
-from controller import __version__, gitter, log
+from controller import __version__, gitter
 from controller.app import Application
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
 from controller.utilities import services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
-
-# These tests will directly access to functions, to verify cases
-# not easly testable through cli commands:
+from tests import create_project, random_project_name
 
 
-def test_all(capfd):
+def test_all(capfd, fake):
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(fake),
+        init=True,
+    )
 
     app = Application()
 
@@ -83,10 +93,6 @@ def test_all(capfd):
     values = app.autocomplete_interfaces("")
     assert len(values) == 0
 
-    if os.getenv("STAGE") == "no-docker":
-        log.warning("Skipping test libs/all: docker is not enabled")
-        return True
-
     assert gitter.get_repo("does/not/exist") is None
     do_repo = gitter.get_repo("submodules/do")
     assert do_repo is not None
@@ -120,15 +126,15 @@ def test_all(capfd):
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
-    out = system.execute_command("echo", "Hello World")
+    out = system.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
     try:
-        assert system.execute_command("ls", "doesnotexistforsure")
-        pytest.fail("ExecutionException not raised!")
+        assert system.execute_command("ls", ["doesnotexistforsure"])
+        pytest.fail("ExecutionException not raised!")  # pragma: no cover
     except system.ExecutionException:
         pass
-    except BaseException:
+    except BaseException:  # pragma: no cover
         pytest.fail("Unexpected exception raised")
 
     assert system.bytes_to_str(0) == "0"
@@ -150,20 +156,8 @@ def test_all(capfd):
 
     # Invalid file / path
     try:
-        load_yaml_file("invalid", "path")
-        pytest.fail("No exception raised")
-    except AttributeError:
-        pass
-
-    try:
-        load_yaml_file(Path("invalid"), "path")
-        pytest.fail("No exception raised")
-    except AttributeError:
-        pass
-
-    try:
         load_yaml_file(Path("invalid"), Path("path"))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
@@ -174,14 +168,14 @@ def test_all(capfd):
 
     try:
         load_yaml_file(Path("invalid"), Path("projects"))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
         load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
@@ -189,7 +183,7 @@ def test_all(capfd):
     f = tempfile.NamedTemporaryFile()
     try:
         load_yaml_file(Path(f.name), Path(os.curdir))
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
     f.close()
@@ -199,40 +193,44 @@ def test_all(capfd):
     assert isinstance(y, dict)
     assert len(y) == 0
 
-    shorten = services.normalize_placeholder_variable
-    assert shorten("NEO4J_AUTH") == "NEO4J_PASSWORD"
-    assert shorten("POSTGRES_USER") == "ALCHEMY_USER"
-    assert shorten("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
-    assert shorten("MYSQL_USER") == "ALCHEMY_USER"
-    assert shorten("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
-    assert shorten("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
-    assert shorten("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
-    assert shorten("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
-    assert shorten("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
-    key = "anyother"
-    assert shorten(key) == key
+    short1 = services.normalize_placeholder_variable
+    assert short1("NEO4J_AUTH") == "NEO4J_PASSWORD"
+    assert short1("POSTGRES_USER") == "ALCHEMY_USER"
+    assert short1("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert short1("MYSQL_USER") == "ALCHEMY_USER"
+    assert short1("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
+    assert short1("RABBITMQ_DEFAULT_USER") == "RABBITMQ_USER"
+    assert short1("RABBITMQ_DEFAULT_PASS") == "RABBITMQ_PASSWORD"
+    assert short1("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
+    assert short1("CYPRESS_AUTH_DEFAULT_PASSWORD") == "AUTH_DEFAULT_PASSWORD"
+    assert short1("NEO4J_dbms_memory_heap_max__size") == "NEO4J_HEAP_SIZE"
+    assert short1("NEO4J_dbms_memory_heap_initial__size") == "NEO4J_HEAP_SIZE"
+    assert short1("NEO4J_dbms_memory_pagecache_size") == "NEO4J_PAGECACHE_SIZE"
 
-    shorten = services.get_celerybeat_scheduler
-    env = {}
-    assert shorten(env) == "Unknown"
+    key = "anyother"
+    assert short1(key) == key
+
+    short2 = services.get_celerybeat_scheduler
+    env: Dict[str, str] = {}
+    assert short2(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required
     env["ACTIVATE_CELERYBEAT"] = "0"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["CELERY_BACKEND"] = "??"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     # This is valid, but ACTIVATE_CELERYBEAT is still missing
     env["CELERY_BACKEND"] = "MONGODB"
     env["ACTIVATE_CELERYBEAT"] = "0"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert shorten(env) == "celerybeatmongo.schedulers.MongoScheduler"
+    assert short2(env) == "celerybeatmongo.schedulers.MongoScheduler"
     env["CELERY_BACKEND"] = "REDIS"
-    assert shorten(env) == "redbeat.RedBeatScheduler"
+    assert short2(env) == "redbeat.RedBeatScheduler"
     env["CELERY_BACKEND"] = "INVALID"
-    assert shorten(env) == "Unknown"
+    assert short2(env) == "Unknown"
 
     assert services.get_default_user("invalid", "angular") is None
     assert services.get_default_user("backend", "") == "developer"
@@ -256,7 +254,7 @@ def test_all(capfd):
     # )
     # try:
     #     Templating()
-    #     pytest.fail("No exception raised")
+    #     pytest.fail("No exception raised")  # pragma: no cover
     # except SystemExit:
     #     pass
 
@@ -268,7 +266,7 @@ def test_all(capfd):
 
     try:
         templating.get_template("invalid", {})
-        pytest.fail("No exception raised")
+        pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 

@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import typer
 
 from controller import SUBMODULES_DIR, gitter, log
@@ -7,15 +9,15 @@ from controller.packages import Packages
 
 @Application.app.command(help="Install specified version of rapydo")
 def install(
-    version: str = typer.Argument("auto", help="Version to be installed"),
+    version: Optional[str] = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
         True,
         "--no-editable",
         help="Disable editable mode",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> Any:
+    Application.get_controller().controller_init()
 
     if version == "auto":
         version = Configuration.rapydo_version
@@ -50,7 +52,7 @@ def install_controller_from_folder(gits, version, user, editable):
     elif gitter.switch_branch(do_repo, version):
         log.info("Controller repository switched to {}", version)
     else:
-        log.exit("Invalid version")
+        Application.exit("Invalid version")
 
     installed = Packages.install(do_path, editable=editable, user=user)
 
@@ -58,15 +60,12 @@ def install_controller_from_folder(gits, version, user, editable):
         log.error("Unable to install controller {} from local folder", version)
     else:
         log.info("Controller version {} installed from local folder", version)
-        installed_version = Packages.check_version("rapydo")
-        log.info("Check on installed version: {}", installed_version)
 
 
 def install_controller_from_git(version, user):
 
     log.info("You asked to install rapydo {} from git", version)
 
-    package = "rapydo"
     controller_repository = "do"
     rapydo_uri = "https://github.com/rapydo"
     controller = f"git+{rapydo_uri}/{controller_repository}.git@{version}"
@@ -77,5 +76,3 @@ def install_controller_from_git(version, user):
         log.error("Unable to install controller {} from git", version)
     else:
         log.info("Controller version {} installed from git", version)
-        installed_version = Packages.check_version(package)
-        log.info("Check on installed version: {}", installed_version)

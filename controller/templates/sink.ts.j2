@@ -3,10 +3,9 @@ import { Component, OnInit } from "@angular/core";
 import { FormGroup } from "@angular/forms";
 import { FormlyFieldConfig } from "@ngx-formly/core";
 
-import { NgxSpinnerService } from "ngx-spinner";
-import { ApiService } from "@rapydo/services/api";
-import { AuthService } from "@rapydo/services/auth";
-import { NotificationService } from "@rapydo/services/notification";
+import { FormlyService } from "@rapydo/services/formly";
+
+import { Schema, SchemaType } from "@rapydo/types";
 
 import * as moment from "moment";
 
@@ -20,12 +19,7 @@ export class SinkComponent implements OnInit {
   public model: any = {};
   public data: any = null;
 
-  constructor(
-    private spinner: NgxSpinnerService,
-    private api: ApiService,
-    private auth: AuthService,
-    private notify: NotificationService
-  ) {}
+  constructor(private formly: FormlyService) {}
 
   ngOnInit() {
     this.fields1 = this.get_fields(null);
@@ -33,115 +27,110 @@ export class SinkComponent implements OnInit {
   }
 
   private get_fields(wrappers) {
-    let m = moment();
 
-    return [
+    const now = new Date();
+
+    const schema: Schema[] = [
       {
+        label: "Username",
+        description: "email",
         key: "email",
-        type: "input",
-        templateOptions: {
-          type: "email",
-          label: "Username",
-          placeholder: "email",
-          addonLeft: {
-            class: "fas fa-envelope",
-          },
-          required: true,
-        },
-        validators: { validation: ["email"] },
-        wrappers: wrappers,
+        required: true,
+        type: SchemaType.EMAIL,
       },
       {
+        label: "Password",
+        description: "password",
         key: "password",
-        type: "input",
-        templateOptions: {
-          type: "password",
-          label: "Password",
-          placeholder: "password",
-          addonLeft: {
-            class: "fas fa-key",
-          },
-          required: true,
-        },
-        wrappers: wrappers,
+        required: true,
+        type: SchemaType.PASSWORD,
       },
       {
+        label: "Date",
+        description: "date",
         key: "date",
-        type: "datepicker",
-        templateOptions: {
-          type: "date",
-          placeholder: "date",
-          // min: {
-          //   year: 2019,
-          //   month: 1,
-          //   day: 1
-          // },
-          // max: {
-          //   year: m.year(),
-          //   month: 1 + m.month(),
-          //   day: m.date()
-          // },
-          label: "Date",
-          required: false,
-        },
-        wrappers: wrappers,
+        required: false,
+        type: SchemaType.DATE,
+        min: new Date().setFullYear(now.getFullYear() - 1),
+        max: new Date().setFullYear(now.getFullYear() + 1),
       },
       {
+        label: "URL",
+        description: "url",
         key: "url",
-        type: "input",
-        templateOptions: {
-          type: "url",
-          label: "URL",
-          placeholder: "url",
-          addonLeft: {
-            class: "fas fa-globe",
-          },
-          required: true,
-        },
-        validators: { validation: ["url"] },
-        wrappers: wrappers,
+        required: true,
+        type: SchemaType.URL,
       },
       {
+        label: "Text",
+        description: "text",
+        key: "text",
+        required: false,
+        type: SchemaType.STRING,
+        min: 4,
+        max: 6
+      },
+      {
+        label: "Number",
+        description: "number",
+        key: "number",
+        required: false,
+        type: SchemaType.NUMBER,
+        min: 1,
+        max: 9
+      },
+      {
+        label: "Boolean",
+        description: "boolean",
+        key: "boolean",
+        required: false,
+        type: SchemaType.BOOLEAN,
+      },
+      {
+        label: "Radio1",
         key: "radio1",
-        type: "radio",
-        templateOptions: {
-          type: "radio",
-          label: "Radio1",
-          required: false,
-          options: [
-            {
-              value: "opt1",
-              label: "Option1",
-            },
-            {
-              value: "opt2",
-              label: "Option2",
-            },
-          ],
-        },
+        required: false,
+        type: SchemaType.RADIO,
+        options: [
+          {
+            value: "opt1",
+            label: "Option1",
+          },
+          {
+            value: "opt2",
+            label: "Option2",
+          },
+        ]
       },
       {
+        label: "Radio2",
         key: "radio2",
-        type: "radio_with_description",
-        templateOptions: {
-          type: "radio",
-          label: "Radio2",
-          required: false,
-          options: [
-            {
-              value: "opt3",
-              label: "Option3",
-              description: "Description 3",
-            },
-            {
-              value: "opt4",
-              label: "Option4",
-              description: "Description 4",
-            },
-          ],
-        },
-      },
+        required: false,
+        type: SchemaType.RADIO_WITH_DESCRIPTION,
+        options: [
+          {
+            value: "opt3",
+            label: "Option3",
+            description: "Description 3"
+          },
+          {
+            value: "opt4",
+            label: "Option4",
+            description: "Description 4"
+          },
+        ]
+      }
     ];
+
+    let data = this.formly.json2Form(schema, {});
+
+    if (wrappers) {
+      for (let idx in data.fields) {
+        data.fields[idx].wrappers = wrappers;
+      }
+    }
+
+    return data.fields;
   }
 
   submit() {

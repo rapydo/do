@@ -34,8 +34,8 @@ def backup(
         help="Service to be restarted once completed the backup (multiple allowed)",
         autocompletion=Application.autocomplete_service,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     service = service.value
 
@@ -50,7 +50,7 @@ def backup(
     now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     if service == Services.neo4j:
         if container_is_running and not force:
-            log.exit(
+            Application.exit(
                 "Neo4j is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -73,7 +73,7 @@ def backup(
     if service == Services.postgres:
 
         if not container_is_running:
-            log.exit(
+            Application.exit(
                 "The backup procedure requires {} running, please start your stack",
                 service,
             )

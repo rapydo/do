@@ -20,8 +20,8 @@ def remove(
         help="Also remove networks and persistent data stored in docker volumes",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     dc = Compose(files=Application.data.files)
 
@@ -31,7 +31,7 @@ def remove(
 
             opt = "--networks" if rm_networks else "--all"
 
-            log.exit(
+            Application.exit(
                 "Incompatibile options {opt} and --service\n"
                 + "rapydo remove {opt} is ALWAYS applied to EVERY container of the "
                 + "stack due to the underlying docker-compose implementation. "

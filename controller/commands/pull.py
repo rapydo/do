@@ -12,9 +12,15 @@ def pull(
         "--all",
         help="Include both core and custom images",
         show_default=False,
-    )
-):
-    Application.controller.controller_init()
+    ),
+    quiet: bool = typer.Option(
+        False,
+        "--quiet",
+        help="Pull without printing progress information",
+        show_default=False,
+    ),
+) -> None:
+    Application.get_controller().controller_init()
 
     if include_all:
         dc = Compose(files=Application.data.files)
@@ -28,15 +34,13 @@ def pull(
         if Configuration.services_list:
             for s in Application.data.services:
                 if s not in base_services_list:
-                    log.exit("Invalid service name: {}", s)
+                    Application.exit("Invalid service name: {}", s)
         # List of BASE active services (i.e. remove services not in base)
         services_intersection = list(
             set(Application.data.services).intersection(base_services_list)
         )
 
-    options = {
-        "SERVICE": services_intersection,
-    }
+    options = {"SERVICE": services_intersection, "--quiet": quiet}
     dc.command("pull", options)
 
     if include_all:

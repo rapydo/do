@@ -1,4 +1,6 @@
+import sys
 from pathlib import Path
+from typing import Optional
 
 import typer
 
@@ -31,31 +33,31 @@ def ssl(
         help="Disable pseudo-tty allocation (e.g. to execute from a cronjob)",
         show_default=False,
     ),
-    chain_file: Path = typer.Option(
+    chain_file: Optional[Path] = typer.Option(
         None,
         "--chain-file",
         help="Path to existing chain file (.pem format)",
         show_default=False,
     ),
-    key_file: Path = typer.Option(
+    key_file: Optional[Path] = typer.Option(
         None,
         "--key-file",
         help="Path to existing key file (.pem format)",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     if chain_file is not None or key_file is not None:
         if chain_file is None:
-            log.exit("Invalid chain file (you provided none)")
+            Application.exit("Invalid chain file (you provided none)")
         elif not chain_file.exists():
-            log.exit("Invalid chain file (you provided {})", chain_file)
+            Application.exit("Invalid chain file (you provided {})", chain_file)
 
         if key_file is None:
-            log.exit("Invalid key file (you provided none)")
+            Application.exit("Invalid key file (you provided none)")
         elif not key_file.exists():
-            log.exit("Invalid key file (you provided {})", key_file)
+            Application.exit("Invalid key file (you provided {})", key_file)
 
     service = "proxy"
 
@@ -89,7 +91,36 @@ def ssl(
 
     dc = Compose(files=Application.data.files)
 
-    if volatile:
-        dc.create_volatile_container(service, command=command)
+    try:
+        if volatile:
+            dc.create_volatile_container(service, command=command)
+        else:
+            dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
+    except SystemExit as e:
+        sys.exit(e.code)
     else:
-        dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
+
+        running_containers = dc.get_running_containers(Configuration.project)
+        if "neo4j" in running_containers:
+            log.info("Neo4j is running, but it will reload the certificate by itself")
+
+        if "rabbit" in running_containers:
+            log.info(
+                "RabbitMQ is running, executing command to refresh the certificate"
+            )
+            # Please note that Erland is able to automatically reload the certificate
+            # But RabbitMQ does not. Probably in the future releases this command will
+            # No longer be required. To test it after the creation of the new cert:
+            #   echo -n | openssl s_client -showcerts -connect hostname:5671
+
+            # Note that this command only works if rabbit is executed in prod mode
+            # Otherwise it will file with the following error:
+            #       Error: unable to perform an operation on node 'rabbit@rabbit'.
+            #       Please see diagnostics information and suggestions below.
+            dc.exec_command(
+                "rabbit",
+                command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
+                disable_tty=no_tty,
+            )
+
+        log.info("New certificate successfully installed")

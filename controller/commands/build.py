@@ -27,8 +27,8 @@ def build(
         help="assume 'yes' as answer to all prompts and run non-interactively",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> bool:
+    Application.get_controller().controller_init()
 
     builds, template_builds, overriding_imgs = locate_builds(
         Application.data.base_services, Application.data.compose_config
@@ -93,7 +93,9 @@ def build(
             img = service2img.get(s)
             # Get the list of services using the same image (img2services.get(img))
             # and check if any of these services is running
-            running = [i for i in img2services.get(img) if i in running_containers]
+            running = [
+                i for i in img2services.get(img, "N/A") if i in running_containers
+            ]
 
             if not running:
                 continue
@@ -109,7 +111,7 @@ def build(
             while True:
                 response = typer.prompt("Do you want to continue? y/n")
                 if response.lower() in ["n", "no"]:
-                    log.exit("Build aborted")
+                    Application.exit("Build aborted")
 
                 if response.lower() in ["y", "yes"]:
                     break

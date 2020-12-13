@@ -16,19 +16,19 @@ def update(
         show_default=False,
         autocompletion=Application.autocomplete_submodule,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     Application.git_update(ignore_submodules)
     # Reading again the configuration, it may change with git updates
-    Application.controller.read_specs(read_extended=True)
+    Application.get_controller().read_specs(read_extended=True)
 
-    Application.controller.make_env()
+    Application.get_controller().make_env()
 
     # Compose services and variables
-    Application.controller.read_composers()
-    Application.controller.set_active_services()
+    Application.get_controller().read_composers()
+    Application.get_controller().set_active_services()
 
-    Application.controller.check_placeholders()
+    Application.get_controller().check_placeholders()
 
     log.info("All updated")

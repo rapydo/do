@@ -30,8 +30,8 @@ def volatile(
         help="User existing in selected service",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     # Deprecated since 0.8
     if old_command:

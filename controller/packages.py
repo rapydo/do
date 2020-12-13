@@ -2,8 +2,7 @@
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
 
-# which version of python is this?
-# Retrocompatibility for Python < 3.6
+import sys
 from distutils.version import LooseVersion
 from importlib import import_module
 
@@ -52,19 +51,8 @@ class Packages:
 
                 return result.rc == 0
         except BaseException as e:  # pragma: no cover
-            log.exit(e)
-
-    @staticmethod
-    def check_version(package_name):
-
-        # Don't import before or pip will mess up everything! Really crazy
-        from pip._internal.utils.misc import get_installed_distributions
-
-        for pkg in get_installed_distributions(local_only=True, user_only=False):
-            if pkg._key == package_name:  # pylint:disable=protected-access
-                return pkg._version  # pylint:disable=protected-access
-
-        return None
+            log.critical(e)
+            sys.exit(1)
 
     @staticmethod
     def import_package(package_name):
@@ -86,23 +74,31 @@ class Packages:
 
         found_version = Packages.package_version(package_name)
         if found_version is None:  # pragma: no cover
-            log.exit("Could not find the following python package: {}", package_name)
+            log.critical(
+                "Could not find the following python package: {}", package_name
+            )
+            sys.exit(1)
+
         try:
             if min_version is not None:  # pragma: no cover
                 if LooseVersion(min_version) > LooseVersion(found_version):
-                    version_error = "Minimum supported version for {} is {}".format(
-                        package_name, min_version
+                    log.critical(
+                        "Minimum supported version for {} is {}, found {}",
+                        package_name,
+                        min_version,
+                        found_version,
                     )
-                    version_error += f", found {found_version} "
-                    log.exit(version_error)
+                    sys.exit(1)
 
             if max_version is not None:  # pragma: no cover
                 if LooseVersion(max_version) < LooseVersion(found_version):
-                    version_error = "Maximum supported version for {} is {}".format(
-                        package_name, max_version
+                    log.critical(
+                        "Maximum supported version for {} is {}, found {}",
+                        package_name,
+                        max_version,
+                        found_version,
                     )
-                    version_error += f", found {found_version} "
-                    log.exit(version_error)
+                    sys.exit(1)
 
             log.debug("{} version: {}", package_name, found_version)
             return found_version
@@ -110,7 +106,9 @@ class Packages:
             log.error("{}: {}", e, found_version)
 
     @staticmethod
-    def check_program(program, min_version=None, max_version=None):
+    def check_program(
+        program, min_version=None, max_version=None, min_recommended_version=None
+    ):
 
         found_version = Packages.get_bin_version(program)
         # Can't be tested on travis...
@@ -120,25 +118,38 @@ class Packages:
             if program == "docker":
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.exit("Missing requirement: {} not found.{}", program, hints)
+            log.critical("Missing requirement: {} not found.{}", program, hints)
+            sys.exit(1)
 
-        if min_version is not None:  # pragma: no cover
-            if LooseVersion(min_version) > LooseVersion(found_version):
-                version_error = "Minimum supported version for {} is {}".format(
+        v = LooseVersion(found_version)
+        if min_version is not None:
+            if LooseVersion(min_version) > v:  # pragma: no cover
+                log.critical(
+                    "Minimum supported version for {} is {}, found {}",
                     program,
                     min_version,
+                    found_version,
                 )
-                version_error += f", found {found_version} "
-                log.exit(version_error)
+                sys.exit(1)
+
+        if min_recommended_version is not None:
+            if LooseVersion(min_recommended_version) > v:  # pragma: no cover
+                log.warning(
+                    "Minimum recommended version for {} is {}, found {}",
+                    program,
+                    min_recommended_version,
+                    found_version,
+                )
 
         if max_version is not None:  # pragma: no cover
-            if LooseVersion(max_version) < LooseVersion(found_version):
-                version_error = "Maximum supported version for {} is {}".format(
+            if LooseVersion(max_version) < v:
+                log.critical(
+                    "Maximum supported version for {} is {}, found {}",
                     program,
                     max_version,
+                    found_version,
                 )
-                version_error += f", found {found_version} "
-                log.exit(version_error)
+                sys.exit(1)
 
         log.debug("{} version: {}", program, found_version)
         return found_version
@@ -189,12 +200,16 @@ class Packages:
         )
 
         if v is None:  # pragma: no cover
-            log.exit(
-                "Cannot verify docker version, is your user not allowed to docker?"
+            log.critical(
+                "Cannot verify docker version, "
+                "is docker running and your user is allowed to use it?"
             )
+            sys.exit(1)
 
         safe_version = "18.09.2"
-        if LooseVersion(safe_version) > LooseVersion(v):
+        # On GitHub Actions docker is >safe_version on all available envronments.
+        # This check cannot be tested
+        if LooseVersion(safe_version) > LooseVersion(v):  # pragma: no cover
             log.critical(
                 """Your docker version is vulnerable to CVE-2019-5736
 

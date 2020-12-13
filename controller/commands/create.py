@@ -1,22 +1,34 @@
 import os
-from typing import List
+import shutil
+from enum import Enum
+from typing import List, Optional
 
 import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
 from controller.app import Application, Configuration
-from controller.project import ANGULAR, NO_FRONTEND, Project
+from controller.project import NO_FRONTEND, Project
 from controller.templating import Templating
+
+
+class AuthTypes(str, Enum):
+    postgres = "postgres"
+    mysql = "mysql"
+    neo4j = "neo4j"
+    mongo = "mongo"
+
+
+class FrontendTypes(str, Enum):
+    no = "no"
+    angular = "angular"
 
 
 @Application.app.command(help="Create a new rapydo project")
 def create(
     project_name: str = typer.Argument(..., help="Name of your project"),
-    auth: str = typer.Option(
-        None, "--auth", help="Auth service to enable (sql, neo4j, mongo)"
-    ),
-    frontend: str = typer.Option(
-        None, "--frontend", help="Frontend framework to enable (no, angular)"
+    auth: AuthTypes = typer.Option(..., "--auth", help="Auth service to enable"),
+    frontend: FrontendTypes = typer.Option(
+        ..., "--frontend", help="Frontend framework to enable"
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
     services: List[str] = typer.Option(
@@ -26,7 +38,7 @@ def create(
         help="Service to be enabled (multiple is enabled)",
         autocompletion=Application.autocomplete_service,
     ),
-    origin_url: str = typer.Option(
+    origin_url: Optional[str] = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"
     ),
     envs: List[str] = typer.Option(
@@ -59,19 +71,18 @@ def create(
         help="Include all optionals files (html templates and customizers)",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     if extend is not None:
         if project_name == extend:
-            log.exit("A project cannot extend itself")
-        if not PROJECT_DIR.joinpath(extend).is_dir():
-            log.exit("Invalid extend value: project {} not found", extend)
+            Application.exit("A project cannot extend itself")
 
-    if auth is None:
-        log.exit("Missing authentication service, add --auth option")
-    if auth not in ["postgres", "mysql", "neo4j", "mongo"]:
-        log.exit("Invalid authentication service: {}", auth)
+        if not PROJECT_DIR.joinpath(extend).is_dir():
+            Application.exit("Invalid extend value: project {} not found", extend)
+
+    auth = auth.value
+    frontend = frontend.value
 
     create_project(
         project_name=project_name,
@@ -135,17 +146,13 @@ def create_project(
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
 
-    if frontend is None:
-        log.exit("Missing frontend framework, add --frontend option")
-    if not frontend or frontend == "no":
+    if frontend == "no":
         frontend = NO_FRONTEND
-    if frontend not in [NO_FRONTEND, ANGULAR]:
-        log.exit("Invalid frontend framework: {}", frontend)
 
     if not force_current:
         dirs = os.listdir(".")
         if dirs and dirs != [".git"]:
-            log.exit(
+            Application.exit(
                 "Current folder is not empty, cannot create a new project here.\n"
                 "Found: {}\n"
                 "Use --current to force the creation here",
@@ -179,10 +186,12 @@ def create_project(
         project_scaffold.load_frontend_scaffold(frontend)
 
     if "_" in project_name:
-        log.exit("Wrong project name, _ is not a valid character")
+        Application.exit("Wrong project name, _ is not a valid character")
 
     if project_name in project_scaffold.reserved_project_names:
-        log.exit("You selected a reserved name, invalid project name: {}", project_name)
+        Application.exit(
+            "You selected a reserved name, invalid project name: {}", project_name
+        )
 
     templating = Templating()
 
@@ -196,7 +205,7 @@ def create_project(
             log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
-            log.exit("\nmkdir -p {}", f)
+            Application.exit("\nmkdir -p {}", f)
 
         f.mkdir(parents=True, exist_ok=True)
 
@@ -206,23 +215,12 @@ def create_project(
     files = project_scaffold.expected_files
     if add_optionals:
         files += project_scaffold.optionals_files
-    files += project_scaffold.recommended_files
 
     if path:
         if path not in files:
-            log.exit("Invalid path, cannot upgrade {}", path)
+            Application.exit("Invalid path, cannot upgrade {}", path)
         else:
             files = [path]
-
-    # Add the Kitchen Sink!
-    if Configuration.testing and frontend == ANGULAR:
-        path = project_scaffold.p_path("frontend", "app", "components", "sink")
-        path.mkdir(parents=True, exist_ok=True)
-
-        files += [
-            path.joinpath("sink.ts"),
-            path.joinpath("sink.html"),
-        ]
 
     for p in files:
 
@@ -265,7 +263,24 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
-            log.exit(p)
+            Application.exit(p)
+
+    if not path:
+        for p in project_scaffold.raw_files:
+            # automatic creation
+            if auto:
+                if p.exists() and not force:
+                    log.info("Project file already exists: {}", p)
+                else:
+                    shutil.copyfile(templating.template_dir.joinpath(p.name), p)
+                continue
+
+            # manual creation
+            if p.exists():
+                log.info("Project file already exists: {}", p)
+            else:
+                # print(f"Missing file: {p}")
+                Application.exit("File is missing: {}", p)
 
 
 def parse_env_variables(envs):
@@ -277,7 +292,7 @@ def parse_env_variables(envs):
     for env in envs:
         e = env.split("=")
         if len(e) != 2:
-            log.exit("Invalid env {}, expected: K1=V1", env)
+            Application.exit("Invalid env {}, expected: K1=V1", env)
         k = e[0].upper()
         v = e[1]
         env_variables[k] = v

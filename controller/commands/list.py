@@ -19,8 +19,8 @@ def list_cmd(
     element_type: ElementTypes = typer.Argument(
         ..., help="Type of element to be listed"
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     if element_type == ElementTypes.env:
         log.info("List env variables:\n")
@@ -69,10 +69,9 @@ def list_cmd(
 def read_env():
     env = {}
     with open(COMPOSE_ENVIRONMENT_FILE) as f:
-        lines = f.readlines()
-        for line in lines:
-            line = line.split("=")
-            k = line[0].strip()
-            v = line[1].strip()
+        for line in f.readlines():
+            tokens = line.split("=")
+            k = tokens[0].strip()
+            v = tokens[1].strip()
             env[k] = v
     return env

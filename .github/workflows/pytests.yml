@@ -1,0 +1,75 @@
+name: Test
+
+on:
+  push:
+  # schedule:
+  #   - cron: "0 1 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        test:
+          [
+            add_upgrade,
+            backup_restore_tuning_neo4j,
+            backup_restore_tuning_postgres,
+            base,
+            build_pull_ancestors,
+            create,
+            cronjobs,
+            diagnostic,
+            dump,
+            install,
+            init_check_update,
+            interfaces,
+            libs,
+            list,
+            rabbit_invalid_characters,
+            scale,
+            ssl_dhparam,
+            start_shell_status_logs_restart_remove,
+            verify,
+            volatile,
+          ]
+        python-version: [3.8, 3.7, 3.6]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools pytest pytest-cov pytest-timeout Faker
+          pip install --upgrade --no-cache-dir --editable .
+          # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
+          git config --global user.email "tests@rapy.do"
+          git config --global user.name "RAPyDo"
+      - name: Run Tests
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+        run: |
+          # This works well for all tests... except for install... that is not covered :o
+          # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
+
+          mkdir rapydo_tests
+          cd rapydo_tests
+          py.test --timeout=300 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          cp coverage.xml ..
+          cd ..
+
+          bash <(curl -s https://codecov.io/bash)
+
+      # - name: Artifact
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: coverage
+      #     path: coverage.xml

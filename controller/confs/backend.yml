@@ -74,14 +74,8 @@ services:
   ###  MAIN CONTAINER  ###
   ########################
   backend:
-    restart: on-failure:5
-    # TO TEST the failure:
-    # 1. go inside backend
-    # 2. ps aux --forest
-    # 3. kill process 1 and the tree branches
-
-    # restart: always
-    # command: sleep infinity
+    # restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -98,6 +92,11 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
+      CRONTAB_ENABLE: ${CRONTAB_ENABLE}
+      GZIP_COMPRESSION_ENABLE: ${GZIP_COMPRESSION_ENABLE}
+      GZIP_COMPRESSION_THRESHOLD: ${GZIP_COMPRESSION_THRESHOLD}
+      GZIP_COMPRESSION_LEVEL: ${GZIP_COMPRESSION_LEVEL}
+
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
       FLASK_ENV: ${FLASK_ENV}
       # used by gunicorn
@@ -138,6 +137,8 @@ services:
 
       ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
       ALCHEMY_ENABLE_CONNECTOR: ${ALCHEMY_ENABLE_CONNECTOR}
+      ALCHEMY_EXPIRATION_TIME: ${ALCHEMY_EXPIRATION_TIME}
+      ALCHEMY_VERIFICATION_TIME: ${ALCHEMY_VERIFICATION_TIME}
       ALCHEMY_HOST: ${ALCHEMY_HOST}
       ALCHEMY_PORT: ${ALCHEMY_PORT}
       ALCHEMY_USER: ${ALCHEMY_USER}
@@ -148,12 +149,16 @@ services:
 
       NEO4J_ENABLE: ${ACTIVATE_NEO4J}
       NEO4J_ENABLE_CONNECTOR: ${NEO4J_ENABLE_CONNECTOR}
+      NEO4J_EXPIRATION_TIME: ${NEO4J_EXPIRATION_TIME}
+      NEO4J_VERIFICATION_TIME: ${NEO4J_VERIFICATION_TIME}
       NEO4J_HOST: ${NEO4J_HOST}
       NEO4J_PORT: ${NEO4J_BOLT_PORT}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
 
       MONGO_ENABLE: ${ACTIVATE_MONGODB}
       MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
+      MONGO_EXPIRATION_TIME: ${MONGO_EXPIRATION_TIME}
+      MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USER: ${MONGO_USER}
@@ -162,6 +167,8 @@ services:
 
       CELERY_ENABLE: ${ACTIVATE_CELERY}
       CELERY_ENABLE_CONNECTOR: ${CELERY_ENABLE_CONNECTOR}
+      CELERY_EXPIRATION_TIME: ${CELERY_EXPIRATION_TIME}
+      CELERY_VERIFICATION_TIME: ${CELERY_VERIFICATION_TIME}
       CELERY_BROKER: ${CELERY_BROKER}
       CELERY_BACKEND: ${CELERY_BACKEND}
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
@@ -169,23 +176,35 @@ services:
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
+      RABBITMQ_EXPIRATION_TIME: ${RABBITMQ_EXPIRATION_TIME}
+      RABBITMQ_VERIFICATION_TIME: ${RABBITMQ_VERIFICATION_TIME}
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
+      # backend can use this port to use management's APIs
+      RABBITMQ_MANAGEMENT_PORT: ${RABBITMQ_MANAGEMENT_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
 
+      REDIS_ENABLE: ${ACTIVATE_REDIS}
+      REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
+      REDIS_EXPIRATION_TIME: ${REDIS_EXPIRATION_TIME}
+      REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
       PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
+      PUSHPIN_EXPIRATION_TIME: ${PUSHPIN_EXPIRATION_TIME}
+      PUSHPIN_VERIFICATION_TIME: ${PUSHPIN_VERIFICATION_TIME}
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
       SMTP_ENABLE: ${ACTIVATE_SMTP}
+      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
+      SMTP_EXPIRATION_TIME: ${SMTP_EXPIRATION_TIME}
+      SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
       SMTP_ADMIN: ${SMTP_ADMIN}
       SMTP_NOREPLY: ${SMTP_NOREPLY}
       SMTP_HOST: ${SMTP_HOST}
@@ -226,6 +245,8 @@ services:
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
       # Logs
       - ${VANILLA_DIR}/data/logs:/logs
+      # Crontabs (only used if enabled)
+      - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
     networks:
       app_net:
         aliases:
@@ -260,6 +281,7 @@ services:
     environment:
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
+      DOMAIN_ALIASES: ${DOMAIN_ALIASES}
       MODE: ${LETSENCRYPT_MODE}
       ACTIVATE: ${ACTIVATE_PROXY}
       CURRENT_UID: ${CURRENT_UID}
@@ -277,7 +299,7 @@ services:
       - backend
 
   maintenance:
-    restart: always
+    # restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/proxy
       args:
@@ -306,8 +328,7 @@ services:
   ###  DATABASES  ###
   ###################
   postgres:
-    # restart: always
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/postgres
       args:
@@ -332,9 +353,8 @@ services:
           - ${ALCHEMY_HOST}
 
   mariadb:
-    # restart: always
-    restart: on-failure:5
-    image: mariadb:10.5.5
+    restart: always
+    image: mariadb:10.5.6
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -349,7 +369,7 @@ services:
           - ${ALCHEMY_HOST}
 
   neo4j:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/neo4j
       args:
@@ -381,6 +401,8 @@ services:
       # Useful in case of corrupted transaction logs
       # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
       # NEO4J_dbms_recovery_fail__on__missing__files: "false"
+
+      # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
       NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
       NEO4J_dbms_ssl_policy_https_enabled: ${NEO4J_SSL_ENABLED}
       NEO4J_dbms_ssl_policy_bolt_base__directory: /ssl/real
@@ -417,7 +439,7 @@ services:
     #   - 7687:7687
 
   mongodb:
-    restart: on-failure:5
+    restart: always
     image: mongo:4.4.1
     volumes:
       - mongodata:/data/db
@@ -433,7 +455,7 @@ services:
   #########################
 
   celery:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -442,7 +464,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
-    command: celery worker --concurrency=1 -Ofair -A restapi.connectors.celery.worker.celery_app -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
 
     # user: developer
     working_dir: /code
@@ -456,13 +478,18 @@ services:
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      FORCE_PRODUCTION_TESTS: ${FORCE_PRODUCTION_TESTS}
 
       CELERY_ENABLE: 1
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
+      CELERY_EXPIRATION_TIME: ${CELERY_EXPIRATION_TIME}
+      CELERY_VERIFICATION_TIME: ${CELERY_VERIFICATION_TIME}
 
       CELERY_BROKER: ${CELERY_BROKER}
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
+      RABBITMQ_EXPIRATION_TIME: ${RABBITMQ_EXPIRATION_TIME}
+      RABBITMQ_VERIFICATION_TIME: ${RABBITMQ_VERIFICATION_TIME}
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -477,6 +504,8 @@ services:
 
       ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
       ALCHEMY_ENABLE_CONNECTOR: ${ALCHEMY_ENABLE_CONNECTOR}
+      ALCHEMY_EXPIRATION_TIME: ${ALCHEMY_EXPIRATION_TIME}
+      ALCHEMY_VERIFICATION_TIME: ${ALCHEMY_VERIFICATION_TIME}
       ALCHEMY_HOST: ${ALCHEMY_HOST}
       ALCHEMY_PORT: ${ALCHEMY_PORT}
       ALCHEMY_USER: ${ALCHEMY_USER}
@@ -487,12 +516,16 @@ services:
 
       NEO4J_ENABLE: ${ACTIVATE_NEO4J}
       NEO4J_ENABLE_CONNECTOR: ${NEO4J_ENABLE_CONNECTOR}
+      NEO4J_EXPIRATION_TIME: ${NEO4J_EXPIRATION_TIME}
+      NEO4J_VERIFICATION_TIME: ${NEO4J_VERIFICATION_TIME}
       NEO4J_HOST: ${NEO4J_HOST}
       NEO4J_PORT: ${NEO4J_BOLT_PORT}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
 
       MONGO_ENABLE: ${ACTIVATE_MONGODB}
       MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
+      MONGO_EXPIRATION_TIME: ${MONGO_EXPIRATION_TIME}
+      MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USER: ${MONGO_USER}
@@ -501,11 +534,15 @@ services:
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
       PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
+      PUSHPIN_EXPIRATION_TIME: ${PUSHPIN_EXPIRATION_TIME}
+      PUSHPIN_VERIFICATION_TIME: ${PUSHPIN_VERIFICATION_TIME}
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
       SMTP_ENABLE: ${ACTIVATE_SMTP}
+      SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
+      SMTP_EXPIRATION_TIME: ${SMTP_EXPIRATION_TIME}
+      SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
       SMTP_ADMIN: ${SMTP_ADMIN}
       SMTP_NOREPLY: ${SMTP_NOREPLY}
       SMTP_HOST: ${SMTP_HOST}
@@ -533,7 +570,7 @@ services:
     #   # - celeryui
 
   celery-beat:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -611,7 +648,7 @@ services:
       worker_net:
 
   rabbit:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/rabbitmq
       args:
@@ -628,6 +665,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
 
+      # If the following variables will ever change, fix the check_ssl.sh script in rabbitmq build
       RABBITMQ_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
       RABBITMQ_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
       RABBITMQ_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
@@ -650,8 +688,8 @@ services:
           - ${RABBITMQ_HOST}
 
   redis:
-    restart: on-failure:5
-    image: redis:6.0.7
+    restart: always
+    image: redis:6.0.9
     command: redis-server --appendonly yes
     volumes:
       - redisdata:/data
@@ -663,7 +701,7 @@ services:
       ACTIVATE: ${ACTIVATE_REDIS}
 
   bot:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -716,7 +754,7 @@ services:
   ##########################
 
   celeryui:
-    restart: on-failure:5
+    restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
       args:
@@ -796,23 +834,48 @@ services:
 
   swaggerui:
     # restart: no
-    image: swaggerapi/swagger-ui:v3.32.5
+    # image: swaggerapi/swagger-ui:v3.36.0
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/swaggerui
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/swaggerui:${RAPYDO_VERSION}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
+      APP_MODE: ${APP_MODE}
+      DOMAIN: ${PROJECT_DOMAIN}
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      - 7777:8080
+      - 7777:80
 
   sqlalchemyui:
+    # image: adminer:4.7.7-standalone
     # restart: no
-    image: adminer:4.7.7-standalone
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/adminer
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/adminer:${RAPYDO_VERSION}
+    # user: adminer
     networks:
       db_net:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
+      APP_MODE: ${APP_MODE}
       # https://github.com/vrana/adminer/tree/master/designs
-      # ADMINER_DESIGN: brade
+      # some choices: brade, ng9, pepa-linha
+      ADMINER_DESIGN: pepa-linha
+    volumes:
+      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      - 7777:8080
+      - 7777:80
 
   mongoui:
     # restart: no
@@ -830,7 +893,7 @@ services:
   ### FTP SERVER  ###
   ###################
   ftp:
-    restart: on-failure:5
+    restart: always
     build: ${SUBMODULE_DIR}/build-templates/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:

@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import dateutil.parser
 import typer
@@ -9,6 +9,7 @@ from controller import gitter, log
 from controller.app import Application
 from controller.builds import locate_builds
 from controller.dockerizing import Dock
+from controller.templating import Templating
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -36,8 +37,8 @@ def check(
         show_default=False,
         autocompletion=Application.autocomplete_submodule,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     if no_git:
         log.info("Skipping git checks")
@@ -65,11 +66,6 @@ def check(
             if not any(
                 x in Application.data.active_services for x in build["services"]
             ):  # pragma: no cover
-                log.verbose(
-                    "Checks skipped: template {} not enabled (service list = {})",
-                    image_tag,
-                    build["services"],
-                )
                 continue
 
             # Check if some recent commit modified the Dockerfile
@@ -85,11 +81,18 @@ def check(
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
 
-                    log.exit(
+                    # This is no longer an errore because custom images may be pulled
+                    # from the docker hub. In that case template images are not required
+                    # Application.exit(
+                    #     "Missing template build for {} ({})\n{}",
+                    #     from_build["services"],
+                    #     from_img,
+                    #     "Suggestion: execute the pull command",
+                    # )
+                    log.warning(
                         "Missing template build for {} ({})\n{}",
                         from_build["services"],
                         from_img,
-                        "Suggestion: execute the pull command",
                     )
 
                 # Verify if template build is obsolete or not
@@ -97,13 +100,18 @@ def check(
                 if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
-                from_timestamp = get_build_timestamp(from_build, as_date=True)
-                build_timestamp = get_build_timestamp(build, as_date=True)
+                from_timestamp = get_build_date(from_build)
+                build_timestamp = get_build_date(build)
 
                 if from_timestamp > build_timestamp:
                     b = build_timestamp.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
                     print_obsolete(image_tag, b, c, build.get("service"), from_img)
+
+    templating = Templating()
+    for f in Application.project_scaffold.fixed_files:
+        if templating.file_changed(str(f)):
+            log.warning("{f} changed, please execute rapydo upgrade --path {f}", f=f)
 
     log.info("Checks completed")
 
@@ -132,15 +140,17 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def get_build_timestamp(build, as_date=False):
+def get_build_date(build: Dict[str, str]) -> datetime:
 
     # timestamp is like: 2017-09-22T07:10:35.822772835Z
-    timestamp = build.get("timestamp") or 0
+    timestamp = build.get("timestamp") or "0"
 
-    d = dateutil.parser.parse(timestamp)
-    if as_date:
-        return d
+    return dateutil.parser.parse(timestamp)
 
+
+def get_build_timestamp(build: Dict[str, str]) -> float:
+
+    d = get_build_date(build)
     return d.timestamp()
 
 
@@ -155,7 +165,7 @@ def build_is_obsolete(build, gits):
     elif path.startswith(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
-        log.exit("Unable to find git repo {}", path)
+        Application.exit("Unable to find git repo {}", path)
 
     build_timestamp = get_build_timestamp(build)
 

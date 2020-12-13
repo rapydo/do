@@ -7,8 +7,10 @@ https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-
 import os
 import re
 import shlex
+import sys
 from contextlib import redirect_stdout
 from io import StringIO
+from typing import Any, Dict
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
@@ -18,6 +20,7 @@ from compose.cli.command import (
     project_from_options,
 )
 from compose.cli.main import TopLevelCommand
+from compose.cli.signals import ShutdownException
 from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
@@ -37,15 +40,14 @@ class Compose:
 
         os.environ["COMPOSE_HTTP_TIMEOUT"] = "180"
 
-        log.verbose("Client compose {}: {}", self.project_name, files)
+        log.debug("Client compose {}: {}", self.project_name, files)
 
     def config(self):
         compose_output_tuple = get_config_from_options(".", self.options)
-        # NOTE: for compatibility with docker-compose > 1.13
-        # services is always the second element
-        return compose_output_tuple[1]
+        # NOTE: compose_output_tuple is a namedtuple
+        return compose_output_tuple.services
 
-    def command(self, command, options):
+    def command(self, command: str, options: Dict[str, Any]) -> None:
 
         compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
         method = getattr(compose_handler, command)
@@ -55,28 +57,29 @@ class Compose:
 
         log.debug("docker-compose command: '{}'", command)
 
-        out = None
         # sometimes this import stucks... importing here to avoid unnecessary waits
         from docker.errors import APIError
 
         try:
-            out = method(options=options)
+            method(options=options)
         except SystemExit as e:
             # System exit is always received, also in case of normal execution
             if e.code > 0:
-                log.exit("Compose received: system.exit({})", e.code, error_code=e.code)
+                log.critical("Compose received: system.exit({})", e.code)
+                sys.exit(e.code)
 
-            log.verbose("Executed compose {} w/{}", command, options)
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
-            log.exit("Failed command execution:\n{}", e)
+            log.critical("Failed command execution:\n{}", e)
+            sys.exit(1)
         except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
-            log.exit("Failed docker container:\n{}", e)
+            log.critical("Failed docker container:\n{}", e)
+            sys.exit(1)
+        except ShutdownException as e:  # pragma: no cover
+            log.info("ShutdownException {}", e)
+            sys.exit(1)
         except (ProjectError, NoSuchService) as e:
-            log.exit(e)
-        else:
-            log.verbose("Executed compose {} w/{}", command, options)
-
-        return out
+            log.critical(e)
+            sys.exit(1)
 
     @staticmethod
     def split_command(command):
@@ -133,12 +136,13 @@ class Compose:
         try:
             return self.command("up", options)
         except NetworkConfigChangedError as e:  # pragma: no cover
-            log.exit(
+            log.critical(
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
                 "you can use rapydo remove --networks or docker system prune",
             )
+            sys.exit(1)
 
     def create_volatile_container(
         self, service, command=None, publish=None, detach=False, user=None
@@ -206,7 +210,7 @@ class Compose:
                 shell_command,
                 " ".join(shell_args),
             )
-        return self.command("exec_command", options)
+        self.command("exec_command", options)
 
     def get_containers_status(self, prefix):
         with StringIO() as buf, redirect_stdout(buf):
@@ -224,17 +228,20 @@ class Compose:
                 # row is:
                 # Name   Command   State   Ports
                 # Split on two or more spaces
-                row = re.split(r"\s\s+", row)
-                status = row[2]
-                row = row[0]
-                if row == "Name":
-                    continue
-                # Removed the prefix (i.e. project name)
-                row = row[1 + len(prefix) :]
-                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                row = row[0 : row.index("_")]
+                row_tokens = re.split(r"\s\s+", row)
 
-                containers[row] = status
+                if row_tokens[0] == "Name":
+                    continue
+
+                status = row_tokens[2]
+                name = row_tokens[0]
+
+                # Removed the prefix (i.e. project name)
+                name = name[1 + len(prefix) :]
+                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+                name = name[0 : name.index("_")]
+
+                containers[name] = status
 
             return containers
 

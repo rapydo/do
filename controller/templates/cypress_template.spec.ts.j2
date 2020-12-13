@@ -1,0 +1,47 @@
+// This is to silence ESLint about undefined cy
+/*global cy, Cypress*/
+
+describe("{{name}}", () => {
+  beforeEach(() => {
+    // cy.login();
+    // const email = "youremail@sample.org";
+    // const pwd = "Y0urP4ss!";
+    // cy.createuser(youremail, pwd);
+    // cy.logout();
+    // cy.login(email, pwd);
+
+    cy.visit("{{name}}");
+
+    cy.closecookielaw();
+
+    cy.location().should((location) => {
+      expect(location.pathname).to.eq("{{name}}");
+    });
+  });
+
+  it("Test web route", () => {
+
+    // cy.get("div.card-header h4").contains("Your Title");
+
+    // cy.get('button:contains("mybutton")').click({ force: true });
+
+    // cy.checkvalidation(0, "This field is required");
+
+    // cy.checkalert("Some error raised");
+
+  });
+
+  afterEach(() => {
+
+    // If you previously logged in as user
+    // cy.logout();
+
+    // Login as admin
+    // cy.login();
+
+    // const email = "youremail@sample.org";
+    // cy.deleteuser(email);
+
+  });
+
+});

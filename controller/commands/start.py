@@ -20,8 +20,8 @@ def start(
         help="Recreate containers even if their configuration/image haven't changed",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     dc = Compose(files=Application.data.files)
 

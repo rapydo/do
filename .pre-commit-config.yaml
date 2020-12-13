@@ -1,8 +1,4 @@
 repos:
-  - repo: https://github.com/asottile/seed-isort-config
-    rev: v2.2.0
-    hooks:
-      - id: seed-isort-config
   - repo: https://github.com/timothycrosley/isort
     rev: 5.5.2
     hooks:
@@ -24,3 +20,65 @@ repos:
     rev: 3.8.3
     hooks:
       - id: flake8
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.790
+    hooks:
+      - id: mypy
+        additional_dependencies: [
+            "docker-compose==1.27.4",
+            "dockerfile-parse==1.0.0",
+            "python-dateutil",
+            "pytz",
+            "loguru",
+            "prettyprinter",
+            "jinja2",
+            "sultan==0.9.1",
+            "plumbum",
+            "glom",
+            "GitPython==3.1.11",
+            "PyYAML==5.3.1",
+            "pip>=10.0.0",
+            "typer[all]==0.3.2",
+
+            # Extra dependencies
+            "lxml",
+            "pytest-stub",
+          ]
+
+        args: [
+            # -> Type of variable becomes "xyz" due to an unfollowed import
+            "--disallow-any-unimported",
+
+            # Disable errors like:
+            # found module but no type hints
+            "--ignore-missing-imports",
+
+            # This flag disallows usage of generic types that do not specify explicit type parameters.
+            # Moreover, built-in collections (such as list and dict)
+            # become disallowed as you should use their aliases from the typing module
+            # (such as List[int] and Dict[str, str]).
+            "--disallow-any-generics",
+            # This flag type checks the body of every function, regardless of whether it has type annotations.
+            # (By default the bodies of functions without annotations are not type checked.)
+            "--check-untyped-defs",
+            "--warn-redundant-casts",
+            "--warn-unused-ignores",
+            "--warn-return-any",
+            "--warn-unreachable",
+
+            # This flag reports an error whenever a function with type annotations
+            # calls a function defined without annotations
+            # -> Call to untyped function "xyz" in typed context
+            # "--disallow-untyped-calls",
+
+            # This flag reports an error whenever it encounters a
+            # function definition without type annotations.
+            # -> xyz Function is missing a type annotation
+            # "--disallow-untyped-defs",
+
+            # This flag reports an error whenever it encounters a
+            # partly annotated function definition.
+            "--disallow-incomplete-defs",
+            "--txt-report",
+            ".",
+          ]

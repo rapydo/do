@@ -1,0 +1,51 @@
+from restapi.tests import API_URI, BaseTests
+
+# from restapi.utilities.logs import log
+
+
+class TestApp(BaseTests):
+    def test_01(self, client):
+
+        headers, _ = self.do_login(client, None, None)
+
+        r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}")
+        assert r.status_code == 401
+
+        r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
+        assert r.status_code == 200
+
+        schema = self.getDynamicInputSchema(client, "{{name.replace(" ", "_").lower()}}", headers)
+        data = self.buildData(schema)
+
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data)
+        assert r.status_code == 401
+
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
+        assert r.status_code == 200
+        uuid = self.get_content(r)
+
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
+        assert r.status_code == 409
+
+        r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
+        assert r.status_code == 200
+        content = self.get_content(r)
+        assert len(content) > 0
+
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data)
+        assert r.status_code == 401
+
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/wrong-id", data=data, headers=headers)
+        assert r.status_code == 404
+
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data, headers=headers)
+        assert r.status_code == 204
+
+        r = client.delete(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}")
+        assert r.status_code == 401
+
+        r = client.delete(f"{API_URI}/{{name.replace(" ", "_").lower()}}/wrong-id", headers=headers)
+        assert r.status_code == 404
+
+        r = client.delete(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", headers=headers)
+        assert r.status_code == 204

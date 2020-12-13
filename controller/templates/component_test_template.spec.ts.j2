@@ -1,0 +1,27 @@
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
+
+import { AppModule } from "@rapydo/app.module";
+import { CustomModule } from "@app/custom.module";
+import { {{name.title().replace(" ", "")}}Component } from "@app/components/{{name.replace(" ", "")}}/{{name.replace(" ", "")}}"
+
+describe("{{name.title().replace(" ", "")}}Component", () => {
+  let component: {{name.title().replace(" ", "")}}Component;
+  let fixture: ComponentFixture<{{name.title().replace(" ", "")}}Component>;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      imports: [AppModule, CustomModule],
+      declarations: [{{name.title().replace(" ", "")}}Component],
+    }).compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent({{name.title().replace(" ", "")}}Component);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it("should create", () => {
+    expect(component).toBeTruthy();
+  });
+});

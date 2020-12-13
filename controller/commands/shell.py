@@ -1,3 +1,5 @@
+from typing import Optional
+
 import typer
 
 from controller import log
@@ -14,7 +16,7 @@ def shell(
     command: str = typer.Argument(
         "bash", help="UNIX command to be executed on selected running service"
     ),
-    user: str = typer.Option(
+    user: Optional[str] = typer.Option(
         None,
         "--user",
         "-u",
@@ -48,8 +50,8 @@ def shell(
         help="Execute the command in detach mode",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     # Deprecated since 0.8
     if old_command:
@@ -72,6 +74,6 @@ def shell(
 
     log.debug("Requested command: {} with user: {}", command, user)
 
-    return dc.exec_command(
+    dc.exec_command(
         service, user=user, command=command, disable_tty=no_tty, detach=detach
     )

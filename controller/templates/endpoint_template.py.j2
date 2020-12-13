@@ -1,19 +1,19 @@
 from restapi import decorators
+from restapi.connectors import {{auth}}
 from restapi.models import Schema, fields  # ,  validate
 from restapi.rest.definition import EndpointResource
 from restapi.utilities.logs import log
-
+# from restapi.services.authentication import Role
 
 class MyInputSchema(Schema):
     myfield1 = fields.Str()
 
 
 class MyOutputSchema(Schema):
-    myfield2= fields.Str()
+    myfield2 = fields.Str()
 
 
 class {{name.title().replace(" ", "")}}(EndpointResource):
-    """ Current user informations """
 
     labels = ["custom"]
 
@@ -26,9 +26,10 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "200": "..."
         }
     )
+    # @decorators.cache(timeout=300)
     def get(self):
 
-        db = self.get_service_instance("{{auth}}")
+        db = {{auth}}.get_instance()
         # current_user = self.get_user()
 
         data = {}
@@ -44,9 +45,8 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def post(self, **kwargs):
-        """ Update password for current user """
 
-        db = self.get_service_instance("{{auth}}")
+        db = {{auth}}.get_instance()
         # user = self.get_user()
         log.info("Created")
 
@@ -65,11 +65,10 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def put(self, uuid, **kwargs):
-        """ Update password for current user """
 
-        db = self.get_service_instance("{{auth}}")
+        db = {{auth}}.get_instance()
         # user = self.get_user()
-        # db.update_properties(user, kwargs)
+        # db.update_properties(myobj, kwargs)
         log.info("Updated")
 
         return self.empty_response()
@@ -86,10 +85,9 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     def patch(self, uuid, **kwargs):
         """ Update profile for current user """
 
-        db = self.get_service_instance("{{auth}}")
+        db = {{auth}}.get_instance()
         # user = self.get_user()
 
-        # db = self.get_service_instance(?)
         # db.update_properties(user, kwargs)
 
         log.info("Updated")
@@ -105,10 +103,8 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     def delete(self, uuid, **kwargs):
-        """ Update password for current user """
 
-        db = self.get_service_instance("{{auth}}")
-        # user = self.get_user()
+        db = {{auth}}.get_instance()
         log.info("Deleted")
 
         return self.empty_response()

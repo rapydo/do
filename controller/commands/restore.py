@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import typer
 
@@ -18,7 +18,7 @@ class Services(str, Enum):
 @Application.app.command(help="Restore a backup of one service")
 def restore(
     service: Services = typer.Argument(..., help="Service name"),
-    backup_file: str = typer.Argument(
+    backup_file: Optional[str] = typer.Argument(
         None,
         help="Specify the backup to be restored",
         show_default=False,
@@ -35,8 +35,8 @@ def restore(
         help="Service to be restarted once completed the restore (multiple allowed)",
         autocompletion=Application.autocomplete_service,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     service = service.value
 
@@ -55,7 +55,9 @@ def restore(
 
     backup_dir = Path("data").joinpath("backup").joinpath(service)
     if not backup_dir.exists():
-        log.exit("No backup found, the following folder does not exist: {}", backup_dir)
+        Application.exit(
+            "No backup found, the following folder does not exist: {}", backup_dir
+        )
 
     if backup_file is None:
         files = os.listdir(backup_dir)
@@ -64,22 +66,22 @@ def restore(
         filtered_files.sort()
 
         if not len(filtered_files):
-            log.exit("No backup found, {} is empty", backup_dir)
+            Application.exit("No backup found, {} is empty", backup_dir)
 
         log.info("Please specify one of the following backup:")
         for f in filtered_files:
-            print(f)
+            print(f"- {f}")
 
         return
 
     # walrus!
-    backup_path = backup_dir.joinpath(backup_file)
-    if not backup_path.exists():
-        log.exit("Invalid backup file, {} does not exist", backup_path)
+    backup_host_path = backup_dir.joinpath(backup_file)
+    if not backup_host_path.exists():
+        Application.exit("Invalid backup file, {} does not exist", backup_host_path)
 
     if service == Services.neo4j:
         if container_is_running and not force:
-            log.exit(
+            Application.exit(
                 "Neo4j is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -103,7 +105,7 @@ def restore(
     if service == Services.postgres:
 
         if not container_is_running:
-            log.exit(
+            Application.exit(
                 "The restore procedure requires {} running, please start your stack",
                 service,
             )

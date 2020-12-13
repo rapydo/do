@@ -16,8 +16,8 @@ def upgrade(
         help="path of file to be upgraded",
         show_default=False,
     ),
-):
-    Application.controller.controller_init()
+) -> None:
+    Application.get_controller().controller_init()
 
     frontend = glom(
         Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=None
