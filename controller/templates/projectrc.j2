@@ -34,6 +34,9 @@ project_configuration:
       RABBITMQ_USER: {{ "RANDOM"| username }}
       RABBITMQ_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
+      {% if service == "redis" -%}
+      REDIS_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
       {% endfor %}{% endif -%}
       {% endif -%}
 

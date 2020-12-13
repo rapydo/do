@@ -193,6 +193,7 @@ services:
       REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
       PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
@@ -499,6 +500,7 @@ services:
 
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
 
@@ -611,6 +613,7 @@ services:
 
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}
@@ -690,7 +693,7 @@ services:
   redis:
     restart: always
     image: redis:6.0.9
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
     networks:
@@ -820,6 +823,7 @@ services:
 
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}

@@ -81,6 +81,7 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "CELERYUI_PASSWORD": ["celeryui"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
+    "REDIS_PASSWORD": ["redis"],
     "ALCHEMY_USER": ["postgres", "mariadb"],
     "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
     "NEO4J_PASSWORD": ["neo4j"],

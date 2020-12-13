@@ -98,7 +98,7 @@ variables:
     FLASK_HOST: apiserver.dockerized.io
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
-    PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
+    PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
     # from GUNICORN docs:
     # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
     # the formula is based on the assumption that for a given core, one worker will be
@@ -238,6 +238,7 @@ variables:
     REDIS_VERIFICATION_TIME: 3600
     REDIS_HOST: redis.dockerized.io
     REDIS_PORT: 6379
+    REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # Celery
     CELERY_ENABLE_CONNECTOR: True
