@@ -1,5 +1,5 @@
 # from restapi.utilities.logs import log
-
+from restapi.connectors import {{auth_service}}
 
 class Initializer:
     """
@@ -7,6 +7,6 @@ class Initializer:
     Implement the constructor to add operations performed one-time at initialization
     """
 
-    def __init__(self, services, app=None):
-        # c = services["{{auth_service}}""]
+    def __init__(self, app=None):
+        # c = {{auth_service}}.get_instance()
         pass
