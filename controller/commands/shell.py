@@ -1,3 +1,4 @@
+import time
 from typing import Optional
 
 import typer
@@ -62,6 +63,9 @@ def shell(
         log.warning(
             "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
         )
+        # Sleep added because when executing a rapydo shell --command "restapi launch"
+        # The spam of the backend startup does not permit to read the warning
+        time.sleep(1)
         command = old_command
 
     dc = Compose(files=Application.data.files)

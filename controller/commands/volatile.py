@@ -1,3 +1,5 @@
+import time
+
 import typer
 
 from controller import log
@@ -42,6 +44,9 @@ def volatile(
         log.warning(
             "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
         )
+        # Sleep added because when executing command with long outputs,
+        # the spam of messages does not permit to read the warning
+        time.sleep(1)
         command = old_command
 
     if user:
