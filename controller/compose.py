@@ -11,7 +11,7 @@ import sys
 from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
@@ -43,10 +43,11 @@ class Compose:
 
         log.debug("Client compose {}: {}", self.project_name, files)
 
-    def config(self):
+    def config(self) -> List[Dict[str, Any]]:
         compose_output_tuple = get_config_from_options(".", self.options)
         # NOTE: compose_output_tuple is a namedtuple
-        return compose_output_tuple.services
+        log.critical(compose_output_tuple.services[0].values())
+        return cast(List[Dict[str, Any]], compose_output_tuple.services)
 
     def command(self, command: str, options: Dict[str, Any]) -> None:
 
