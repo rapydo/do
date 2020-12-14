@@ -22,7 +22,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-11-05"
+known_update = "2020-12-14"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -37,23 +37,23 @@ known_latests = {
     # https://hub.docker.com/r/fanout/pushpin/tags
     # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "neo4j": "4.1.3",
-        "postgres": "13.0-alpine",
-        "mariadb": "10.5.6",
-        "mongo": "4.4.1",
+        "neo4j": "4.2.1",
+        "postgres": "13.1-alpine",
+        "mariadb": "10.5.8",
+        "mongo": "4.4.2",
         "redis": "6.0.9",
-        "nginx": "1.19.3-alpine",
-        "node": "14.15.0-buster",
+        "nginx": "1.19.5-alpine",
+        "node": "15.4-buster",
         "rabbitmq": "3.8.9-management",
-        "adminer": "4.7.7-standalone",
+        "adminer": "4.7.8-standalone",
         "mongo-express": "0.54.0",
-        "fanout/pushpin": "1.30.0",
-        "swaggerapi/swagger-ui": "v3.36.0",
+        "fanout/pushpin": "1.31.0",
+        "swaggerapi/swagger-ui": "v3.38.0",
         "stilliard/pure-ftpd": "stretch-latest",
         "ubuntu": "20.04",
     },
     # https://github.com/acmesh-official/acme.sh/releases
-    "acme": "2.8.7",
+    "acme": "2.8.8",
     # Not used
     "urls": {
         "isort": "5.5.2",

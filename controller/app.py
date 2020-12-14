@@ -866,7 +866,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if len(placeholders) > 0:
             Application.exit(
                 "The following variables are missing in your configuration:\n\n{}"
-                "\n\nYou can fix this error by updating the your .projectrc file\n",
+                "\n\nYou can fix this error by updating your .projectrc file\n",
                 "\n".join(placeholders),
             )
 
