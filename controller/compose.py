@@ -116,9 +116,9 @@ class Compose:
         Start containers (docker-compose up)
         """
 
-        # if scale is None:
-        #     scale = {}
-        #     scale = []
+        if scale is None:
+            scale = []
+            # scale = {}
 
         options = {
             "SERVICE": services,
