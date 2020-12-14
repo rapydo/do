@@ -46,7 +46,6 @@ class Compose:
     def config(self) -> List[Dict[str, Any]]:
         compose_output_tuple = get_config_from_options(".", self.options)
         # NOTE: compose_output_tuple is a namedtuple
-        log.critical(compose_output_tuple.services[0].values())
         return cast(List[Dict[str, Any]], compose_output_tuple.services)
 
     def command(self, command: str, options: Dict[str, Any]) -> None:
