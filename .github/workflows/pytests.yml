@@ -73,7 +73,3 @@ jobs:
       #   with:
       #     name: coverage
       #     path: coverage.xml
-
-      - name: MyPy
-        run: |
-          mypy controller/
