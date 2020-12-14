@@ -34,6 +34,16 @@ def name_priority(name1: str, name2: str) -> str:
     return name2
 
 
+# -> Dict[str, Dict[str, Any]]
+# Shoud be a TypedDict istead of Dict[str, Any] with:
+#     'services': List[str],
+#     'path': str,
+#     'timestamp': Optional[str],
+#     'service': str
+
+# Build: Dict[str, Dict[str, ]]
+
+
 def find_templates_build(base_services):
 
     # From python 3.8 could be converted in a TypedDict
