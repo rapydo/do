@@ -23,6 +23,5 @@ jobs:
 
       - name: MyPy
         run: |
-          # --follow-imports=error
-          mypy --allow-untyped-globals --warn-redundant-casts --warn-unused-ignores --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
+          mypy --follow-imports=error --warn-redundant-casts --warn-unused-ignores --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
           cat index.txt
