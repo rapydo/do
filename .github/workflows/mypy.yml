@@ -23,7 +23,7 @@ jobs:
 
       - name: MyPy
         run: |
-          touch mypy.ini
+          echo "[mypy]" > mypy.ini
           echo "[mypy-glom.*]" >> mypy.ini
           echo "ignore_missing_imports = True" >> mypy.ini
           mypy --warn-redundant-casts --warn-unused-ignores --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
