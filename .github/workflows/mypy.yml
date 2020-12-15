@@ -26,5 +26,17 @@ jobs:
           echo "[mypy]" > mypy.ini
           echo "[mypy-glom.*]" >> mypy.ini
           echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-git.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-docker.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-compose.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-plumbum.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-sultan.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
+          echo "[mypy-dockerfile_parse.*]" >> mypy.ini
+          echo "ignore_missing_imports = True" >> mypy.ini
           mypy --warn-redundant-casts --warn-unused-ignores --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
           cat index.txt
