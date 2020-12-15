@@ -36,7 +36,7 @@ jobs:
             verify,
             volatile,
           ]
-        python-version: [3.8, 3.7, 3.6]
+        python-version: [3.9, 3.8, 3.7, 3.6]
 
     steps:
       - uses: actions/checkout@v2
