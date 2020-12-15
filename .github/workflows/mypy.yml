@@ -24,6 +24,21 @@ jobs:
       - name: MyPy
         run: |
           echo "[mypy]" > mypy.ini
+
+          for lib in \
+            glom \
+            git \
+            docker \
+            compose \
+            plumbum \
+            sultan \
+            dockerfile_parse \
+            ; do
+            echo "[mypy-${lib}.*]" >> mypy.ini
+            echo "ignore_missing_imports = True" >> mypy.ini
+            
+          done
+
           echo "[mypy-glom.*]" >> mypy.ini
           echo "ignore_missing_imports = True" >> mypy.ini
           echo "[mypy-git.*]" >> mypy.ini
@@ -38,5 +53,5 @@ jobs:
           echo "ignore_missing_imports = True" >> mypy.ini
           echo "[mypy-dockerfile_parse.*]" >> mypy.ini
           echo "ignore_missing_imports = True" >> mypy.ini
-          mypy --warn-redundant-casts --warn-unused-ignores --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
+          mypy --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
           cat index.txt
