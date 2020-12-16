@@ -1,17 +1,24 @@
+from typing import Any, Dict, Tuple
+
 from restapi.customizer import BaseCustomizer
 
 # from restapi.utilities.logs import log
 
+Props = Dict[str, Any]
+
 
 class Customizer(BaseCustomizer):
     @staticmethod
-    def custom_user_properties_pre(properties):
+    def custom_user_properties_pre(
+        properties: Props,
+    ) -> Tuple[Props, Props]:
+
         """
             executed just before user creation
             use this method to removed or manipulate input properties
             before sending to the database
         """
-        extra_properties = {}
+        extra_properties: Props = {}
         # if "myfield" in properties:
         #     extra_properties["myfield"] = properties["myfield"]
         return properties, extra_properties

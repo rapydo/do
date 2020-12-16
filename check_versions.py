@@ -43,7 +43,7 @@ known_latests = {
         "mongo": "4.4.2",
         "redis": "6.0.9",
         "nginx": "1.19.5-alpine",
-        "node": "15.4-buster",
+        "node": "14.15.1-buster",
         "rabbitmq": "3.8.9-management",
         "adminer": "4.7.8-standalone",
         "mongo-express": "0.54.0",
