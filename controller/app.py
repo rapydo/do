@@ -579,7 +579,9 @@ class Application:
     def git_submodules(from_path=None):
         """ Check and/or clone git projects """
 
-        repos = glom(Configuration.specs, "variables.submodules", default={}).copy()
+        repos: Dict[str, str] = glom(
+            Configuration.specs, "variables.submodules", default={}
+        ).copy()
         Application.gits["main"] = gitter.get_repo(".")
 
         for name, repo in repos.items():
@@ -627,7 +629,9 @@ class Application:
 
         compose_files = OrderedDict()
 
-        confs = glom(Configuration.specs, "variables.composers", default={})
+        confs: Dict[str, Any] = glom(
+            Configuration.specs, "variables.composers", default={}
+        )
         for name, conf in confs.items():
             compose_files[name] = services.apply_variables(conf, myvars)
 
