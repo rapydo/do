@@ -154,16 +154,17 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
     return "Unknown"
 
 
-def check_rabbit_password(pwd: str) -> None:
-    invalid_rabbit_characters = ["£", "§", "”", "’"]
-    if any([c in pwd for c in invalid_rabbit_characters]):
-        log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
-        log.critical(
-            "Some special characters, including {}, are not allowed "
-            "because make RabbitMQ crash at startup",
-            " ".join(invalid_rabbit_characters),
-        )
-        sys.exit(1)
+def check_rabbit_password(pwd: Optional[str]) -> None:
+    if pwd:
+        invalid_rabbit_characters = ["£", "§", "”", "’"]
+        if any([c in pwd for c in invalid_rabbit_characters]):
+            log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
+            log.critical(
+                "Some special characters, including {}, are not allowed "
+                "because make RabbitMQ crash at startup",
+                " ".join(invalid_rabbit_characters),
+            )
+            sys.exit(1)
 
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:

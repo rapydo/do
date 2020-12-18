@@ -60,8 +60,8 @@ class Configuration:
     load_frontend = False
     load_commons = False
 
-    version: Optional[str] = None
-    rapydo_version: Optional[str] = None
+    version: str = ""
+    rapydo_version: str = ""
     project_title: Optional[str] = None
     project_description: Optional[str] = None
 
@@ -460,18 +460,16 @@ class Application:
         Configuration.project_title = glom(
             Configuration.specs, "project.title", default="Unknown title"
         )
-        Configuration.version = glom(
-            Configuration.specs, "project.version", default=None
-        )
+        Configuration.version = glom(Configuration.specs, "project.version", default="")
         Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=None
+            Configuration.specs, "project.rapydo", default=""
         )
 
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
         )
 
-        if Configuration.rapydo_version is None:  # pragma: no cover
+        if not Configuration.rapydo_version:  # pragma: no cover
             Application.exit(
                 "RAPyDo version not found in your project_configuration file"
             )
@@ -488,19 +486,19 @@ class Application:
         )
 
         Application.verify_rapydo_version(
-            rapydo_version=glom(specs, "project.rapydo", default=None)
+            rapydo_version=glom(specs, "project.rapydo", default="")
         )
 
     @staticmethod
-    def verify_rapydo_version(rapydo_version=None):
+    def verify_rapydo_version(rapydo_version=""):
         """
         Verify if the installed rapydo version matches the current project requirement
         """
 
-        if rapydo_version is None:
+        if not rapydo_version:
             rapydo_version = Configuration.rapydo_version
 
-        if rapydo_version is None:  # pragma: no cover
+        if not rapydo_version:  # pragma: no cover
             return True
 
         r = LooseVersion(rapydo_version)
@@ -672,7 +670,7 @@ class Application:
         except FileNotFoundError:
             pass
 
-        env = glom(Configuration.specs, "variables.env", default={})
+        env: Dict[str, Any] = glom(Configuration.specs, "variables.env", default={})
 
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
