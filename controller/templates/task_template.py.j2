@@ -2,12 +2,10 @@ from restapi.connectors.celery import CeleryExt
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
-celery_app = CeleryExt.celery_app
 
-
-@celery_app.task(bind=True)
+@CeleryExt.celery_app.task(bind=True)
 def {{name}}(self):
-    with celery_app.app.app_context():
+    with CeleryExt.app.app_context():
 
         db = {{auth}}.get_instance()
 
