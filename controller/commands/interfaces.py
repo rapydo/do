@@ -58,7 +58,9 @@ def interfaces(
 
     url = None
     if service == "swaggerui":
-        BACKEND_PORT = glom(Configuration.specs, "variables.env.BACKEND_PORT")
+        BACKEND_PORT: str = glom(
+            Configuration.specs, "variables.env.BACKEND_PORT", default="80"
+        )
         swagger_host = f"{Configuration.hostname}:{port}"
         if Configuration.production:
             spec = f"https://{Configuration.hostname}/api/specs"
