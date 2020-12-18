@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional, cast
+from typing import Any, Dict, List, MutableMapping, Optional, Set, cast
 
 import requests
 import typer
@@ -49,9 +49,9 @@ class Configuration:
 
     action: Optional[str] = None
 
-    production = False
-    testing = False
-    privileged = False
+    production: bool = False
+    testing: bool = False
+    privileged: bool = False
     project: str = ""
     frontend: Optional[str] = None
     hostname: str = ""
@@ -235,7 +235,7 @@ class CommandsData:
         active_services: List[str] = [],
         base_services: List[Any] = [],
         compose_config: List[Any] = [],
-        services_dict: Any = None,
+        services_dict: Dict[str, Any] = None,
     ):
         self.files = files
         self.base_files = base_files
@@ -244,7 +244,7 @@ class CommandsData:
         self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
-        self.services_dict: Dict[str, Any] = services_dict or {}
+        self.services_dict = services_dict or {}
 
 
 class Application:
@@ -262,7 +262,7 @@ class Application:
     # This Any should be Repo, but GitPython is lacking typings
     gits: MutableMapping[str, Any] = OrderedDict()
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         Application.controller = self
 
@@ -273,14 +273,14 @@ class Application:
         self.enabled_services: List[str] = []
         self.base_services: List[Any] = []
         self.compose_config: List[Any] = []
-        self.services_dict = {}
+        self.services_dict: Dict[str, List[Any]] = {}
 
         load_commands()
 
         Application.load_projectrc()
 
     @staticmethod
-    def exit(message, *args, **kwargs):
+    def exit(message: str, *args: Any, **kwargs: Any) -> None:
         log.critical(message, *args, **kwargs)
         sys.exit(1)
 
@@ -392,7 +392,7 @@ class Application:
         return None
 
     @staticmethod
-    def load_projectrc():
+    def load_projectrc() -> None:
 
         projectrc_yaml = configuration.load_yaml_file(
             PROJECTRC, path=Path(), is_optional=True
@@ -405,7 +405,7 @@ class Application:
         Configuration.projectrc = projectrc_yaml
 
     @staticmethod
-    def check_installed_software():
+    def check_installed_software() -> None:
 
         log.debug(
             "python version: {}.{}.{}",
@@ -428,7 +428,7 @@ class Application:
         Packages.check_python_package("requests", min_version="2.6.1")
         Packages.check_python_package("pip", min_version="10.0.0")
 
-    def read_specs(self, read_extended=True):
+    def read_specs(self, read_extended: bool = True) -> None:
         """ Read project configuration """
 
         try:
@@ -448,7 +448,7 @@ class Application:
             self.extended_project_path = confs[2]
 
         except AttributeError as e:  # pragma: no cover
-            Application.exit(e)
+            Application.exit(str(e))
 
         Configuration.frontend = glom(
             Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
@@ -477,7 +477,7 @@ class Application:
         Configuration.rapydo_version = str(Configuration.rapydo_version)
 
     @staticmethod
-    def preliminary_version_check():
+    def preliminary_version_check() -> None:
 
         specs = configuration.load_yaml_file(
             file=configuration.PROJECT_CONF_FILENAME,
@@ -490,7 +490,7 @@ class Application:
         )
 
     @staticmethod
-    def verify_rapydo_version(rapydo_version=""):
+    def verify_rapydo_version(rapydo_version: str = "") -> bool:
         """
         Verify if the installed rapydo version matches the current project requirement
         """
@@ -519,8 +519,10 @@ class Application:
 
             Application.exit(msg)
 
+        return False
+
     @staticmethod
-    def check_internet_connection():
+    def check_internet_connection() -> None:
         """ Check if connected to internet """
 
         try:
@@ -576,7 +578,7 @@ class Application:
         )
 
     @staticmethod
-    def git_submodules(from_path=None):
+    def git_submodules(from_path: str = None) -> None:
         """ Check and/or clone git projects """
 
         repos: Dict[str, str] = glom(
@@ -591,7 +593,7 @@ class Application:
                 name, repo, from_path=from_path
             )
 
-    def set_active_services(self):
+    def set_active_services(self) -> None:
         self.services_dict, self.active_services = services.find_active(
             self.compose_config
         )
@@ -602,7 +604,7 @@ class Application:
 
         self.create_datafile()
 
-    def read_composers(self):
+    def read_composers(self) -> None:
 
         # Find configuration that tells us which files have to be read
 
@@ -647,7 +649,7 @@ class Application:
         dc = Compose(files=self.files)
         self.compose_config = dc.config()
 
-    def create_projectrc(self):
+    def create_projectrc(self) -> None:
         templating = Templating()
         t = templating.get_template(
             "projectrc",
@@ -669,7 +671,7 @@ class Application:
         else:
             log.info("Created default {} file", PROJECTRC)
 
-    def make_env(self):
+    def make_env(self) -> None:
 
         try:
             COMPOSE_ENVIRONMENT_FILE.unlink()
@@ -739,7 +741,7 @@ class Application:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
 
-    def create_datafile(self):
+    def create_datafile(self) -> None:
         try:
             DATAFILE.unlink()
         except FileNotFoundError:
@@ -780,7 +782,7 @@ class Application:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def get_available_interfaces(self):
+    def get_available_interfaces(self) -> List[str]:
         available_interfaces = list()
         if self.compose_config:
             for s in self.compose_config:
@@ -819,7 +821,7 @@ class Application:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def check_placeholders(self):
+    def check_placeholders(self) -> Set[str]:
 
         if len(self.active_services) == 0:  # pragma: no cover
             Application.exit(
@@ -836,7 +838,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             service = self.services_dict.get(service_name)
 
             if service:
-                for key, value in service.get("environment", {}).items():
+                for key, value in (
+                    cast(Dict[str, Any], service).get("environment", {}).items()
+                ):
                     if PLACEHOLDER in str(value):
                         key = services.normalize_placeholder_variable(key)
                         missing.add(key)
@@ -877,7 +881,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         return missing
 
     @staticmethod
-    def git_update(ignore_submodule):
+    def git_update(ignore_submodule: List[str]) -> None:
 
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
@@ -887,7 +891,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 gitter.update(name, gitobj)
 
     @staticmethod
-    def git_checks(ignore_submodule):
+    def git_checks(ignore_submodule: List[str]) -> None:
 
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
