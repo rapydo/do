@@ -263,7 +263,7 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
-            Application.exit(p)
+            Application.exit(str(p))
 
     if not path:
         for p in project_scaffold.raw_files:

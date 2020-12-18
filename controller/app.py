@@ -532,6 +532,7 @@ class Application:
         except requests.ConnectionError:  # pragma: no cover
             Application.exit("Internet connection is unavailable")
 
+    # from_path: Optional[Path]
     @staticmethod
     def working_clone(name, repo, from_path=None):
 
@@ -578,7 +579,7 @@ class Application:
         )
 
     @staticmethod
-    def git_submodules(from_path: str = None) -> None:
+    def git_submodules(from_path: Optional[Path] = None) -> None:
         """ Check and/or clone git projects """
 
         repos: Dict[str, str] = glom(
