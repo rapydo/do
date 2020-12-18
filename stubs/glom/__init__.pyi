@@ -1,6 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, TypeVar
 
 
-# Glom is not really intended to return a str, but it is true in my case
-def glom(target: Dict[str, Any], spec: str, **kwargs: Any) -> str:
+T = TypeVar("T")
+
+
+def glom(target: Dict[str, Any], spec: str, default: T, **kwargs: Any) -> T:
     ...
