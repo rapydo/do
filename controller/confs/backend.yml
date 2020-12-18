@@ -582,7 +582,7 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
-    command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    command: celery beat --app restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
 
     # user: developer
     working_dir: /code
