@@ -53,12 +53,12 @@ class Configuration:
     testing = False
     privileged = False
     project: str = ""
-    frontend = None
+    frontend: Optional[str] = None
     hostname: str = ""
     stack: str = ""
-    load_backend = False
-    load_frontend = False
-    load_commons = False
+    load_backend: bool = False
+    load_frontend: bool = False
+    load_commons: bool = False
 
     version: str = ""
     rapydo_version: str = ""
