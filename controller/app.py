@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional
+from typing import Any, Dict, List, MutableMapping, Optional, cast
 
 import requests
 import typer
@@ -580,7 +580,9 @@ class Application:
         """ Check and/or clone git projects """
 
         repos: Dict[str, str] = glom(
-            Configuration.specs, "variables.submodules", default={}
+            Configuration.specs,
+            "variables.submodules",
+            default=cast(Dict[str, str], {}),
         ).copy()
         Application.gits["main"] = gitter.get_repo(".")
 
