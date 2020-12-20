@@ -3,7 +3,7 @@ from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
 
-@CeleryExt.celery_app.task(bind=True)
+@CeleryExt.celery_app.task(bind=True, name="{{name}}")
 def {{name}}(self):
     with CeleryExt.app.app_context():
 

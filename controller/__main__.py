@@ -5,7 +5,7 @@
 from controller.app import Application
 
 
-def main():
+def main() -> None:
     Application.load_projectrc()
     controller = Application()
     controller.app()
