@@ -93,6 +93,12 @@ def test_create(capfd):
         "You selected a reserved name, invalid project name: celery",
     )
 
+    exec_command(
+        capfd,
+        "create first --auth postgres --frontend angular --current --service invalid",
+        "You requested an invalid service: invalid",
+    )
+
     create_command = "create first --auth postgres --frontend angular"
     create_command += " --service rabbit --service neo4j --add-optionals --current"
     create_command += " --origin-url https://your_remote_git/your_project.git"
