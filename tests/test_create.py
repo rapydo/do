@@ -96,7 +96,7 @@ def test_create(capfd):
     exec_command(
         capfd,
         "create first --auth postgres --frontend angular --current --service invalid",
-        "You requested an invalid service: invalid",
+        "Error: Invalid value for '--service'",
     )
 
     create_command = "create first --auth postgres --frontend angular"
