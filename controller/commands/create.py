@@ -137,7 +137,7 @@ def create_project(
     auth: str,
     frontend: str,
     services: List[str],
-    extend: str,
+    extend: Optional[str],
     envs: Optional[List[str]] = None,
     auto: bool = False,
     force: bool = False,

@@ -517,9 +517,8 @@ class Application:
                 r, c, action
             )
 
-            Application.exit(msg)
-
-        return False
+            log.critical(msg)
+            sys.exit(1)
 
     @staticmethod
     def check_internet_connection() -> None:
