@@ -224,6 +224,8 @@ class Project:
                     self.p_path("frontend", "app", "custom.declarations.ts"),
                     self.p_path("frontend", "app", "custom.routes.ts"),
                     self.p_path("frontend", "app", "custom.project.options.ts"),
+                    # Removed since 1.0
+                    frontend_data_dir.joinpath("browserslist"),
                 ]
             )
 
