@@ -200,7 +200,6 @@ class Project:
             self.data_files.extend(
                 [
                     frontend_data_dir.joinpath("angular.json"),
-                    frontend_data_dir.joinpath("browserslist"),
                     frontend_data_dir.joinpath("karma.conf.js"),
                     frontend_data_dir.joinpath("package.json"),
                     frontend_data_dir.joinpath("polyfills.ts"),

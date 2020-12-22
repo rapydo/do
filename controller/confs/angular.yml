@@ -91,7 +91,6 @@ services:
       # Output folder, configured in cypress.json
       - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
-      - ${SUBMODULE_DIR}/rapydo-angular/browserslist:/app/browserslist
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.json:/app/tsconfig.json
