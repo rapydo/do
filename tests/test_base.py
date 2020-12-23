@@ -87,7 +87,7 @@ def test_base(capfd, fake):
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=False, convert to 1",
+        "Deprecated value ENABLE_FOOTER=False, convert to 0",
     )
 
     folder = os.getcwd()
