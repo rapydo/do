@@ -44,6 +44,52 @@ def test_base(capfd, fake):
         f"required rapydo: \033[1;32m{__version__}",
     )
 
+    # boolean variables mostly deprecated in 1.0
+    # Use the old-fashioned 0/1 integers
+    # Backend and Frontend use different booleans due to Python vs Javascript
+    # 0/1 is a much more portable value to prevent true|True|"true"
+    # This fixes troubles in setting boolean values only used by Angular
+    # (expected true|false) or used by Pyton (expected True|False)
+
+    # Test adding strings True|False|true|false
+    exec_command(
+        capfd,
+        "check -e ENABLE_FOOTER=true -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=true, convert to 1",
+    )
+    exec_command(
+        capfd,
+        "check -e ENABLE_FOOTER=True -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=True, convert to 1",
+    )
+    exec_command(
+        capfd,
+        "check -e ENABLE_FOOTER=false -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=false, convert to 0",
+    )
+    exec_command(
+        capfd,
+        "check -e ENABLE_FOOTER=False -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=False, convert to 0",
+    )
+
+    # Test adding boolean True|False
+    with open(".projectrc", "a") as f:
+        f.write("\n      ENABLE_FOOTER: True\n")
+    exec_command(
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=True, convert to 1",
+    )
+
+    with open(".projectrc", "a") as f:
+        f.write("\n      ENABLE_FOOTER: False\n")
+    exec_command(
+        capfd,
+        "check -i main --no-git --no-builds",
+        "Deprecated value ENABLE_FOOTER=False, convert to 1",
+    )
+
     folder = os.getcwd()
     # Tests from a subfolder
     os.chdir("projects")

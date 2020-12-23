@@ -723,15 +723,40 @@ class Application:
 
         env.update(Configuration.environment)
 
+        bool_envs = [
+            # This variable is for docker-compose and is expected to be true|false
+            "DOCKER_PRIVILEGED_MODE",
+            # This variabiles is for RabbitManagement and is expected to be true|false
+            "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
+        ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
 
-                # if isinstance(value, str):  # pragma: no
-                #     if value.lower() == 'true':
-                #         log.warning("{}={}, convert to 1?", key, value)
+                # Deprecated since 1.0
+                # Backend and Frontend use different booleans due to Py vs Js
+                # 0/1 is a much more portable value to prevent true|True|"true"
+                # This fixes troubles in setting boolean values only used by Angular
+                # (expected true|false) or used by Pyton (expected True|False)
+                if key not in bool_envs:
+                    if isinstance(value, str):
+                        if value.lower() == "true":
+                            log.warning(
+                                "Deprecated value {}={}, convert to 1", key, value
+                            )
 
-                #     if value.lower() == 'false':
-                #         log.warning("{}={}, convert to 0?", key, value)
+                        if value.lower() == "false":
+                            log.warning(
+                                "Deprecated value {}={}, convert to 0", key, value
+                            )
+                    elif isinstance(value, bool):
+                        if value:
+                            log.warning(
+                                "Deprecated value {}={}, convert to 1", key, value
+                            )
+                        else:
+                            log.warning(
+                                "Deprecated value {}={}, convert to 0", key, value
+                            )
 
                 if value is None:
                     value = ""

@@ -18,7 +18,7 @@ variables:
     # RABBITMQ_SSL_DEPTH: 1
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "false"
     # RABBITMQ_SSL_VERIFY
-    RABBITMQ_SSL_ENABLED: True # it is used by Celery
+    RABBITMQ_SSL_ENABLED: 0 # it is used by Celery
 
     CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     TELEGRAM_WORKERS: 4
@@ -30,7 +30,7 @@ variables:
     POSTGRES_MAX_WORKER_PROCESSES: 2
 
     NEO4J_WEB_INTERFACE_PORT: 7473
-    NEO4J_SSL_ENABLED: true
+    NEO4J_SSL_ENABLED: 0
     NEO4J_BOLT_TLS_LEVEL: "OPTIONAL"
     NEO4J_HEAP_SIZE: "**PLACEHOLDER**"
     NEO4J_PAGECACHE_SIZE: "**PLACEHOLDER**"
