@@ -46,8 +46,8 @@ project_configuration:
       SMTP_PORT: 0
       SMTP_USERNAME: {{ "RANDOM"| username }}
       SMTP_PASSWORD: {{ "RANDOM"| password }}
-      ALLOW_PASSWORD_RESET: "true"
-      ALLOW_REGISTRATION: "true"
+      ALLOW_PASSWORD_RESET: 1
+      ALLOW_REGISTRATION: 1
       AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}+Aa1-nowit'sstrong!
       UPLOAD_PATH: /tmp
