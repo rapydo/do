@@ -54,22 +54,22 @@ def test_base(capfd, fake):
     # Test adding strings True|False|true|false
     exec_command(
         capfd,
-        "check -e ENABLE_FOOTER=true -i main --no-git --no-builds",
+        "-e ENABLE_FOOTER=true check -i main --no-git --no-builds",
         "Deprecated value ENABLE_FOOTER=true, convert to 1",
     )
     exec_command(
         capfd,
-        "check -e ENABLE_FOOTER=True -i main --no-git --no-builds",
+        "-e ENABLE_FOOTER=True check -i main --no-git --no-builds",
         "Deprecated value ENABLE_FOOTER=True, convert to 1",
     )
     exec_command(
         capfd,
-        "check -e ENABLE_FOOTER=false -i main --no-git --no-builds",
+        "-e ENABLE_FOOTER=false check -i main --no-git --no-builds",
         "Deprecated value ENABLE_FOOTER=false, convert to 0",
     )
     exec_command(
         capfd,
-        "check -e ENABLE_FOOTER=False -i main --no-git --no-builds",
+        "-e ENABLE_FOOTER=False check -i main --no-git --no-builds",
         "Deprecated value ENABLE_FOOTER=False, convert to 0",
     )
 
