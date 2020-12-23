@@ -55,22 +55,22 @@ def test_base(capfd, fake):
     exec_command(
         capfd,
         "-e ENABLE_FOOTER=true check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=true, convert to 1",
+        "Deprecated value for ENABLE_FOOTER, convert true to 1",
     )
     exec_command(
         capfd,
         "-e ENABLE_FOOTER=True check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=True, convert to 1",
+        "Deprecated value for ENABLE_FOOTER, convert True to 1",
     )
     exec_command(
         capfd,
         "-e ENABLE_FOOTER=false check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=false, convert to 0",
+        "Deprecated value for ENABLE_FOOTER, convert false to 0",
     )
     exec_command(
         capfd,
         "-e ENABLE_FOOTER=False check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=False, convert to 0",
+        "Deprecated value for ENABLE_FOOTER, convert False to 0",
     )
 
     # Test adding boolean True|False
@@ -79,7 +79,7 @@ def test_base(capfd, fake):
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=True, convert to 1",
+        "Deprecated value for ENABLE_FOOTER, convert True to 1",
     )
 
     with open(".projectrc", "a") as f:
@@ -87,7 +87,7 @@ def test_base(capfd, fake):
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",
-        "Deprecated value ENABLE_FOOTER=False, convert to 0",
+        "Deprecated value for ENABLE_FOOTER, convert False to 0",
     )
 
     folder = os.getcwd()

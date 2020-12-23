@@ -726,8 +726,11 @@ class Application:
         bool_envs = [
             # This variable is for docker-compose and is expected to be true|false
             "DOCKER_PRIVILEGED_MODE",
-            # This variabiles is for RabbitManagement and is expected to be true|false
+            # This variable is for RabbitManagement and is expected to be true|false
             "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
+            # These variables are for Neo4j and are expected to be true|false
+            "NEO4J_SSL_ENABLED",
+            "NEO4J_ALLOW_UPGRADE",
         ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
@@ -741,21 +744,33 @@ class Application:
                     if isinstance(value, str):
                         if value.lower() == "true":
                             log.warning(
-                                "Deprecated value {}={}, convert to 1", key, value
+                                "Deprecated value for {}, convert {} to 1",
+                                key,
+                                value,
+                                key,
                             )
 
                         if value.lower() == "false":
                             log.warning(
-                                "Deprecated value {}={}, convert to 0", key, value
+                                "Deprecated value for {}, convert {} to 0",
+                                key,
+                                value,
+                                key,
                             )
                     elif isinstance(value, bool):
                         if value:
                             log.warning(
-                                "Deprecated value {}={}, convert to 1", key, value
+                                "Deprecated value for {}, convert {} to 1",
+                                key,
+                                value,
+                                key,
                             )
                         else:
                             log.warning(
-                                "Deprecated value {}={}, convert to 0", key, value
+                                "Deprecated value for {}, convert {} to 0",
+                                key,
+                                value,
+                                key,
                             )
 
                 if value is None:
