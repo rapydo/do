@@ -36,8 +36,12 @@ jobs:
 
           docker-compose pull --quiet
           docker-compose up -d
+          # wait backend startup before launching restatpi
+          sleep 20
           docker-compose ps
           docker-compose exec -T -d -u developer backend restapi launch
-          sleep 30
+          # wait complete service startup before testing the APIs
+          sleep 20
+          docker-compose ps
           docker-compose logs --tail=20
           curl --silent --insecure -X GET --max-time 5 http://localhost:8080/api/status | grep "Server is alive"
