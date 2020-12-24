@@ -30,7 +30,7 @@ jobs:
         run: |
           mkdir rapydo_tests
           cd rapydo_tests
-          rapydo create test --auth neo4j --frontend angular --service celery --service redis --service rabbit --origin-url https://your_remote_git/your_project.git
+          rapydo create composetest --auth neo4j --frontend angular --service celery --service redis --service rabbit --origin-url https://your_remote_git/your_project.git
           rapydo init
           rapydo dump
 
@@ -38,5 +38,5 @@ jobs:
           docker-compose ps
           docker-compose exec -T -d -u developer backend restapi launch
           sleep 25
-          docker compose logs
+          docker-compose logs
           curl --silent --insecure -X GET --max-time 5 http://localhost:8080/api/status | grep "Server is alive"
