@@ -34,7 +34,7 @@ jobs:
           rapydo init
           rapydo dump
 
-          docker-compose pull
+          docker-compose pull --quiet
           docker-compose up -d
           docker-compose ps
           docker-compose exec -T -d -u developer backend restapi launch
