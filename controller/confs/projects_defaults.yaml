@@ -151,7 +151,7 @@ variables:
     # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
-    CORS_ALLOW_ALL_ORIGINS: 1
+    CORS_ALLOWED_ORIGIN: # if empty will be automatically replaced with DOMAIN in proxy entrypoint
 
     ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
@@ -279,6 +279,7 @@ variables:
     SENTRY_URL:
     GA_TRACKING_CODE:
     ENABLE_FOOTER: 0
+    ENABLE_ANGULAR_SSR: 0
 
     ACTIVATE_AUTH: 1
     AUTH_SERVICE: sqlalchemy
@@ -289,11 +290,10 @@ variables:
     AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: 0
     AUTH_MAX_LOGIN_ATTEMPTS: 0
     AUTH_REGISTER_FAILED_LOGIN: 0
-    AUTH_SECOND_FACTOR_AUTHENTICATION: None
+    AUTH_SECOND_FACTOR_AUTHENTICATION: None # or TOTP
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
     AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
     ALLOW_ACCESS_TOKEN_PARAMETER: 0
-    # AUTH_SECOND_FACTOR_AUTHENTICATION: TOTP
     DEFAULT_DHLEN: 2048
 
     TELEGRAM_API_KEY: "**PLACEHOLDER**"

@@ -27,6 +27,7 @@ services:
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       PROJECT_TITLE: ${PROJECT_TITLE}
       PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      ENABLE_ANGULAR_SSR: ${ENABLE_ANGULAR_SSR}
       ENABLE_FOOTER: ${ENABLE_FOOTER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
@@ -95,14 +96,15 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.json:/app/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
+      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.server.json:/app/tsconfig.server.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
       - ${PROJECT_DIR}/frontend:/app/app/subproject
 
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
