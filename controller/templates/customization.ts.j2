@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { FormlyFieldConfig } from "@ngx-formly/core";
 import { BaseProjectOptions } from "@rapydo/base.project.options";
+import { AdminMenu, User } from "@rapydo/types";
 
 @Injectable()
 export class ProjectOptions extends BaseProjectOptions {
@@ -31,6 +32,10 @@ export class ProjectOptions extends BaseProjectOptions {
 
   registration_disclaimer(): string {
     return null;
+  }
+
+  admin_menu_entries(user: User): AdminMenu[] {
+    return [];
   }
 
   private initTemplates() {
