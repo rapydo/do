@@ -1,7 +1,8 @@
+from typing import Any
 from restapi import decorators
 from restapi.connectors import {{auth}}
 from restapi.models import Schema, fields  # ,  validate
-from restapi.rest.definition import EndpointResource
+from restapi.rest.definition import EndpointResource, Response
 from restapi.utilities.logs import log
 # from restapi.services.authentication import Role
 
@@ -27,7 +28,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     # @decorators.cache(timeout=300)
-    def get(self):
+    def get(self) -> Response:
 
         db = {{auth}}.get_instance()
         # current_user = self.get_user()
@@ -44,7 +45,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "200": "..."
         }
     )
-    def post(self, **kwargs):
+    def post(self, **kwargs: Any) -> Response:
 
         db = {{auth}}.get_instance()
         # user = self.get_user()
@@ -64,7 +65,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def put(self, uuid, **kwargs):
+    def put(self, uuid: str, **kwargs: Any) -> Response:
 
         db = {{auth}}.get_instance()
         # user = self.get_user()
@@ -82,7 +83,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def patch(self, uuid, **kwargs):
+    def patch(self, uuid: str, **kwargs: Any) -> Response:
         """ Update profile for current user """
 
         db = {{auth}}.get_instance()
@@ -102,7 +103,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def delete(self, uuid, **kwargs):
+    def delete(self, uuid: str, **kwargs: Any) -> Response:
 
         db = {{auth}}.get_instance()
         log.info("Deleted")
