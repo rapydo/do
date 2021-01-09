@@ -735,6 +735,14 @@ class Application:
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
 
+                if (
+                    Configuration.production
+                    and key.endswith("_PASSWORD")
+                    and value
+                    and len(value) < 8
+                ):
+                    log.warning("{} is set with a short password", key)
+
                 # Deprecated since 1.0
                 # Backend and Frontend use different booleans due to Py vs Js
                 # 0/1 is a much more portable value to prevent true|True|"true"
