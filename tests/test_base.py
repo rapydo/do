@@ -73,6 +73,12 @@ def test_base(capfd, fake):
         "Deprecated value for ENABLE_FOOTER, convert False to 0",
     )
 
+    exec_command(
+        capfd,
+        "-e AUTH_DEFAULT_PASSWORD=short check -i main --no-git --no-builds",
+        "AUTH_DEFAULT_PASSWORD is set with a short password",
+    )
+
     # Test adding boolean True|False
     with open(".projectrc", "a") as f:
         f.write("\n      ENABLE_FOOTER: True\n")
