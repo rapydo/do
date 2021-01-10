@@ -26,6 +26,10 @@ project_configuration:
       NEO4J_PAGECACHE_SIZE: 1G
       NEO4J_HEAP_SIZE: 1G
       {% endif -%}
+      {% if service == "mongo" -%}
+      MONGO_PASSWORD: {{ "RANDOM"| password }}
+      MONGO_USER: mongo
+      {% endif -%}
       {% if service == "celeryui" -%}
       CELERYUI_PASSWORD: {{ "RANDOM"| password }}
       CELERYUI_USER: {{ "RANDOM"| username }}
