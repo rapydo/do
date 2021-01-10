@@ -73,10 +73,13 @@ def test_base(capfd, fake):
         "Deprecated value for ENABLE_FOOTER, convert False to 0",
     )
 
+    auth_envs = "-e AUTH_DEFAULT_PASSWORD=short"
+    alchemy_envs = " -e ALCHEMY_USER=sqluser -e ALCHEMY_PASSWORD=short"
     exec_command(
         capfd,
-        "-e AUTH_DEFAULT_PASSWORD=short check -i main --no-git --no-builds",
+        f"--prod {auth_envs} {alchemy_envs} check -i main --no-git --no-builds",
         "AUTH_DEFAULT_PASSWORD is set with a short password",
+        "ALCHEMY_PASSWORD is set with a short password",
     )
 
     # Test adding boolean True|False
