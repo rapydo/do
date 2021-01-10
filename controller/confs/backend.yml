@@ -441,7 +441,13 @@ services:
 
   mongodb:
     restart: always
-    image: mongo:4.4.2
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/mongodb
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/mongodb:${RAPYDO_VERSION}
     volumes:
       - mongodata:/data/db
     networks:
@@ -450,6 +456,8 @@ services:
           - ${MONGO_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_MONGODB}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
