@@ -97,6 +97,8 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "SMTP_PASSWORD": ["backend"],
     "TELEGRAM_API_KEY": ["bot"],
     "TELEGRAM_ADMINS": ["bot"],
+    "MONGO_PASSWORD": ["mongodb"],
+    "MONGO_USER": ["mongodb"],
 }
 
 
@@ -131,6 +133,11 @@ def normalize_placeholder_variable(key: str) -> str:
         return "AUTH_DEFAULT_USERNAME"
     if key == "CYPRESS_AUTH_DEFAULT_PASSWORD":
         return "AUTH_DEFAULT_PASSWORD"
+
+    if key == "MONGO_INITDB_ROOT_PASSWORD":
+        return "MONGO_PASSWORD"
+    if key == "MONGO_INITDB_ROOT_USERNAME":
+        return "MONGO_USER"
 
     return key
 
