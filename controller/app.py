@@ -351,14 +351,11 @@ class Application:
         # Cannot be tested
         if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
-            self.current_os_user = "privileged"
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = system.get_username(self.current_uid)
-            log.debug(
-                "Current user: {} (UID: {})", self.current_os_user, self.current_uid
-            )
-            log.debug("Current group ID: {}", self.current_gid)
+            os_user = system.get_username(self.current_uid)
+            log.debug("Current UID: {} ({})", self.current_uid, os_user)
+            log.debug("Current GID: {}", self.current_gid)
 
         if Configuration.initialize:
             return None
@@ -714,6 +711,7 @@ class Application:
         env["DOCKER_NETWORK_MODE"] = "bridge"
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
+        services.check_redis_password(env.get("REDIS_PASSWORD"))
 
         for e in env:
             env_value = os.environ.get(e)

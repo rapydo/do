@@ -174,6 +174,19 @@ def check_rabbit_password(pwd: Optional[str]) -> None:
             sys.exit(1)
 
 
+def check_redis_password(pwd: Optional[str]) -> None:
+    if pwd:
+        invalid_rabbit_characters = ["#"]
+        if any([c in pwd for c in invalid_rabbit_characters]):
+            log.critical("Not allowed characters found in REDIS_PASSWORD.")
+            log.critical(
+                "Some special characters, including {}, are not allowed "
+                "because make some clients to fail to connect",
+                " ".join(invalid_rabbit_characters),
+            )
+            sys.exit(1)
+
+
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
 
     if service in ["backend", "celery", "celeryui", "celery-beat"]:
