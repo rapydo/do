@@ -151,6 +151,7 @@ variables:
     # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
+    SET_CSP_CONNECT_SRC:
     CORS_ALLOWED_ORIGIN: # if empty will be automatically replaced with DOMAIN in proxy entrypoint
 
     ALCHEMY_ENABLE_CONNECTOR: 1

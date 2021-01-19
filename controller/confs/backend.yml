@@ -296,6 +296,7 @@ services:
       CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
       CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
       CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
+      CSP_CONNECT_SRC: ${SET_CSP_CONNECT_SRC}
     depends_on:
       - backend
 
