@@ -95,14 +95,11 @@ def create(
         if not PROJECT_DIR.joinpath(extend).is_dir():
             Application.exit("Invalid extend value: project {} not found", extend)
 
-    auth = auth.value
-    frontend = frontend.value
-
     services_list: List[str] = [service.value for service in services]
     create_project(
         project_name=project_name,
-        auth=auth,
-        frontend=frontend,
+        auth=auth.value,
+        frontend=frontend.value,
         services=services_list,
         extend=extend,
         envs=envs,
