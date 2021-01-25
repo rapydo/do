@@ -876,6 +876,7 @@ services:
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
       BACKEND_PORT: ${BACKEND_PORT}
+      PROJECT_TITLE: ${PROJECT_TITLE}
 
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
