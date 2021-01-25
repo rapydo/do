@@ -875,6 +875,7 @@ services:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_PORT: ${BACKEND_PORT}
 
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
