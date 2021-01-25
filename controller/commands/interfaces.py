@@ -57,9 +57,14 @@ def interfaces(
     publish = [f"{port}:{current_ports.target}"]
 
     if service == "swaggerui":
+        if Configuration.production:
+            prot = "https"
+        else:
+            prot = "http"
+
         log.info(
             "You can access SwaggerUI web page here: {}\n",
-            f"http://{Configuration.hostname}:{port}",
+            f"{prot}://{Configuration.hostname}:{port}",
         )
     else:
         log.info("Launching interface: {}", service)
