@@ -300,6 +300,7 @@ services:
       CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
       CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
       CSP_CONNECT_SRC: ${SET_CSP_CONNECT_SRC}
+      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
     depends_on:
       - backend
 
