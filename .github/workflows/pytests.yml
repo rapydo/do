@@ -30,6 +30,7 @@ jobs:
             libs,
             list,
             rabbit_invalid_characters,
+            redis_invalid_characters,
             scale,
             ssl_dhparam,
             start_shell_status_logs_restart_remove,
