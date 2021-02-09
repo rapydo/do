@@ -22,7 +22,7 @@ class Customizer(BaseCustomizer):
         return properties, extra_properties
 
     @staticmethod
-    def custom_user_properties_post(user: USER, properties: Props, extra_properties: Props, db: Any) -> None:
+    def custom_user_properties_post(user: User, properties: Props, extra_properties: Props, db: Any) -> None:
         """
             executed just after user creation
             use this method to implement extra operation needed to create a user
