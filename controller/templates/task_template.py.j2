@@ -1,9 +1,11 @@
-from restapi.connectors.celery import CeleryExt
+from restapi.connectors.celery import CeleryExt, send_errors_by_email
+
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
 
 @CeleryExt.celery_app.task(bind=True, name="{{name}}")
+@send_errors_by_email
 def {{name}}(self):
     with CeleryExt.app.app_context():
 
