@@ -10,7 +10,8 @@ describe("{{name}}", () => {
 
     cy.visit("{{name}}");
 
-    cy.closecookielaw();
+    // quiet = true => no error if already closed
+    cy.closecookielaw(true);
 
     cy.location().should((location) => {
       expect(location.pathname).to.eq("{{name}}");

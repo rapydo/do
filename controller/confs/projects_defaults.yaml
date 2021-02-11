@@ -298,7 +298,7 @@ variables:
     AUTH_SECOND_FACTOR_AUTHENTICATION: 0
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
     AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
-    AUTH_TOKEN_IP_GRACE_PERIOD: 7200 # period before starting to evaluate IP address on token validation
+    AUTH_TOKEN_IP_GRACE_PERIOD: 1800 # period before starting to evaluate IP address on token validation
     ALLOW_ACCESS_TOKEN_PARAMETER: 0
     DEFAULT_DHLEN: 2048
 
