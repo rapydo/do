@@ -21,11 +21,11 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import create_project, random_project_name
 
 
-def test_all(capfd, fake):
+def test_all(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         init=True,
     )
 

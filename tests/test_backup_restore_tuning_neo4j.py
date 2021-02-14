@@ -7,11 +7,11 @@ import time
 from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
 
 
-def test_all(capfd, fake):
+def test_all(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="neo4j",
         frontend="no",
         init=True,

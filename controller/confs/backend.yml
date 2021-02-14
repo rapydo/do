@@ -110,7 +110,7 @@ services:
       UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
 
-      # enable the basic /api/login method
+      # enable /auth/login and /api/admin/users methods
       MAIN_LOGIN_ENABLE: 1
       # base the user/role mechanism on some database
       AUTH_ENABLE: ${ACTIVATE_AUTH}

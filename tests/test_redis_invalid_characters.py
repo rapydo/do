@@ -5,11 +5,11 @@ special characters in the password
 from tests import create_project, exec_command, random_project_name
 
 
-def test_redis_invalid_characters(capfd, fake):
+def test_redis_invalid_characters(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="postgres",
         frontend="no",
         services=["redis"],

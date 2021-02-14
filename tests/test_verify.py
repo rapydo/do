@@ -4,11 +4,11 @@ This module will test the verify command
 from tests import create_project, exec_command, random_project_name
 
 
-def test_verify(capfd, fake):
+def test_verify(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
         services=["neo4j"],

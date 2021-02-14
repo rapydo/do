@@ -9,7 +9,7 @@ from controller import __version__
 from tests import create_project, exec_command, random_project_name
 
 
-def test_base(capfd, fake):
+def test_base(capfd, faker):
 
     exec_command(
         capfd,
@@ -17,7 +17,7 @@ def test_base(capfd, fake):
         f"rapydo version: {__version__}",
     )
 
-    project = random_project_name(fake)
+    project = random_project_name(faker)
 
     exec_command(
         capfd,

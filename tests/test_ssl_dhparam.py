@@ -6,9 +6,9 @@ import time
 from tests import create_project, exec_command, random_project_name
 
 
-def test_all(capfd, fake):
+def test_all(capfd, faker):
 
-    project = random_project_name(fake)
+    project = random_project_name(faker)
     create_project(
         capfd=capfd,
         name=project,

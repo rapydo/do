@@ -96,9 +96,9 @@ def exec_command(capfd, command, *asserts, input_text=None):
     return out
 
 
-def random_project_name(fake):
+def random_project_name(faker):
 
-    return f"{fake.word()}{fake.pyint(min_value=100, max_value=999)}"
+    return f"{faker.word()}{faker.pyint(min_value=100, max_value=999)}"
 
 
 def create_project(
