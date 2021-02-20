@@ -440,7 +440,6 @@ services:
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
 
-
     # ports:
     #   - 9090:${NEO4J_WEB_INTERFACE_PORT}
     #   - 7687:7687
@@ -717,7 +716,7 @@ services:
 
   redis:
     restart: always
-    image: redis:6.0.9
+    image: redis:6.0.10
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
@@ -866,8 +865,6 @@ services:
       CELERYUI_DBDIR: ${CELERYUI_DBDIR}
 
   swaggerui:
-    # restart: no
-    # image: swaggerapi/swagger-ui:v3.36.0
     build:
       context: ${SUBMODULE_DIR}/build-templates/swaggerui
       args:

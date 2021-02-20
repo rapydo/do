@@ -37,18 +37,18 @@ known_latests = {
     # https://hub.docker.com/r/fanout/pushpin/tags
     # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "neo4j": "4.2.1",
-        "postgres": "13.1-alpine",
+        "neo4j": "4.2.3",
+        "postgres": "13.2-alpine",
         "mariadb": "10.5.8",
-        "mongo": "4.4.2",
-        "redis": "6.0.9",
-        "nginx": "1.19.5-alpine",
-        "node": "14.15.1-buster",
-        "rabbitmq": "3.8.9-management",
-        "adminer": "4.7.8-standalone",
+        "mongo": "4.4.4",
+        "redis": "6.0.10",
+        "nginx": "1.19.7-alpine",
+        "node": "15.9.0-buster",
+        "rabbitmq": "3.8.12-management",
+        "adminer": "4.8.0",
         "mongo-express": "0.54.0",
         "fanout/pushpin": "1.31.0",
-        "swaggerapi/swagger-ui": "v3.38.0",
+        "swaggerapi/swagger-ui": "v3.43.0",
         "stilliard/pure-ftpd": "stretch-latest",
         "ubuntu": "20.04",
     },
@@ -57,7 +57,7 @@ known_latests = {
     # Not used
     "urls": {
         "isort": "5.7.0",
-        "prettier": "2.2.1",
+        "prettier": "v2.2.1",
         "pyupgrade": "v2.10.0",
         "black": "20.8b1",
         "flake8": "3.8.4",
