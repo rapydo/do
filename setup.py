@@ -16,7 +16,7 @@ setup(
     },
     # Remember to update mypy.additional_dependencies
     install_requires=[
-        "docker-compose==1.28.4",
+        "docker-compose==1.27.4",
         "dockerfile-parse==1.1.0",
         "python-dateutil",
         "pytz",
