@@ -22,7 +22,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2020-12-14"
+known_update = "2021-02-20"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -56,11 +56,12 @@ known_latests = {
     "acme": "2.8.8",
     # Not used
     "urls": {
-        "isort": "5.5.2",
-        "prettier": "2.1.1",
-        "pyupgrade": "v2.7.2",
+        "isort": "5.7.0",
+        "prettier": "2.2.1",
+        "pyupgrade": "v2.10.0",
         "black": "20.8b1",
-        "flake8": "3.8.3",
+        "flake8": "3.8.4",
+        "mypy": "v0.812",
     },
 }
 
