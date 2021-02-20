@@ -98,7 +98,7 @@ variables:
     FLASK_HOST: apiserver.dockerized.io
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
-    PYTHON_PATH: /usr/local/lib/python3.8/dist-packages
+    PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
     # from GUNICORN docs:
     # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
     # the formula is based on the assumption that for a given core, one worker will be
@@ -117,6 +117,8 @@ variables:
     GZIP_COMPRESSION_THRESHOLD: 1500
     # From 1 to 9, best tradeoffs seem to be 3 (faster) and 7 (better compression)
     GZIP_COMPRESSION_LEVEL: 3
+    # Automatically apply flask migrations at backend startup
+    ALEMBIC_AUTO_MIGRATE: 1
 
     FRONTEND_BUILD_MODE: angular # or angular-test
     BACKEND_BUILD_MODE: backend
@@ -151,9 +153,10 @@ variables:
     # SET_CSP_SCRIPT_SRC: "https://www.googletagmanager.com https://www.google-analytics.com"
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
-    CORS_ALLOW_ALL_ORIGINS: 1
+    SET_CSP_CONNECT_SRC:
+    CORS_ALLOWED_ORIGIN: # if empty will be automatically replaced with DOMAIN in proxy entrypoint
 
-    ALCHEMY_ENABLE_CONNECTOR: True
+    ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
     ALCHEMY_VERIFICATION_TIME: 900
     ALCHEMY_HOST: sql.dockerized.io
@@ -191,7 +194,7 @@ variables:
     # Set as the number of core (and not more). Also used to set max_parallel_workers
     POSTGRES_MAX_WORKER_PROCESSES: 1 # default increased to 2 in production mode
 
-    NEO4J_ENABLE_CONNECTOR: True
+    NEO4J_ENABLE_CONNECTOR: 1
     NEO4J_EXPIRATION_TIME: 7200
     NEO4J_VERIFICATION_TIME: 900
     NEO4J_HOST: matrix.dockerized.io
@@ -206,19 +209,21 @@ variables:
     NEO4J_PAGECACHE_SIZE: 512M # Setting invalidated in production mode
     NEO4J_ALLOW_UPGRADE: false
 
-    MONGO_ENABLE_CONNECTOR: True
+    MONGO_ENABLE_CONNECTOR: 1
     MONGO_EXPIRATION_TIME: 7200
     MONGO_VERIFICATION_TIME: 900
     MONGO_HOST: mongo.dockerized.io
     MONGO_PORT: 27017
     MONGO_DATABASE: rapydo
-    MONGO_USER:
-    MONGO_PASSWORD:
+    MONGO_USER: mongo
+    MONGO_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+    MONGOUI_USER: mongo
+    MONGOUI_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     ELASTIC_HOST: elastic.dockerized.io
     ELASTIC_PORT: 9200
 
-    RABBITMQ_ENABLE_CONNECTOR: True
+    RABBITMQ_ENABLE_CONNECTOR: 1
     RABBITMQ_EXPIRATION_TIME: 7200
     RABBITMQ_VERIFICATION_TIME: 900
     RABBITMQ_HOST: rabbit.dockerized.io
@@ -231,21 +236,22 @@ variables:
     RABBITMQ_SSL_CERTFILE:
     RABBITMQ_SSL_KEYFILE:
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT:
-    RABBITMQ_SSL_ENABLED: False # it is used by Celery
+    RABBITMQ_SSL_ENABLED: 0 # it is used by Celery
 
-    REDIS_ENABLE_CONNECTOR: True
+    REDIS_ENABLE_CONNECTOR: 1
     REDIS_EXPIRATION_TIME: 86400
     REDIS_VERIFICATION_TIME: 3600
     REDIS_HOST: redis.dockerized.io
     REDIS_PORT: 6379
+    REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # Celery
-    CELERY_ENABLE_CONNECTOR: True
+    CELERY_ENABLE_CONNECTOR: 1
     CELERY_EXPIRATION_TIME: 7200
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    CELERYBEAT_ENABLE_CONNECTOR: True
+    CELERYBEAT_ENABLE_CONNECTOR: 1
 
     # Flower
     CELERYUI_USER: "flower" # This default is invalidated in production mode
@@ -254,14 +260,14 @@ variables:
     CELERYUI_PORT: 5555
     CELERYUI_SSL_OPTIONS:
 
-    PUSHPIN_ENABLE_CONNECTOR: True
+    PUSHPIN_ENABLE_CONNECTOR: 1
     PUSHPIN_EXPIRATION_TIME: 7200
     PUSHPIN_VERIFICATION_TIME: 900
     PUSHPIN_HOST: pushpin.dockerized.io
     PUSHPIN_PORT: 7999
     PUSHPIN_CONTROL_PORT: 5561
 
-    SMTP_ENABLE_CONNECTOR: True
+    SMTP_ENABLE_CONNECTOR: 1
     SMTP_EXPIRATION_TIME: 7200
     SMTP_VERIFICATION_TIME: 900
     SMTP_ADMIN:
@@ -271,28 +277,29 @@ variables:
     SMTP_USERNAME:
     SMTP_PASSWORD:
 
-    ALLOW_PASSWORD_RESET: "false"
-    ALLOW_REGISTRATION: "false"
-    ALLOW_TERMS_OF_USE: "false"
-    REGISTRATION_NOTIFICATIONS: true
+    ALLOW_PASSWORD_RESET: 0
+    ALLOW_REGISTRATION: 0
+    ALLOW_TERMS_OF_USE: 0
+    REGISTRATION_NOTIFICATIONS: 1
     SENTRY_URL:
     GA_TRACKING_CODE:
-    ENABLE_FOOTER: false
+    ENABLE_FOOTER: 1
+    ENABLE_ANGULAR_SSR: 1
 
     ACTIVATE_AUTH: 1
     AUTH_SERVICE: sqlalchemy
     AUTH_MIN_PASSWORD_LENGTH: 8
-    AUTH_VERIFY_PASSWORD_STRENGTH: True
-    AUTH_FORCE_FIRST_PASSWORD_CHANGE: False
+    AUTH_VERIFY_PASSWORD_STRENGTH: 1
+    AUTH_FORCE_FIRST_PASSWORD_CHANGE: 0
     AUTH_MAX_PASSWORD_VALIDITY: 0
     AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: 0
     AUTH_MAX_LOGIN_ATTEMPTS: 0
-    AUTH_REGISTER_FAILED_LOGIN: False
-    AUTH_SECOND_FACTOR_AUTHENTICATION: None
+    AUTH_LOGIN_BAN_TIME: 3600
+    AUTH_SECOND_FACTOR_AUTHENTICATION: 0
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
     AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
-    ALLOW_ACCESS_TOKEN_PARAMETER: False
-    # AUTH_SECOND_FACTOR_AUTHENTICATION: TOTP
+    AUTH_TOKEN_IP_GRACE_PERIOD: 1800 # period before starting to evaluate IP address on token validation
+    ALLOW_ACCESS_TOKEN_PARAMETER: 0
     DEFAULT_DHLEN: 2048
 
     TELEGRAM_API_KEY: "**PLACEHOLDER**"

@@ -5,7 +5,7 @@ import sys
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional
+from typing import Any, Dict, List, MutableMapping, Optional, Set, cast
 
 import requests
 import typer
@@ -49,19 +49,19 @@ class Configuration:
 
     action: Optional[str] = None
 
-    production = False
-    testing = False
-    privileged = False
+    production: bool = False
+    testing: bool = False
+    privileged: bool = False
     project: str = ""
-    frontend = None
+    frontend: Optional[str] = None
     hostname: str = ""
     stack: str = ""
-    load_backend = False
-    load_frontend = False
-    load_commons = False
+    load_backend: bool = False
+    load_frontend: bool = False
+    load_commons: bool = False
 
-    version: Optional[str] = None
-    rapydo_version: Optional[str] = None
+    version: str = ""
+    rapydo_version: str = ""
     project_title: Optional[str] = None
     project_description: Optional[str] = None
 
@@ -235,7 +235,7 @@ class CommandsData:
         active_services: List[str] = [],
         base_services: List[Any] = [],
         compose_config: List[Any] = [],
-        services_dict: Any = None,
+        services_dict: Dict[str, Any] = None,
     ):
         self.files = files
         self.base_files = base_files
@@ -244,7 +244,7 @@ class CommandsData:
         self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
-        self.services_dict: Dict[str, Any] = services_dict or {}
+        self.services_dict = services_dict or {}
 
 
 class Application:
@@ -262,7 +262,7 @@ class Application:
     # This Any should be Repo, but GitPython is lacking typings
     gits: MutableMapping[str, Any] = OrderedDict()
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         Application.controller = self
 
@@ -273,14 +273,14 @@ class Application:
         self.enabled_services: List[str] = []
         self.base_services: List[Any] = []
         self.compose_config: List[Any] = []
-        self.services_dict = {}
+        self.services_dict: Dict[str, List[Any]] = {}
 
         load_commands()
 
         Application.load_projectrc()
 
     @staticmethod
-    def exit(message, *args, **kwargs):
+    def exit(message: str, *args: Any, **kwargs: Any) -> None:
         log.critical(message, *args, **kwargs)
         sys.exit(1)
 
@@ -351,14 +351,11 @@ class Application:
         # Cannot be tested
         if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
-            self.current_os_user = "privileged"
             log.warning("Current user is 'root'")
         else:
-            self.current_os_user = system.get_username(self.current_uid)
-            log.debug(
-                "Current user: {} (UID: {})", self.current_os_user, self.current_uid
-            )
-            log.debug("Current group ID: {}", self.current_gid)
+            os_user = system.get_username(self.current_uid)
+            log.debug("Current UID: {} ({})", self.current_uid, os_user)
+            log.debug("Current GID: {}", self.current_gid)
 
         if Configuration.initialize:
             return None
@@ -392,7 +389,7 @@ class Application:
         return None
 
     @staticmethod
-    def load_projectrc():
+    def load_projectrc() -> None:
 
         projectrc_yaml = configuration.load_yaml_file(
             PROJECTRC, path=Path(), is_optional=True
@@ -405,7 +402,7 @@ class Application:
         Configuration.projectrc = projectrc_yaml
 
     @staticmethod
-    def check_installed_software():
+    def check_installed_software() -> None:
 
         log.debug(
             "python version: {}.{}.{}",
@@ -428,7 +425,7 @@ class Application:
         Packages.check_python_package("requests", min_version="2.6.1")
         Packages.check_python_package("pip", min_version="10.0.0")
 
-    def read_specs(self, read_extended=True):
+    def read_specs(self, read_extended: bool = True) -> None:
         """ Read project configuration """
 
         try:
@@ -448,7 +445,7 @@ class Application:
             self.extended_project_path = confs[2]
 
         except AttributeError as e:  # pragma: no cover
-            Application.exit(e)
+            Application.exit(str(e))
 
         Configuration.frontend = glom(
             Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
@@ -460,18 +457,16 @@ class Application:
         Configuration.project_title = glom(
             Configuration.specs, "project.title", default="Unknown title"
         )
-        Configuration.version = glom(
-            Configuration.specs, "project.version", default=None
-        )
+        Configuration.version = glom(Configuration.specs, "project.version", default="")
         Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=None
+            Configuration.specs, "project.rapydo", default=""
         )
 
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
         )
 
-        if Configuration.rapydo_version is None:  # pragma: no cover
+        if not Configuration.rapydo_version:  # pragma: no cover
             Application.exit(
                 "RAPyDo version not found in your project_configuration file"
             )
@@ -479,7 +474,7 @@ class Application:
         Configuration.rapydo_version = str(Configuration.rapydo_version)
 
     @staticmethod
-    def preliminary_version_check():
+    def preliminary_version_check() -> None:
 
         specs = configuration.load_yaml_file(
             file=configuration.PROJECT_CONF_FILENAME,
@@ -488,19 +483,19 @@ class Application:
         )
 
         Application.verify_rapydo_version(
-            rapydo_version=glom(specs, "project.rapydo", default=None)
+            rapydo_version=glom(specs, "project.rapydo", default="")
         )
 
     @staticmethod
-    def verify_rapydo_version(rapydo_version=None):
+    def verify_rapydo_version(rapydo_version: str = "") -> bool:
         """
         Verify if the installed rapydo version matches the current project requirement
         """
 
-        if rapydo_version is None:
+        if not rapydo_version:
             rapydo_version = Configuration.rapydo_version
 
-        if rapydo_version is None:  # pragma: no cover
+        if not rapydo_version:  # pragma: no cover
             return True
 
         r = LooseVersion(rapydo_version)
@@ -519,10 +514,11 @@ class Application:
                 r, c, action
             )
 
-            Application.exit(msg)
+            log.critical(msg)
+            sys.exit(1)
 
     @staticmethod
-    def check_internet_connection():
+    def check_internet_connection() -> None:
         """ Check if connected to internet """
 
         try:
@@ -532,6 +528,7 @@ class Application:
         except requests.ConnectionError:  # pragma: no cover
             Application.exit("Internet connection is unavailable")
 
+    # from_path: Optional[Path]
     @staticmethod
     def working_clone(name, repo, from_path=None):
 
@@ -578,10 +575,14 @@ class Application:
         )
 
     @staticmethod
-    def git_submodules(from_path=None):
+    def git_submodules(from_path: Optional[Path] = None) -> None:
         """ Check and/or clone git projects """
 
-        repos = glom(Configuration.specs, "variables.submodules", default={}).copy()
+        repos: Dict[str, str] = glom(
+            Configuration.specs,
+            "variables.submodules",
+            default=cast(Dict[str, str], {}),
+        ).copy()
         Application.gits["main"] = gitter.get_repo(".")
 
         for name, repo in repos.items():
@@ -589,7 +590,7 @@ class Application:
                 name, repo, from_path=from_path
             )
 
-    def set_active_services(self):
+    def set_active_services(self) -> None:
         self.services_dict, self.active_services = services.find_active(
             self.compose_config
         )
@@ -600,7 +601,7 @@ class Application:
 
         self.create_datafile()
 
-    def read_composers(self):
+    def read_composers(self) -> None:
 
         # Find configuration that tells us which files have to be read
 
@@ -629,7 +630,9 @@ class Application:
 
         compose_files = OrderedDict()
 
-        confs = glom(Configuration.specs, "variables.composers", default={})
+        confs: Dict[str, Any] = glom(
+            Configuration.specs, "variables.composers", default={}
+        )
         for name, conf in confs.items():
             compose_files[name] = services.apply_variables(conf, myvars)
 
@@ -643,7 +646,7 @@ class Application:
         dc = Compose(files=self.files)
         self.compose_config = dc.config()
 
-    def create_projectrc(self):
+    def create_projectrc(self) -> None:
         templating = Templating()
         t = templating.get_template(
             "projectrc",
@@ -665,14 +668,14 @@ class Application:
         else:
             log.info("Created default {} file", PROJECTRC)
 
-    def make_env(self):
+    def make_env(self) -> None:
 
         try:
             COMPOSE_ENVIRONMENT_FILE.unlink()
         except FileNotFoundError:
             pass
 
-        env = glom(Configuration.specs, "variables.env", default={})
+        env: Dict[str, Any] = glom(Configuration.specs, "variables.env", default={})
 
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
@@ -708,6 +711,7 @@ class Application:
         env["DOCKER_NETWORK_MODE"] = "bridge"
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
+        services.check_redis_password(env.get("REDIS_PASSWORD"))
 
         for e in env:
             env_value = os.environ.get(e)
@@ -717,15 +721,63 @@ class Application:
 
         env.update(Configuration.environment)
 
+        bool_envs = [
+            # This variable is for docker-compose and is expected to be true|false
+            "DOCKER_PRIVILEGED_MODE",
+            # This variable is for RabbitManagement and is expected to be true|false
+            "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
+            # These variables are for Neo4j and are expected to be true|false
+            "NEO4J_SSL_ENABLED",
+            "NEO4J_ALLOW_UPGRADE",
+        ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
 
-                # if isinstance(value, str):  # pragma: no
-                #     if value.lower() == 'true':
-                #         log.warning("{}={}, convert to 1?", key, value)
+                if (
+                    Configuration.production
+                    and key.endswith("_PASSWORD")
+                    and value
+                    and len(value) < 8
+                ):
+                    log.warning("{} is set with a short password", key)
 
-                #     if value.lower() == 'false':
-                #         log.warning("{}={}, convert to 0?", key, value)
+                # Deprecated since 1.0
+                # Backend and Frontend use different booleans due to Py vs Js
+                # 0/1 is a much more portable value to prevent true|True|"true"
+                # This fixes troubles in setting boolean values only used by Angular
+                # (expected true|false) or used by Pyton (expected True|False)
+                if key not in bool_envs:
+                    if isinstance(value, str):
+                        if value.lower() == "true":
+                            log.warning(
+                                "Deprecated value for {}, convert {} to 1",
+                                key,
+                                value,
+                                key,
+                            )
+
+                        if value.lower() == "false":
+                            log.warning(
+                                "Deprecated value for {}, convert {} to 0",
+                                key,
+                                value,
+                                key,
+                            )
+                    elif isinstance(value, bool):
+                        if value:
+                            log.warning(
+                                "Deprecated value for {}, convert {} to 1",
+                                key,
+                                value,
+                                key,
+                            )
+                        else:
+                            log.warning(
+                                "Deprecated value for {}, convert {} to 0",
+                                key,
+                                value,
+                                key,
+                            )
 
                 if value is None:
                     value = ""
@@ -735,7 +787,7 @@ class Application:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
 
-    def create_datafile(self):
+    def create_datafile(self) -> None:
         try:
             DATAFILE.unlink()
         except FileNotFoundError:
@@ -776,7 +828,7 @@ class Application:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def get_available_interfaces(self):
+    def get_available_interfaces(self) -> List[str]:
         available_interfaces = list()
         if self.compose_config:
             for s in self.compose_config:
@@ -815,7 +867,7 @@ class Application:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def check_placeholders(self):
+    def check_placeholders(self) -> Set[str]:
 
         if len(self.active_services) == 0:  # pragma: no cover
             Application.exit(
@@ -832,7 +884,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             service = self.services_dict.get(service_name)
 
             if service:
-                for key, value in service.get("environment", {}).items():
+                for key, value in (
+                    cast(Dict[str, Any], service).get("environment", {}).items()
+                ):
                     if PLACEHOLDER in str(value):
                         key = services.normalize_placeholder_variable(key)
                         missing.add(key)
@@ -866,14 +920,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if len(placeholders) > 0:
             Application.exit(
                 "The following variables are missing in your configuration:\n\n{}"
-                "\n\nYou can fix this error by updating the your .projectrc file\n",
+                "\n\nYou can fix this error by updating your .projectrc file\n",
                 "\n".join(placeholders),
             )
 
         return missing
 
     @staticmethod
-    def git_update(ignore_submodule):
+    def git_update(ignore_submodule: List[str]) -> None:
 
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
@@ -883,7 +937,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 gitter.update(name, gitobj)
 
     @staticmethod
-    def git_checks(ignore_submodule):
+    def git_checks(ignore_submodule: List[str]) -> None:
 
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:

@@ -81,6 +81,7 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "CELERYUI_PASSWORD": ["celeryui"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
+    "REDIS_PASSWORD": ["redis"],
     "ALCHEMY_USER": ["postgres", "mariadb"],
     "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
     "NEO4J_PASSWORD": ["neo4j"],
@@ -96,6 +97,8 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "SMTP_PASSWORD": ["backend"],
     "TELEGRAM_API_KEY": ["bot"],
     "TELEGRAM_ADMINS": ["bot"],
+    "MONGO_PASSWORD": ["mongodb"],
+    "MONGO_USER": ["mongodb"],
 }
 
 
@@ -131,6 +134,11 @@ def normalize_placeholder_variable(key: str) -> str:
     if key == "CYPRESS_AUTH_DEFAULT_PASSWORD":
         return "AUTH_DEFAULT_PASSWORD"
 
+    if key == "MONGO_INITDB_ROOT_PASSWORD":
+        return "MONGO_PASSWORD"
+    if key == "MONGO_INITDB_ROOT_USERNAME":
+        return "MONGO_USER"
+
     return key
 
 
@@ -153,16 +161,30 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
     return "Unknown"
 
 
-def check_rabbit_password(pwd: str) -> None:
-    invalid_rabbit_characters = ["£", "§", "”", "’"]
-    if any([c in pwd for c in invalid_rabbit_characters]):
-        log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
-        log.critical(
-            "Some special characters, including {}, are not allowed "
-            "because make RabbitMQ crash at startup",
-            " ".join(invalid_rabbit_characters),
-        )
-        sys.exit(1)
+def check_rabbit_password(pwd: Optional[str]) -> None:
+    if pwd:
+        invalid_rabbit_characters = ["£", "§", "”", "’"]
+        if any([c in pwd for c in invalid_rabbit_characters]):
+            log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
+            log.critical(
+                "Some special characters, including {}, are not allowed "
+                "because make RabbitMQ crash at startup",
+                " ".join(invalid_rabbit_characters),
+            )
+            sys.exit(1)
+
+
+def check_redis_password(pwd: Optional[str]) -> None:
+    if pwd:
+        invalid_rabbit_characters = ["#"]
+        if any([c in pwd for c in invalid_rabbit_characters]):
+            log.critical("Not allowed characters found in REDIS_PASSWORD.")
+            log.critical(
+                "Some special characters, including {}, are not allowed "
+                "because make some clients to fail to connect",
+                " ".join(invalid_rabbit_characters),
+            )
+            sys.exit(1)
 
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:

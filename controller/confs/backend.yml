@@ -110,7 +110,7 @@ services:
       UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
 
-      # enable the basic /api/login method
+      # enable /auth/login and /api/admin/users methods
       MAIN_LOGIN_ENABLE: 1
       # base the user/role mechanism on some database
       AUTH_ENABLE: ${ACTIVATE_AUTH}
@@ -120,13 +120,16 @@ services:
       AUTH_VERIFY_PASSWORD_STRENGTH: ${AUTH_VERIFY_PASSWORD_STRENGTH}
       AUTH_MAX_PASSWORD_VALIDITY: ${AUTH_MAX_PASSWORD_VALIDITY}
       AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: ${AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER}
-      AUTH_REGISTER_FAILED_LOGIN: ${AUTH_REGISTER_FAILED_LOGIN}
       AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
+      AUTH_LOGIN_BAN_TIME: ${AUTH_LOGIN_BAN_TIME}
       AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
       AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
       AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}
       AUTH_JWT_TOKEN_TTL: ${AUTH_JWT_TOKEN_TTL}
       AUTH_TOKEN_SAVE_FREQUENCY: ${AUTH_TOKEN_SAVE_FREQUENCY}
+      AUTH_TOKEN_IP_GRACE_PERIOD: ${AUTH_TOKEN_IP_GRACE_PERIOD}
+      # Only used for testing purpose
+      AUTH_TESTING_TOTP_HASH:
       ALLOW_ACCESS_TOKEN_PARAMETER: ${ALLOW_ACCESS_TOKEN_PARAMETER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
@@ -146,6 +149,7 @@ services:
       ALCHEMY_DB: ${ALCHEMY_DB}
       ALCHEMY_POOLSIZE: ${ALCHEMY_POOLSIZE}
       ALCHEMY_DBTYPE: ${ALCHEMY_DBTYPE}
+      ALEMBIC_AUTO_MIGRATE: ${ALEMBIC_AUTO_MIGRATE}
 
       NEO4J_ENABLE: ${ACTIVATE_NEO4J}
       NEO4J_ENABLE_CONNECTOR: ${NEO4J_ENABLE_CONNECTOR}
@@ -193,6 +197,7 @@ services:
       REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
       PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
@@ -291,10 +296,12 @@ services:
       FRONTEND: ${FRONTEND_FRAMEWORK}
       UNSAFE_EVAL: ${SET_UNSAFE_EVAL}
       STYLE_UNSAFE_INLINE: ${SET_STYLE_UNSAFE_INLINE}
-      CORS_ALLOW_ALL_ORIGINS: ${CORS_ALLOW_ALL_ORIGINS}
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
       CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
       CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
       CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
+      CSP_CONNECT_SRC: ${SET_CSP_CONNECT_SRC}
+      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
     depends_on:
       - backend
 
@@ -354,7 +361,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.5.6
+    image: mariadb:10.5.8
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -440,7 +447,13 @@ services:
 
   mongodb:
     restart: always
-    image: mongo:4.4.1
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/mongodb
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/mongodb:${RAPYDO_VERSION}
     volumes:
       - mongodata:/data/db
     networks:
@@ -449,6 +462,11 @@ services:
           - ${MONGO_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_MONGODB}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
 
   #########################
   ###  QUEUE MANAGEMENT ###
@@ -497,8 +515,13 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
 
+      REDIS_ENABLE: ${ACTIVATE_REDIS}
+      REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
+      REDIS_EXPIRATION_TIME: ${REDIS_EXPIRATION_TIME}
+      REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
 
@@ -580,7 +603,7 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
-    command: celery beat -A restapi.connectors.celery.beat.celery_app --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
 
     # user: developer
     working_dir: /code
@@ -609,8 +632,13 @@ services:
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
 
+      REDIS_ENABLE: ${ACTIVATE_REDIS}
+      REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
+      REDIS_EXPIRATION_TIME: ${REDIS_EXPIRATION_TIME}
+      REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}
@@ -690,7 +718,7 @@ services:
   redis:
     restart: always
     image: redis:6.0.9
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
     networks:
@@ -818,8 +846,13 @@ services:
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
 
+      REDIS_ENABLE: ${ACTIVATE_REDIS}
+      REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
+      REDIS_EXPIRATION_TIME: ${REDIS_EXPIRATION_TIME}
+      REDIS_VERIFICATION_TIME: ${REDIS_VERIFICATION_TIME}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}
@@ -846,11 +879,14 @@ services:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_PORT: ${BACKEND_PORT}
+      PROJECT_TITLE: ${PROJECT_TITLE}
+
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
     ports:
-      - 7777:80
+      - 7777:8080
 
   sqlalchemyui:
     # image: adminer:4.7.7-standalone
@@ -883,6 +919,10 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_MONGOUI}
       ME_CONFIG_MONGODB_SERVER: ${MONGO_HOST}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOUI_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOUI_PASSWORD}
       ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
     networks:
       db_net:
@@ -910,7 +950,7 @@ services:
 
   pushpin:
     restart: always
-    image: fanout/pushpin:1.30.0
+    image: fanout/pushpin:1.31.0
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:

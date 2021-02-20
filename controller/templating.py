@@ -67,7 +67,7 @@ class Templating:
         try:
             template_name = self.get_template_name(filename)
             template = self.env.get_template(template_name)
-            content = template.render(**data)
+            content = str(template.render(**data))
             # from jinja2.meta import find_undeclared_variables
             # ast = self.env.parse(content)
             # undefined = find_undeclared_variables(ast)

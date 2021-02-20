@@ -23,7 +23,7 @@ name_priorities = [
 ]
 
 
-def name_priority(name1, name2):
+def name_priority(name1: str, name2: str) -> str:
     if name1 not in name_priorities or name2 not in name_priorities:
         log.warning("Cannot determine build priority between {} and {}", name1, name2)
         return name2
@@ -32,6 +32,16 @@ def name_priority(name1, name2):
     if p1 <= p2:
         return name1
     return name2
+
+
+# -> Dict[str, Dict[str, Any]]
+# Shoud be a TypedDict istead of Dict[str, Any] with:
+#     'services': List[str],
+#     'path': str,
+#     'timestamp': Optional[str],
+#     'service': str
+
+# Build: Dict[str, Dict[str, ]]
 
 
 def find_templates_build(base_services):
@@ -63,7 +73,7 @@ def find_templates_build(base_services):
                 templates[template_image] = {
                     "services": [],
                     "path": template_build.get("context"),
-                    "timestamp": docker.image_attribute(template_image),
+                    "timestamp": docker.image_info(template_image).get("Created"),
                 }
 
             if "service" not in templates[template_image]:

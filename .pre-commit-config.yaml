@@ -47,7 +47,7 @@ repos:
 
         args: [
             # -> Type of variable becomes "xyz" due to an unfollowed import
-            "--disallow-any-unimported",
+            # "--disallow-any-unimported",
 
             # Disable errors like:
             # found module but no type hints

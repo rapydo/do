@@ -13,6 +13,7 @@ variables:
   # roles:
   #   normal_user: YourCustomName
   #   staff_user: YourCustomName
+  #   # staff_user: disabled
   #   group_coordinator: YourCustomName
   #   admin_root: YourCustomName
   #   extra_role: YourExtraRole
@@ -45,7 +46,7 @@ variables:
     {% endif -%}
     {% if enable_celery -%}
     ACTIVATE_CELERY: 1
-    ACTIVATE_CELERYUI: 1
+    ACTIVATE_CELERYUI: 0
     {% if enable_mongo or enable_redis -%}
     ACTIVATE_CELERYBEAT: 1
     {% endif -%}

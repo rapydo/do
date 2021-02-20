@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "0.9"
+version = "1.0"
 
 setup(
     name="rapydo",
@@ -17,7 +17,7 @@ setup(
     # Remember to update mypy.additional_dependencies
     install_requires=[
         "docker-compose==1.27.4",
-        "dockerfile-parse==1.0.0",
+        "dockerfile-parse==1.1.0",
         "python-dateutil",
         "pytz",
         "loguru",
@@ -43,5 +43,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         # End-of-life: 2024-10
         "Programming Language :: Python :: 3.8",
+        # End-of-life: 2025-10
+        "Programming Language :: Python :: 3.9",
     ],
 )

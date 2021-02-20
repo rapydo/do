@@ -1,6 +1,7 @@
 import os
 import shutil
 from enum import Enum
+from pathlib import Path
 from typing import List, Optional
 
 import typer
@@ -18,6 +19,19 @@ class AuthTypes(str, Enum):
     mongo = "mongo"
 
 
+class ServiceTypes(str, Enum):
+    postgres = "postgres"
+    mysql = "mysql"
+    neo4j = "neo4j"
+    mongo = "mongo"
+    rabbit = "rabbit"
+    redis = "redis"
+    celery = "celery"
+    pushpin = "pushpin"
+    ftp = "ftp"
+    bot = "bot"
+
+
 class FrontendTypes(str, Enum):
     no = "no"
     angular = "angular"
@@ -31,7 +45,7 @@ def create(
         ..., "--frontend", help="Frontend framework to enable"
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
-    services: List[str] = typer.Option(
+    services: List[ServiceTypes] = typer.Option(
         "",
         "--service",
         "-s",
@@ -81,14 +95,12 @@ def create(
         if not PROJECT_DIR.joinpath(extend).is_dir():
             Application.exit("Invalid extend value: project {} not found", extend)
 
-    auth = auth.value
-    frontend = frontend.value
-
+    services_list: List[str] = [service.value for service in services]
     create_project(
         project_name=project_name,
-        auth=auth,
-        frontend=frontend,
-        services=services,
+        auth=auth.value,
+        frontend=frontend.value,
+        services=services_list,
         extend=extend,
         envs=envs,
         auto=auto,
@@ -118,18 +130,18 @@ def create(
 
 
 def create_project(
-    project_name,
-    auth,
-    frontend,
-    services,
-    extend,
-    envs=None,
-    auto=False,
-    force=False,
-    force_current=False,
-    add_optionals=False,
-    path=None,
-):
+    project_name: str,
+    auth: str,
+    frontend: str,
+    services: List[str],
+    extend: Optional[str],
+    envs: Optional[List[str]] = None,
+    auto: bool = False,
+    force: bool = False,
+    force_current: bool = False,
+    add_optionals: bool = False,
+    path: Path = None,
+) -> None:
 
     project_scaffold = Project()
     enable_postgres = auth == "postgres" or "postgres" in services
@@ -263,7 +275,7 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
-            Application.exit(p)
+            Application.exit(str(p))
 
     if not path:
         for p in project_scaffold.raw_files:

@@ -5,9 +5,9 @@ from controller import __version__, gitter
 from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
 
 
-def test_install(capfd, fake):
+def test_install(capfd, faker):
 
-    project = random_project_name(fake)
+    project = random_project_name(faker)
     create_project(
         capfd=capfd,
         name=project,

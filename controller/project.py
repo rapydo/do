@@ -62,6 +62,10 @@ class Project:
         self.expected_files.append(self.p_path("confs", "production.yml"))
         self.expected_files.append(self.p_path("backend", "initialization.py"))
         self.expected_files.append(self.p_path("backend", "customization.py"))
+        self.expected_files.append(self.p_path("backend", "endpoints", "__init__.py"))
+        self.expected_files.append(self.p_path("backend", "models", "__init__.py"))
+        self.expected_files.append(self.p_path("backend", "tasks", "__init__.py"))
+        self.expected_files.append(self.p_path("backend", "tests", "__init__.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
         self.expected_files.append(Path(".pre-commit-config.yaml"))
@@ -196,13 +200,13 @@ class Project:
             self.data_files.extend(
                 [
                     frontend_data_dir.joinpath("angular.json"),
-                    frontend_data_dir.joinpath("browserslist"),
                     frontend_data_dir.joinpath("karma.conf.js"),
                     frontend_data_dir.joinpath("package.json"),
                     frontend_data_dir.joinpath("polyfills.ts"),
                     frontend_data_dir.joinpath("tsconfig.json"),
                     frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.spec.json"),
+                    frontend_data_dir.joinpath("tsconfig.server.json"),
                     frontend_data_dir.joinpath("cypress.json"),
                 ]
             )
@@ -221,6 +225,8 @@ class Project:
                     self.p_path("frontend", "app", "custom.declarations.ts"),
                     self.p_path("frontend", "app", "custom.routes.ts"),
                     self.p_path("frontend", "app", "custom.project.options.ts"),
+                    # Removed since 1.0
+                    frontend_data_dir.joinpath("browserslist"),
                 ]
             )
 

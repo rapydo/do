@@ -21,11 +21,11 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import create_project, random_project_name
 
 
-def test_all(capfd, fake):
+def test_all(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         init=True,
     )
 
@@ -206,6 +206,8 @@ def test_all(capfd, fake):
     assert short1("NEO4J_dbms_memory_heap_max__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_heap_initial__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_pagecache_size") == "NEO4J_PAGECACHE_SIZE"
+    assert short1("MONGO_INITDB_ROOT_PASSWORD") == "MONGO_PASSWORD"
+    assert short1("MONGO_INITDB_ROOT_USERNAME") == "MONGO_USER"
 
     key = "anyother"
     assert short1(key) == key

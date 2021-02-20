@@ -1,16 +1,18 @@
-from restapi.connectors.celery import CeleryExt
+from restapi.connectors.celery import CeleryExt, send_errors_by_email
+
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
-celery_app = CeleryExt.celery_app
 
-
-@celery_app.task(bind=True)
+@CeleryExt.celery_app.task(bind=True, name="{{name}}")
+@send_errors_by_email
 def {{name}}(self):
-    with celery_app.app.app_context():
+    with CeleryExt.app.app_context():
+
+        log.info("Task ID: {}", self.request.id)
 
         db = {{auth}}.get_instance()
 
-        log.info("Task started!")
+        log.info("Task executed!")
 
         return "Task executed!"

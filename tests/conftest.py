@@ -3,8 +3,6 @@ import os
 import pytest
 from faker import Faker
 
-f = Faker("en_US")
-
 
 # This fixture is execute before every test to create a new random folder
 # To execute tests in an insulated environment
@@ -22,13 +20,9 @@ def create_folder() -> None:
         os.chdir("..")
 
     # Create a new folder with a random name
+    f = Faker("en_US")
     folder = f"{prefix}{f.pystr(min_chars=12, max_chars=12)}{suffix}"
     os.makedirs(f"{folder}/data/logs")
     os.chdir(folder)
 
     print(f"FOLDER = {folder}")
-
-
-@pytest.fixture
-def fake():
-    return f

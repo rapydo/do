@@ -1,7 +1,6 @@
 from typing import Optional
 
 import typer
-from glom import glom
 
 from controller import log
 from controller.app import Application, Configuration
@@ -56,19 +55,16 @@ def interfaces(
 
     publish = [f"{port}:{current_ports.target}"]
 
-    url = None
     if service == "swaggerui":
-        BACKEND_PORT = glom(Configuration.specs, "variables.env.BACKEND_PORT")
-        swagger_host = f"{Configuration.hostname}:{port}"
         if Configuration.production:
-            spec = f"https://{Configuration.hostname}/api/specs"
-            url = f"https://{swagger_host}?docExpansion=list&url={spec}"
+            prot = "https"
         else:
-            spec = f"http://{Configuration.hostname}:{BACKEND_PORT}/api/specs"
-            url = f"http://{swagger_host}?docExpansion=list&url={spec}"
+            prot = "http"
 
-    if url is not None:
-        log.info("You can access {} web page here:\n\n{}\n", service, url)
+        log.info(
+            "You can access SwaggerUI web page here: {}\n",
+            f"{prot}://{Configuration.hostname}:{port}",
+        )
     else:
         log.info("Launching interface: {}", service)
 

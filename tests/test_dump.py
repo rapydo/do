@@ -6,11 +6,11 @@ This module will test the dump command
 from tests import create_project, exec_command, random_project_name
 
 
-def test_dump(capfd, fake):
+def test_dump(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],

@@ -6,6 +6,7 @@ from glom import glom
 from controller import EXTENDED_PROJECT_DISABLED
 from controller.app import Application, Configuration
 from controller.commands.create import create_project
+from controller.project import NO_FRONTEND
 
 
 @Application.app.command(help="Upgrade a project by re-applying the templates")
@@ -20,9 +21,11 @@ def upgrade(
     Application.get_controller().controller_init()
 
     frontend = glom(
-        Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=None
+        Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
     )
-    auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
+    auth = glom(
+        Configuration.specs, "variables.env.AUTH_SERVICE", default="NO_AUTHENTICATION"
+    )
     extend = glom(Configuration.specs, "variables.env.EXTENDED_PROJECT", default=None)
 
     if extend == EXTENDED_PROJECT_DISABLED:

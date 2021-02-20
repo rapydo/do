@@ -26,6 +26,12 @@ project_configuration:
       NEO4J_PAGECACHE_SIZE: 1G
       NEO4J_HEAP_SIZE: 1G
       {% endif -%}
+      {% if service == "mongodb" -%}
+      MONGO_PASSWORD: {{ "RANDOM"| password }}
+      MONGO_USER: mongo
+      MONGOUI_PASSWORD: {{ "RANDOM"| password }}
+      MONGOUI_USER: mongo
+      {% endif -%}
       {% if service == "celeryui" -%}
       CELERYUI_PASSWORD: {{ "RANDOM"| password }}
       CELERYUI_USER: {{ "RANDOM"| username }}
@@ -33,6 +39,9 @@ project_configuration:
       {% if service == "rabbit" -%}
       RABBITMQ_USER: {{ "RANDOM"| username }}
       RABBITMQ_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
+      {% if service == "redis" -%}
+      REDIS_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% endfor %}{% endif -%}
       {% endif -%}
@@ -43,8 +52,8 @@ project_configuration:
       SMTP_PORT: 0
       SMTP_USERNAME: {{ "RANDOM"| username }}
       SMTP_PASSWORD: {{ "RANDOM"| password }}
-      ALLOW_PASSWORD_RESET: "true"
-      ALLOW_REGISTRATION: "true"
+      ALLOW_PASSWORD_RESET: 1
+      ALLOW_REGISTRATION: 1
       AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
       AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}+Aa1-nowit'sstrong!
       UPLOAD_PATH: /tmp

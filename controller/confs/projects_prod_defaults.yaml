@@ -18,7 +18,7 @@ variables:
     # RABBITMQ_SSL_DEPTH: 1
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "false"
     # RABBITMQ_SSL_VERIFY
-    RABBITMQ_SSL_ENABLED: True # it is used by Celery
+    RABBITMQ_SSL_ENABLED: 1 # it is used by Celery
 
     CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     TELEGRAM_WORKERS: 4
@@ -42,5 +42,11 @@ variables:
     NEO4J_PASSWORD: "**PLACEHOLDER**"
     RABBITMQ_USER: "**PLACEHOLDER**"
     RABBITMQ_PASSWORD: "**PLACEHOLDER**"
+    REDIS_PASSWORD: "**PLACEHOLDER**"
     CELERYUI_USER: "**PLACEHOLDER**"
     CELERYUI_PASSWORD: "**PLACEHOLDER**"
+
+    MONGO_USER: "**PLACEHOLDER**"
+    MONGO_PASSWORD: "**PLACEHOLDER**"
+    MONGOUI_USER: "**PLACEHOLDER**"
+    MONGOUI_PASSWORD: "**PLACEHOLDER**"

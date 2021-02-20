@@ -38,22 +38,22 @@ def restore(
 ) -> None:
     Application.get_controller().controller_init()
 
-    service = service.value
+    service_name = service.value
 
-    options = {"SERVICE": [service]}
+    options = {"SERVICE": [service_name]}
     dc = Compose(files=Application.data.files)
 
     running_containers = dc.get_running_containers(Configuration.project)
-    container_is_running = service in running_containers
+    container_is_running = service_name in running_containers
 
     expected_ext = ""
 
-    if service == Services.neo4j:
+    if service_name == Services.neo4j:
         expected_ext = ".dump"
-    elif service == Services.postgres:
+    elif service_name == Services.postgres:
         expected_ext = ".sql.gz"
 
-    backup_dir = Path("data").joinpath("backup").joinpath(service)
+    backup_dir = Path("data").joinpath("backup").joinpath(service_name)
     if not backup_dir.exists():
         Application.exit(
             "No backup found, the following folder does not exist: {}", backup_dir
@@ -79,7 +79,7 @@ def restore(
     if not backup_host_path.exists():
         Application.exit("Invalid backup file, {} does not exist", backup_host_path)
 
-    if service == Services.neo4j:
+    if service_name == Services.neo4j:
         if container_is_running and not force:
             Application.exit(
                 "Neo4j is running and the restore will temporary stop it. "
@@ -89,48 +89,50 @@ def restore(
         if container_is_running:
             dc.command("stop", options)
 
-        backup_path = f"/backup/{service}/{backup_file}"
+        backup_path = f"/backup/{service_name}/{backup_file}"
 
         command = f"neo4j-admin load --from={backup_path} --database=neo4j --force"
 
-        log.info("Starting restore on {}...", service)
+        log.info("Starting restore on {}...", service_name)
 
-        dc.create_volatile_container(service, command=command)
+        dc.create_volatile_container(service_name, command=command)
 
         log.info("Restore from data{} completed", backup_path)
 
         if container_is_running:
-            dc.start_containers([service], detach=True)
+            dc.start_containers([service_name], detach=True)
 
-    if service == Services.postgres:
+    if service_name == Services.postgres:
 
         if not container_is_running:
             Application.exit(
                 "The restore procedure requires {} running, please start your stack",
-                service,
+                service_name,
             )
 
-        log.info("Starting restore on {}...", service)
+        log.info("Starting restore on {}...", service_name)
 
-        backup_path = f"/backup/{service}/{backup_file}"
+        backup_path = f"/backup/{service_name}/{backup_file}"
         dump_file = backup_file.replace(".gz", "")
         dump_path = f"/tmp/{dump_file}"
 
         command = f"cp {backup_path} /tmp/"
         # Executed as root
-        dc.exec_command(service, command=command, disable_tty=True)
+        dc.exec_command(service_name, command=command, disable_tty=True)
 
         command = f"gunzip -kf /tmp/{backup_file}"
         # Executed as root
-        dc.exec_command(service, command=command, disable_tty=True)
+        dc.exec_command(service_name, command=command, disable_tty=True)
 
         command = f"chown postgres {dump_path}"
         # Executed as root
-        dc.exec_command(service, command=command, disable_tty=True)
+        dc.exec_command(service_name, command=command, disable_tty=True)
 
         # By using pg_dumpall the resulting dump can be restored with psql:
         command = f"psql -U sqluser -f {dump_path} postgres"
-        dc.exec_command(service, command=command, user="postgres", disable_tty=True)
+        dc.exec_command(
+            service_name, command=command, user="postgres", disable_tty=True
+        )
 
         log.info("Restore from data{} completed", backup_path)
 

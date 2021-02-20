@@ -6,11 +6,11 @@ import signal
 from tests import create_project, exec_command, random_project_name, signal_handler
 
 
-def test_volatile(capfd, fake):
+def test_volatile(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
         init=True,

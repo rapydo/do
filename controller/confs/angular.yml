@@ -27,6 +27,7 @@ services:
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       PROJECT_TITLE: ${PROJECT_TITLE}
       PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      ENABLE_ANGULAR_SSR: ${ENABLE_ANGULAR_SSR}
       ENABLE_FOOTER: ${ENABLE_FOOTER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
@@ -53,6 +54,9 @@ services:
       CYPRESS_AUTH_MAX_PASSWORD_VALIDITY: ${AUTH_MAX_PASSWORD_VALIDITY}
       CYPRESS_AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: ${AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER}
       CYPRESS_AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
+      CYPRESS_AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
+      CYPRESS_AUTH_LOGIN_BAN_TIME: ${AUTH_LOGIN_BAN_TIME}
+      CYPRESS_TESTING_TOTP_HASH:
 
       CYPRESS_BACKEND_HOST: ${FLASK_HOST}
       CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
@@ -91,19 +95,19 @@ services:
       # Output folder, configured in cypress.json
       - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
-      - ${SUBMODULE_DIR}/rapydo-angular/browserslist:/app/browserslist
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.json:/app/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
+      - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.server.json:/app/tsconfig.server.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
       - ${PROJECT_DIR}/frontend:/app/app/subproject
 
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support

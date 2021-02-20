@@ -5,11 +5,11 @@ This module will test the interfaces command
 from tests import create_project, exec_command, random_project_name
 
 
-def test_interfaces(capfd, fake):
+def test_interfaces(capfd, faker):
 
     create_project(
         capfd=capfd,
-        name=random_project_name(fake),
+        name=random_project_name(faker),
         auth="postgres",
         frontend="no",
         init=True,
@@ -57,9 +57,7 @@ def test_interfaces(capfd, fake):
     exec_command(
         capfd,
         "interfaces swagger --port 124 --detach",
-        "You can access swaggerui web page here:",
-        "http://localhost:124?docExpansion=list&",
-        "url=http://localhost:8080/api/specs",
+        "You can access SwaggerUI web page here: http://localhost:124",
     )
 
     exec_command(
@@ -72,9 +70,7 @@ def test_interfaces(capfd, fake):
     exec_command(
         capfd,
         "--prod interfaces swagger --port 124 --detach",
-        "You can access swaggerui web page here:",
-        "https://localhost:124?docExpansion=list&",
-        "url=https://localhost/api/specs",
+        "You can access SwaggerUI web page here: https://localhost:124",
     )
 
     exec_command(capfd, "remove --all", "Stack removed")

@@ -23,7 +23,7 @@ def tuning(
 ) -> None:
     Application.get_controller().controller_init()
 
-    service = service.value
+    service_name = service.value
 
     if not cpu:
         cpu = os.cpu_count() or 1
@@ -36,19 +36,19 @@ def tuning(
 
     log.info("Suggested settings:")
 
-    if service == Services.neo4j:
+    if service_name == Services.neo4j:
 
         dc = Compose(files=Application.data.files)
 
         running_containers = dc.get_running_containers(Configuration.project)
-        container_is_running = service in running_containers
+        container_is_running = service_name in running_containers
 
         command = f"neo4j-admin memrec --memory {ram}"
 
         if container_is_running:
-            dc.exec_command(service, command=command, disable_tty=True)
+            dc.exec_command(service_name, command=command, disable_tty=True)
         else:
-            dc.create_volatile_container(service, command=command)
+            dc.create_volatile_container(service_name, command=command)
 
         # output = temporary_stream.getvalue().split("\\")
         # print(output)
@@ -65,7 +65,7 @@ def tuning(
             "(check size reported in the output, if any)"
         )
 
-    if service == Services.postgres:
+    if service_name == Services.postgres:
 
         # Something like 25% of available RAM
         print(f"POSTGRES_SHARED_BUFFERS: {system.bytes_to_str(ram * 0.25)}")
@@ -76,5 +76,5 @@ def tuning(
         # Set as the number of core (and not more).
         print(f"POSTGRES_MAX_WORKER_PROCESSES: {cpu}")
 
-    if service == Services.backend:
+    if service_name == Services.backend:
         print(f"GUNICORN_MAX_NUM_WORKERS: {1 + 2 * cpu}")

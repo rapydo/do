@@ -10,7 +10,8 @@ import shlex
 import sys
 from contextlib import redirect_stdout
 from io import StringIO
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
@@ -29,7 +30,7 @@ from controller import log
 
 
 class Compose:
-    def __init__(self, files):
+    def __init__(self, files: List[Path]):
         super().__init__()
 
         self.files = files
@@ -42,10 +43,10 @@ class Compose:
 
         log.debug("Client compose {}: {}", self.project_name, files)
 
-    def config(self):
+    def config(self) -> List[Dict[str, Any]]:
         compose_output_tuple = get_config_from_options(".", self.options)
         # NOTE: compose_output_tuple is a namedtuple
-        return compose_output_tuple.services
+        return cast(List[Dict[str, Any]], compose_output_tuple.services)
 
     def command(self, command: str, options: Dict[str, Any]) -> None:
 
@@ -82,7 +83,7 @@ class Compose:
             sys.exit(1)
 
     @staticmethod
-    def split_command(command):
+    def split_command(command: Optional[str]) -> Tuple[Optional[str], List[str]]:
         """
         Split a command into command + args_array
         """
@@ -101,22 +102,23 @@ class Compose:
 
     def start_containers(
         self,
-        services,
+        services: List[str],
         # used by backup
-        detach=True,
+        detach: bool = True,
         # used by scale
-        scale=None,
+        scale: Optional[List[str]] = None,
         # used by scale
-        skip_dependencies=False,
+        skip_dependencies: bool = False,
         # used by start
-        force_recreate=False,
-    ):
+        force_recreate: bool = False,
+    ) -> None:
         """
         Start containers (docker-compose up)
         """
 
         if scale is None:
-            scale = {}
+            scale = []
+            # scale = {}
 
         options = {
             "SERVICE": services,
@@ -134,7 +136,7 @@ class Compose:
         }
 
         try:
-            return self.command("up", options)
+            self.command("up", options)
         except NetworkConfigChangedError as e:  # pragma: no cover
             log.critical(
                 "{}.\n{} ({})",
@@ -145,8 +147,13 @@ class Compose:
             sys.exit(1)
 
     def create_volatile_container(
-        self, service, command=None, publish=None, detach=False, user=None
-    ):
+        self,
+        service: str,
+        command: Optional[str] = None,
+        publish: Optional[List[str]] = None,
+        detach: bool = False,
+        user: Optional[str] = None,
+    ) -> None:
         """
         Execute a command on a not container
         """
@@ -181,11 +188,16 @@ class Compose:
             "--label": None,
         }
 
-        return self.command("run", options)
+        self.command("run", options)
 
     def exec_command(
-        self, service, user=None, command=None, disable_tty=False, detach=False
-    ):
+        self,
+        service: str,
+        user: Optional[str] = None,
+        command: str = None,
+        disable_tty: bool = False,
+        detach: bool = False,
+    ) -> None:
         """
         Execute a command on a running container
         """
@@ -212,7 +224,7 @@ class Compose:
             )
         self.command("exec_command", options)
 
-    def get_containers_status(self, prefix):
+    def get_containers_status(self, prefix: str) -> Dict[str, str]:
         with StringIO() as buf, redirect_stdout(buf):
             self.command("ps", {"--quiet": False, "--services": False, "--all": False})
             output = buf.getvalue().split("\n")
@@ -245,7 +257,7 @@ class Compose:
 
             return containers
 
-    def get_running_containers(self, prefix):
+    def get_running_containers(self, prefix: str) -> Set[str]:
         containers_status = self.get_containers_status(prefix)
         containers = set()
         for name, status in containers_status.items():

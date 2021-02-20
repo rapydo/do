@@ -64,7 +64,9 @@ def add(
 
     Application.get_controller().controller_init()
 
-    auth = glom(Configuration.specs, "variables.env.AUTH_SERVICE", default=None)
+    auth = glom(
+        Configuration.specs, "variables.env.AUTH_SERVICE", default="NO_AUTHENTICATION"
+    )
 
     fn = get_function(element_type)
 
