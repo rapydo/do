@@ -3,7 +3,7 @@ from typing import List
 
 import yaml
 
-from controller import log
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 from controller.app import Application
 from controller.utilities import system
 
@@ -20,6 +20,8 @@ def dump():
     for file in Application.data.files:
         params.append("-f")
         params.append(str(file))
+    params.append("--env-file")
+    params.append(str(COMPOSE_ENVIRONMENT_FILE.resolve()))
     params.append("config")
     yaml_string = system.execute_command("docker-compose", parameters=params)
 
