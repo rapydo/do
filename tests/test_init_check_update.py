@@ -200,7 +200,7 @@ def test_base(capfd):
         "2": "2",
         "C": "C",
         # Invalid characters in output are ordered
-        "_C-2": "_-2C",
+        "_C-2": "-2C_",
     }
     # Check invalid and reserved project names
     for invalid_key, invalid_value in invalid_characters.items():

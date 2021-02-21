@@ -2,7 +2,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -262,15 +262,8 @@ class Project:
             )
             sys.exit(1)
 
-        # Duplicated in create.py
-        if not re.match("^[a-z]+$", project):
-            invalid_set = set(re.sub("[a-z]", "", project))
-            invalid_chars = "".join(str(e) for e in invalid_set)
-
-            log.critical(
-                "Wrong project name, found invalid characters: {}", invalid_chars
-            )
-            sys.exit(1)
+        # In case of errors this function will exit
+        Project.check_invalid_characters(project)
 
         if project in Project.reserved_project_names:
             log.critical(
@@ -280,7 +273,19 @@ class Project:
 
         return project
 
-    def check_main_folder(self):
+    @staticmethod
+    def check_invalid_characters(project: str) -> None:
+        if not re.match("^[a-z]+$", project):
+            invalid_list = list(set(re.sub("[a-z]", "", project)))
+            invalid_list.sort()
+            invalid_chars = "".join(str(e) for e in invalid_list)
+
+            log.critical(
+                "Wrong project name, found invalid characters: {}", invalid_chars
+            )
+            sys.exit(1)
+
+    def check_main_folder(self) -> Optional[str]:
         folder = Path(os.getcwd())
         first_level_error = self.inspect_main_folder(folder)
         # No error raised: the current folder is a valid rapydo root
@@ -309,7 +314,7 @@ class Project:
 
         return first_level_error
 
-    def inspect_main_folder(self, folder):
+    def inspect_main_folder(self, folder: Path) -> Optional[str]:
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based

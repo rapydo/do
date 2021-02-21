@@ -198,14 +198,8 @@ def create_project(
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
-    # Duplicated in project.py
-    if not re.match("^[a-z]+$", project_name):
-        invalid_set = set(re.sub("[a-z]", "", project_name))
-        invalid_chars = "".join(str(e) for e in invalid_set)
-
-        Application.exit(
-            "Wrong project name, found invalid characters: {}", invalid_chars
-        )
+    # In case of errors this function will exit
+    project_scaffold.check_invalid_characters(project_name)
 
     if project_name in project_scaffold.reserved_project_names:
         Application.exit(
