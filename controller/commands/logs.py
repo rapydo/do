@@ -40,16 +40,20 @@ def logs(
 
     if len(services) > 1:
         timestamps = False
+        log_prefix = True
     elif services[0] in "frontend":
         timestamps = True
+        log_prefix = False
     else:
         timestamps = False
+        log_prefix = False
 
     options = {
         "--follow": follow,
         "--tail": str(tail),
         "--timestamps": timestamps,
         "--no-color": nocolor,
+        "--no-log-prefix": not log_prefix,
         "SERVICE": services,
     }
 
