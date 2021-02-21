@@ -140,18 +140,20 @@ def test_all(capfd):
         capfd,
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
+        # Logs are not prefixed because only one service is shown
+        "Development mode",
     )
 
     now = datetime.now()
     timestamp = now.strftime("%Y-%m-%dT")
 
-    # Frontend logs are timestamped
+    # Frontend logs are always timestamped
     exec_command(
         capfd,
         "-s frontend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        f"frontend_1      | {timestamp}",
+        # Logs are not prefixed because only one service is shown
+        f"{timestamp}",
     )
 
     # With multiple services logs are not timestamped
@@ -159,6 +161,7 @@ def test_all(capfd):
         capfd,
         "-s frontend,backend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
+        # Logs are prefixed because more than one service is shown
         "backend_1       | Development mode",
         "frontend_1      | Merging files...",
     )

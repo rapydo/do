@@ -33,7 +33,8 @@ def test_cronjobs(capfd, faker):
         capfd,
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
+        # Logs are not prefixed because only one service is shown
+        "Development mode",
         "Found no cronjob to be enabled, skipping crontab setup",
     )
 
@@ -52,9 +53,10 @@ def test_cronjobs(capfd, faker):
         capfd,
         "logs -s backend --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
-        "backend_1       | Enabling cron...",
-        "backend_1       | Cron enabled",
+        # Logs are not prefixed because only one service is shown
+        "Development mode",
+        "Enabling cron...",
+        "Cron enabled",
         # this is the output of crontab -l that verifies the cronjob installation
         "* * * * * echo 'Hello world'",
     )
