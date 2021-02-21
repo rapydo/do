@@ -26,7 +26,7 @@ from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
 
-from controller import log
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 
 
 class Compose:
@@ -34,8 +34,11 @@ class Compose:
         super().__init__()
 
         self.files = files
-
-        self.options = {"--file": self.files}
+        self.options = {
+            "--file": self.files,
+            # Resolve to absolute path
+            "--env-file": str(COMPOSE_ENVIRONMENT_FILE.resolve()),
+        }
 
         self.project_name = get_project_name(os.curdir)
 

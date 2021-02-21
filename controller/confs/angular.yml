@@ -1,4 +1,4 @@
-version: "3"
+version: "3.2"
 
 services:
   frontend:
@@ -81,7 +81,6 @@ services:
       # `tput: No value for $TERM and no -T specified`
       # Raised when running Cypress on --no-tty shells
       TERM: xterm
-
 
       # DISPLAY: ":0"
 
