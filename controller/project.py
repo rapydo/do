@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from pathlib import Path
 from typing import List
@@ -261,24 +262,15 @@ class Project:
             )
             sys.exit(1)
 
-        if "_" in project:
+        # Duplicated in create.py
+        if not re.match("^[a-z]+$", project):
+            invalid_set = set(re.sub("[a-z]", "", project))
+            invalid_chars = "".join(str(e) for e in invalid_set)
+
             log.critical(
-                "Wrong project name, _ is not a valid character."
-                "\nPlease consider to rename {} into {}",
-                project,
-                project.replace("_", ""),
+                "Wrong project name, found invalid characters: {}", invalid_chars
             )
             sys.exit(1)
-
-        # Projects with - cannot be imported in python
-        # if "-" in project:
-        #     log.critical(
-        #         "Wrong project name, - is not a valid character."
-        #         "\nPlease consider to rename {} into {}",
-        #         project,
-        #         project.replace("-", ""),
-        #     )
-        #     sys.exit(1)
 
         if project in Project.reserved_project_names:
             log.critical(

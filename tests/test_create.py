@@ -54,7 +54,31 @@ def test_create(capfd):
     exec_command(
         capfd,
         "create test_celery --auth postgres --frontend angular --current",
-        "Wrong project name, _ is not a valid character",
+        "Wrong project name, found invalid characters: _",
+    )
+
+    exec_command(
+        capfd,
+        "create test-celery --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: -",
+    )
+
+    exec_command(
+        capfd,
+        "create testCelery --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: C",
+    )
+
+    exec_command(
+        capfd,
+        "create testcelery2 --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: 2",
+    )
+
+    exec_command(
+        capfd,
+        "create test_Celery-2 --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: _C-2",
     )
 
     exec_command(

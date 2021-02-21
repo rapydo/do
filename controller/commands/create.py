@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from enum import Enum
 from pathlib import Path
@@ -197,8 +198,14 @@ def create_project(
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
-    if "_" in project_name:
-        Application.exit("Wrong project name, _ is not a valid character")
+    # Duplicated in project.py
+    if not re.match("^[a-z]+$", project_name):
+        invalid_set = set(re.sub("[a-z]", "", project_name))
+        invalid_chars = "".join(str(e) for e in invalid_set)
+
+        Application.exit(
+            "Wrong project name, found invalid characters: {}", invalid_chars
+        )
 
     if project_name in project_scaffold.reserved_project_names:
         Application.exit(

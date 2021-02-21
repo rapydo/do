@@ -22,7 +22,7 @@ from prettyprinter import pprint as pp
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-02-20"
+known_update = "2021-02-21"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -190,11 +190,13 @@ def parse_npm(url, lib):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html5lib")
     span = soup.find("span", attrs={"title": lib})
+
     if span is None:
         log.error("Span not found for: {} ({})", lib, url)
         return "unknown"
 
-    return span.next_element.next_element.text.split("\xa0")[0]
+    spans = span.parent.parent.findChildren("span", recursive=False)
+    return spans[0].text.split("\xa0")[0]
 
 
 def parse_pypi(url, lib):

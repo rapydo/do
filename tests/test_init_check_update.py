@@ -195,13 +195,20 @@ def test_base(capfd):
     )
 
     # Check invalid and reserved project names
-    os.makedirs("projects/invalid_character")
-    exec_command(
-        capfd,
-        "-p invalid_character check -i main --no-git --no-builds",
-        "Wrong project name, _ is not a valid character.",
-    )
-    shutil.rmtree("projects/invalid_character")
+    for invalid in (
+        "_",
+        "-",
+        "2",
+        "C",
+        "_-2C",
+    ):
+        os.makedirs(f"projects/invalid{invalid}character")
+        exec_command(
+            capfd,
+            "-p invalid{invalid}character check -i main --no-git --no-builds",
+            f"Wrong project name, found invalid characters: {invalid}",
+        )
+        shutil.rmtree(f"projects/invalid{invalid}character")
 
     os.makedirs("projects/celery")
     exec_command(
