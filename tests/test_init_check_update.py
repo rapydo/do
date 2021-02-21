@@ -207,7 +207,7 @@ def test_base(capfd):
         os.makedirs(f"projects/invalid{invalid_key}character")
         exec_command(
             capfd,
-            "-p invalid{invalid_key}character check -i main --no-git --no-builds",
+            f"-p invalid{invalid_key}character check -i main --no-git --no-builds",
             f"Wrong project name, found invalid characters: {invalid_value}",
         )
         shutil.rmtree(f"projects/invalid{invalid_key}character")
