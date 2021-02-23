@@ -12,10 +12,10 @@ variables:
       online_url: https://github.com/rapydo/do.git
 
   roles:
-    normal_user: User
-    staff_user: Staff
-    group_coordinator: disabled
     admin_root: Admin
+    staff_user: Staff
+    group_coordinator: Coordinator
+    normal_user: User
     default: normal_user
     # Roles allowed for non-admin users (e.g. coordinator allowed to create users)
     # allowed_roles:
