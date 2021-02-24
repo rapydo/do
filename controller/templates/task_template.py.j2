@@ -4,7 +4,7 @@ from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
 
-@CeleryExt.task(name="{{name}}")
+@CeleryExt.task()
 def {{name}}(self):
     log.info("Task ID: {}", self.request.id)
 
