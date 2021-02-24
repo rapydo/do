@@ -194,23 +194,34 @@ def test_base(capfd):
         "Checks completed",
     )
 
+    # Numbers are not allowed as first characters
+    pname = "2invalidcharacter"
+    os.makedirs(f"projects/{pname}")
+    exec_command(
+        capfd,
+        f"-p {pname} check -i main --no-git --no-builds",
+        "Wrong project name, found invalid characters: 2",
+    )
+    shutil.rmtree(f"projects/{pname}")
+
     invalid_characters = {
         "_": "_",
         "-": "-",
-        "2": "2",
         "C": "C",
         # Invalid characters in output are ordered
-        "_C-2": "-2C_",
+        # Numbers are allowed if not leading
+        "_C-2": "-C_",
     }
     # Check invalid and reserved project names
     for invalid_key, invalid_value in invalid_characters.items():
-        os.makedirs(f"projects/invalid{invalid_key}character")
+        pname = f"invalid{invalid_key}character"
+        os.makedirs(f"projects/{pname}")
         exec_command(
             capfd,
-            f"-p invalid{invalid_key}character check -i main --no-git --no-builds",
+            f"-p {pname} check -i main --no-git --no-builds",
             f"Wrong project name, found invalid characters: {invalid_value}",
         )
-        shutil.rmtree(f"projects/invalid{invalid_key}character")
+        shutil.rmtree(f"projects/{pname}")
 
     os.makedirs("projects/celery")
     exec_command(

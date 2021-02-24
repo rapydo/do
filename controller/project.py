@@ -275,8 +275,8 @@ class Project:
 
     @staticmethod
     def check_invalid_characters(project: str) -> None:
-        if not re.match("^[a-z]+$", project):
-            invalid_list = list(set(re.sub("[a-z]", "", project)))
+        if not re.match("^[a-z][a-z0-9]+$", project):
+            invalid_list = list(set(re.sub("[a-z][a-z0-9]", "", project)))
             invalid_list.sort()
             invalid_chars = "".join(str(e) for e in invalid_list)
 

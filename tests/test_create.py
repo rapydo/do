@@ -69,17 +69,19 @@ def test_create(capfd):
         "Wrong project name, found invalid characters: C",
     )
 
+    # Numbers are not allowed as first characters
     exec_command(
         capfd,
-        "create testcelery2 --auth postgres --frontend angular --current",
+        "create 2testcelery --auth postgres --frontend angular --current",
         "Wrong project name, found invalid characters: 2",
     )
 
+    # Numbers are allowed if not leading
     exec_command(
         capfd,
         "create test_Celery-2 --auth postgres --frontend angular --current",
         # Invalid characters in output are ordered
-        "Wrong project name, found invalid characters: -2C_",
+        "Wrong project name, found invalid characters: -C_",
     )
 
     exec_command(
