@@ -361,7 +361,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.5.8
+    image: mariadb:10.5.9
     volumes:
       - mariadb:/var/lib/mysql
     environment:
