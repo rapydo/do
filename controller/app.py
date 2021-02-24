@@ -415,15 +415,10 @@ class Application:
         )
 
         # 17.05 added support for multi-stage builds
-        if Configuration.testing:
-            max_docker = None
-        else:
-            max_docker = "19.99"
         Packages.check_program(
             "docker",
             min_version="17.05",
             min_recommended_version="19.03.1",
-            max_version=max_docker,
         )
         Packages.check_program("git")
 
