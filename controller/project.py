@@ -61,6 +61,8 @@ class Project:
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
+        # Need to ensure mypy to correctly extract typing from the project module
+        self.expected_files.append(self.p_path("backend", "__init__.py"))
         self.expected_files.append(self.p_path("backend", "initialization.py"))
         self.expected_files.append(self.p_path("backend", "customization.py"))
         self.expected_files.append(self.p_path("backend", "endpoints", "__init__.py"))
