@@ -5,7 +5,7 @@ from restapi.connectors import {{auth}}
 
 
 @CeleryExt.task()
-def {{name}}(self):
+def {{name}}(self: CeleryExt.TaskType) -> str:
     log.info("Task ID: {}", self.request.id)
 
     db = {{auth}}.get_instance()
