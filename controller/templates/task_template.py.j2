@@ -13,3 +13,12 @@ def {{name}}(self):
     log.info("Task executed!")
 
     return "Task executed!"
+
+# Note to execute this task from an endpoint:
+#
+# celery_ext = celery.get_instance()
+# task = celery_ext.celery_app.send_task(
+#     "{{name}}",
+#     args=[...]
+# )
+# log.debug("Task id={}", task.id)

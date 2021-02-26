@@ -41,3 +41,13 @@ jobs:
           export MYPYPATH='./stubs'
           mypy --disallow-incomplete-defs --disallow-any-unimported --disallow-any-generics --check-untyped-defs --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report . --html-report . controller/
           cat index.txt
+
+      - name: Save Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: mypy-report
+          path: |
+            index.txt
+            index.html
+            mypy-html.css
+            html
