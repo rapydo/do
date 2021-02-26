@@ -40,7 +40,7 @@ jobs:
 
           export MYPYPATH='./stubs'
           mypy --disallow-incomplete-defs --disallow-any-unimported --disallow-any-generics --check-untyped-defs --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report report --html-report report controller/
-          cat index.txt
+          cat report/index.txt
 
       - name: Save Report
         uses: actions/upload-artifact@v2
