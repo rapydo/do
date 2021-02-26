@@ -68,9 +68,3 @@ jobs:
           cd ..
 
           bash <(curl -s https://codecov.io/bash)
-
-      # - name: Artifact
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: coverage
-      #     path: coverage.xml
