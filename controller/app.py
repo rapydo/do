@@ -413,7 +413,7 @@ class Application:
 
         # 17.05 added support for multi-stage builds
         Packages.check_program(
-            "docker", min_version="17.05", min_recommended_version="19.03.1"
+            "docker", min_version="17.05", min_recommended_version="19.03.8"
         )
         Packages.check_program("git")
 
