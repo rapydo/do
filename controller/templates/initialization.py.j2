@@ -1,6 +1,5 @@
-from typing import Optional
 from restapi.connectors import {{auth_service}}
-from restapi.customizer import FlaskApp
+
 
 class Initializer:
     """
@@ -8,7 +7,7 @@ class Initializer:
     Implement the constructor to add operations performed one-time at initialization
     """
 
-    def __init__(self, app: Optional[FlaskApp] = None) -> None:
+    def __init__(self) -> None:
         # c = {{auth_service}}.get_instance()
         pass
 
