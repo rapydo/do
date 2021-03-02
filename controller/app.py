@@ -412,6 +412,7 @@ class Application:
         )
 
         # 17.05 added support for multi-stage builds
+        # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
         Packages.check_program(
             "docker", min_version="17.05", min_recommended_version="19.03.8"
         )
