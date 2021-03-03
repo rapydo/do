@@ -106,8 +106,9 @@ class Project:
 
         self.data_folders.extend(
             [
-                DATA.joinpath("logs"),
                 DATA.joinpath("backup"),
+                DATA.joinpath("logs"),
+                DATA.joinpath("uploads"),
             ]
         )
 
