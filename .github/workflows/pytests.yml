@@ -63,7 +63,7 @@ jobs:
 
           mkdir rapydo_tests
           cd rapydo_tests
-          py.test --timeout=300 --durations=0 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          py.test --timeout=300 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
           cp coverage.xml ..
           cd ..
 

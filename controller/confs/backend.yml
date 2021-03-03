@@ -252,6 +252,8 @@ services:
       - ${VANILLA_DIR}/data/logs:/logs
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
+      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      - ${VANILLA_DIR}/data/uploads:/uploads
     networks:
       app_net:
         aliases:
@@ -585,6 +587,8 @@ services:
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
       - ${VANILLA_DIR}/data/logs:/logs
+      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      - ${VANILLA_DIR}/data/uploads:/uploads
     networks:
       db_net:
       worker_net:
