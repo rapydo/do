@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import sys
+import warnings
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
@@ -31,6 +32,8 @@ from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
+
+warnings.simplefilter("always", DeprecationWarning)
 
 DataFileStub = Dict[str, List[str]]
 
@@ -750,34 +753,26 @@ class Application:
                 if key not in bool_envs:
                     if isinstance(value, str):
                         if value.lower() == "true":
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 1",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 1",
+                                DeprecationWarning,
                             )
 
                         if value.lower() == "false":
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 0",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 0",
+                                DeprecationWarning,
                             )
                     elif isinstance(value, bool):
                         if value:
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 1",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 1",
+                                DeprecationWarning,
                             )
                         else:
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 0",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 0",
+                                DeprecationWarning,
                             )
 
                 if value is None:

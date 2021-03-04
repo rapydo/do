@@ -1,4 +1,5 @@
 import time
+import warnings
 
 import typer
 
@@ -41,8 +42,10 @@ def volatile(
             cmd = f'"{old_command}"'
         else:
             cmd = old_command
-        log.warning(
-            "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
+
+        warnings.warn(
+            f"Deprecated use of --command, use: rapydo shell {service} {cmd}",
+            DeprecationWarning,
         )
         # Sleep added because when executing command with long outputs,
         # the spam of messages does not permit to read the warning
