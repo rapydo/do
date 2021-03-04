@@ -61,18 +61,6 @@ def test_all(capfd):
         "the input device is not a TTY",
     )
 
-    # --no-tty is needed on GitHub Actions
-    exec_command(
-        capfd,
-        "shell --no-tty backend --command hostname",
-        "Deprecated use of --command",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty backend --command 'hostname --short'",
-        "Deprecated use of --command",
-    )
-
     exec_command(
         capfd,
         "shell --no-tty backend hostname",

@@ -56,7 +56,7 @@ def shell(
     Application.get_controller().controller_init()
 
     # Deprecated since 0.8
-    if old_command:
+    if old_command:  # pragma: no cover
         if " " in old_command:
             cmd = f'"{old_command}"'
         else:

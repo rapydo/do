@@ -48,17 +48,6 @@ def test_volatile(capfd, faker):
 
     exec_command(
         capfd,
-        "volatile backend --command hostname",
-        "Deprecated use of --command",
-    )
-    exec_command(
-        capfd,
-        "volatile backend --command 'hostname --short'",
-        "Deprecated use of --command",
-    )
-
-    exec_command(
-        capfd,
         "volatile backend hostname",
         "backend-server",
     )
