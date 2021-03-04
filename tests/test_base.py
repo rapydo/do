@@ -44,35 +44,6 @@ def test_base(capfd, faker):
         f"required rapydo: \033[1;32m{__version__}",
     )
 
-    # boolean variables mostly deprecated in 1.0
-    # Use the old-fashioned 0/1 integers
-    # Backend and Frontend use different booleans due to Python vs Javascript
-    # 0/1 is a much more portable value to prevent true|True|"true"
-    # This fixes troubles in setting boolean values only used by Angular
-    # (expected true|false) or used by Pyton (expected True|False)
-
-    # Test adding strings True|False|true|false
-    exec_command(
-        capfd,
-        "-e ENABLE_FOOTER=true check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert true to 1",
-    )
-    exec_command(
-        capfd,
-        "-e ENABLE_FOOTER=True check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert True to 1",
-    )
-    exec_command(
-        capfd,
-        "-e ENABLE_FOOTER=false check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert false to 0",
-    )
-    exec_command(
-        capfd,
-        "-e ENABLE_FOOTER=False check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert False to 0",
-    )
-
     auth_envs = "-e AUTH_DEFAULT_PASSWORD=short"
     alchemy_envs = " -e ALCHEMY_USER=sqluser -e ALCHEMY_PASSWORD=short"
     exec_command(
@@ -80,23 +51,6 @@ def test_base(capfd, faker):
         f"--prod {auth_envs} {alchemy_envs} check -i main --no-git --no-builds",
         "AUTH_DEFAULT_PASSWORD is set with a short password",
         "ALCHEMY_PASSWORD is set with a short password",
-    )
-
-    # Test adding boolean True|False
-    with open(".projectrc", "a") as f:
-        f.write("\n      ENABLE_FOOTER: True\n")
-    exec_command(
-        capfd,
-        "check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert True to 1",
-    )
-
-    with open(".projectrc", "a") as f:
-        f.write("\n      ENABLE_FOOTER: False\n")
-    exec_command(
-        capfd,
-        "check -i main --no-git --no-builds",
-        "Deprecated value for ENABLE_FOOTER, convert False to 0",
     )
 
     folder = os.getcwd()

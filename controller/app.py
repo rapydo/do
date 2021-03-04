@@ -750,7 +750,7 @@ class Application:
                 # 0/1 is a much more portable value to prevent true|True|"true"
                 # This fixes troubles in setting boolean values only used by Angular
                 # (expected true|false) or used by Pyton (expected True|False)
-                if key not in bool_envs:
+                if key not in bool_envs:  # pragma: no cover
                     if isinstance(value, str):
                         if value.lower() == "true":
                             warnings.warn(
