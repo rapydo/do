@@ -15,13 +15,25 @@ import * as moment from "moment";
   templateUrl: "sink.html",
 })
 export class SinkComponent implements OnInit {
-  public form = new FormGroup({});
+
+  public form1 = new FormGroup({});
   public fields1: FormlyFieldConfig[] = [];
+  public model1: any = {};
+
+  // Used by horizontal-form
+  public form2 = new FormGroup({});
   public fields2: FormlyFieldConfig[] = [];
+  public model2: any = {};
+
   // Used to test the autocomplete 
+  public form3 = new FormGroup({});
   public fields3: FormlyFieldConfig[] = [];
+  public model3: any = {};
+
+  public form4 = new FormGroup({});
   public fields4: FormlyFieldConfig[] = [];
-  public model: any = {};
+  public model4: any = {};
+
   public data: any = null;
 
   constructor(private formly: FormlyService, private api: ApiService, private notify: NotificationService) {}
@@ -159,12 +171,39 @@ export class SinkComponent implements OnInit {
     return data.fields;
   }
 
-  submit() {
+  submit1() {
     this.data = null;
-    if (!this.form.valid) {
+    if (!this.form1.valid) {
       return false;
     }
 
-    this.data = this.model;
+    this.data = this.model1;
+  }
+
+  submit2() {
+    this.data = null;
+    if (!this.form2.valid) {
+      return false;
+    }
+
+    this.data = this.model2;
+  }
+
+  submit3() {
+    this.data = null;
+    if (!this.form3.valid) {
+      return false;
+    }
+
+    this.data = this.model3;
+  }
+
+  submit4() {
+    this.data = null;
+    if (!this.form4.valid) {
+      return false;
+    }
+
+    this.data = this.model4;
   }
 }
