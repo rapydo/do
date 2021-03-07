@@ -72,6 +72,62 @@
             </li>
 
             <li ngbNavItem>
+              <a ngbNavLink>Autocomplete 1</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form" (ngSubmit)="submit()">
+                      <formly-form
+                        [form]="form"
+                        [fields]="fields3"
+                        [model]="model"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>Autocomplete 1</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form" (ngSubmit)="submit()">
+                      <formly-form
+                        [form]="form"
+                        [fields]="fields4"
+                        [model]="model"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
               <a ngbNavLink>ngx-uploadx</a>
               <ng-template ngbNavContent>
                 <br />
