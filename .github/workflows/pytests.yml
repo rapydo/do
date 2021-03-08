@@ -29,7 +29,7 @@ jobs:
             interfaces,
             libs,
             list,
-            test_passwords_invalid_characters,
+            passwords_invalid_characters,
             scale,
             ssl_dhparam,
             start_shell_status_logs_restart_remove,
