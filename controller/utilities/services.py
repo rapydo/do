@@ -163,26 +163,39 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
 
 def check_rabbit_password(pwd: Optional[str]) -> None:
     if pwd:
-        invalid_rabbit_characters = ["£", "§", "”", "’"]
-        if any([c in pwd for c in invalid_rabbit_characters]):
+        invalid_characters = ["£", "§", "”", "’"]
+        if any([c in pwd for c in invalid_characters]):
             log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
                 "because make RabbitMQ crash at startup",
-                " ".join(invalid_rabbit_characters),
+                " ".join(invalid_characters),
             )
             sys.exit(1)
 
 
 def check_redis_password(pwd: Optional[str]) -> None:
     if pwd:
-        invalid_rabbit_characters = ["#"]
-        if any([c in pwd for c in invalid_rabbit_characters]):
+        invalid_characters = ["#"]
+        if any([c in pwd for c in invalid_characters]):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",
-                " ".join(invalid_rabbit_characters),
+                " ".join(invalid_characters),
+            )
+            sys.exit(1)
+
+
+def check_mongodb_password(pwd: Optional[str]) -> None:
+    if pwd:
+        invalid_characters = ["#"]
+        if any([c in pwd for c in invalid_characters]):
+            log.critical("Not allowed characters found in MONGO_PASSWORD.")
+            log.critical(
+                "Some special characters, including {}, are not allowed "
+                "because make some clients to fail to connect",
+                " ".join(invalid_characters),
             )
             sys.exit(1)
 

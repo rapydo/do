@@ -716,6 +716,7 @@ class Application:
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
         services.check_redis_password(env.get("REDIS_PASSWORD"))
+        services.check_mongodb_password(env.get("MONGO_PASSWORD"))
 
         for e in env:
             env_value = os.environ.get(e)
