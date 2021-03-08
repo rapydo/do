@@ -93,7 +93,7 @@
 
 
             <li ngbNavItem>
-              <a ngbNavLink>Autocomplete 1</a>
+              <a ngbNavLink>Autocomplete</a>
               <ng-template ngbNavContent>
                 <br />
                 <div class="row">
@@ -121,7 +121,7 @@
             </li>
 
             <li ngbNavItem>
-              <a ngbNavLink>Autocomplete 2</a>
+              <a ngbNavLink>Multi Autocomplete</a>
               <ng-template ngbNavContent>
                 <br />
                 <div class="row">
@@ -131,6 +131,34 @@
                         [form]="form4"
                         [fields]="fields4"
                         [model]="model4"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>Preloaded Autocomplete</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form5" (ngSubmit)="submit5()">
+                      <formly-form
+                        [form]="form5"
+                        [fields]="fields5"
+                        [model]="model5"
                       >
                       </formly-form>
 
