@@ -62,7 +62,7 @@ def test_mongodb_invalid_characters(capfd, faker):
         name=random_project_name(faker),
         auth="postgres",
         frontend="no",
-        services=["mongodb"],
+        services=["mongo"],
         extra="--env MONGO_PASSWORD=invalid#password",
         init=False,
         pull=False,
