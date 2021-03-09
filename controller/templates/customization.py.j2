@@ -66,11 +66,43 @@ class Customizer(BaseCustomizer):
         if scope == BaseCustomizer.REGISTRATION:
             return {}
         """
+
+        {% if testing -%}
+        from restapi.models import fields
+        if scope == BaseCustomizer.ADMIN:
+            return {
+                'custom_field1': fields.String()
+            }
+        # these are editable fields in profile
+        if scope == BaseCustomizer.PROFILE:
+            return {
+                'custom_field2': fields.String()
+            }
+
+        # these are additional fields in registration form
+        if scope == BaseCustomizer.REGISTRATION:
+            return {
+                'custom_field3': fields.String()
+            }
+        {% endif -%}
         return {}
 
     @staticmethod
     def get_custom_output_fields(request: FlaskRequest) -> Props:
         """
-        this method is used to extend the output model of admin users
+        this method is used to extend the output model of profile and admin users
         """
+
+        {% if testing -%}
+        from restapi.models import fields
+        # Temporary using authmethod that is the only field not already included in the
+        # response schema (expect for the dangerous password and mfa hashes)
+        # If/When authmethod will no longer be available (because dropped or included
+        # into the standard response, you will have to extend the User model in
+        # testing mode with some additional fields to be used here as a replacement
+        return {
+            'authmethod': fields.String()
+        }
+        {% endif -%}
+
         return Customizer.get_custom_input_fields(request, scope=BaseCustomizer.ADMIN)
