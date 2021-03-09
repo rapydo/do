@@ -20,6 +20,13 @@ class Customizer(BaseCustomizer):
         extra_properties: Props = {}
         # if "myfield" in properties:
         #     extra_properties["myfield"] = properties["myfield"]
+
+        {% if testing -%}
+        # remove any custom testing field, if any
+        properties.pop("custom_field1", None)
+        properties.pop("custom_field2", None)
+        properties.pop("custom_field3", None)
+        {% endif -%}
         return properties, extra_properties
 
     @staticmethod
