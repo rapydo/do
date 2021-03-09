@@ -48,6 +48,10 @@ class Customizer(BaseCustomizer):
         """
         # data["CustomField"] = user.custom_field
 
+        {% if testing -%}
+        data["authmethod"] = user.authmethod
+        {% endif -%}
+
         return data
 
     @staticmethod
