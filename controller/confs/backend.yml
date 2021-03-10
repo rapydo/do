@@ -236,13 +236,12 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - secrets:${APP_SECRETS}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret
-      - secrets:${APP_SECRETS}
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Unit tests
@@ -769,6 +768,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - secrets:${APP_SECRETS}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
