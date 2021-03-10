@@ -131,7 +131,7 @@ variables:
     FRONTEND_PREFIX: /
     BACKEND_PREFIX: ""
     LOG_LEVEL: DEBUG # log level for backend and celery
-    JWT_APP_SECRETS: /jwt_tokens
+    APP_SECRETS: /secrets
     UPLOAD_PATH: /uploads
 
     PROXY_HOST: myproxy.dockerized.io

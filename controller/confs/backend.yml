@@ -5,7 +5,7 @@ version: "3.2"
 # #####################
 
 volumes:
-  jwt_tokens:
+  secrets:
     driver: local
   rabbitdata:
     driver: local
@@ -106,7 +106,7 @@ services:
       GUNICORN_MAX_NUM_WORKERS: ${GUNICORN_MAX_NUM_WORKERS}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
       UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
 
@@ -242,7 +242,7 @@ services:
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # JWT tokens secret
-      - jwt_tokens:${JWT_APP_SECRETS}
+      - secrets:${APP_SECRETS}
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Unit tests
@@ -497,7 +497,7 @@ services:
       DOMAIN: ${PROJECT_DOMAIN}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
       FORCE_PRODUCTION_TESTS: ${FORCE_PRODUCTION_TESTS}
 
       CELERY_ENABLE: 1
@@ -620,7 +620,7 @@ services:
       DOMAIN: ${PROJECT_DOMAIN}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
 
       CELERY_ENABLE: 1
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
@@ -812,8 +812,6 @@ services:
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret and SSL
-      # - jwt_tokens:${JWT_APP_SECRETS}
       # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
       # submodules
@@ -836,7 +834,7 @@ services:
 
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
 
       CELERY_ENABLE: 1
 
