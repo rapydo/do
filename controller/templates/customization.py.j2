@@ -49,6 +49,12 @@ class Customizer(BaseCustomizer):
         # data["CustomField"] = user.custom_field
 
         {% if testing -%}
+        # Temporary using authmethod that is the only field not already included in the
+        # response schema (expect for the dangerous password and mfa hashes)
+        # If/When authmethod will no longer be available (because dropped or included
+        # into the standard response, you will have to extend the User model in
+        # testing mode with some additional fields to be used here as a replacement
+        # Please note: in testing mode also the user type on frontend is extended with authmethod
         data["authmethod"] = user.authmethod
         {% endif -%}
 
@@ -111,6 +117,7 @@ class Customizer(BaseCustomizer):
         # If/When authmethod will no longer be available (because dropped or included
         # into the standard response, you will have to extend the User model in
         # testing mode with some additional fields to be used here as a replacement
+        # Please note: in testing mode also the user type on frontend is extended with authmethod
         return {
             'authmethod': fields.String()
         }
