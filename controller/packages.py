@@ -1,10 +1,12 @@
 # BEWARE: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
-
+import re
 import sys
 from distutils.version import LooseVersion
 from importlib import import_module
+from types import ModuleType
+from typing import List, Optional
 
 from sultan.api import Sultan
 
@@ -14,7 +16,9 @@ from controller.utilities import system
 
 class Packages:
     @staticmethod
-    def install(package, editable=False, user=False, use_pip3=True):
+    def install(
+        package: str, editable: bool = False, user: bool = False, use_pip3: bool = True
+    ) -> bool:
 
         # Do not import outside, otherwise:
         # cannot import name 'Configuration' from partially initialized module
@@ -49,13 +53,13 @@ class Packages:
                 for r in result.stdout + result.stderr:
                     print(r)
 
-                return result.rc == 0
+                return bool(result.rc == 0)
         except BaseException as e:  # pragma: no cover
             log.critical(e)
             sys.exit(1)
 
     @staticmethod
-    def import_package(package_name):
+    def import_package(package_name: str) -> Optional[ModuleType]:
 
         try:
             return import_module(package_name)
@@ -63,24 +67,28 @@ class Packages:
             return None
 
     @staticmethod
-    def package_version(package_name):
+    def package_version(package_name: str) -> Optional[str]:
         package = Packages.import_package(package_name)
         if package is None:
             return None
-        return package.__version__
+        return str(package.__version__)  # type: ignore
 
     @staticmethod
-    def check_python_package(package_name, min_version=None, max_version=None):
+    def check_python_package(
+        package_name: str,
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+    ) -> Optional[str]:
 
         found_version = Packages.package_version(package_name)
-        if found_version is None:  # pragma: no cover
+        if found_version is None:
             log.critical(
                 "Could not find the following python package: {}", package_name
             )
             sys.exit(1)
 
         try:
-            if min_version is not None:  # pragma: no cover
+            if min_version is not None:
                 if LooseVersion(min_version) > LooseVersion(found_version):
                     log.critical(
                         "Minimum supported version for {} is {}, found {}",
@@ -90,7 +98,7 @@ class Packages:
                     )
                     sys.exit(1)
 
-            if max_version is not None:  # pragma: no cover
+            if max_version is not None:
                 if LooseVersion(max_version) < LooseVersion(found_version):
                     log.critical(
                         "Maximum supported version for {} is {}, found {}",
@@ -104,15 +112,18 @@ class Packages:
             return found_version
         except TypeError as e:  # pragma: no cover
             log.error("{}: {}", e, found_version)
+            return None
 
     @staticmethod
     def check_program(
-        program, min_version=None, max_version=None, min_recommended_version=None
-    ):
+        program: str,
+        min_version: Optional[str] = None,
+        max_version: Optional[str] = None,
+        min_recommended_version: Optional[str] = None,
+    ) -> str:
 
         found_version = Packages.get_bin_version(program)
-        # Can't be tested on travis...
-        if found_version is None:  # pragma: no cover
+        if found_version is None:
 
             hints = ""
             if program == "docker":
@@ -123,7 +134,7 @@ class Packages:
 
         v = LooseVersion(found_version)
         if min_version is not None:
-            if LooseVersion(min_version) > v:  # pragma: no cover
+            if LooseVersion(min_version) > v:
                 log.critical(
                     "Minimum supported version for {} is {}, found {}",
                     program,
@@ -133,7 +144,7 @@ class Packages:
                 sys.exit(1)
 
         if min_recommended_version is not None:
-            if LooseVersion(min_recommended_version) > v:  # pragma: no cover
+            if LooseVersion(min_recommended_version) > v:
                 log.warning(
                     "Minimum recommended version for {} is {}, found {}",
                     program,
@@ -141,7 +152,7 @@ class Packages:
                     found_version,
                 )
 
-        if max_version is not None:  # pragma: no cover
+        if max_version is not None:
             if LooseVersion(max_version) < v:
                 log.critical(
                     "Maximum supported version for {} is {}, found {}",
@@ -155,7 +166,9 @@ class Packages:
         return found_version
 
     @staticmethod
-    def get_bin_version(exec_cmd, option="--version"):
+    def get_bin_version(
+        exec_cmd: str, option: List[str] = ["--version"]
+    ) -> Optional[str]:
 
         try:
             output = system.execute_command(exec_cmd, option)
@@ -190,7 +203,7 @@ class Packages:
         return None
 
     @staticmethod
-    def check_docker_vulnerability():
+    def check_docker_vulnerability() -> None:
 
         # Check for CVE-2019-5736 vulnerability
         # Checking version of docker server, since docker client is not affected
