@@ -242,7 +242,9 @@ To fix this issue, please update docker to version {}+
             )
 
     @staticmethod
-    def get_editable_path(use_pip3: bool = True) -> Optional[str]:
+    def get_installation_path(
+        package: str = "rapydo", use_pip3: bool = True
+    ) -> Optional[str]:
         command = "list --editable"
 
         with Sultan.load(sudo=False) as sultan:
@@ -250,7 +252,7 @@ To fix this issue, please update docker to version {}+
             result = pip(command).run()
 
             for r in result.stdout + result.stderr:
-                if r.startswith("rapydo "):
+                if r.startswith(f"{package} "):
                     tokens = re.split(r"\s+", r)
                     return str(tokens[2])
         return None

@@ -925,29 +925,40 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:
 
-        controller_updated = False
+        controller_is_updated = False
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
 
             if name == "do":
-                controller_updated = True
+                controller_is_updated = True
 
             if gitobj:
                 gitter.update(name, gitobj)
 
-        if controller_updated:
-            installation_path = Packages.get_editable_path()
+        if controller_is_updated:
+            installation_path = Packages.get_installation_path("rapydo")
             if installation_path:
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.readlink()
-                log.critical(Application.gits["do"].working_dir)
-                log.warning(do_dir)
-                log.info("Controller installed from {}", installation_path)
+
+                if do_dir == installation_path:
+                    log.info(
+                        "Controller installed from {} and updated", installation_path
+                    )
+                else:
+                    log.warning(
+                        "Controller is not updated because it is installed "
+                        "outside this project. Current installation path is {}",
+                        do_dir,
+                    )
             else:
-                log.info("Controller not installed in editable mode")
+                log.warning(
+                    "Controller is not installed in editable mode, "
+                    "you haven't updated it with this command"
+                )
 
     @staticmethod
     def git_checks(ignore_submodule: List[str]) -> None:
