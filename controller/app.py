@@ -952,7 +952,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     log.warning(
                         "Controller is not updated because it is installed "
                         "outside this project. Current installation path is {}",
-                        do_dir,
+                        installation_path,
                     )
             else:
                 log.warning(
