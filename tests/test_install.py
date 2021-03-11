@@ -18,6 +18,16 @@ def test_install(capfd, faker):
         start=False,
     )
 
+    # Initially the controller is installed from pip
+    exec_command(
+        capfd,
+        "update -i main",
+        "Controller is not updated because it is installed ",
+        "outside this project. Current installation path is ",
+        "you have updated it on ",
+        "All updated",
+    )
+
     with TemporaryRemovePath("submodules/do"):
         exec_command(
             capfd,
@@ -36,6 +46,16 @@ def test_install(capfd, faker):
         capfd,
         "install",
         f"Controller repository switched to {__version__}",
+    )
+
+    # Here the controller is installed in editable mode from the correct submodules
+    # folder (this is exactly the default normal condition)
+    exec_command(
+        capfd,
+        "update -i main",
+        # Controller installed from {} and updated
+        "Controller installed from ",
+        " and updated" "All updated",
     )
 
     exec_command(capfd, "install")

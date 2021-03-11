@@ -92,6 +92,7 @@ def test_base(capfd):
         "submodules/do/temp.file",
         "Changes not staged for commit:",
         "submodules/do/setup.py",
+        "Can't continue with updates",
     )
     os.remove("submodules/do/temp.file")
     r = gitter.get_repo("submodules/do")
@@ -265,6 +266,7 @@ def test_base(capfd):
         "You have unstaged files on do",
         "Untracked files:",
         "submodules/do/new_file",
+        "Can't continue with updates",
     )
 
     with open(".pre-commit-config.yaml", "a") as a_file:
