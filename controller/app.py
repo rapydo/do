@@ -940,7 +940,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if controller_updated:
             installation_path = Packages.get_editable_path()
             if installation_path:
-                log.critical(Application.gits["do"].git_dir)
+                do_dir = Path(Application.gits["do"].working_dir)
+                if do_dir.is_symlink():
+                    do_dir = do_dir.readlink()
+                log.critical(Application.gits["do"].working_dir)
+                log.warning(do_dir)
                 log.info("Controller installed from {}", installation_path)
             else:
                 log.info("Controller not installed in editable mode")
