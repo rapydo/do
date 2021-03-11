@@ -414,3 +414,7 @@ def test_all(capfd, faker):
         min_recommended_version="99999.99",
     )
     assert v is not None
+
+    assert Packages.get_installation_path("invalid") is None
+    assert Packages.get_installation_path("rapydo") is not None
+    assert Packages.get_installation_path("pip") is None

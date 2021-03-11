@@ -265,9 +265,6 @@ def can_be_updated(path: str, gitobj: GitRepoType, do_print: bool = True) -> boo
 
 def update(path: str, gitobj: GitRepoType) -> None:
 
-    if not can_be_updated(path, gitobj):
-        sys.exit(1)
-
     for remote in gitobj.remotes:
         if remote.name == "origin":
             try:
