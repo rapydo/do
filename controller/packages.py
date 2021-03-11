@@ -18,16 +18,15 @@ from controller.utilities import system
 class Packages:
     @staticmethod
     def install(
-        # Path if editable
+        # Path if editable, str otherwise
         package: Union[str, Path],
         editable: bool = False,
         user: bool = False,
         use_pip3: bool = True,
     ) -> bool:
 
-        # Do not import outside, otherwise:
+        # Do not import outside, otherwise it will lead to a circular import:
         # cannot import name 'Configuration' from partially initialized module
-        # most likely due to a circular import
         from controller.app import Configuration
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
