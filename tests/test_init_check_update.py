@@ -266,7 +266,6 @@ def test_base(capfd):
         "You have unstaged files on do",
         "Untracked files:",
         "submodules/do/new_file",
-        "Can't continue with updates",
     )
 
     with open(".pre-commit-config.yaml", "a") as a_file:
