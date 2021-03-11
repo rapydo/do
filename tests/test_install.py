@@ -22,9 +22,9 @@ def test_install(capfd, faker):
     exec_command(
         capfd,
         "update -i main",
-        "Controller is not updated because it is installed ",
-        "outside this project. Current installation path is ",
-        "you have updated it on ",
+        "Controller not updated because it is installed outside this project",
+        "Installation path is ",
+        ", the current folder is ",
         "All updated",
     )
 
