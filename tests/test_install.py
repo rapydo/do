@@ -55,7 +55,8 @@ def test_install(capfd, faker):
         "update -i main",
         # Controller installed from {} and updated
         "Controller installed from ",
-        " and updated" "All updated",
+        " and updated",
+        "All updated",
     )
 
     exec_command(capfd, "install")
