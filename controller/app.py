@@ -6,7 +6,7 @@ import warnings
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional, Set, cast
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union, cast
 
 import requests
 import typer
@@ -282,7 +282,7 @@ class Application:
         Application.load_projectrc()
 
     @staticmethod
-    def exit(message: str, *args: Any, **kwargs: Any) -> None:
+    def exit(message: str, *args: Union[str, Path], **kwargs: Union[str, Path]) -> None:
         log.critical(message, *args, **kwargs)
         sys.exit(1)
 

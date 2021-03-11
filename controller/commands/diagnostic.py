@@ -31,7 +31,7 @@ def diagnostic(
 
     resp = requests.get(f"{host}/api/status")
     if resp.status_code != 200:
-        Application.exit("Invalid backend response status: {}", resp.status_code)
+        Application.exit("Invalid backend response status: {}", str(resp.status_code))
 
     if resp.text.strip() == SERVER_IS_ALIVE:
         log.info("Backend is able to respond")
@@ -46,7 +46,7 @@ def diagnostic(
     if resp.text.strip() == SERVER_IS_ALIVE:
         log.error("No frontend found")
     elif resp.status_code != 200:
-        Application.exit("Invalid frontend response status: {}", resp.status_code)
+        Application.exit("Invalid frontend response status: {}", str(resp.status_code))
     elif '<span class="sr-only">Loading...</span>' not in resp.text:
         Application.exit("Unexcepted response from frontend: {}", resp.text)
     else:
