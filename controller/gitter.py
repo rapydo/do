@@ -1,7 +1,7 @@
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import pytz
@@ -183,17 +183,15 @@ Suggestion: remove {} and execute the init command
     return True
 
 
-def timestamp_from_string(timestamp_string: float) -> datetime:
-    # precision = float(timestamp_string)
-
-    utc_dt = datetime.utcfromtimestamp(timestamp_string)
+def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
+    utc_dt = datetime.utcfromtimestamp(float(timestamp_string))
     aware_utc_dt = utc_dt.replace(tzinfo=pytz.utc)
 
     return aware_utc_dt
 
 
 def check_file_younger_than(
-    gitobj: GitRepoType, filename: str, timestamp: float
+    gitobj: GitRepoType, filename: Path, timestamp: Union[str, float]
 ) -> Tuple[bool, float, datetime]:
 
     try:
@@ -208,7 +206,11 @@ def check_file_younger_than(
         dates.append(current_blame.committed_datetime)
 
     m = max(dates)
-    return bool(timestamp_from_string(timestamp) < m), timestamp, cast(datetime, m)
+    return (
+        bool(timestamp_from_string(timestamp) < m),
+        float(timestamp),
+        cast(datetime, m),
+    )
 
 
 def get_unstaged_files(gitobj: GitRepoType) -> Dict[str, List[Any]]:
