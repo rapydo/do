@@ -2,14 +2,17 @@ import os
 import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
+from typing import Any
 
-from pytest.capture import CaptureFixture
 from typer.testing import CliRunner
 
 runner = CliRunner()
 
 
-Capture = CaptureFixture[str]
+# This does not work...
+# from pytest.capture import CaptureFixture
+# Capture = CaptureFixture[str]
+Capture = Any
 
 
 class TemporaryRemovePath:
