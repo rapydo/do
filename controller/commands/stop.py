@@ -4,7 +4,7 @@ from controller.compose import Compose
 
 
 @Application.app.command(help="Stop running containers, but do not remove them")
-def stop():
+def stop() -> None:
     Application.get_controller().controller_init()
 
     options = {"SERVICE": Application.data.services}

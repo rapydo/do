@@ -11,10 +11,16 @@ import signal
 import time
 from datetime import datetime
 
-from tests import create_project, exec_command, mock_KeyboardInterrupt, signal_handler
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    mock_KeyboardInterrupt,
+    signal_handler,
+)
 
 
-def test_all(capfd):
+def test_all(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,

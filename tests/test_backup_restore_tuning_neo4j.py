@@ -4,10 +4,18 @@ This module will test the backup and restore commands + tuning neo4j
 import os
 import time
 
-from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import (
+    Capture,
+    TemporaryRemovePath,
+    create_project,
+    exec_command,
+    random_project_name,
+)
 
 
-def test_all(capfd, faker):
+def test_all(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,

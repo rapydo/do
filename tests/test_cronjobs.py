@@ -3,10 +3,12 @@ This module will test the cronjobs installed on the backend container
 """
 import time
 
-from tests import create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_cronjobs(capfd, faker):
+def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     project = random_project_name(faker)
     create_project(

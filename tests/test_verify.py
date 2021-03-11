@@ -1,10 +1,12 @@
 """
 This module will test the verify command
 """
-from tests import create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_verify(capfd, faker):
+def test_verify(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,

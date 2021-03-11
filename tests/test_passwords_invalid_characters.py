@@ -2,10 +2,12 @@
 This module will test a verify specific use case where rabbit fails due to some
 special characters in the password
 """
-from tests import create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_rabbit_invalid_characters(capfd, faker):
+def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,
@@ -30,7 +32,7 @@ def test_rabbit_invalid_characters(capfd, faker):
     )
 
 
-def test_redis_invalid_characters(capfd, faker):
+def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,
@@ -55,7 +57,7 @@ def test_redis_invalid_characters(capfd, faker):
     )
 
 
-def test_mongodb_invalid_characters(capfd, faker):
+def test_mongodb_invalid_characters(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,

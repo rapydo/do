@@ -3,9 +3,13 @@ import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 
+from pytest.capture import CaptureFixture
 from typer.testing import CliRunner
 
 runner = CliRunner()
+
+
+Capture = CaptureFixture[str]
 
 
 class TemporaryRemovePath:

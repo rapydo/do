@@ -15,7 +15,7 @@ SUBMODULES = Path("submodules")
 
 
 class Project:
-    def __init__(self):
+    def __init__(self) -> None:
         self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
         self.expected_folders: List[Path] = []
@@ -34,10 +34,16 @@ class Project:
         self.obsolete_files: List[Path] = []
         self.suggested_gitkeep: List[Path] = []
 
-    def p_path(self, *args):
+    def p_path(self, *args: str) -> Path:
         return PROJECT_DIR.joinpath(self.project, *args)
 
-    def load_project_scaffold(self, project, auth, services=None):
+    def load_project_scaffold(
+        self, project: str, auth: Optional[str], services: Optional[List[str]] = None
+    ) -> bool:
+
+        if services is None:
+            services = []
+
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         self.expected_folders.append(self.p_path("confs"))
@@ -128,7 +134,7 @@ class Project:
         self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
         return True
 
-    def load_frontend_scaffold(self, frontend):
+    def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:
         self.frontend = frontend
 
         if self.frontend is None or self.frontend == NO_FRONTEND:
@@ -237,7 +243,7 @@ class Project:
         return True
 
     @staticmethod
-    def get_project(project):
+    def get_project(project: Optional[str]) -> str:
 
         projects = os.listdir(PROJECT_DIR)
 
@@ -350,7 +356,7 @@ Verify that you are in the right folder, now you are in: {}
 
         return None
 
-    def inspect_project_folder(self):
+    def inspect_project_folder(self) -> None:
 
         for fpath in self.expected_folders:
             if not fpath.is_dir():

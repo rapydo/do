@@ -3,14 +3,15 @@ This module will test the build and ancestors commands
 """
 import os
 
+from faker import Faker
 from git import Repo
 
 from controller import __version__
 from controller.dockerizing import Dock
-from tests import create_project, exec_command, random_project_name
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_all(capfd, faker):
+def test_all(capfd: Capture, faker: Faker) -> None:
 
     project2 = random_project_name(faker)
     create_project(

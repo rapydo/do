@@ -17,6 +17,7 @@ from glom import glom
 from loguru import logger as log
 from prettyprinter import pprint as pp
 
+Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
 # this way the script will be allowed to access all required files
 # by providing relative links
@@ -73,7 +74,8 @@ if now != known_update:
     known_latests = {}
 
 
-def load_yaml_file(filepath):
+# This Any is required because yaml.load_all is untyped
+def load_yaml_file(filepath: Path) -> Any:
 
     log.debug("Reading file {}", filepath)
 
@@ -99,13 +101,13 @@ def load_yaml_file(filepath):
             return {}
 
 
-def check_updates(category, lib, npm_timeout):
+def check_updates(category: str, lib: str, npm_timeout: int) -> None:
 
     if category == "pip":
         if "==" in lib:
             tokens = lib.split("==")
         elif ">=" in lib:
-            return None
+            return
             # tokens = lib.split(">=")
         else:
             log.critical("Invalid lib format: {}", lib)
@@ -185,7 +187,7 @@ def check_updates(category, lib, npm_timeout):
         log.critical("{}: {}", category, lib)
 
 
-def parse_npm(url, lib):
+def parse_npm(url: str, lib: str) -> str:
 
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html5lib")
@@ -196,10 +198,10 @@ def parse_npm(url, lib):
         return "unknown"
 
     spans = span.parent.parent.findChildren("span", recursive=False)
-    return spans[0].text.split("\xa0")[0]
+    return spans[0].text.split("\xa0")[0]  # type: ignore
 
 
-def parse_pypi(url, lib):
+def parse_pypi(url: str, lib: str) -> str:
 
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html5lib")
@@ -208,14 +210,14 @@ def parse_pypi(url, lib):
     if span is None:
         log.critical("Cannot find pip-command for {}", lib)
 
-    return span.text.strip().replace(f"{lib} ", "").strip()
+    return span.text.strip().replace(f"{lib} ", "").strip()  # type: ignore
 
 
 def parseDockerfile(
     d: str,
-    dependencies: Dict[str, Dict[str, List[str]]],
+    dependencies: Dependencies,
     skip_angular: bool,
-) -> Dict[str, Dict[str, List[str]]]:
+) -> Dependencies:
     with open(d) as f:
         service = d.replace("../build-templates/", "")
         service = service.replace("/Dockerfile", "")
@@ -261,7 +263,7 @@ def parseDockerfile(
     return dependencies
 
 
-def parseRequirements(d, dependencies):
+def parseRequirements(d: str, dependencies: Dependencies) -> Dependencies:
     with open(d) as f:
         service = d.replace("../build-templates/", "")
         service = service.replace("/requirements.txt", "")
@@ -275,7 +277,7 @@ def parseRequirements(d, dependencies):
     return dependencies
 
 
-def parsePackageJson(package_json, dependencies):
+def parsePackageJson(package_json: Path, dependencies: Dependencies) -> Dependencies:
     if not package_json.exists():
         return dependencies
 
@@ -300,9 +302,7 @@ def parsePackageJson(package_json, dependencies):
     return dependencies
 
 
-def parsePrecommitConfig(
-    f: Path, dependencies: Dict[str, Dict[str, List[str]]], key: str
-) -> Dict[str, Dict[str, List[str]]]:
+def parsePrecommitConfig(f: Path, dependencies: Dependencies, key: str) -> Dependencies:
 
     dependencies.setdefault("precommit", {})
     dependencies["precommit"].setdefault(key, [])
@@ -330,7 +330,7 @@ def check_versions(
     skip_angular: bool = False, npm_timeout: int = 1, verbose: bool = False
 ) -> None:
 
-    dependencies: Dict[str, Dict[str, List[str]]] = {}
+    dependencies: Dependencies = {}
 
     backend = load_yaml_file(Path("controller/confs/backend.yml"))
     services = backend.get("services", {})
@@ -385,7 +385,7 @@ def check_versions(
         "rapydo-angular",
     )
 
-    filtered_dependencies: Dict[str, Dict[str, List[str]]] = {}
+    filtered_dependencies: Dependencies = {}
 
     for service, categories in dependencies.items():
 

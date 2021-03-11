@@ -7,10 +7,10 @@ and will only use the specific configuration needed by the test itself
 import os
 
 from controller.templating import Templating
-from tests import TemporaryRemovePath, exec_command
+from tests import Capture, TemporaryRemovePath, exec_command
 
 
-def test_create(capfd):
+def test_create(capfd: Capture) -> None:
 
     exec_command(
         capfd,

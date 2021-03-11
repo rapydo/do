@@ -1,11 +1,12 @@
 """
 This module will test the interfaces command
 """
+from faker import Faker
 
-from tests import create_project, exec_command, random_project_name
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_interfaces(capfd, faker):
+def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,

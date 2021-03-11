@@ -3,10 +3,10 @@ This module will test the scale command
 """
 import os
 
-from tests import create_project, exec_command
+from tests import Capture, create_project, exec_command
 
 
-def test_scale(capfd):
+def test_scale(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,
