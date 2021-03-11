@@ -183,18 +183,18 @@ Suggestion: remove {} and execute the init command
     return True
 
 
-def timestamp_from_string(timestamp_string: str) -> datetime:
-    precision = float(timestamp_string)
+def timestamp_from_string(timestamp_string: float) -> datetime:
+    # precision = float(timestamp_string)
 
-    utc_dt = datetime.utcfromtimestamp(precision)
+    utc_dt = datetime.utcfromtimestamp(timestamp_string)
     aware_utc_dt = utc_dt.replace(tzinfo=pytz.utc)
 
     return aware_utc_dt
 
 
 def check_file_younger_than(
-    gitobj: GitRepoType, filename: str, timestamp: str
-) -> Tuple[bool, str, datetime]:
+    gitobj: GitRepoType, filename: str, timestamp: float
+) -> Tuple[bool, float, datetime]:
 
     try:
         commits = gitobj.blame(rev="HEAD", file=filename)
@@ -250,18 +250,20 @@ def print_diff(gitobj: GitRepoType, unstaged: Dict[str, List[Any]]) -> bool:
     return True
 
 
-def can_be_updated(path: str, gitobj: GitRepoType) -> bool:
+def can_be_updated(path: str, gitobj: GitRepoType, do_print: bool = True) -> bool:
     unstaged = get_unstaged_files(gitobj)
-    return len(unstaged["changed"]) == 0 and len(unstaged["untracked"]) == 0
+    updatable = len(unstaged["changed"]) == 0 and len(unstaged["untracked"]) == 0
+
+    if not updatable and do_print:
+        log.critical("Unable to update {} repo, you have unstaged files", path)
+        print_diff(gitobj, unstaged)
+
+    return updatable
 
 
 def update(path: str, gitobj: GitRepoType) -> None:
 
-    unstaged = get_unstaged_files(gitobj)
-
     if not can_be_updated(path, gitobj):
-        log.critical("Unable to update {} repo, you have unstaged files", path)
-        print_diff(gitobj, unstaged)
         sys.exit(1)
 
     for remote in gitobj.remotes:

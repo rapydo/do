@@ -925,10 +925,17 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:
 
-        controller_is_updated = False
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
+                continue
+
+            if gitobj and not gitter.can_be_updated(name, gitobj):
+                Application.exit("Can't continue with updates")
+
+        controller_is_updated = False
+        for name, gitobj in Application.gits.items():
+            if name in ignore_submodule:
                 continue
 
             if name == "do":
