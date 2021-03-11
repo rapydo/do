@@ -1,4 +1,4 @@
-from typing import Any, MutableMapping, Optional
+from typing import MutableMapping
 
 import typer
 
@@ -16,7 +16,7 @@ def install(
         help="Disable editable mode",
         show_default=False,
     ),
-) -> Any:
+) -> None:
     Application.get_controller().controller_init()
 
     if version == "auto":
@@ -25,12 +25,9 @@ def install(
 
     user_mode = not editable
     if editable:
-        return install_controller_from_folder(
-            Application.gits, version, user_mode, editable
-        )
-
+        install_controller_from_folder(Application.gits, version, user_mode, editable)
     else:
-        return install_controller_from_git(version, user_mode)
+        install_controller_from_git(version, user_mode)
 
 
 def install_controller_from_folder(
