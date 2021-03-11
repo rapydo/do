@@ -965,7 +965,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         installation_path,
                         do_dir,
                     )
-            else:  # Can't be tested on GA since rapydo is alway installed from a folder
+            # Can't be tested on GA since rapydo is alway installed from a folder
+            else:  # pragma: no cover
                 log.warning(
                     "Controller is not installed in editable mode, "
                     "you haven't updated it with this command"

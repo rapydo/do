@@ -136,6 +136,17 @@ def test_base(capfd):
     assert os.path.islink("submodules/do")
     assert not os.path.islink("submodules.bak/do")
 
+    # Since submodules/do it will be resolved to verify
+    # that installation folder matches the update folders
+    exec_command(
+        capfd,
+        "update -i main",
+        # Controller installed from {} and updated
+        "Controller installed from ",
+        " and updated",
+        "All updated",
+    )
+
     # Init again, this time in submodules there are links...
     # and will be removed as well as the folders
     exec_command(
