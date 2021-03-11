@@ -5,8 +5,9 @@ import re
 import sys
 from distutils.version import LooseVersion
 from importlib import import_module
+from pathlib import Path
 from types import ModuleType
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from sultan.api import Sultan
 
@@ -17,7 +18,11 @@ from controller.utilities import system
 class Packages:
     @staticmethod
     def install(
-        package: str, editable: bool = False, user: bool = False, use_pip3: bool = True
+        # Path if editable
+        package: Union[str, Path],
+        editable: bool = False,
+        user: bool = False,
+        use_pip3: bool = True,
     ) -> bool:
 
         # Do not import outside, otherwise:
@@ -126,7 +131,7 @@ class Packages:
         if found_version is None:
 
             hints = ""
-            if program == "docker":
+            if program == "docker":  # pragma: no cover
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
             log.critical("Missing requirement: {} not found.{}", program, hints)
@@ -236,3 +241,17 @@ To fix this issue, please update docker to version {}+
                 v,
                 safe_version,
             )
+
+    @staticmethod
+    def get_editable_path(use_pip3: bool = True) -> Optional[str]:
+        command = "list --editable"
+
+        with Sultan.load(sudo=False) as sultan:
+            pip = sultan.pip3 if use_pip3 else sultan.pip
+            result = pip(command).run()
+
+            for r in result.stdout + result.stderr:
+                if r.startswith("rapydo "):
+                    tokens = re.split(r"\s+", r)
+                    return str(tokens[2])
+        return None

@@ -262,8 +262,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    # This Any should be Repo, but GitPython is lacking typings
-    gits: MutableMapping[str, Any] = OrderedDict()
+    gits: MutableMapping[str, gitter.GitRepoType] = OrderedDict()
 
     def __init__(self) -> None:
 
@@ -926,12 +925,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:
 
+        controller_updated = False
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
+
+            if name == "do":
+                controller_updated = True
+
             if gitobj:
                 gitter.update(name, gitobj)
+
+        if controller_updated:
+            installation_path = Packages.get_editable_path()
+            if installation_path:
+                log.info(
+                    "Controller installed in editable mode from {}", installation_path
+                )
+            else:
+                log.info("Controller not installed in editable mode")
 
     @staticmethod
     def git_checks(ignore_submodule: List[str]) -> None:

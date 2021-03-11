@@ -1,6 +1,7 @@
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import pytz
@@ -8,6 +9,9 @@ from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from controller import SUBMODULES_DIR, log
+
+# This Any should be Repo, but GitPython is lacking typings
+GitRepoType = Any
 
 
 def get_repo(path):
