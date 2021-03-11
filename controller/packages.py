@@ -244,7 +244,7 @@ To fix this issue, please update docker to version {}+
     @staticmethod
     def get_installation_path(
         package: str = "rapydo", use_pip3: bool = True
-    ) -> Optional[str]:
+    ) -> Optional[Path]:
         command = "list --editable"
 
         with Sultan.load(sudo=False) as sultan:
@@ -254,5 +254,5 @@ To fix this issue, please update docker to version {}+
             for r in result.stdout + result.stderr:
                 if r.startswith(f"{package} "):
                     tokens = re.split(r"\s+", r)
-                    return str(tokens[2])
+                    return Path(str(tokens[2]))
         return None
