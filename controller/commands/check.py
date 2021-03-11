@@ -179,8 +179,8 @@ def build_is_obsolete(build, gits):
 
         if obsolete:
             log.info("File changed: {}", f)
-            build_ts = datetime.fromtimestamp(build_ts).strftime(DATE_FORMAT)
-            last_commit = last_commit.strftime(DATE_FORMAT)
-            return True, build_ts, last_commit
+            build_ts_f = datetime.fromtimestamp(build_ts).strftime(DATE_FORMAT)
+            last_commit_str = last_commit.strftime(DATE_FORMAT)
+            return True, build_ts_f, last_commit_str
 
     return False, 0, 0
