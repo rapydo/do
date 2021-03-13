@@ -155,6 +155,19 @@ export class SinkComponent implements OnInit {
         type: SchemaType.BOOLEAN,
       },
       {
+        label: "Select",
+        description: "This is a select",
+        key: "select",
+        required: true,
+        type: SchemaType.STRING,
+        options: {
+          "first-key": "This is the first option",
+          "second-key": "This is the second one",
+          "third-key": "And this the third",
+        }
+
+      },
+      {
         label: "Radio1",
         key: "radio1",
         required: false,
