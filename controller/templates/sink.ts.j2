@@ -165,7 +165,21 @@ export class SinkComponent implements OnInit {
           "second-key": "This is the second one",
           "third-key": "And this the third",
         }
-
+      },
+      {
+        label: "MultiSelect",
+        description: "This is a multi-select",
+        key: "multiselect",
+        required: true,
+        type: SchemaType.STRING_ARRAY,
+        options: {
+          dog: "Canis familiaris",
+          cat: "Felix catus",
+          cow: "Bos taurus",
+          horse: "Equus caballus",
+          sheep: "Ovis aries",
+          pig: "Sus scrofa domesticus",
+        }
       },
       {
         label: "Radio1",
