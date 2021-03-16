@@ -40,7 +40,6 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         # Added pip3 install rapydo-http in testing mode
         "Collecting git+https://github.com/rapydo/http-api.git",
         # due to the pip install, after only 5 seconds the container is not ready yet
-        # "Development mode",
         # "Testing mode",
     )
 
@@ -60,7 +59,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         "logs -s backend --tail 20 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
-        # "Development mode",
+        # "Testing mode",
         "Enabling cron...",
         "Cron enabled",
         # this is the output of crontab -l that verifies the cronjob installation
