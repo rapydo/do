@@ -128,7 +128,7 @@ def test_all(capfd: Capture) -> None:
         # "first_backend_1",
     )
 
-    time.sleep(2)
+    time.sleep(5)
     # Backend logs are never timestamped
     exec_command(
         capfd,
