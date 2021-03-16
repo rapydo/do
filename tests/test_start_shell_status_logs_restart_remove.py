@@ -132,12 +132,12 @@ def test_all(capfd: Capture) -> None:
     # Backend logs are never timestamped
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --no-color",
+        "logs -s backend --tail 100 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         # Added pip3 install rapydo-http in testing mode
         "Collecting git+https://github.com/rapydo/http-api.git",
-        # due to the pip install, after only 5 seconds the container is not ready yet
+        # due to the pip install the container could be not ready yet
         # "Testing mode",
     )
 
