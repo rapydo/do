@@ -132,7 +132,9 @@ def test_all(capfd: Capture) -> None:
     # Backend logs are never timestamped
     exec_command(
         capfd,
-        "logs -s backend --tail 100 --no-color",
+        # logs with tail 200 needed due to the spam of Requirement installation
+        # after the Collecting ... /http-api.git
+        "logs -s backend --tail 200 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         # Added pip3 install rapydo-http in testing mode
