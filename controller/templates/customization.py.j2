@@ -11,7 +11,6 @@ class Customizer(BaseCustomizer):
     def custom_user_properties_pre(
         properties: Props,
     ) -> Tuple[Props, Props]:
-
         """
         executed just before user creation
         use this method to removed or manipulate input properties

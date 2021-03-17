@@ -1,6 +1,8 @@
 """
 This module will test the verify command
 """
+import time
+
 from faker import Faker
 
 from tests import Capture, create_project, exec_command, random_project_name
@@ -29,6 +31,9 @@ def test_verify(capfd: Capture, faker: Faker) -> None:
         "docker-compose command: 'up'",
         "Stack started",
     )
+
+    # Just wait for the startup of the backend container
+    time.sleep(20)
 
     exec_command(capfd, "verify --no-tty invalid", "Service invalid not detected")
     exec_command(capfd, "verify --no-tty redis", "Service redis not detected")
