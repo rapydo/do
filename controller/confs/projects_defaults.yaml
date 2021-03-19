@@ -296,6 +296,7 @@ variables:
     AUTH_MAX_LOGIN_ATTEMPTS: 0
     AUTH_LOGIN_BAN_TIME: 3600
     AUTH_SECOND_FACTOR_AUTHENTICATION: 0
+    AUTH_TOTP_VALIDITY_WINDOW: 1 # int value
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
     AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
     AUTH_TOKEN_IP_GRACE_PERIOD: 1800 # period before starting to evaluate IP address on token validation
