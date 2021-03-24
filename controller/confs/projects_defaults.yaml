@@ -85,6 +85,7 @@ variables:
     ACTIVATE_FTP: 0
     ACTIVATE_PUSHPIN: 0
     ACTIVATE_SMTP: 1
+    ACTIVATE_SMTP_SERVER: 0
     ACTIVATE_TELEGRAM: 0
 
     ACTIVATE_SWAGGERUI: 0
@@ -276,6 +277,12 @@ variables:
     SMTP_PORT:
     SMTP_USERNAME:
     SMTP_PASSWORD:
+
+    # These two variables should be merged with the variables above
+    # i.e. if smtp server is enabled these should be the default values
+    # for smtp host and port instead of empty strings
+    SMTP_SERVER_HOST: smtp.dockerized.io
+    SMTP_SERVER_PORT: 25
 
     ALLOW_PASSWORD_RESET: 0
     ALLOW_REGISTRATION: 0

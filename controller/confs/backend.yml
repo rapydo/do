@@ -948,6 +948,25 @@ services:
     networks:
       ftp_net:
 
+  ###################
+  ### SMTP SERVER  ###
+  ###################
+  smtp:
+    restart: always
+    image: namshi/smtp:latest
+    # volumes:
+    #   - ...
+    environment:
+      ACTIVATE: ${ACTIVATE_SMTP_SERVER}
+    networks:
+      app_net:
+        aliases:
+          - ${SMTP_SERVER_HOST}
+
+  ####################################
+  ### REVERSE PROXY FOR WEBSOCKETS ###
+  ####################################
+
   pushpin:
     restart: always
     image: fanout/pushpin:1.31.0
