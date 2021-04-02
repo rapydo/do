@@ -209,6 +209,8 @@ variables:
     NEO4J_HEAP_SIZE: 512M # Setting invalidated in production mode
     NEO4J_PAGECACHE_SIZE: 512M # Setting invalidated in production mode
     NEO4J_ALLOW_UPGRADE: false
+    # Enable this in case of corrupted or missing transaction logs
+    NEO4J_RECOVERY_MODE: false
 
     MONGO_ENABLE_CONNECTOR: 1
     MONGO_EXPIRATION_TIME: 7200

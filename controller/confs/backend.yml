@@ -407,8 +407,8 @@ services:
       NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
       # Useful in case of corrupted transaction logs
-      # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
-      # NEO4J_dbms_recovery_fail__on__missing__files: "false"
+      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: ${NEO4J_RECOVERY_MODE}
+      NEO4J_dbms_recovery_fail__on__missing__files: ${NEO4J_RECOVERY_MODE}
 
       # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
       NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
