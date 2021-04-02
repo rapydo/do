@@ -733,6 +733,7 @@ class Application:
             # These variables are for Neo4j and are expected to be true|false
             "NEO4J_SSL_ENABLED",
             "NEO4J_ALLOW_UPGRADE",
+            "NEO4J_RECOVERY_MODE",
         ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
