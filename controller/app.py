@@ -67,6 +67,7 @@ class Configuration:
     rapydo_version: str = ""
     project_title: Optional[str] = None
     project_description: Optional[str] = None
+    project_keywords: Optional[str] = None
 
     initialize: bool = False
     update: bool = False
@@ -469,6 +470,10 @@ class Application:
             Configuration.specs, "project.description", default="Unknown description"
         )
 
+        Configuration.project_keywords = glom(
+            Configuration.specs, "project.keywords", default=""
+        )
+
         if not Configuration.rapydo_version:  # pragma: no cover
             Application.exit(
                 "RAPyDo version not found in your project_configuration file"
@@ -704,6 +709,7 @@ class Application:
         env["CURRENT_GID"] = self.current_gid
         env["PROJECT_TITLE"] = Configuration.project_title
         env["PROJECT_DESCRIPTION"] = Configuration.project_description
+        env["PROJECT_KEYWORDS"] = Configuration.project_keywords
         env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
 
         if Configuration.testing:

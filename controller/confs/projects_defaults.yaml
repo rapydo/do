@@ -131,7 +131,7 @@ variables:
     BACKEND_URI: ""
     FRONTEND_PREFIX: /
     BACKEND_PREFIX: ""
-    LOG_LEVEL: DEBUG # log level for backend and celery
+    LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     APP_SECRETS: /secrets
     UPLOAD_PATH: /uploads
 
@@ -330,9 +330,10 @@ variables:
     NETWORK_MTU: 1500
 
 project:
-  title: REST HTTP-API server with Python, Flask and Docker
-  description: No description yet
-  rapydo: 0.7.3
+  title: "REST HTTP-API server with Python, Flask and Docker"
+  description: "No description yet"
+  keywords: ""
+  rapydo: 1.1
   version: v0.1
 
 tags:
