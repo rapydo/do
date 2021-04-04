@@ -5,6 +5,7 @@ and will only use the specific configuration needed by the test itself
 """
 
 import os
+from pathlib import Path
 
 from controller.templating import Templating
 from tests import Capture, TemporaryRemovePath, exec_command
@@ -107,7 +108,7 @@ def test_create(capfd: Capture) -> None:
     )
 
     templating = Templating()
-    with TemporaryRemovePath(templating.template_dir):
+    with TemporaryRemovePath(Path(templating.template_dir)):
         exec_command(
             capfd,
             "create firsts --auth postgres --frontend no --current",

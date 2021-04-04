@@ -2,6 +2,7 @@ import os
 import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
+from pathlib import Path
 from typing import Any
 
 from typer.testing import CliRunner
@@ -16,17 +17,17 @@ Capture = Any
 
 
 class TemporaryRemovePath:
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.tmp_path = f"{self.path}.bak"
+    def __init__(self, path: Path):
+        self.path = path.absolute()
+        self.tmp_path = self.path.with_suffix(f"{path.suffix}.bak")
 
     def __enter__(self):
 
-        os.rename(self.path, self.tmp_path)
+        self.path.rename(self.tmp_path)
         return self
 
     def __exit__(self, _type, value, tb):
-        os.rename(self.tmp_path, self.path)
+        self.tmp_path.rename(self.path)
 
 
 class Timeout(Exception):

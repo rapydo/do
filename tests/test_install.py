@@ -2,6 +2,7 @@
 This module will test the install command
 """
 import os
+from pathlib import Path
 
 from faker import Faker
 
@@ -38,7 +39,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         "All updated",
     )
 
-    with TemporaryRemovePath("submodules/do"):
+    with TemporaryRemovePath(Path("submodules/do")):
         exec_command(
             capfd,
             "install",

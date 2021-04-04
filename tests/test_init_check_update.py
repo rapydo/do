@@ -4,6 +4,7 @@ Other module that will initialize projects will consider the init command fully 
 """
 import os
 import shutil
+from pathlib import Path
 
 from controller import __version__, gitter
 from tests import Capture, TemporaryRemovePath, create_project, exec_command
@@ -50,7 +51,7 @@ def test_base(capfd: Capture) -> None:
         f"do already set on branch {__version__}",
     )
 
-    with TemporaryRemovePath("data"):
+    with TemporaryRemovePath(Path("data")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -59,14 +60,14 @@ def test_base(capfd: Capture) -> None:
             "Verify that you are in the right folder, now you are in: ",
         )
 
-    with TemporaryRemovePath("projects/third/builds"):
+    with TemporaryRemovePath(Path("projects/third/builds")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
             "Project third is invalid: required folder not found projects/third/builds",
         )
 
-    with TemporaryRemovePath(".gitignore"):
+    with TemporaryRemovePath(Path(".gitignore")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -120,7 +121,7 @@ def test_base(capfd: Capture) -> None:
 
     modules_path = os.path.abspath("submodules.bak")
 
-    with TemporaryRemovePath("submodules.bak/do"):
+    with TemporaryRemovePath(Path("submodules.bak/do")):
         exec_command(
             capfd,
             f"init --submodules-path {modules_path}",
@@ -180,7 +181,7 @@ def test_base(capfd: Capture) -> None:
     )
 
     # Test with zero projects
-    with TemporaryRemovePath("projects"):
+    with TemporaryRemovePath(Path("projects")):
         os.mkdir("projects")
         exec_command(
             capfd,

@@ -17,7 +17,7 @@ from tests import (
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
-    backup_folder = "data/backup/postgres"
+    backup_folder = Path("data/backup/postgres")
 
     create_project(
         capfd=capfd,
@@ -105,9 +105,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/postgres/",
     )
     # Save the current number of backup files
-    backup_folder_path = Path(backup_folder)
-
-    number_of_backups = len(list(backup_folder_path.glob("*")))
+    number_of_backups = len(list(backup_folder.glob("*")))
 
     # Verify the deletion
     exec_command(
@@ -119,22 +117,22 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Now the number of backups should be reduced by 1 (i.e. +1 -2)
-    assert len(list(backup_folder_path.glob("*"))) == number_of_backups - 1
+    assert len(list(backup_folder.glob("*"))) == number_of_backups - 1
 
     # Verify that --max ignores files without the date pattern
-    backup_folder_path.joinpath("xyz").touch(exist_ok=True)
-    backup_folder_path.joinpath("xyz.ext").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-01").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-01_01").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-01_01_01").touch(exist_ok=True)
-    backup_folder_path.joinpath("9999_01_01-01_01_01.bak").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_99_01-01_01_01.bak").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_99-01_01_01.bak").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-99_01_01.bak").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-01_99_01.bak").touch(exist_ok=True)
-    backup_folder_path.joinpath("2020_01_01-01_01_99.bak").touch(exist_ok=True)
+    backup_folder.joinpath("xyz").touch(exist_ok=True)
+    backup_folder.joinpath("xyz.ext").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01_01").touch(exist_ok=True)
+    backup_folder.joinpath("9999_01_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_99_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_99-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-99_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_99_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01_99.bak").touch(exist_ok=True)
 
     exec_command(
         capfd,
@@ -176,7 +174,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/postgres/invalid does not exist",
     )
 
-    with TemporaryRemovePath("data/backup"):
+    with TemporaryRemovePath(Path("data/backup")):
         exec_command(
             capfd,
             "restore postgres",
