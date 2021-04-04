@@ -87,6 +87,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j --max 999 --dry-run",
+        "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
@@ -95,6 +96,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j --max 999 --dry-run",
+        "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
@@ -103,7 +105,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j --max 1 --dry-run",
-        "deleted because exceeding the max number of backup files (1)"
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
@@ -111,7 +114,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j --max 1 --dry-run",
-        "deleted because exceeding the max number of backup files (1)"
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )

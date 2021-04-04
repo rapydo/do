@@ -61,6 +61,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
@@ -69,6 +70,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
@@ -77,7 +79,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres --max 1 --dry-run",
-        "deleted because exceeding the max number of backup files (1)"
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
@@ -85,7 +88,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres --max 1 --dry-run",
-        "deleted because exceeding the max number of backup files (1)"
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
