@@ -2,6 +2,7 @@
 This module test the backup and restore commands + tuning postgres
 """
 import os
+from pathlib import Path
 
 from faker import Faker
 
@@ -15,6 +16,8 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
+
+    backup_folder = "data/backup/postgres"
 
     create_project(
         capfd=capfd,
@@ -94,6 +97,55 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/postgres/",
     )
 
+    # Create an additional backup to the test deletion (now backups are 3)
+    exec_command(
+        capfd,
+        "backup postgres",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Save the current number of backup files
+    backup_folder_path = Path(backup_folder)
+
+    number_of_backups = len(list(backup_folder_path.glob("*")))
+
+    # Verify the deletion
+    exec_command(
+        capfd,
+        "backup postgres --max 1",
+        "deleted because exceeding the max number of backup files (1)",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    # Now the number of backups should be reduced by 1 (i.e. +1 -2)
+    assert len(list(backup_folder_path.glob("*"))) == number_of_backups - 1
+
+    # Verify that --max ignores files without the date pattern
+    backup_folder_path.joinpath("xyz").touch(exist_ok=True)
+    backup_folder_path.joinpath("xyz.ext").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-01").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-01_01").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-01_01_01").touch(exist_ok=True)
+    backup_folder_path.joinpath("9999_01_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_99_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_99-01_01_01.bak").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-99_01_01.bak").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-01_99_01.bak").touch(exist_ok=True)
+    backup_folder_path.joinpath("2020_01_01-01_01_99.bak").touch(exist_ok=True)
+
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
+        # Still finding 2, all files above are ignore because not matching the pattern
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
     exec_command(
         capfd,
         "backup invalid",
@@ -132,12 +184,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
             "does not exist: data/backup/postgres",
         )
 
-    dfolder = "data/backup/postgres"
-    with TemporaryRemovePath(dfolder):
+    with TemporaryRemovePath(backup_folder):
         exec_command(
             capfd,
             "restore postgres",
-            f"No backup found, the following folder does not exist: {dfolder}",
+            f"No backup found, the following folder does not exist: {backup_folder}",
         )
 
         os.mkdir("data/backup/postgres")
