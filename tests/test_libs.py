@@ -4,6 +4,7 @@ to verify cases not easly testable through cli commands
 """
 
 import os
+import re
 import tempfile
 from distutils.version import LooseVersion
 from pathlib import Path
@@ -14,6 +15,7 @@ from faker import Faker
 
 from controller import __version__, gitter
 from controller.app import Application
+from controller.commands.backup import get_date_pattern
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
@@ -419,3 +421,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert Packages.get_installation_path("invalid") is None
     assert Packages.get_installation_path("rapydo") is not None
     assert Packages.get_installation_path("pip") is None
+
+    date_pattern = get_date_pattern()
+    # just a trick to transform a glob-like expression into a valid regular expression
+    date_pattern.replace(".*", "\\.+")
+    # Same pattern used in backup.py to create backup filenames
+    d = faker.date("%Y_%m_%d-%H_%M_%S")
+    for _ in range(20):
+        assert re.match(date_pattern, f"{d}.bak")

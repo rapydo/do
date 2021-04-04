@@ -48,6 +48,46 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
+
+    # A second backup is needed to test backup retention
+    exec_command(
+        capfd,
+        "backup postgres",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    # Test backup retention
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Found 2 backup files, maximum not reached" "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Found 2 backup files, maximum not reached" "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    exec_command(
+        capfd,
+        "backup postgres --max 1 --dry-run",
+        "deleted because exceeding the max number of backup files (1)"
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup postgres --max 1 --dry-run",
+        "deleted because exceeding the max number of backup files (1)"
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
     exec_command(
         capfd,
         "backup invalid",

@@ -83,6 +83,37 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/neo4j/",
     )
 
+    # Test backup retention
+    exec_command(
+        capfd,
+        "backup neo4j --max 999 --dry-run",
+        "Found 2 backup files, maximum not reached" "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup neo4j --max 999 --dry-run",
+        "Found 2 backup files, maximum not reached" "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
+
+    exec_command(
+        capfd,
+        "backup neo4j --max 1 --dry-run",
+        "deleted because exceeding the max number of backup files (1)"
+        "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup neo4j --max 1 --dry-run",
+        "deleted because exceeding the max number of backup files (1)"
+        "Starting backup on neo4j...",
+        "Backup completed: data/backup/neo4j/",
+    )
+
     exec_command(capfd, "-s neo4j start")
 
     # Restore command
