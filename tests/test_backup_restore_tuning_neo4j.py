@@ -87,14 +87,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j --max 999 --dry-run",
-        "Found 2 backup files, maximum not reached" "Starting backup on neo4j...",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
     # Verify that due to dry run, no backup is executed
     exec_command(
         capfd,
         "backup neo4j --max 999 --dry-run",
-        "Found 2 backup files, maximum not reached" "Starting backup on neo4j...",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )
 

@@ -61,14 +61,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres --max 999 --dry-run",
-        "Found 2 backup files, maximum not reached" "Starting backup on postgres...",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
     # Verify that due to dry run, no backup is executed
     exec_command(
         capfd,
         "backup postgres --max 999 --dry-run",
-        "Found 2 backup files, maximum not reached" "Starting backup on postgres...",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
 
