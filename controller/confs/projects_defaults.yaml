@@ -144,6 +144,8 @@ variables:
     DOMAIN_ALIASES:
     SET_UNSAFE_EVAL:
     # SET_UNSAFE_EVAL: "unsafe-eval"
+    SET_UNSAFE_INLINE:
+    # SET_UNSAFE_INLINE: "unsafe-inline"
     # Still required by:
     #  - ngx-formly/bootstrap addonLeft/addonRight (https://github.com/ngx-formly/ngx-formly/issues/2496)
     #  - cookie-law
