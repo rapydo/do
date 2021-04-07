@@ -1,9 +1,9 @@
-import os
 import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 from pathlib import Path
-from typing import Any
+from types import TracebackType
+from typing import Any, Optional, Type, TypeVar
 
 from typer.testing import CliRunner
 
@@ -15,19 +15,31 @@ runner = CliRunner()
 # Capture = CaptureFixture[str]
 Capture = Any
 
+T = TypeVar("T", bound="TemporaryRemovePath")
+
 
 class TemporaryRemovePath:
     def __init__(self, path: Path):
         self.path = path.absolute()
         self.tmp_path = self.path.with_suffix(f"{path.suffix}.bak")
 
-    def __enter__(self):
+    def __enter__(self: T) -> T:
 
         self.path.rename(self.tmp_path)
         return self
 
-    def __exit__(self, _type, value, tb):
+    def __exit__(
+        self,
+        _type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> bool:
         self.tmp_path.rename(self.path)
+        # return False if the exception is not handled:
+        # -> return True if the exception is None (nothing to be handled)
+        # -> return False if the exception is not None (because it is not handled here)
+        # always return False is not accepted by mypy...
+        return _type is None
 
 
 class Timeout(Exception):
