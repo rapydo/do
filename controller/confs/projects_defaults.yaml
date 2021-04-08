@@ -251,12 +251,12 @@ variables:
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # Celery
-    CELERY_ENABLE_CONNECTOR: 1
+    CELERY_ENABLE_CONNECTOR: 0
     CELERY_EXPIRATION_TIME: 7200
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    CELERYBEAT_ENABLE_CONNECTOR: 1
+    # CELERYBEAT_ENABLE_CONNECTOR: 1
 
     # Flower
     CELERYUI_USER: "flower" # This default is invalidated in production mode
