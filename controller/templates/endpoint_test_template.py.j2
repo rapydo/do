@@ -1,10 +1,9 @@
-from restapi.tests import API_URI, BaseTests
-
+from restapi.tests import API_URI, BaseTests, FlaskClient
 # from restapi.utilities.logs import log
 
 
 class TestApp(BaseTests):
-    def test_01(self, client):
+    def test_01(self, client: FlaskClient) -> None:
 
         headers, _ = self.do_login(client, None, None)
 
