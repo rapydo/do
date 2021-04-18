@@ -5,10 +5,15 @@ from restapi.connectors import {{auth}}
 
 
 @CeleryExt.task()
-def {{name}}(self: CeleryExt.TaskType) -> str:
+def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
     log.info("Task ID: {}", self.request.id)
 
     db = {{auth}}.get_instance()
+
+    if myinput == "wrong":
+        raise AttributeError(
+            "You can raise exceptions to stop the task execution in case of errors"
+        )
 
     log.info("Task executed!")
 
