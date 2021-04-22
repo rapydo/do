@@ -147,7 +147,8 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "ancestors XYZ",
-        "No child found for XYZ",
+        # "No child found for XYZ",
+        "No child found for",
     )
 
     dock = Dock()
