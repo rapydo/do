@@ -139,7 +139,8 @@ RUN mkdir xyz
         capfd,
         "-s rabbit build",
         "Successfully built",
-        f"Successfully tagged testbuild/rabbit:{__version__}",
+        # no longer printed with buildkit
+        # f"Successfully tagged testbuild/rabbit:{__version__}",
         "Custom images built",
     )
 
