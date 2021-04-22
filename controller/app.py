@@ -975,7 +975,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             else:  # pragma: no cover
                 log.warning(
                     "Controller is not installed in editable mode, "
-                    "you haven't updated it with this command"
+                    "rapydo is unable to update it"
                 )
 
     @staticmethod
