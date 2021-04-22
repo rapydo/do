@@ -172,7 +172,7 @@ RUN mkdir xyz
         capfd,
         f"ancestors {img_id}",
         f"Finding all children and (grand)+ children of {img_id}",
-        "testbuild/rabbit",
+        # "testbuild/rabbit",
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
