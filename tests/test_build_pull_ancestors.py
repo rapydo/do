@@ -139,16 +139,16 @@ RUN mkdir xyz
         capfd,
         "-s rabbit build",
         "Successfully built",
-        # no longer printed with buildkit
+        # before buildkit:
         # f"Successfully tagged testbuild/rabbit:{__version__}",
-        "Custom images built",
+        # with buildkit:
+        f"naming to docker.io/testbuild/rabbit:{__version__}" "Custom images built",
     )
 
     exec_command(
         capfd,
         "ancestors XYZ",
-        # "No child found for XYZ",
-        "No child found for",
+        "No child found for XYZ",
     )
 
     dock = Dock()

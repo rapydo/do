@@ -43,6 +43,7 @@ class Compose:
         self.project_name = get_project_name(os.curdir)
 
         os.environ["COMPOSE_HTTP_TIMEOUT"] = "180"
+        os.environ["DOCKER_BUILDKIT"] = "1"
 
         log.debug("Client compose {}: {}", self.project_name, files)
 
