@@ -23,7 +23,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-02-21"
+known_update = "2021-04-24"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -38,32 +38,23 @@ known_latests = {
     # https://hub.docker.com/r/fanout/pushpin/tags
     # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "neo4j": "4.2.3",
+        "neo4j": "4.2.5",
         "postgres": "13.2-alpine",
-        "mariadb": "10.5.8",
-        "mongo": "4.4.4",
-        "redis": "6.0.10",
-        "nginx": "1.19.7-alpine",
-        "node": "15.9.0-buster",
-        "rabbitmq": "3.8.12-management",
+        "mariadb": "10.5.9",
+        "mongo": "4.4.5",
+        "redis": "6.2.2",
+        "nginx": "1.20.0-alpine",
+        "node": "14.15.5-buster",
+        "rabbitmq": "3.8.15-management",
         "adminer": "4.8.0",
         "mongo-express": "0.54.0",
         "fanout/pushpin": "1.31.0",
-        "swaggerapi/swagger-ui": "v3.43.0",
+        "swaggerapi/swagger-ui": "v3.47.1",
         "stilliard/pure-ftpd": "stretch-latest",
         "ubuntu": "20.04",
     },
     # https://github.com/acmesh-official/acme.sh/releases
     "acme": "2.8.8",
-    # Not used
-    "urls": {
-        "isort": "5.7.0",
-        "prettier": "v2.2.1",
-        "pyupgrade": "v2.10.0",
-        "black": "20.8b1",
-        "flake8": "3.8.4",
-        "mypy": "v0.812",
-    },
 }
 
 prevent_duplicates = {}
