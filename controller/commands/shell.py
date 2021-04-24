@@ -25,14 +25,6 @@ def shell(
         help="User existing in selected service",
         show_default=False,
     ),
-    # Deprecated since 0.8
-    old_command: str = typer.Option(
-        None,
-        "--command",
-        "-c",
-        help="[DEPRECATED] UNIX command to be executed on selected running service",
-        show_default=False,
-    ),
     default_command: bool = typer.Option(
         False,
         "--default-command",
@@ -54,21 +46,6 @@ def shell(
     ),
 ) -> None:
     Application.get_controller().controller_init()
-
-    # Deprecated since 0.8
-    if old_command:  # pragma: no cover
-        if " " in old_command:
-            cmd = f'"{old_command}"'
-        else:
-            cmd = old_command
-        warnings.warn(
-            f"Deprecated use of --command, use: rapydo shell {service} {cmd}",
-            DeprecationWarning,
-        )
-        # Sleep added because when executing a rapydo shell --command "restapi launch"
-        # The spam of the backend startup does not permit to read the warning
-        time.sleep(1)
-        command = old_command
 
     dc = Compose(files=Application.data.files)
 
