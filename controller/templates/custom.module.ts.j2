@@ -23,6 +23,12 @@ const routes: Routes = [
     component: MyComponent,
     canActivate: [AuthGuard],
     runGuardsAndResolvers: "always",
+    data: {
+      // roles: ["your_role"],
+      // description: "Your custom page description",
+      // title: "Your custom page title",
+      // keywords: "Your custom page keywords",
+    },
   },
 */
 ];

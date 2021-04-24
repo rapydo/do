@@ -1,7 +1,7 @@
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple
 
+from restapi.customizer import BaseCustomizer, FlaskRequest, Props, User
 from restapi.rest.definition import EndpointResource
-from restapi.customizer import BaseCustomizer, Props, FlaskRequest, User
 
 # from restapi.utilities.logs import log
 
@@ -11,33 +11,51 @@ class Customizer(BaseCustomizer):
     def custom_user_properties_pre(
         properties: Props,
     ) -> Tuple[Props, Props]:
-
         """
-            executed just before user creation
-            use this method to removed or manipulate input properties
-            before sending to the database
+        executed just before user creation
+        use this method to removed or manipulate input properties
+        before sending to the database
         """
         extra_properties: Props = {}
         # if "myfield" in properties:
         #     extra_properties["myfield"] = properties["myfield"]
+
+        {% if testing -%}
+        # remove any custom testing field, if any
+        properties.pop("custom_field1", None)
+        properties.pop("custom_field2", None)
+        properties.pop("custom_field3", None)
+        {% endif -%}
         return properties, extra_properties
 
     @staticmethod
-    def custom_user_properties_post(user: User, properties: Props, extra_properties: Props, db: Any) -> None:
+    def custom_user_properties_post(
+        user: User, properties: Props, extra_properties: Props, db: Any
+    ) -> None:
         """
-            executed just after user creation
-            use this method to implement extra operation needed to create a user
-            e.g. store additional relationships
+        executed just after user creation
+        use this method to implement extra operation needed to create a user
+        e.g. store additional relationships
         """
         pass
 
     @staticmethod
     def manipulate_profile(ref: EndpointResource, user: User, data: Props) -> Props:
         """
-            execute before sending data from the profile endpoint
-            use this method to add additonal information to the user profile
+        execute before sending data from the profile endpoint
+        use this method to add additonal information to the user profile
         """
         # data["CustomField"] = user.custom_field
+
+        {% if testing -%}
+        # Temporary using authmethod that is the only field not already included in the
+        # response schema (expect for the dangerous password and mfa hashes)
+        # If/When authmethod will no longer be available (because dropped or included
+        # into the standard response, you will have to extend the User model in
+        # testing mode with some additional fields to be used here as a replacement
+        # Please note: in testing mode also the user type on frontend is extended with authmethod
+        data["authmethod"] = user.authmethod
+        {% endif -%}
 
         return data
 
@@ -53,7 +71,7 @@ class Customizer(BaseCustomizer):
                     # validate=validate.Range(min=0, max=???),
                     validate=validate.Range(min=0),
                     label="CustomField",
-                    description="This is a custom field"
+                    description="This is a custom field",
                 )
             }
         # these are editable fields in profile
@@ -64,11 +82,44 @@ class Customizer(BaseCustomizer):
         if scope == BaseCustomizer.REGISTRATION:
             return {}
         """
+
+        {% if testing -%}
+        from restapi.models import fields
+        if scope == BaseCustomizer.ADMIN:
+            return {
+                'custom_field1': fields.String()
+            }
+        # these are editable fields in profile
+        if scope == BaseCustomizer.PROFILE:
+            return {
+                'custom_field2': fields.String()
+            }
+
+        # these are additional fields in registration form
+        if scope == BaseCustomizer.REGISTRATION:
+            return {
+                'custom_field3': fields.String()
+            }
+        {% endif -%}
         return {}
 
     @staticmethod
     def get_custom_output_fields(request: FlaskRequest) -> Props:
         """
-            this method is used to extend the output model of admin users
+        this method is used to extend the output model of profile and admin users
         """
+
+        {% if testing -%}
+        from restapi.models import fields
+        # Temporary using authmethod that is the only field not already included in the
+        # response schema (expect for the dangerous password and mfa hashes)
+        # If/When authmethod will no longer be available (because dropped or included
+        # into the standard response, you will have to extend the User model in
+        # testing mode with some additional fields to be used here as a replacement
+        # Please note: in testing mode also the user type on frontend is extended with authmethod
+        return {
+            'authmethod': fields.String()
+        }
+        {% endif -%}
+
         return Customizer.get_custom_input_fields(request, scope=BaseCustomizer.ADMIN)

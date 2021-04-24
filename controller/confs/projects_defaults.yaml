@@ -12,10 +12,10 @@ variables:
       online_url: https://github.com/rapydo/do.git
 
   roles:
-    normal_user: User
-    staff_user: Staff
-    group_coordinator: disabled
     admin_root: Admin
+    staff_user: Staff
+    group_coordinator: Coordinator
+    normal_user: User
     default: normal_user
     # Roles allowed for non-admin users (e.g. coordinator allowed to create users)
     # allowed_roles:
@@ -85,6 +85,7 @@ variables:
     ACTIVATE_FTP: 0
     ACTIVATE_PUSHPIN: 0
     ACTIVATE_SMTP: 1
+    ACTIVATE_SMTP_SERVER: 0
     ACTIVATE_TELEGRAM: 0
 
     ACTIVATE_SWAGGERUI: 0
@@ -130,8 +131,8 @@ variables:
     BACKEND_URI: ""
     FRONTEND_PREFIX: /
     BACKEND_PREFIX: ""
-    LOG_LEVEL: DEBUG # log level for backend and celery
-    JWT_APP_SECRETS: /jwt_tokens
+    LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
+    APP_SECRETS: /secrets
     UPLOAD_PATH: /uploads
 
     PROXY_HOST: myproxy.dockerized.io
@@ -143,6 +144,8 @@ variables:
     DOMAIN_ALIASES:
     SET_UNSAFE_EVAL:
     # SET_UNSAFE_EVAL: "unsafe-eval"
+    SET_UNSAFE_INLINE:
+    # SET_UNSAFE_INLINE: "unsafe-inline"
     # Still required by:
     #  - ngx-formly/bootstrap addonLeft/addonRight (https://github.com/ngx-formly/ngx-formly/issues/2496)
     #  - cookie-law
@@ -208,6 +211,8 @@ variables:
     NEO4J_HEAP_SIZE: 512M # Setting invalidated in production mode
     NEO4J_PAGECACHE_SIZE: 512M # Setting invalidated in production mode
     NEO4J_ALLOW_UPGRADE: false
+    # Enable this in case of corrupted or missing transaction logs
+    NEO4J_RECOVERY_MODE: false
 
     MONGO_ENABLE_CONNECTOR: 1
     MONGO_EXPIRATION_TIME: 7200
@@ -246,12 +251,12 @@ variables:
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # Celery
-    CELERY_ENABLE_CONNECTOR: 1
+    CELERY_ENABLE_CONNECTOR: 0
     CELERY_EXPIRATION_TIME: 7200
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    CELERYBEAT_ENABLE_CONNECTOR: 1
+    # CELERYBEAT_ENABLE_CONNECTOR: 1
 
     # Flower
     CELERYUI_USER: "flower" # This default is invalidated in production mode
@@ -277,12 +282,19 @@ variables:
     SMTP_USERNAME:
     SMTP_PASSWORD:
 
+    # These two variables should be merged with the variables above
+    # i.e. if smtp server is enabled these should be the default values
+    # for smtp host and port instead of empty strings
+    SMTP_SERVER_HOST: smtp.dockerized.io
+    SMTP_SERVER_PORT: 25
+
     ALLOW_PASSWORD_RESET: 0
     ALLOW_REGISTRATION: 0
     ALLOW_TERMS_OF_USE: 0
     REGISTRATION_NOTIFICATIONS: 1
     SENTRY_URL:
     GA_TRACKING_CODE:
+    SHOW_LOGIN: 1
     ENABLE_FOOTER: 1
     ENABLE_ANGULAR_SSR: 1
 
@@ -294,8 +306,11 @@ variables:
     AUTH_MAX_PASSWORD_VALIDITY: 0
     AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: 0
     AUTH_MAX_LOGIN_ATTEMPTS: 0
-    AUTH_LOGIN_BAN_TIME: 3600
+    # Increased from 1 hour to 12 hours after implementing the unlock token mechanism
+    # AUTH_LOGIN_BAN_TIME: 3600
+    AUTH_LOGIN_BAN_TIME: 43200
     AUTH_SECOND_FACTOR_AUTHENTICATION: 0
+    AUTH_TOTP_VALIDITY_WINDOW: 1 # int value
     AUTH_JWT_TOKEN_TTL: 2592000 # 1 month in seconds
     AUTH_TOKEN_SAVE_FREQUENCY: 60 # tokens are saved every this amount of seconds
     AUTH_TOKEN_IP_GRACE_PERIOD: 1800 # period before starting to evaluate IP address on token validation
@@ -318,9 +333,10 @@ variables:
     NETWORK_MTU: 1500
 
 project:
-  title: REST HTTP-API server with Python, Flask and Docker
-  description: No description yet
-  rapydo: 0.7.3
+  title: "REST HTTP-API server with Python, Flask and Docker"
+  description: "No description yet"
+  keywords: ""
+  rapydo: 1.1
   version: v0.1
 
 tags:

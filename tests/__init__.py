@@ -1,25 +1,45 @@
-import os
 import time
 from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
+from pathlib import Path
+from types import TracebackType
+from typing import Any, Optional, Type, TypeVar
 
 from typer.testing import CliRunner
 
 runner = CliRunner()
 
 
+# This does not work...
+# from pytest.capture import CaptureFixture
+# Capture = CaptureFixture[str]
+Capture = Any
+
+T = TypeVar("T", bound="TemporaryRemovePath")
+
+
 class TemporaryRemovePath:
-    def __init__(self, path):
-        self.path = os.path.abspath(path)
-        self.tmp_path = f"{self.path}.bak"
+    def __init__(self, path: Path):
+        self.path = path.absolute()
+        self.tmp_path = self.path.with_suffix(f"{path.suffix}.bak")
 
-    def __enter__(self):
+    def __enter__(self: T) -> T:
 
-        os.rename(self.path, self.tmp_path)
+        self.path.rename(self.tmp_path)
         return self
 
-    def __exit__(self, _type, value, tb):
-        os.rename(self.tmp_path, self.path)
+    def __exit__(
+        self,
+        _type: Optional[Type[BaseException]],
+        value: Optional[BaseException],
+        tb: Optional[TracebackType],
+    ) -> bool:
+        self.tmp_path.rename(self.path)
+        # return False if the exception is not handled:
+        # -> return True if the exception is None (nothing to be handled)
+        # -> return False if the exception is not None (because it is not handled here)
+        # always return False is not accepted by mypy...
+        return _type is None
 
 
 class Timeout(Exception):
@@ -98,7 +118,7 @@ def exec_command(capfd, command, *asserts, input_text=None):
 
 def random_project_name(faker):
 
-    return f"{faker.word()}{faker.pyint(min_value=100, max_value=999)}"
+    return f"{faker.word()}{faker.word()}"
 
 
 def create_project(

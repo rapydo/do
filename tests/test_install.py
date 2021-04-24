@@ -1,11 +1,22 @@
 """
 This module will test the install command
 """
+import os
+from pathlib import Path
+
+from faker import Faker
+
 from controller import __version__, gitter
-from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    TemporaryRemovePath,
+    create_project,
+    exec_command,
+    random_project_name,
+)
 
 
-def test_install(capfd, faker):
+def test_install(capfd: Capture, faker: Faker) -> None:
 
     project = random_project_name(faker)
     create_project(
@@ -18,7 +29,17 @@ def test_install(capfd, faker):
         start=False,
     )
 
-    with TemporaryRemovePath("submodules/do"):
+    # Initially the controller is installed from pip
+    exec_command(
+        capfd,
+        "update -i main",
+        "Controller not updated because it is installed outside this project",
+        "Installation path is ",
+        ", the current folder is ",
+        "All updated",
+    )
+
+    with TemporaryRemovePath(Path("submodules/do")):
         exec_command(
             capfd,
             "install",
@@ -36,6 +57,47 @@ def test_install(capfd, faker):
         capfd,
         "install",
         f"Controller repository switched to {__version__}",
+    )
+
+    # Here the controller is installed in editable mode from the correct submodules
+    # folder (this is exactly the default normal condition)
+    exec_command(
+        capfd,
+        "update -i main",
+        # Controller installed from {} and updated
+        "Controller installed from ",
+        " and updated",
+        "All updated",
+    )
+
+    # Install the controller from a linked folder to verify that the post-update checks
+    # are able to correctly resolve symlinks
+    # ###########################################################
+    # Copied from test_init_check_update.py from here...
+    os.rename("submodules", "submodules.bak")
+    os.mkdir("submodules")
+
+    # This is to re-fill the submodules folder,
+    # these folder will be removed by the next init
+    exec_command(capfd, "init", "Project initialized")
+
+    modules_path = os.path.abspath("submodules.bak")
+
+    exec_command(
+        capfd,
+        f"init --submodules-path {modules_path}",
+        "Path submodules/http-api already exists, removing",
+        "Project initialized",
+    )
+    # ... to here
+    # ###########################################################
+    exec_command(
+        capfd,
+        "update -i main",
+        # Controller installed from {} and updated
+        "Controller installed from ",
+        " and updated",
+        "All updated",
     )
 
     exec_command(capfd, "install")

@@ -1,18 +1,29 @@
-from restapi.connectors.celery import CeleryExt, send_errors_by_email
+from restapi.connectors.celery import CeleryExt
 
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
 
-@CeleryExt.celery_app.task(bind=True, name="{{name}}")
-@send_errors_by_email
-def {{name}}(self):
-    with CeleryExt.app.app_context():
+@CeleryExt.task()
+def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
+    log.info("Task ID: {}", self.request.id)
 
-        log.info("Task ID: {}", self.request.id)
+    db = {{auth}}.get_instance()
 
-        db = {{auth}}.get_instance()
+    if myinput == "wrong":
+        raise AttributeError(
+            "You can raise exceptions to stop the task execution in case of errors"
+        )
 
-        log.info("Task executed!")
+    log.info("Task executed!")
 
-        return "Task executed!"
+    return "Task executed!"
+
+# Note to execute this task from an endpoint:
+#
+# celery_ext = celery.get_instance()
+# task = celery_ext.celery_app.send_task(
+#     "{{name}}",
+#     args=[...]
+# )
+# log.debug("Task id={}", task.id)

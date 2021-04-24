@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import MutableMapping
 
 import typer
 
@@ -9,14 +9,14 @@ from controller.packages import Packages
 
 @Application.app.command(help="Install specified version of rapydo")
 def install(
-    version: Optional[str] = typer.Argument("auto", help="Version to be installed"),
+    version: str = typer.Argument("auto", help="Version to be installed"),
     editable: bool = typer.Option(
         True,
         "--no-editable",
         help="Disable editable mode",
         show_default=False,
     ),
-) -> Any:
+) -> None:
     Application.get_controller().controller_init()
 
     if version == "auto":
@@ -25,15 +25,17 @@ def install(
 
     user_mode = not editable
     if editable:
-        return install_controller_from_folder(
-            Application.gits, version, user_mode, editable
-        )
-
+        install_controller_from_folder(Application.gits, version, user_mode, editable)
     else:
-        return install_controller_from_git(version, user_mode)
+        install_controller_from_git(version, user_mode)
 
 
-def install_controller_from_folder(gits, version, user, editable):
+def install_controller_from_folder(
+    gits: MutableMapping[str, gitter.GitRepoType],
+    version: str,
+    user: bool,
+    editable: bool,
+) -> None:
 
     Application.git_submodules()
 
@@ -62,7 +64,7 @@ def install_controller_from_folder(gits, version, user, editable):
         log.info("Controller version {} installed from local folder", version)
 
 
-def install_controller_from_git(version, user):
+def install_controller_from_git(version: str, user: bool) -> None:
 
     log.info("You asked to install rapydo {} from git", version)
 

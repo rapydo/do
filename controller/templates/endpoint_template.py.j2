@@ -31,7 +31,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     def get(self) -> Response:
 
         db = {{auth}}.get_instance()
-        # current_user = self.get_user()
+        # user = self.get_user()
 
         data = {}
         return self.response(data)

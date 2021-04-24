@@ -1,4 +1,5 @@
 import time
+import warnings
 from typing import Optional
 
 import typer
@@ -55,13 +56,14 @@ def shell(
     Application.get_controller().controller_init()
 
     # Deprecated since 0.8
-    if old_command:
+    if old_command:  # pragma: no cover
         if " " in old_command:
             cmd = f'"{old_command}"'
         else:
             cmd = old_command
-        log.warning(
-            "Deprecated use of --command, use: rapydo shell {} {}", service, cmd
+        warnings.warn(
+            f"Deprecated use of --command, use: rapydo shell {service} {cmd}",
+            DeprecationWarning,
         )
         # Sleep added because when executing a rapydo shell --command "restapi launch"
         # The spam of the backend startup does not permit to read the warning

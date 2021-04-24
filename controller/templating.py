@@ -12,7 +12,7 @@ from jinja2.exceptions import TemplateNotFound, UndefinedError
 from controller import TEMPLATE_DIR, log
 
 
-def username(param_not_used, length=8):
+def username(param_not_used: Any, length: int = 8) -> str:
     rand = random.SystemRandom()
     charset = string.ascii_lowercase
     random_string = rand.choice(charset)
@@ -22,7 +22,7 @@ def username(param_not_used, length=8):
     return random_string
 
 
-def password(param_not_used, length=12):
+def password(param_not_used: Any, length: int = 12) -> str:
     rand = random.SystemRandom()
     charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
@@ -35,7 +35,7 @@ def password(param_not_used, length=12):
 
 
 class Templating:
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.template_dir = Path(__file__).resolve().parent.joinpath(TEMPLATE_DIR)
 
@@ -86,7 +86,7 @@ class Templating:
             log.critical(e)
             sys.exit(1)
 
-    def save_template(self, filename, content, force=False):
+    def save_template(self, filename: Path, content: str, force: bool = False) -> None:
 
         if filename.exists():
             if force:
@@ -100,7 +100,7 @@ class Templating:
             fh.write(content)
 
     @staticmethod
-    def make_backup(filename):
+    def make_backup(filename: Path) -> None:
         backup_filename = f"{filename}.bak"
         os.rename(filename, backup_filename)
         log.info("A backup of {} is saved as {}", filename, backup_filename)

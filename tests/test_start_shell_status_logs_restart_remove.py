@@ -11,10 +11,16 @@ import signal
 import time
 from datetime import datetime
 
-from tests import create_project, exec_command, mock_KeyboardInterrupt, signal_handler
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    mock_KeyboardInterrupt,
+    signal_handler,
+)
 
 
-def test_all(capfd):
+def test_all(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,
@@ -59,18 +65,6 @@ def test_all(capfd):
         capfd,
         "shell backend hostname",
         "the input device is not a TTY",
-    )
-
-    # --no-tty is needed on GitHub Actions
-    exec_command(
-        capfd,
-        "shell --no-tty backend --command hostname",
-        "Deprecated use of --command",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty backend --command 'hostname --short'",
-        "Deprecated use of --command",
     )
 
     exec_command(
@@ -134,24 +128,31 @@ def test_all(capfd):
         # "first_backend_1",
     )
 
-    time.sleep(2)
+    time.sleep(5)
     # Backend logs are never timestamped
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --no-color",
+        # logs with tail 200 needed due to the spam of Requirement installation
+        # after the Collecting ... /http-api.git
+        "logs -s backend --tail 200 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
+        # Logs are not prefixed because only one service is shown
+        # Added pip3 install rapydo-http in testing mode
+        "Collecting git+https://github.com/rapydo/http-api.git",
+        # due to the pip install the container could be not ready yet
+        # "Testing mode",
     )
 
     now = datetime.now()
     timestamp = now.strftime("%Y-%m-%dT")
 
-    # Frontend logs are timestamped
+    # Frontend logs are always timestamped
     exec_command(
         capfd,
         "-s frontend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        f"frontend_1      | {timestamp}",
+        # Logs are not prefixed because only one service is shown
+        f"{timestamp}",
     )
 
     # With multiple services logs are not timestamped
@@ -159,7 +160,9 @@ def test_all(capfd):
         capfd,
         "-s frontend,backend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
+        # Logs are prefixed because more than one service is shown
+        "backend_1       | Testing mode",
+        # "backend_1       | Development mode",
         "frontend_1      | Merging files...",
     )
 

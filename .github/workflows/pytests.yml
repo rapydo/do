@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      DOCKER_BUILDKIT: "1"
     timeout-minutes: 10
 
     strategy:
@@ -29,8 +31,7 @@ jobs:
             interfaces,
             libs,
             list,
-            rabbit_invalid_characters,
-            redis_invalid_characters,
+            passwords_invalid_characters,
             scale,
             ssl_dhparam,
             start_shell_status_logs_restart_remove,
@@ -48,7 +49,7 @@ jobs:
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools pytest pytest-cov pytest-timeout Faker mypy
+          pip install setuptools pytest pytest-cov pytest-timeout Faker
           pip install --upgrade --no-cache-dir --editable .
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
@@ -63,14 +64,8 @@ jobs:
 
           mkdir rapydo_tests
           cd rapydo_tests
-          py.test --timeout=300 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          py.test --timeout=300 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
           cp coverage.xml ..
           cd ..
 
           bash <(curl -s https://codecov.io/bash)
-
-      # - name: Artifact
-      #   uses: actions/upload-artifact@v1
-      #   with:
-      #     name: coverage
-      #     path: coverage.xml

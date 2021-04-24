@@ -1,6 +1,14 @@
 // DO NOT REMOVE ME!
 // Put here custom User properties, if any... or keep it empty
+{% if testing -%}
+// Extended in testing mode because this field is added on 
+// the customization at backend level for testing purpose
+export interface CustomUser {
+    authmethod?: string;
+}
+{% else -%}
 export interface CustomUser {}
+{% endif -%}
 
 /**
 export interface MyType {

@@ -9,7 +9,7 @@ from controller import log
 
 
 class Dock:
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.client = docker.from_env()

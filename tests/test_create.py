@@ -5,12 +5,13 @@ and will only use the specific configuration needed by the test itself
 """
 
 import os
+from pathlib import Path
 
 from controller.templating import Templating
-from tests import TemporaryRemovePath, exec_command
+from tests import Capture, TemporaryRemovePath, exec_command
 
 
-def test_create(capfd):
+def test_create(capfd: Capture) -> None:
 
     exec_command(
         capfd,
@@ -54,7 +55,34 @@ def test_create(capfd):
     exec_command(
         capfd,
         "create test_celery --auth postgres --frontend angular --current",
-        "Wrong project name, _ is not a valid character",
+        "Wrong project name, found invalid characters: _",
+    )
+
+    exec_command(
+        capfd,
+        "create test-celery --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: -",
+    )
+
+    exec_command(
+        capfd,
+        "create testCelery --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: C",
+    )
+
+    # Numbers are not allowed as first characters
+    exec_command(
+        capfd,
+        "create 2testcelery --auth postgres --frontend angular --current",
+        "Wrong project name, found invalid characters: 2",
+    )
+
+    # Numbers are allowed if not leading
+    exec_command(
+        capfd,
+        "create test_Celery-2 --auth postgres --frontend angular --current",
+        # Invalid characters in output are ordered
+        "Wrong project name, found invalid characters: -C_",
     )
 
     exec_command(
@@ -80,7 +108,7 @@ def test_create(capfd):
     )
 
     templating = Templating()
-    with TemporaryRemovePath(templating.template_dir):
+    with TemporaryRemovePath(Path(templating.template_dir)):
         exec_command(
             capfd,
             "create firsts --auth postgres --frontend no --current",

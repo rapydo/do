@@ -2,7 +2,7 @@ import os
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import typer
 
@@ -197,8 +197,8 @@ def create_project(
     if frontend != NO_FRONTEND:
         project_scaffold.load_frontend_scaffold(frontend)
 
-    if "_" in project_name:
-        Application.exit("Wrong project name, _ is not a valid character")
+    # In case of errors this function will exit
+    project_scaffold.check_invalid_characters(project_name)
 
     if project_name in project_scaffold.reserved_project_names:
         Application.exit(
@@ -295,12 +295,12 @@ def create_project(
                 Application.exit("File is missing: {}", p)
 
 
-def parse_env_variables(envs):
+def parse_env_variables(envs: Optional[List[str]]) -> Dict[str, str]:
 
     if not envs:
         return {}
 
-    env_variables = {}
+    env_variables: Dict[str, str] = {}
     for env in envs:
         e = env.split("=")
         if len(e) != 2:

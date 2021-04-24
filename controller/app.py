@@ -2,10 +2,11 @@ import json
 import os
 import shutil
 import sys
+import warnings
 from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional, Set, cast
+from typing import Any, Dict, List, MutableMapping, Optional, Set, Union, cast
 
 import requests
 import typer
@@ -31,6 +32,8 @@ from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, services, system
+
+warnings.simplefilter("always", DeprecationWarning)
 
 DataFileStub = Dict[str, List[str]]
 
@@ -64,6 +67,7 @@ class Configuration:
     rapydo_version: str = ""
     project_title: Optional[str] = None
     project_description: Optional[str] = None
+    project_keywords: Optional[str] = None
 
     initialize: bool = False
     update: bool = False
@@ -259,8 +263,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    # This Any should be Repo, but GitPython is lacking typings
-    gits: MutableMapping[str, Any] = OrderedDict()
+    gits: MutableMapping[str, gitter.GitRepoType] = OrderedDict()
 
     def __init__(self) -> None:
 
@@ -280,7 +283,7 @@ class Application:
         Application.load_projectrc()
 
     @staticmethod
-    def exit(message: str, *args: Any, **kwargs: Any) -> None:
+    def exit(message: str, *args: Union[str, Path], **kwargs: Union[str, Path]) -> None:
         log.critical(message, *args, **kwargs)
         sys.exit(1)
 
@@ -412,8 +415,9 @@ class Application:
         )
 
         # 17.05 added support for multi-stage builds
+        # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
         Packages.check_program(
-            "docker", min_version="17.05", min_recommended_version="19.03.1"
+            "docker", min_version="17.05", min_recommended_version="19.03.8"
         )
         Packages.check_program("git")
 
@@ -464,6 +468,10 @@ class Application:
 
         Configuration.project_description = glom(
             Configuration.specs, "project.description", default="Unknown description"
+        )
+
+        Configuration.project_keywords = glom(
+            Configuration.specs, "project.keywords", default=""
         )
 
         if not Configuration.rapydo_version:  # pragma: no cover
@@ -701,6 +709,7 @@ class Application:
         env["CURRENT_GID"] = self.current_gid
         env["PROJECT_TITLE"] = Configuration.project_title
         env["PROJECT_DESCRIPTION"] = Configuration.project_description
+        env["PROJECT_KEYWORDS"] = Configuration.project_keywords
         env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
 
         if Configuration.testing:
@@ -712,6 +721,7 @@ class Application:
 
         services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
         services.check_redis_password(env.get("REDIS_PASSWORD"))
+        services.check_mongodb_password(env.get("MONGO_PASSWORD"))
 
         for e in env:
             env_value = os.environ.get(e)
@@ -729,6 +739,7 @@ class Application:
             # These variables are for Neo4j and are expected to be true|false
             "NEO4J_SSL_ENABLED",
             "NEO4J_ALLOW_UPGRADE",
+            "NEO4J_RECOVERY_MODE",
         ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(env.items()):
@@ -746,37 +757,29 @@ class Application:
                 # 0/1 is a much more portable value to prevent true|True|"true"
                 # This fixes troubles in setting boolean values only used by Angular
                 # (expected true|false) or used by Pyton (expected True|False)
-                if key not in bool_envs:
+                if key not in bool_envs:  # pragma: no cover
                     if isinstance(value, str):
                         if value.lower() == "true":
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 1",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 1",
+                                DeprecationWarning,
                             )
 
                         if value.lower() == "false":
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 0",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 0",
+                                DeprecationWarning,
                             )
                     elif isinstance(value, bool):
                         if value:
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 1",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 1",
+                                DeprecationWarning,
                             )
                         else:
-                            log.warning(
-                                "Deprecated value for {}, convert {} to 0",
-                                key,
-                                value,
-                                key,
+                            warnings.warn(
+                                f"Deprecated value for {key}, convert {value} to 0",
+                                DeprecationWarning,
                             )
 
                 if value is None:
@@ -933,8 +936,47 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
                 continue
+
+            if gitobj and not gitter.can_be_updated(name, gitobj):
+                Application.exit("Can't continue with updates")
+
+        controller_is_updated = False
+        for name, gitobj in Application.gits.items():
+            if name in ignore_submodule:
+                continue
+
+            if name == "do":
+                controller_is_updated = True
+
             if gitobj:
                 gitter.update(name, gitobj)
+
+        if controller_is_updated:
+            installation_path = Packages.get_installation_path("rapydo")
+            if installation_path:
+                do_dir = Path(Application.gits["do"].working_dir)
+                if do_dir.is_symlink():
+                    do_dir = do_dir.resolve()
+                    # This can be used starting from python 3.9
+                    # do_dir = do_dir.readlink()
+
+                if do_dir == installation_path:
+                    log.info(
+                        "Controller installed from {} and updated", installation_path
+                    )
+                else:
+                    log.warning(
+                        "Controller not updated because it is installed outside this "
+                        "project. Installation path is {}, the current folder is {}",
+                        installation_path,
+                        do_dir,
+                    )
+            # Can't be tested on GA since rapydo is alway installed from a folder
+            else:  # pragma: no cover
+                log.warning(
+                    "Controller is not installed in editable mode, "
+                    "rapydo is unable to update it"
+                )
 
     @staticmethod
     def git_checks(ignore_submodule: List[str]) -> None:

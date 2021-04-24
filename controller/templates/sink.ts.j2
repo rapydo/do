@@ -4,6 +4,8 @@ import { FormGroup } from "@angular/forms";
 import { FormlyFieldConfig } from "@ngx-formly/core";
 
 import { FormlyService } from "@rapydo/services/formly";
+import { ApiService } from "@rapydo/services/api";
+import { NotificationService } from "@rapydo/services/notification";
 
 import { Schema, SchemaType } from "@rapydo/types";
 
@@ -13,17 +15,83 @@ import * as moment from "moment";
   templateUrl: "sink.html",
 })
 export class SinkComponent implements OnInit {
-  public form = new FormGroup({});
+
+  public form1 = new FormGroup({});
   public fields1: FormlyFieldConfig[] = [];
+  public model1: any = {};
+
+  // Used by horizontal-form
+  public form2 = new FormGroup({});
   public fields2: FormlyFieldConfig[] = [];
-  public model: any = {};
+  public model2: any = {};
+
+  // Used to test the autocomplete 
+  public form3 = new FormGroup({});
+  public fields3: FormlyFieldConfig[] = [];
+  public model3: any = {};
+
+  // Used to test the multi-value autocomplete
+  public form4 = new FormGroup({});
+  public fields4: FormlyFieldConfig[] = [];
+  public model4: any = {};
+
+  // Used to test the autocomplete with preloaded data
+  public form5 = new FormGroup({});
+  public fields5: FormlyFieldConfig[] = [];
+  public model5: any = {};
+
   public data: any = null;
 
-  constructor(private formly: FormlyService) {}
+  constructor(private formly: FormlyService, private api: ApiService, private notify: NotificationService) {}
 
   ngOnInit() {
     this.fields1 = this.get_fields(null);
     this.fields2 = this.get_fields(["form-field-horizontal"]);
+
+    this.api.put<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+      (response) => {
+        let data = this.formly.json2Form(response, {});
+        this.fields3 = data.fields;
+      },
+      (error) => {
+        this.notify.showError(error);
+      }
+    );
+
+    this.api.post<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+      (response) => {
+        let data = this.formly.json2Form(response, {});
+        this.fields4 = data.fields;
+      },
+      (error) => {
+        this.notify.showError(error);
+      }
+    );
+
+    this.api.post<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+      (response) => {
+        let model = {
+          "elements": [
+            {
+              "my_id": "CSK",
+              "my_label": "Charlie Smith the Kid",
+            },
+            {
+              "my_id": "JWR",
+              "my_label": "Jack Williams the Ripper",
+            }
+          ]
+        }
+        let data = this.formly.json2Form(response, model);
+        this.fields5 = data.fields;
+        this.model5 = data.model;
+      },
+      (error) => {
+        this.notify.showError(error);
+      }
+    );
+
+
   }
 
   private get_fields(wrappers) {
@@ -87,6 +155,33 @@ export class SinkComponent implements OnInit {
         type: SchemaType.BOOLEAN,
       },
       {
+        label: "Select",
+        description: "This is a select",
+        key: "select",
+        required: true,
+        type: SchemaType.STRING,
+        options: {
+          "first-key": "This is the first option",
+          "second-key": "This is the second one",
+          "third-key": "And this the third",
+        }
+      },
+      {
+        label: "MultiSelect",
+        description: "This is a multi-select",
+        key: "multiselect",
+        required: true,
+        type: SchemaType.STRING_ARRAY,
+        options: {
+          dog: "Canis familiaris",
+          cat: "Felix catus",
+          cow: "Bos taurus",
+          horse: "Equus caballus",
+          sheep: "Ovis aries",
+          pig: "Sus scrofa domesticus",
+        }
+      },
+      {
         label: "Radio1",
         key: "radio1",
         required: false,
@@ -106,7 +201,7 @@ export class SinkComponent implements OnInit {
         label: "Radio2",
         key: "radio2",
         required: false,
-        type: SchemaType.RADIO_WITH_DESCRIPTION,
+        type: SchemaType.RADIO,
         options: [
           {
             value: "opt3",
@@ -133,12 +228,49 @@ export class SinkComponent implements OnInit {
     return data.fields;
   }
 
-  submit() {
+  submit1() {
     this.data = null;
-    if (!this.form.valid) {
+    if (!this.form1.valid) {
       return false;
     }
 
-    this.data = this.model;
+    this.data = this.model1;
   }
+
+  submit2() {
+    this.data = null;
+    if (!this.form2.valid) {
+      return false;
+    }
+
+    this.data = this.model2;
+  }
+
+  submit3() {
+    this.data = null;
+    if (!this.form3.valid) {
+      return false;
+    }
+
+    this.data = this.model3;
+  }
+
+  submit4() {
+    this.data = null;
+    if (!this.form4.valid) {
+      return false;
+    }
+
+    this.data = this.model4;
+  }
+
+  submit5() {
+    this.data = null;
+    if (!this.form5.valid) {
+      return false;
+    }
+
+    this.data = this.model5;
+  }
+
 }

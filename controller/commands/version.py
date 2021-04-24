@@ -5,7 +5,7 @@ from controller.app import Application, Configuration
 
 
 @Application.app.command(help="Retrieve version details")
-def version():
+def version() -> None:
     Application.get_controller().controller_init()
 
     # Check if rapydo version is compatible with version required by the project

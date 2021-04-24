@@ -3,10 +3,12 @@ This module will test the cronjobs installed on the backend container
 """
 import time
 
-from tests import create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_cronjobs(capfd, faker):
+def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     project = random_project_name(faker)
     create_project(
@@ -31,10 +33,14 @@ def test_cronjobs(capfd, faker):
 
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --no-color",
+        "logs -s backend --tail 20 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
+        # Logs are not prefixed because only one service is shown
         "Found no cronjob to be enabled, skipping crontab setup",
+        # Added pip3 install rapydo-http in testing mode
+        "Collecting git+https://github.com/rapydo/http-api.git",
+        # due to the pip install, after only 5 seconds the container is not ready yet
+        # "Testing mode",
     )
 
     with open(f"projects/{project}/backend/cron/hello-world.cron", "w+") as f:
@@ -50,11 +56,12 @@ def test_cronjobs(capfd, faker):
 
     exec_command(
         capfd,
-        "logs -s backend --tail 10 --no-color",
+        "logs -s backend --tail 20 --no-color",
         "docker-compose command: 'logs'",
-        "backend_1       | Development mode",
-        "backend_1       | Enabling cron...",
-        "backend_1       | Cron enabled",
+        # Logs are not prefixed because only one service is shown
+        # "Testing mode",
+        "Enabling cron...",
+        "Cron enabled",
         # this is the output of crontab -l that verifies the cronjob installation
         "* * * * * echo 'Hello world'",
     )

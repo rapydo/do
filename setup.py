@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.0"
+version = "1.1"
 
 setup(
     name="rapydo",
@@ -16,7 +16,7 @@ setup(
     },
     # Remember to update mypy.additional_dependencies
     install_requires=[
-        "docker-compose==1.27.4",
+        "docker-compose==1.28.4",
         "dockerfile-parse==1.1.0",
         "python-dateutil",
         "pytz",
@@ -26,8 +26,8 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.11",
-        "PyYAML==5.3.1",
+        "GitPython==3.1.13",
+        "PyYAML==5.4.1",
         "pip>=10.0.0",
         "typer[all]==0.3.2",
     ],

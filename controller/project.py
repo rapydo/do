@@ -1,7 +1,8 @@
 import os
+import re
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from controller import PROJECT_DIR, gitter, log
 
@@ -14,7 +15,7 @@ SUBMODULES = Path("submodules")
 
 
 class Project:
-    def __init__(self):
+    def __init__(self) -> None:
         self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA, SUBMODULES]
         # Will be verifed by check and added by create
         self.expected_folders: List[Path] = []
@@ -33,10 +34,16 @@ class Project:
         self.obsolete_files: List[Path] = []
         self.suggested_gitkeep: List[Path] = []
 
-    def p_path(self, *args):
+    def p_path(self, *args: str) -> Path:
         return PROJECT_DIR.joinpath(self.project, *args)
 
-    def load_project_scaffold(self, project, auth, services=None):
+    def load_project_scaffold(
+        self, project: str, auth: Optional[str], services: Optional[List[str]] = None
+    ) -> bool:
+
+        if services is None:
+            services = []
+
         self.project = project
         self.expected_folders.extend(self.expected_main_folders)
         self.expected_folders.append(self.p_path("confs"))
@@ -60,6 +67,8 @@ class Project:
         self.expected_files.append(self.p_path("confs", "commons.yml"))
         self.expected_files.append(self.p_path("confs", "development.yml"))
         self.expected_files.append(self.p_path("confs", "production.yml"))
+        # Need to ensure mypy to correctly extract typing from the project module
+        self.expected_files.append(self.p_path("backend", "__init__.py"))
         self.expected_files.append(self.p_path("backend", "initialization.py"))
         self.expected_files.append(self.p_path("backend", "customization.py"))
         self.expected_files.append(self.p_path("backend", "endpoints", "__init__.py"))
@@ -103,8 +112,9 @@ class Project:
 
         self.data_folders.extend(
             [
-                DATA.joinpath("logs"),
                 DATA.joinpath("backup"),
+                DATA.joinpath("logs"),
+                DATA.joinpath("uploads"),
             ]
         )
 
@@ -124,7 +134,7 @@ class Project:
         self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
         return True
 
-    def load_frontend_scaffold(self, frontend):
+    def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:
         self.frontend = frontend
 
         if self.frontend is None or self.frontend == NO_FRONTEND:
@@ -233,7 +243,7 @@ class Project:
         return True
 
     @staticmethod
-    def get_project(project):
+    def get_project(project: Optional[str]) -> str:
 
         projects = os.listdir(PROJECT_DIR)
 
@@ -261,24 +271,8 @@ class Project:
             )
             sys.exit(1)
 
-        if "_" in project:
-            log.critical(
-                "Wrong project name, _ is not a valid character."
-                "\nPlease consider to rename {} into {}",
-                project,
-                project.replace("_", ""),
-            )
-            sys.exit(1)
-
-        # Projects with - cannot be imported in python
-        # if "-" in project:
-        #     log.critical(
-        #         "Wrong project name, - is not a valid character."
-        #         "\nPlease consider to rename {} into {}",
-        #         project,
-        #         project.replace("-", ""),
-        #     )
-        #     sys.exit(1)
+        # In case of errors this function will exit
+        Project.check_invalid_characters(project)
 
         if project in Project.reserved_project_names:
             log.critical(
@@ -288,7 +282,24 @@ class Project:
 
         return project
 
-    def check_main_folder(self):
+    @staticmethod
+    def check_invalid_characters(project: str) -> None:
+        if not re.match("^[a-z][a-z0-9]+$", project):
+
+            # First character is expected to be a-z
+            tmp_str = re.sub("[a-z]", "", project[0])
+            # Other characters are expected to be a-z 0-9
+            tmp_str += re.sub("[a-z0-9]", "", project[1:])
+            invalid_list = list(set(tmp_str))
+            invalid_list.sort()
+            invalid_chars = "".join(str(e) for e in invalid_list)
+
+            log.critical(
+                "Wrong project name, found invalid characters: {}", invalid_chars
+            )
+            sys.exit(1)
+
+    def check_main_folder(self) -> Optional[str]:
         folder = Path(os.getcwd())
         first_level_error = self.inspect_main_folder(folder)
         # No error raised: the current folder is a valid rapydo root
@@ -317,7 +328,7 @@ class Project:
 
         return first_level_error
 
-    def inspect_main_folder(self, folder):
+    def inspect_main_folder(self, folder: Path) -> Optional[str]:
         """
         RAPyDo commands only works on rapydo projects, we want to ensure that
         the current folder have a rapydo-like structure. These checks are based
@@ -345,7 +356,7 @@ Verify that you are in the right folder, now you are in: {}
 
         return None
 
-    def inspect_project_folder(self):
+    def inspect_project_folder(self) -> None:
 
         for fpath in self.expected_folders:
             if not fpath.is_dir():

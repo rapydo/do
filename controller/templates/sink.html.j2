@@ -4,10 +4,10 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header">
-          <h4>Kitchen Sink</h4>
+          <h1>Kitchen Sink</h1>
         </div>
 
-        <div class="card-block">
+        <div class="card-body">
           <ul ngbNav #nav="ngbNav" class="nav-tabs">
             <li ngbNavItem>
               <a ngbNavLink>ngx-formly</a>
@@ -15,11 +15,11 @@
                 <br />
                 <div class="row">
                   <div class="col-12">
-                    <form [formGroup]="form" (ngSubmit)="submit()">
+                    <form [formGroup]="form1" (ngSubmit)="submit1()">
                       <formly-form
-                        [form]="form"
+                        [form]="form1"
                         [fields]="fields1"
-                        [model]="model"
+                        [model]="model1"
                       >
                       </formly-form>
 
@@ -32,7 +32,7 @@
                       <br />
 
                       <button type="submit" class="btn btn-success">
-                        <h5>Submit</h5>
+                        Submit
                       </button>
                     </form>
 
@@ -47,11 +47,11 @@
                 <br />
                 <div class="row">
                   <div class="col-12">
-                    <form [formGroup]="form" (ngSubmit)="submit()">
+                    <form [formGroup]="form2" (ngSubmit)="submit2()">
                       <formly-form
-                        [form]="form"
+                        [form]="form2"
                         [fields]="fields2"
-                        [model]="model"
+                        [model]="model2"
                       >
                       </formly-form>
 
@@ -60,7 +60,7 @@
                       </div>
 
                       <button type="submit" class="btn btn-success">
-                        <h5>Submit</h5>
+                        Submit
                       </button>
                     </form>
 
@@ -90,6 +90,92 @@
                 </div>
               </ng-template>
             </li>
+
+
+            <li ngbNavItem>
+              <a ngbNavLink>Autocomplete</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form3" (ngSubmit)="submit3()">
+                      <formly-form
+                        [form]="form3"
+                        [fields]="fields3"
+                        [model]="model3"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>Multi Autocomplete</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form4" (ngSubmit)="submit4()">
+                      <formly-form
+                        [form]="form4"
+                        [fields]="fields4"
+                        [model]="model4"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
+            <li ngbNavItem>
+              <a ngbNavLink>Preloaded Autocomplete</a>
+              <ng-template ngbNavContent>
+                <br />
+                <div class="row">
+                  <div class="col-12">
+                    <form [formGroup]="form5" (ngSubmit)="submit5()">
+                      <formly-form
+                        [form]="form5"
+                        [fields]="fields5"
+                        [model]="model5"
+                      >
+                      </formly-form>
+
+                      <div *ngIf="data" class="card">
+                        <div class="card-body">{{ data | json }}</div>
+                      </div>
+
+                      <button type="submit" class="btn btn-success">
+                        Submit
+                      </button>
+                    </form>
+                  <br />
+                  </div>
+                </div>
+              </ng-template>
+            </li>
+
           </ul>
 
           <div [ngbNavOutlet]="nav"></div>

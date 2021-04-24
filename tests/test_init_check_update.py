@@ -4,12 +4,13 @@ Other module that will initialize projects will consider the init command fully 
 """
 import os
 import shutil
+from pathlib import Path
 
 from controller import __version__, gitter
-from tests import TemporaryRemovePath, create_project, exec_command
+from tests import Capture, TemporaryRemovePath, create_project, exec_command
 
 
-def test_base(capfd):
+def test_base(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,
@@ -50,7 +51,7 @@ def test_base(capfd):
         f"do already set on branch {__version__}",
     )
 
-    with TemporaryRemovePath("data"):
+    with TemporaryRemovePath(Path("data")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -59,14 +60,14 @@ def test_base(capfd):
             "Verify that you are in the right folder, now you are in: ",
         )
 
-    with TemporaryRemovePath("projects/third/builds"):
+    with TemporaryRemovePath(Path("projects/third/builds")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
             "Project third is invalid: required folder not found projects/third/builds",
         )
 
-    with TemporaryRemovePath(".gitignore"):
+    with TemporaryRemovePath(Path(".gitignore")):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -92,6 +93,7 @@ def test_base(capfd):
         "submodules/do/temp.file",
         "Changes not staged for commit:",
         "submodules/do/setup.py",
+        "Can't continue with updates",
     )
     os.remove("submodules/do/temp.file")
     r = gitter.get_repo("submodules/do")
@@ -119,7 +121,7 @@ def test_base(capfd):
 
     modules_path = os.path.abspath("submodules.bak")
 
-    with TemporaryRemovePath("submodules.bak/do"):
+    with TemporaryRemovePath(Path("submodules.bak/do")):
         exec_command(
             capfd,
             f"init --submodules-path {modules_path}",
@@ -179,7 +181,7 @@ def test_base(capfd):
     )
 
     # Test with zero projects
-    with TemporaryRemovePath("projects"):
+    with TemporaryRemovePath(Path("projects")):
         os.mkdir("projects")
         exec_command(
             capfd,
@@ -194,14 +196,34 @@ def test_base(capfd):
         "Checks completed",
     )
 
-    # Check invalid and reserved project names
-    os.makedirs("projects/invalid_character")
+    # Numbers are not allowed as first characters
+    pname = "2invalidcharacter"
+    os.makedirs(f"projects/{pname}")
     exec_command(
         capfd,
-        "-p invalid_character check -i main --no-git --no-builds",
-        "Wrong project name, _ is not a valid character.",
+        f"-p {pname} check -i main --no-git --no-builds",
+        "Wrong project name, found invalid characters: 2",
     )
-    shutil.rmtree("projects/invalid_character")
+    shutil.rmtree(f"projects/{pname}")
+
+    invalid_characters = {
+        "_": "_",
+        "-": "-",
+        "C": "C",
+        # Invalid characters in output are ordered
+        # Numbers are allowed if not leading
+        "_C-2": "-C_",
+    }
+    # Check invalid and reserved project names
+    for invalid_key, invalid_value in invalid_characters.items():
+        pname = f"invalid{invalid_key}character"
+        os.makedirs(f"projects/{pname}")
+        exec_command(
+            capfd,
+            f"-p {pname} check -i main --no-git --no-builds",
+            f"Wrong project name, found invalid characters: {invalid_value}",
+        )
+        shutil.rmtree(f"projects/{pname}")
 
     os.makedirs("projects/celery")
     exec_command(

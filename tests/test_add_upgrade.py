@@ -5,10 +5,10 @@ This module will test the add and upgrade commands
 import os
 import shutil
 
-from tests import create_project, exec_command
+from tests import Capture, create_project, exec_command
 
 
-def test_add(capfd):
+def test_add(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,

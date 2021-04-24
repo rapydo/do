@@ -2,11 +2,22 @@
 This module test the backup and restore commands + tuning postgres
 """
 import os
+from pathlib import Path
 
-from tests import TemporaryRemovePath, create_project, exec_command, random_project_name
+from faker import Faker
+
+from tests import (
+    Capture,
+    TemporaryRemovePath,
+    create_project,
+    exec_command,
+    random_project_name,
+)
 
 
-def test_all(capfd, faker):
+def test_all(capfd: Capture, faker: Faker) -> None:
+
+    backup_folder = Path("data/backup/postgres")
 
     create_project(
         capfd=capfd,
@@ -31,7 +42,7 @@ def test_all(capfd, faker):
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user | User",
+        " normal_user       | User",
     )
 
     exec_command(
@@ -40,6 +51,99 @@ def test_all(capfd, faker):
         "Starting backup on postgres...",
         "Backup completed: data/backup/postgres/",
     )
+
+    # A second backup is needed to test backup retention
+    exec_command(
+        capfd,
+        "backup postgres",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    # Test backup retention
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    exec_command(
+        capfd,
+        "backup postgres --max 1 --dry-run",
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Verify that due to dry run, no backup is executed
+    exec_command(
+        capfd,
+        "backup postgres --max 1 --dry-run",
+        "Dry run mode is enabled",
+        "deleted because exceeding the max number of backup files (1)",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    # Create an additional backup to the test deletion (now backups are 3)
+    exec_command(
+        capfd,
+        "backup postgres",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+    # Save the current number of backup files
+    number_of_backups = len(list(backup_folder.glob("*")))
+
+    # Verify the deletion
+    exec_command(
+        capfd,
+        "backup postgres --max 1",
+        "deleted because exceeding the max number of backup files (1)",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
+    # Now the number of backups should be reduced by 1 (i.e. +1 -2)
+    assert len(list(backup_folder.glob("*"))) == number_of_backups - 1
+
+    # Verify that --max ignores files without the date pattern
+    backup_folder.joinpath("xyz").touch(exist_ok=True)
+    backup_folder.joinpath("xyz.ext").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01_01").touch(exist_ok=True)
+    backup_folder.joinpath("9999_01_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_99_01-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_99-01_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-99_01_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_99_01.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01_99.bak").touch(exist_ok=True)
+
+    exec_command(
+        capfd,
+        "backup postgres --max 999 --dry-run",
+        "Dry run mode is enabled",
+        # Still finding 2, all files above are ignore because not matching the pattern
+        "Found 2 backup files, maximum not reached",
+        "Starting backup on postgres...",
+        "Backup completed: data/backup/postgres/",
+    )
+
     exec_command(
         capfd,
         "backup invalid",
@@ -70,7 +174,7 @@ def test_all(capfd, faker):
         "Invalid backup file, data/backup/postgres/invalid does not exist",
     )
 
-    with TemporaryRemovePath("data/backup"):
+    with TemporaryRemovePath(Path("data/backup")):
         exec_command(
             capfd,
             "restore postgres",
@@ -78,12 +182,11 @@ def test_all(capfd, faker):
             "does not exist: data/backup/postgres",
         )
 
-    dfolder = "data/backup/postgres"
-    with TemporaryRemovePath(dfolder):
+    with TemporaryRemovePath(backup_folder):
         exec_command(
             capfd,
             "restore postgres",
-            f"No backup found, the following folder does not exist: {dfolder}",
+            f"No backup found, the following folder does not exist: {backup_folder}",
         )
 
         os.mkdir("data/backup/postgres")
@@ -128,7 +231,7 @@ def test_all(capfd, faker):
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user | User",
+        " normal_user       | User",
     )
     # 2) Modify such data
     exec_command(
@@ -138,7 +241,7 @@ def test_all(capfd, faker):
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user | normal_user",
+        " normal_user       | normal_user",
     )
     # 3) restore the dump
     exec_command(
@@ -154,7 +257,7 @@ def test_all(capfd, faker):
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user | User",
+        " normal_user       | User",
     )
 
     exec_command(

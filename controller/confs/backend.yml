@@ -1,11 +1,11 @@
-version: "3"
+version: "3.2"
 
 # #####################
 # VOLUMES
 # #####################
 
 volumes:
-  jwt_tokens:
+  secrets:
     driver: local
   rabbitdata:
     driver: local
@@ -106,7 +106,7 @@ services:
       GUNICORN_MAX_NUM_WORKERS: ${GUNICORN_MAX_NUM_WORKERS}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
       UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
 
@@ -176,7 +176,7 @@ services:
       CELERY_BROKER: ${CELERY_BROKER}
       CELERY_BACKEND: ${CELERY_BACKEND}
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
-      CELERYBEAT_ENABLE_CONNECTOR: ${CELERYBEAT_ENABLE_CONNECTOR}
+      # CELERYBEAT_ENABLE_CONNECTOR: ${CELERYBEAT_ENABLE_CONNECTOR}
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
@@ -236,13 +236,12 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - secrets:${APP_SECRETS}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret
-      - jwt_tokens:${JWT_APP_SECRETS}
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Unit tests
@@ -252,6 +251,8 @@ services:
       - ${VANILLA_DIR}/data/logs:/logs
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
+      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      - ${VANILLA_DIR}/data/uploads:/uploads
     networks:
       app_net:
         aliases:
@@ -295,6 +296,7 @@ services:
       DEFAULT_DHLEN: ${DEFAULT_DHLEN}
       FRONTEND: ${FRONTEND_FRAMEWORK}
       UNSAFE_EVAL: ${SET_UNSAFE_EVAL}
+      UNSAFE_INLINE: ${SET_UNSAFE_INLINE}
       STYLE_UNSAFE_INLINE: ${SET_STYLE_UNSAFE_INLINE}
       CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
       CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
@@ -361,7 +363,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.5.8
+    image: mariadb:10.5.9
     volumes:
       - mariadb:/var/lib/mysql
     environment:
@@ -406,8 +408,8 @@ services:
       NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
       # Useful in case of corrupted transaction logs
-      # NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "false"
-      # NEO4J_dbms_recovery_fail__on__missing__files: "false"
+      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: ${NEO4J_RECOVERY_MODE}
+      NEO4J_dbms_recovery_fail__on__missing__files: ${NEO4J_RECOVERY_MODE}
 
       # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
       NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
@@ -439,7 +441,6 @@ services:
       # failed: WebSocket opening handshake was canceled
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
-
 
     # ports:
     #   - 9090:${NEO4J_WEB_INTERFACE_PORT}
@@ -492,10 +493,11 @@ services:
       ACTIVATE: ${ACTIVATE_CELERY}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
+      UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
       FORCE_PRODUCTION_TESTS: ${FORCE_PRODUCTION_TESTS}
 
       CELERY_ENABLE: 1
@@ -585,6 +587,8 @@ services:
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
       - ${VANILLA_DIR}/data/logs:/logs
+      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      - ${VANILLA_DIR}/data/uploads:/uploads
     networks:
       db_net:
       worker_net:
@@ -616,7 +620,7 @@ services:
       DOMAIN: ${PROJECT_DOMAIN}
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
 
       CELERY_ENABLE: 1
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
@@ -717,7 +721,7 @@ services:
 
   redis:
     restart: always
-    image: redis:6.0.9
+    image: redis:6.0.10
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
@@ -765,6 +769,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - secrets:${APP_SECRETS}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -808,8 +813,6 @@ services:
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # JWT tokens secret and SSL
-      # - jwt_tokens:${JWT_APP_SECRETS}
       # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
       # submodules
@@ -832,7 +835,7 @@ services:
 
       VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      JWT_APP_SECRETS: ${JWT_APP_SECRETS}
+      APP_SECRETS: ${APP_SECRETS}
 
       CELERY_ENABLE: 1
 
@@ -866,8 +869,6 @@ services:
       CELERYUI_DBDIR: ${CELERYUI_DBDIR}
 
   swaggerui:
-    # restart: no
-    # image: swaggerapi/swagger-ui:v3.36.0
     build:
       context: ${SUBMODULE_DIR}/build-templates/swaggerui
       args:
@@ -947,6 +948,25 @@ services:
       ADDED_FLAGS: -d -d
     networks:
       ftp_net:
+
+  ###################
+  ### SMTP SERVER  ###
+  ###################
+  smtp:
+    restart: always
+    image: namshi/smtp:latest
+    # volumes:
+    #   - ...
+    environment:
+      ACTIVATE: ${ACTIVATE_SMTP_SERVER}
+    networks:
+      app_net:
+        aliases:
+          - ${SMTP_SERVER_HOST}
+
+  ####################################
+  ### REVERSE PROXY FOR WEBSOCKETS ###
+  ####################################
 
   pushpin:
     restart: always

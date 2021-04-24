@@ -2,11 +2,12 @@
 This module will test the diagnostic command
 """
 
+from faker import Faker
 
-from tests import create_project, exec_command, random_project_name
+from tests import Capture, create_project, exec_command, random_project_name
 
 
-def test_diagnostic(capfd, faker):
+def test_diagnostic(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,

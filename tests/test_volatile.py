@@ -3,10 +3,18 @@ This module will test the volatile command
 """
 import signal
 
-from tests import create_project, exec_command, random_project_name, signal_handler
+from faker import Faker
+
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    random_project_name,
+    signal_handler,
+)
 
 
-def test_volatile(capfd, faker):
+def test_volatile(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,
@@ -44,17 +52,6 @@ def test_volatile(capfd, faker):
         capfd,
         "remove --all",
         "Stack removed",
-    )
-
-    exec_command(
-        capfd,
-        "volatile backend --command hostname",
-        "Deprecated use of --command",
-    )
-    exec_command(
-        capfd,
-        "volatile backend --command 'hostname --short'",
-        "Deprecated use of --command",
     )
 
     exec_command(

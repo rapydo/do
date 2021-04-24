@@ -1,14 +1,14 @@
 repos:
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.5.2
+    rev: 5.7.0
     hooks:
       - id: isort
-  - repo: https://github.com/prettier/prettier
-    rev: 2.1.1
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.2.1
     hooks:
       - id: prettier
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.2
+    rev: v2.10.1
     hooks:
       - id: pyupgrade
         args: [--py36-plus]
@@ -17,11 +17,11 @@ repos:
     hooks:
       - id: black
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.9.0
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.790
+    rev: v0.812
     hooks:
       - id: mypy
         additional_dependencies: [
@@ -35,8 +35,8 @@ repos:
             "sultan==0.9.1",
             "plumbum",
             "glom",
-            "GitPython==3.1.11",
-            "PyYAML==5.3.1",
+            "GitPython==3.1.13",
+            "PyYAML==5.4.1",
             "pip>=10.0.0",
             "typer[all]==0.3.2",
 
