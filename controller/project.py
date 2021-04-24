@@ -51,6 +51,7 @@ class Project:
         self.expected_folders.append(self.p_path("backend"))
         self.expected_folders.append(self.p_path("backend", "endpoints"))
         self.expected_folders.append(self.p_path("backend", "models"))
+        self.expected_folders.append(self.p_path("backend", "models", "emails"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
         self.expected_folders.append(self.p_path("backend", "cron"))
@@ -62,6 +63,9 @@ class Project:
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tests", GITKEEP))
+        self.suggested_gitkeep.append(
+            self.p_path("backend", "models", "emails", GITKEEP)
+        )
 
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
