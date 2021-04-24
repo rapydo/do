@@ -137,10 +137,7 @@ def test_all(capfd: Capture) -> None:
         "logs -s backend --tail 200 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
-        # Added pip3 install rapydo-http in testing mode
-        "Collecting git+https://github.com/rapydo/http-api.git",
-        # due to the pip install the container could be not ready yet
-        # "Testing mode",
+        "Testing mode",
     )
 
     now = datetime.now()
