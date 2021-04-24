@@ -45,7 +45,7 @@ known_latests = {
         "redis": "6.2.2",
         "nginx": "1.20.0-alpine",
         "node": "14.15.5-buster",
-        "rabbitmq": "3.8.15-management",
+        "rabbitmq": "3.8.14-management",
         "adminer": "4.8.0",
         "mongo-express": "0.54.0",
         "fanout/pushpin": "1.31.0",
@@ -360,21 +360,21 @@ def check_versions(
     dependencies["http-api"] = {}
     dependencies["http-api"]["pip"] = http_api.install_requires
 
-    dependencies = parsePrecommitConfig(
-        Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
+    # )
 
-    dependencies = parsePrecommitConfig(
-        Path("../http-api/.pre-commit-config.yaml"),
-        dependencies,
-        "http-api",
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../http-api/.pre-commit-config.yaml"),
+    #     dependencies,
+    #     "http-api",
+    # )
 
-    dependencies = parsePrecommitConfig(
-        Path("../rapydo-angular/.pre-commit-config.yaml"),
-        dependencies,
-        "rapydo-angular",
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../rapydo-angular/.pre-commit-config.yaml"),
+    #     dependencies,
+    #     "rapydo-angular",
+    # )
 
     filtered_dependencies: Dependencies = {}
 
