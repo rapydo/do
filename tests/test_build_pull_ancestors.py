@@ -142,7 +142,8 @@ RUN mkdir xyz
         # before buildkit:
         # f"Successfully tagged testbuild/rabbit:{__version__}",
         # with buildkit:
-        f"naming to docker.io/testbuild/rabbit:{__version__}" "Custom images built",
+        f"naming to docker.io/testbuild/rabbit:{__version__}",
+        "Custom images built",
     )
 
     exec_command(
