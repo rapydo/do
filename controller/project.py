@@ -81,6 +81,7 @@ class Project:
         self.expected_files.append(Path(".isort.cfg"))
         self.expected_files.append(Path("pyproject.toml"))
         self.expected_files.append(Path(".flake8"))
+        self.expected_files.append(Path(".prettierignore"))
 
         self.fixed_files.append(Path(".gitattributes"))
         self.fixed_files.append(Path(".pre-commit-config.yaml"))
