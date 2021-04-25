@@ -152,7 +152,7 @@ class Project:
             self.expected_folders.extend(
                 [
                     self.p_path("frontend", "app"),
-                    self.p_path("frontend", "css"),
+                    self.p_path("frontend", "styles"),
                     self.p_path("frontend", "integration"),
                     self.p_path("frontend", "assets"),
                     self.p_path("frontend", "assets", "favicon"),
@@ -166,7 +166,8 @@ class Project:
             self.expected_files.extend(
                 [
                     self.p_path("frontend", "package.json"),
-                    self.p_path("frontend", "css", "style.css"),
+                    self.p_path("frontend", "styles", "style.scss"),
+                    self.p_path("frontend", "styles", "variables.scss"),
                     self.p_path("frontend", "app", "customization.ts"),
                     self.p_path("frontend", "app", "custom.module.ts"),
                     self.p_path("frontend", "app", "custom.navbar.ts"),
@@ -242,6 +243,8 @@ class Project:
                     self.p_path("frontend", "app", "custom.project.options.ts"),
                     # Removed since 1.0
                     frontend_data_dir.joinpath("browserslist"),
+                    # Removed since 1.2 (replaced with scss in styles)
+                    self.p_path("frontend", "css"),
                 ]
             )
 

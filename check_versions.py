@@ -23,7 +23,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-04-24"
+known_update = "2021-04-25"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -56,6 +56,22 @@ known_latests = {
     # https://github.com/acmesh-official/acme.sh/releases
     "acme": "2.8.8",
 }
+
+# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
+changelogs = {
+    # ## NPM
+    "@ng-bootstrap/ng-bootstrap": "https://github.com/ng-bootstrap/ng-bootstrap/blob/master/CHANGELOG.md",
+    "ngx-spinner": "https://github.com/Napster2210/ngx-spinner/releases",
+    "ngx-formly": "https://github.com/ngx-formly/ngx-formly/releases",
+    "jasmine-spec-reporter": "https://github.com/bcaudan/jasmine-spec-reporter/blob/master/CHANGELOG.md",
+    "ajv": "https://github.com/ajv-validator/ajv/releases",
+    # ## PYPI
+    "schemathesis": "https://schemathesis.readthedocs.io/en/stable/changelog.html",
+    # ## DockerHub
+}
+
+
+skip_versions = {"flower": "0.9.7"}
 
 prevent_duplicates = {}
 
@@ -111,24 +127,41 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
         url = f"https://pypi.org/project/{tokens[0]}"
         latest = parse_pypi(url, tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
 
     elif category in ["compose", "Dockerfile"]:
         tokens = lib.split(":")
+        # remove any additinal word from the version from example in case of:
+        # FROM imgname: imgversion AS myname => imgversion AS myname => imgversion
+        tokens[1] = tokens[1].split(" ")[0]
         latest = glom(known_latests, f"docker.{tokens[0]}", default="????")
 
         if latest == "????":
             log.warning("Unknown latest version for {}", tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             if "/" in tokens[0]:
                 print(f"https://hub.docker.com/r/{tokens[0]}?tab=tags")
             else:
                 print(f"https://hub.docker.com/_/{tokens[0]}?tab=tags")
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
     elif category in ["package.json", "dev-package.json", "npm"]:
         lib = lib.strip()
@@ -147,9 +180,16 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
         time.sleep(npm_timeout)
         latest = parse_npm(url, tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
 
     elif category in ["ACME"]:
@@ -161,7 +201,7 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
             log.warning("Unknown latest version acme.sh")
 
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [ACME]: {tokens[1]} -> {latest}")
             print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
             print("")
     elif category == "url":
@@ -171,7 +211,7 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
             tokens = lib.split("/")
             latest = glom(known_latests, f"urls.{tokens[4]}", default="????")
             if latest != tokens[7]:
-                print(f"# {tokens[7]} -> {latest}")
+                print(f"[{tokens[4]}]: # {tokens[7]} -> {latest}")
                 print(lib)
                 print("")
     else:
@@ -443,8 +483,3 @@ def check_versions(
 
 if __name__ == "__main__":
     check_versions()
-
-# Changelogs and release notes
-
-# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
-# https://github.com/ngx-formly/ngx-formly/releases
