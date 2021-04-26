@@ -1,4 +1,4 @@
-from restapi.connectors.celery import CeleryExt
+from restapi.connectors.celery import CeleryExt, Ignore
 
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
@@ -13,6 +13,11 @@ def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
     if myinput == "wrong":
         raise AttributeError(
             "You can raise exceptions to stop the task execution in case of errors"
+        )
+
+    if myinput == "ignore":
+        raise Ignore(
+            "You can raise exceptions to stop the execution but without sending emails"
         )
 
     log.info("Task executed!")
