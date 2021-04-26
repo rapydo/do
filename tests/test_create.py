@@ -211,6 +211,13 @@ def test_create(capfd: Capture) -> None:
         "Project first successfully created",
     )
 
+    # Test projects with no-authentication
+    exec_command(
+        capfd,
+        "create noauth --auth no --frontend no --current",
+        "Project noauth successfully created",
+    )
+
     # Test extended projects
 
     # base project is --auth postgres --frontend angular
