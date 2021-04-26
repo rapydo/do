@@ -8,11 +8,12 @@ import typer
 
 from controller import PROJECT_DIR, __version__, gitter, log
 from controller.app import Application, Configuration
-from controller.project import NO_FRONTEND, Project
+from controller.project import NO_AUTHENTICATION, NO_FRONTEND, Project
 from controller.templating import Templating
 
 
 class AuthTypes(str, Enum):
+    no = "no"
     postgres = "postgres"
     mysql = "mysql"
     neo4j = "neo4j"
@@ -157,6 +158,9 @@ def create_project(
 
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
+
+    if auth == "no":
+        auth = NO_AUTHENTICATION
 
     if frontend == "no":
         frontend = NO_FRONTEND

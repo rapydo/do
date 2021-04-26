@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from controller import PROJECT_DIR, gitter, log
 
+NO_AUTHENTICATION = "NO_AUTHENTICATION"
 NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
 GITKEEP = ".gitkeep"
