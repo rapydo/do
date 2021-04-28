@@ -63,7 +63,6 @@ changelogs = {
     "@ng-bootstrap/ng-bootstrap": "https://github.com/ng-bootstrap/ng-bootstrap/blob/master/CHANGELOG.md",
     "ngx-spinner": "https://github.com/Napster2210/ngx-spinner/releases",
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly/releases",
-    "jasmine-spec-reporter": "https://github.com/bcaudan/jasmine-spec-reporter/blob/master/CHANGELOG.md",
     "ajv": "https://github.com/ajv-validator/ajv/releases",
     # ## PYPI
     "schemathesis": "https://schemathesis.readthedocs.io/en/stable/changelog.html",
