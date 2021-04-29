@@ -88,7 +88,6 @@ class Project:
         self.expected_files.append(Path(".prettierignore"))
 
         self.fixed_files.append(Path(".gitattributes"))
-        self.fixed_files.append(Path(".pre-commit-config.yaml"))
         self.fixed_files.append(Path("pyproject.toml"))
 
         if auth or services:
