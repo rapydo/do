@@ -404,6 +404,10 @@ def check_versions(
     # )
 
     # dependencies = parsePrecommitConfig(
+    #     Path("../do/pre-commit-projects-config.yaml"), dependencies, "projects"
+    # )
+
+    # dependencies = parsePrecommitConfig(
     #     Path("../http-api/.pre-commit-config.yaml"),
     #     dependencies,
     #     "http-api",

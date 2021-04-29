@@ -17,7 +17,7 @@ repos:
       - id: pyupgrade
         args: [--py38-plus]
   - repo: https://github.com/ambv/black
-    rev: 20.8b1
+    rev: 21.4b2
     hooks:
       - id: black
   - repo: https://gitlab.com/pycqa/flake8

@@ -82,7 +82,6 @@ class Project:
         self.expected_files.append(self.p_path("backend", "tests", "__init__.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
-        self.expected_files.append(Path(".pre-commit-config.yaml"))
         self.expected_files.append(Path(".isort.cfg"))
         self.expected_files.append(Path("pyproject.toml"))
         self.expected_files.append(Path(".flake8"))
@@ -138,6 +137,8 @@ class Project:
         # Removed since 0.9
         self.obsolete_files.append(self.p_path("backend", "initialization"))
         self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
+        # Removed since 1.2
+        self.obsolete_files.append(Path(".pre-commit-config.yaml"))
         return True
 
     def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:
