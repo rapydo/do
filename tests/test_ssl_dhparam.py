@@ -90,17 +90,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "RabbitMQ is running, executing command to refresh the certificate",
         "New certificate successfully installed",
     )
-    # Shutoff services, only started to verify certificate creation
-    # exec_command(
-    #     capfd,
-    #     "-s rabbit,neo4j remove",
-    # )
 
-    exec_command(
-        capfd,
-        "ssl --force",
-        "No container found for proxy_1",
-    )
     exec_command(
         capfd,
         "ssl --chain-file /file",

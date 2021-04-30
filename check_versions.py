@@ -54,7 +54,7 @@ known_latests = {
         "ubuntu": "20.04",
     },
     # https://github.com/acmesh-official/acme.sh/releases
-    "acme": "2.8.8",
+    # "acme": "2.8.8",
 }
 
 # https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
@@ -191,18 +191,18 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
                 print(changelog)
             print("")
 
-    elif category in ["ACME"]:
-        tokens = lib.split(":")
+    # elif category in ["ACME"]:
+    #     tokens = lib.split(":")
 
-        latest = glom(known_latests, "acme", default="????")
+    #     latest = glom(known_latests, "acme", default="????")
 
-        if latest == "????":
-            log.warning("Unknown latest version acme.sh")
+    #     if latest == "????":
+    #         log.warning("Unknown latest version acme.sh")
 
-        if latest != tokens[1]:
-            print(f"# [ACME]: {tokens[1]} -> {latest}")
-            print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
-            print("")
+    #     if latest != tokens[1]:
+    #         print(f"# [ACME]: {tokens[1]} -> {latest}")
+    #         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
+    #         print("")
     elif category == "url":
         if lib not in prevent_duplicates:
 
@@ -284,11 +284,11 @@ def parseDockerfile(
                         dependencies.setdefault(service, {})
                         dependencies[service].setdefault("pip", [])
                         dependencies[service]["pip"].append(t)
-            elif "ENV ACMEV" in line:
-                line = line.replace("ENV ACMEV", "").strip()
-                line = line.replace('"', "").strip()
+            # elif "ENV ACMEV" in line:
+            #     line = line.replace("ENV ACMEV", "").strip()
+            #     line = line.replace('"', "").strip()
 
-                dependencies[service]["ACME"] = [f"ACME:{line}"]
+            #     dependencies[service]["ACME"] = [f"ACME:{line}"]
 
     return dependencies
 
