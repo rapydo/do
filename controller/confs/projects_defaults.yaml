@@ -139,8 +139,6 @@ variables:
     # in production mode this will be mapped on port 80
     PROXY_DEV_PORT: 81
     PROXY_PROD_PORT: 443
-    # LETSENCRYPT_MODE: --staging
-    LETSENCRYPT_MODE:
     DOMAIN_ALIASES:
     SET_UNSAFE_EVAL:
     # SET_UNSAFE_EVAL: "unsafe-eval"
