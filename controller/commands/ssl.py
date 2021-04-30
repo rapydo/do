@@ -21,12 +21,6 @@ def ssl(
         help="Create a volatile proxy service to request the certificate",
         show_default=False,
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force Let's Encrypt to renew the certificate",
-        show_default=False,
-    ),
     no_tty: bool = typer.Option(
         False,
         "--no-tty",
@@ -83,11 +77,7 @@ def ssl(
 
         return
 
-    command = "/bin/bash updatecertificates"
-    if force:
-        command = f"{command} --force"
-
-    command = f"{command} {Configuration.hostname}"
+    command = f"/bin/bash updatecertificates {Configuration.hostname}"
 
     dc = Compose(files=Application.data.files)
 
