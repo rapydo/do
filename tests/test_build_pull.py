@@ -1,5 +1,5 @@
 """
-This module will test the build and ancestors commands
+This module will test the build and pull commands
 """
 import os
 
@@ -7,7 +7,6 @@ from faker import Faker
 from git import Repo
 
 from controller import __version__
-from controller.dockerizing import Dock
 from tests import Capture, create_project, exec_command, random_project_name
 
 
@@ -146,36 +145,6 @@ RUN mkdir xyz
         "Custom images built",
     )
 
-    exec_command(
-        capfd,
-        "ancestors XYZ",
-        "No child found for XYZ",
-    )
-
-    dock = Dock()
-    img = dock.images().pop(0)
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(img).get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    exec_command(
-        capfd,
-        f"ancestors {img_id}",
-        f"Finding all children and (grand)+ children of {img_id}",
-    )
-
-    # sha256:c1a845de80526fcab136f9fab5f83BLABLABLABLABLA
-    img_id = dock.image_info(f"rapydo/rabbitmq:{__version__}").get("Id")
-    # => c1a845de8052
-    img_id = img_id[7:19]
-    # rapydo/rabbitmq has a child: testbuild/rabbit just created
-    exec_command(
-        capfd,
-        f"ancestors {img_id}",
-        f"Finding all children and (grand)+ children of {img_id}",
-        # "testbuild/rabbit",
-    )
-
     # Rebuild core rabbit image => custom rabbit is now obsolete
     # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild
@@ -193,13 +162,6 @@ RUN mkdir xyz
         "built on ",
         " that changed on ",
         "Update it with: rapydo --services rabbit build",
-    )
-
-    # rabbit images has no longer any child because it is just rebuilt
-    exec_command(
-        capfd,
-        f"ancestors {img_id}",
-        f"Finding all children and (grand)+ children of {img_id}",
     )
 
     # Add a second service with the same image to test redundant builds

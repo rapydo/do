@@ -133,7 +133,9 @@ class Packages:
             if program == "docker":  # pragma: no cover
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.critical("Missing requirement: {} not found.{}", program, hints)
+            log.critical(
+                "A mandatory dependency is missing: {} not found{}", program, hints
+            )
             sys.exit(1)
 
         v = LooseVersion(found_version)
