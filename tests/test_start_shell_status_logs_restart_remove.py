@@ -200,13 +200,13 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend,frontend logs --tail 1",
-        "Enabled services: ['backend', frontend']",
+        "Enabled services: ['backend', 'frontend']",
     )
 
     exec_command(
         capfd,
         "-s frontend,backend logs --tail 1",
-        "Enabled services: ['backend', frontend']",
+        "Enabled services: ['backend', 'frontend']",
     )
 
     exec_command(
