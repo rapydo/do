@@ -18,7 +18,7 @@ def get_services(
     if excluded_services_list:
 
         splitted = excluded_services_list.split(",")
-        return [s for s in default if s not in splitted]
+        return sorted([s for s in default if s not in splitted])
 
     return sorted(default)
 
