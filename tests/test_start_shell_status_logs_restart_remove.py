@@ -230,13 +230,13 @@ def test_all(capfd: Capture) -> None:
     # Invalid services in -s are refused
     exec_command(
         capfd,
-        "-s invalid --tail 1",
+        "-s invalid logs --tail 1",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend,invalid --tail 1",
+        "-s backend,invalid logs --tail 1",
         "No such service: invalid",
     )
 
