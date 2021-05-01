@@ -235,7 +235,6 @@ class CommandsData:
         files: List[Path] = [],
         base_files: List[Path] = [],
         services: List[str] = [],
-        services_list: Optional[str] = None,
         active_services: List[str] = [],
         base_services: List[Any] = [],
         compose_config: List[Any] = [],
@@ -244,7 +243,6 @@ class CommandsData:
         self.files = files
         self.base_files = base_files
         self.services = services
-        self.services_list = services_list
         self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
@@ -382,7 +380,6 @@ class Application:
             files=self.files,
             base_files=self.base_files,
             services=self.enabled_services,
-            services_list=Configuration.services_list,
             active_services=self.active_services,
             base_services=self.base_services,
             compose_config=self.compose_config,
