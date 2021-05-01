@@ -175,6 +175,86 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "-s backend -S frontend logs",
+        "Incompatibile use of both --services/-s and --skip-services/-S options",
+    )
+
+    exec_command(
+        capfd,
+        "logs --tail 1",
+        "Enabled services: ['backend', 'frontend', 'neo4j', 'postgres', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-s logs --tail 1",
+        "Enabled services: ['backend', frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend logs --tail 1",
+        "Enabled services: ['backend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s frontend logs --tail 1",
+        "Enabled services: ['frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend,frontend logs --tail 1",
+        "Enabled services: ['backend', frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s frontend,backend logs --tail 1",
+        "Enabled services: ['backend', frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend logs --tail 1",
+        "Enabled services: ['backend', 'neo4j', 'postgres', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend,postgres logs --tail 1",
+        "Enabled services: ['backend', 'neo4j', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend,postgres,neo4j logs --tail 1",
+        "Enabled services: ['backend', 'rabbit']",
+    )
+
+    # Invalid services in -s are refused
+    exec_command(
+        capfd,
+        "-s invalid --tail 1",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend,invalid --tail 1",
+        "No such service: invalid",
+    )
+
+    # Invalid services in -S are simply ignored
+    exec_command(
+        capfd,
+        "-S frontend,postgres,neo4j,invalid logs --tail 1",
+        "Enabled services: ['backend', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
         "-s backend remove --net",
         "Incompatibile options --networks and --service",
     )

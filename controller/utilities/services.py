@@ -8,11 +8,19 @@ from controller import log
 from controller.project import ANGULAR
 
 
-def get_services(services: Optional[str], default: List[str]) -> List[str]:
+def get_services(
+    services: Optional[str], excluded_services_list: Optional[str], default: List[str]
+) -> List[str]:
 
     if services:
-        return services.split(",")
-    return default
+        return sorted(services.split(","))
+
+    if excluded_services_list:
+
+        splitted = excluded_services_list.split(",")
+        return [s for s in default if s not in splitted]
+
+    return sorted(default)
 
 
 def walk_services(

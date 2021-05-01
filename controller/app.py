@@ -43,11 +43,12 @@ BASE_UID = 1000
 
 class Configuration:
     projectrc: Dict[str, str] = {}
-    # To be better charactirized. This is a:
+    # To be better characterized. This is a:
     # {'variables': 'env': Dict[str, str]}
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
     specs: MutableMapping[str, str] = OrderedDict()
     services_list: Optional[str]
+    excluded_services_list: Optional[str]
     environment: Dict[str, str]
 
     action: Optional[str] = None
@@ -126,7 +127,14 @@ def controller_cli_options(
         None,
         "--services",
         "-s",
-        help="Comma separated list of services",
+        help="Comma separated list of services to be included",
+        callback=projectrc_values,
+    ),
+    excluded_services_list: Optional[str] = typer.Option(
+        None,
+        "--skip-services",
+        "-S",
+        help="Comma separated list of services to be exluded",
         callback=projectrc_values,
     ),
     hostname: str = typer.Option(
@@ -207,7 +215,13 @@ def controller_cli_options(
 
     Configuration.set_action(ctx.invoked_subcommand)
 
+    if services_list and excluded_services_list:
+        Application.exit(
+            "Incompatibile use of both --services/-s and --skip-services/-S options"
+        )
+
     Configuration.services_list = services_list
+    Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
     Configuration.testing = testing
     Configuration.privileged = privileged
@@ -601,8 +615,12 @@ class Application:
         )
 
         self.enabled_services = services.get_services(
-            Configuration.services_list, default=self.active_services
+            Configuration.services_list,
+            Configuration.excluded_services_list,
+            default=self.active_services,
         )
+
+        log.debug("Enabled services: {}", self.enabled_services)
 
         self.create_datafile()
 
