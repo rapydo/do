@@ -235,7 +235,7 @@ class CommandsData:
         files: List[Path] = [],
         base_files: List[Path] = [],
         services: List[str] = [],
-        services_list: Any = None,
+        services_list: Optional[str] = None,
         active_services: List[str] = [],
         base_services: List[Any] = [],
         compose_config: List[Any] = [],
@@ -430,7 +430,7 @@ class Application:
         Packages.check_python_package("pip", min_version="10.0.0")
 
     def read_specs(self, read_extended: bool = True) -> None:
-        """ Read project configuration """
+        """Read project configuration"""
 
         try:
 
@@ -527,7 +527,7 @@ class Application:
 
     @staticmethod
     def check_internet_connection() -> None:
-        """ Check if connected to internet """
+        """Check if connected to internet"""
 
         try:
             requests.get("https://www.google.com")
@@ -584,7 +584,7 @@ class Application:
 
     @staticmethod
     def git_submodules(from_path: Optional[Path] = None) -> None:
-        """ Check and/or clone git projects """
+        """Check and/or clone git projects"""
 
         repos: Dict[str, str] = glom(
             Configuration.specs,
