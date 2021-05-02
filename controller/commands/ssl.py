@@ -87,6 +87,11 @@ def ssl(
         else:
             dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
     except SystemExit as e:
+
+        if not volatile:
+            log.info(
+                "If you proxy container is not running, try with rapydo ssl --volatile"
+            )
         sys.exit(e.code)
     else:
 
@@ -113,4 +118,4 @@ def ssl(
                 disable_tty=no_tty,
             )
 
-        log.info("New certificate successfully installed")
+        log.info("New certificate successfully enabled")

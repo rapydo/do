@@ -88,7 +88,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Self signed SSL certificate successfully created",
         "Neo4j is running, but it will reload the certificate by itself",
         "RabbitMQ is running, executing command to refresh the certificate",
-        "New certificate successfully installed",
+        "New certificate successfully enabled",
     )
 
     exec_command(
