@@ -523,15 +523,19 @@ class Application:
             return True
         else:  # pragma: no cover
             if r > c:
-                action = f"Upgrade your controller to version {r}"
+                ac = f"Upgrade your controller to version {r}"
             else:
-                action = f"Downgrade your controller to version {r}"
-                action += " or upgrade your project"
+                ac = f"Downgrade your controller to version {r} or upgrade your project"
 
-            msg = "RAPyDo version is not compatible\n\n"
-            msg += "This project requires rapydo {}, you are using {}\n\n{}\n".format(
-                r, c, action
-            )
+            msg = f"""RAPyDo version is not compatible.
+
+This project requires rapydo {r}, you are using {c}. {ac}
+
+You can use of one:
+  -  rapydo install               (install in editable from submodules/do, if available)
+  -  rapydo install --no-editable (install from pypi)
+
+"""
 
             log.critical(msg)
             sys.exit(1)
