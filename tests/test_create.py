@@ -305,6 +305,8 @@ def test_create(capfd: Capture) -> None:
         )
         if service == "mysql":
             active_services = "['backend', 'mariadb']"
+        elif service == "mongo":
+            active_services = "['backend', 'mongodb']"
         elif service == "celery":
             active_services = "['backend', 'celery', 'flower', 'rabbit']"
         else:
