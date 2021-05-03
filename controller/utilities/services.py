@@ -85,8 +85,8 @@ def apply_variables(
 
 
 vars_to_services_mapping: Dict[str, List[str]] = {
-    "CELERYUI_USER": ["celeryui"],
-    "CELERYUI_PASSWORD": ["celeryui"],
+    "CELERYUI_USER": ["flower"],
+    "CELERYUI_PASSWORD": ["flower"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
     "REDIS_PASSWORD": ["redis"],
@@ -210,7 +210,7 @@ def check_mongodb_password(pwd: Optional[str]) -> None:
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
 
-    if service in ["backend", "celery", "celeryui", "celery-beat"]:
+    if service in ["backend", "celery", "flower", "celery-beat"]:
         return "developer"
 
     if service in ["frontend"]:

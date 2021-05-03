@@ -22,10 +22,6 @@ class ServiceTypes(str, Enum):
     mongo = "mongo"
 
 
-# show_default=False,
-# autocompletion=Application.autocomplete_interfaces,
-
-
 @Application.app.command(help="Execute predefined interfaces to services")
 def interfaces(
     service: ServiceTypes = typer.Argument(

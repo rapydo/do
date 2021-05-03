@@ -304,17 +304,17 @@ def test_create(capfd: Capture) -> None:
             "Project testservices successfully created",
         )
         if service == "mysql":
-            services = ["mariadb"]
+            actived_services = ["_ mariadb"]
         elif service == "celery":
-            services = ["celery", "celeryui", "rabbit"]
+            actived_services = ["_ celery", "_ flower", "_ rabbit"]
         else:
-            services = [service]
+            actived_services = [f"_ {service}"]
 
         exec_command(
             capfd,
             "-p testservices list services",
             "List of active services:",
-            *services,
+            *actived_services,
         )
 
     # Test Celery Activation

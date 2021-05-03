@@ -28,6 +28,30 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "interfaces swagger",
+        "Deprecated interface swagger, use swaggerui instead",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces sqlalchemy",
+        "Deprecated interface sqlalchemy, use adminer instead",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces mongo",
+        "Deprecated interface mongo, use adminer instead",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces celery",
+        "Deprecated interface celery, use flower instead",
+    )
+
+    exec_command(
+        capfd,
         "interfaces",
         "Missing argument",
         "swaggerui,",

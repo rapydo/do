@@ -32,7 +32,7 @@ project_configuration:
       MONGOUI_PASSWORD: {{ "RANDOM"| password }}
       MONGOUI_USER: mongo
       {% endif -%}
-      {% if service == "celeryui" -%}
+      {% if service == "flower" -%}
       CELERYUI_PASSWORD: {{ "RANDOM"| password }}
       CELERYUI_USER: {{ "RANDOM"| username }}
       {% endif -%}

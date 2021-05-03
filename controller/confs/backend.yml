@@ -593,9 +593,6 @@ services:
     networks:
       db_net:
       worker_net:
-    # depends_on:
-    #   - rabbit
-    #   # - celeryui
 
   celery-beat:
     restart: always
