@@ -305,6 +305,7 @@ def test_create(capfd: Capture) -> None:
             ),
             "Project testservices successfully created",
         )
+        # Note: active services are sorted alphabetically
         if service == "mysql":
             active_services = "['backend', 'mariadb']"
         elif service == "postgres":
@@ -316,11 +317,11 @@ def test_create(capfd: Capture) -> None:
         elif service == "celery":
             active_services = "['backend', 'celery', 'flower', 'rabbit']"
         elif service == "rabbit":
-            active_services = "['backend', 'rabbit', 'postgres']"
+            active_services = "['backend', 'postgres', 'rabbit']"
         elif service == "redis":
-            active_services = "['backend', 'redis', 'postgres']"
+            active_services = "['backend', 'postgres', 'redis']"
         elif service == "pushpin":
-            active_services = "['backend', 'pushpin', 'postgres']"
+            active_services = "['backend', 'postgres', 'pushpin']"
         elif service == "ftp":
             active_services = "['backend', 'ftp', 'postgres']"
         else:  # pragma: no cover
