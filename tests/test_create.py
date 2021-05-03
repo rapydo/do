@@ -7,6 +7,8 @@ and will only use the specific configuration needed by the test itself
 import os
 from pathlib import Path
 
+import pytest
+
 from controller.templating import Templating
 from tests import Capture, TemporaryRemovePath, exec_command
 
@@ -305,12 +307,24 @@ def test_create(capfd: Capture) -> None:
         )
         if service == "mysql":
             active_services = "['backend', 'mariadb']"
+        elif service == "postgres":
+            active_services = "['backend', 'postgres']"
+        elif service == "neo4j":
+            active_services = "['backend', 'neo4j']"
         elif service == "mongo":
             active_services = "['backend', 'mongodb']"
         elif service == "celery":
             active_services = "['backend', 'celery', 'flower', 'rabbit']"
-        else:
-            active_services = f"['backend', '{service}']"
+        elif service == "rabbit":
+            active_services = "['backend', 'rabbit', 'postgres']"
+        elif service == "redis":
+            active_services = "['backend', 'redis', 'postgres']"
+        elif service == "pushpin":
+            active_services = "['backend', 'pushpin', 'postgres']"
+        elif service == "ftp":
+            active_services = "['backend', 'ftp', 'postgres']"
+        else:  # pragma: no cover
+            pytest.fail(f"Unrecognized service {service}")
 
         exec_command(
             capfd,
