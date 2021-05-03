@@ -819,7 +819,6 @@ You can use of one:
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
             "allservices": list(self.services_dict.keys()),
-            "interfaces": self.get_available_interfaces(),
         }
 
         with open(DATAFILE, "w+") as outfile:
@@ -834,7 +833,6 @@ You can use of one:
                 # This is needed to let mypy understand the correct type
                 output["submodules"] = datafile.get("submodules")
                 output["services"] = datafile.get("services")
-                output["interfaces"] = datafile.get("interfaces")
                 output["allservices"] = datafile.get("allservices")
                 return output
         except FileNotFoundError:
@@ -846,25 +844,6 @@ You can use of one:
         if not d:
             return []
         values = d.get("services", [])
-        if not incomplete:
-            return values
-        return [x for x in values if x.startswith(incomplete)]
-
-    def get_available_interfaces(self) -> List[str]:
-        available_interfaces = list()
-        if self.compose_config:
-            for s in self.compose_config:
-                name = s.get("name", "")
-                if name.endswith("ui"):
-                    available_interfaces.append(name[0:-2])
-        return available_interfaces
-
-    @staticmethod
-    def autocomplete_interfaces(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("interfaces", [])
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]

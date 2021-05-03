@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Optional
 
 import typer
@@ -7,13 +8,29 @@ from controller.app import Application, Configuration
 from controller.compose import Compose
 
 
+class ServiceTypes(str, Enum):
+
+    # New values
+    swaggerui = "swaggerui"
+    adminer = "adminer"
+    flower = "flower"
+
+    # Old values
+    swagger = "swagger"
+    celery = "celery"
+    sqlalchemy = "sqlalchemy"
+    mongo = "mongo"
+
+
+# show_default=False,
+# autocompletion=Application.autocomplete_interfaces,
+
+
 @Application.app.command(help="Execute predefined interfaces to services")
 def interfaces(
-    service: str = typer.Argument(
-        "list",
+    service: ServiceTypes = typer.Argument(
+        ...,
         help="Service name",
-        show_default=False,
-        autocompletion=Application.autocomplete_interfaces,
     ),
     detach: bool = typer.Option(
         False,
@@ -30,19 +47,24 @@ def interfaces(
 ) -> bool:
     Application.get_controller().controller_init()
 
-    if service == "list":
-        print("List of available interfaces:")
-        for service in Application.get_controller().get_available_interfaces():
-            print(f" - {service}")
-        return True
+    # Deprecated since 1.2
+    if service.value == "celery":
+        log.warning("Deprecated interface celery, use flower instead")
+        return False
 
-    service = service + "ui"
+    if service.value == "swagger":
+        log.warning("Deprecated interface swagger, use swaggerui instead")
+        return False
 
-    if not container_service_exists(Application.data.services_dict, service):
-        suggest = "You can use rapydo interfaces list to get available interfaces"
-        Application.exit("Container '{}' is not defined\n{}", service, suggest)
+    if service.value == "sqlalchemy":
+        log.warning("Deprecated interface sqlalchemy, use adminer instead")
+        return False
 
-    info = container_info(Application.data.services_dict, service)
+    if service.value == "mongo":
+        log.warning("Deprecated interface mongo, use adminer instead")
+        return False
+
+    info = container_info(Application.data.services_dict, service.value)
     try:
         current_ports = info.get("ports", []).pop(0)
     except IndexError:  # pragma: no cover
@@ -55,7 +77,7 @@ def interfaces(
 
     publish = [f"{port}:{current_ports.target}"]
 
-    if service == "swaggerui":
+    if service.value == "swaggerui":
         if Configuration.production:
             prot = "https"
         else:
@@ -68,26 +90,8 @@ def interfaces(
     else:
         log.info("Launching interface: {}", service)
 
-    # from contextlib import contextmanager
-
-    # @contextmanager
-    # def suppress_stdout():
-    #     """
-    #     http://thesmithfam.org/blog/2012/10/25/
-    #     temporarily-suppress-console-output-in-python/
-    #     """
-    #     with open(os.devnull, "w") as devnull:
-    #         old_stdout = sys.stdout
-    #         sys.stdout = devnull
-    #         try:
-    #             yield
-    #         finally:
-    #             sys.stdout = old_stdout
-
     dc = Compose(files=Application.data.files)
 
-    # with suppress_stdout():
-    #     # NOTE: this is suppressing also image build...
     dc.command("pull", {"SERVICE": [service]})
 
     dc.create_volatile_container(service, publish=publish, detach=detach)

@@ -23,41 +23,40 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "interfaces XYZ",
-        "Container 'XYZui' is not defined",
-        "You can use rapydo interfaces list to get available interfaces",
-    )
-    exec_command(
-        capfd,
-        "interfaces list",
-        "List of available interfaces:",
-        " - mongo",
-        " - sqlalchemy",
-        " - swagger",
-        " - celery",
+        "invalid choice: XYZ",
     )
 
     exec_command(
         capfd,
-        "interfaces sqlalchemy --port XYZ --detach",
+        "interfaces",
+        "Missing argument",
+        "swaggerui,",
+        "adminer,",
+        "flower,",
+    )
+
+    exec_command(
+        capfd,
+        "interfaces adminer --port XYZ --detach",
         "Invalid value for '--port' / '-p': XYZ is not a valid integer",
     )
 
     exec_command(
         capfd,
-        "interfaces sqlalchemy --detach",
-        "Launching interface: sqlalchemyui",
+        "interfaces adminer --detach",
+        "Launching interface: adminer",
         "docker-compose command: 'run'",
     )
     exec_command(
         capfd,
-        "interfaces sqlalchemy --port 123 --detach",
-        "Launching interface: sqlalchemyui",
+        "interfaces adminer --port 123 --detach",
+        "Launching interface: adminer",
         "docker-compose command: 'run'",
     )
 
     exec_command(
         capfd,
-        "interfaces swagger --port 124 --detach",
+        "interfaces swaggerui --port 124 --detach",
         "You can access SwaggerUI web page here: http://localhost:124",
     )
 
@@ -70,7 +69,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod interfaces swagger --port 124 --detach",
+        "--prod interfaces swaggerui --port 124 --detach",
         "You can access SwaggerUI web page here: https://localhost:124",
     )
 
