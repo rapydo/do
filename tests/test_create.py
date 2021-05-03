@@ -308,13 +308,13 @@ def test_create(capfd: Capture) -> None:
         elif service == "celery":
             active_services = "['backend', 'celery', 'flower', 'rabbit']"
         else:
-            active_services = "['backend', service]"
+            active_services = f"['backend', '{service}']"
 
         exec_command(
             capfd,
             "-p testservices list services",
             "List of active services:",
-            active_services,
+            f"Enabled services: {active_services}",
         )
 
     # Test Celery Activation
