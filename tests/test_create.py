@@ -305,25 +305,24 @@ def test_create(capfd: Capture) -> None:
             ),
             "Project testservices successfully created",
         )
-        # Note: active services are sorted alphabetically
         if service == "mysql":
-            active_services = "['backend', 'mariadb']"
+            active_services = ["backend", "mariadb"]
         elif service == "postgres":
-            active_services = "['backend', 'postgres']"
+            active_services = ["backend", "postgres"]
         elif service == "neo4j":
-            active_services = "['backend', 'neo4j']"
+            active_services = ["backend", "neo4j"]
         elif service == "mongo":
-            active_services = "['backend', 'mongodb']"
+            active_services = ["backend", "mongodb"]
         elif service == "celery":
-            active_services = "['backend', 'celery', 'flower', 'rabbit']"
+            active_services = ["backend", "celery", "flower", "rabbit"]
         elif service == "rabbit":
-            active_services = "['backend', 'postgres', 'rabbit']"
+            active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
-            active_services = "['backend', 'postgres', 'redis']"
+            active_services = ["backend", "postgres", "redis"]
         elif service == "pushpin":
-            active_services = "['backend', 'postgres', 'pushpin']"
+            active_services = ["backend", "postgres", "pushpin"]
         elif service == "ftp":
-            active_services = "['backend', 'ftp', 'postgres']"
+            active_services = ["backend", "ftp", "postgres"]
         else:  # pragma: no cover
             pytest.fail(f"Unrecognized service {service}")
 
@@ -331,7 +330,7 @@ def test_create(capfd: Capture) -> None:
             capfd,
             "-p testservices list services",
             "List of active services:",
-            f"Enabled services: {active_services}",
+            f"Enabled services: {sorted(active_services)}",
         )
 
     # Test Celery Activation
