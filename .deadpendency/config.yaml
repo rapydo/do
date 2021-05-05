@@ -5,3 +5,9 @@ additional-deps:
   python:
     - name: plumbum
       repo: tomerfiliba/plumbum
+
+    - name: pytz
+      repo: stub42/pytz
+
+    - name: python-dateutil
+      repo: dateutil/dateutil
