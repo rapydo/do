@@ -97,7 +97,3 @@ def interfaces(
 
 def container_info(services_dict, service_name):
     return services_dict.get(service_name, None)
-
-
-def container_service_exists(services_dict, service_name):
-    return container_info(services_dict, service_name) is not None

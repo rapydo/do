@@ -1,0 +1,2 @@
+rules-config:
+  repository-is-fork: disabled
