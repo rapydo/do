@@ -18,7 +18,7 @@ setup(
     install_requires=[
         "docker-compose==1.28.4",
         "dockerfile-parse==1.1.0",
-        # "python-dateutil",
+        "python-dateutil",
         "pytz",
         "loguru",
         "jinja2",
