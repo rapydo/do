@@ -1,2 +1,7 @@
 rules-config:
   repository-is-fork: disabled
+
+additional-deps:
+  python:
+    - name: plumbum
+      repo: tomerfiliba/plumbum
