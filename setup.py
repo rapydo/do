@@ -21,7 +21,6 @@ setup(
         "python-dateutil",
         "pytz",
         "loguru",
-        "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
         "plumbum",

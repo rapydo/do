@@ -15,7 +15,6 @@ import yaml
 from bs4 import BeautifulSoup
 from glom import glom
 from loguru import logger as log
-from prettyprinter import pprint as pp
 
 Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
@@ -355,10 +354,7 @@ def parsePrecommitConfig(f: Path, dependencies: Dependencies, key: str) -> Depen
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
 @click.option("--npm-timeout", default=1)
-@click.option("--verbose", is_flag=True, default=False)
-def check_versions(
-    skip_angular: bool = False, npm_timeout: int = 1, verbose: bool = False
-) -> None:
+def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
 
     dependencies: Dependencies = {}
 
@@ -479,9 +475,6 @@ def check_versions(
             del filtered_dependencies[service]
 
         # print(service)
-
-    if verbose:
-        pp(filtered_dependencies)
 
 
 if __name__ == "__main__":
