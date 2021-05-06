@@ -110,6 +110,7 @@ services:
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
       UPLOAD_PATH: ${UPLOAD_PATH}
+      DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
 
       # enable /auth/login and /api/admin/users methods
