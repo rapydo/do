@@ -17,6 +17,8 @@ volumes:
     driver: local
   mongodata:
     driver: local
+  data_imports:
+    driver: local
   pureftpd:
     driver: local
   letsencrypt_certs:
@@ -238,6 +240,7 @@ services:
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
       - secrets:${APP_SECRETS}
       - letsencrypt_certs:/etc/letsencrypt
+      - data_imports:${DATA_IMPORT_FOLDER}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -390,6 +393,7 @@ services:
       - graphdata:/data
       # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
+      - data_imports:/var/lib/neo4j/import
       - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:

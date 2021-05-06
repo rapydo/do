@@ -134,6 +134,7 @@ variables:
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     APP_SECRETS: /secrets
     UPLOAD_PATH: /uploads
+    DATA_IMPORT_FOLDER: /imports
 
     PROXY_HOST: myproxy.dockerized.io
     # in production mode this will be mapped on port 80
