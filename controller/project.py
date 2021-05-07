@@ -346,22 +346,18 @@ class Project:
 
         r = gitter.get_repo(str(folder))
         if r is None or gitter.get_origin(r) is None:
-            return """You are not in a git repository
+            return f"""You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                """.format(
-                os.getcwd()
-            )
+Verify that you are in the right folder, now you are in: {os.getcwd()}
+                """
 
         for fpath in self.expected_main_folders:
             if not folder.joinpath(fpath).is_dir():
 
-                return """Folder not found: {}
+                return f"""Folder not found: {fpath}
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                    """.format(
-                    fpath, Path.cwd()
-                )
+Verify that you are in the right folder, now you are in: {Path.cwd()}
+                    """
 
         return None
 

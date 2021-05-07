@@ -114,7 +114,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
     exec_command(
         capfd,
-        "ssl --chain-file {f} --key-file {f}".format(f=pconf),
+        f"ssl --chain-file {pconf} --key-file {pconf}"
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
     )

@@ -17,6 +17,7 @@ from controller.compose import Compose
 class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
+    mariadb = "mariadb"
 
 
 # Returned from a function just to be able to easily test it
@@ -155,6 +156,9 @@ def backup(
             dc.exec_command(service_name, command=command, disable_tty=True)
 
         log.info("Backup completed: data{}", backup_path)
+
+    if service_name == Services.mariadb:
+        log.error("Not implemented yet")
 
     if restart and not dry_run:
         dc.command("restart", {"SERVICE": restart})

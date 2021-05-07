@@ -13,6 +13,7 @@ from controller.compose import Compose
 class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
+    mariadb = "mariadb"
 
 
 @Application.app.command(help="Restore a backup of one service")
@@ -135,6 +136,9 @@ def restore(
         )
 
         log.info("Restore from data{} completed", backup_path)
+
+    if service_name == Services.mariadb:
+        log.error("Not implemented yet")
 
     if restart:
         dc.command("restart", {"SERVICE": restart})

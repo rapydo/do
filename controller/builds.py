@@ -63,9 +63,7 @@ def find_templates_build(base_services):
 
             if template_image is None:  # pragma: no cover
                 log.critical(
-                    "Template builds must have a name, missing for {}".format(
-                        template_name
-                    )
+                    "Template builds must have a name, missing for {}", template_name
                 )
                 sys.exit(1)
 

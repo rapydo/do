@@ -119,13 +119,11 @@ services:
 
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write(
-            """
-FROM rapydo/rabbitmq:{}
+            f"""
+FROM rapydo/rabbitmq:{__version__}
 # Just a simple command to differentiate from the parent
 RUN mkdir xyz
-""".format(
-                __version__
-            )
+"""
         )
 
     r = Repo(".")

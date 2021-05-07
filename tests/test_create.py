@@ -176,7 +176,7 @@ def test_create(capfd: Capture) -> None:
         capfd,
         create_command,
         "Project folder already exists: projects/first/confs",
-        "A backup of {f} is saved as {f}.bak".format(f=pconf),
+        f"A backup of {pconf} is saved as {pconf}.bak",
         "Project first successfully created",
     )
 
@@ -300,9 +300,7 @@ def test_create(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "create testservices {opt} --auth {auth} {service}".format(
-                opt=opt, auth=auth, service=serv_opt
-            ),
+            f"create testservices {opt} --auth {auth} {serv_opt}",
             "Project testservices successfully created",
         )
         if service == "mysql":

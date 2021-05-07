@@ -60,19 +60,12 @@ def ssl(
         log.info("Unable to automatically perform the requested operation")
         log.info("You can execute the following commands by your-self:")
 
+        container = f"{Configuration.project}_{service}_1"
+        letsencrypt_path = "/etc/letsencrypt/real"
         print("")
-        print(
-            "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
-                chain_file, Configuration.project, service
-            )
-        )
-        print(
-            "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
-                key_file, Configuration.project, service
-            )
-        )
-
-        print(f'rapydo shell {service} "nginx -s reload"')
+        print(f"docker cp {chain_file} {container}:{letsencrypt_path}/fullchain1.pem")
+        print(f"docker cp {key_file} {container}:{letsencrypt_path}/privkey1.pem")
+        print(f"rapydo shell {service} 'nginx -s reload'")
         print("")
 
         return

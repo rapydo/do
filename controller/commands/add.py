@@ -185,12 +185,12 @@ def create_component(
     with open(module_path) as f:
         module = f.read().splitlines()
 
-    CNAME = "{}Component".format(name.title().replace(" ", ""))
+    normalized_name = name.title().replace(" ", "")
+    CNAME = f"{normalized_name}Component"
 
     # Add component import
-    import_line = "import {{ {} }} from '@app/components/{}/{}';".format(
-        CNAME, name, name
-    )
+    import_line = f"import {{ {CNAME} }} from '@app/components/{name}/{name}';"
+
     for idx, row in enumerate(module):
         if import_line in row:
             log.info("Import already included in module file")
@@ -273,7 +273,8 @@ def create_service(
     with open(module_path) as f:
         module = f.read().splitlines()
 
-    SNAME = "{}Service".format(name.title().replace(" ", ""))
+    normalized_name = name.title().replace(" ", "")
+    SNAME = f"{normalized_name}Service"
 
     # Add service import
     import_line = f"import {{ {SNAME} }} from '@app/services/{name}';"

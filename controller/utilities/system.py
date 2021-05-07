@@ -21,14 +21,14 @@ def execute_command(command: str, parameters: List[str]) -> str:
 
         # Pattern in plumbum library for executing a shell command
         local_command = local[command]
-        log.debug("Executing command {} {}", command, parameters)
+        log.debug("Executing command {} {}", command, " ".join(parameters))
         return str(local_command(parameters))
     except CommandNotFound:
         raise ExecutionException(f"Command not found: {command}")
 
     except ProcessExecutionError:
         raise ExecutionException(
-            "Cannot execute command: {} {}".format(command, " ".join(parameters))
+            f"Cannot execute command: {command} {' '.join(parameters)}"
         )
 
 
