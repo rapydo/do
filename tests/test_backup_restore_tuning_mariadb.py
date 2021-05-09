@@ -31,7 +31,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty mysql", "Service mysql is reachable")
+    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
 
     # Just some delay extra delay. restapi init alone not always is enough...
     # time.sleep(5)
