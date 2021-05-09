@@ -158,6 +158,49 @@ def backup(
         log.info("Backup completed: data{}", backup_path)
 
     if service_name == Services.mariadb:
+
+        if not container_is_running:
+            Application.exit(
+                "The backup procedure requires {} running, please start your stack",
+                service_name,
+            )
+
+        log.info("Starting backup on {}...", service_name)
+
+        tmp_backup_path = f"/tmp/{now}.sql"
+        # f"mariabackup --backup --target-dir=${tmp_backup_path} --user=$MYSQL_USER --password=$MYSQL_PASSWORD"
+        command = "ls /tmp"
+        # Creating backup on a tmp folder as mysql user
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Compress the sql with best compression ratio
+        command = f"gzip -9 {tmp_backup_path}"
+        command = "ls /tmp"
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Verify the gz integrity
+        command = f"gzip -t {tmp_backup_path}.gz"
+        command = "ls /tmp"
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Move the backup from /tmp to /backup (as root user)
+        backup_path = f"/backup/{service_name}/{now}.sql.gz"
+        command = f"mv {tmp_backup_path}.gz {backup_path}"
+        command = "ls /tmp"
+        if not dry_run:
+            dc.exec_command(service_name, command=command, disable_tty=True)
+
+        # log.info("Backup completed: data{}", backup_path)
+
         log.error("Not implemented yet")
 
     if restart and not dry_run:

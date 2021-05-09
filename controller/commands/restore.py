@@ -53,6 +53,8 @@ def restore(
         expected_ext = ".dump"
     elif service_name == Services.postgres:
         expected_ext = ".sql.gz"
+    elif service_name == Services.mariadb:
+        expected_ext = ".sql.gz"
 
     backup_dir = Path("data").joinpath("backup").joinpath(service_name)
     if not backup_dir.exists():
@@ -138,6 +140,15 @@ def restore(
         log.info("Restore from data{} completed", backup_path)
 
     if service_name == Services.mariadb:
+
+        if not container_is_running:
+            Application.exit(
+                "The restore procedure requires {} running, please start your stack",
+                service_name,
+            )
+
+        log.info("Starting restore on {}...", service_name)
+
         log.error("Not implemented yet")
 
     if restart:

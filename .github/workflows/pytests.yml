@@ -16,6 +16,7 @@ jobs:
         test:
           [
             add_upgrade,
+            backup_restore_tuning_mariadb,
             backup_restore_tuning_neo4j,
             backup_restore_tuning_postgres,
             base,
