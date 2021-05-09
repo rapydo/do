@@ -1,5 +1,3 @@
-import time
-import warnings
 from typing import Optional
 
 import typer

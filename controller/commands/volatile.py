@@ -1,6 +1,3 @@
-import time
-import warnings
-
 import typer
 
 from controller import log
