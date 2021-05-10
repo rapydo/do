@@ -233,6 +233,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
     assert services.get_default_command("postgres") == "psql"
+    assert "mysql -D" in services.get_default_command("mariadb")
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
     # )

@@ -240,4 +240,6 @@ def get_default_command(service: str) -> str:
     if service == "postgres":
         return "psql"
 
+    if service == "mariadb":
+        return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''
     return "bash"
