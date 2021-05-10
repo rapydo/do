@@ -241,12 +241,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "If you want to continue add --force flag",
     )
 
-    exec_command(
-        capfd,
-        "stop",
-        "Stack stopped",
-    )
-
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
@@ -264,6 +258,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         exec_query("select name, description from role"),
         "normal_user\tnormal_user",
     )
+
+    exec_command(
+        capfd,
+        "stop",
+        "Stack stopped",
+    )
+
     # 3) restore the dump
     exec_command(
         capfd,
@@ -276,6 +277,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "completed OK!",
         "Removing the temporary uncompressed folder",
         f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
+    )
+
+    exec_command(
+        capfd,
+        "restart",
+        "Stack restarted",
     )
 
     # 4) verify data match again point 1 (restore completed)
