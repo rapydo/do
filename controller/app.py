@@ -690,6 +690,7 @@ You can use of one:
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,
+                "envs": Configuration.environment,
             },
         )
         templating.save_template(PROJECTRC, t, force=True)

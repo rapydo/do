@@ -68,3 +68,7 @@ project_configuration:
       APP_MODE: test
       {% endif -%}
       {% endif -%}
+
+      {% for env_key in envs -%}
+      {{ env_key }}: {{ envs[env_key] }}
+      {% endfor %}

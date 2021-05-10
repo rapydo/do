@@ -295,6 +295,17 @@ def test_base(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "--prod -e MYVAR=MYVAL init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
+
+    with open(".projectrc") as projectrc:
+        lines = [line.strip() for line in projectrc.readlines()]
+        assert "MYVAR: MYVAL" in lines
+
+    exec_command(
+        capfd,
         "--prod check -i main --no-git --no-builds",
         "Checks completed",
     )
