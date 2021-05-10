@@ -133,6 +133,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     backup_folder.joinpath("2020_01_01-99_01_01.bak").touch(exist_ok=True)
     backup_folder.joinpath("2020_01_01-01_99_01.bak").touch(exist_ok=True)
     backup_folder.joinpath("2020_01_01-01_01_99.bak").touch(exist_ok=True)
+    backup_folder.joinpath("2020_01_01-01_01_99.gz").touch(exist_ok=True)
 
     exec_command(
         capfd,
