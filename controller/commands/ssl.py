@@ -90,7 +90,10 @@ def ssl(
 
         running_containers = dc.get_running_containers(Configuration.project)
         if "neo4j" in running_containers:
-            log.info("Neo4j is running, but it will reload the certificate by itself")
+            # This is not true!! A full restart is needed
+            # log.info("Neo4j is running, but it will reload the certificate by itself")
+            # But not implemented yet...
+            log.info("Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.")
 
         if "rabbit" in running_containers:
             log.info(
@@ -101,8 +104,8 @@ def ssl(
             # No longer be required. To test it after the creation of the new cert:
             #   echo -n | openssl s_client -showcerts -connect hostname:5671
 
-            # Note that this command only works if rabbit is executed in prod mode
-            # Otherwise it will file with the following error:
+            # Also note that this command only works if rabbit is executed in PROD mode
+            # Otherwise it will fail with the following error:
             #       Error: unable to perform an operation on node 'rabbit@rabbit'.
             #       Please see diagnostics information and suggestions below.
             dc.exec_command(

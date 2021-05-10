@@ -86,7 +86,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "ssl --volatile --no-tty",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
-        "Neo4j is running, but it will reload the certificate by itself",
+        "Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.",
         "RabbitMQ is running, executing command to refresh the certificate",
         "New certificate successfully enabled",
     )
