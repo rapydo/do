@@ -54,7 +54,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         exec_query("select name, description from role"),
-        "| normal_user       | User        |",
+        "normal_user\tUser",
     )
 
     exec_command(
