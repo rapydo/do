@@ -41,8 +41,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     def exec_query(query):
 
         command = 'shell --no-tty mariadb "'
-        command += f'sh -c \'mysql -uroot -e \\"{query};\\"'
-        command += '-p"$MYSQL_ROOT_PASSWORD"\' '
+        command += 'sh -c \'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" '
+        command += f'-e \\"{query};\\"'
+        # This is to close the sh -c 'command'
+        command += "'"
+        # This is to close the shell "command"
         command += '"'
 
         return command
