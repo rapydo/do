@@ -6,7 +6,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import log
+# from controller import log
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -237,7 +237,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f"restore mariadb {mariadb_dump_file}",
-        "MariaDB is running and the backup will temporary stop it. "
+        "MariaDB is running and the restore will temporary stop it. "
         "If you want to continue add --force flag",
     )
 
