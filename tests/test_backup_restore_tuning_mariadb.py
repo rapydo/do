@@ -222,4 +222,67 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
         os.remove("data/backup/mariadb/test.tar.gz")
 
-    # TO BE IMPLEMENTED
+    files = os.listdir("data/backup/mariadb")
+    files = [f for f in files if f.endswith(".tar.gz")]
+    files.sort()
+    mariadb_dump_file = files[-1]
+
+    exec_command(
+        capfd,
+        "restart",
+        "Stack restarted",
+    )
+
+    # Postgres restore not allowed if container is not running
+    exec_command(
+        capfd,
+        f"restore mariadb {mariadb_dump_file}",
+        "MariaDB is running and the backup will temporary stop it. "
+        "If you want to continue add --force flag",
+    )
+
+    exec_command(
+        capfd,
+        "stop",
+        "Stack stopped",
+    )
+
+    # Here we test the restore procedure:
+    # 1) verify some data in the database
+    exec_command(
+        capfd,
+        exec_query("select name, description from role"),
+        "normal_user\tUser",
+    )
+    # 2) Modify such data
+    exec_command(
+        capfd,
+        exec_query("update role SET description=name"),
+    )
+    exec_command(
+        capfd,
+        exec_query("select name, description from role"),
+        "normal_user\tnormal_user",
+    )
+    # 3) restore the dump
+    exec_command(
+        capfd,
+        f"restore mariadb {mariadb_dump_file}",
+        "Starting restore on mariadb...",
+        "Opening backup file",
+        "Removing current datadir",
+        "Restoring the backup",
+        "...done",
+        "completed OK!",
+        "Removing the temporary uncompressed folder",
+        f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
+    )
+
+    # 4) verify data match again point 1 (restore completed)
+    exec_command(
+        capfd,
+        exec_query("select name, description from role"),
+        "normal_user\tUser",
+    )
+
+    exec_command(capfd, "remove --all", "Stack removed")

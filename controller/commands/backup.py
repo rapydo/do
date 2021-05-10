@@ -185,8 +185,9 @@ def backup(
                 service_name, command=command, user="mysql", disable_tty=True
             )
 
-        # Compress the sql with best compression ratio
-        command = f"tar -zcf {tmp_backup_path}.tar.gz {tmp_backup_path}"
+        # Compress the prepared data folder. Used -C to skip the /tmp from folders paths
+        command = f"tar -zcf {tmp_backup_path}.tar.gz -C /tmp {now}"
+
         if not dry_run:
             dc.exec_command(
                 service_name, command=command, user="mysql", disable_tty=True
@@ -194,6 +195,7 @@ def backup(
 
         # Verify the gz integrity
         command = f"gzip -t {tmp_backup_path}.tar.gz"
+
         if not dry_run:
             dc.exec_command(
                 service_name, command=command, user="mysql", disable_tty=True
@@ -202,6 +204,7 @@ def backup(
         # Move the backup from /tmp to /backup (as root user)
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
         command = f"mv {tmp_backup_path}.tar.gz {backup_path}"
+
         if not dry_run:
             dc.exec_command(service_name, command=command, disable_tty=True)
 
