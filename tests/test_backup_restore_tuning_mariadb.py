@@ -259,16 +259,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "normal_user\tnormal_user",
     )
 
-    exec_command(
-        capfd,
-        "stop",
-        "Stack stopped",
-    )
-
     # 3) restore the dump
     exec_command(
         capfd,
-        f"restore mariadb {mariadb_dump_file}",
+        f"restore mariadb {mariadb_dump_file} --force",
         "Starting restore on mariadb...",
         "Opening backup file",
         "Removing current datadir",
@@ -277,12 +271,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "completed OK!",
         "Removing the temporary uncompressed folder",
         f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
-    )
-
-    exec_command(
-        capfd,
-        "restart",
-        "Stack restarted",
     )
 
     # 4) verify data match again point 1 (restore completed)
