@@ -54,7 +54,7 @@ def restore(
     elif service_name == Services.postgres:
         expected_ext = ".sql.gz"
     elif service_name == Services.mariadb:
-        expected_ext = ".sql.gz"
+        expected_ext = ".tar.gz"
 
     backup_dir = Path("data").joinpath("backup").joinpath(service_name)
     if not backup_dir.exists():

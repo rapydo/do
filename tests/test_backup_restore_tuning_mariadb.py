@@ -1,7 +1,5 @@
 """
-This module test the backup and restore commands + tuning mariadb
-
-NOT IMPLEMENTED
+This module test the backup and restore commands + (tuning not implemented) mariadb
 """
 import os
 from pathlib import Path
@@ -43,8 +41,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup mariadb",
         "Starting backup on mariadb...",
-        # "Backup completed: data/backup/mariadb/",
-        "Not implemented yet",
+        "Backup completed: data/backup/mariadb/",
     )
 
     # A second backup is needed to test backup retention
@@ -52,8 +49,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup mariadb",
         "Starting backup on mariadb...",
-        # "Backup completed: data/backup/mariadb/",
-        "Not implemented yet",
+        "Backup completed: data/backup/mariadb/",
     )
 
     exec_command(
@@ -68,13 +64,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "The backup procedure requires mariadb running, please start your stack",
     )
 
-    # TO BE RESTORED
-    # exec_command(
-    #     capfd,
-    #     "restore mariadb",
-    #     "Please specify one of the following backup:",
-    #     ".sql.gz",
-    # )
+    exec_command(
+        capfd,
+        "restore mariadb",
+        "Please specify one of the following backup:",
+        ".tar.gz",
+    )
     exec_command(
         capfd,
         "restore mariadb invalid",
@@ -104,15 +99,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
             "No backup found, data/backup/mariadb is empty",
         )
 
-        open("data/backup/mariadb/test.sql.gz", "a").close()
+        open("data/backup/mariadb/test.tar.gz", "a").close()
 
         exec_command(
             capfd,
             "restore mariadb",
             "Please specify one of the following backup:",
-            "test.sql.gz",
+            "test.tar.gz",
         )
 
-        os.remove("data/backup/mariadb/test.sql.gz")
+        os.remove("data/backup/mariadb/test.tar.gz")
 
     # TO BE IMPLEMENTED

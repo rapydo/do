@@ -167,9 +167,18 @@ def backup(
 
         log.info("Starting backup on {}...", service_name)
 
-        tmp_backup_path = f"/tmp/{now}.sql"
-        # f"mariabackup --backup --target-dir=${tmp_backup_path} --user=$MYSQL_USER --password=$MYSQL_PASSWORD"
-        command = "ls /tmp"
+        tmp_backup_path = f"/tmp/{now}"
+        command = f"sh -c 'mariabackup --backup --target-dir={tmp_backup_path} "
+        command += '-uroot -p"$MYSQL_ROOT_PASSWORD"\''
+
+        # Creating backup on a tmp folder as mysql user
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        command = f"sh -c 'mariabackup --prepare --target-dir={tmp_backup_path}'"
+
         # Creating backup on a tmp folder as mysql user
         if not dry_run:
             dc.exec_command(
@@ -177,31 +186,26 @@ def backup(
             )
 
         # Compress the sql with best compression ratio
-        command = f"gzip -9 {tmp_backup_path}"
-        command = "ls /tmp"
+        command = f"tar -zcf {tmp_backup_path}.tar.gz {tmp_backup_path}"
         if not dry_run:
             dc.exec_command(
                 service_name, command=command, user="mysql", disable_tty=True
             )
 
         # Verify the gz integrity
-        command = f"gzip -t {tmp_backup_path}.gz"
-        command = "ls /tmp"
+        command = f"gzip -t {tmp_backup_path}.tar.gz"
         if not dry_run:
             dc.exec_command(
                 service_name, command=command, user="mysql", disable_tty=True
             )
 
         # Move the backup from /tmp to /backup (as root user)
-        backup_path = f"/backup/{service_name}/{now}.sql.gz"
-        command = f"mv {tmp_backup_path}.gz {backup_path}"
-        command = "ls /tmp"
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+        command = f"mv {tmp_backup_path}.tar.gz {backup_path}"
         if not dry_run:
             dc.exec_command(service_name, command=command, disable_tty=True)
 
-        # log.info("Backup completed: data{}", backup_path)
-
-        log.error("Not implemented yet")
+        log.info("Backup completed: data{}", backup_path)
 
     if restart and not dry_run:
         dc.command("restart", {"SERVICE": restart})

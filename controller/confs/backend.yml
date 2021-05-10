@@ -370,9 +370,11 @@ services:
     image: mariadb:10.5.9
     volumes:
       - mariadb:/var/lib/mysql
+      - ${VANILLA_DIR}/data/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_MYSQL}
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_USER: "${ALCHEMY_USER}"
       MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
       MYSQL_DATABASE: ${ALCHEMY_DB}
