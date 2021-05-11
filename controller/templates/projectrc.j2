@@ -21,6 +21,9 @@ project_configuration:
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
+      {% if service == "mariadb" -%}
+      MYSQL_ROOT_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
       {% if service == "neo4j" -%}
       NEO4J_PASSWORD: {{ "RANDOM"| password }}
       NEO4J_PAGECACHE_SIZE: 1G
