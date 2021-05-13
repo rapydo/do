@@ -19,6 +19,7 @@ jobs:
             backup_restore_tuning_mariadb,
             backup_restore_tuning_neo4j,
             backup_restore_tuning_postgres,
+            backup_restore_tuning_rabbit,
             base,
             build_pull,
             create,
