@@ -256,7 +256,7 @@ def backup(
             if container_is_running:
                 dc.exec_command(service_name, command=command, disable_tty=True)
             else:
-                dc.start_containers([service_name], detach=True)
+                dc.create_volatile_container(service_name, command=command)
 
         # Verify the gz integrity
         command = f"gzip -t {backup_path}"
@@ -264,7 +264,7 @@ def backup(
             if container_is_running:
                 dc.exec_command(service_name, command=command, disable_tty=True)
             else:
-                dc.start_containers([service_name], detach=True)
+                dc.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 
