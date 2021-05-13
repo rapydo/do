@@ -261,7 +261,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         f"restore rabbit {rabbit_dump_file}",
         "Starting restore on rabbit...",
-        "Done: ",
         f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
     )
 
@@ -280,7 +279,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         f"restore rabbit {rabbit_dump_file} --force --restart backend",
         "Starting restore on rabbit...",
-        "Done: ",
         f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
     )
 

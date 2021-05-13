@@ -253,7 +253,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         f"restore redis {redis_dump_file}",
         "Starting restore on redis...",
-        "Done: ",
         f"Restore from data/backup/redis/{redis_dump_file} completed",
     )
 
@@ -272,7 +271,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         f"restore redis {redis_dump_file} --force --restart backend",
         "Starting restore on redis...",
-        "Done: ",
         f"Restore from data/backup/redis/{redis_dump_file} completed",
     )
 
