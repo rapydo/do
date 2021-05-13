@@ -180,9 +180,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/rabbit/",
     )
 
-    exec_command(capfd, "-s rabbit start")
+    exec_command(capfd, "-s backend,rabbit start")
 
-    # Probably a sleep is needed here
+    # Just some delay extra delay, rabbit is a slow starter
+    time.sleep(5)
 
     exec_command(
         capfd,
