@@ -51,8 +51,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     set_key1 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value1}\'"'
     set_key2 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value2}\'"'
 
-    # exec_command(capfd, get_key, "(nil)")
-
     exec_command(
         capfd,
         set_key1,
@@ -65,6 +63,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
+        # this is the output of redis-cli save
+        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -85,6 +85,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
+        # this is the output of redis-cli save
+        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -130,6 +132,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
+        # this is the output of redis-cli save
+        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -142,6 +146,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup redis --max 1",
         "deleted because exceeding the max number of backup files (1)",
         "Starting backup on redis...",
+        # this is the output of redis-cli save
+        "OK",
         "Backup completed: data/backup/redis/",
     )
 

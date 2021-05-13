@@ -245,6 +245,7 @@ def backup(
 
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
 
+        log.info("Starting backup on {}...", service_name)
         # If running, ask redis to synchronize the database
         if container_is_running:
             command = "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
@@ -264,6 +265,8 @@ def backup(
                 dc.exec_command(service_name, command=command, disable_tty=True)
             else:
                 dc.start_containers([service_name], detach=True)
+
+        log.info("Backup completed: data{}", backup_path)
 
     if restart and not dry_run:
         dc.command("restart", {"SERVICE": restart})
