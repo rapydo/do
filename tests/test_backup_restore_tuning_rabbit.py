@@ -26,6 +26,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="no",
+        services=["rabbit"],
         init=True,
         pull=True,
         start=True,
