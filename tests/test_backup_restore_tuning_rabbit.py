@@ -41,9 +41,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     time.sleep(5)
 
     # Verify the initialization
-    query_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance();print('QUEUE EXISTS =', r.queue_exists('blabla'));'\""
-    create_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance(); r.create_queue('blabla');'\""
-    delete_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance(); r.delete_queue('blabla');'\""
+    query_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance();print(\\'QUEUE EXISTS =\\', r.queue_exists(\\'blabla\\'));'\""
+    create_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance(); r.create_queue(\\'blabla\\');'\""
+    delete_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; r = rabbitmq.get_instance(); r.delete_queue(\\'blabla\\');'\""
 
     exec_command(capfd, query_queue, "QUEUE EXISTS = False")
 
