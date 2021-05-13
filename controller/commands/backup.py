@@ -18,6 +18,7 @@ class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
     mariadb = "mariadb"
+    rabbit = "rabbit"
 
 
 # Returned from a function just to be able to easily test it
@@ -209,6 +210,29 @@ def backup(
             dc.exec_command(service_name, command=command, disable_tty=True)
 
         log.info("Backup completed: data{}", backup_path)
+
+    if service_name == Services.rabbit:
+        if container_is_running and not force:
+            Application.exit(
+                "RabbitMQ is running and the backup will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running and not dry_run:
+            dc.command("stop", {"SERVICE": [service_name]})
+
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+
+        command = f"tar -zcf {backup_path} -C /var/lib/rabbitmq mnesia"
+
+        log.info("Starting backup on {}...", service_name)
+        if not dry_run:
+            dc.create_volatile_container(service_name, command=command)
+
+        log.info("Backup completed: data{}", backup_path)
+
+        if container_is_running and not dry_run:
+            dc.start_containers([service_name], detach=True)
 
     if restart and not dry_run:
         dc.command("restart", {"SERVICE": restart})

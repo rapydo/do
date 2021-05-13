@@ -718,8 +718,8 @@ services:
 
     volumes:
       - rabbitdata:/var/lib/rabbitmq
-      # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       worker_net:
         aliases:

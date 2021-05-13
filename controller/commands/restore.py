@@ -14,6 +14,7 @@ class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
     mariadb = "mariadb"
+    rabbit = "rabbit"
 
 
 @Application.app.command(help="Restore a backup of one service")
@@ -54,6 +55,8 @@ def restore(
     elif service_name == Services.postgres:
         expected_ext = ".sql.gz"
     elif service_name == Services.mariadb:
+        expected_ext = ".tar.gz"
+    elif service_name == Services.rabbit:
         expected_ext = ".tar.gz"
 
     backup_dir = Path("data").joinpath("backup").joinpath(service_name)
@@ -186,6 +189,29 @@ def restore(
             dc.start_containers([service_name], detach=True)
 
         log.info("Restore from data{} completed", backup_path)
+
+    if service_name == Services.rabbit:
+        if container_is_running and not force:
+            Application.exit(
+                "RabbitMQ is running and the restore will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running:
+            dc.command("stop", options)
+
+        backup_path = f"/backup/{service_name}/{backup_file}"
+
+        command = f"tar -xf {backup_path} -C /var/lib/rabbitmq/"
+
+        log.info("Starting restore on {}...", service_name)
+
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Restore from data{} completed", backup_path)
+
+        if container_is_running:
+            dc.start_containers([service_name], detach=True)
 
     if restart:
         dc.command("restart", {"SERVICE": restart})

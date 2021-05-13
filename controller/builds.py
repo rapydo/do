@@ -131,7 +131,7 @@ def find_templates_override(services, templates):
 
             vanilla_img = service.get("image")
             template_img = dfp.baseimage
-            log.debug("{} overrides {}", vanilla_img, template_img)
+            log.debug("{} extends {}", vanilla_img, template_img)
             tbuilds[template_img] = templates.get(template_img)
             vbuilds[vanilla_img] = template_img
 
