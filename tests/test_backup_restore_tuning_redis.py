@@ -63,8 +63,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
-        # this is the output of redis-cli save
-        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -85,8 +83,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
-        # this is the output of redis-cli save
-        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -132,8 +128,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup redis",
         "Starting backup on redis...",
-        # this is the output of redis-cli save
-        "OK",
         "Backup completed: data/backup/redis/",
     )
 
@@ -146,8 +140,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup redis --max 1",
         "deleted because exceeding the max number of backup files (1)",
         "Starting backup on redis...",
-        # this is the output of redis-cli save
-        "OK",
         "Backup completed: data/backup/redis/",
     )
 
