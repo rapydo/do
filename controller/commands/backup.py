@@ -229,6 +229,12 @@ def backup(
         if not dry_run:
             dc.create_volatile_container(service_name, command=command)
 
+        # Verify the gz integrity
+        command = f"gzip -t {backup_path}"
+
+        if not dry_run:
+            dc.exec_command(service_name, command=command, disable_tty=True)
+
         log.info("Backup completed: data{}", backup_path)
 
         if container_is_running and not dry_run:

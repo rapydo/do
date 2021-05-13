@@ -32,7 +32,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty rabbit", "Service rabbit is reachable")
+    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
 
     # # This will initialize rabbit
     # exec_command(capfd, "shell --no-tty backend 'restapi init'")
@@ -283,7 +283,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait rabbit to completely startup
-    exec_command(capfd, "verify --no-tty rabbit", "Service rabbit is reachable")
+    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
 
     exec_command(capfd, query_queue, "QUEUE EXISTS = True")
 
