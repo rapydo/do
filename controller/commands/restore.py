@@ -15,6 +15,7 @@ class Services(str, Enum):
     postgres = "postgres"
     mariadb = "mariadb"
     rabbit = "rabbit"
+    redis = "redis"
 
 
 @Application.app.command(help="Restore a backup of one service")
@@ -57,6 +58,8 @@ def restore(
     elif service_name == Services.mariadb:
         expected_ext = ".tar.gz"
     elif service_name == Services.rabbit:
+        expected_ext = ".tar.gz"
+    elif service_name == Services.redis:
         expected_ext = ".tar.gz"
 
     backup_dir = Path("data").joinpath("backup").joinpath(service_name)
@@ -206,6 +209,28 @@ def restore(
 
         log.info("Starting restore on {}...", service_name)
 
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Restore from data{} completed", backup_path)
+
+        if container_is_running:
+            dc.start_containers([service_name], detach=True)
+
+    if service_name == Services.redis:
+
+        if container_is_running and not force:
+            Application.exit(
+                "Redis is running and the restore will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running:
+            dc.command("stop", options)
+
+        backup_path = f"/backup/{service_name}/{backup_file}"
+        log.info("Starting restore on {}...", service_name)
+
+        command = f"tar -xf {backup_path} -C /data/"
         dc.create_volatile_container(service_name, command=command)
 
         log.info("Restore from data{} completed", backup_path)

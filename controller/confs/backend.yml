@@ -731,12 +731,14 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:
         aliases:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   bot:
     restart: always

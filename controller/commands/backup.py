@@ -19,6 +19,7 @@ class Services(str, Enum):
     postgres = "postgres"
     mariadb = "mariadb"
     rabbit = "rabbit"
+    redis = "redis"
 
 
 # Returned from a function just to be able to easily test it
@@ -233,12 +234,36 @@ def backup(
         command = f"gzip -t {backup_path}"
 
         if not dry_run:
-            dc.exec_command(service_name, command=command, disable_tty=True)
+            dc.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 
         if container_is_running and not dry_run:
             dc.start_containers([service_name], detach=True)
+
+    if service_name == Services.redis:
+
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+
+        # If running, ask redis to synchronize the database
+        if container_is_running:
+            command = "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
+            dc.exec_command(service_name, command=command, disable_tty=True)
+
+        command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
+        if not dry_run:
+            if container_is_running:
+                dc.exec_command(service_name, command=command, disable_tty=True)
+            else:
+                dc.start_containers([service_name], detach=True)
+
+        # Verify the gz integrity
+        command = f"gzip -t {backup_path}"
+        if not dry_run:
+            if container_is_running:
+                dc.exec_command(service_name, command=command, disable_tty=True)
+            else:
+                dc.start_containers([service_name], detach=True)
 
     if restart and not dry_run:
         dc.command("restart", {"SERVICE": restart})
