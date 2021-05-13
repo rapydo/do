@@ -51,7 +51,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     set_key1 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value1}\'"'
     set_key2 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value2}\'"'
 
-    exec_command(capfd, get_key, "(nil)")
+    # exec_command(capfd, get_key, "(nil)")
 
     exec_command(
         capfd,
