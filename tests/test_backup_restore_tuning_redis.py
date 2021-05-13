@@ -71,7 +71,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup invalid",
-        "invalid choice: invalid. (choose from neo4j, postgres, mariadb, redis, redis",
+        "invalid choice: invalid. (choose from neo4j, postgres, mariadb, rabbit, redis",
     )
 
     exec_command(
