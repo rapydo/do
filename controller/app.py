@@ -434,13 +434,16 @@ class Application:
 
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
+        # 18.09.2 fixed the CVE-2019-5736 vulnerability
         Packages.check_program(
-            "docker", min_version="17.05", min_recommended_version="19.03.8"
+            "docker", min_version="18.09.2", min_recommended_version="19.03.14"
         )
         Packages.check_program("git")
 
-        # Check for CVE-2019-5736 vulnerability
-        Packages.check_docker_vulnerability()
+        Packages.check_python_package("compose", min_version="1.18")
+        Packages.check_python_package("docker", min_version="4.0.0")
+        Packages.check_python_package("requests", min_version="2.6.1")
+        Packages.check_python_package("pip", min_version="10.0.0")
 
         Packages.check_python_package("compose", min_version="1.18")
         Packages.check_python_package("docker", min_version="4.0.0")
