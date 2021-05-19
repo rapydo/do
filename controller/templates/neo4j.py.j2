@@ -1,5 +1,4 @@
-from neomodel import (  # UniqueIdProperty
-    AliasProperty,
+from neomodel import (
     ArrayProperty,
     BooleanProperty,
     DateProperty,
@@ -11,11 +10,11 @@ from neomodel import (  # UniqueIdProperty
     RelationshipFrom,
     RelationshipTo,
     StringProperty,
-    StructuredNode,
-    StructuredRel,
+    # StructuredNode,
+    # StructuredRel,
     ZeroOrMore,
 )
-from restapi.connectors.neo4j.types import IdentifiedNode, TimestampedNode
+from restapi.connectors.neo4j.types import IdentifiedNode  # , TimestampedNode
 
 # from restapi.utilities.logs import log
 
@@ -30,12 +29,12 @@ class GroupCustom(IdentifiedNode):
     __abstract_node__ = True
 
 
-{% if not extend -%}
-class RelationTest(StructuredRel):
+"""
+class RelationTemplate(StructuredRel):
     pp = StringProperty()
 
 
-class JustATest(TimestampedNode):
+class NodeTemplate(TimestampedNode):
     p_str = StringProperty(required=True)
     p_int = IntegerProperty()
     p_arr = ArrayProperty()
@@ -59,4 +58,4 @@ class JustATest(TimestampedNode):
         cardinality=ZeroOrMore,
         model=RelationTest
     )
-{% endif -%}
+"""
