@@ -156,9 +156,12 @@ variables:
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
     SET_CSP_CONNECT_SRC:
-    SET_MAX_REQUESTS_PER_MINUTE_API: 180
+    # Used with an additional burst of 2 requests
     SET_MAX_REQUESTS_PER_MINUTE_AUTH: 15
-    SET_MAX_REQUESTS_PER_MINUTE_ASSETS: 600
+    # Used with an additional burst of 5 requests
+    SET_MAX_REQUESTS_PER_SECOND_API: 3
+    # Used with an additional burst of 10 requests
+    SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
     CORS_ALLOWED_ORIGIN: # if empty will be automatically replaced with DOMAIN in proxy entrypoint
 
     ALCHEMY_ENABLE_CONNECTOR: 1
