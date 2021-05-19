@@ -162,7 +162,8 @@ variables:
     SET_MAX_REQUESTS_PER_SECOND_API: 3
     # Used with an additional burst of 10 requests
     SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
-    CORS_ALLOWED_ORIGIN: # if empty will be automatically replaced with DOMAIN in proxy entrypoint
+    # if empty will be automatically replaced with DOMAIN in proxy entrypoint
+    CORS_ALLOWED_ORIGIN:
 
     ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
