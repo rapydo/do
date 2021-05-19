@@ -67,6 +67,7 @@ project_configuration:
       DEFAULT_DHLEN: 1024
       GUNICORN_WORKERS: 1
       FORCE_PRODUCTION_TESTS: 1
+      SET_MAX_REQUESTS_PER_MINUTE_ASSETS: 1200
       {% else -%}
       APP_MODE: test
       {% endif -%}
