@@ -190,10 +190,9 @@ def test_add(capfd: Capture) -> None:
         "add workflow backend",
         f"{path} already exists",
     )
-    # Here a little variant, by adding a leading /
     exec_command(
         capfd,
-        "add workflow backend",
+        "add --force workflow backend",
         f"GitHub Actions workflow created: {path}",
     )
     assert os.path.isfile(path)
