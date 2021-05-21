@@ -156,7 +156,7 @@ variables:
     SET_CSP_FONT_SRC:
     SET_CSP_CONNECT_SRC:
     # Used with an additional burst of 2 requests
-    SET_MAX_REQUESTS_PER_MINUTE_AUTH: 15
+    SET_MAX_REQUESTS_PER_SECOND_AUTH: 2
     # Used with an additional burst of 5 requests
     SET_MAX_REQUESTS_PER_SECOND_API: 3
     # Used with an additional burst of 10 requests
