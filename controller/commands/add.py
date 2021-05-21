@@ -438,4 +438,4 @@ def create_workflow(
         project_scaffold.project,
     )
 
-    log.info("Integration test created: {}", path)
+    log.info("Workflow created: {}", path)
