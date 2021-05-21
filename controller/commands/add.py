@@ -438,4 +438,4 @@ def create_workflow(
         project_scaffold.project,
     )
 
-    log.info("Workflow created: {}", path)
+    log.info("GitHub Actions workflow created: {}", path)

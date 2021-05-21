@@ -182,7 +182,7 @@ def test_add(capfd: Capture) -> None:
     exec_command(
         capfd,
         "add workflow backend",
-        f"Workflow created: {path}",
+        f"GitHub Actions workflow created: {path}",
     )
 
     exec_command(
@@ -194,7 +194,7 @@ def test_add(capfd: Capture) -> None:
     exec_command(
         capfd,
         "add workflow backend",
-        f"Integration test created: {path}",
+        f"GitHub Actions workflow created: {path}",
     )
     assert os.path.isfile(path)
 
