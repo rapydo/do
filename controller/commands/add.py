@@ -17,6 +17,7 @@ class ElementTypes(str, Enum):
     component = "component"
     service = "service"
     integration_test = "integration_test"
+    workflow = "workflow"
 
 
 def get_function(
@@ -37,6 +38,9 @@ def get_function(
 
     if element == "integration_test":
         return create_integration_test
+
+    if element == "workflow":
+        return create_workflow
 
     # Can't be reached
     return create_service  # pragma: no cover
@@ -88,13 +92,15 @@ def create_template(
     services: Dict[str, str],
     auth: str,
     force: bool,
+    project: str,
 ) -> None:
 
     if not force and target_path.exists():
         Application.exit("{} already exists", target_path)
 
     template = templating.get_template(
-        template_name, {"name": name, "services": services, "auth": auth}
+        template_name,
+        {"name": name, "services": services, "auth": auth, "project": project},
     )
 
     templating.save_template(target_path, template, force=force)
@@ -113,7 +119,14 @@ def create_endpoint(
 
     templating = Templating()
     create_template(
-        templating, "endpoint_template.py", path, name, services, auth, force
+        templating,
+        "endpoint_template.py",
+        path,
+        name,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
     )
 
     log.info("Endpoint created: {}", path)
@@ -123,7 +136,14 @@ def create_endpoint(
         path = path.joinpath(f"test_endpoints_{name}.py")
 
         create_template(
-            templating, "endpoint_test_template.py", path, name, services, auth, force
+            templating,
+            "endpoint_test_template.py",
+            path,
+            name,
+            services,
+            auth,
+            force,
+            project_scaffold.project,
         )
 
         log.info("Tests scaffold created: {}", path)
@@ -141,7 +161,16 @@ def create_task(
     path = path.joinpath(f"{name}.py")
 
     templating = Templating()
-    create_template(templating, "task_template.py", path, name, services, auth, force)
+    create_template(
+        templating,
+        "task_template.py",
+        path,
+        name,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
+    )
 
     log.info("Task created: {}", path)
 
@@ -172,10 +201,28 @@ def create_component(
 
     cpath = path.joinpath(f"{name}.ts")
     templating = Templating()
-    create_template(templating, template_ts, cpath, name, services, auth, force)
+    create_template(
+        templating,
+        template_ts,
+        cpath,
+        name,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
+    )
 
     hpath = path.joinpath(f"{name}.html")
-    create_template(templating, template_html, hpath, name, services, auth, force)
+    create_template(
+        templating,
+        template_html,
+        hpath,
+        name,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
+    )
 
     log.info("Component created: {}", path)
 
@@ -242,6 +289,7 @@ def create_component(
             services,
             auth,
             force,
+            project_scaffold.project,
         )
 
         log.info("Tests scaffold created: {}", path)
@@ -262,7 +310,14 @@ def create_service(
 
     templating = Templating()
     create_template(
-        templating, "service_template.ts", path, name, services, auth, force
+        templating,
+        "service_template.ts",
+        path,
+        name,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
     )
 
     log.info("Service created: {}", path)
@@ -334,7 +389,53 @@ def create_integration_test(
 
     templating = Templating()
     create_template(
-        templating, "cypress_template.spec.ts", path, f"/{name}", services, auth, force
+        templating,
+        "cypress_template.spec.ts",
+        path,
+        f"/{name}",
+        services,
+        auth,
+        force,
+        project_scaffold.project,
+    )
+
+    log.info("Integration test created: {}", path)
+
+
+def create_workflow(
+    project_scaffold: Project,
+    name: str,
+    services: Any,
+    auth: str,
+    force: bool,
+    add_tests: bool,
+) -> None:
+
+    if add_tests:
+        Application.exit("Add workflow does not support --add-tests flag")
+
+    workflows = ["backend", "frontend", "cypress", "mypy"]
+    if name not in workflows:
+        Application.exit("Invalid workflow name, expected: {}", ", ".join(workflows))
+
+    path = Path(".github").joinpath("workflows")
+
+    if not path.exists():
+        path.mkdir(parents=True)
+
+    filename = f"github_actions-{name}.yml"
+    path = path.joinpath(filename)
+
+    templating = Templating()
+    create_template(
+        templating,
+        filename,
+        path,
+        filename,
+        services,
+        auth,
+        force,
+        project_scaffold.project,
     )
 
     log.info("Integration test created: {}", path)

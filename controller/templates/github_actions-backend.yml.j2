@@ -1,0 +1,73 @@
+name: Backend
+
+on:
+  # push:
+  # schedule:
+  #   - cron: "0 5 * * *"
+  workflow_dispatch:
+env:
+  PROJECT: {{ project }}
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: rapydo/actions/install@v1
+        with:
+          project: ${PROJECT}
+          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+
+      - name: Run Pytest
+        run: |
+
+          rapydo pull --quiet
+          # If a custom build is added
+          # rapydo build
+
+          # To add a test task
+          # rapydo add task test_task
+
+          rapydo start
+          rapydo shell --no-tty backend 'restapi wait'
+
+          rapydo shell --no-tty backend 'restapi tests --wait --destroy'
+
+          LOGURU_LEVEL=WARNING rapydo list services
+          # This should fail if at least one container is in Exit status
+          [[ ! $(LOGURU_LEVEL=WARNING rapydo list services | grep -E "Exit|Restarting|Created") ]]
+
+          docker cp ${PROJECT}_backend_1:/code/coverage.xml coverage.xml
+          bash <(curl -s https://codecov.io/bash)
+
+      - name: Production mode
+        run: |
+          rapydo remove --all
+          rapydo --prod init --force
+          rapydo pull --quiet
+          rapydo ssl --volatile
+          rapydo start
+          sleep 45
+          rapydo logs
+          curl --insecure -X GET --max-time 5 https://localhost/api/status | grep "Server is alive"
+          rapydo -s proxy,backend logs --tail 20
+
+          LOGURU_LEVEL=WARNING rapydo list services
+          # This should fail if at least one container is in Exit status
+          # Except for frontend that is expected to be exited in prod mode
+          [[ ! $(LOGURU_LEVEL=WARNING rapydo list services | grep -v frontend | grep -E "Exit|Restarting|Created") ]]
+
+      - name: Print Logs
+        if: failure()
+        run: tail -100 data/logs/backend-server.log
+
+      - name: Docker Logs
+        if: failure()
+        run: |
+          rapydo logs

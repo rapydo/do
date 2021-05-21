@@ -164,11 +164,45 @@ def test_add(capfd: Capture) -> None:
     )
     assert os.path.isfile(path)
 
+    path = ".github/workflows/github_actions-backend.yml"
+    assert not os.path.exists(path)
+
+    exec_command(
+        capfd,
+        "add workflow unexpectedname",
+        "Invalid workflow name, expected: backend, frontend, cypress, mypy",
+    )
+
+    exec_command(
+        capfd,
+        "add workflow backend --add-tests",
+        "Add workflow does not support --add-tests flag",
+    )
+
+    exec_command(
+        capfd,
+        "add workflow backend",
+        f"Workflow created: {path}",
+    )
+
+    exec_command(
+        capfd,
+        "add workflow backend",
+        f"{path} already exists",
+    )
+    # Here a little variant, by adding a leading /
+    exec_command(
+        capfd,
+        "add workflow backend",
+        f"Integration test created: {path}",
+    )
+    assert os.path.isfile(path)
+
     exec_command(
         capfd,
         "add abc xyz",
-        "invalid choice: abc. "  # Note no command
-        "(choose from endpoint, task, component, service, integration_test)",
+        "invalid choice: abc. "  # Note no comma, it's a line continuation
+        "(choose from endpoint, task, component, service, integration_test, workflow)",
     )
 
     exec_command(capfd, "upgrade")

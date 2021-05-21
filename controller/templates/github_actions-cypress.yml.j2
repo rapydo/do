@@ -1,0 +1,66 @@
+name: Cypress
+
+on:
+  # push:
+  # schedule:
+  #   - cron: "0 5 * * *"
+  workflow_dispatch:
+env:
+  PROJECT: {{ project }}
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - uses: rapydo/actions/install@v1
+        with:
+          project: ${PROJECT}
+          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+
+      - uses: rapydo/actions/setup-cypress@v1
+        with:
+          id: {% raw -%}${{ secrets.CYPRESS_PROJECT_ID }}{% endraw %}
+          key: {% raw -%}${{ secrets.CYPRESS_RECORD_KEY }}{% endraw %}
+
+      - name: Run Cypress
+        run: |
+
+          rapydo pull --quiet;
+          rapydo start;
+          rapydo shell --no-tty backend 'restapi wait';
+
+          sleep 20
+          rapydo logs
+
+          rapydo shell --no-tty backend --detach "restapi launch"
+          rapydo -s frontend logs
+          rapydo shell --no-tty frontend "yarn install"
+          rapydo shell --no-tty frontend "reload-types"
+
+          rapydo shell --no-tty frontend "yarn run cypress:start:norecord"
+          # Cypress with record mode enabled
+          # rapydo shell --no-tty frontend "yarn run cypress:start:full"
+
+          rapydo shell --no-tty frontend "npx nyc --all report --reporter=lcov --report-dir /coverage"
+          cp data/${PROJECT}/karma/lcov.info .
+          bash <(curl -s https://codecov.io/bash)
+
+      - name: Print docker logs on failure
+        if: failure()
+        run: |
+          rapydo logs
+
+      - name: Print backend logs on failure
+        if: failure()
+        run: cat data/logs/backend-server.log
+
+      - name: Print mocked email on failure
+        if: failure()
+        run: cat data/logs/mock.mail.*.body
