@@ -1,14 +1,14 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
-import dateutil.parser
 import typer
+from python_on_whales import docker
+from python_on_whales.utils import DockerException
 
 from controller import gitter, log
 from controller.app import Application
 from controller.builds import locate_builds
-from controller.dockerizing import Dock
 from controller.templating import Templating
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -38,6 +38,13 @@ def check(
         autocompletion=Application.autocomplete_submodule,
     ),
 ) -> None:
+
+    # Set as first operation to quickly exit in case of docker issues
+    try:
+        dimages = [img.repo_tags[0] for img in docker.images()]
+    except DockerException as e:  # pragma: no cover
+        Application.exit(e)
+
     Application.get_controller().controller_init()
 
     if no_git:
@@ -55,8 +62,6 @@ def check(
         builds, template_builds, overriding_imgs = locate_builds(
             Application.data.base_services, Application.data.compose_config
         )
-
-        dimages = Dock().images()
 
         for image_tag, build in builds.items():
 
@@ -100,8 +105,8 @@ def check(
                 if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
-                from_timestamp = get_build_date(from_build)
-                build_timestamp = get_build_date(build)
+                from_timestamp = from_build["creation"]
+                build_timestamp = build["creation"]
 
                 if from_timestamp > build_timestamp:
                     b = build_timestamp.strftime(DATE_FORMAT)
@@ -140,20 +145,6 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def get_build_date(build: Dict[str, str]) -> datetime:
-
-    # timestamp is like: 2017-09-22T07:10:35.822772835Z
-    timestamp = build.get("timestamp") or "0"
-
-    return dateutil.parser.parse(timestamp)
-
-
-def get_build_timestamp(build: Dict[str, str]) -> float:
-
-    d = get_build_date(build)
-    return d.timestamp()
-
-
 def build_is_obsolete(build, gits):
     # compare dates between git and docker
     path = build.get("path")
@@ -167,7 +158,7 @@ def build_is_obsolete(build, gits):
     else:  # pragma: no cover
         Application.exit("Unable to find git repo {}", path)
 
-    build_timestamp = get_build_timestamp(build)
+    build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
 
     for f in Path(path).rglob("*"):
         if f.is_dir():  # pragma: no cover

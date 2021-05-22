@@ -5,7 +5,7 @@ import sys
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, MutableMapping, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Union, cast
 
 import requests
 import typer
