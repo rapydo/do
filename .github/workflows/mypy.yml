@@ -27,7 +27,8 @@ jobs:
 
           for lib in \
             git \
-            docker \
+            python_on_whales \
+            python_on_whales.utils \
             compose \
             plumbum \
             sultan \
