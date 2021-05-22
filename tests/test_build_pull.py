@@ -197,9 +197,6 @@ RUN mkdir xyz
         "Build aborted",
         input_text="invalid\nno\n",
     )
-    # DEBUG CODE - REMOVE ME
-    exec_command(capfd, "-s rabbit logs")
-    # #####################
     exec_command(
         capfd,
         "-s rabbit build",

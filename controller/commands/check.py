@@ -41,7 +41,7 @@ def check(
 
     # Set as first operation to quickly exit in case of docker issues
     try:
-        dimages = [img.repo_tags[0] for img in docker.images()]
+        dimages = [img.repo_tags[0] for img in docker.images() if img.repo_tags]
     except DockerException as e:  # pragma: no cover
         Application.exit(e)
 
