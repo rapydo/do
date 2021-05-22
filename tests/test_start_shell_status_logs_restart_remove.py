@@ -137,10 +137,7 @@ def test_all(capfd: Capture) -> None:
         "logs -s backend --tail 200 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
-        # Added pip3 install rapydo-http in testing mode
-        "Collecting git+https://github.com/rapydo/http-api.git",
-        # due to the pip install the container could be not ready yet
-        # "Testing mode",
+        "Testing mode",
     )
 
     now = datetime.now()
@@ -161,9 +158,9 @@ def test_all(capfd: Capture) -> None:
         "-s frontend,backend logs --tail 10 --no-color",
         "docker-compose command: 'logs'",
         # Logs are prefixed because more than one service is shown
-        "backend_1       | Testing mode",
+        "backend_1      | Testing mode",
         # "backend_1       | Development mode",
-        "frontend_1      | Merging files...",
+        "frontend_1     | Merging files...",
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
@@ -174,6 +171,80 @@ def test_all(capfd: Capture) -> None:
         "-s backend logs --tail 10 --follow",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend -S frontend logs",
+        "Incompatibile use of both --services/-s and --skip-services/-S options",
+    )
+
+    exec_command(
+        capfd,
+        "logs --tail 1",
+        "Enabled services: ['backend', 'frontend', 'neo4j', 'postgres', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend logs --tail 1",
+        "Enabled services: ['backend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s frontend logs --tail 1",
+        "Enabled services: ['frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend,frontend logs --tail 1",
+        "Enabled services: ['backend', 'frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-s frontend,backend logs --tail 1",
+        "Enabled services: ['backend', 'frontend']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend logs --tail 1",
+        "Enabled services: ['backend', 'neo4j', 'postgres', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend,postgres logs --tail 1",
+        "Enabled services: ['backend', 'neo4j', 'rabbit']",
+    )
+
+    exec_command(
+        capfd,
+        "-S frontend,postgres,neo4j logs --tail 1",
+        "Enabled services: ['backend', 'rabbit']",
+    )
+
+    # Invalid services in -s are refused
+    exec_command(
+        capfd,
+        "-s invalid logs --tail 1",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend,invalid logs --tail 1",
+        "No such service: invalid",
+    )
+
+    # Invalid services in -S are simply ignored
+    exec_command(
+        capfd,
+        "-S frontend,postgres,neo4j,invalid logs --tail 1",
+        "Enabled services: ['backend', 'rabbit']",
     )
 
     exec_command(

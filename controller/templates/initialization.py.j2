@@ -1,6 +1,8 @@
+{% if auth_service != "NO_AUTHENTICATION" -%}
 # from restapi.connectors import {{auth_service}}
 
 
+{% endif -%}
 class Initializer:
 
     """
@@ -9,7 +11,9 @@ class Initializer:
     """
 
     def __init__(self) -> None:
+        {% if auth_service != "NO_AUTHENTICATION" -%}
         # c = {{auth_service}}.get_instance()
+        {% endif -%}
         pass
 
     # This method is called after normal initialization if TESTING mode is enabled

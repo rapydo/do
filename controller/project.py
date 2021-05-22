@@ -6,6 +6,7 @@ from typing import List, Optional
 
 from controller import PROJECT_DIR, gitter, log
 
+NO_AUTHENTICATION = "NO_AUTHENTICATION"
 NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
 GITKEEP = ".gitkeep"
@@ -51,6 +52,7 @@ class Project:
         self.expected_folders.append(self.p_path("backend"))
         self.expected_folders.append(self.p_path("backend", "endpoints"))
         self.expected_folders.append(self.p_path("backend", "models"))
+        self.expected_folders.append(self.p_path("backend", "models", "emails"))
         self.expected_folders.append(self.p_path("backend", "tasks"))
         self.expected_folders.append(self.p_path("backend", "tests"))
         self.expected_folders.append(self.p_path("backend", "cron"))
@@ -62,6 +64,9 @@ class Project:
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tasks", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "tests", GITKEEP))
+        self.suggested_gitkeep.append(
+            self.p_path("backend", "models", "emails", GITKEEP)
+        )
 
         self.expected_files.append(self.p_path("project_configuration.yaml"))
         self.expected_files.append(self.p_path("confs", "commons.yml"))
@@ -77,13 +82,12 @@ class Project:
         self.expected_files.append(self.p_path("backend", "tests", "__init__.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
-        self.expected_files.append(Path(".pre-commit-config.yaml"))
         self.expected_files.append(Path(".isort.cfg"))
         self.expected_files.append(Path("pyproject.toml"))
         self.expected_files.append(Path(".flake8"))
+        self.expected_files.append(Path(".prettierignore"))
 
         self.fixed_files.append(Path(".gitattributes"))
-        self.fixed_files.append(Path(".pre-commit-config.yaml"))
         self.fixed_files.append(Path("pyproject.toml"))
 
         if auth or services:
@@ -132,6 +136,8 @@ class Project:
         # Removed since 0.9
         self.obsolete_files.append(self.p_path("backend", "initialization"))
         self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
+        # Removed since 1.2
+        self.obsolete_files.append(Path(".pre-commit-config.yaml"))
         return True
 
     def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:
@@ -147,7 +153,7 @@ class Project:
             self.expected_folders.extend(
                 [
                     self.p_path("frontend", "app"),
-                    self.p_path("frontend", "css"),
+                    self.p_path("frontend", "styles"),
                     self.p_path("frontend", "integration"),
                     self.p_path("frontend", "assets"),
                     self.p_path("frontend", "assets", "favicon"),
@@ -161,7 +167,8 @@ class Project:
             self.expected_files.extend(
                 [
                     self.p_path("frontend", "package.json"),
-                    self.p_path("frontend", "css", "style.css"),
+                    self.p_path("frontend", "styles", "style.scss"),
+                    self.p_path("frontend", "styles", "variables.scss"),
                     self.p_path("frontend", "app", "customization.ts"),
                     self.p_path("frontend", "app", "custom.module.ts"),
                     self.p_path("frontend", "app", "custom.navbar.ts"),
@@ -237,6 +244,8 @@ class Project:
                     self.p_path("frontend", "app", "custom.project.options.ts"),
                     # Removed since 1.0
                     frontend_data_dir.joinpath("browserslist"),
+                    # Removed since 1.2 (replaced with scss in styles)
+                    self.p_path("frontend", "css"),
                 ]
             )
 
@@ -337,22 +346,18 @@ class Project:
 
         r = gitter.get_repo(str(folder))
         if r is None or gitter.get_origin(r) is None:
-            return """You are not in a git repository
+            return f"""You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                """.format(
-                os.getcwd()
-            )
+Verify that you are in the right folder, now you are in: {os.getcwd()}
+                """
 
         for fpath in self.expected_main_folders:
             if not folder.joinpath(fpath).is_dir():
 
-                return """Folder not found: {}
+                return f"""Folder not found: {fpath}
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {}
-                    """.format(
-                    fpath, Path.cwd()
-                )
+Verify that you are in the right folder, now you are in: {Path.cwd()}
+                    """
 
         return None
 

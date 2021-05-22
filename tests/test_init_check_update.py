@@ -269,15 +269,15 @@ def test_base(capfd: Capture) -> None:
         "submodules/do/new_file",
     )
 
-    with open(".pre-commit-config.yaml", "a") as a_file:
+    with open(".gitattributes", "a") as a_file:
         a_file.write("\n")
         a_file.write("# new line")
 
     exec_command(
         capfd,
         "check -i main",
-        ".pre-commit-config.yaml changed, "
-        "please execute rapydo upgrade --path .pre-commit-config.yaml",
+        ".gitattributes changed, "
+        "please execute rapydo upgrade --path .gitattributes",
     )
 
     exec_command(
@@ -292,6 +292,17 @@ def test_base(capfd: Capture) -> None:
         "Created default .projectrc file",
         "Project initialized",
     )
+
+    exec_command(
+        capfd,
+        "--prod -e MYVAR=MYVAL init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
+
+    with open(".projectrc") as projectrc:
+        lines = [line.strip() for line in projectrc.readlines()]
+        assert "MYVAR: MYVAL" in lines
 
     exec_command(
         capfd,

@@ -24,15 +24,7 @@ def version() -> None:
         cver = LooseVersion(__version__)
         rver = LooseVersion(Configuration.rapydo_version)
         updown = "upgrade" if cver < rver else "downgrade"
-        print(
-            "\nThis project is not compatible with rapydo version {}".format(
-                __version__
-            )
-        )
-        print(
-            "Please {} rapydo to version {} or modify this project".format(
-                updown, Configuration.rapydo_version
-            )
-        )
-
+        rv = Configuration.rapydo_version
+        print(f"\nThis project is not compatible with rapydo version {__version__}")
+        print(f"Please {updown} rapydo to version {rv} or modify this project")
         print(f"\n\033[1;31mrapydo install {Configuration.rapydo_version}\033[0m")

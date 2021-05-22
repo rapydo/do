@@ -43,11 +43,12 @@ BASE_UID = 1000
 
 class Configuration:
     projectrc: Dict[str, str] = {}
-    # To be better charactirized. This is a:
+    # To be better characterized. This is a:
     # {'variables': 'env': Dict[str, str]}
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
     specs: MutableMapping[str, str] = OrderedDict()
     services_list: Optional[str]
+    excluded_services_list: Optional[str]
     environment: Dict[str, str]
 
     action: Optional[str] = None
@@ -126,7 +127,14 @@ def controller_cli_options(
         None,
         "--services",
         "-s",
-        help="Comma separated list of services",
+        help="Comma separated list of services to be included",
+        callback=projectrc_values,
+    ),
+    excluded_services_list: Optional[str] = typer.Option(
+        None,
+        "--skip-services",
+        "-S",
+        help="Comma separated list of services to be exluded",
         callback=projectrc_values,
     ),
     hostname: str = typer.Option(
@@ -207,7 +215,13 @@ def controller_cli_options(
 
     Configuration.set_action(ctx.invoked_subcommand)
 
+    if services_list and excluded_services_list:
+        Application.exit(
+            "Incompatibile use of both --services/-s and --skip-services/-S options"
+        )
+
     Configuration.services_list = services_list
+    Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
     Configuration.testing = testing
     Configuration.privileged = privileged
@@ -235,7 +249,6 @@ class CommandsData:
         files: List[Path] = [],
         base_files: List[Path] = [],
         services: List[str] = [],
-        services_list: Any = None,
         active_services: List[str] = [],
         base_services: List[Any] = [],
         compose_config: List[Any] = [],
@@ -244,7 +257,6 @@ class CommandsData:
         self.files = files
         self.base_files = base_files
         self.services = services
-        self.services_list = services_list
         self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
@@ -382,7 +394,6 @@ class Application:
             files=self.files,
             base_files=self.base_files,
             services=self.enabled_services,
-            services_list=Configuration.services_list,
             active_services=self.active_services,
             base_services=self.base_services,
             compose_config=self.compose_config,
@@ -414,15 +425,25 @@ class Application:
             sys.version_info.micro,
         )
 
+        if sys.version_info.major == 3 and sys.version_info.minor == 6:
+            # Deprecated since 1.2
+            log.warning(
+                "Support to python 3.6 is deprecated and will be dropped "
+                "in the next version, please upgrade to python 3.7+"
+            )
+
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
+        # 18.09.2 fixed the CVE-2019-5736 vulnerability
         Packages.check_program(
-            "docker", min_version="17.05", min_recommended_version="19.03.8"
+            "docker", min_version="18.09.2", min_recommended_version="19.03.14"
         )
         Packages.check_program("git")
 
-        # Check for CVE-2019-5736 vulnerability
-        Packages.check_docker_vulnerability()
+        Packages.check_python_package("compose", min_version="1.18")
+        Packages.check_python_package("docker", min_version="4.0.0")
+        Packages.check_python_package("requests", min_version="2.6.1")
+        Packages.check_python_package("pip", min_version="10.0.0")
 
         Packages.check_python_package("compose", min_version="1.18")
         Packages.check_python_package("docker", min_version="4.0.0")
@@ -430,7 +451,7 @@ class Application:
         Packages.check_python_package("pip", min_version="10.0.0")
 
     def read_specs(self, read_extended: bool = True) -> None:
-        """ Read project configuration """
+        """Read project configuration"""
 
         try:
 
@@ -512,22 +533,26 @@ class Application:
             return True
         else:  # pragma: no cover
             if r > c:
-                action = f"Upgrade your controller to version {r}"
+                ac = f"Upgrade your controller to version {r}"
             else:
-                action = f"Downgrade your controller to version {r}"
-                action += " or upgrade your project"
+                ac = f"Downgrade your controller to version {r} or upgrade your project"
 
-            msg = "RAPyDo version is not compatible\n\n"
-            msg += "This project requires rapydo {}, you are using {}\n\n{}\n".format(
-                r, c, action
-            )
+            msg = f"""RAPyDo version is not compatible.
+
+This project requires rapydo {r}, you are using {c}. {ac}
+
+You can use of one:
+  -  rapydo install               (install in editable from submodules/do, if available)
+  -  rapydo install --no-editable (install from pypi)
+
+"""
 
             log.critical(msg)
             sys.exit(1)
 
     @staticmethod
     def check_internet_connection() -> None:
-        """ Check if connected to internet """
+        """Check if connected to internet"""
 
         try:
             requests.get("https://www.google.com")
@@ -584,7 +609,7 @@ class Application:
 
     @staticmethod
     def git_submodules(from_path: Optional[Path] = None) -> None:
-        """ Check and/or clone git projects """
+        """Check and/or clone git projects"""
 
         repos: Dict[str, str] = glom(
             Configuration.specs,
@@ -604,8 +629,12 @@ class Application:
         )
 
         self.enabled_services = services.get_services(
-            Configuration.services_list, default=self.active_services
+            Configuration.services_list,
+            Configuration.excluded_services_list,
+            default=self.active_services,
         )
+
+        log.debug("Enabled services: {}", self.enabled_services)
 
         self.create_datafile()
 
@@ -664,6 +693,7 @@ class Application:
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,
+                "envs": Configuration.environment,
             },
         )
         templating.save_template(PROJECTRC, t, force=True)
@@ -800,7 +830,6 @@ class Application:
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
             "allservices": list(self.services_dict.keys()),
-            "interfaces": self.get_available_interfaces(),
         }
 
         with open(DATAFILE, "w+") as outfile:
@@ -815,7 +844,6 @@ class Application:
                 # This is needed to let mypy understand the correct type
                 output["submodules"] = datafile.get("submodules")
                 output["services"] = datafile.get("services")
-                output["interfaces"] = datafile.get("interfaces")
                 output["allservices"] = datafile.get("allservices")
                 return output
         except FileNotFoundError:
@@ -827,25 +855,6 @@ class Application:
         if not d:
             return []
         values = d.get("services", [])
-        if not incomplete:
-            return values
-        return [x for x in values if x.startswith(incomplete)]
-
-    def get_available_interfaces(self) -> List[str]:
-        available_interfaces = list()
-        if self.compose_config:
-            for s in self.compose_config:
-                name = s.get("name", "")
-                if name.endswith("ui"):
-                    available_interfaces.append(name[0:-2])
-        return available_interfaces
-
-    @staticmethod
-    def autocomplete_interfaces(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("interfaces", [])
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]

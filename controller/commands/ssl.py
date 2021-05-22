@@ -21,12 +21,6 @@ def ssl(
         help="Create a volatile proxy service to request the certificate",
         show_default=False,
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force Let's Encrypt to renew the certificate",
-        show_default=False,
-    ),
     no_tty: bool = typer.Option(
         False,
         "--no-tty",
@@ -66,28 +60,17 @@ def ssl(
         log.info("Unable to automatically perform the requested operation")
         log.info("You can execute the following commands by your-self:")
 
+        container = f"{Configuration.project}_{service}_1"
+        letsencrypt_path = "/etc/letsencrypt/real"
         print("")
-        print(
-            "docker cp {} {}_{}_1:/etc/letsencrypt/real/fullchain1.pem".format(
-                chain_file, Configuration.project, service
-            )
-        )
-        print(
-            "docker cp {} {}_{}_1:/etc/letsencrypt/real/privkey1.pem".format(
-                key_file, Configuration.project, service
-            )
-        )
-
-        print(f'rapydo shell {service} "nginx -s reload"')
+        print(f"docker cp {chain_file} {container}:{letsencrypt_path}/fullchain1.pem")
+        print(f"docker cp {key_file} {container}:{letsencrypt_path}/privkey1.pem")
+        print(f"rapydo shell {service} 'nginx -s reload'")
         print("")
 
         return
 
-    command = "/bin/bash updatecertificates"
-    if force:
-        command = f"{command} --force"
-
-    command = f"{command} {Configuration.hostname}"
+    command = f"/bin/bash updatecertificates {Configuration.hostname}"
 
     dc = Compose(files=Application.data.files)
 
@@ -97,12 +80,20 @@ def ssl(
         else:
             dc.exec_command(service, user="root", command=command, disable_tty=no_tty)
     except SystemExit as e:
+
+        if not volatile:
+            log.info(
+                "If you proxy container is not running, try with rapydo ssl --volatile"
+            )
         sys.exit(e.code)
     else:
 
         running_containers = dc.get_running_containers(Configuration.project)
         if "neo4j" in running_containers:
-            log.info("Neo4j is running, but it will reload the certificate by itself")
+            # This is not true!! A full restart is needed
+            # log.info("Neo4j is running, but it will reload the certificate by itself")
+            # But not implemented yet...
+            log.info("Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.")
 
         if "rabbit" in running_containers:
             log.info(
@@ -113,8 +104,8 @@ def ssl(
             # No longer be required. To test it after the creation of the new cert:
             #   echo -n | openssl s_client -showcerts -connect hostname:5671
 
-            # Note that this command only works if rabbit is executed in prod mode
-            # Otherwise it will file with the following error:
+            # Also note that this command only works if rabbit is executed in PROD mode
+            # Otherwise it will fail with the following error:
             #       Error: unable to perform an operation on node 'rabbit@rabbit'.
             #       Please see diagnostics information and suggestions below.
             dc.exec_command(
@@ -123,4 +114,4 @@ def ssl(
                 disable_tty=no_tty,
             )
 
-        log.info("New certificate successfully installed")
+        log.info("New certificate successfully enabled")

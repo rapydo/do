@@ -17,6 +17,9 @@ from controller.compose import Compose
 class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
+    mariadb = "mariadb"
+    rabbit = "rabbit"
+    redis = "redis"
 
 
 # Returned from a function just to be able to easily test it
@@ -153,6 +156,115 @@ def backup(
         command = f"mv {tmp_backup_path}.gz {backup_path}"
         if not dry_run:
             dc.exec_command(service_name, command=command, disable_tty=True)
+
+        log.info("Backup completed: data{}", backup_path)
+
+    if service_name == Services.mariadb:
+
+        if not container_is_running:
+            Application.exit(
+                "The backup procedure requires {} running, please start your stack",
+                service_name,
+            )
+
+        log.info("Starting backup on {}...", service_name)
+
+        tmp_backup_path = f"/tmp/{now}"
+        command = f"sh -c 'mariabackup --backup --target-dir={tmp_backup_path} "
+        command += '-uroot -p"$MYSQL_ROOT_PASSWORD"\''
+
+        # Creating backup on a tmp folder as mysql user
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        command = f"sh -c 'mariabackup --prepare --target-dir={tmp_backup_path}'"
+
+        # Creating backup on a tmp folder as mysql user
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Compress the prepared data folder. Used -C to skip the /tmp from folders paths
+        command = f"tar -zcf {tmp_backup_path}.tar.gz -C /tmp {now}"
+
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Verify the gz integrity
+        command = f"gzip -t {tmp_backup_path}.tar.gz"
+
+        if not dry_run:
+            dc.exec_command(
+                service_name, command=command, user="mysql", disable_tty=True
+            )
+
+        # Move the backup from /tmp to /backup (as root user)
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+        command = f"mv {tmp_backup_path}.tar.gz {backup_path}"
+
+        if not dry_run:
+            dc.exec_command(service_name, command=command, disable_tty=True)
+
+        log.info("Backup completed: data{}", backup_path)
+
+    if service_name == Services.rabbit:
+        if container_is_running and not force:
+            Application.exit(
+                "RabbitMQ is running and the backup will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running and not dry_run:
+            dc.command("stop", {"SERVICE": [service_name]})
+
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+
+        command = f"tar -zcf {backup_path} -C /var/lib/rabbitmq mnesia"
+
+        log.info("Starting backup on {}...", service_name)
+        if not dry_run:
+            dc.create_volatile_container(service_name, command=command)
+
+        # Verify the gz integrity
+        command = f"gzip -t {backup_path}"
+
+        if not dry_run:
+            dc.create_volatile_container(service_name, command=command)
+
+        log.info("Backup completed: data{}", backup_path)
+
+        if container_is_running and not dry_run:
+            dc.start_containers([service_name], detach=True)
+
+    if service_name == Services.redis:
+
+        backup_path = f"/backup/{service_name}/{now}.tar.gz"
+
+        log.info("Starting backup on {}...", service_name)
+        # If running, ask redis to synchronize the database
+        if container_is_running:
+            command = "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
+            dc.exec_command(service_name, command=command, disable_tty=True)
+
+        command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
+        if not dry_run:
+            if container_is_running:
+                dc.exec_command(service_name, command=command, disable_tty=True)
+            else:
+                dc.create_volatile_container(service_name, command=command)
+
+        # Verify the gz integrity
+        command = f"gzip -t {backup_path}"
+        if not dry_run:
+            if container_is_running:
+                dc.exec_command(service_name, command=command, disable_tty=True)
+            else:
+                dc.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 

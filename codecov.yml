@@ -3,5 +3,6 @@ ignore:
   - "controller/templates"
   - "setup.py"
   - "check_versions.py"
+  - "check_ciphers.py"
 # fixes:
 #   - "before/::after/"  # move path   e.g., "before/path" => "after/path"

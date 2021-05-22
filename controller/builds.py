@@ -16,7 +16,7 @@ name_priorities = [
     "backend",
     "proxy",
     "celery",
-    "celeryui",
+    "flower",
     "celery-beat",
     "maintenance",
     "bot",
@@ -63,9 +63,7 @@ def find_templates_build(base_services):
 
             if template_image is None:  # pragma: no cover
                 log.critical(
-                    "Template builds must have a name, missing for {}".format(
-                        template_name
-                    )
+                    "Template builds must have a name, missing for {}", template_name
                 )
                 sys.exit(1)
 
@@ -133,7 +131,7 @@ def find_templates_override(services, templates):
 
             vanilla_img = service.get("image")
             template_img = dfp.baseimage
-            log.debug("{} overrides {}", vanilla_img, template_img)
+            log.debug("{} extends {}", vanilla_img, template_img)
             tbuilds[template_img] = templates.get(template_img)
             vbuilds[vanilla_img] = template_img
 

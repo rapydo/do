@@ -20,7 +20,7 @@ def verify(
 
     # Verify one service connection (inside backend)
     dc = Compose(files=Application.data.files)
-    command = f"restapi verify --services {service}"
+    command = f"restapi verify --service {service}"
 
     try:
         dc.exec_command("backend", command=command, disable_tty=no_tty)

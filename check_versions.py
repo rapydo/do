@@ -15,7 +15,6 @@ import yaml
 from bs4 import BeautifulSoup
 from glom import glom
 from loguru import logger as log
-from prettyprinter import pprint as pp
 
 Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
@@ -23,7 +22,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-02-21"
+known_update = "2021-04-25"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -38,33 +37,39 @@ known_latests = {
     # https://hub.docker.com/r/fanout/pushpin/tags
     # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "neo4j": "4.2.3",
+        "neo4j": "4.2.5",
         "postgres": "13.2-alpine",
-        "mariadb": "10.5.8",
-        "mongo": "4.4.4",
-        "redis": "6.0.10",
-        "nginx": "1.19.7-alpine",
-        "node": "15.9.0-buster",
-        "rabbitmq": "3.8.12-management",
+        "mariadb": "10.5.9",
+        "mongo": "4.4.5",
+        "redis": "6.2.2",
+        "nginx": "1.20.0-alpine",
+        "node": "14.15.5-buster",
+        "rabbitmq": "3.8.14-management",
         "adminer": "4.8.0",
         "mongo-express": "0.54.0",
         "fanout/pushpin": "1.31.0",
-        "swaggerapi/swagger-ui": "v3.43.0",
+        "swaggerapi/swagger-ui": "v3.47.1",
         "stilliard/pure-ftpd": "stretch-latest",
         "ubuntu": "20.04",
     },
     # https://github.com/acmesh-official/acme.sh/releases
-    "acme": "2.8.8",
-    # Not used
-    "urls": {
-        "isort": "5.7.0",
-        "prettier": "v2.2.1",
-        "pyupgrade": "v2.10.0",
-        "black": "20.8b1",
-        "flake8": "3.8.4",
-        "mypy": "v0.812",
-    },
+    # "acme": "2.8.8",
 }
+
+# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
+changelogs = {
+    # ## NPM
+    "@ng-bootstrap/ng-bootstrap": "https://github.com/ng-bootstrap/ng-bootstrap/blob/master/CHANGELOG.md",
+    "ngx-spinner": "https://github.com/Napster2210/ngx-spinner/releases",
+    "ngx-formly": "https://github.com/ngx-formly/ngx-formly/releases",
+    "ajv": "https://github.com/ajv-validator/ajv/releases",
+    # ## PYPI
+    "schemathesis": "https://schemathesis.readthedocs.io/en/stable/changelog.html",
+    # ## DockerHub
+}
+
+
+skip_versions = {"flower": "0.9.7"}
 
 prevent_duplicates = {}
 
@@ -120,24 +125,41 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
         url = f"https://pypi.org/project/{tokens[0]}"
         latest = parse_pypi(url, tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
 
     elif category in ["compose", "Dockerfile"]:
         tokens = lib.split(":")
+        # remove any additinal word from the version from example in case of:
+        # FROM imgname: imgversion AS myname => imgversion AS myname => imgversion
+        tokens[1] = tokens[1].split(" ")[0]
         latest = glom(known_latests, f"docker.{tokens[0]}", default="????")
 
         if latest == "????":
             log.warning("Unknown latest version for {}", tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             if "/" in tokens[0]:
                 print(f"https://hub.docker.com/r/{tokens[0]}?tab=tags")
             else:
                 print(f"https://hub.docker.com/_/{tokens[0]}?tab=tags")
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
     elif category in ["package.json", "dev-package.json", "npm"]:
         lib = lib.strip()
@@ -156,23 +178,30 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
         time.sleep(npm_timeout)
         latest = parse_npm(url, tokens[0])
 
+        if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
+            print(f"# Skipping version {latest} for {tokens[0]}")
+            print("")
+            return
+
         if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
+            print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
+            if changelog := changelogs.get(tokens[0]):
+                print(changelog)
             print("")
 
-    elif category in ["ACME"]:
-        tokens = lib.split(":")
+    # elif category in ["ACME"]:
+    #     tokens = lib.split(":")
 
-        latest = glom(known_latests, "acme", default="????")
+    #     latest = glom(known_latests, "acme", default="????")
 
-        if latest == "????":
-            log.warning("Unknown latest version acme.sh")
+    #     if latest == "????":
+    #         log.warning("Unknown latest version acme.sh")
 
-        if latest != tokens[1]:
-            print(f"# {tokens[1]} -> {latest}")
-            print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
-            print("")
+    #     if latest != tokens[1]:
+    #         print(f"# [ACME]: {tokens[1]} -> {latest}")
+    #         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
+    #         print("")
     elif category == "url":
         if lib not in prevent_duplicates:
 
@@ -180,7 +209,7 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
             tokens = lib.split("/")
             latest = glom(known_latests, f"urls.{tokens[4]}", default="????")
             if latest != tokens[7]:
-                print(f"# {tokens[7]} -> {latest}")
+                print(f"[{tokens[4]}]: # {tokens[7]} -> {latest}")
                 print(lib)
                 print("")
     else:
@@ -254,11 +283,11 @@ def parseDockerfile(
                         dependencies.setdefault(service, {})
                         dependencies[service].setdefault("pip", [])
                         dependencies[service]["pip"].append(t)
-            elif "ENV ACMEV" in line:
-                line = line.replace("ENV ACMEV", "").strip()
-                line = line.replace('"', "").strip()
+            # elif "ENV ACMEV" in line:
+            #     line = line.replace("ENV ACMEV", "").strip()
+            #     line = line.replace('"', "").strip()
 
-                dependencies[service]["ACME"] = [f"ACME:{line}"]
+            #     dependencies[service]["ACME"] = [f"ACME:{line}"]
 
     return dependencies
 
@@ -325,10 +354,7 @@ def parsePrecommitConfig(f: Path, dependencies: Dependencies, key: str) -> Depen
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
 @click.option("--npm-timeout", default=1)
-@click.option("--verbose", is_flag=True, default=False)
-def check_versions(
-    skip_angular: bool = False, npm_timeout: int = 1, verbose: bool = False
-) -> None:
+def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
 
     dependencies: Dependencies = {}
 
@@ -369,21 +395,25 @@ def check_versions(
     dependencies["http-api"] = {}
     dependencies["http-api"]["pip"] = http_api.install_requires
 
-    dependencies = parsePrecommitConfig(
-        Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
+    # )
 
-    dependencies = parsePrecommitConfig(
-        Path("../http-api/.pre-commit-config.yaml"),
-        dependencies,
-        "http-api",
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../do/pre-commit-projects-config.yaml"), dependencies, "projects"
+    # )
 
-    dependencies = parsePrecommitConfig(
-        Path("../rapydo-angular/.pre-commit-config.yaml"),
-        dependencies,
-        "rapydo-angular",
-    )
+    # dependencies = parsePrecommitConfig(
+    #     Path("../http-api/.pre-commit-config.yaml"),
+    #     dependencies,
+    #     "http-api",
+    # )
+
+    # dependencies = parsePrecommitConfig(
+    #     Path("../rapydo-angular/.pre-commit-config.yaml"),
+    #     dependencies,
+    #     "rapydo-angular",
+    # )
 
     filtered_dependencies: Dependencies = {}
 
@@ -446,14 +476,6 @@ def check_versions(
 
         # print(service)
 
-    if verbose:
-        pp(filtered_dependencies)
-
 
 if __name__ == "__main__":
     check_versions()
-
-# Changelogs and release notes
-
-# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
-# https://github.com/ngx-formly/ngx-formly/releases

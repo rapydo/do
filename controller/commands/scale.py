@@ -20,9 +20,8 @@ def scale(
             Configuration.specs, f"variables.env.{scale_var}", default=None
         )
         if nreplicas is None:
-            hints = "You can also set a {} variable in your .projectrc file".format(
-                scale_var
-            )
+            hints = f"You can also set a {scale_var} variable in your .projectrc file"
+
             Application.exit(
                 "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints
             )

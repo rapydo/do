@@ -8,11 +8,19 @@ from controller import log
 from controller.project import ANGULAR
 
 
-def get_services(services: Optional[str], default: List[str]) -> List[str]:
+def get_services(
+    services: Optional[str], excluded_services_list: Optional[str], default: List[str]
+) -> List[str]:
 
     if services:
-        return services.split(",")
-    return default
+        return sorted(services.split(","))
+
+    if excluded_services_list:
+
+        splitted = excluded_services_list.split(",")
+        return sorted([s for s in default if s not in splitted])
+
+    return sorted(default)
 
 
 def walk_services(
@@ -77,8 +85,8 @@ def apply_variables(
 
 
 vars_to_services_mapping: Dict[str, List[str]] = {
-    "CELERYUI_USER": ["celeryui"],
-    "CELERYUI_PASSWORD": ["celeryui"],
+    "CELERYUI_USER": ["flower"],
+    "CELERYUI_PASSWORD": ["flower"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
     "REDIS_PASSWORD": ["redis"],
@@ -202,7 +210,7 @@ def check_mongodb_password(pwd: Optional[str]) -> None:
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
 
-    if service in ["backend", "celery", "celeryui", "celery-beat"]:
+    if service in ["backend", "celery", "flower", "celery-beat"]:
         return "developer"
 
     if service in ["frontend"]:
@@ -232,4 +240,6 @@ def get_default_command(service: str) -> str:
     if service == "postgres":
         return "psql"
 
+    if service == "mariadb":
+        return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''
     return "bash"

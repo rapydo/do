@@ -20,8 +20,12 @@ variables:
 
   env:
 
-    FRONTEND_FRAMEWORK: {{ frontend }}
+    {% if auth_service == "NO_AUTHENTICATION" -%}
+    ACTIVATE_AUTH: 0
+    {% else -%}
     AUTH_SERVICE: {{ auth_service }}
+    {% endif -%}
+    FRONTEND_FRAMEWORK: {{ frontend }}
     {% if enable_postgres -%}
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_POSTGRES: 1

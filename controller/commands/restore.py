@@ -13,6 +13,9 @@ from controller.compose import Compose
 class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
+    mariadb = "mariadb"
+    rabbit = "rabbit"
+    redis = "redis"
 
 
 @Application.app.command(help="Restore a backup of one service")
@@ -52,6 +55,12 @@ def restore(
         expected_ext = ".dump"
     elif service_name == Services.postgres:
         expected_ext = ".sql.gz"
+    elif service_name == Services.mariadb:
+        expected_ext = ".tar.gz"
+    elif service_name == Services.rabbit:
+        expected_ext = ".tar.gz"
+    elif service_name == Services.redis:
+        expected_ext = ".tar.gz"
 
     backup_dir = Path("data").joinpath("backup").joinpath(service_name)
     if not backup_dir.exists():
@@ -74,7 +83,6 @@ def restore(
 
         return
 
-    # walrus!
     backup_host_path = backup_dir.joinpath(backup_file)
     if not backup_host_path.exists():
         Application.exit("Invalid backup file, {} does not exist", backup_host_path)
@@ -135,6 +143,100 @@ def restore(
         )
 
         log.info("Restore from data{} completed", backup_path)
+
+    if service_name == Services.mariadb:
+
+        if container_is_running and not force:
+            Application.exit(
+                "MariaDB is running and the restore will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        log.info("Starting restore on {}...", service_name)
+
+        if container_is_running:
+            dc.command("stop", options)
+
+        # backup.tar.gz
+        backup_path = f"/backup/{service_name}/{backup_file}"
+
+        # backup without tar.gz
+        tmp_backup_path = backup_path.replace(".tar.gz", "")
+
+        log.info("Opening backup file")
+        # Uncompress /backup/{service_name}/{backup_file} into /backup/{service_name}
+        command = f"tar -xf {backup_path} -C /backup/{service_name}"
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Removing current datadir")
+        # mariabackup required the datadir to be empty...
+        command = "rm -rf /var/lib/mysql/*"
+        # without bash -c   the * does not work...
+        command = "bash -c 'rm -rf /var/lib/mysql/*'"
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Restoring the backup")
+        # Note: --move-back moves instead of copying
+        # But since some files are preserved and anyway the top level folder has to be
+        # manually deleted, it is preferred to use the more conservative copy-back
+        # and then delete the whole temporary folder manually
+        command = f"sh -c 'mariabackup --copy-back --target-dir={tmp_backup_path}'"
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Removing the temporary uncompressed folder")
+        # Removed the temporary uncompressed folder in /backup/{service_name}
+        command = f"rm -rf {tmp_backup_path}"
+        dc.create_volatile_container(service_name, command=command)
+
+        if container_is_running:
+            dc.start_containers([service_name], detach=True)
+
+        log.info("Restore from data{} completed", backup_path)
+
+    if service_name == Services.rabbit:
+        if container_is_running and not force:
+            Application.exit(
+                "RabbitMQ is running and the restore will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running:
+            dc.command("stop", options)
+
+        backup_path = f"/backup/{service_name}/{backup_file}"
+
+        command = f"tar -xf {backup_path} -C /var/lib/rabbitmq/"
+
+        log.info("Starting restore on {}...", service_name)
+
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Restore from data{} completed", backup_path)
+
+        if container_is_running:
+            dc.start_containers([service_name], detach=True)
+
+    if service_name == Services.redis:
+
+        if container_is_running and not force:
+            Application.exit(
+                "Redis is running and the restore will temporary stop it. "
+                "If you want to continue add --force flag"
+            )
+
+        if container_is_running:
+            dc.command("stop", options)
+
+        backup_path = f"/backup/{service_name}/{backup_file}"
+        log.info("Starting restore on {}...", service_name)
+
+        command = f"tar -xf {backup_path} -C /data/"
+        dc.create_volatile_container(service_name, command=command)
+
+        log.info("Restore from data{} completed", backup_path)
+
+        if container_is_running:
+            dc.start_containers([service_name], detach=True)
 
     if restart:
         dc.command("restart", {"SERVICE": restart})

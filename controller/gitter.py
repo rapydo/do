@@ -340,9 +340,7 @@ def check_updates(path: str, gitobj: GitRepoType) -> bool:
         commits_ahead_list = list(commits_ahead)
     except GitCommandError:  # pragma: no cover
         log.info(
-            "Remote branch {} not found for {}. Is it a local branch?".format(
-                branch, path
-            )
+            "Remote branch {} not found for {}. Is it a local branch?", branch, path
         )
     else:
 

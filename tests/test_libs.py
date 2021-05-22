@@ -67,33 +67,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert len(values) >= 1
     assert "main" not in values
 
-    values = app.autocomplete_interfaces("")
-    assert len(values) > 0
-    assert "swagger" in values
-    assert "sqlalchemy" in values
-    assert "mongo" in values
-    assert "celery" in values
-    values = app.autocomplete_interfaces("invalid")
-    assert len(values) == 0
-    values = app.autocomplete_interfaces("s")
-    assert len(values) >= 1
-    assert "swagger" in values
-    assert "sqlalchemy" in values
-    assert "celery" not in values
-    values = app.autocomplete_interfaces("c")
-    assert len(values) >= 1
-    assert "swagger" not in values
-    assert "sqlalchemy" not in values
-    assert "celery" in values
-
     os.unlink(".rapydo")
     values = app.autocomplete_service("")
     assert len(values) == 0
     values = app.autocomplete_allservice("")
     assert len(values) == 0
     values = app.autocomplete_submodule("")
-    assert len(values) == 0
-    values = app.autocomplete_interfaces("")
     assert len(values) == 0
 
     assert gitter.get_repo("does/not/exist") is None
@@ -240,7 +219,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_user("invalid", "angular") is None
     assert services.get_default_user("backend", "") == "developer"
     assert services.get_default_user("celery", "") == "developer"
-    assert services.get_default_user("celeryui", "") == "developer"
+    assert services.get_default_user("flower", "") == "developer"
     assert services.get_default_user("celery-beat", "") == "developer"
     assert services.get_default_user("frontend", "invalid") is None
     assert services.get_default_user("frontend", "no") is None
@@ -254,6 +233,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
     assert services.get_default_command("postgres") == "psql"
+    assert "mysql -D" in services.get_default_command("mariadb")
     # os.rename(
     #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
     # )

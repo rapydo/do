@@ -79,6 +79,9 @@ def build(
         "--no-cache": force,
         "--force-rm": True,
         "--pull": not core,
+        # In case of warning:
+        # Flag '--parallel' is ignored when building with COMPOSE_DOCKER_CLI_BUILD=1
+        # See: https://github.com/docker/compose/issues/7901
         "--parallel": True,
     }
     dc = Compose(files=Application.data.files)

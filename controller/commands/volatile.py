@@ -1,6 +1,3 @@
-import time
-import warnings
-
 import typer
 
 from controller import log
@@ -18,14 +15,6 @@ def volatile(
     command: str = typer.Argument(
         "bash", help="UNIX command to be executed on selected running service"
     ),
-    # Deprecated since 0.8
-    old_command: str = typer.Option(
-        None,
-        "--command",
-        "-c",
-        help="[DEPRECATED] UNIX command to be executed",
-        show_default=False,
-    ),
     user: str = typer.Option(
         None,
         "--user",
@@ -35,22 +24,6 @@ def volatile(
     ),
 ) -> None:
     Application.get_controller().controller_init()
-
-    # Deprecated since 0.8
-    if old_command:  # pragma: no cover
-        if " " in old_command:
-            cmd = f'"{old_command}"'
-        else:
-            cmd = old_command
-
-        warnings.warn(
-            f"Deprecated use of --command, use: rapydo shell {service} {cmd}",
-            DeprecationWarning,
-        )
-        # Sleep added because when executing command with long outputs,
-        # the spam of messages does not permit to read the warning
-        time.sleep(1)
-        command = old_command
 
     if user:
         log.warning(

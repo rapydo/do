@@ -21,6 +21,9 @@ project_configuration:
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
+      {% if service == "mariadb" -%}
+      MYSQL_ROOT_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
       {% if service == "neo4j" -%}
       NEO4J_PASSWORD: {{ "RANDOM"| password }}
       NEO4J_PAGECACHE_SIZE: 1G
@@ -32,7 +35,7 @@ project_configuration:
       MONGOUI_PASSWORD: {{ "RANDOM"| password }}
       MONGOUI_USER: mongo
       {% endif -%}
-      {% if service == "celeryui" -%}
+      {% if service == "flower" -%}
       CELERYUI_PASSWORD: {{ "RANDOM"| password }}
       CELERYUI_USER: {{ "RANDOM"| username }}
       {% endif -%}
@@ -68,3 +71,7 @@ project_configuration:
       APP_MODE: test
       {% endif -%}
       {% endif -%}
+
+      {% for env_key in envs -%}
+      {{ env_key }}: {{ envs[env_key] }}
+      {% endfor %}

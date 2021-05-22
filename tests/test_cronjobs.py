@@ -33,14 +33,11 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "logs -s backend --tail 20 --no-color",
+        "logs -s backend --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Found no cronjob to be enabled, skipping crontab setup",
-        # Added pip3 install rapydo-http in testing mode
-        "Collecting git+https://github.com/rapydo/http-api.git",
-        # due to the pip install, after only 5 seconds the container is not ready yet
-        # "Testing mode",
+        "Testing mode",
     )
 
     with open(f"projects/{project}/backend/cron/hello-world.cron", "w+") as f:
@@ -56,7 +53,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "logs -s backend --tail 20 --no-color",
+        "logs -s backend --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         # "Testing mode",

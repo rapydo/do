@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "1.1"
+version = "1.2"
 
 setup(
     name="rapydo",
@@ -21,12 +21,11 @@ setup(
         "python-dateutil",
         "pytz",
         "loguru",
-        "prettyprinter",
         "jinja2",
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.13",
+        "GitPython==3.1.14",
         "PyYAML==5.4.1",
         "pip>=10.0.0",
         "typer[all]==0.3.2",

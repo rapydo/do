@@ -86,21 +86,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "ssl --volatile --no-tty",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
-        "Neo4j is running, but it will reload the certificate by itself",
+        "Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.",
         "RabbitMQ is running, executing command to refresh the certificate",
-        "New certificate successfully installed",
+        "New certificate successfully enabled",
     )
-    # Shutoff services, only started to verify certificate creation
-    # exec_command(
-    #     capfd,
-    #     "-s rabbit,neo4j remove",
-    # )
 
-    exec_command(
-        capfd,
-        "ssl --force",
-        "No container found for proxy_1",
-    )
     exec_command(
         capfd,
         "ssl --chain-file /file",
@@ -124,7 +114,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
     exec_command(
         capfd,
-        "ssl --chain-file {f} --key-file {f}".format(f=pconf),
+        f"ssl --chain-file {pconf} --key-file {pconf}",
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
     )

@@ -17,6 +17,8 @@ volumes:
     driver: local
   mongodata:
     driver: local
+  data_imports:
+    driver: local
   pureftpd:
     driver: local
   letsencrypt_certs:
@@ -108,6 +110,7 @@ services:
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
       UPLOAD_PATH: ${UPLOAD_PATH}
+      DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
 
       # enable /auth/login and /api/admin/users methods
@@ -237,6 +240,8 @@ services:
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
       - secrets:${APP_SECRETS}
+      - letsencrypt_certs:/etc/letsencrypt
+      - data_imports:${DATA_IMPORT_FOLDER}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -288,7 +293,6 @@ services:
       APP_MODE: ${APP_MODE}
       DOMAIN: ${PROJECT_DOMAIN}
       DOMAIN_ALIASES: ${DOMAIN_ALIASES}
-      MODE: ${LETSENCRYPT_MODE}
       ACTIVATE: ${ACTIVATE_PROXY}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
@@ -303,9 +307,12 @@ services:
       CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
       CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
       CSP_CONNECT_SRC: ${SET_CSP_CONNECT_SRC}
+      MAX_REQUESTS_PER_SECOND_AUTH: ${SET_MAX_REQUESTS_PER_SECOND_AUTH}
+      MAX_REQUESTS_PER_SECOND_API: ${SET_MAX_REQUESTS_PER_SECOND_API}
+      MAX_REQUESTS_PER_SECOND_ASSETS: ${SET_MAX_REQUESTS_PER_SECOND_ASSETS}
       GA_TRACKING_CODE: ${GA_TRACKING_CODE}
-    depends_on:
-      - backend
+    # depends_on:
+    #   - backend
 
   maintenance:
     # restart: always
@@ -366,9 +373,11 @@ services:
     image: mariadb:10.5.9
     volumes:
       - mariadb:/var/lib/mysql
+      - ${VANILLA_DIR}/data/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_MYSQL}
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
       MYSQL_USER: "${ALCHEMY_USER}"
       MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
       MYSQL_DATABASE: ${ALCHEMY_DB}
@@ -390,6 +399,7 @@ services:
       - graphdata:/data
       # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
+      - data_imports:/var/lib/neo4j/import
       - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:
@@ -578,6 +588,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - letsencrypt_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -592,9 +603,6 @@ services:
     networks:
       db_net:
       worker_net:
-    # depends_on:
-    #   - rabbit
-    #   # - celeryui
 
   celery-beat:
     restart: always
@@ -666,6 +674,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - letsencrypt_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -712,8 +721,8 @@ services:
 
     volumes:
       - rabbitdata:/var/lib/rabbitmq
-      # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       worker_net:
         aliases:
@@ -721,16 +730,18 @@ services:
 
   redis:
     restart: always
-    image: redis:6.0.10
+    image: redis:6.2.2
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
+      - ${VANILLA_DIR}/data/backup:/backup
     networks:
       db_net:
         aliases:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   bot:
     restart: always
@@ -786,7 +797,7 @@ services:
   ### SERVICE INTERFACES ###
   ##########################
 
-  celeryui:
+  flower:
     restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
@@ -808,6 +819,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
+      - letsencrypt_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -889,7 +901,7 @@ services:
     ports:
       - 7777:8080
 
-  sqlalchemyui:
+  adminer:
     # image: adminer:4.7.7-standalone
     # restart: no
     build:
@@ -913,22 +925,6 @@ services:
       - ssl_dhparam:/etc/nginx/ssl/
     ports:
       - 7777:80
-
-  mongoui:
-    # restart: no
-    image: mongo-express:0.54.0
-    environment:
-      ACTIVATE: ${ACTIVATE_MONGOUI}
-      ME_CONFIG_MONGODB_SERVER: ${MONGO_HOST}
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGOUI_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGOUI_PASSWORD}
-      ME_CONFIG_OPTIONS_EDITORTHEME: ambiance
-    networks:
-      db_net:
-    ports:
-      - 7777:8081
 
   ###################
   ### FTP SERVER  ###

@@ -133,7 +133,9 @@ class Packages:
             if program == "docker":  # pragma: no cover
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.critical("Missing requirement: {} not found.{}", program, hints)
+            log.critical(
+                "A mandatory dependency is missing: {} not found{}", program, hints
+            )
             sys.exit(1)
 
         v = LooseVersion(found_version)
@@ -205,41 +207,6 @@ class Packages:
             log.error(e)
 
         return None
-
-    @staticmethod
-    def check_docker_vulnerability() -> None:
-
-        # Check for CVE-2019-5736 vulnerability
-        # Checking version of docker server, since docker client is not affected
-        # and the two versions can differ
-        v = Packages.get_bin_version(
-            "docker", option=["version", "--format", "'{{.Server.Version}}'"]
-        )
-
-        if v is None:  # pragma: no cover
-            log.critical(
-                "Cannot verify docker version, "
-                "is docker running and your user is allowed to use it?"
-            )
-            sys.exit(1)
-
-        safe_version = "18.09.2"
-        # On GitHub Actions docker is >safe_version on all available envronments.
-        # This check cannot be tested
-        if LooseVersion(safe_version) > LooseVersion(v):  # pragma: no cover
-            log.critical(
-                """Your docker version is vulnerable to CVE-2019-5736
-
-***************************************************************************************
-Your docker installation (version {}) is affected by a critical vulnerability
-that allows specially-crafted containers to gain administrative privileges on the host.
-For details please visit: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-5736
-***************************************************************************************
-To fix this issue, please update docker to version {}+
-            """,
-                v,
-                safe_version,
-            )
 
     @staticmethod
     def get_installation_path(

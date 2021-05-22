@@ -7,6 +7,8 @@ and will only use the specific configuration needed by the test itself
 import os
 from pathlib import Path
 
+import pytest
+
 from controller.templating import Templating
 from tests import Capture, TemporaryRemovePath, exec_command
 
@@ -174,7 +176,7 @@ def test_create(capfd: Capture) -> None:
         capfd,
         create_command,
         "Project folder already exists: projects/first/confs",
-        "A backup of {f} is saved as {f}.bak".format(f=pconf),
+        f"A backup of {pconf} is saved as {pconf}.bak",
         "Project first successfully created",
     )
 
@@ -209,6 +211,13 @@ def test_create(capfd: Capture) -> None:
         "Project folder already exists: projects/first/confs",
         f"Project file already exists: {pconf}",
         "Project first successfully created",
+    )
+
+    # Test projects with no-authentication
+    exec_command(
+        capfd,
+        "create noauth --auth no --frontend no --current",
+        "Project noauth successfully created",
     )
 
     # Test extended projects
@@ -291,23 +300,37 @@ def test_create(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "create testservices {opt} --auth {auth} {service}".format(
-                opt=opt, auth=auth, service=serv_opt
-            ),
+            f"create testservices {opt} --auth {auth} {serv_opt}",
             "Project testservices successfully created",
         )
         if service == "mysql":
-            services = ["mariadb"]
+            active_services = ["backend", "mariadb"]
+        elif service == "postgres":
+            active_services = ["backend", "postgres"]
+        elif service == "neo4j":
+            active_services = ["backend", "neo4j"]
+        elif service == "mongo":
+            active_services = ["backend", "mongodb"]
         elif service == "celery":
-            services = ["celery", "celeryui", "rabbit"]
-        else:
-            services = [service]
+            # Flower is temporary disabled due to incompatibilities with Celery 5+
+            # active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
+            active_services = ["backend", "celery", "postgres", "rabbit"]
+        elif service == "rabbit":
+            active_services = ["backend", "postgres", "rabbit"]
+        elif service == "redis":
+            active_services = ["backend", "postgres", "redis"]
+        elif service == "pushpin":
+            active_services = ["backend", "postgres", "pushpin"]
+        elif service == "ftp":
+            active_services = ["backend", "ftp", "postgres"]
+        else:  # pragma: no cover
+            pytest.fail(f"Unrecognized service {service}")
 
         exec_command(
             capfd,
             "-p testservices list services",
             "List of active services:",
-            *services,
+            f"Enabled services: {sorted(active_services)}",
         )
 
     # Test Celery Activation
