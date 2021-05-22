@@ -10,7 +10,7 @@ setup(
     license="MIT",
     packages=find_packages(where=".", exclude=["tests*"]),
     package_data={"controller": ["templates/*", "confs/*"]},
-    python_requires=">=3.6.0",
+    python_requires=">=3.7.0",
     entry_points={
         "console_scripts": ["rapydo=controller.__main__:main"],
     },
@@ -36,8 +36,6 @@ setup(
         "Intended Audience :: Developers",
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",
-        # End-of-life: 2021-12-23
-        "Programming Language :: Python :: 3.6",
         # End-of-life: 2023-06-27
         "Programming Language :: Python :: 3.7",
         # End-of-life: 2024-10
