@@ -3,7 +3,6 @@ import os
 import shutil
 import sys
 import warnings
-from collections import OrderedDict  # can be removed from python 3.7
 from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Any, Dict, List, MutableMapping, Optional, Set, Union, cast
@@ -46,7 +45,7 @@ class Configuration:
     # To be better characterized. This is a:
     # {'variables': 'env': Dict[str, str]}
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
-    specs: MutableMapping[str, str] = OrderedDict()
+    specs: Dict[str, str] = {}
     services_list: Optional[str]
     excluded_services_list: Optional[str]
     environment: Dict[str, str]
@@ -275,7 +274,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    gits: MutableMapping[str, gitter.GitRepoType] = OrderedDict()
+    gits: Dict[str, gitter.GitRepoType] = {}
 
     def __init__(self) -> None:
 
@@ -654,7 +653,7 @@ You can use of one:
                 CONTAINERS_YAML_DIRNAME
             )
 
-        compose_files = OrderedDict()
+        compose_files = {}
 
         confs: Dict[str, Any] = glom(
             Configuration.specs, "variables.composers", default={}

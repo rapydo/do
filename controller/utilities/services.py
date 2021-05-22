@@ -1,5 +1,4 @@
 import sys
-from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Tuple
 
 from glom import glom
@@ -70,7 +69,7 @@ def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
 
 
 def apply_variables(
-    dictionary: "OrderedDict[str, Any]", variables: Dict[str, Any]
+    dictionary: Dict[str, Any], variables: Dict[str, Any]
 ) -> Dict[str, Any]:
 
     new_dict: Dict[str, Any] = {}

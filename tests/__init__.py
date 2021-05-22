@@ -1,5 +1,4 @@
 import time
-from collections import OrderedDict  # can be removed from python 3.7
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
@@ -74,7 +73,7 @@ def exec_command(capfd, command, *asserts, input_text=None):
     # re-read everytime before invoking a command to cleanup the Configuration class
     Application.load_projectrc()
     Application.project_scaffold = Project()
-    Application.gits = OrderedDict()
+    Application.gits = {}
     result = runner.invoke(ctrl.app, command, input=input_text)
 
     with capfd.disabled():

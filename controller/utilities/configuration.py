@@ -1,5 +1,4 @@
 import sys
-from collections import OrderedDict  # can be removed from python 3.7
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -152,7 +151,7 @@ class OrderedLoader(yaml.SafeLoader):
 
 def construct_mapping(loader, node):
     loader.flatten_mapping(node)
-    return OrderedDict(loader.construct_pairs(node))
+    return dict(loader.construct_pairs(node))
 
 
 def get_yaml_path(file: Path, path: Path) -> Optional[Path]:
@@ -210,7 +209,7 @@ def load_yaml_file(
 
 
 def read_composer_yamls(
-    composers: "OrderedDict[str, Dict[str, Any]]",
+    composers: Dict[str, Dict[str, Any]]
 ) -> Tuple[List[Path], List[Path]]:
 
     base_files: List[Path] = []
