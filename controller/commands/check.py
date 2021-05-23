@@ -9,6 +9,7 @@ from python_on_whales.utils import DockerException
 from controller import gitter, log
 from controller.app import Application
 from controller.builds import locate_builds
+from controller.swarm import Swarm
 from controller.templating import Templating
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -46,6 +47,11 @@ def check(
         Application.exit(e)
 
     Application.get_controller().controller_init()
+
+    swarm = Swarm()
+    if not swarm.get_token():
+        Application.exit("Swarm is not initialized, please execute rapydo init")
+    log.debug("Swarm is correctly initialized")
 
     if no_git:
         log.info("Skipping git checks")
