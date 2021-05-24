@@ -164,7 +164,7 @@ def test_all(capfd: Capture) -> None:
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    signal.alarm(3)
+    signal.alarm(5)
     # Here using main services option
     exec_command(
         capfd,
