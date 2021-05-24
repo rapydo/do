@@ -60,18 +60,16 @@ def interfaces(
         log.warning("Deprecated interface mongo, use adminer instead")
         return False
 
-    info = container_info(Application.data.compose_config, service.value)
+    info = Application.data.compose_config.get(service.value, None)
     try:
         current_ports = info.get("ports", []).pop(0)
     except IndexError:  # pragma: no cover
         Application.exit("No default port found?")
 
-    # cannot set current_ports.published as default in get
-    # because since port is in args... but can be None
-    if port is None:
-        port = current_ports.published
+    port = port or current_ports["published"]
+    target = current_ports["target"]
 
-    publish = [f"{port}:{current_ports.target}"]
+    publish = [f"{port}:{target}"]
 
     if service.value == "swaggerui":
         if Configuration.production:
@@ -93,7 +91,3 @@ def interfaces(
     dc.create_volatile_container(service, publish=publish, detach=detach)
 
     return True
-
-
-def container_info(compose_config, service_name):
-    return compose_config.get(service_name, None)
