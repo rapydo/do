@@ -25,12 +25,12 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [
-            "docker-compose==1.27.4",
+            "docker-compose==1.28.4",
+            "python-on-whales==0.18.0",
             "dockerfile-parse==1.0.0",
             "python-dateutil",
             "pytz",
             "loguru",
-            "prettyprinter",
             "jinja2",
             "sultan==0.9.1",
             "plumbum",

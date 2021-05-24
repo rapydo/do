@@ -3,8 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from glom import glom
 
-from controller import log
-from controller.app import ComposeConfig
+from controller import ComposeConfig, log
 from controller.project import ANGULAR
 
 

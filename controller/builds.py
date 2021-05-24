@@ -13,8 +13,7 @@ from dockerfile_parse import DockerfileParser
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
-from controller import log
-from controller.app import ComposeConfig
+from controller import ComposeConfig, log
 
 name_priorities = [
     "backend",

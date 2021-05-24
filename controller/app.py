@@ -22,6 +22,7 @@ from controller import (
     PROJECT_DIR,
     PROJECTRC,
     SUBMODULES_DIR,
+    ComposeConfig,
     __version__,
     gitter,
     log,
@@ -37,7 +38,6 @@ warnings.simplefilter("always", DeprecationWarning)
 
 DataFileStub = Dict[str, List[str]]
 # From python 3.8 it could be a TypedDict
-ComposeConfig = Dict[str, Any]
 
 ROOT_UID = 0
 BASE_UID = 1000

@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict
 
 from loguru import logger as log
 
@@ -51,3 +52,5 @@ DATAFILE = Path(".rapydo")
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = "confs"
 COMPOSE_FILE = Path("docker-compose.yml")
+
+ComposeConfig = Dict[str, Any]
