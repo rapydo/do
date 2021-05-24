@@ -22,6 +22,7 @@ from compose.cli.command import (
 )
 from compose.cli.main import TopLevelCommand
 from compose.cli.signals import ShutdownException
+from compose.config.serialize import serialize_config
 from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
@@ -52,9 +53,16 @@ class Compose:
         # NOTE: compose_output_tuple is a namedtuple
         return cast(List[Dict[str, Any]], compose_output_tuple.services)
 
+    def dump_config(self) -> str:
+        compose_config = get_config_from_options(".", self.options)
+        return cast(str, serialize_config(compose_config, None, True))
+
+    def get_handler(self) -> TopLevelCommand:
+        return TopLevelCommand(project_from_options(os.curdir, self.options))
+
     def command(self, command: str, options: Dict[str, Any]) -> None:
 
-        compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
+        compose_handler = self.get_handler()
         method = getattr(compose_handler, command)
 
         if options.get("SERVICE", None) is None:

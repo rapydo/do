@@ -1,8 +1,11 @@
 version: "3.2"
 
 services:
+  proxy:
+    volumes:
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+
   frontend:
-    # restart: no
     build:
       context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
       args:
@@ -121,8 +124,3 @@ services:
       - ${BASE_PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
 
       - ${VANILLA_DIR}/data/logs:/logs
-
-  ###############################
-  proxy:
-    volumes:
-      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
