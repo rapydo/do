@@ -59,9 +59,8 @@ def find_templates_build(base_services: ComposeConfig) -> Dict[str, Any]:
     # From python 3.8 could be converted in a TypedDict
     templates = {}
 
-    for name, base_service in base_services.values():
+    for name, base_service in base_services.items():
 
-        log.critical(base_service)
         template_build = base_service.get("build")
 
         if template_build is not None:
