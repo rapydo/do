@@ -17,7 +17,7 @@ def get_services(
     if excluded_services_list:
 
         splitted = excluded_services_list.split(",")
-        return sorted([s for s in default if s not in splitted])
+        return sorted(s for s in default if s not in splitted)
 
     return sorted(default)
 
@@ -41,20 +41,17 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
+def find_active(services: Dict[str, Any]) -> List[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
     """
 
     dependencies: Dict[str, List[str]] = {}
-    all_services: Dict[str, List[Any]] = {}
     base_actives: List[str] = []
 
-    for service in services:
+    for name, service in services.items():
 
-        name = service.get("name")
-        all_services[name] = service
         dependencies[name] = list(service.get("depends_on", {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
@@ -65,7 +62,7 @@ def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
     log.debug("Base active services = {}", base_actives)
     log.debug("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
-    return all_services, active_services
+    return active_services
 
 
 def apply_variables(
@@ -171,7 +168,7 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
 def check_rabbit_password(pwd: Optional[str]) -> None:
     if pwd:
         invalid_characters = ["£", "§", "”", "’"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in pwd for c in invalid_characters):
             log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
@@ -184,7 +181,7 @@ def check_rabbit_password(pwd: Optional[str]) -> None:
 def check_redis_password(pwd: Optional[str]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in pwd for c in invalid_characters):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
@@ -197,7 +194,7 @@ def check_redis_password(pwd: Optional[str]) -> None:
 def check_mongodb_password(pwd: Optional[str]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in pwd for c in invalid_characters):
             log.critical("Not allowed characters found in MONGO_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "

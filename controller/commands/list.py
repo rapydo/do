@@ -36,8 +36,7 @@ def list_cmd(
         containers_status = dc.get_containers_status(Configuration.project)
 
         print("{:<12} {:<8} {:<24} Path".format("Name", "Status", "Image"))
-        for service in Application.data.compose_config:
-            name = service.get("name")
+        for name, service in Application.data.compose_config.values():
             if name in Application.data.active_services:
                 image = service.get("image")
                 build = service.get("build")

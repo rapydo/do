@@ -60,7 +60,7 @@ def interfaces(
         log.warning("Deprecated interface mongo, use adminer instead")
         return False
 
-    info = container_info(Application.data.services_dict, service.value)
+    info = container_info(Application.data.compose_config, service.value)
     try:
         current_ports = info.get("ports", []).pop(0)
     except IndexError:  # pragma: no cover
@@ -95,5 +95,5 @@ def interfaces(
     return True
 
 
-def container_info(services_dict, service_name):
-    return services_dict.get(service_name, None)
+def container_info(compose_config, service_name):
+    return compose_config.get(service_name, None)

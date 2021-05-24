@@ -27,10 +27,11 @@ def pull(
         services_intersection = Application.data.services
     else:
         dc = Compose(files=Application.data.base_files)
-        base_services_list = []
-        for s in Application.data.base_services:
-            base_services_list.append(s.get("name"))
+        # base_services_list = []
+        # for s in Application.data.base_services:
+        #     base_services_list.append(s.get("name"))
 
+        base_services_list = Application.data.base_services.keys()
         if Configuration.services_list:
             for s in Application.data.services:
                 if s not in base_services_list:

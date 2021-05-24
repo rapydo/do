@@ -13,6 +13,7 @@ from io import StringIO
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
+import yaml
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
 from compose.cli.command import (
@@ -48,14 +49,50 @@ class Compose:
 
         log.debug("Client compose {}: {}", self.project_name, files)
 
-    def config(self) -> List[Dict[str, Any]]:
-        compose_output_tuple = get_config_from_options(".", self.options)
-        # NOTE: compose_output_tuple is a namedtuple
-        return cast(List[Dict[str, Any]], compose_output_tuple.services)
-
-    def dump_config(self) -> str:
+    def config(self, relative_paths: bool = False) -> Dict[str, Any]:
         compose_config = get_config_from_options(".", self.options)
-        return cast(str, serialize_config(compose_config, None, True))
+        yaml_string = serialize_config(compose_config, None, True)
+
+        if relative_paths:
+            yaml_string = yaml_string.replace(os.getcwd(), ".")
+
+        return cast(Dict[str, Any], yaml.safe_load(yaml_string))
+
+    def dump_config(
+        self, compose_config: Dict[str, Any], path: Path, active_services: List[str]
+    ) -> None:
+
+        clean_config: Dict[str, Any] = {
+            "version": compose_config.get("version", "3.8"),
+            "networks": {},
+            "volumes": {},
+            "services": {},
+        }
+        networks = set()
+        volumes = set()
+        # Remove unused services, networks and volumes from compose configuration
+        for key, value in compose_config.get("services", {}).items():
+            if key not in active_services:
+                continue
+            clean_config["services"][key] = value
+
+            for k in value.get("networks", {}).keys():
+                networks.add(k)
+
+            for k in value.get("volumes", []):
+                if k.startswith("./"):
+                    continue
+                volumes.add(k.split(":")[0])
+
+        for net in networks:
+            clean_config["networks"][net] = compose_config["networks"].get(net)
+
+        for vol in volumes:
+            clean_config["volumes"][vol] = compose_config["volumes"].get(vol)
+
+        filename = Path("docker-compose.yml")
+        with open(filename, "w") as fh:
+            fh.write(yaml.dump(clean_config, default_flow_style=False))
 
     def get_handler(self) -> TopLevelCommand:
         return TopLevelCommand(project_from_options(os.curdir, self.options))

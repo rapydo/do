@@ -249,9 +249,8 @@ class CommandsData:
         base_files: List[Path] = [],
         services: List[str] = [],
         active_services: List[str] = [],
-        base_services: List[Any] = [],
-        compose_config: List[Any] = [],
-        services_dict: Dict[str, Any] = None,
+        base_services: Dict[str, Any] = {},
+        compose_config: Dict[str, Any] = {},
     ):
         self.files = files
         self.base_files = base_files
@@ -259,7 +258,6 @@ class CommandsData:
         self.active_services = active_services or []
         self.base_services = base_services
         self.compose_config = compose_config
-        self.services_dict = services_dict or {}
 
 
 class Application:
@@ -285,9 +283,8 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        self.base_services: List[Any] = []
-        self.compose_config: List[Any] = []
-        self.services_dict: Dict[str, List[Any]] = {}
+        self.base_services: Dict[str, Any] = {}
+        self.compose_config: Dict[str, Any] = {}
 
         load_commands()
 
@@ -396,7 +393,6 @@ class Application:
             active_services=self.active_services,
             base_services=self.base_services,
             compose_config=self.compose_config,
-            services_dict=self.services_dict,
         )
 
         return None
@@ -611,9 +607,7 @@ You can use of one:
             )
 
     def set_active_services(self) -> None:
-        self.services_dict, self.active_services = services.find_active(
-            self.compose_config
-        )
+        self.active_services = services.find_active(self.compose_config)
 
         self.enabled_services = services.get_services(
             Configuration.services_list,
@@ -665,10 +659,12 @@ You can use of one:
 
         # to build the config with files and variables
         dc = Compose(files=self.base_files)
-        self.base_services = dc.config()
+        self.base_services = cast(Dict[str, Any], dc.config().get("services", {}))
 
         dc = Compose(files=self.files)
-        self.compose_config = dc.config()
+        compose_config = dc.config()
+        self.compose_config = cast(Dict[str, Any], compose_config.get("services", {}))
+        # dc.dump_config(COMPOSE_FILE, Application.data.active_services)
 
     def create_projectrc(self) -> None:
         templating = Templating()
@@ -816,7 +812,7 @@ You can use of one:
         data: DataFileStub = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": self.active_services,
-            "allservices": list(self.services_dict.keys()),
+            "allservices": list(self.compose_config.keys()),
         }
 
         with open(DATAFILE, "w+") as outfile:
@@ -880,7 +876,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         missing = set()
         for service_name in self.active_services:
-            service = self.services_dict.get(service_name)
+            service = self.compose_config.get(service_name)
 
             if service:
                 for key, value in (
