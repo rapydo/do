@@ -2,14 +2,13 @@
 Integration with Docker swarmg
 """
 
-# from pathlib import Path
 from typing import Optional
 
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
-# from controller import COMPOSE_ENVIRONMENT_FILE, log
-# from controller.app import Configuration
+from controller import COMPOSE_FILE
+from controller.app import Configuration
 
 
 class Swarm:
@@ -29,10 +28,8 @@ class Swarm:
             # log.debug(e)
             return None
 
-    # def deploy(self, compose_files: List[Path]) -> None:
-    #     log.critical(COMPOSE_ENVIRONMENT_FILE.resolve())
-    #     docker.stack.deploy(
-    #         name=Configuration.project,
-    #         compose_files=compose_files,
-    #         env_files=[COMPOSE_ENVIRONMENT_FILE.resolve()]
-    #     )
+    def deploy(self) -> None:
+        docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
+
+    def remove(self) -> None:
+        docker.stack.remove(Configuration.project)
