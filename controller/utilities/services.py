@@ -1,9 +1,10 @@
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from glom import glom
 
 from controller import log
+from controller.app import ComposeConfig
 from controller.project import ANGULAR
 
 
@@ -41,7 +42,7 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: Dict[str, Any]) -> List[str]:
+def find_active(services: ComposeConfig) -> List[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.

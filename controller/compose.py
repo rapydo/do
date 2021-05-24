@@ -93,12 +93,9 @@ class Compose:
         with open(path, "w") as fh:
             fh.write(yaml.dump(clean_config, default_flow_style=False))
 
-    def get_handler(self) -> TopLevelCommand:
-        return TopLevelCommand(project_from_options(os.curdir, self.options))
-
     def command(self, command: str, options: Dict[str, Any]) -> None:
 
-        compose_handler = self.get_handler()
+        compose_handler = TopLevelCommand(project_from_options(os.curdir, self.options))
         method = getattr(compose_handler, command)
 
         if options.get("SERVICE", None) is None:

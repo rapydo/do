@@ -36,6 +36,8 @@ from controller.utilities import configuration, services, system
 warnings.simplefilter("always", DeprecationWarning)
 
 DataFileStub = Dict[str, List[str]]
+# From python 3.8 it could be a TypedDict
+ComposeConfig = Dict[str, Any]
 
 ROOT_UID = 0
 BASE_UID = 1000
@@ -250,8 +252,8 @@ class CommandsData:
         base_files: List[Path] = [],
         services: List[str] = [],
         active_services: List[str] = [],
-        base_services: Dict[str, Any] = {},
-        compose_config: Dict[str, Any] = {},
+        base_services: ComposeConfig = {},
+        compose_config: ComposeConfig = {},
     ):
         self.files = files
         self.base_files = base_files
@@ -284,8 +286,8 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        self.base_services: Dict[str, Any] = {}
-        self.compose_config: Dict[str, Any] = {}
+        self.base_services: ComposeConfig = {}
+        self.compose_config: ComposeConfig = {}
 
         load_commands()
 
@@ -646,10 +648,10 @@ You can use of one:
 
         # to build the config with files and variables
         dc = Compose(files=self.base_files)
-        self.base_services = cast(Dict[str, Any], dc.config().get("services", {}))
+        self.base_services = cast(ComposeConfig, dc.config().get("services", {}))
 
         dc = Compose(files=self.files)
-        self.compose_config = cast(Dict[str, Any], dc.config().get("services", {}))
+        self.compose_config = cast(ComposeConfig, dc.config().get("services", {}))
 
         self.set_active_services()
 

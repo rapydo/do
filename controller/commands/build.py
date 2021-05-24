@@ -55,15 +55,15 @@ def build(
     custom_services = []
     service2img = {}
     img2services = {}
-    for img, build in builds.items():
-        if img in overriding_imgs:
+    for img_name, build in builds.items():
+        if img_name in overriding_imgs:
             services = build.get("services", [])
             custom_services.extend(build.get("services", []))
 
             # These will be used to verify running images
-            img2services[img] = services
+            img2services[img_name] = services
             for service in services:
-                service2img[service] = img
+                service2img[service] = img_name
 
     # Remove services not selected at project level, i.e. restricted by --service
     build_services = [i for i in custom_services if i in Application.data.services]
@@ -93,7 +93,7 @@ def build(
         # and verify if any of them is running
         for s in build_services:
             # This the image that will be built for this service:
-            img = service2img.get(s)
+            img = service2img.get(s, "")
             # Get the list of services using the same image (img2services.get(img))
             # and check if any of these services is running
             running = [

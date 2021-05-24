@@ -7,13 +7,14 @@ Parse dockerfiles and check for builds
 
 import sys
 from datetime import datetime
-from typing import Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import log
+from controller.app import ComposeConfig
 
 name_priorities = [
     "backend",
@@ -54,13 +55,14 @@ def get_image_creation(image_name: str) -> Optional[datetime]:
         return None
 
 
-def find_templates_build(base_services):
+def find_templates_build(base_services: ComposeConfig) -> Dict[str, Any]:
 
     # From python 3.8 could be converted in a TypedDict
     templates = {}
 
-    for base_service in base_services:
+    for name, base_service in base_services.values():
 
+        log.critical(base_service)
         template_build = base_service.get("build")
 
         if template_build is not None:
@@ -92,13 +94,15 @@ def find_templates_build(base_services):
     return templates
 
 
-def find_templates_override(services, templates):
+def find_templates_override(
+    services: ComposeConfig, templates: Dict[str, Any]
+) -> Tuple[Dict[str, Any], Dict[str, str]]:
 
     # Template and vanilla builds involved in override
-    tbuilds = {}
-    vbuilds = {}
+    tbuilds: Dict[str, Any] = {}
+    vbuilds: Dict[str, str] = {}
 
-    for service in services:
+    for service in services.values():
 
         builder = service.get("build")
         if builder is not None:
@@ -144,7 +148,9 @@ def find_templates_override(services, templates):
     return tbuilds, vbuilds
 
 
-def locate_builds(base_services, services):
+def locate_builds(
+    base_services: ComposeConfig, services: ComposeConfig
+) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
 
     # All builds used for the current configuration (templates + custom)
     builds = find_templates_build(services)
@@ -159,7 +165,7 @@ def locate_builds(base_services, services):
     return builds, template_imgs, vanilla_imgs
 
 
-def remove_redundant_services(services, builds):
+def remove_redundant_services(services: List[str], builds: ComposeConfig) -> List[str]:
 
     # Sort the list of services to obtain determinist outputs
     services.sort()
@@ -198,14 +204,16 @@ def remove_redundant_services(services, builds):
         if len(redundant_services) == 1:
             non_redundant_services.append(redundant_services[0])
         else:
-            service = None
+            non_redundant_service: Optional[str] = None
             for serv in redundant_services:
 
-                if service is None:
-                    service = serv
+                if non_redundant_service is None:
+                    non_redundant_service = serv
                 else:
-                    service = name_priority(service, serv)
-            non_redundant_services.append(service)
+                    non_redundant_service = name_priority(non_redundant_service, serv)
+
+            if non_redundant_service:
+                non_redundant_services.append(non_redundant_service)
 
     if len(services) != len(non_redundant_services):
         log.info(

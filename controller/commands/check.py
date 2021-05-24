@@ -86,8 +86,12 @@ def check(
 
             # if FROM image is newer, this build should be re-built
             elif image_tag in overriding_imgs:
-                from_img = overriding_imgs.get(image_tag)
+                from_img = overriding_imgs.get(image_tag, "")
                 from_build = template_builds.get(from_img)
+
+                # This check should not be needed, added to prevent errors from mypy
+                if not from_build:  # pragma: no cover
+                    continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
@@ -102,7 +106,7 @@ def check(
                     # )
                     log.warning(
                         "Missing template build for {} ({})\n{}",
-                        from_build["services"],
+                        from_build.get("services"),
                         from_img,
                     )
 
