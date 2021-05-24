@@ -13,6 +13,7 @@ from glom import glom
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
+    COMPOSE_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
     DATAFILE,
@@ -379,8 +380,7 @@ class Application:
         self.make_env()
 
         # Compose services and variables
-        self.read_composers()
-        self.set_active_services()
+        self.get_compose_configuration()
 
         self.check_placeholders()
 
@@ -606,20 +606,7 @@ You can use of one:
                 name, repo, from_path=from_path
             )
 
-    def set_active_services(self) -> None:
-        self.active_services = services.find_active(self.compose_config)
-
-        self.enabled_services = services.get_services(
-            Configuration.services_list,
-            Configuration.excluded_services_list,
-            default=self.active_services,
-        )
-
-        log.debug("Enabled services: {}", self.enabled_services)
-
-        self.create_datafile()
-
-    def read_composers(self) -> None:
+    def get_compose_configuration(self) -> None:
 
         # Find configuration that tells us which files have to be read
 
@@ -662,9 +649,26 @@ You can use of one:
         self.base_services = cast(Dict[str, Any], dc.config().get("services", {}))
 
         dc = Compose(files=self.files)
-        compose_config = dc.config()
-        self.compose_config = cast(Dict[str, Any], compose_config.get("services", {}))
-        # dc.dump_config(COMPOSE_FILE, Application.data.active_services)
+        self.compose_config = cast(Dict[str, Any], dc.config().get("services", {}))
+
+        self.set_active_services()
+
+        compose_config = dc.config(relative_paths=True)
+        dc.dump_config(compose_config, COMPOSE_FILE, self.active_services)
+        log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
+
+    def set_active_services(self) -> None:
+        self.active_services = services.find_active(self.compose_config)
+
+        self.enabled_services = services.get_services(
+            Configuration.services_list,
+            Configuration.excluded_services_list,
+            default=self.active_services,
+        )
+
+        log.debug("Enabled services: {}", self.enabled_services)
+
+        self.create_datafile()
 
     def create_projectrc(self) -> None:
         templating = Templating()

@@ -33,12 +33,14 @@ def test_base(capfd: Capture) -> None:
     exec_command(
         capfd,
         "init",
+        "Compose configuration dumped on docker-compose.yml",
         "Swarm is now initialized",
         "Project initialized",
     )
     exec_command(
         capfd,
         "init",
+        "Compose configuration dumped on docker-compose.yml",
         "Swarm is already initialized",
         "Project initialized",
     )
@@ -111,6 +113,7 @@ def test_base(capfd: Capture) -> None:
     exec_command(
         capfd,
         "check -i main",
+        "Compose configuration dumped on docker-compose.yml",
         "Swarm is correctly initialized",
         "Checks completed",
     )
@@ -121,11 +124,13 @@ def test_base(capfd: Capture) -> None:
     exec_command(
         capfd,
         "check -i main",
+        "Compose configuration dumped on docker-compose.yml",
         "Swarm is not initialized, please execute rapydo init",
     )
     exec_command(
         capfd,
         "init",
+        "Compose configuration dumped on docker-compose.yml",
         "Swarm is now initialized",
         "Project initialized",
     )

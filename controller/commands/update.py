@@ -26,8 +26,7 @@ def update(
     Application.get_controller().make_env()
 
     # Compose services and variables
-    Application.get_controller().read_composers()
-    Application.get_controller().set_active_services()
+    Application.get_controller().get_compose_configuration()
 
     Application.get_controller().check_placeholders()
 

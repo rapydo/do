@@ -80,7 +80,7 @@ class Compose:
                 networks.add(k)
 
             for k in value.get("volumes", []):
-                if k.startswith("./"):
+                if k.startswith("/") or k.startswith("./"):
                     continue
                 volumes.add(k.split(":")[0])
 
@@ -90,8 +90,7 @@ class Compose:
         for vol in volumes:
             clean_config["volumes"][vol] = compose_config["volumes"].get(vol)
 
-        filename = Path("docker-compose.yml")
-        with open(filename, "w") as fh:
+        with open(path, "w") as fh:
             fh.write(yaml.dump(clean_config, default_flow_style=False))
 
     def get_handler(self) -> TopLevelCommand:
