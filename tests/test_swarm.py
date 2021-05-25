@@ -179,6 +179,8 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "remove", "rm_networks is currently always enabled", "Stack removed"
     )
 
+    time.sleep(2)
+
     exec_command(
         capfd,
         "status",
