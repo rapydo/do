@@ -54,7 +54,7 @@ def test_swarm(capfd: Capture) -> None:
     #     "preparing",
     # )
 
-    time.sleep(5)
+    time.sleep(10)
 
     exec_command(
         capfd,
