@@ -34,8 +34,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "start --no-detach --force",
-        "Detach flag is no longer supported",
+        "start --force",
         "Force flag is not yet implemented",
         "Stack started",
     )

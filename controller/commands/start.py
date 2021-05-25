@@ -7,12 +7,6 @@ from controller.compose import Compose
 
 @Application.app.command(help="Start containers for this configuration")
 def start(
-    detach: bool = typer.Option(
-        True,
-        "--no-detach",
-        help="Disable detach mode and attach to container execution",
-        show_default=False,
-    ),
     force: bool = typer.Option(
         False,
         "--force",
@@ -25,6 +19,6 @@ def start(
 
     dc = Compose(files=Application.data.files)
 
-    dc.start_containers(Application.data.services, detach=detach, force_recreate=force)
+    dc.start_containers(Application.data.services, force_recreate=force)
 
     log.info("Stack started")

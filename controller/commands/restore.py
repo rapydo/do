@@ -108,7 +108,7 @@ def restore(
         log.info("Restore from data{} completed", backup_path)
 
         if container_is_running:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
     if service_name == Services.postgres:
 
@@ -189,7 +189,7 @@ def restore(
         dc.create_volatile_container(service_name, command=command)
 
         if container_is_running:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
         log.info("Restore from data{} completed", backup_path)
 
@@ -214,7 +214,7 @@ def restore(
         log.info("Restore from data{} completed", backup_path)
 
         if container_is_running:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
     if service_name == Services.redis:
 
@@ -236,7 +236,7 @@ def restore(
         log.info("Restore from data{} completed", backup_path)
 
         if container_is_running:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
     if restart:
         dc.command("restart", {"SERVICE": restart})

@@ -148,8 +148,6 @@ class Compose:
     def start_containers(
         self,
         services: List[str],
-        # used by backup
-        detach: bool = True,
         # used by scale
         scale: Optional[List[str]] = None,
         # used by scale
@@ -168,7 +166,7 @@ class Compose:
         options = {
             "SERVICE": services,
             "--no-deps": skip_dependencies,
-            "--detach": detach,
+            "--detach": True,
             "--build": None,
             "--no-color": False,
             "--remove-orphans": False,
@@ -196,6 +194,7 @@ class Compose:
         service: str,
         command: Optional[str] = None,
         publish: Optional[List[str]] = None,
+        # used by interfaces
         detach: bool = False,
         user: Optional[str] = None,
     ) -> None:

@@ -32,22 +32,6 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "Bind for 0.0.0.0:8080 failed: port is already allocated",
     )
 
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
-    exec_command(
-        capfd,
-        "-s backend start --no-detach",
-        # "REST API backend server is ready to be launched",
-        "Time is up",
-    )
-
-    # This is because after start --no-detach the container in still in exited status
-    exec_command(
-        capfd,
-        "volatile backend hostname",
-        "Bind for 0.0.0.0:8080 failed: port is already allocated",
-    )
-
     exec_command(
         capfd,
         "remove --all",

@@ -115,7 +115,7 @@ def backup(
         log.info("Backup completed: data{}", backup_path)
 
         if container_is_running and not dry_run:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
     if service_name == Services.postgres:
 
@@ -239,7 +239,7 @@ def backup(
         log.info("Backup completed: data{}", backup_path)
 
         if container_is_running and not dry_run:
-            dc.start_containers([service_name], detach=True)
+            dc.start_containers([service_name])
 
     if service_name == Services.redis:
 
