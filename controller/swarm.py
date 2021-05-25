@@ -125,3 +125,23 @@ class Swarm:
     @staticmethod
     def remove() -> None:
         docker.stack.remove(Configuration.project)
+
+    # def exec_command(
+    #     self,
+    #     service: str,
+    #     user: Optional[str] = None,
+    #     command: str = None,
+    #     disable_tty: bool = False,
+    #     detach: bool = False,
+    # ) -> None:
+    #     """
+    #     Execute a command on a running container
+    #     """
+    #     log.debug("Command on {}: {}", service.lower(), command)
+    #     print(
+    #         docker.container.execute(
+    #             container="-",
+    #             command=command,
+    #             detach=detach
+    #         )
+    #     )

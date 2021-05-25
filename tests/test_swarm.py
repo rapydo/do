@@ -156,6 +156,8 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "scale backend=0", "swarm_backend scaled to 0", "Service converged"
     )
 
+    time.sleep(2)
+
     exec_command(
         capfd,
         "status",
