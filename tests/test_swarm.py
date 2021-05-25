@@ -31,7 +31,7 @@ def test_swarm(capfd: Capture) -> None:
         auth=auth,
         frontend="angular",
         init=False,
-        pull=True,
+        pull=False,
         start=False,
     )
 
@@ -94,6 +94,11 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "pull",
+        "Base images pulled from docker hub",
+    )
+    exec_command(
+        capfd,
         "start --force",
         "Force flag is not yet implemented",
         "Stack started",
@@ -125,6 +130,36 @@ def test_swarm(capfd: Capture) -> None:
         f"swarm_frontend (rapydo/angular:{__version__})",
         " \\_ [1]",
         "running",
+    )
+
+    exec_command(capfd, "scale backend=2", "swarm_backend scaled to 3")
+
+    exec_command(
+        capfd,
+        "status",
+        " \\_ [2]",
+    )
+
+    exec_command(
+        capfd, "-e DEFAULT_SCALE_BACKEND=3 scale backend", "swarm_backend scaled to 3"
+    )
+    exec_command(
+        capfd,
+        "scale backend=x",
+        "Invalid number of replicas: x",
+    )
+
+    with open(".projectrc", "a") as f:
+        f.write("\n      DEFAULT_SCALE_BACKEND: 4\n")
+
+    exec_command(capfd, "scale backend", "swarm_backend scaled to 4")
+
+    exec_command(capfd, "scale backend=0", "swarm_backend scaled to 0")
+
+    exec_command(
+        capfd,
+        "status",
+        "! no task is running",
     )
 
     exec_command(

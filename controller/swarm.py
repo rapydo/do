@@ -115,5 +115,11 @@ class Swarm:
                 )
 
     @staticmethod
+    def scale(service: str, nreplicas: int) -> None:
+        docker.service.scale(
+            {f"{Configuration.project}_{service}": nreplicas}, detach=False
+        )
+
+    @staticmethod
     def remove() -> None:
         docker.stack.remove(Configuration.project)
