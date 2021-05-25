@@ -26,12 +26,12 @@ def scale(
                 "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints
             )
         service = scaling
-        scaling = f"{service}={nreplicas}"
     else:
         service, nreplicas = options
 
-    if isinstance(nreplicas, str) and not nreplicas.isnumeric():
-        Application.exit("Invalid number of replicas: {}", nreplicas)
+    if nreplicas is None or (isinstance(nreplicas, str) and not nreplicas.isnumeric()):
+        # str() is needed because nreplicas can be None
+        Application.exit("Invalid number of replicas: {}", str(nreplicas))
 
     swarm = Swarm()
     swarm.scale(service, int(nreplicas))

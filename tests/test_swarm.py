@@ -102,33 +102,20 @@ def test_swarm(capfd: Capture) -> None:
         "Stack started",
     )
 
-    # exec_command(
-    #     capfd,
-    #     "status",
-    #     "====== Nodes ======",
-    #     "Manager",
-    #     "Ready+Active",
-    #     "====== Services ======",
-    #     f"swarm_backend (rapydo/backend:{__version__})",
-    #     f"swarm_frontend (rapydo/angular:{__version__})",
-    #     " \\_ [1]",
-    #     "preparing",
-    # )
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        f"swarm_backend (rapydo/backend:{__version__})",
+        f"swarm_frontend (rapydo/angular:{__version__})",
+        " [1]",
+        "preparing",
+    )
 
     time.sleep(5)
-
-    # exec_command(
-    #     capfd,
-    #     "status",
-    #     "====== Nodes ======",
-    #     "Manager",
-    #     "Ready+Active",
-    #     "====== Services ======",
-    #     f"swarm_backend (rapydo/backend:{__version__})",
-    #     f"swarm_frontend (rapydo/angular:{__version__})",
-    #     " \\_ [1]",
-    #     "running",
-    # )
 
     exec_command(
         capfd,
@@ -139,7 +126,8 @@ def test_swarm(capfd: Capture) -> None:
         "====== Services ======",
         f"swarm_backend (rapydo/backend:{__version__})",
         f"swarm_frontend (rapydo/angular:{__version__})",
-        " \\_ [1]",
+        " [1]",
+        "running",
     )
 
     exec_command(capfd, "scale backend=2", "swarm_backend scaled to 3")
@@ -147,12 +135,19 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "status",
-        " \\_ [2]",
+        " [2]",
     )
 
     exec_command(
         capfd, "-e DEFAULT_SCALE_BACKEND=3 scale backend", "swarm_backend scaled to 3"
     )
+
+    exec_command(
+        capfd,
+        "status",
+        " [3]",
+    )
+
     exec_command(
         capfd,
         "scale backend=x",
