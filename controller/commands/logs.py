@@ -20,23 +20,11 @@ def logs(
         "-t",
         help="Number of lines to show",
     ),
-    service: str = typer.Option(
-        None,
-        "--service",
-        "-s",
-        help="Service name",
-        show_default=False,
-        autocompletion=Application.autocomplete_service,
-    ),
     nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
 ) -> None:
     Application.get_controller().controller_init()
 
-    # if provided, use specific service instead of general services opt
-    if service:
-        services = [service]
-    else:
-        services = Application.data.services
+    services = Application.data.services
 
     if len(services) > 1:
         timestamps = False
