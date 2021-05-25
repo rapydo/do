@@ -4,6 +4,7 @@ This module will test the swarm mode
 
 import os
 import random
+import time
 
 from controller import __version__
 from tests import Capture, create_project, exec_command
@@ -39,6 +40,21 @@ def test_swarm(capfd: Capture) -> None:
         "Force flag is not yet implemented",
         "Stack started",
     )
+
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        f"swarm_backend (rapydo/backend:{__version__})",
+        f"swarm_frontend (rapydo/angular:{__version__})",
+        " \\_ [1]",
+        "preparing",
+    )
+
+    time.sleep(1)
 
     exec_command(
         capfd,

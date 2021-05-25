@@ -2,9 +2,9 @@
 Integration with Docker swarmg
 """
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
-from python_on_whales import Task, docker
+from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
@@ -59,7 +59,9 @@ class Swarm:
                 sep="\t",
             )
 
-        tasks: Dict[str, List[Task]] = {}
+        # This Any should be python_on_whales.Task but:
+        # Type of variable becomes Any due to an unfollowed import
+        tasks: Dict[str, List[Any]] = {}
 
         try:
             for task in docker.stack.ps(Configuration.project):
