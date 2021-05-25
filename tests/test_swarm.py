@@ -91,9 +91,10 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "pull",
+        "pull --quiet",
         "Base images pulled from docker hub",
     )
+
     exec_command(
         capfd,
         "start --force",
@@ -116,6 +117,19 @@ def test_swarm(capfd: Capture) -> None:
 
     time.sleep(5)
 
+    # exec_command(
+    #     capfd,
+    #     "status",
+    #     "====== Nodes ======",
+    #     "Manager",
+    #     "Ready+Active",
+    #     "====== Services ======",
+    #     f"swarm_backend (rapydo/backend:{__version__})",
+    #     f"swarm_frontend (rapydo/angular:{__version__})",
+    #     " \\_ [1]",
+    #     "running",
+    # )
+
     exec_command(
         capfd,
         "status",
@@ -126,7 +140,6 @@ def test_swarm(capfd: Capture) -> None:
         f"swarm_backend (rapydo/backend:{__version__})",
         f"swarm_frontend (rapydo/angular:{__version__})",
         " \\_ [1]",
-        "running",
     )
 
     exec_command(capfd, "scale backend=2", "swarm_backend scaled to 3")
@@ -157,6 +170,15 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "status",
         "! no task is running",
+    )
+
+    exec_command(
+        capfd,
+        "stop",
+        "Stop command is not implemented in Swarm Mode",
+        "Stop is in contrast with the Docker Swarm approach",
+        "You can remove the stack => rapydo remove",
+        "Or you can scale all the services to zero => rapydo scale service=0",
     )
 
     exec_command(

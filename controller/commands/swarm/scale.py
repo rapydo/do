@@ -34,4 +34,4 @@ def scale(
         Application.exit("Invalid number of replicas: {}", nreplicas)
 
     swarm = Swarm()
-    swarm.scale(service, nreplicas)
+    swarm.scale(service, int(nreplicas))
