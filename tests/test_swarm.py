@@ -5,6 +5,7 @@ This module will test the swarm mode
 import os
 import random
 
+from controller import __version__
 from tests import Capture, create_project, exec_command
 
 
@@ -40,9 +41,31 @@ def test_swarm(capfd: Capture) -> None:
     )
 
     exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        f"swarm_backend (rapydo/backend:{__version__})",
+        f"swarm_frontend (rapydo/angular:{__version__})",
+        " \\_ [1]",
+        "running",
+    )
+
+    exec_command(
         capfd, "remove --all", "rm_all flag is not implemented yet", "Not implemented"
     )
 
     exec_command(
         capfd, "remove", "rm_networks is currently always enabled", "Stack removed"
+    )
+
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "No service is running",
     )
