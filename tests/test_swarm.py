@@ -103,6 +103,47 @@ def test_swarm(capfd: Capture) -> None:
 
     time.sleep(2)
 
+    # DEBUG CODE #
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+    )
+
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        "running",
+    )
+
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        " [1]",
+        "running",
+    )
+
+    exec_command(
+        capfd,
+        "status",
+        "====== Nodes ======",
+        "Manager",
+        "Ready+Active",
+        "====== Services ======",
+        "swarm_backend",
+    )
+    # ############
     exec_command(
         capfd,
         "status",
