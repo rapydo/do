@@ -4,7 +4,6 @@ This module will test the swarm mode
 import random
 import time
 
-from controller import __version__
 from controller.swarm import Swarm
 from tests import Capture, create_project, exec_command
 
@@ -104,23 +103,6 @@ def test_swarm(capfd: Capture) -> None:
 
     time.sleep(2)
 
-    # DEBUG CODE
-    exec_command(
-        capfd,
-        "status",
-    )
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-    )
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-    )
     exec_command(
         capfd,
         "status",
@@ -128,39 +110,8 @@ def test_swarm(capfd: Capture) -> None:
         "Manager",
         "Ready+Active",
         "====== Services ======",
-    )
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "====== Services ======",
-        f"swarm_backend (rapydo/backend:{__version__})",
-        f"swarm_frontend (rapydo/angular:{__version__})",
-    )
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "====== Services ======",
-        f"swarm_backend (rapydo/backend:{__version__})",
-        f"swarm_frontend (rapydo/angular:{__version__})",
-        " [1]",
-    )
-
-    # #################################
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "====== Services ======",
-        f"swarm_backend (rapydo/backend:{__version__})",
-        f"swarm_frontend (rapydo/angular:{__version__})",
+        "swarm_backend (rapydo/backend:",
+        "swarm_frontend (rapydo/angular:",
         " [1]",
         "running",
     )
