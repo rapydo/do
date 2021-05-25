@@ -33,7 +33,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "logs -s backend --tail 50 --no-color",
+        "-s backend logs --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Found no cronjob to be enabled, skipping crontab setup",
@@ -53,7 +53,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "logs -s backend --tail 50 --no-color",
+        "-s backend logs --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         # "Testing mode",

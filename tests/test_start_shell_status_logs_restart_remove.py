@@ -134,7 +134,7 @@ def test_all(capfd: Capture) -> None:
         capfd,
         # logs with tail 200 needed due to the spam of Requirement installation
         # after the Collecting ... /http-api.git
-        "logs -s backend --tail 200 --no-color",
+        "-s backend logs --tail 200 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Testing mode",
