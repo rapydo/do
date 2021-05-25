@@ -59,6 +59,14 @@ class Swarm:
                 sep="\t",
             )
 
+        services = docker.service.list()
+
+        print("")
+
+        if not services:
+            log.info("No service is running")
+            return
+
         # This Any should be python_on_whales.Task but:
         # Type of variable becomes Any due to an unfollowed import
         tasks: Dict[str, List[Any]] = {}
@@ -70,15 +78,9 @@ class Swarm:
         except DockerException:
             pass
 
-        print("")
-
-        if not tasks:
-            log.info("No service is running")
-            return
-
         print("====== Services ======")
 
-        for service in docker.service.list():
+        for service in services:
             ports = []
             if service.endpoint.ports:
                 ports = [

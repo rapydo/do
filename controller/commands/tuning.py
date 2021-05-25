@@ -15,7 +15,7 @@ class Services(str, Enum):
     backend = "backend"
 
 
-@Application.app.command(help="Tuning suggestion for a service")
+@Application.app.command(help="Tuning suggestions for a service")
 def tuning(
     service: Services = typer.Argument(..., help="Service name"),
     cpu: int = typer.Option(None, "--cpu", help="Force the amount of cpus", min=1),
