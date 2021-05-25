@@ -29,9 +29,11 @@ def scale(
     else:
         service, nreplicas = options
 
-    if nreplicas is None or (isinstance(nreplicas, str) and not nreplicas.isnumeric()):
-        # str() is needed because nreplicas can be None
-        Application.exit("Invalid number of replicas: {}", str(nreplicas))
+    if isinstance(nreplicas, str) and not nreplicas.isnumeric():
+        Application.exit("Invalid number of replicas: {}", nreplicas)
 
-    swarm = Swarm()
-    swarm.scale(service, int(nreplicas))
+    if nreplicas is not None:
+        swarm = Swarm()
+        swarm.scale(service, int(nreplicas))
+    else:  # pragma: no cover
+        Application.exit("Number of replica is missing")
