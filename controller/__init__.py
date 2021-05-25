@@ -54,3 +54,5 @@ CONTAINERS_YAML_DIRNAME = "confs"
 COMPOSE_FILE = Path("docker-compose.yml")
 
 ComposeConfig = Dict[str, Any]
+
+SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"

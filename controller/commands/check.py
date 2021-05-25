@@ -6,7 +6,7 @@ import typer
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
-from controller import gitter, log
+from controller import SWARM_MODE, gitter, log
 from controller.app import Application
 from controller.builds import locate_builds
 from controller.swarm import Swarm
@@ -48,10 +48,11 @@ def check(
 
     Application.get_controller().controller_init()
 
-    swarm = Swarm()
-    if not swarm.get_token():
-        Application.exit("Swarm is not initialized, please execute rapydo init")
-    log.debug("Swarm is correctly initialized")
+    if SWARM_MODE:
+        swarm = Swarm()
+        if not swarm.get_token():
+            Application.exit("Swarm is not initialized, please execute rapydo init")
+        log.debug("Swarm is correctly initialized")
 
     if no_git:
         log.info("Skipping git checks")

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 
-from controller import log
+from controller import SWARM_MODE, log
 from controller.app import Application, Configuration
 from controller.swarm import Swarm
 
@@ -24,12 +24,13 @@ def init(
 ) -> None:
     Application.get_controller().controller_init()
 
-    swarm = Swarm()
-    if not swarm.get_token():
-        swarm.init()
-        log.info("Swarm is now initialized")
-    else:
-        log.debug("Swarm is already initialized")
+    if SWARM_MODE:
+        swarm = Swarm()
+        if not swarm.get_token():
+            swarm.init()
+            log.info("Swarm is now initialized")
+        else:
+            log.debug("Swarm is already initialized")
 
     for p in Application.project_scaffold.data_folders:
         if not p.exists():

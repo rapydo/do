@@ -22,6 +22,7 @@ from controller import (
     PROJECT_DIR,
     PROJECTRC,
     SUBMODULES_DIR,
+    SWARM_MODE,
     ComposeConfig,
     __version__,
     gitter,
@@ -655,9 +656,10 @@ You can use of one:
 
         self.set_active_services()
 
-        compose_config = dc.config(relative_paths=True)
-        dc.dump_config(compose_config, COMPOSE_FILE, self.active_services)
-        log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
+        if SWARM_MODE:
+            compose_config = dc.config(relative_paths=True)
+            dc.dump_config(compose_config, COMPOSE_FILE, self.active_services)
+            log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     def set_active_services(self) -> None:
         self.active_services = services.find_active(self.compose_config)
