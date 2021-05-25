@@ -41,18 +41,18 @@ def test_swarm(capfd: Capture) -> None:
         "Stack started",
     )
 
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "====== Services ======",
-        f"swarm_backend (rapydo/backend:{__version__})",
-        f"swarm_frontend (rapydo/angular:{__version__})",
-        " \\_ [1]",
-        "preparing",
-    )
+    # exec_command(
+    #     capfd,
+    #     "status",
+    #     "====== Nodes ======",
+    #     "Manager",
+    #     "Ready+Active",
+    #     "====== Services ======",
+    #     f"swarm_backend (rapydo/backend:{__version__})",
+    #     f"swarm_frontend (rapydo/angular:{__version__})",
+    #     " \\_ [1]",
+    #     "preparing",
+    # )
 
     time.sleep(1)
 
