@@ -37,6 +37,7 @@ jobs:
             scale,
             ssl_dhparam,
             start_shell_status_logs_restart_remove,
+            swarm,
             verify,
             volatile,
           ]
