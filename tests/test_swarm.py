@@ -1,8 +1,6 @@
 """
 This module will test the swarm mode
 """
-
-import os
 import random
 import time
 
@@ -12,7 +10,6 @@ from tests import Capture, create_project, exec_command
 
 
 def test_swarm(capfd: Capture) -> None:
-    os.environ["SWARM_MODE"] = "1"
 
     rand = random.SystemRandom()
 
