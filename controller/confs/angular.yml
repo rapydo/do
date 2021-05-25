@@ -14,8 +14,6 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${FRONTEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: angular
-    # user: node
-    privileged: ${DOCKER_PRIVILEGED_MODE}
     networks:
       app_net:
         aliases:

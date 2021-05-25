@@ -58,7 +58,6 @@ class Configuration:
 
     production: bool = False
     testing: bool = False
-    privileged: bool = False
     project: str = ""
     frontend: Optional[str] = None
     hostname: str = ""
@@ -177,13 +176,6 @@ def controller_cli_options(
         "-e",
         help="Temporary change the value of an environment variable",
     ),
-    privileged: bool = typer.Option(
-        False,
-        "--privileged",
-        help="Allow containers privileged mode",
-        callback=projectrc_values,
-        show_default=False,
-    ),
     no_backend: bool = typer.Option(
         False,
         "--no-backend",
@@ -227,7 +219,6 @@ def controller_cli_options(
     Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
     Configuration.testing = testing
-    Configuration.privileged = privileged
     Configuration.project = project
     Configuration.hostname = hostname
     Configuration.environment = {}
@@ -731,7 +722,6 @@ You can use of one:
         env["PROJECT_TITLE"] = Configuration.project_title
         env["PROJECT_DESCRIPTION"] = Configuration.project_description
         env["PROJECT_KEYWORDS"] = Configuration.project_keywords
-        env["DOCKER_PRIVILEGED_MODE"] = "true" if Configuration.privileged else "false"
 
         if Configuration.testing:
             env["APP_MODE"] = "test"
@@ -753,8 +743,6 @@ You can use of one:
         env.update(Configuration.environment)
 
         bool_envs = [
-            # This variable is for docker-compose and is expected to be true|false
-            "DOCKER_PRIVILEGED_MODE",
             # This variable is for RabbitManagement and is expected to be true|false
             "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
             # These variables are for Neo4j and are expected to be true|false
