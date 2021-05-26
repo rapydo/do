@@ -179,7 +179,7 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs",
-        "docker logs --tail 500 swarm_backend.1."
+        "docker logs --tail 500 swarm_backend.1.",
         "docker logs --tail 500 swarm_frontend.1.",
     )
 
