@@ -116,6 +116,73 @@ def test_swarm(capfd: Capture) -> None:
         "running",
     )
 
+    exec_command(capfd, "shell invalid", "Service invalid not found")
+
+    exec_command(
+        capfd,
+        "shell backend",
+        "Due to limitations of the underlying packages, "
+        "the shell command is not yet implemented",
+        "You can execute by yourself the following command",
+        "docker exec --interactive --tty --user developer swarm_backend.1.",
+        "bash",
+    )
+
+    exec_command(
+        capfd,
+        "shell backend --default",
+        "Due to limitations of the underlying packages, "
+        "the shell command is not yet implemented",
+        "You can execute by yourself the following command",
+        "docker exec --interactive --tty --user developer swarm_backend.1.",
+        "restapi launch",
+    )
+
+    exec_command(capfd, "shell backend -u aRandomUser", "--user aRandomUser")
+
+    exec_command(capfd, "shell backend --detach", "--detach")
+
+    exec_command(
+        capfd,
+        "-s invalid logs",
+        "Due to limitations of the underlying packages, "
+        "the logs command is not yet implemented",
+        "You can execute by yourself the following command(s):",
+        "Service invalid not found",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend logs",
+        "Due to limitations of the underlying packages, "
+        "the logs command is not yet implemented",
+        "You can execute by yourself the following command(s):",
+        "docker logs --tail 500 swarm_backend.1.",
+    )
+
+    exec_command(
+        capfd, "-s backend logs --tail 123", "docker logs --tail 123 swarm_backend.1."
+    )
+
+    exec_command(
+        capfd,
+        "-s backend logs --follow",
+        "docker logs --tail 500 --follow swarm_backend.1.",
+    )
+
+    exec_command(
+        capfd,
+        "-s frontend logs",
+        "docker logs --tail 500 --timestamps swarm_frontend.1.",
+    )
+
+    exec_command(
+        capfd,
+        "logs",
+        "docker logs --tail 500 swarm_backend.1."
+        "docker logs --tail 500 swarm_frontend.1.",
+    )
+
     exec_command(
         capfd, "scale backend=2", "swarm_backend scaled to 2", "Service converged"
     )

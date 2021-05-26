@@ -126,22 +126,103 @@ class Swarm:
     def remove() -> None:
         docker.stack.remove(Configuration.project)
 
-    # def exec_command(
-    #     self,
-    #     service: str,
-    #     user: Optional[str] = None,
-    #     command: str = None,
-    #     disable_tty: bool = False,
-    #     detach: bool = False,
-    # ) -> None:
-    #     """
-    #     Execute a command on a running container
-    #     """
-    #     log.debug("Command on {}: {}", service.lower(), command)
-    #     print(
-    #         docker.container.execute(
-    #             container="-",
-    #             command=command,
-    #             detach=detach
-    #         )
-    #     )
+    @staticmethod
+    def get_container(service: str, slot: int) -> Optional[str]:
+
+        service_id: Optional[str] = None
+        services = docker.service.list()
+        for s in services:
+            if s.spec.name == f"{Configuration.project}_{service}":
+                service_id = s.id
+                break
+
+        if not service_id:
+            return None
+
+        for task in docker.stack.ps(Configuration.project):
+            if task.service_id != service_id:
+                continue
+            if task.slot != slot:
+                continue
+
+            return f"{Configuration.project}_{service}.{slot}.{task.id}"
+
+        return None
+
+    def exec_command(
+        self,
+        service: str,
+        user: Optional[str] = None,
+        command: str = None,
+        disable_tty: bool = False,
+        detach: bool = False,
+        slot: int = 1,
+    ) -> None:
+        """
+        Execute a command on a running container
+        """
+        log.debug("Command on {}: {}", service.lower(), command)
+
+        container = self.get_container(service, slot)
+        # docker.container.execute(
+        #     container=container,
+        #     command=command,
+        #     detach=detach
+        # )
+        if not container:
+            log.error("Service {} not found", service)
+            return None
+
+        exec_command = "docker exec --interactive "
+        if not disable_tty:
+            exec_command += "--tty "
+        if detach:
+            exec_command += "--detach "
+        if user:
+            exec_command += f"--user {user} "
+
+        exec_command += f"{container} {command}"
+
+        log.warning(
+            "Due to limitations of the underlying packages, "
+            "the shell command is not yet implemented"
+        )
+
+        print("")
+        print("You can execute by yourself the following command:")
+        print(exec_command)
+        print("")
+
+        return None
+
+    def logs(
+        self, services: List[str], follow: bool, tail: int, timestamps: bool
+    ) -> None:
+
+        log.warning(
+            "Due to limitations of the underlying packages, "
+            "the logs command is not yet implemented"
+        )
+
+        print("")
+        print("You can execute by yourself the following command(s):")
+
+        for service in services:
+            container = self.get_container(service, 1)
+
+            if not container:
+                log.error("Service {} not found", service)
+                continue
+
+            logs_command = f"docker logs --tail {tail} "
+            if follow:
+                logs_command += "--follow "
+            if timestamps:
+                logs_command += "--timestamps "
+
+            logs_command += f"{container}"
+
+            print(logs_command)
+            print("")
+
+        return None
