@@ -22,7 +22,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-04-25"
+known_update = "2021-05-27"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -37,18 +37,18 @@ known_latests = {
     # https://hub.docker.com/r/fanout/pushpin/tags
     # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
     "docker": {
-        "neo4j": "4.2.5",
-        "postgres": "13.2-alpine",
-        "mariadb": "10.5.9",
-        "mongo": "4.4.5",
-        "redis": "6.2.2",
-        "nginx": "1.20.0-alpine",
-        "node": "14.15.5-buster",
-        "rabbitmq": "3.8.14-management",
+        "neo4j": "4.2.6",
+        "postgres": "13.3-alpine",
+        "mariadb": "10.6.1",
+        "mongo": "4.4.6",
+        "redis": "6.2.3",
+        "nginx": "1.21.0-alpine",
+        "node": "16.2.0-buster",
+        "rabbitmq": "3.8.16-management",
         "adminer": "4.8.0",
-        "mongo-express": "0.54.0",
-        "fanout/pushpin": "1.31.0",
-        "swaggerapi/swagger-ui": "v3.47.1",
+        # "mongo-express": "0.54.0",
+        "fanout/pushpin": "1.32.1",
+        "swaggerapi/swagger-ui": "v3.49.0",
         "stilliard/pure-ftpd": "stretch-latest",
         "ubuntu": "20.04",
     },

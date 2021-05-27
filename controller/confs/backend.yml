@@ -369,7 +369,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.5.9
+    image: mariadb:10.6.1
     volumes:
       - mariadb:/var/lib/mysql
       - ${VANILLA_DIR}/data/backup:/backup
