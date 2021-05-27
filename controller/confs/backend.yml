@@ -729,7 +729,7 @@ services:
 
   redis:
     restart: always
-    image: redis:6.2.2
+    image: redis:6.2.3
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
