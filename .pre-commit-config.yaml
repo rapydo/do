@@ -25,7 +25,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [
-            "docker-compose==1.28.4",
+            "docker-compose==1.29.2",
             "python-on-whales==0.18.0",
             "dockerfile-parse==1.0.0",
             "python-dateutil",

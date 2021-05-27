@@ -48,7 +48,7 @@ export class SinkComponent implements OnInit {
     this.fields1 = this.get_fields(null);
     this.fields2 = this.get_fields(["form-field-horizontal"]);
 
-    this.api.put<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+    this.api.put<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
         let data = this.formly.json2Form(response, {});
         this.fields3 = data.fields;
@@ -58,7 +58,7 @@ export class SinkComponent implements OnInit {
       }
     );
 
-    this.api.post<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+    this.api.post<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
         let data = this.formly.json2Form(response, {});
         this.fields4 = data.fields;
@@ -68,7 +68,7 @@ export class SinkComponent implements OnInit {
       }
     );
 
-    this.api.post<Schema[]>("tests/autocomplete", { get_schema: true }).subscribe(
+    this.api.post<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
         let model = {
           "elements": [
