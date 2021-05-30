@@ -139,6 +139,9 @@ variables:
     # in production mode this will be mapped on port 80
     PROXY_DEV_PORT: 81
     PROXY_PROD_PORT: 443
+    # if 1 an additional proxy or load balancer is assumed and the backend will extract
+    # the client IP from the X-Forwarded-For instead of X-Real-IP
+    PROXIED_CONNECTION: 0
     DOMAIN_ALIASES:
     SET_UNSAFE_EVAL:
     # SET_UNSAFE_EVAL: "unsafe-eval"
