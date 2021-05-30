@@ -22,7 +22,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
-known_update = "2021-05-27"
+known_update = "2021-05-29"
 known_latests = {
     # https://hub.docker.com/_/neo4j?tab=tags
     # https://hub.docker.com/_/postgres?tab=tags
@@ -63,13 +63,15 @@ changelogs = {
     "ngx-spinner": "https://github.com/Napster2210/ngx-spinner/releases",
     "ngx-formly": "https://github.com/ngx-formly/ngx-formly/releases",
     "ajv": "https://github.com/ajv-validator/ajv/releases",
+    "dotenv": "https://github.com/motdotla/dotenv/blob/HEAD/CHANGELOG.md",
+    "ngx-uploadx": "https://github.com/kukhariev/ngx-uploadx/releases",
     # ## PYPI
     "schemathesis": "https://schemathesis.readthedocs.io/en/stable/changelog.html",
     # ## DockerHub
 }
 
 
-skip_versions = {"flower": "0.9.7"}
+skip_versions = {"flower": "0.9.7", "typescript": "4.3.2"}
 
 prevent_duplicates = {}
 
