@@ -3,7 +3,7 @@ version: "3.2"
 services:
   proxy:
     volumes:
-      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
 
   frontend:
     build:
@@ -95,10 +95,10 @@ services:
       # - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - ${SUBMODULE_DIR}/rapydo-angular/utility:/rapydo
 
-      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
-      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/karma:/coverage
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/karma:/coverage
       # Output folder, configured in cypress.json
-      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/cypress:/cypress
+      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
@@ -120,4 +120,4 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
       - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
 
-      - ${DATA_DIR}/logs:/logs
+      - ${VANILLA_DIR}/data/logs:/logs
