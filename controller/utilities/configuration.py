@@ -221,16 +221,16 @@ def read_composer_yamls(
         if not composer.pop("if", False):
             continue
 
-        mandatory = composer.pop("mandatory", False)
+        # mandatory = composer.pop("mandatory", False)
         base = composer.pop("base", False)
 
         try:
             f = Path(str(composer.get("file")))
             p = Path(str(composer.get("path")))
-            compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
+            # compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
 
-            if compose.get("services") is None or len(compose.get("services", {})) < 1:
-                continue
+            # if not compose.get("services"):
+            #     continue
 
             filepath = get_yaml_path(file=f, path=p)
 

@@ -1,0 +1,28 @@
+version: "3.8"
+volumes:
+  secrets:
+    driver: local
+  rabbitdata:
+    driver: local
+  sqldata:
+    driver: local
+  mariadb:
+    driver: local
+  graphdata:
+    driver: local
+  mongodata:
+    driver: local
+  data_imports:
+    driver: local
+  pureftpd:
+    driver: local
+  letsencrypt_certs:
+    driver: local
+  ssl_dhparam:
+    driver: local
+  flower_db:
+    driver: local
+  celerybeat:
+    driver: local
+  redisdata:
+    driver: local

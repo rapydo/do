@@ -64,6 +64,18 @@ variables:
       path: $$customconf
       mandatory: True
       if: True
+    local_volumes:
+      file: volumes_local.yml
+      base: True
+      path: $$baseconf
+      mandatory: True
+      if: $$local_volumes
+    nfs_volumes:
+      file: volumes_nfs.yml
+      base: True
+      path: $$baseconf
+      mandatory: True
+      if: $$nfs_volumes
 
   env:
     BACKEND_BUILD_MODE: backend
@@ -259,6 +271,9 @@ variables:
     REDIS_HOST: redis.dockerized.io
     REDIS_PORT: 6379
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+
+    NFS_HOST: 127.0.0.1
+    NFS_EXPORTS_RABBITDATA: /exports/rabbitdata
 
     # Celery
     CELERY_ENABLE_CONNECTOR: 0

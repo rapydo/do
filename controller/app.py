@@ -607,6 +607,8 @@ You can use of one:
         # substitute values starting with '$$'
 
         myvars = {
+            "local_volumes": True,
+            "nfs_volumes": False,
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
             "commons": Configuration.load_commons,

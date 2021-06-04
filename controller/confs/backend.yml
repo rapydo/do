@@ -1,36 +1,10 @@
-version: "3.2"
+version: "3.8"
 
 # #####################
 # VOLUMES
 # #####################
 
-volumes:
-  secrets:
-    driver: local
-  rabbitdata:
-    driver: local
-  sqldata:
-    driver: local
-  mariadb:
-    driver: local
-  graphdata:
-    driver: local
-  mongodata:
-    driver: local
-  data_imports:
-    driver: local
-  pureftpd:
-    driver: local
-  letsencrypt_certs:
-    driver: local
-  ssl_dhparam:
-    driver: local
-  flower_db:
-    driver: local
-  celerybeat:
-    driver: local
-  redisdata:
-    driver: local
+# Moved on volumes_local.yml and volumes_nfs.yml
 
 # #####################
 # NETWORKS
@@ -60,21 +34,12 @@ networks:
   db_net:
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
-    # # driver: bridge
-    # ipam:
-    #   driver: default
-    #   config:
-    #     # Note: use this configuration to match inside internal rules
-    #     # TOFIX: make this an env variable
-    #     - subnet: ${DB_SUBNET}/16
 
 # #####################
 # SERVICES
 # #####################
+
 services:
-  ########################
-  ###  MAIN CONTAINER  ###
-  ########################
   backend:
     # restart: on-failure:5
     restart: always
@@ -743,6 +708,10 @@ services:
       ACTIVATE: ${ACTIVATE_REDIS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
 
+  #################
+  ###    BOT    ###
+  #################
+
   bot:
     restart: always
     build:
@@ -916,7 +885,7 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
       APP_MODE: ${APP_MODE}
-      # https://github.com/vrana/adminer/tree/master/designs
+      # https://github.com/vrana/adminer/tree/master/designs
       # some choices: brade, ng9, pepa-linha
       ADMINER_DESIGN: pepa-linha
     volumes:

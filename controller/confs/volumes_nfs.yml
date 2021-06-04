@@ -1,0 +1,33 @@
+version: "3.8"
+
+volumes:
+  secrets:
+    driver: local
+  rabbitdata:
+    driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_RABBITDATA}"
+  sqldata:
+    driver: local
+  mariadb:
+    driver: local
+  graphdata:
+    driver: local
+  mongodata:
+    driver: local
+  data_imports:
+    driver: local
+  pureftpd:
+    driver: local
+  letsencrypt_certs:
+    driver: local
+  ssl_dhparam:
+    driver: local
+  flower_db:
+    driver: local
+  celerybeat:
+    driver: local
+  redisdata:
+    driver: local
