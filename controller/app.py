@@ -16,8 +16,10 @@ from controller import (
     COMPOSE_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
+    DATA_FOLDER,
     DATAFILE,
     EXTENDED_PROJECT_DISABLED,
+    MULTI_HOST_MODE,
     PLACEHOLDER,
     PROJECT_DIR,
     PROJECTRC,
@@ -607,8 +609,8 @@ You can use of one:
         # substitute values starting with '$$'
 
         myvars = {
-            "local_volumes": True,
-            "nfs_volumes": False,
+            "local_volumes": not MULTI_HOST_MODE,
+            "nfs_volumes": MULTI_HOST_MODE,
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
             "commons": Configuration.load_commons,
@@ -701,7 +703,11 @@ You can use of one:
 
         env["PROJECT_DOMAIN"] = Configuration.hostname
         env["COMPOSE_PROJECT_NAME"] = Configuration.project
+
+        # TO BE REMOVED!
         env["VANILLA_DIR"] = Path().cwd()
+
+        env["DATA_DIR"] = DATA_FOLDER
         env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
         env["PROJECT_DIR"] = PROJECT_DIR.joinpath(Configuration.project).resolve()
 

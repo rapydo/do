@@ -56,3 +56,4 @@ COMPOSE_FILE = Path("docker-compose.yml")
 ComposeConfig = Dict[str, Any]
 
 SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
+MULTI_HOST_MODE = os.environ.get("MULTI_HOST_MODE", "0") == "1"
