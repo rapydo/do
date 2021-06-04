@@ -163,6 +163,10 @@ class Project:
             )
 
             self.suggested_gitkeep.append(
+                DATA.joinpath(self.project, "frontend", GITKEEP)
+            )
+
+            self.suggested_gitkeep.append(
                 self.p_path("frontend", "integration", GITKEEP)
             )
 
