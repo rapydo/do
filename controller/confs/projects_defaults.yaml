@@ -273,7 +273,19 @@ variables:
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     NFS_HOST: 127.0.0.1
+    NFS_EXPORTS_SECRETS: /exports/secrets
     NFS_EXPORTS_RABBITDATA: /exports/rabbitdata
+    NFS_EXPORTS_SQLDATA: /exports/sqldata
+    NFS_EXPORTS_MARIADB: /exports/mariadb
+    NFS_EXPORTS_GRAPHDATA: /exports/graphdata
+    NFS_EXPORTS_MONGODATA: /exports/mongodata
+    NFS_EXPORTS_DATA_IMPORTS: /exports/data_imports
+    NFS_EXPORTS_PUREFTPD: /exports/pureftpd
+    NFS_EXPORTS_LETSENCRYPT_CERTS: /exports/letsencrypt_certs
+    NFS_EXPORTS_SSL_DHPARAM: /exports/ssl_dhparam
+    NFS_EXPORTS_FLOWER_DB: /exports/flower_db
+    NFS_EXPORTS_CELERYBEAT: /exports/celerybeat
+    NFS_EXPORTS_REDISDATA: /exports/redisdata
 
     # Celery
     CELERY_ENABLE_CONNECTOR: 0

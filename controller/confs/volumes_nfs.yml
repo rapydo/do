@@ -3,6 +3,10 @@ version: "3.8"
 volumes:
   secrets:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_SECRETS}"
   rabbitdata:
     driver: local
     driver_opts:
@@ -11,23 +15,67 @@ volumes:
       device: ":${NFS_EXPORTS_RABBITDATA}"
   sqldata:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_SQLDATA}"
   mariadb:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_MARIADB}"
   graphdata:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_GRAPHDATA}"
   mongodata:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_MONGODATA}"
   data_imports:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_DATA_IMPORTS}"
   pureftpd:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_PUREFTPD}"
   letsencrypt_certs:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_LETSENCRYPT_CERTS}"
   ssl_dhparam:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_SSL_DHPARAM}"
   flower_db:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_FLOWER_DB}"
   celerybeat:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_CELERYBEAT}"
   redisdata:
     driver: local
+    driver_opts:
+      type: "nfs"
+      o: addr=${NFS_HOST},nolock,soft,rw
+      device: ":${NFS_EXPORTS_REDISDATA}"
