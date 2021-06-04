@@ -59,6 +59,8 @@ class Project:
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath("logs", GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath("backup", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "cron", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
