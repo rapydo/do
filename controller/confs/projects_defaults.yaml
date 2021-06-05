@@ -284,7 +284,6 @@ variables:
     NFS_EXPORTS_LETSENCRYPT_CERTS: /volumes/letsencrypt_certs
     NFS_EXPORTS_SSL_DHPARAM: /volumes/ssl_dhparam
     NFS_EXPORTS_FLOWER_DB: /volumes/flower_db
-    NFS_EXPORTS_CELERYBEAT: /volumes/celerybeat
     NFS_EXPORTS_REDISDATA: /volumes/redisdata
 
     # Celery
@@ -293,7 +292,6 @@ variables:
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    # CELERYBEAT_ENABLE_CONNECTOR: 1
 
     # Flower
     CELERYUI_USER: "flower" # This default is invalidated in production mode

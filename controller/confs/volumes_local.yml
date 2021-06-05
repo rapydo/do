@@ -23,7 +23,5 @@ volumes:
     driver: local
   flower_db:
     driver: local
-  celerybeat:
-    driver: local
   redisdata:
     driver: local

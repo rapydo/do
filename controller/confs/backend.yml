@@ -144,7 +144,6 @@ services:
       CELERY_BROKER: ${CELERY_BROKER}
       CELERY_BACKEND: ${CELERY_BACKEND}
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
-      # CELERYBEAT_ENABLE_CONNECTOR: ${CELERYBEAT_ENABLE_CONNECTOR}
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
@@ -580,7 +579,7 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
-    command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
 
     # user: developer
     working_dir: /code
@@ -635,7 +634,6 @@ services:
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
     volumes:
-      - celerybeat:/beat
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
