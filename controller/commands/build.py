@@ -1,3 +1,4 @@
+import socket
 from typing import List
 
 import typer
@@ -88,7 +89,7 @@ def build(
     }
     dc = Compose(files=Application.data.files)
 
-    registry_host = Application.env.get("REGISTRY_HOST")
+    registry_host = Application.env.get("REGISTRY_HOST", "")
     local_registry_images: List[str] = []
 
     if not yes:
@@ -128,6 +129,26 @@ def build(
 
                 log.warning("Unknown response {}, respond yes or no", response)
                 # In any other case, as again
+
+    if MULTI_HOST_MODE and local_registry_images:
+        # manager.host:port/ => (managaer.host, port)
+        tokens = registry_host.replace("/", "").split(":")
+        host = tokens[0]
+        port = int(tokens[1])
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.settimeout(1)
+            try:
+                result = sock.connect_ex((host, port))
+            except socket.gaierror:
+                # The error is not important, let's use a generic -1
+                # result = errno.ESRCH
+                result = -1
+
+            if result != 0:
+                Application.exit(
+                    "Multi Host Mode is enabled, but registry at {} not reachable",
+                    registry_host,
+                )
 
     dc.command("build", options)
 
