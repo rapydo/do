@@ -217,3 +217,7 @@ def remove_redundant_services(services: List[str], builds: ComposeConfig) -> Lis
             "Removed redundant builds from {} -> {}", services, non_redundant_services
         )
     return non_redundant_services
+
+
+def push_image(image_tag: str) -> None:
+    docker.push(image_tag)

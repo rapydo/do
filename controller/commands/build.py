@@ -1,8 +1,10 @@
+from typing import List
+
 import typer
 
-from controller import log
+from controller import MULTI_HOST_MODE, log
 from controller.app import Application, Configuration
-from controller.builds import locate_builds, remove_redundant_services
+from controller.builds import locate_builds, push_image, remove_redundant_services
 from controller.compose import Compose
 
 
@@ -86,6 +88,9 @@ def build(
     }
     dc = Compose(files=Application.data.files)
 
+    registry_host = Application.env.get("REGISTRY_HOST")
+    local_registry_images: List[str] = []
+
     if not yes:
         running_containers = dc.get_running_containers(Configuration.project)
 
@@ -94,6 +99,8 @@ def build(
         for s in build_services:
             # This the image that will be built for this service:
             img = service2img.get(s, "")
+            if registry_host and img.startswith(registry_host):
+                local_registry_images.append(img)
             # Get the list of services using the same image (img2services.get(img))
             # and check if any of these services is running
             running = [
@@ -125,4 +132,10 @@ def build(
     dc.command("build", options)
 
     log.info("Custom images built")
+
+    if MULTI_HOST_MODE and local_registry_images:
+        log.info("Multi Host Mode is enabled, pushing images to the local registry")
+        for img in local_registry_images:
+            push_image(img)
+
     return True

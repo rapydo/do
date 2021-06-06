@@ -270,6 +270,7 @@ class Application:
     project_scaffold = Project()
     data = CommandsData()
     gits: Dict[str, gitter.GitRepoType] = {}
+    env: Dict[str, Any] = {}
 
     def __init__(self) -> None:
 
@@ -699,56 +700,74 @@ You can use of one:
         except FileNotFoundError:
             pass
 
-        env: Dict[str, Any] = glom(Configuration.specs, "variables.env", default={})
+        Application.env = glom(Configuration.specs, "variables.env", default={})
 
-        env["PROJECT_DOMAIN"] = Configuration.hostname
-        env["COMPOSE_PROJECT_NAME"] = Configuration.project
+        Application.env["PROJECT_DOMAIN"] = Configuration.hostname
+        Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
 
         # TO BE REMOVED!
-        env["VANILLA_DIR"] = Path().cwd()
+        Application.env["VANILLA_DIR"] = Path().cwd()
 
-        env["DATA_DIR"] = DATA_FOLDER
-        env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
-        env["PROJECT_DIR"] = PROJECT_DIR.joinpath(Configuration.project).resolve()
+        Application.env["DATA_DIR"] = DATA_FOLDER
+        Application.env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
+        Application.env["PROJECT_DIR"] = PROJECT_DIR.joinpath(
+            Configuration.project
+        ).resolve()
 
         if self.extended_project_path is None:
-            env["BASE_PROJECT_DIR"] = env["PROJECT_DIR"]
+            Application.env["BASE_PROJECT_DIR"] = Application.env["PROJECT_DIR"]
         else:
-            env["BASE_PROJECT_DIR"] = self.extended_project_path.resolve()
+            Application.env["BASE_PROJECT_DIR"] = self.extended_project_path.resolve()
 
         if self.extended_project is None:
-            env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
-            env["BASE_PROJECT"] = env["COMPOSE_PROJECT_NAME"]
+            Application.env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
+            Application.env["BASE_PROJECT"] = Application.env["COMPOSE_PROJECT_NAME"]
         else:
-            env["EXTENDED_PROJECT"] = self.extended_project
-            env["BASE_PROJECT"] = env["EXTENDED_PROJECT"]
+            Application.env["EXTENDED_PROJECT"] = self.extended_project
+            Application.env["BASE_PROJECT"] = Application.env["EXTENDED_PROJECT"]
 
-        env["RAPYDO_VERSION"] = __version__
-        env["PROJECT_VERSION"] = Configuration.version
-        env["CURRENT_UID"] = self.current_uid
-        env["CURRENT_GID"] = self.current_gid
-        env["PROJECT_TITLE"] = Configuration.project_title
-        env["PROJECT_DESCRIPTION"] = Configuration.project_description
-        env["PROJECT_KEYWORDS"] = Configuration.project_keywords
+        Application.env["RAPYDO_VERSION"] = __version__
+        Application.env["PROJECT_VERSION"] = Configuration.version
+        Application.env["CURRENT_UID"] = self.current_uid
+        Application.env["CURRENT_GID"] = self.current_gid
+        Application.env["PROJECT_TITLE"] = Configuration.project_title
+        Application.env["PROJECT_DESCRIPTION"] = Configuration.project_description
+        Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords
 
         if Configuration.testing:
-            env["APP_MODE"] = "test"
+            Application.env["APP_MODE"] = "test"
 
-        env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(env)
+        Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
+            Application.env
+        )
 
-        env["DOCKER_NETWORK_MODE"] = "bridge"
+        Application.env["DOCKER_NETWORK_MODE"] = "bridge"
 
-        services.check_rabbit_password(env.get("RABBITMQ_PASSWORD"))
-        services.check_redis_password(env.get("REDIS_PASSWORD"))
-        services.check_mongodb_password(env.get("MONGO_PASSWORD"))
+        services.check_rabbit_password(Application.env.get("RABBITMQ_PASSWORD"))
+        services.check_redis_password(Application.env.get("REDIS_PASSWORD"))
+        services.check_mongodb_password(Application.env.get("MONGO_PASSWORD"))
 
-        for e in env:
+        for e in Application.env:
             env_value = os.environ.get(e)
             if env_value is None:
                 continue
-            env[e] = env_value
+            Application.env[e] = env_value
 
-        env.update(Configuration.environment)
+        Application.env.update(Configuration.environment)
+
+        if MULTI_HOST_MODE:
+            if not Application.env.get("REGISTRY_HOST"):
+                Application.exit(
+                    "MultiHost is enabled but registry host is missing. "
+                    "Expected value: REGISTRY_HOST=manager.host:5000/"
+                )
+            if not Application.env.get("NFS_HOST"):
+                Application.exit(
+                    "MultiHost is enabled but nfs host is missing. "
+                    "Expected value: NFS_HOST=manager.host"
+                )
+
+            Application.env["ACTIVATE_REGISTRY"] = "1"
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false
@@ -759,7 +778,7 @@ You can use of one:
             "NEO4J_RECOVERY_MODE",
         ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
-            for key, value in sorted(env.items()):
+            for key, value in sorted(Application.env.items()):
 
                 if (
                     Configuration.production

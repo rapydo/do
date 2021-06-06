@@ -49,7 +49,7 @@ services:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: backend-server
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
@@ -947,3 +947,20 @@ services:
       - 7999:7999
     volumes:
       - ${SUBMODULE_DIR}/do/controller/confs/pushpin/routes:/etc/pushpin/routes
+
+  #############################
+  ### LOCAL DOCKER REGISTRY ###
+  #############################
+
+  registry:
+    restart: always
+    image: registry:2.7.1
+    # constraint=node.role==manager
+    hostname: registry
+    environment:
+      ACTIVATE: ${ACTIVATE_REGISTRY}
+      # REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      # REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt
+      # REGISTRY_HTTP_TLS_KEY=/certs/registry.key
+    ports:
+      - 5000:5000

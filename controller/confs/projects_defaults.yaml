@@ -272,7 +272,8 @@ variables:
     REDIS_PORT: 6379
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
-    NFS_HOST: 127.0.0.1
+    # To be enabled with "manager.host"
+    NFS_HOST:
     NFS_EXPORTS_SECRETS: /volumes/secrets
     NFS_EXPORTS_RABBITDATA: /volumes/rabbitdata
     NFS_EXPORTS_SQLDATA: /volumes/sqldata
@@ -300,6 +301,7 @@ variables:
     CELERYUI_PORT: 5555
     CELERYUI_SSL_OPTIONS:
 
+    # Pushpin
     PUSHPIN_ENABLE_CONNECTOR: 1
     PUSHPIN_EXPIRATION_TIME: 7200
     PUSHPIN_VERIFICATION_TIME: 900
@@ -307,6 +309,12 @@ variables:
     PUSHPIN_PORT: 7999
     PUSHPIN_CONTROL_PORT: 5561
 
+    # Local docker registry
+    ACTIVATE_REGISTRY: 0
+    # To be enabled with "manager.host:5000/"
+    REGISTRY_HOST:
+
+    # Smtp
     SMTP_ENABLE_CONNECTOR: 1
     SMTP_EXPIRATION_TIME: 7200
     SMTP_VERIFICATION_TIME: 900
