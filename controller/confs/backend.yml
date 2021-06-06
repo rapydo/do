@@ -957,10 +957,13 @@ services:
     image: registry:2.7.1
     # constraint=node.role==manager
     hostname: registry
+    ports:
+      - 5000:5000
     environment:
       ACTIVATE: ${ACTIVATE_REGISTRY}
       # REGISTRY_HTTP_ADDR=0.0.0.0:5000
-      # REGISTRY_HTTP_TLS_CERTIFICATE=/certs/registry.crt
-      # REGISTRY_HTTP_TLS_KEY=/certs/registry.key
-    ports:
-      - 5000:5000
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/real/fullchain1.pem
+      REGISTRY_HTTP_TLS_KEY: /certs/real/privkey1.pem
+
+    volumes:
+      - letsencrypt_certs:/certs
