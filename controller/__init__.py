@@ -7,8 +7,7 @@ from loguru import logger as log
 
 __version__ = "2.0"
 
-DATA_FOLDER = Path("data").resolve()
-LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
+LOGS_FOLDER = Path("data").resolve().joinpath("logs")
 
 LOGS_FILE = None
 if LOGS_FOLDER.is_dir():

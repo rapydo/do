@@ -96,11 +96,6 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "list env",
-    )
-
-    exec_command(
-        capfd,
         "start --force",
         "Force flag is not yet implemented",
         "Stack started",

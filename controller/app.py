@@ -16,7 +16,6 @@ from controller import (
     COMPOSE_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
-    DATA_FOLDER,
     DATAFILE,
     EXTENDED_PROJECT_DISABLED,
     MULTI_HOST_MODE,
@@ -708,7 +707,7 @@ You can use of one:
         # TO BE REMOVED!
         Application.env["VANILLA_DIR"] = Path().cwd()
 
-        Application.env["DATA_DIR"] = DATA_FOLDER
+        Application.env["DATA_DIR"] = Path().cwd().joinpath("data")
         Application.env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
         Application.env["PROJECT_DIR"] = PROJECT_DIR.joinpath(
             Configuration.project
