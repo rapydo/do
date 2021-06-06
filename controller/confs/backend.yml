@@ -223,11 +223,11 @@ services:
       - ${SUBMODULE_DIR}/http-api/tests:/code/tests
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
-      - ${VANILLA_DIR}/data/uploads:/uploads
+      - ${DATA_DIR}/uploads:/uploads
     networks:
       app_net:
         aliases:
@@ -339,7 +339,7 @@ services:
     command: postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=${POSTGRES_SHARED_BUFFERS} -c wal_buffers=${POSTGRES_WAL_BUFFERS} -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE} -c work_mem=${POSTGRES_WORK_MEM} -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM} -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY} -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES} -c max_parallel_workers=${POSTGRES_MAX_WORKER_PROCESSES}
     volumes:
       - sqldata:/var/lib/postgresql
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
@@ -363,7 +363,7 @@ services:
           memory: ${ASSIGNED_MEMORY_MARIADB}
     volumes:
       - mariadb:/var/lib/mysql
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_MYSQL}
       # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
@@ -397,7 +397,7 @@ services:
       # it is used to enable SSL in production mode
       - letsencrypt_certs:/ssl
       - data_imports:/var/lib/neo4j/import
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     networks:
       db_net:
         aliases:
@@ -607,9 +607,9 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
-      - ${VANILLA_DIR}/data/uploads:/uploads
+      - ${DATA_DIR}/uploads:/uploads
     networks:
       db_net:
       worker_net:
@@ -698,7 +698,7 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
     networks:
       db_net:
       worker_net:
@@ -744,7 +744,7 @@ services:
     volumes:
       - rabbitdata:/var/lib/rabbitmq
       - letsencrypt_certs:/ssl
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     networks:
       worker_net:
         aliases:
@@ -763,7 +763,7 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     networks:
       db_net:
         aliases:
@@ -828,7 +828,7 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
     networks:
       app_net:
 
@@ -876,7 +876,7 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # DB
       - flower_db:${CELERYUI_DBDIR}
     networks:
