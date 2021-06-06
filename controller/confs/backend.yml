@@ -954,8 +954,8 @@ services:
 
   registry:
     restart: always
-    image: registry:2.7.1
-    # constraint=node.role==manager
+    build: ${SUBMODULE_DIR}/build-templates/registry
+    image: rapydo/registry:${RAPYDO_VERSION}
     hostname: registry
     deploy:
       placement:
@@ -965,9 +965,11 @@ services:
       - 5000:5000
     environment:
       ACTIVATE: ${ACTIVATE_REGISTRY}
+      # Used to issue the certificate
+      REGISTRY_ADDRESS: ${REGISTRY_HOST}
       # REGISTRY_HTTP_ADDR=0.0.0.0:5000
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/real/fullchain1.pem
-      REGISTRY_HTTP_TLS_KEY: /certs/real/privkey1.pem
+      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
 
     volumes:
       - letsencrypt_certs:/certs
