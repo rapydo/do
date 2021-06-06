@@ -705,9 +705,6 @@ You can use of one:
         Application.env["PROJECT_DOMAIN"] = Configuration.hostname
         Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
 
-        # TO BE REMOVED!
-        Application.env["VANILLA_DIR"] = Path().cwd()
-
         Application.env["DATA_DIR"] = DATA_FOLDER
         Application.env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
         Application.env["PROJECT_DIR"] = PROJECT_DIR.joinpath(
