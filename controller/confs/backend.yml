@@ -957,6 +957,10 @@ services:
     image: registry:2.7.1
     # constraint=node.role==manager
     hostname: registry
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
     ports:
       - 5000:5000
     environment:
