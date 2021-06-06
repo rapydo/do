@@ -131,6 +131,7 @@ def build(
                 # In any other case, as again
 
     if MULTI_HOST_MODE and local_registry_images:
+        log.info("Multi Host Mode is enabled, verifying if the registry is reachable")
         # manager.host:port/ => (managaer.host, port)
         tokens = registry_host.replace("/", "").split(":")
         host = tokens[0]
@@ -155,7 +156,7 @@ def build(
     log.info("Custom images built")
 
     if MULTI_HOST_MODE and local_registry_images:
-        log.info("Multi Host Mode is enabled, pushing images to the local registry")
+        log.info("Multi Host Mode is enabled, pushing images to the docker registry")
         for img in local_registry_images:
             push_image(img)
 
