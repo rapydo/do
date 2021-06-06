@@ -67,12 +67,6 @@ jobs:
           mkdir rapydo_tests
           cd rapydo_tests
 
-          # debug code
-
-          ls /home/runner/work/do/do/rapydo_tests
-          ls /home/runner/work/do/do/rapydo_tests/data
-          ls /home/runner/work/do/do/rapydo_tests/data/logs
-
           if [[ "${{ matrix.test }}" == "swarm" ]]; then
             export SWARM_MODE="1"
           fi
