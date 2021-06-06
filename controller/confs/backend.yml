@@ -51,6 +51,12 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: backend-server
+    deploy:
+      replicas: ${DEFAULT_SCALE_BACKEND}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_BACKEND}"
+          memory: ${ASSIGNED_MEMORY_BACKEND}
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
@@ -242,6 +248,12 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
+    deploy:
+      replicas: ${DEFAULT_SCALE_PROXY}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_PROXY}"
+          memory: ${ASSIGNED_MEMORY_PROXY}
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - ssl_dhparam:/etc/nginx/ssl/
@@ -316,6 +328,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/postgres:${RAPYDO_VERSION}
+    deploy:
+      # is postgres supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_POSTGRES}"
+          memory: ${ASSIGNED_MEMORY_POSTGRES}
 
     command: postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=${POSTGRES_SHARED_BUFFERS} -c wal_buffers=${POSTGRES_WAL_BUFFERS} -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE} -c work_mem=${POSTGRES_WORK_MEM} -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM} -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY} -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES} -c max_parallel_workers=${POSTGRES_MAX_WORKER_PROCESSES}
     volumes:
@@ -335,6 +354,13 @@ services:
   mariadb:
     restart: always
     image: mariadb:10.6.1
+    deploy:
+      # Is mariadb supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_MARIADB}"
+          memory: ${ASSIGNED_MEMORY_MARIADB}
     volumes:
       - mariadb:/var/lib/mysql
       - ${VANILLA_DIR}/data/backup:/backup
@@ -359,6 +385,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/neo4j:${RAPYDO_VERSION}
+    deploy:
+      # Replicas are not supported for sure
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_NEO4J}"
+          memory: ${ASSIGNED_MEMORY_NEO4J}
     volumes:
       - graphdata:/data
       # it is used to enable SSL in production mode
@@ -429,6 +462,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/mongodb:${RAPYDO_VERSION}
+    deploy:
+      # Is mongo supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_MONGODB}"
+          memory: ${ASSIGNED_MEMORY_MONGODB}
     volumes:
       - mongodata:/data/db
     networks:
@@ -456,6 +496,12 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    deploy:
+      replicas: ${DEFAULT_SCALE_CELERY}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_CELERY}"
+          memory: ${ASSIGNED_MEMORY_CELERY}
     entrypoint: docker-entrypoint-celery
     command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
 
@@ -578,6 +624,12 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
+    deploy:
+      replicas: ${DEFAULT_SCALE_CELERYBEAT}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_CELERYBEAT}"
+          memory: ${ASSIGNED_MEMORY_CELERYBEAT}
     entrypoint: docker-entrypoint-celery
     command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
 
@@ -661,6 +713,13 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/rabbitmq:${RAPYDO_VERSION}
     hostname: rabbit
+    deploy:
+      # Is rabbit supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_RABBIT}"
+          memory: ${ASSIGNED_MEMORY_RABBIT}
     environment:
       # CAN BE locally changed by ovverride with:
       ACTIVATE: ${ACTIVATE_RABBIT}
@@ -694,6 +753,13 @@ services:
   redis:
     restart: always
     image: redis:6.2.3
+    deploy:
+      # Is redis supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_REDIS}"
+          memory: ${ASSIGNED_MEMORY_REDIS}
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     volumes:
       - redisdata:/data
@@ -721,6 +787,13 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-bot
     hostname: telegram-bot
+    deploy:
+      # Can't support replicas for sure
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_BOT}"
+          memory: ${ASSIGNED_MEMORY_BOT}
     environment:
       ACTIVATE: ${ACTIVATE_TELEGRAM}
       APP_MODE: ${APP_MODE}
@@ -772,6 +845,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    deploy:
+      # Are replicas needed? And supported?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_FLOWER}"
+          memory: ${ASSIGNED_MEMORY_FLOWER}
     entrypoint: docker-entrypoint-celery
     # user: root
     command: flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -A restapi.connectors.celery.worker.celery_app -n flower_monitor
@@ -854,6 +934,12 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/swaggerui:${RAPYDO_VERSION}
+    deploy:
+      replicas: ${DEFAULT_SCALE_SWAGGERUI}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_SWAGGERUI}"
+          memory: ${ASSIGNED_MEMORY_SWAGGERUI}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
@@ -877,6 +963,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/adminer:${RAPYDO_VERSION}
+    deploy:
+      # Are replicas needed? And supported?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_ADMINER}"
+          memory: ${ASSIGNED_MEMORY_ADMINER}
     # user: adminer
     networks:
       db_net:
@@ -899,6 +992,13 @@ services:
     restart: always
     build: ${SUBMODULE_DIR}/build-templates/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
+    deploy:
+      # Is proftp supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_FTP}"
+          memory: ${ASSIGNED_MEMORY_FTP}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
     # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
@@ -917,6 +1017,13 @@ services:
   smtp:
     restart: always
     image: namshi/smtp:latest
+    deploy:
+      # Is smtp supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_SMTP}"
+          memory: ${ASSIGNED_MEMORY_SMTP}
     # volumes:
     #   - ...
     environment:
@@ -933,6 +1040,13 @@ services:
   pushpin:
     restart: always
     image: fanout/pushpin:1.32.1
+    deploy:
+      # Is pushpin supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_PUSHPIN}"
+          memory: ${ASSIGNED_MEMORY_PUSHPIN}
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
@@ -958,6 +1072,12 @@ services:
     image: rapydo/registry:${RAPYDO_VERSION}
     hostname: registry
     deploy:
+      # Are replicas needed?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_REGISTRY}"
+          memory: ${ASSIGNED_MEMORY_REGISTRY}
       placement:
         constraints:
           - "node.role==manager"
