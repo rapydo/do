@@ -210,7 +210,7 @@ services:
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
       - secrets:${APP_SECRETS}
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       - data_imports:${DATA_IMPORT_FOLDER}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
@@ -255,8 +255,7 @@ services:
           cpus: "${ASSIGNED_CPU_PROXY}"
           memory: ${ASSIGNED_MEMORY_PROXY}
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     networks:
       proxy_net:
         aliases:
@@ -302,8 +301,7 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     networks:
       proxy_net:
         aliases:
@@ -395,7 +393,7 @@ services:
     volumes:
       - graphdata:/data
       # it is used to enable SSL in production mode
-      - letsencrypt_certs:/ssl
+      - ssl_certs:/ssl
       - data_imports:/var/lib/neo4j/import
       - ${DATA_DIR}/backup:/backup
     networks:
@@ -598,7 +596,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -689,7 +687,7 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -743,7 +741,7 @@ services:
 
     volumes:
       - rabbitdata:/var/lib/rabbitmq
-      - letsencrypt_certs:/ssl
+      - ssl_certs:/ssl
       - ${DATA_DIR}/backup:/backup
     networks:
       worker_net:
@@ -865,14 +863,14 @@ services:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # it is used to enable SSL in production mode
-      - letsencrypt_certs:/ssl
+      - ssl_certs:/ssl
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
@@ -948,8 +946,7 @@ services:
       PROJECT_TITLE: ${PROJECT_TITLE}
 
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     ports:
       - 7777:8080
 
@@ -980,8 +977,7 @@ services:
       # some choices: brade, ng9, pepa-linha
       ADMINER_DESIGN: pepa-linha
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     ports:
       - 7777:80
 
@@ -1092,4 +1088,4 @@ services:
       REGISTRY_HTTP_TLS_KEY: /certs/registry.key
 
     volumes:
-      - letsencrypt_certs:/certs
+      - ssl_certs:/certs

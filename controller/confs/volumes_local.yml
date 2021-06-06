@@ -17,9 +17,7 @@ volumes:
     driver: local
   pureftpd:
     driver: local
-  letsencrypt_certs:
-    driver: local
-  ssl_dhparam:
+  ssl_certs:
     driver: local
   flower_db:
     driver: local

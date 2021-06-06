@@ -282,8 +282,7 @@ variables:
     NFS_EXPORTS_MONGODATA: /volumes/mongodata
     NFS_EXPORTS_DATA_IMPORTS: /volumes/data_imports
     NFS_EXPORTS_PUREFTPD: /volumes/pureftpd
-    NFS_EXPORTS_LETSENCRYPT_CERTS: /volumes/letsencrypt_certs
-    NFS_EXPORTS_SSL_DHPARAM: /volumes/ssl_dhparam
+    NFS_EXPORTS_SSL_CERTS: /volumes/ssl_certs
     NFS_EXPORTS_FLOWER_DB: /volumes/flower_db
     NFS_EXPORTS_REDISDATA: /volumes/redisdata
 

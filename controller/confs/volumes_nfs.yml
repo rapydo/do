@@ -49,18 +49,12 @@ volumes:
       type: "nfs"
       o: addr=${NFS_HOST},nolock,soft,rw
       device: ":${NFS_EXPORTS_PUREFTPD}"
-  letsencrypt_certs:
+  ssl_certs:
     driver: local
     driver_opts:
       type: "nfs"
       o: addr=${NFS_HOST},nolock,soft,rw
-      device: ":${NFS_EXPORTS_LETSENCRYPT_CERTS}"
-  ssl_dhparam:
-    driver: local
-    driver_opts:
-      type: "nfs"
-      o: addr=${NFS_HOST},nolock,soft,rw
-      device: ":${NFS_EXPORTS_SSL_DHPARAM}"
+      device: ":${NFS_EXPORTS_SSL_CERTS}"
   flower_db:
     driver: local
     driver_opts:

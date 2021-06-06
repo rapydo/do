@@ -6,6 +6,6 @@ from controller.compose import Compose
 def dhparam() -> None:
     Application.get_controller().controller_init()
 
-    command = "openssl dhparam -out /etc/nginx/ssl/dhparam.pem 4096"
+    command = "openssl dhparam -out /etc/letsencrypt/dhparam.pem 4096"
     dc = Compose(files=Application.data.files)
     dc.exec_command("proxy", user="root", command=command)
