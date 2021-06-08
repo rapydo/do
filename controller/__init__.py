@@ -8,6 +8,7 @@ from loguru import logger as log
 __version__ = "2.0"
 
 LOGS_FOLDER = Path("data").resolve().joinpath("logs")
+LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
 
 LOGS_FILE = None
 if LOGS_FOLDER.is_dir():
@@ -32,7 +33,12 @@ log.add(sys.stderr, colorize=colorize, format=fmt)
 
 if LOGS_FILE is not None:
     try:
-        log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
+        log.add(
+            LOGS_FILE,
+            level="WARNING",
+            rotation="1 week",
+            retention=f"{LOG_RETENTION} days",
+        )
     except PermissionError as e:  # pragma: no cover
         log.error(e)
         LOGS_FILE = None
