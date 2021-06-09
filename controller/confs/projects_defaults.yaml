@@ -190,7 +190,7 @@ variables:
     ALCHEMY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
-    ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
+    ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
 
     MYSQL_ROOT_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 

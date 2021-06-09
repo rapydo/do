@@ -84,7 +84,7 @@ services:
       DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
 
-      # enable /auth/login and /api/admin/users methods
+      # enable /auth/login and /api/admin/users methods
       MAIN_LOGIN_ENABLE: 1
       # base the user/role mechanism on some database
       AUTH_ENABLE: ${ACTIVATE_AUTH}
@@ -228,6 +228,7 @@ services:
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      # Projects can then map a different folder and change the UPLOAD_PATH accordingly
       - ${DATA_DIR}/uploads:/uploads
     networks:
       app_net:
@@ -1031,6 +1032,9 @@ services:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
       app_net:
+        aliases:
+          - ${SMTP_SERVER_HOST}
+      worker_net:
         aliases:
           - ${SMTP_SERVER_HOST}
 
