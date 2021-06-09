@@ -960,6 +960,9 @@ services:
       app_net:
         aliases:
           - ${SMTP_SERVER_HOST}
+      worker_net:
+        aliases:
+          - ${SMTP_SERVER_HOST}
 
   ####################################
   ### REVERSE PROXY FOR WEBSOCKETS ###
