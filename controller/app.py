@@ -611,6 +611,7 @@ You can use of one:
         myvars = {
             "local_volumes": not MULTI_HOST_MODE,
             "nfs_volumes": MULTI_HOST_MODE,
+            "swarm_options": SWARM_MODE,
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
             "commons": Configuration.load_commons,

@@ -76,6 +76,12 @@ variables:
       path: $$baseconf
       mandatory: True
       if: $$nfs_volumes
+    swarm_options:
+      file: swarm_options.yml
+      base: True
+      path: $$baseconf
+      mandatory: True
+      if: $$swarm_options
 
   env:
     BACKEND_BUILD_MODE: backend
