@@ -53,6 +53,8 @@ def check(
         # if the node has joined a swarm cluster by requesting for a swarm token
         # If not, the execution will halt
         Swarm()
+        # this is true, otherwise during the Swarm initialization the app will be halt
+        log.debug("Swarm is correctly initialized")
 
     if no_git:
         log.info("Skipping git checks")
