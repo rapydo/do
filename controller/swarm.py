@@ -8,13 +8,15 @@ from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
-from controller.app import Configuration
+from controller.app import Application, Configuration
 from controller.utilities import system
 
 
 class Swarm:
     def __init__(self):
-        pass
+        if not self.get_token():
+            Application.exit("Swarm is not initialized, please execute rapydo init")
+        log.debug("Swarm is correctly initialized")
 
     @staticmethod
     def init() -> None:

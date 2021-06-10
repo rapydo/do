@@ -49,10 +49,10 @@ def check(
     Application.get_controller().controller_init()
 
     if SWARM_MODE:
-        swarm = Swarm()
-        if not swarm.get_token():
-            Application.exit("Swarm is not initialized, please execute rapydo init")
-        log.debug("Swarm is correctly initialized")
+        # This is to verify if swarm is working. It will verify in the constructor
+        # if the node has joined a swarm cluster by requesting for a swarm token
+        # If not, the execution will halt
+        Swarm()
 
     if no_git:
         log.info("Skipping git checks")
