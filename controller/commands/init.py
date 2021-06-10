@@ -25,7 +25,7 @@ def init(
     Application.get_controller().controller_init()
 
     if SWARM_MODE:
-        swarm = Swarm()
+        swarm = Swarm(check_initialization=False)
         if not swarm.get_token():
             swarm.init()
             log.info("Swarm is now initialized")
