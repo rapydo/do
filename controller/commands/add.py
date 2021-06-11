@@ -418,7 +418,7 @@ def create_workflow(
     if name not in workflows:
         Application.exit("Invalid workflow name, expected: {}", ", ".join(workflows))
 
-    path = Path(".github").joinpath("workflows")
+    path = Path(".github", "workflows")
 
     if not path.exists():
         path.mkdir(parents=True)

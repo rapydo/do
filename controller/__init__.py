@@ -7,7 +7,7 @@ from loguru import logger as log
 
 __version__ = "2.0"
 
-LOGS_FOLDER = Path("data").resolve().joinpath("logs")
+LOGS_FOLDER = Path("data", "logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
 
 LOGS_FILE = None

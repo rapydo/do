@@ -76,7 +76,7 @@ def backup(
     running_containers = dc.get_running_containers(Configuration.project)
     container_is_running = service_name in running_containers
 
-    backup_dir = Path("data").joinpath("backup").joinpath(service_name)
+    backup_dir = Path("data", "backup", service_name)
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     if max_backups > 0:

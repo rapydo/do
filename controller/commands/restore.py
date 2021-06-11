@@ -62,7 +62,7 @@ def restore(
     elif service_name == Services.redis:
         expected_ext = ".tar.gz"
 
-    backup_dir = Path("data").joinpath("backup").joinpath(service_name)
+    backup_dir = Path("data", "backup", service_name)
     if not backup_dir.exists():
         Application.exit(
             "No backup found, the following folder does not exist: {}", backup_dir

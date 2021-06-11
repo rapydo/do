@@ -315,7 +315,7 @@ class Project:
             sys.exit(1)
 
     def check_main_folder(self) -> Optional[str]:
-        folder = Path(os.getcwd())
+        folder = Path.cwd()
         first_level_error = self.inspect_main_folder(folder)
         # No error raised: the current folder is a valid rapydo root
         if first_level_error is None:
@@ -354,7 +354,7 @@ class Project:
         if r is None or gitter.get_origin(r) is None:
             return f"""You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {os.getcwd()}
+Verify that you are in the right folder, now you are in: {Path.cwd()}
                 """
 
         for fpath in self.expected_main_folders:
