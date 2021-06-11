@@ -36,12 +36,6 @@ def shell(
         help="Disable pseudo-tty allocation (useful for non-interactive script)",
         show_default=False,
     ),
-    detach: bool = typer.Option(
-        False,
-        "--detach",
-        help="Execute the command in detach mode",
-        show_default=False,
-    ),
 ) -> None:
     Application.get_controller().controller_init()
 
@@ -55,6 +49,4 @@ def shell(
 
     log.debug("Requested command: {} with user: {}", command, user)
 
-    dc.exec_command(
-        service, user=user, command=command, disable_tty=no_tty, detach=detach
-    )
+    dc.exec_command(service, user=user, command=command, disable_tty=no_tty)

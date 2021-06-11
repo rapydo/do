@@ -156,7 +156,6 @@ class Swarm:
         user: Optional[str] = None,
         command: str = None,
         disable_tty: bool = False,
-        detach: bool = False,
         slot: int = 1,
     ) -> None:
         """
@@ -165,11 +164,7 @@ class Swarm:
         log.debug("Command on {}: {}", service.lower(), command)
 
         container = self.get_container(service, slot)
-        # docker.container.execute(
-        #     container=container,
-        #     command=command,
-        #     detach=detach
-        # )
+
         if not container:
             log.error("Service {} not found", service)
             return None
@@ -177,8 +172,6 @@ class Swarm:
         exec_command = "docker exec --interactive "
         if not disable_tty:
             exec_command += "--tty "
-        if detach:
-            exec_command += "--detach "
         if user:
             exec_command += f"--user {user} "
 

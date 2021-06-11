@@ -140,8 +140,6 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(capfd, "shell backend -u aRandomUser", "--user aRandomUser")
 
-    exec_command(capfd, "shell backend --detach", "--detach")
-
     exec_command(
         capfd,
         "-s invalid logs",

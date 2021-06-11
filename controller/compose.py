@@ -240,7 +240,6 @@ class Compose:
         user: Optional[str] = None,
         command: str = None,
         disable_tty: bool = False,
-        detach: bool = False,
     ) -> None:
         """
         Execute a command on a running container
@@ -255,8 +254,7 @@ class Compose:
             "-T": disable_tty,
             "--env": None,
             "--workdir": None,
-            # '-d': False,
-            "--detach": detach,
+            "--detach": False,
             "--privileged": False,
         }
         if shell_command is not None:
