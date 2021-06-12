@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Optional, Set
 
 import typer
 from glom import glom
@@ -30,6 +30,8 @@ def pull(
             if s not in Application.data.base_services.keys():
                 Application.exit("Invalid service name: {}", s)
 
+    base_image: Optional[str] = None
+    image: Optional[str] = None
     images: Set[str] = set()
     for service in Application.data.active_services:
         if Configuration.services_list and service not in Configuration.services_list:
