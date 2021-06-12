@@ -1,8 +1,11 @@
+from typing import Set
+
 import typer
+from glom import glom
+from python_on_whales import docker
 
 from controller import log
 from controller.app import Application, Configuration
-from controller.compose import Compose
 
 
 @Application.app.command(help="Pull available images from docker hub")
@@ -22,27 +25,32 @@ def pull(
 ) -> None:
     Application.get_controller().controller_init()
 
-    if include_all:
-        dc = Compose(files=Application.data.files)
-        services_intersection = Application.data.services
-    else:
-        dc = Compose(files=Application.data.base_files)
-        # base_services_list = []
-        # for s in Application.data.base_services:
-        #     base_services_list.append(s.get("name"))
+    if Configuration.services_list:
+        for s in Application.data.services:
+            if s not in Application.data.base_services.keys():
+                Application.exit("Invalid service name: {}", s)
 
-        base_services_list = Application.data.base_services.keys()
-        if Configuration.services_list:
-            for s in Application.data.services:
-                if s not in base_services_list:
-                    Application.exit("Invalid service name: {}", s)
-        # List of BASE active services (i.e. remove services not in base)
-        services_intersection = list(
-            set(Application.data.services).intersection(base_services_list)
+    images: Set[str] = set()
+    for service in Application.data.active_services:
+        if Configuration.services_list and service not in Configuration.services_list:
+            continue
+        base_image = glom(
+            Application.data.base_services, f"{service}.image", default=None
         )
 
-    options = {"SERVICE": services_intersection, "--quiet": quiet}
-    dc.command("pull", options)
+        # from py38 use walrus here
+        if base_image:
+            images.add(base_image)
+
+        if include_all:
+            image = glom(
+                Application.data.compose_config, f"{service}.image", default=None
+            )
+            # from py38 use walrus here
+            if image:
+                images.add(image)
+
+    docker.pull(list(images), quiet=quiet)
 
     if include_all:
         log.info("Images pulled from docker hub")
