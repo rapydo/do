@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Set
 
 import typer
 from glom import glom
@@ -30,14 +30,14 @@ def pull(
             if s not in Application.data.base_services.keys():
                 Application.exit("Invalid service name: {}", s)
 
-    base_image: Optional[str] = None
-    image: Optional[str] = None
+    base_image: str = ""
+    image: str = ""
     images: Set[str] = set()
     for service in Application.data.active_services:
         if Configuration.services_list and service not in Configuration.services_list:
             continue
         base_image = glom(
-            Application.data.base_services, f"{service}.image", default=None
+            Application.data.base_services, f"{service}.image", default=""
         )
 
         # from py38 use walrus here
@@ -46,7 +46,7 @@ def pull(
 
         if include_all:
             image = glom(
-                Application.data.compose_config, f"{service}.image", default=None
+                Application.data.compose_config, f"{service}.image", default=""
             )
             # from py38 use walrus here
             if image:
