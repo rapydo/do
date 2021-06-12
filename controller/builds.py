@@ -219,5 +219,6 @@ def remove_redundant_services(services: List[str], builds: ComposeConfig) -> Lis
     return non_redundant_services
 
 
-def push_image(image_tag: str) -> None:
-    docker.push(image_tag)
+def push_image(image_tags: List[str]) -> None:
+    # docker.push accepts Union[str, List[str]]
+    docker.push(image_tags)

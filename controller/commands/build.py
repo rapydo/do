@@ -157,7 +157,6 @@ def build(
 
     if MULTI_HOST_MODE and local_registry_images:
         log.info("Multi Host Mode is enabled, pushing images to the docker registry")
-        for img in local_registry_images:
-            push_image(img)
+        push_image(local_registry_images)
 
     return True
