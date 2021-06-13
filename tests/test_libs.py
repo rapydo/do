@@ -15,7 +15,7 @@ from faker import Faker
 
 from controller import __version__, gitter
 from controller.app import Application
-from controller.commands.backup import get_date_pattern
+from controller.commands.compose.backup import get_date_pattern
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
