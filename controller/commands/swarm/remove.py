@@ -5,7 +5,7 @@ from controller.app import Application, Configuration
 from controller.swarm import Swarm
 
 
-@Application.app.command(help="[SWARM] Stop and remove containers")
+@Application.app.command(help="Stop and remove services")
 def remove(
     rm_networks: bool = typer.Option(
         False,

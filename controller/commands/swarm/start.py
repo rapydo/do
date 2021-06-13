@@ -5,7 +5,7 @@ from controller.app import Application
 from controller.swarm import Swarm
 
 
-@Application.app.command(help="[SWARM] Start containers for this configuration")
+@Application.app.command(help="Start services for this configuration")
 def start(
     force: bool = typer.Option(
         False,

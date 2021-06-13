@@ -26,7 +26,6 @@ jobs:
             build_pull,
             create,
             cronjobs,
-            diagnostic,
             dump,
             install,
             init_check_update,

@@ -8,9 +8,7 @@ from controller.swarm import Swarm
 from controller.utilities import services
 
 
-@Application.app.command(
-    help="[SWARM] Open a shell or execute a command onto a container"
-)
+@Application.app.command(help="Open a shell or execute a command onto a container")
 def shell(
     service: str = typer.Argument(
         ..., help="Service name", autocompletion=Application.autocomplete_service

@@ -7,7 +7,7 @@ from controller.swarm import Swarm
 # scaling should be a "Multiple Value"
 
 
-@Application.app.command(help="[SWARM] Scale the number of containers for one service")
+@Application.app.command(help="Scale the number of replicas for a service")
 def scale(
     scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
 ) -> None:

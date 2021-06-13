@@ -5,7 +5,7 @@ from controller.app import Application
 from controller.swarm import Swarm
 
 
-@Application.app.command(help="[SWARM] Watch log tails of all or specified containers")
+@Application.app.command(help="Watch log tails of services")
 def logs(
     follow: bool = typer.Option(
         False,
