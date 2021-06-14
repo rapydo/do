@@ -173,7 +173,6 @@ RUN mkdir xyz
         capfd,
         "-s rabbit,rabbit2 build",
         "Cannot determine build priority between rabbit and rabbit2",
-        "Removed redundant builds from ['rabbit', 'rabbit2'] -> ['rabbit2']",
     )
 
     fin = open("submodules/build-templates/backend/Dockerfile", "a")
