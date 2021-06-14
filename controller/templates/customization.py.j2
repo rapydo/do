@@ -120,6 +120,8 @@ class Customizer(BaseCustomizer):
         return {
             'authmethod': fields.String()
         }
+        {% else -%}
+        return {
+            'custom_field': fields.Int()
+        }
         {% endif -%}
-
-        return Customizer.get_custom_input_fields(request, scope=BaseCustomizer.ADMIN)

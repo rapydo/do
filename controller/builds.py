@@ -7,7 +7,7 @@ Parse dockerfiles and check for builds
 
 import sys
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, Optional, Tuple, cast
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales import docker
@@ -160,65 +160,3 @@ def locate_builds(
 
     # TODO: cool progress bar in cli for the whole function END
     return builds, template_imgs, vanilla_imgs
-
-
-def remove_redundant_services(services: List[str], builds: ComposeConfig) -> List[str]:
-
-    # Sort the list of services to obtain determinist outputs
-    services.sort()
-    # this will be the output
-    non_redundant_services = []
-
-    # Transform: {'build-name': {'services': ['A', 'B'], [...]}
-    # Into: {'A': 'build-name', 'B': 'build-name'}
-    # NOTE: builds == ALL builds
-    flat_builds = {}
-    for b in builds:
-        for s in builds[b]["services"]:
-            flat_builds[s] = b
-
-    # Group requested services by builds
-    requested_builds: Dict[str, List[str]] = {}
-    for service in services:
-        build_name = flat_builds.get(service)
-        # this service is not built from a rapydo image
-        if build_name is None:
-            # Let's consider not-rapydo-services as non-redundant
-            non_redundant_services.append(service)
-            continue
-
-        requested_builds.setdefault(build_name, [])
-        requested_builds[build_name].append(service)
-
-    # Transform requested builds from:
-    # {'build-name': {'services': ['A', 'B'], [...]}
-    # NOTE: only considering requested services
-    # to list of non redundant services
-    for build in requested_builds:
-        redundant_services = requested_builds.get(build)
-        if not redundant_services:  # pragma: no cover
-            continue
-        if len(redundant_services) == 1:
-            non_redundant_services.append(redundant_services[0])
-        else:
-            non_redundant_service: Optional[str] = None
-            for serv in redundant_services:
-
-                if non_redundant_service is None:
-                    non_redundant_service = serv
-                else:
-                    non_redundant_service = name_priority(non_redundant_service, serv)
-
-            if non_redundant_service:
-                non_redundant_services.append(non_redundant_service)
-
-    if len(services) != len(non_redundant_services):
-        log.info(
-            "Removed redundant builds from {} -> {}", services, non_redundant_services
-        )
-    return non_redundant_services
-
-
-def push_image(image_tags: List[str]) -> None:
-    # docker.push accepts Union[str, List[str]]
-    docker.push(image_tags)

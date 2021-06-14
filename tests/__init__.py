@@ -53,7 +53,7 @@ def mock_KeyboardInterrupt(signum, frame):
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd, command, *asserts, input_text=None):
+def exec_command(capfd, command, *asserts):
 
     # This is needed to reload the LOG dir
     import controller
@@ -74,7 +74,7 @@ def exec_command(capfd, command, *asserts, input_text=None):
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = {}
-    result = runner.invoke(ctrl.app, command, input=input_text)
+    result = runner.invoke(ctrl.app, command)
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
