@@ -135,10 +135,6 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "-s rabbit build",
-        "Successfully built",
-        # before buildkit:
-        # f"Successfully tagged testbuild/rabbit:{__version__}",
-        # with buildkit:
         f"naming to docker.io/testbuild/rabbit:{__version__}",
         "Custom images built",
     )
