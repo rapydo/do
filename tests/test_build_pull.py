@@ -169,12 +169,6 @@ RUN mkdir xyz
     """
         )
 
-    exec_command(
-        capfd,
-        "-s rabbit,rabbit2 build",
-        "Cannot determine build priority between rabbit and rabbit2",
-    )
-
     fin = open("submodules/build-templates/backend/Dockerfile", "a")
     fin.write("xyz")
     fin.close()

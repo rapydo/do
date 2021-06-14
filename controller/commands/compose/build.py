@@ -66,7 +66,6 @@ def build(
     for b in template_builds.values():
         services_with_custom_builds.extend(b["services"])
 
-    log.critical(services_with_custom_builds)
     targets: List[str] = []
     for service in Application.data.active_services:
         if Configuration.services_list and service not in Configuration.services_list:
