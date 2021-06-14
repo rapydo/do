@@ -5,7 +5,7 @@ from python_on_whales import docker
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application, Configuration
-from controller.builds import find_templates_build, locate_builds
+from controller.builds import find_templates_build, find_templates_override
 from controller.compose import Compose
 
 
@@ -57,13 +57,10 @@ def build(
     dc.dump_config(compose_config, COMPOSE_FILE, Application.data.active_services)
     log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-    t = find_templates_build(Application.data.base_services)
-    log.critical(t)
-    builds, template_builds, overriding_imgs = locate_builds(
-        Application.data.base_services, Application.data.compose_config
+    templates = find_templates_build(Application.data.base_services)
+    template_builds, _ = find_templates_override(
+        Application.data.compose_config, templates
     )
-
-    log.critical(template_builds)
 
     services_with_custom_builds: List[str] = []
     for b in template_builds.values():

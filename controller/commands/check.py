@@ -8,7 +8,7 @@ from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, gitter, log
 from controller.app import Application
-from controller.builds import locate_builds
+from controller.builds import find_templates_build, find_templates_override
 from controller.swarm import Swarm
 from controller.templating import Templating
 
@@ -67,9 +67,15 @@ def check(
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        # Compare builds depending on templates (slow operation!)
-        builds, template_builds, overriding_imgs = locate_builds(
-            Application.data.base_services, Application.data.compose_config
+        # All builds used for the current configuration (templates + custom)
+        builds = find_templates_build(Application.data.compose_config)
+
+        # All template builds
+        templates = find_templates_build(Application.data.base_services)
+
+        # Find templates that were extended in vanilla
+        template_builds, overriding_imgs = find_templates_override(
+            Application.data.compose_config, templates
         )
 
         for image_tag, build in builds.items():

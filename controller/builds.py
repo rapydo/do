@@ -143,20 +143,3 @@ def find_templates_override(
             vbuilds[vanilla_img] = template_img
 
     return tbuilds, vbuilds
-
-
-def locate_builds(
-    base_services: ComposeConfig, services: ComposeConfig
-) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, str]]:
-
-    # All builds used for the current configuration (templates + custom)
-    builds = find_templates_build(services)
-
-    # All template builds
-    templates = find_templates_build(base_services)
-
-    # 2. find templates that were extended in vanilla
-    template_imgs, vanilla_imgs = find_templates_override(services, templates)
-
-    # TODO: cool progress bar in cli for the whole function END
-    return builds, template_imgs, vanilla_imgs
