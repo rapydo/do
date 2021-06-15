@@ -90,6 +90,20 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "join",
+        "To add a worker to this swarm, run the following command:",
+        "docker swarm join --token ",
+    )
+
+    exec_command(
+        capfd,
+        "join --manager",
+        "To add a manager to this swarm, run the following command:",
+        "docker swarm join --token ",
+    )
+
+    exec_command(
+        capfd,
         "pull --quiet",
         "Base images pulled from docker hub",
     )
