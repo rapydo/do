@@ -2,6 +2,7 @@ from typing import Any, Tuple
 
 from restapi.customizer import BaseCustomizer, FlaskRequest, Props, User
 from restapi.rest.definition import EndpointResource
+# from restapi.models import fields
 
 # from restapi.utilities.logs import log
 
@@ -121,7 +122,7 @@ class Customizer(BaseCustomizer):
             'authmethod': fields.String()
         }
         {% else -%}
-        return {
-            'custom_field': fields.Int()
-        }
+        # return {
+        #     'custom_field': fields.Int()
+        # }
         {% endif -%}
