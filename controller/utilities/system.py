@@ -74,3 +74,40 @@ def bytes_to_str(value: float) -> str:
         unit = ""
 
     return f"{int(round(value, 0))}{unit}"
+
+
+def str_to_bytes(text: str) -> float:
+
+    text = text.upper()
+
+    value: str = text
+    unit: int = 1
+
+    if text.endswith("G"):
+        value = text[:-1]
+        unit = GB
+
+    if text.endswith("M"):
+        value = text[:-1]
+        unit = MB
+
+    if text.endswith("K"):
+        value = text[:-1]
+        unit = KB
+
+    if text.endswith("GB"):
+        value = text[:-2]
+        unit = GB
+
+    if text.endswith("MB"):
+        value = text[:-2]
+        unit = MB
+
+    if text.endswith("KB"):
+        value = text[:-2]
+        unit = KB
+
+    if not value.isnumeric():
+        raise AttributeError(f"Invalid float value {value}")
+
+    return float(value) * unit

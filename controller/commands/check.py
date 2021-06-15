@@ -52,9 +52,11 @@ def check(
         # This is to verify if swarm is working. It will verify in the constructor
         # if the node has joined a swarm cluster by requesting for a swarm token
         # If not, the execution will halt
-        Swarm()
+        swarm = Swarm()
         # this is true, otherwise during the Swarm initialization the app will be halt
         log.debug("Swarm is correctly initialized")
+
+        swarm.check_resources()
 
     if no_git:
         log.info("Skipping git checks")

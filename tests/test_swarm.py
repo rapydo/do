@@ -88,6 +88,42 @@ def test_swarm(capfd: Capture) -> None:
         "Checks completed",
     )
 
+    check = "check -i main --no-git --no-builds"
+
+    exec_command(
+        capfd,
+        f"-e ASSIGNED_MEMORY_BACKEND=50G {check}",
+        "Your deployment requires 50GB of RAM but your nodes only have",
+        # The error does not halt the checks execution
+        "Checks completed",
+    )
+
+    exec_command(
+        capfd,
+        f"-e ASSIGNED_CPU_BACKEND=50 {check}",
+        "Your deployment requires ",
+        " cpus but your nodes only have ",
+        # The error does not halt the checks execution
+        "Checks completed",
+    )
+
+    exec_command(
+        capfd,
+        f"-e DEFAULT_SCALE_BACKEND=55 -e ASSIGNED_MEMORY_BACKEND=1G {check}",
+        "Your deployment requires 55GB of RAM but your nodes only have",
+        # The error does not halt the checks execution
+        "Checks completed",
+    )
+
+    exec_command(
+        capfd,
+        f"-e DEFAULT_SCALE_BACKEND=50 ASSIGNED_CPU_BACKEND=1 {check}",
+        "Your deployment requires ",
+        " cpus but your nodes only have ",
+        # The error does not halt the checks execution
+        "Checks completed",
+    )
+
     exec_command(
         capfd,
         "join",

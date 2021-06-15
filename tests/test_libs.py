@@ -136,6 +136,43 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024) == "1024GB"
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
 
+    assert system.str_to_bytes("0") == 0
+    assert system.str_to_bytes("1") == 1
+    assert system.str_to_bytes("42") == 42
+
+    assert system.str_to_bytes("1K") == 1024
+    assert system.str_to_bytes("1k") == 1024
+    assert system.str_to_bytes("1KB") == 1024
+    assert system.str_to_bytes("1kb") == 1024
+
+    assert system.str_to_bytes("1M") == 1024 * 1024
+    assert system.str_to_bytes("1m") == 1024 * 1024
+    assert system.str_to_bytes("1MB") == 1024 * 1024
+    assert system.str_to_bytes("1mb") == 1024 * 1024
+
+    assert system.str_to_bytes("1G") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1g") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1GB") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1gb") == 1024 * 1024 * 1024
+
+    try:
+        system.str_to_bytes("x")
+        pytest.fail("No exception raised")  # pragma: no cover
+    except AttributeError:
+        pass
+
+    try:
+        system.str_to_bytes("1T")
+        pytest.fail("No exception raised")  # pragma: no cover
+    except AttributeError:
+        pass
+
+    try:
+        system.str_to_bytes("1TB")
+        pytest.fail("No exception raised")  # pragma: no cover
+    except AttributeError:
+        pass
+
     # Invalid file / path
     try:
         load_yaml_file(Path("invalid"), Path("path"))

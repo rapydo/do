@@ -4,6 +4,7 @@ Integration with Docker swarmg
 
 from typing import Any, Dict, List, Optional
 
+from glom import glom
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
@@ -220,3 +221,43 @@ class Swarm:
             print("")
 
         return None
+
+    def check_resources(self) -> None:
+        total_cpus = 0.0
+        total_memory = 0.0
+        for service in Application.data.active_services:
+            config = Application.data.compose_config[service]
+
+            # frontend container has no deploy options
+            if "deploy" not in config:
+                continue
+
+            replicas = int(glom(config, "deploy.replicas", default=1))
+            cpus = float(glom(config, "deploy.resources.reservations.cpus", default=0))
+            memory = system.str_to_bytes(
+                glom(config, "deploy.resources.reservations.memory", default="0")
+            )
+
+            total_cpus += replicas * cpus
+            total_memory += replicas * memory
+
+        nodes_cpus = 0.0
+        nodes_memory = 0.0
+        for node in docker.node.list():
+
+            nodes_cpus += round(node.description.resources.nano_cpus / 1000000000)
+            nodes_memory += node.description.resources.memory_bytes
+
+        if total_cpus > nodes_cpus:
+            log.critical(
+                "Your deployment requires {} cpus but your nodes only have {}",
+                total_cpus,
+                nodes_cpus,
+            )
+
+        if total_memory > nodes_memory:
+            log.critical(
+                "Your deployment requires {} of RAM but your nodes only have {}",
+                system.bytes_to_str(total_memory),
+                system.bytes_to_str(nodes_memory),
+            )
