@@ -6,10 +6,11 @@ from typing import Dict, List, Optional
 
 import typer
 
-from controller import PROJECT_DIR, __version__, gitter, log
+from controller import PROJECT_DIR, __version__, log
 from controller.app import Application, Configuration
 from controller.project import NO_AUTHENTICATION, NO_FRONTEND, Project
 from controller.templating import Templating
+from controller.utilities import git
 
 
 class AuthTypes(str, Enum):
@@ -112,12 +113,12 @@ def create(
 
     log.info("Project {} successfully created", project_name)
 
-    git_repo = gitter.get_repo(".")
+    git_repo = git.get_repo(".")
     if git_repo is None:
-        git_repo = gitter.init(".")
+        git_repo = git.init(".")
 
     print("\nYou can now init and start the project:\n")
-    current_origin = gitter.get_origin(git_repo)
+    current_origin = git.get_origin(git_repo)
 
     if current_origin is None:
         if origin_url is None:  # pragma: no cover

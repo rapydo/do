@@ -13,13 +13,13 @@ from typing import Dict
 import pytest
 from faker import Faker
 
-from controller import __version__, gitter
+from controller import __version__
 from controller.app import Application
 from controller.commands.compose.backup import get_date_pattern
 from controller.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
-from controller.utilities import services, system
+from controller.utilities import git, services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import Capture, create_project, random_project_name
 
@@ -75,35 +75,35 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     values = app.autocomplete_submodule("")
     assert len(values) == 0
 
-    assert gitter.get_repo("does/not/exist") is None
-    do_repo = gitter.get_repo("submodules/do")
+    assert git.get_repo("does/not/exist") is None
+    do_repo = git.get_repo("submodules/do")
     assert do_repo is not None
-    assert gitter.get_active_branch(None) is None
-    assert gitter.get_active_branch(do_repo) == __version__
-    assert not gitter.switch_branch(do_repo, branch_name=None)
+    assert git.get_active_branch(None) is None
+    assert git.get_active_branch(do_repo) == __version__
+    assert not git.switch_branch(do_repo, branch_name=None)
     # Same branch => no change => return True
-    assert gitter.switch_branch(do_repo, branch_name=__version__)
-    assert not gitter.switch_branch(do_repo, branch_name="XYZ")
+    assert git.switch_branch(do_repo, branch_name=__version__)
+    assert not git.switch_branch(do_repo, branch_name="XYZ")
     # non remote branch is not found, because we only fetched current version
     # 0.7.3 is already test for automatic switch in editable mode,
     # i.e. local branch already exists and remote=False fails... let's use 0.7.2
-    assert not gitter.switch_branch(do_repo, branch_name="0.7.2", remote=False)
+    assert not git.switch_branch(do_repo, branch_name="0.7.2", remote=False)
 
-    assert gitter.switch_branch(do_repo, branch_name="0.7.3")
-    assert gitter.get_active_branch(do_repo) == "0.7.3"
-    assert gitter.switch_branch(do_repo, branch_name=__version__)
-    assert gitter.get_active_branch(do_repo) == __version__
+    assert git.switch_branch(do_repo, branch_name="0.7.3")
+    assert git.get_active_branch(do_repo) == "0.7.3"
+    assert git.switch_branch(do_repo, branch_name=__version__)
+    assert git.get_active_branch(do_repo) == __version__
 
-    assert gitter.get_origin(None) is None
-    assert gitter.get_origin("not-a-git-object") is None
-    assert gitter.get_active_branch("not-a-git-object") is None
+    assert git.get_origin(None) is None
+    assert git.get_origin("not-a-git-object") is None
+    assert git.get_active_branch("not-a-git-object") is None
 
-    r = gitter.get_repo(".")
-    assert gitter.get_origin(r) == "https://your_remote_git/your_project.git"
+    r = git.get_repo(".")
+    assert git.get_origin(r) == "https://your_remote_git/your_project.git"
 
     # Create an invalid repo (i.e. without any remote)
-    r = gitter.init("../justatest")
-    assert gitter.get_origin(r) is None
+    r = git.init("../justatest")
+    assert git.get_origin(r) is None
 
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"

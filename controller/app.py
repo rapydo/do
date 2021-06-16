@@ -26,7 +26,6 @@ from controller import (
     SWARM_MODE,
     ComposeConfig,
     __version__,
-    gitter,
     log,
 )
 from controller.commands import load_commands
@@ -34,7 +33,7 @@ from controller.compose import Compose
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
-from controller.utilities import configuration, services, system
+from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
 
@@ -268,7 +267,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    gits: Dict[str, gitter.GitRepoType] = {}
+    gits: Dict[str, git.GitRepoType] = {}
     env: Dict[str, Any] = {}
 
     def __init__(self) -> None:
@@ -578,7 +577,7 @@ You can use of one:
 
             os.symlink(local_path, submodule_path)
 
-        return gitter.clone(
+        return git.clone(
             url=repo.get("online_url"),
             path=name,
             branch=repo.get("branch"),
@@ -595,7 +594,7 @@ You can use of one:
             "variables.submodules",
             default=cast(Dict[str, str], {}),
         ).copy()
-        Application.gits["main"] = gitter.get_repo(".")
+        Application.gits["main"] = git.get_repo(".")
 
         for name, repo in repos.items():
             Application.gits[name] = Application.working_clone(
@@ -949,7 +948,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 log.debug("Skipping update on {}", name)
                 continue
 
-            if gitobj and not gitter.can_be_updated(name, gitobj):
+            if gitobj and not git.can_be_updated(name, gitobj):
                 Application.exit("Can't continue with updates")
 
         controller_is_updated = False
@@ -961,7 +960,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 controller_is_updated = True
 
             if gitobj:
-                gitter.update(name, gitobj)
+                git.update(name, gitobj)
 
         if controller_is_updated:
             installation_path = Packages.get_installation_path("rapydo")
@@ -998,5 +997,5 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 log.debug("Skipping checks on {}", name)
                 continue
             if gitobj:
-                gitter.check_updates(name, gitobj)
-                gitter.check_unstaged(name, gitobj)
+                git.check_updates(name, gitobj)
+                git.check_unstaged(name, gitobj)

@@ -6,7 +6,8 @@ import os
 import shutil
 from pathlib import Path
 
-from controller import __version__, gitter
+from controller import __version__
+from controller.utilities import git
 from tests import Capture, TemporaryRemovePath, create_project, exec_command
 
 
@@ -35,8 +36,8 @@ def test_base(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    r = gitter.get_repo("submodules/http-api")
-    gitter.switch_branch(r, "0.7.6")
+    r = git.get_repo("submodules/http-api")
+    git.switch_branch(r, "0.7.6")
     exec_command(
         capfd,
         "check -i main",
@@ -96,7 +97,7 @@ def test_base(capfd: Capture) -> None:
         "Can't continue with updates",
     )
     os.remove("submodules/do/temp.file")
-    r = gitter.get_repo("submodules/do")
+    r = git.get_repo("submodules/do")
     r.git().execute(["git", "checkout", "--", "setup.py"])
 
     # Skipping main because we are on a fake git repository

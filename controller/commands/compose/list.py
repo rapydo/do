@@ -3,9 +3,10 @@ from enum import Enum
 
 import typer
 
-from controller import COMPOSE_ENVIRONMENT_FILE, gitter, log
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 from controller.app import Application, Configuration
 from controller.compose import Compose
+from controller.utilities import git
 
 
 class ElementTypes(str, Enum):
@@ -57,7 +58,7 @@ def list_cmd(
         for name in Application.gits:
             repo = Application.gits.get(name)
             if repo:
-                branch = gitter.get_active_branch(repo)
+                branch = git.get_active_branch(repo)
                 path = repo.working_dir
                 path = path.replace(os.getcwd(), "")
                 if path.startswith("/"):

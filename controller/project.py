@@ -4,7 +4,9 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from controller import PROJECT_DIR, gitter, log
+from contoller.utilities import git
+
+from controller import PROJECT_DIR, log
 
 NO_AUTHENTICATION = "NO_AUTHENTICATION"
 NO_FRONTEND = "nofrontend"
@@ -350,8 +352,8 @@ class Project:
         on file existence. Further checks are performed in the following steps
         """
 
-        r = gitter.get_repo(str(folder))
-        if r is None or gitter.get_origin(r) is None:
+        r = git.get_repo(str(folder))
+        if r is None or git.get_origin(r) is None:
             return f"""You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {Path.cwd()}

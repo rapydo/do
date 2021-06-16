@@ -2,9 +2,10 @@ import time
 
 import typer
 
-from controller import SUBMODULES_DIR, gitter, log
+from controller import SUBMODULES_DIR, log
 from controller.app import Application, Configuration
 from controller.packages import Packages
+from controller.utilities import git
 
 
 @Application.app.command(help="Install the specified version of rapydo")
@@ -68,13 +69,13 @@ sudo pip3 install --upgrade --editable {}
 
     do_repo = Application.gits.get("do")
 
-    b = gitter.get_active_branch(do_repo)
+    b = git.get_active_branch(do_repo)
 
     if b is None:
         log.error("Unable to read local controller repository")  # pragma: no cover
     elif b == version:
         log.info("Controller repository already at {}", version)
-    elif gitter.switch_branch(do_repo, version):
+    elif git.switch_branch(do_repo, version):
         log.info("Controller repository switched to {}", version)
     else:
         Application.exit("Invalid version")

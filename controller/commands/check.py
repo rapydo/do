@@ -6,11 +6,12 @@ import typer
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
-from controller import SWARM_MODE, gitter, log
+from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.builds import find_templates_build, find_templates_override
 from controller.swarm import Swarm
 from controller.templating import Templating
+from controller.utilities import git
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -185,7 +186,7 @@ def build_is_obsolete(build, gits):
         if f.is_dir():  # pragma: no cover
             continue
 
-        obsolete, build_ts, last_commit = gitter.check_file_younger_than(
+        obsolete, build_ts, last_commit = git.check_file_younger_than(
             gitobj=git_repo, filename=f, timestamp=build_timestamp
         )
 

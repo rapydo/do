@@ -6,7 +6,8 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import __version__, gitter
+from controller import __version__
+from controller.utilities import git
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -50,8 +51,8 @@ def test_install(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "install auto")
 
-    r = gitter.get_repo("submodules/do")
-    gitter.switch_branch(r, "0.7.6")
+    r = git.get_repo("submodules/do")
+    git.switch_branch(r, "0.7.6")
 
     exec_command(
         capfd,
