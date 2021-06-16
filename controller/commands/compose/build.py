@@ -1,12 +1,12 @@
 from typing import List
 
 import typer
-from python_on_whales import docker
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application, Configuration
 from controller.builds import find_templates_build, find_templates_override
 from controller.compose import Compose
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Force building of one or more services docker images")
@@ -34,6 +34,7 @@ def build(
 
         enabled_services.append(service)
 
+    docker = Docker()
     if core:
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with only core files
@@ -42,7 +43,7 @@ def build(
         dc.dump_config(compose_config, COMPOSE_FILE, Application.data.active_services)
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-        docker.buildx.bake(
+        docker.client.buildx.bake(
             targets=enabled_services,
             files=[COMPOSE_FILE],
             pull=True,
@@ -100,7 +101,7 @@ def build(
     #                 registry_host,
     #             )
 
-    docker.buildx.bake(
+    docker.client.buildx.bake(
         targets=targets,
         files=[COMPOSE_FILE],
         load=True,

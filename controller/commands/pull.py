@@ -2,10 +2,10 @@ from typing import Set
 
 import typer
 from glom import glom
-from python_on_whales import docker
 
 from controller import log
 from controller.app import Application, Configuration
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Pull available images from docker hub")
@@ -52,7 +52,8 @@ def pull(
             if image:
                 images.add(image)
 
-    docker.pull(list(images), quiet=quiet)
+    docker = Docker()
+    docker.client.pull(list(images), quiet=quiet)
 
     if include_all:
         log.info("Images pulled from docker hub")

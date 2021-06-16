@@ -5,11 +5,11 @@ Integration with Docker swarmg
 from typing import Any, Dict, List, Optional
 
 from glom import glom
-from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
 from controller.app import Application, Configuration
+from controller.deploy.docker import Docker
 from controller.utilities import system
 
 
@@ -18,31 +18,28 @@ class Swarm:
         if check_initialization and not self.get_token():
             Application.exit("Swarm is not initialized, please execute rapydo init")
 
-    @staticmethod
-    def init() -> None:
-        docker.swarm.init()
+        self.docker = Docker().client
 
-    @staticmethod
-    def leave() -> None:
-        docker.swarm.leave(force=True)
+    def init(self) -> None:
+        self.docker.swarm.init()
 
-    @staticmethod
-    def get_token(node_type: str = "manager") -> Optional[str]:
+    def leave(self) -> None:
+        self.docker.swarm.leave(force=True)
+
+    def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
-            return str(docker.swarm.join_token(node_type))
+            return str(self.docker.swarm.join_token(node_type))
         except DockerException:
             # log.debug(e)
             return None
 
-    @staticmethod
-    def deploy() -> None:
-        docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
+    def deploy(self) -> None:
+        self.docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
 
-    @staticmethod
-    def status() -> None:
+    def status(self) -> None:
         nodes: Dict[str, str] = {}
         print("====== Nodes ======")
-        for node in docker.node.list():
+        for node in self.docker.node.list():
             nodes[node.id] = node.description.hostname
 
             state = f"{node.status.state.title()}+{node.spec.availability.title()}"
@@ -61,7 +58,7 @@ class Swarm:
                 sep="\t",
             )
 
-        services = docker.service.list()
+        services = self.docker.service.list()
 
         print("")
 
@@ -74,7 +71,7 @@ class Swarm:
         tasks: Dict[str, List[Any]] = {}
 
         try:
-            for task in docker.stack.ps(Configuration.project):
+            for task in self.docker.stack.ps(Configuration.project):
                 tasks.setdefault(task.service_id, [])
                 tasks[task.service_id].append(task)
         except DockerException:
@@ -118,21 +115,18 @@ class Swarm:
                     sep="\t",
                 )
 
-    @staticmethod
-    def scale(service: str, nreplicas: int) -> None:
-        docker.service.scale(
+    def scale(self, service: str, nreplicas: int) -> None:
+        self.docker.service.scale(
             {f"{Configuration.project}_{service}": nreplicas}, detach=False
         )
 
-    @staticmethod
-    def remove() -> None:
-        docker.stack.remove(Configuration.project)
+    def remove(self) -> None:
+        self.docker.stack.remove(Configuration.project)
 
-    @staticmethod
-    def get_container(service: str, slot: int) -> Optional[str]:
+    def get_container(self, service: str, slot: int) -> Optional[str]:
 
         service_id: Optional[str] = None
-        services = docker.service.list()
+        services = self.docker.service.list()
         for s in services:
             if s.spec.name == f"{Configuration.project}_{service}":
                 service_id = s.id
@@ -141,7 +135,7 @@ class Swarm:
         if not service_id:
             return None
 
-        for task in docker.stack.ps(Configuration.project):
+        for task in self.docker.stack.ps(Configuration.project):
             if task.service_id != service_id:
                 continue
             if task.slot != slot:
@@ -243,7 +237,7 @@ class Swarm:
 
         nodes_cpus = 0.0
         nodes_memory = 0.0
-        for node in docker.node.list():
+        for node in self.docker.node.list():
 
             nodes_cpus += round(node.description.resources.nano_cpus / 1000000000)
             nodes_memory += node.description.resources.memory_bytes

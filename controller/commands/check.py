@@ -3,12 +3,12 @@ from pathlib import Path
 from typing import List
 
 import typer
-from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.builds import find_templates_build, find_templates_override
+from controller.deploy.docker import Docker
 from controller.swarm import Swarm
 from controller.templating import Templating
 from controller.utilities import git
@@ -43,7 +43,8 @@ def check(
 
     # Set as first operation to quickly exit in case of docker issues
     try:
-        dimages = [img.repo_tags[0] for img in docker.images() if img.repo_tags]
+        docker = Docker()
+        dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
     except DockerException as e:  # pragma: no cover
         Application.exit(e)
 

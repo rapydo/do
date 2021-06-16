@@ -10,10 +10,10 @@ from datetime import datetime
 from typing import Any, Dict, Optional, Tuple, cast
 
 from dockerfile_parse import DockerfileParser
-from python_on_whales import docker
 from python_on_whales.utils import DockerException
 
 from controller import ComposeConfig, log
+from controller.deploy.docker import Docker
 
 name_priorities = [
     "backend",
@@ -49,7 +49,8 @@ def name_priority(name1: str, name2: str) -> str:
 
 def get_image_creation(image_name: str) -> Optional[datetime]:
     try:
-        return cast(datetime, docker.image.inspect(image_name).created)
+        docker = Docker()
+        return cast(datetime, docker.client.image.inspect(image_name).created)
     except DockerException:
         return None
 

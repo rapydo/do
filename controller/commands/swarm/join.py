@@ -1,8 +1,8 @@
 import typer
-from python_on_whales import docker
 
 from controller import log
 from controller.app import Application
+from controller.deploy.docker import Docker
 from controller.swarm import Swarm
 
 
@@ -15,10 +15,11 @@ def join(
     Application.get_controller().controller_init()
 
     swarm = Swarm()
+    docker = Docker()
 
     manager_address = "N/A"
     # Search for the manager address
-    for node in docker.node.list():
+    for node in docker.client.node.list():
 
         role = node.spec.role
         state = node.status.state

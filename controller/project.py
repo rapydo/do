@@ -4,9 +4,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-from contoller.utilities import git
-
 from controller import PROJECT_DIR, log
+from controller.utilities import git
 
 NO_AUTHENTICATION = "NO_AUTHENTICATION"
 NO_FRONTEND = "nofrontend"
