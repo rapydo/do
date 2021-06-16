@@ -1,5 +1,5 @@
 from controller.app import Application
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 
 
 @Application.app.command(help="Generate SSL DH DSA parameters, 4096 bit long prime")

@@ -29,7 +29,7 @@ from controller import (
     log,
 )
 from controller.commands import load_commands
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating

@@ -5,7 +5,7 @@ import typer
 
 from controller import log
 from controller.app import Application, Configuration
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 from controller.utilities import system
 
 

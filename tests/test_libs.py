@@ -16,7 +16,7 @@ from faker import Faker
 from controller import __version__
 from controller.app import Application
 from controller.commands.compose.backup import get_date_pattern
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
 from controller.utilities import git, services, system

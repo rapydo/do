@@ -1,6 +1,6 @@
 from controller import log
 from controller.app import Application
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 
 
 @Application.app.command(help="Restart running containers")

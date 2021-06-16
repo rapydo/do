@@ -2,7 +2,7 @@ import typer
 from glom import glom
 
 from controller.app import Application, Configuration
-from controller.compose import Compose
+from controller.deploy.compose import Compose
 
 # scaling should be a "Multiple Value"
 

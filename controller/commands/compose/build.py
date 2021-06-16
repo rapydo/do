@@ -4,8 +4,8 @@ import typer
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application, Configuration
-from controller.compose import Compose
 from controller.deploy.builds import find_templates_build, find_templates_override
+from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
 
