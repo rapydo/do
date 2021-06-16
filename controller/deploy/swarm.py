@@ -15,10 +15,11 @@ from controller.utilities import system
 
 class Swarm:
     def __init__(self, check_initialization: bool = True):
-        if check_initialization and not self.get_token():
-            Application.exit("Swarm is not initialized, please execute rapydo init")
 
         self.docker = Docker().client
+
+        if check_initialization and not self.get_token():
+            Application.exit("Swarm is not initialized, please execute rapydo init")
 
     def init(self) -> None:
         self.docker.swarm.init()
