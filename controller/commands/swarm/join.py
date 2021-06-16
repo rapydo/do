@@ -3,7 +3,7 @@ import typer
 from controller import log
 from controller.app import Application
 from controller.deploy.docker import Docker
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Provide instructions to join new nodes")

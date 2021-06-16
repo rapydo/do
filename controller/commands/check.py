@@ -9,7 +9,7 @@ from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import find_templates_build, find_templates_override
 from controller.deploy.docker import Docker
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 from controller.templating import Templating
 from controller.utilities import git
 

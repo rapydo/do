@@ -2,7 +2,7 @@ import typer
 from glom import glom
 
 from controller.app import Application, Configuration
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 
 # scaling should be a "Multiple Value"
 

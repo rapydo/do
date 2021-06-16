@@ -4,7 +4,7 @@ import typer
 
 from controller import SWARM_MODE, log
 from controller.app import Application, Configuration
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Initialize current RAPyDo project")

@@ -4,7 +4,7 @@ This module will test the swarm mode
 import random
 import time
 
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 from tests import Capture, create_project, exec_command
 
 

@@ -4,7 +4,7 @@ import typer
 
 from controller import log
 from controller.app import Application, Configuration
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 from controller.utilities import services
 
 

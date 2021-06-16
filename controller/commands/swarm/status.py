@@ -1,5 +1,5 @@
 from controller.app import Application
-from controller.swarm import Swarm
+from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Show current services status")
