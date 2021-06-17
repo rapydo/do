@@ -34,7 +34,7 @@ jobs:
             list,
             passwords_invalid_characters,
             scale,
-            ssl_dhparam,
+            ssl,
             start_shell_status_logs_restart_remove,
             swarm,
             verify,

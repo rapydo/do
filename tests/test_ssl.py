@@ -1,5 +1,5 @@
 """
-This module will test the ssl and dhparam commands
+This module will test the ssl command
 """
 import time
 
@@ -117,12 +117,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"ssl --chain-file {pconf} --key-file {pconf}",
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
-    )
-
-    exec_command(
-        capfd,
-        "dhparam",
-        "No container found for proxy_1",
     )
 
     exec_command(capfd, "remove --all", "Stack removed")

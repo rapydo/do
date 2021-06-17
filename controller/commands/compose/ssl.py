@@ -13,6 +13,13 @@ from controller.deploy.compose import Compose
 #         /home/???/data/logs/ssl.log 2>&1
 
 
+# dhparam is automatically generated with a default length of 2048
+# You can generate stronger dhparams with the following command in the proxy container:
+# openssl dhparam -out /etc/letsencrypt/dhparam.pem 4096
+# But consider the increased handshake as explained here:
+# https://expeditedsecurity.com/blog/measuring-ssl-rsa-keys/
+
+
 @Application.app.command(help="Issue a SSL certificate with Let's Encrypt")
 def ssl(
     volatile: bool = typer.Option(
@@ -115,3 +122,13 @@ def ssl(
             )
 
         log.info("New certificate successfully enabled")
+
+
+# NOTE: This was the dhparam command:
+# @Application.app.command(help="Generate SSL DH DSA parameters, 4096 bit long prime")
+# def dhparam() -> None:
+#     Application.get_controller().controller_init()
+
+#     command = "openssl dhparam -out /etc/letsencrypt/dhparam.pem 4096"
+#     dc = Compose(files=Application.data.files)
+#     dc.exec_command("proxy", user="root", command=command)
