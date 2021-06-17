@@ -14,6 +14,7 @@ from tests import (
     create_project,
     exec_command,
     random_project_name,
+    service_verify,
 )
 
 
@@ -32,7 +33,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty redis", "Service redis is reachable")
+    service_verify(capfd, "redis")
 
     # # This will initialize redis
     # exec_command(capfd, "shell --no-tty backend 'restapi init'")
@@ -273,7 +274,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait redis to completely startup
-    exec_command(capfd, "verify --no-tty redis", "Service redis is reachable")
+    service_verify(capfd, "redis")
 
     exec_command(capfd, get_key, value1)
 

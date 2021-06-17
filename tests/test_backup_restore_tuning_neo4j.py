@@ -13,6 +13,7 @@ from tests import (
     create_project,
     exec_command,
     random_project_name,
+    service_verify,
 )
 
 
@@ -30,7 +31,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
+    service_verify(capfd, "neo4j")
 
     # This will initialize neo4j
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
@@ -329,7 +330,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait neo4j to completely startup
-    exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
+    service_verify(capfd, "neo4j")
 
     # 4) verify data match again point 1 (restore completed)
     exec_command(

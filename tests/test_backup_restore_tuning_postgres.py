@@ -12,6 +12,7 @@ from tests import (
     create_project,
     exec_command,
     random_project_name,
+    service_verify,
 )
 
 
@@ -29,7 +30,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
+    service_verify(capfd, "sqlalchemy")
 
     # Just some delay extra delay. restapi init alone not always is enough...
     # time.sleep(5)

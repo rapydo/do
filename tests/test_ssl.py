@@ -1,11 +1,15 @@
 """
 This module will test the ssl command
 """
-import time
-
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    random_project_name,
+    service_verify,
+)
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -75,7 +79,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
 
-    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
+    service_verify(capfd, "rabbitmq")
 
     exec_command(
         capfd,

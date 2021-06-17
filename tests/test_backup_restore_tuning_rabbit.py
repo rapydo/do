@@ -281,7 +281,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait rabbit to completely startup
-    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
+    service_verify(capfd, "rabbitmq")
 
     exec_command(capfd, query_queue, "restapi.connectors.rabbitmq True")
 
