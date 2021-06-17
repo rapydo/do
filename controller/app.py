@@ -61,6 +61,7 @@ class Configuration:
     project: str = ""
     frontend: Optional[str] = None
     hostname: str = ""
+    remote_engine: Optional[str] = None
     stack: str = ""
     load_backend: bool = False
     load_frontend: bool = False
@@ -176,6 +177,11 @@ def controller_cli_options(
         "-e",
         help="Temporary change the value of an environment variable",
     ),
+    remote_engine: Optional[str] = typer.Option(
+        None,
+        "--remote",
+        help="Execute commands on a remote host",
+    ),
     no_backend: bool = typer.Option(
         False,
         "--no-backend",
@@ -221,6 +227,7 @@ def controller_cli_options(
     Configuration.testing = testing
     Configuration.project = project
     Configuration.hostname = hostname
+    Configuration.remote_engine = remote_engine
     Configuration.environment = {}
     for e in environment:
         key, value = e.split("=")

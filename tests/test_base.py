@@ -86,3 +86,15 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     )
 
     os.chdir(folder)
+
+    exec_command(
+        capfd,
+        "--remote invalid check -i main --no-git --no-builds",
+        "Invalid remote host invalid, expected user@ip-or-hostname",
+    )
+
+    exec_command(
+        capfd,
+        "--remote invalid@invalid check -i main --no-git --no-builds",
+        "Could not resolve hostname invalid: Temporary failure in name resolution",
+    )
