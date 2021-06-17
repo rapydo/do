@@ -4,6 +4,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Optional, Type, TypeVar
 
+from faker import Faker
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -53,7 +54,7 @@ def mock_KeyboardInterrupt(signum, frame):
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd, command, *asserts):
+def exec_command(capfd: Any, command: str, *asserts: str) -> None:
 
     # This is needed to reload the LOG dir
     import controller
@@ -112,10 +113,16 @@ def exec_command(capfd, command, *asserts):
         # Check if the assert is in any line (also as substring) from out or err
         assert a in out + err or any(a in x for x in out + err + cout + exc)
 
-    return out
+
+def service_verify(capfd: Any, service: str) -> None:
+    exec_command(
+        capfd,
+        f"shell backend --no-tty 'restapi verify --service {service}'",
+        f"Service {service} is reachable",
+    )
 
 
-def random_project_name(faker):
+def random_project_name(faker: Faker) -> str:
 
     return f"{faker.word()}{faker.word()}"
 

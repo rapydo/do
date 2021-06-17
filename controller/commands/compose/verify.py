@@ -3,6 +3,9 @@ import typer
 from controller.app import Application
 from controller.deploy.compose import Compose
 
+# Note: this command is equivalent to:
+# shell backend {no_tty} 'restapi verify --service {service}'
+
 
 @Application.app.command(help="Test if service is reachable from the backend")
 def verify(

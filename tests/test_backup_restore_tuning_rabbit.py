@@ -14,6 +14,7 @@ from tests import (
     create_project,
     exec_command,
     random_project_name,
+    service_verify,
 )
 
 
@@ -32,10 +33,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=True,
     )
 
-    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
-
-    # # This will initialize rabbit
-    # exec_command(capfd, "shell --no-tty backend 'restapi init'")
+    service_verify(capfd, "rabbitmq")
 
     # Just some delay extra delay, rabbit is a slow starter
     time.sleep(5)
