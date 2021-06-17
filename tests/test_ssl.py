@@ -67,17 +67,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Start neo4j and rabbit to verify certificate creation while services are running
     exec_command(
         capfd,
-        "--prod -s rabbit,neo4j start",
+        "--prod -s backend,rabbit,neo4j start",
     )
 
-    # ARGHHH!!! But it is needed because the next command need rabbit already started
-    # And it takes some time to make the server up and running
+    # Needed because the next command requires rabbit already started
     # Otherwise will fail with:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
 
-    # To be replaced with a rapydo verify?
-    time.sleep(10)
+    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
 
     exec_command(
         capfd,
