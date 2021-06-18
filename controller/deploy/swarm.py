@@ -75,7 +75,7 @@ class Swarm:
             for task in self.docker.stack.ps(Configuration.project):
                 tasks.setdefault(task.service_id, [])
                 tasks[task.service_id].append(task)
-        except DockerException:
+        except DockerException:  # pragma: no cover
             pass
 
         print("====== Services ======")
