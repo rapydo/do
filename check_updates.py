@@ -4,16 +4,15 @@ import os
 import re
 import sys
 import time
-from datetime import datetime
+from distutils.version import LooseVersion
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import click
 import requests
 import yaml
 from bs4 import BeautifulSoup
-from glom import glom
 from loguru import logger as log
 
 Dependencies = Dict[str, Dict[str, List[str]]]
@@ -21,40 +20,6 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # this way the script will be allowed to access all required files
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
-
-known_update = "2021-05-31"
-known_latests = {
-    # https://hub.docker.com/_/neo4j?tab=tags
-    # https://hub.docker.com/_/postgres?tab=tags
-    # https://hub.docker.com/_/mariadb?tab=tags
-    # https://hub.docker.com/_/mongo?tab=tags
-    # https://hub.docker.com/_/redis?tab=tags
-    # https://hub.docker.com/_/nginx?tab=tags
-    # https://hub.docker.com/_/node?tab=tags
-    # https://hub.docker.com/_/rabbitmq?tab=tags
-    # https://hub.docker.com/_/adminer?tab=tags
-    # https://hub.docker.com/_/mongo-express?tab=tags
-    # https://hub.docker.com/r/fanout/pushpin/tags
-    # https://hub.docker.com/r/swaggerapi/swagger-ui/tags
-    "docker": {
-        "neo4j": "4.2.6",
-        "postgres": "13.3-alpine",
-        "mariadb": "10.6.1",
-        "mongo": "4.4.6",
-        "redis": "6.2.3",
-        "nginx": "1.21.0-alpine",
-        "node": "16.2.0-buster",
-        "rabbitmq": "3.8.16-management",
-        "adminer": "4.8.0",
-        # "mongo-express": "0.54.0",
-        "fanout/pushpin": "1.32.1",
-        "swaggerapi/swagger-ui": "v3.49.0",
-        "stilliard/pure-ftpd": "stretch-latest",
-        "ubuntu": "20.04",
-    },
-    # https://github.com/acmesh-official/acme.sh/releases
-    # "acme": "2.8.8",
-}
 
 # https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
 changelogs = {
@@ -73,13 +38,6 @@ changelogs = {
 
 
 skip_versions = {"flower": "0.9.7", "typescript": "4.3.2"}
-
-prevent_duplicates = {}
-
-now = datetime.now().strftime("%Y-%m-%d")
-if now != known_update:
-    log.warning("List of known latests is obsolete, ignoring it")
-    known_latests = {}
 
 
 # This Any is required because yaml.load_all is untyped
@@ -109,7 +67,9 @@ def load_yaml_file(filepath: Path) -> Any:
             return {}
 
 
-def check_updates(category: str, lib: str, npm_timeout: int) -> None:
+def check_updates(
+    category: str, lib: str, npm_timeout: int, dockerhub_timeout: int
+) -> None:
 
     if category == "pip":
         if "==" in lib:
@@ -145,10 +105,13 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
         # remove any additinal word from the version from example in case of:
         # FROM imgname: imgversion AS myname => imgversion AS myname => imgversion
         tokens[1] = tokens[1].split(" ")[0]
-        latest = glom(known_latests, f"docker.{tokens[0]}", default="????")
 
-        if latest == "????":
-            log.warning("Unknown latest version for {}", tokens[0])
+        if "/" in tokens[0]:
+            url = f"https://hub.docker.com/r/{tokens[0]}?tab=tags"
+        else:
+            url = f"https://hub.docker.com/_/{tokens[0]}?tab=tags"
+
+        latest = parse_dockerhub(tokens[0], dockerhub_timeout)
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
             print(f"# Skipping version {latest} for {tokens[0]}")
@@ -157,10 +120,7 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
 
         if latest != tokens[1]:
             print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
-            if "/" in tokens[0]:
-                print(f"https://hub.docker.com/r/{tokens[0]}?tab=tags")
-            else:
-                print(f"https://hub.docker.com/_/{tokens[0]}?tab=tags")
+            print(url)
             if changelog := changelogs.get(tokens[0]):
                 print(changelog)
             print("")
@@ -178,8 +138,7 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
             tokens = [lib, ""]
 
         url = f"https://www.npmjs.com/package/{tokens[0]}"
-        time.sleep(npm_timeout)
-        latest = parse_npm(url, tokens[0])
+        latest = parse_npm(url, tokens[0], npm_timeout, tokens[1])
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
             print(f"# Skipping version {latest} for {tokens[0]}")
@@ -193,33 +152,30 @@ def check_updates(category: str, lib: str, npm_timeout: int) -> None:
                 print(changelog)
             print("")
 
-    # elif category in ["ACME"]:
-    #     tokens = lib.split(":")
-
-    #     latest = glom(known_latests, "acme", default="????")
-
-    #     if latest == "????":
-    #         log.warning("Unknown latest version acme.sh")
-
-    #     if latest != tokens[1]:
-    #         print(f"# [ACME]: {tokens[1]} -> {latest}")
-    #         print(f"https://github.com/Neilpang/acme.sh/releases/tag/{tokens[1]}")
-    #         print("")
-    elif category == "url":
-        if lib not in prevent_duplicates:
-
-            prevent_duplicates[lib] = True
-            tokens = lib.split("/")
-            latest = glom(known_latests, f"urls.{tokens[4]}", default="????")
-            if latest != tokens[7]:
-                print(f"[{tokens[4]}]: # {tokens[7]} -> {latest}")
-                print(lib)
-                print("")
     else:
         log.critical("{}: {}", category, lib)
 
 
-def parse_npm(url: str, lib: str) -> str:
+def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
+
+    # This is to prevent duplicated checks on libraries beloging the same family
+    if lib in [
+        "@angular/compiler",
+        "@angular/core",
+        "@angular/forms",
+        "@angular/platform-browser",
+        "@angular/platform-browser-dynamic",
+        "@angular/router",
+        "@angular/animations",
+        "@angular/localize",
+        "@angular/language-service",
+        "@angular/platform-server",
+        "@angular/compiler-cli",
+    ]:
+
+        return current_version
+
+    time.sleep(sleep_time)
 
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html5lib")
@@ -245,10 +201,94 @@ def parse_pypi(url: str, lib: str) -> str:
     return span.text.strip().replace(f"{lib} ", "").strip()  # type: ignore
 
 
+# Sem ver with 3 tokens (like... mostly everything!)
+SEMVER3 = r"^[0-9]+\.[0-9]+\.[0-9]+$"
+# Sem ver with 2 tokens (like Ubuntu 20.04)
+SEMVER2 = r"^[0-9]+\.[0-9]+$"
+
+
+def get_latest_version(
+    tags: List[str],
+    regexp: str = SEMVER3,
+    suffix: str = "",
+    ignores: Optional[List[str]] = None,
+) -> str:
+
+    if ignores is None:
+        ignores = []
+
+    latest = "0.0.0"
+    for t in tags:
+
+        clean_t = t.replace(suffix, "")
+
+        if clean_t in ignores:
+            continue
+
+        if not re.match(regexp, clean_t):
+            continue
+
+        clean_latest = latest.replace(suffix, "")
+        if LooseVersion(clean_t) > LooseVersion(clean_latest):
+            latest = t
+
+    return latest
+
+
+def parse_dockerhub(lib: str, sleep_time: int) -> str:
+
+    if lib == "stilliard/pure-ftpd":
+        return "stretch-latest"
+
+    time.sleep(sleep_time)
+    if "/" not in lib:
+        lib = f"library/{lib}"
+
+    AUTH_URL = "https://auth.docker.io"
+    REGISTRY_URL = "https://registry.hub.docker.com"
+    AUTH_SCOPE = f"repository:{lib}:pull"
+
+    url = f"{AUTH_URL}/token?service=registry.docker.io&scope={AUTH_SCOPE}"
+
+    resp = requests.get(url)
+    token = resp.json()["token"]
+
+    if not token:
+        log.critical("Invalid docker hub token")
+        sys.exit(1)
+
+    headers = {"Authorization": f"Bearer {token}"}
+
+    url = f"{REGISTRY_URL}/v2/{lib}/tags/list"
+    resp = requests.get(url, headers=headers)
+    tags = resp.json().get("tags")
+
+    if lib == "library/node":
+        return get_latest_version(tags, suffix="-buster")
+
+    if lib == "library/rabbitmq":
+        return get_latest_version(tags, suffix="-management")
+
+    if lib == "library/ubuntu":
+        return get_latest_version(
+            tags, regexp=SEMVER2, ignores=["20.10", "21.04", "21.10"]
+        )
+
+    if lib == "library/postgres":
+        return get_latest_version(tags, regexp=SEMVER2, suffix="-alpine")
+
+    if lib == "library/nginx":
+        return get_latest_version(tags, suffix="-alpine")
+
+    return get_latest_version(tags)
+
+
 def parseDockerfile(
     d: str,
     dependencies: Dependencies,
     skip_angular: bool,
+    skip_docker: bool,
+    skip_python: bool,
 ) -> Dependencies:
     with open(d) as f:
         service = d.replace("../build-templates/", "")
@@ -260,9 +300,8 @@ def parseDockerfile(
             if line.startswith("#"):
                 continue
 
-            if "FROM" in line:
+            if not skip_docker and "FROM" in line:
                 line = line.replace("FROM", "").strip()
-
                 dependencies[service]["Dockerfile"] = [line]
             elif not skip_angular and (
                 "RUN npm install" in line
@@ -277,7 +316,9 @@ def parseDockerfile(
                         dependencies.setdefault(service, {})
                         dependencies[service].setdefault("npm", [])
                         dependencies[service]["npm"].append(t)
-            elif "RUN pip install" in line or "RUN pip3 install" in line:
+            elif not skip_python and (
+                "RUN pip install" in line or "RUN pip3 install" in line
+            ):
 
                 tokens = line.split(" ")
                 for t in tokens:
@@ -286,11 +327,6 @@ def parseDockerfile(
                         dependencies.setdefault(service, {})
                         dependencies[service].setdefault("pip", [])
                         dependencies[service]["pip"].append(t)
-            # elif "ENV ACMEV" in line:
-            #     line = line.replace("ENV ACMEV", "").strip()
-            #     line = line.replace('"', "").strip()
-
-            #     dependencies[service]["ACME"] = [f"ACME:{line}"]
 
     return dependencies
 
@@ -334,54 +370,48 @@ def parsePackageJson(package_json: Path, dependencies: Dependencies) -> Dependen
     return dependencies
 
 
-def parsePrecommitConfig(f: Path, dependencies: Dependencies, key: str) -> Dependencies:
-
-    dependencies.setdefault("precommit", {})
-    dependencies["precommit"].setdefault(key, [])
-    if not f.exists():
-        return dependencies
-
-    y = load_yaml_file(f)
-    for r in y.get("repos"):
-        rev = r.get("rev")
-        repo = r.get("repo")
-        if "gitlab" in repo:
-            u = f"{repo}/-/tags/{rev}"
-        else:
-            u = f"{repo}/releases/tag/{rev}"
-        dependencies["precommit"][key].append(u)
-
-    return dependencies
-
-
 @click.command()
 @click.option("--skip-angular", is_flag=True, default=False)
+@click.option("--skip-docker", is_flag=True, default=False)
+@click.option("--skip-python", is_flag=True, default=False)
 @click.option("--npm-timeout", default=1)
-def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
+def check_versions(
+    skip_angular: bool = False,
+    skip_docker: bool = False,
+    skip_python: bool = False,
+    npm_timeout: int = 1,
+    dockerhub_timeout: int = 1,
+) -> None:
 
     dependencies: Dependencies = {}
 
-    backend = load_yaml_file(Path("controller/confs/backend.yml"))
-    services = backend.get("services", {})
-    for service in services:
-        definition = services.get(service)
-        image = definition.get("image")
+    if not skip_docker:
+        backend = load_yaml_file(Path("controller/confs/backend.yml"))
+        services = backend.get("services", {})
+        for service in services:
+            definition = services.get(service)
+            image = definition.get("image")
 
-        if image.startswith("rapydo/"):
-            continue
-        dependencies.setdefault(service, {})
+            image = image.replace("${REGISTRY_HOST}", "")
 
-        dependencies[service]["compose"] = [image]
+            if image.startswith("rapydo/"):
+                continue
+            dependencies.setdefault(service, {})
+
+            dependencies[service]["compose"] = [image]
 
     for d in glob("../build-templates/*/Dockerfile"):
         if "not_used_anymore_" in d:
             continue
 
-        dependencies = parseDockerfile(d, dependencies, skip_angular)
+        dependencies = parseDockerfile(
+            d, dependencies, skip_angular, skip_docker, skip_python
+        )
 
-    for d in glob("../build-templates/*/requirements.txt"):
+    if not skip_python:
+        for d in glob("../build-templates/*/requirements.txt"):
 
-        dependencies = parseRequirements(d, dependencies)
+            dependencies = parseRequirements(d, dependencies)
 
     if not skip_angular:
 
@@ -392,31 +422,9 @@ def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
     controller: Any = distutils.core.run_setup("../do/setup.py")
     http_api: Any = distutils.core.run_setup("../http-api/setup.py")
 
-    dependencies["controller"] = {}
-    dependencies["controller"]["pip"] = controller.install_requires
-
-    dependencies["http-api"] = {}
-    dependencies["http-api"]["pip"] = http_api.install_requires
-
-    # dependencies = parsePrecommitConfig(
-    #     Path("../do/.pre-commit-config.yaml"), dependencies, "controller"
-    # )
-
-    # dependencies = parsePrecommitConfig(
-    #     Path("../do/pre-commit-projects-config.yaml"), dependencies, "projects"
-    # )
-
-    # dependencies = parsePrecommitConfig(
-    #     Path("../http-api/.pre-commit-config.yaml"),
-    #     dependencies,
-    #     "http-api",
-    # )
-
-    # dependencies = parsePrecommitConfig(
-    #     Path("../rapydo-angular/.pre-commit-config.yaml"),
-    #     dependencies,
-    #     "rapydo-angular",
-    # )
+    if not skip_python:
+        dependencies["controller"] = {"pip": controller.install_requires}
+        dependencies["http-api"] = {"pip": http_api.install_requires}
 
     filtered_dependencies: Dependencies = {}
 
@@ -430,44 +438,22 @@ def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
 
                 filtered_dependencies[service][category] = []
 
-                if service == "precommit":
-
-                    skipped = False
-                    # repos from pre-commit (github)
-                    if "/releases/tag/" in d:
-                        filtered_dependencies[service][category].append(d)
-                        check_updates("url", d, npm_timeout)
-                    # repos from pre-commit (gitlab)
-                    elif "/tags/" in d:
-                        filtered_dependencies[service][category].append(d)
-                        check_updates("url", d, npm_timeout)
-                    elif "==" not in d and ">=" not in d:
-                        skipped = True
-                    else:
-                        filtered_dependencies[service][category].append(d)
-                        check_updates(service, d, npm_timeout)
-
-                    if skipped:
-                        log.debug("Filtering out {}", d)
-
+                skipped = False
+                if re.match(r"^git\+https://github\.com.*@master$", d):
+                    skipped = True
+                elif d.endswith(":latest"):
+                    skipped = True
+                elif "==" in d or ":" in d:
+                    filtered_dependencies[service][category].append(d)
+                    check_updates(category, d, npm_timeout, dockerhub_timeout)
+                elif "@" in d:
+                    filtered_dependencies[service][category].append(d)
+                    check_updates(category, d, npm_timeout, dockerhub_timeout)
                 else:
+                    skipped = True
 
-                    skipped = False
-                    if re.match(r"^git\+https://github\.com.*@master$", d):
-                        skipped = True
-                    elif d.endswith(":latest"):
-                        skipped = True
-                    elif "==" in d or ":" in d:
-                        filtered_dependencies[service][category].append(d)
-                        check_updates(category, d, npm_timeout)
-                    elif "@" in d:
-                        filtered_dependencies[service][category].append(d)
-                        check_updates(category, d, npm_timeout)
-                    else:
-                        skipped = True
-
-                    if skipped:
-                        log.debug("Filtering out {}", d)
+                if skipped:
+                    log.debug("Filtering out {}", d)
 
             if len(filtered_dependencies[service][category]) == 0:
                 log.debug("Removing empty list: {}", service)
@@ -476,8 +462,6 @@ def check_versions(skip_angular: bool = False, npm_timeout: int = 1) -> None:
         if len(filtered_dependencies[service]) == 0:
             log.debug("Removing empty list: {}", service)
             del filtered_dependencies[service]
-
-        # print(service)
 
 
 if __name__ == "__main__":
