@@ -175,25 +175,25 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     # Invalid file / path
     try:
-        load_yaml_file(Path("invalid"), Path("path"))
+        load_yaml_file(file=Path("path", "invalid"))
         pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
-    y = load_yaml_file(Path("invalid"), Path("path"), is_optional=True)
+    y = load_yaml_file(file=Path("path", "invalid"), is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
     try:
-        load_yaml_file(Path("invalid"), Path("projects"))
+        load_yaml_file(file=Path("projects", "invalid"))
         pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
 
     # Valid path, but not in yaml format
     try:
-        load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
+        load_yaml_file(file=Path("pyproject.toml"))
         pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass
@@ -201,7 +201,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # File is empty
     f = tempfile.NamedTemporaryFile()
     try:
-        load_yaml_file(Path(f.name), Path(os.curdir))
+        load_yaml_file(file=Path(f.name))
         pytest.fail("No exception raised")  # pragma: no cover
     except SystemExit:
         pass

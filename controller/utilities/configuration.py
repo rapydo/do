@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from controller import log
+from controller import COMPOSE_FILE_VERSION, log
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
@@ -26,7 +26,7 @@ def read_configuration(
     """
 
     custom_configuration = load_yaml_file(
-        file=PROJECT_CONF_FILENAME, path=base_project_path, keep_order=True
+        file=base_project_path.joinpath(PROJECT_CONF_FILENAME), keep_order=True
     )
 
     # Verify custom project configuration
@@ -50,13 +50,12 @@ def read_configuration(
             sys.exit(1)
 
     base_configuration = load_yaml_file(
-        file=PROJECTS_DEFAULTS_FILE, path=default_file_path, keep_order=True
+        file=default_file_path.joinpath(PROJECTS_DEFAULTS_FILE), keep_order=True
     )
 
     if production:
         base_prod_conf = load_yaml_file(
-            file=PROJECTS_PROD_DEFAULTS_FILE,
-            path=default_file_path,
+            file=default_file_path.joinpath(PROJECTS_PROD_DEFAULTS_FILE),
             keep_order=True,
         )
         base_configuration = mix_configuration(base_configuration, base_prod_conf)
@@ -92,7 +91,7 @@ def read_configuration(
         sys.exit(1)
 
     extended_configuration = load_yaml_file(
-        file=PROJECT_CONF_FILENAME, path=extend_path, keep_order=True
+        file=extend_path.joinpath(PROJECT_CONF_FILENAME), keep_order=True
     )
 
     m1 = mix_configuration(base_configuration, extended_configuration)
@@ -154,31 +153,20 @@ def construct_mapping(loader, node):
     return dict(loader.construct_pairs(node))
 
 
-def get_yaml_path(file: Path, path: Path) -> Optional[Path]:
-
-    filepath = path.joinpath(file)
-
-    if not filepath.exists():
-        return None
-    return filepath
-
-
 def load_yaml_file(
-    file: Path, path: Path, keep_order: bool = False, is_optional: bool = False
+    file: Path, keep_order: bool = False, is_optional: bool = False
 ) -> Configuration:
     """
     Import any data from a YAML file.
     """
 
-    filepath = get_yaml_path(file, path=path)
-
-    if filepath is None:
+    if not file.exists():
         if not is_optional:
-            log.critical("Failed to read {}/{}: File does not exist", path, file)
+            log.critical("Failed to read {}: File does not exist", file)
             sys.exit(1)
         return {}
 
-    with open(filepath) as fh:
+    with open(file) as fh:
         try:
             if keep_order:
 
@@ -192,7 +180,7 @@ def load_yaml_file(
             docs = list(loader)
 
             if len(docs) == 0:
-                log.critical("YAML file is empty: {}", filepath)
+                log.critical("YAML file is empty: {}", file)
                 sys.exit(1)
 
             # Return value of yaml.load_all is un-annotated and considered as Any
@@ -204,7 +192,7 @@ def load_yaml_file(
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.critical("Failed to read [{}]: {}", filepath, e)
+            log.critical("Failed to read [{}]: {}", file, e)
             sys.exit(1)
 
 
@@ -225,26 +213,30 @@ def read_composer_yamls(
         base = composer.pop("base", False)
 
         try:
-            f = Path(str(composer.get("file")))
             p = Path(str(composer.get("path")))
+            f = str(composer.get("file"))
+            path = p.joinpath(f)
+
             # This is to verify that mandatory files exist and yml syntax is valid
-            load_yaml_file(file=f, path=p, is_optional=not mandatory)
+            conf = load_yaml_file(file=path, is_optional=not mandatory)
 
-            # compose = load_yaml_file(file=f, path=p, is_optional=not mandatory)
-            # if not compose.get("services"):
-            #     continue
+            if conf.get("version") != COMPOSE_FILE_VERSION:
+                log.warning(
+                    "Compose file version in {} is {}, expected {}",
+                    f,
+                    conf.get("version"),
+                    COMPOSE_FILE_VERSION,
+                )
 
-            filepath = get_yaml_path(file=f, path=p)
-
-            if filepath:
-                all_files.append(filepath)
+            if path.exists():
+                all_files.append(path)
 
                 if base:
-                    base_files.append(filepath)
+                    base_files.append(path)
 
         except KeyError as e:  # pragma: no cover
 
-            log.critical("Error reading {}: {}", filepath, e)
+            log.critical("Error reading {}: {}", path, e)
             sys.exit(1)
 
     return all_files, base_files
