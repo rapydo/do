@@ -14,6 +14,7 @@ from glom import glom
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
+    COMPOSE_FILE_VERSION,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
     DATAFILE,
@@ -648,6 +649,18 @@ You can use of one:
 
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
+
+        for f in self.files:
+            conf = configuration.load_yaml_file(
+                file=Path(f.name), path=f.parent, is_optional=True
+            )
+            if conf.get("version") != COMPOSE_FILE_VERSION:
+                log.warning(
+                    "Compose file version in {} is {}, expected {}",
+                    f,
+                    conf.get("version"),
+                    COMPOSE_FILE_VERSION,
+                )
 
         # to build the config with files and variables
         dc = Compose(files=self.base_files)
