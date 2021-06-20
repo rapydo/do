@@ -32,6 +32,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         db = {{auth}}.get_instance()
         # user = self.get_user()
+        # self.log_event(self.events.access, your-obj)
 
         data = {}
         return self.response(data)
@@ -54,6 +55,8 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         # Assign with the uuid of newly created resource
         data = {}
 
+        # self.log_event(self.events.create, your-obj, kwargs)
+
         return self.response(data)
 
     @decorators.auth.require()
@@ -71,6 +74,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         # user = self.get_user()
         # db.update_properties(myobj, kwargs)
         log.info("Updated")
+        # self.log_event(self.events.modify, your-obj, kwargs)
 
         return self.empty_response()
 
@@ -91,6 +95,8 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         # db.update_properties(user, kwargs)
 
+        # self.log_event(self.events.modify, your-obj, kwargs)
+
         log.info("Updated")
 
         return self.empty_response()
@@ -107,5 +113,6 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
 
         db = {{auth}}.get_instance()
         log.info("Deleted")
+        # self.log_event(self.events.delete, your-obj)
 
         return self.empty_response()
