@@ -56,8 +56,9 @@ class Compose:
 
         return cast(Dict[str, Any], yaml.safe_load(yaml_string))
 
+    @staticmethod
     def dump_config(
-        self, compose_config: Dict[str, Any], path: Path, active_services: List[str]
+        compose_config: Dict[str, Any], path: Path, active_services: List[str]
     ) -> None:
 
         clean_config: Dict[str, Any] = {
