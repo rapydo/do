@@ -234,7 +234,7 @@ def get_default_command(service: str) -> str:
         return "bin/cypher-shell"
 
     if service == "postgres":
-        return "psql"
+        return 'psql -U sqluser "$POSTGRES_DEFAULT_DB"'
 
     if service == "mariadb":
         return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''

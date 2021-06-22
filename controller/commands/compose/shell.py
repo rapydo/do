@@ -46,6 +46,7 @@ def shell(
 
     if default_command:
         command = services.get_default_command(service)
+        log.critical(command)
 
     log.debug("Requested command: {} with user: {}", command, user)
 

@@ -1,6 +1,5 @@
 variables:
   submodules:
-    # IMPORTANT: if you change online_urls here, remember to also fix in develop
     http-api:
       online_url: https://github.com/rapydo/http-api.git
     build-templates:
@@ -17,14 +16,6 @@ variables:
     group_coordinator: Coordinator
     normal_user: User
     default: normal_user
-    # Roles allowed for non-admin users (e.g. coordinator allowed to create users)
-    # allowed_roles:
-    #   - normal_user
-    # List of preauthorized roles with assigned roles
-    # preauthorized_users:
-    #   yourusername:
-    #     - yourrole
-    #     - yourrole
 
   # The list of files to be considered
   composers:

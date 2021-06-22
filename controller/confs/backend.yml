@@ -324,6 +324,7 @@ services:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
       POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
+      POSTGRES_DEFAULT_DB: ${ALCHEMY_DB}
       POSTGRES_DBS: ${ALCHEMY_DBS}
       PGDATA: /var/lib/postgresql/current
     networks:
