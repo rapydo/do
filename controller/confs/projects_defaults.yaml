@@ -79,6 +79,7 @@ variables:
     FRONTEND_FRAMEWORK: nofrontend
     FRONTEND_BUILD_MODE: angular # or angular-test
     NETWORK_MTU: 1500
+    HEALTHCHECK_INTERVAL: "2m"
 
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     LOG_RETENTION: 180 # in days

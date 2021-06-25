@@ -52,10 +52,10 @@ services:
     image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     healthcheck:
       test: "curl --fail http://localhost:8080/api/status"
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      # start_period: 10s
+      start_period: 30s
 
     hostname: backend-server
     environment:
@@ -255,10 +255,10 @@ services:
     #   driver: syslog
     healthcheck:
       test: "wget -t 1 --quiet --no-check-certificate http://localhost -O - > /dev/null"
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      # start_period: 10s
+      start_period: 30s
 
     volumes:
       - ssl_certs:/etc/letsencrypt
@@ -335,10 +335,10 @@ services:
     command: postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=${POSTGRES_SHARED_BUFFERS} -c wal_buffers=${POSTGRES_WAL_BUFFERS} -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE} -c work_mem=${POSTGRES_WORK_MEM} -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM} -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY} -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES} -c max_parallel_workers=${POSTGRES_MAX_WORKER_PROCESSES}
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${ALCHEMY_USER}"]
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 20s
       retries: 3
-      # start_period: 30s
+      start_period: 30s
     volumes:
       - sqldata:/var/lib/postgresql
       - ${DATA_DIR}/backup:/backup
@@ -359,10 +359,10 @@ services:
     image: mariadb:10.6.1
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 20s
       retries: 3
-      # start_period: 30s
+      start_period: 30s
     volumes:
       - mariadb:/var/lib/mysql
       - ${DATA_DIR}/backup:/backup
@@ -391,10 +391,10 @@ services:
     healthcheck:
       # test: ["CMD", "cypher-shell", "'match (n) WITH n LIMIT 1 return count(n)'"]
       test: "cypher-shell 'match (n) WITH n LIMIT 1 return count(n)'"
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      # start_period: 30s
+      start_period: 30s
 
     volumes:
       - graphdata:/data
@@ -468,10 +468,10 @@ services:
     image: rapydo/mongodb:${RAPYDO_VERSION}
     healthcheck:
       test: 'mongo --eval ''db.runCommand("ping").ok'' 127.0.0.1:27017/test --quiet'
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      # start_period: 10s
+      start_period: 30s
     volumes:
       - mongodata:/data/db
     networks:
@@ -742,10 +742,10 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
       test: "redis-cli --pass ${REDIS_PASSWORD} -h 127.0.0.1 ping"
-      interval: 2m
+      interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      # start_period: 30s
+      start_period: 30s
 
     volumes:
       - redisdata:/data
