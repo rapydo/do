@@ -33,7 +33,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "init -e HEALTHCHECK_INTERVAL=1s",
+        "-e HEALTHCHECK_INTERVAL=1s init",
         "Compose configuration dumped on docker-compose.yml",
         "Swarm is now initialized",
         "Project initialized",
