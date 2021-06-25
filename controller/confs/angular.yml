@@ -13,6 +13,12 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${FRONTEND_BUILD_MODE}:${RAPYDO_VERSION}
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate http://localhost:8080 -O - > /dev/null"
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      # start_period: 10s
     hostname: angular
     networks:
       app_net:
