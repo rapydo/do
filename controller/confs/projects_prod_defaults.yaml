@@ -10,6 +10,8 @@ variables:
     # in production it match the with proxy ssl port (${PROXY_PROD_PORT})
     BACKEND_API_PORT: 443
 
+    HEALTHCHECK_BACKEND_CMD: "curl --fail http://localhost:8080/api/status"
+
     RABBITMQ_PORT: 5671
     RABBITMQ_MANAGEMENT_PORT: 15671
 

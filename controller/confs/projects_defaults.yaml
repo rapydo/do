@@ -80,6 +80,8 @@ variables:
     FRONTEND_BUILD_MODE: angular # or angular-test
     NETWORK_MTU: 1500
     HEALTHCHECK_INTERVAL: "2m"
+    # Healtcheck in development is not possibile because the server is not automatically executed
+    HEALTHCHECK_BACKEND_CMD: "exit 0" # changed in prod mode to enable a true check
 
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     LOG_RETENTION: 180 # in days

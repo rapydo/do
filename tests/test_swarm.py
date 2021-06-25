@@ -41,7 +41,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
+        "init",
         "Compose configuration dumped on docker-compose.yml",
         "Swarm is already initialized",
         "Project initialized",
@@ -76,7 +76,7 @@ def test_swarm(capfd: Capture) -> None:
     )
     exec_command(
         capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
+        "init",
         "Compose configuration dumped on docker-compose.yml",
         "Swarm is now initialized",
         "Project initialized",
@@ -146,7 +146,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-e HEALTHCHECK_INTERVAL=1s start --force",
+        "start --force",
         "Force flag is not yet implemented",
         "Stack started",
     )

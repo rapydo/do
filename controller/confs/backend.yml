@@ -51,7 +51,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     healthcheck:
-      test: "curl --fail http://localhost:8080/api/status"
+      test: ${HEALTHCHECK_BACKEND_CMD}
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
