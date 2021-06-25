@@ -302,7 +302,11 @@ class Compose:
         containers_status = self.get_containers_status(prefix)
         containers = set()
         for name, status in containers_status.items():
-            if status != "Up":
+            if not status.startswith("Up"):
                 continue
+
+            if status == "Up (unhealthy)":
+                log.error("Status of {} container is unhealthy", name)
+
             containers.add(name)
         return containers
