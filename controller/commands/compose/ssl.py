@@ -90,7 +90,7 @@ def ssl(
 
         if not volatile:
             log.info(
-                "If you proxy container is not running, try with rapydo ssl --volatile"
+                "If your proxy container is not running, try with rapydo ssl --volatile"
             )
         sys.exit(e.code)
     else:
