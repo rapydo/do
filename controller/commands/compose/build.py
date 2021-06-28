@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List, Set
 
 import typer
 
@@ -79,6 +79,20 @@ def build(
         log.info("No custom images to build")
         return False
 
+    # Removed redundant services
+    services_normalization_mapping: Dict[str, str] = {}
+
+    for s in templates.values():
+        for s1 in s["services"]:
+            s0 = s["service"]
+            services_normalization_mapping[s1] = s0
+
+    clean_targets: Set[str] = set()
+
+    for t in targets:
+        clean_t = services_normalization_mapping.get(t, t)
+        clean_targets.add(clean_t)
+
     # import socket
     # if MULTI_HOST_MODE and local_registry_images:
     #     log.info("Multi Host Mode is enabled, verifying if the registry is reachable")
@@ -102,7 +116,7 @@ def build(
     #             )
 
     docker.client.buildx.bake(
-        targets=targets,
+        targets=list(clean_targets),
         files=[COMPOSE_FILE],
         load=True,
         pull=True,
