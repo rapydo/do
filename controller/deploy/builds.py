@@ -7,12 +7,13 @@ Parse dockerfiles and check for builds
 
 import sys
 from datetime import datetime
-from typing import Any, Dict, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales.utils import DockerException
 
 from controller import ComposeConfig, log
+from controller.app import Application
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -144,3 +145,68 @@ def find_templates_override(
             vbuilds[vanilla_img] = template_img
 
     return tbuilds, vbuilds
+
+
+# templates is the return values of a find_templates_build
+def get_non_redundant_services(
+    templates: Dict[str, Any], targets: List[str]
+) -> Set[str]:
+
+    # Removed redundant services
+    services_normalization_mapping: Dict[str, str] = {}
+
+    for s in templates.values():
+        for s1 in s["services"]:
+            s0 = s["service"]
+            services_normalization_mapping[s1] = s0
+
+    clean_targets: Set[str] = set()
+
+    for t in targets:
+        clean_t = services_normalization_mapping.get(t, t)
+        clean_targets.add(clean_t)
+
+    return clean_targets
+
+
+def verify_available_images(
+    services: List[str], compose_config: ComposeConfig, base_services: ComposeConfig
+) -> None:
+
+    docker = Docker()
+    images: List[str] = []
+
+    for image in docker.client.images():
+        images.extend(image.repo_tags)
+
+    # All template builds (core only)
+    templates = find_templates_build(base_services)
+    clean_core_services = get_non_redundant_services(templates, services)
+
+    for service in clean_core_services:
+        for image, data in templates.items():
+            if data["service"] != service and service not in data["services"]:
+                continue
+
+            if image not in images:
+                Application.exit(
+                    "Missing {} image for {} service, execute rapydo pull",
+                    image,
+                    service,
+                )
+
+    # All builds used for the current configuration (core + custom)
+    builds = find_templates_build(compose_config)
+    clean_services = get_non_redundant_services(builds, services)
+
+    for service in clean_services:
+        for image, data in builds.items():
+            if data["service"] != service and service not in data["services"]:
+                continue
+
+            if image not in images:
+                Application.exit(
+                    "Missing {} image for {} service, execute rapydo build",
+                    image,
+                    service,
+                )

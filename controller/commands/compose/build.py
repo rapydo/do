@@ -1,10 +1,14 @@
-from typing import Dict, List, Set
+from typing import List
 
 import typer
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application, Configuration
-from controller.deploy.builds import find_templates_build, find_templates_override
+from controller.deploy.builds import (
+    find_templates_build,
+    find_templates_override,
+    get_non_redundant_services,
+)
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
@@ -79,19 +83,7 @@ def build(
         log.info("No custom images to build")
         return False
 
-    # Removed redundant services
-    services_normalization_mapping: Dict[str, str] = {}
-
-    for s in templates.values():
-        for s1 in s["services"]:
-            s0 = s["service"]
-            services_normalization_mapping[s1] = s0
-
-    clean_targets: Set[str] = set()
-
-    for t in targets:
-        clean_t = services_normalization_mapping.get(t, t)
-        clean_targets.add(clean_t)
+    clean_targets = get_non_redundant_services(templates, targets)
 
     # import socket
     # if MULTI_HOST_MODE and local_registry_images:
