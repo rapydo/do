@@ -34,6 +34,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         start=False,
     )
 
+    image = f"rapydo/rabbitmq:{__version__}"
+    exec_command(
+        capfd,
+        "-s rabbit start",
+        f"Missing {image} image for rabbit service, execute rapydo pull",
+    )
+
     exec_command(
         capfd,
         "-s rabbit pull --quiet",
@@ -62,7 +69,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 services:
   rabbit:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+    image: myproject/rabbit:${RAPYDO_VERSION}
 
     """
         )
@@ -130,6 +137,13 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
+    image = f"myproject/rabbit:${__version__}"
+    exec_command(
+        capfd,
+        "-s rabbit start",
+        f"Missing {image} image for rabbit service, execute rapydo build",
+    )
+
     # Selected a very fast service to speed up tests
     # Build custom rabbit image from pulled image
     exec_command(
@@ -164,7 +178,7 @@ RUN mkdir xyz
             """
   rabbit2:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+    image: myproject/rabbit:${RAPYDO_VERSION}
 
     """
         )
