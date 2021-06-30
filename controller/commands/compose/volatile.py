@@ -2,6 +2,7 @@ import typer
 
 from controller import log
 from controller.app import Application
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 
 
@@ -24,6 +25,12 @@ def volatile(
     ),
 ) -> None:
     Application.get_controller().controller_init()
+
+    verify_available_images(
+        [service],
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     if user:
         log.warning(

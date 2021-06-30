@@ -26,6 +26,13 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         frontend="angular",
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "volatile backend",
+        "image for backend service, execute rapydo pull",
+    )
+
     pull_images(capfd)
     start_project(capfd)
 
