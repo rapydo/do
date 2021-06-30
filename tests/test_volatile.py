@@ -9,6 +9,8 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
     signal_handler,
     start_project,
@@ -22,9 +24,9 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
-        init=True,
-        pull=True,
     )
+    init_project(capfd)
+    pull_images(capfd)
     start_project(capfd)
 
     exec_command(

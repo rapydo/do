@@ -26,9 +26,6 @@ def test_swarm(capfd: Capture) -> None:
         name="swarm",
         auth=auth,
         frontend="angular",
-        init=False,
-        pull=False,
-        start=False,
     )
 
     exec_command(

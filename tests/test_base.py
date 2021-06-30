@@ -8,7 +8,13 @@ import tempfile
 from faker import Faker
 
 from controller import __version__
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+)
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
@@ -34,10 +40,8 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         name=project,
         auth="postgres",
         frontend="no",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     exec_command(
         capfd,

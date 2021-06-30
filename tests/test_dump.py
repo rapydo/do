@@ -4,7 +4,14 @@ This module will test the dump command
 
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    pull_images,
+    random_project_name,
+)
 
 
 def test_dump(capfd: Capture, faker: Faker) -> None:
@@ -15,10 +22,9 @@ def test_dump(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],
-        init=True,
-        pull=True,
-        start=False,
     )
+    init_project(capfd)
+    pull_images(capfd)
 
     exec_command(
         capfd,

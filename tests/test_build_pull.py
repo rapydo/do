@@ -7,7 +7,13 @@ from faker import Faker
 from git import Repo
 
 from controller import __version__
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+)
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -19,19 +25,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
     create_project(
         capfd=capfd,
         name=project2,
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        init=False,
-        pull=False,
-        start=False,
     )
 
     image = f"rapydo/rabbitmq:{__version__}"
@@ -69,7 +70,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 services:
   rabbit:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: myproject/rabbit:${RAPYDO_VERSION}
+    image: testbuild/rabbit:${RAPYDO_VERSION}
 
     """
         )
@@ -137,7 +138,7 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
-    image = f"myproject/rabbit:${__version__}"
+    image = f"testbuild/rabbit:${__version__}"
     exec_command(
         capfd,
         "-s rabbit start",
@@ -179,7 +180,7 @@ RUN mkdir xyz
             """
   rabbit2:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: myproject/rabbit:${RAPYDO_VERSION}
+    image: testbuild/rabbit:${RAPYDO_VERSION}
 
     """
         )

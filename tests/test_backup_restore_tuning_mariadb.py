@@ -12,6 +12,8 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
     service_verify,
     start_project,
@@ -27,9 +29,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="mysql",
         frontend="no",
-        init=True,
-        pull=True,
     )
+    init_project(capfd)
+    pull_images(capfd)
     start_project(capfd)
 
     service_verify(capfd, "sqlalchemy")

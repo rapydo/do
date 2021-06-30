@@ -13,6 +13,8 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
     service_verify,
     start_project,
@@ -29,10 +31,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["redis"],
-        init=True,
-        pull=True,
     )
-
+    init_project(capfd)
+    pull_images(capfd)
     start_project(capfd)
 
     service_verify(capfd, "redis")

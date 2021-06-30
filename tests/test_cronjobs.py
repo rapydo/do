@@ -5,7 +5,14 @@ import time
 
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    pull_images,
+    random_project_name,
+)
 
 
 def test_cronjobs(capfd: Capture, faker: Faker) -> None:
@@ -16,11 +23,9 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         name=project,
         auth="postgres",
         frontend="no",
-        init=True,
-        pull=True,
-        start=False,
     )
-
+    init_project(capfd)
+    pull_images(capfd)
     exec_command(
         capfd,
         "-e CRONTAB_ENABLE=1 start",

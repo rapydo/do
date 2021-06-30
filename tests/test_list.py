@@ -4,7 +4,13 @@ This module will test the list command
 
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+)
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -16,10 +22,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         frontend="angular",
         services=["rabbit", "neo4j"],
         extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     # Some tests with list
     exec_command(

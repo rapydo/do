@@ -5,7 +5,7 @@ This module will test the add and upgrade commands
 import os
 import shutil
 
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, init_project
 
 
 def test_add(capfd: Capture) -> None:
@@ -15,10 +15,8 @@ def test_add(capfd: Capture) -> None:
         name="second",
         auth="postgres",
         frontend="angular",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     path = "projects/second/backend/endpoints/xyz.py"
     test_path = "projects/second/backend/tests/test_endpoints_xyz.py"

@@ -18,9 +18,6 @@ def test_base(capfd: Capture) -> None:
         name="third",
         auth="postgres",
         frontend="angular",
-        init=False,
-        pull=False,
-        start=False,
     )
 
     # Basic initialization
@@ -168,9 +165,6 @@ def test_base(capfd: Capture) -> None:
         name="justanother",
         auth="postgres",
         frontend="no",
-        init=False,
-        pull=False,
-        start=False,
     )
 
     os.remove(".projectrc")

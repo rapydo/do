@@ -13,6 +13,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
     random_project_name,
 )
 
@@ -25,10 +26,8 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         name=project,
         auth="postgres",
         frontend="angular",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     # Initially the controller is installed from pip
     exec_command(

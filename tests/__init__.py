@@ -129,13 +129,11 @@ def random_project_name(faker: Faker) -> str:
 
 def create_project(
     capfd,
-    name,
+    name=None,
     auth="postgres",
     frontend="angular",
     services=None,
     extra="",
-    init=False,
-    pull=False,
 ):
 
     opt = "--current --origin-url https://your_remote_git/your_project.git"
@@ -150,19 +148,21 @@ def create_project(
         f"Project {name} successfully created",
     )
 
-    if init:
-        exec_command(
-            capfd,
-            "init",
-            "Project initialized",
-        )
 
-    if pull:
-        exec_command(
-            capfd,
-            "pull --quiet",
-            "Base images pulled from docker hub",
-        )
+def init_project(capfd):
+    exec_command(
+        capfd,
+        "init",
+        "Project initialized",
+    )
+
+
+def pull_images(capfd):
+    exec_command(
+        capfd,
+        "pull --quiet",
+        "Base images pulled from docker hub",
+    )
 
 
 def start_project(capfd):

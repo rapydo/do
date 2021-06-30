@@ -21,7 +21,7 @@ from controller.packages import Packages
 from controller.templating import Templating
 from controller.utilities import git, services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
-from tests import Capture, create_project, random_project_name
+from tests import Capture, create_project, init_project, random_project_name
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -29,8 +29,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        init=True,
     )
+    init_project(capfd)
 
     app = Application()
 

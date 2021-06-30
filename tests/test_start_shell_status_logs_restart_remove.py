@@ -15,7 +15,9 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    init_project,
     mock_KeyboardInterrupt,
+    pull_images,
     signal_handler,
 )
 
@@ -28,10 +30,9 @@ def test_all(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],
-        init=True,
-        pull=True,
-        start=False,
     )
+    init_project(capfd)
+    pull_images(capfd)
 
     exec_command(
         capfd,

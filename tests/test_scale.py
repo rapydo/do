@@ -3,7 +3,7 @@ This module will test the scale command
 """
 import os
 
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, init_project, pull_images
 
 
 def test_scale(capfd: Capture) -> None:
@@ -14,10 +14,9 @@ def test_scale(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
         services=["rabbit"],
-        init=True,
-        pull=True,
-        start=False,
     )
+    init_project(capfd)
+    pull_images(capfd)
 
     exec_command(
         capfd,
