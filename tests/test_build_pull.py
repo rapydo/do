@@ -64,7 +64,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "-s xxx pull",
-        "Invalid service name: xxx",
+        "Configuration error: xxx service is not enabled",
     )
 
     # --all is useless here... added just to include the parameter in some tests.
