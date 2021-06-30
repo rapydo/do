@@ -7,6 +7,7 @@ import typer
 
 from controller import log
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 
 
@@ -42,6 +43,12 @@ def restore(
     Application.get_controller().controller_init()
 
     service_name = service.value
+
+    verify_available_images(
+        [service_name],
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     options = {"SERVICE": [service_name]}
     dc = Compose(files=Application.data.files)

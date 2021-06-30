@@ -31,6 +31,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup mariadb",
+        "image for mariadb service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore mariadb",
+        "image for mariadb service, execute rapydo pull",
+    )
+
     pull_images(capfd)
     start_project(capfd)
 

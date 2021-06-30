@@ -33,6 +33,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["rabbit"],
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup rabbit",
+        "image for rabbit service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore rabbit",
+        "image for rabbit service, execute rapydo pull",
+    )
+
     pull_images(capfd)
     start_project(capfd)
 

@@ -56,7 +56,9 @@ def get_image_creation(image_name: str) -> Optional[datetime]:
         return None
 
 
-def find_templates_build(base_services: ComposeConfig) -> Dict[str, Any]:
+def find_templates_build(
+    base_services: ComposeConfig, include_image: bool = False
+) -> Dict[str, Any]:
 
     # From python 3.8 could be converted in a TypedDict
     templates = {}
@@ -65,30 +67,31 @@ def find_templates_build(base_services: ComposeConfig) -> Dict[str, Any]:
 
         template_build = base_service.get("build")
 
-        if template_build is not None:
+        if not template_build and not include_image:
+            continue
 
-            template_image = base_service.get("image")
+        template_image = base_service.get("image")
 
-            if template_image is None:  # pragma: no cover
-                log.critical(
-                    "Template builds must have a name, missing for {}", template_name
-                )
-                sys.exit(1)
+        if template_image is None:  # pragma: no cover
+            log.critical(
+                "Template builds must have a name, missing for {}", template_name
+            )
+            sys.exit(1)
 
-            if template_image not in templates:
-                templates[template_image] = {
-                    "services": [],
-                    "path": template_build.get("context"),
-                    "creation": get_image_creation(template_image),
-                }
-            if "service" not in templates[template_image]:
-                templates[template_image]["service"] = template_name
-            else:
-                templates[template_image]["service"] = name_priority(
-                    templates[template_image]["service"],
-                    template_name,
-                )
-            templates[template_image]["services"].append(template_name)
+        if template_image not in templates:
+            templates[template_image] = {
+                "services": [],
+                "path": template_build.get("context") if template_build else None,
+                "creation": get_image_creation(template_image),
+            }
+        if "service" not in templates[template_image]:
+            templates[template_image]["service"] = template_name
+        else:
+            templates[template_image]["service"] = name_priority(
+                templates[template_image]["service"],
+                template_name,
+            )
+        templates[template_image]["services"].append(template_name)
 
     return templates
 
@@ -180,7 +183,7 @@ def verify_available_images(
         images.extend(image.repo_tags)
 
     # All template builds (core only)
-    templates = find_templates_build(base_services)
+    templates = find_templates_build(base_services, include_image=True)
     clean_core_services = get_non_redundant_services(templates, services)
 
     for service in clean_core_services:
@@ -196,7 +199,7 @@ def verify_available_images(
                 )
 
     # All builds used for the current configuration (core + custom)
-    builds = find_templates_build(compose_config)
+    builds = find_templates_build(compose_config, include_image=True)
     clean_services = get_non_redundant_services(builds, services)
 
     for service in clean_services:
@@ -205,8 +208,10 @@ def verify_available_images(
                 continue
 
             if image not in images:
+                action = "build" if data["path"] else "pull"
                 Application.exit(
-                    "Missing {} image for {} service, execute rapydo build",
+                    "Missing {} image for {} service, execute rapydo {}",
                     image,
                     service,
+                    action,
                 )

@@ -30,6 +30,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup postgres",
+        "image for postgres service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore postgres",
+        "image for postgres service, execute rapydo pull",
+    )
+
     pull_images(capfd)
     start_project(capfd)
 

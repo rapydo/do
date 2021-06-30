@@ -33,6 +33,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["redis"],
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup redis",
+        "image for redis service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore redis",
+        "image for redis service, execute rapydo pull",
+    )
+
     pull_images(capfd)
     start_project(capfd)
 

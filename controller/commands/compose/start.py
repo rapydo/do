@@ -18,14 +18,13 @@ def start(
 ) -> None:
     Application.get_controller().controller_init()
 
-    dc = Compose(files=Application.data.files)
-
     verify_available_images(
         Application.data.services,
         Application.data.compose_config,
         Application.data.base_services,
     )
 
+    dc = Compose(files=Application.data.files)
     dc.start_containers(Application.data.services, force_recreate=force)
 
     log.info("Stack started")
