@@ -79,25 +79,8 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "image for proxy service, execute rapydo pull",
     )
 
-    # The proxy image is only pulled if proxy is activated, i.e.
-    # in production mode (but some placeholders are missed in projectrc raising errors
-    # if explicitly activated with -e
     exec_command(
         capfd,
-        "-s proxy pull",
-        "Base images pulled from docker hub",
-    )
-
-    exec_command(
-        capfd,
-        "volatile maintenance",
-        "image for proxy service, execute rapydo pull",
-    )
-
-    exec_command(
-        capfd,
-        # --prod does not work here due to missing placeholders
-        # "-s proxy --prod pull",
         "-s proxy -e ACTIVATE_PROXY=1 pull",
         "Base images pulled from docker hub",
     )
