@@ -6,6 +6,7 @@ import typer
 
 from controller import log
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 
 # 0 0 * * 3 cd /home/??? && \
@@ -61,6 +62,12 @@ def ssl(
             Application.exit("Invalid key file (you provided {})", key_file)
 
     service = "proxy"
+
+    verify_available_images(
+        [service],
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     if chain_file is not None and key_file is not None:
 

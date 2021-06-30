@@ -33,6 +33,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "ssl",
+        "image for proxy service, execute rapydo pull",
+    )
+
+    exec_command(
+        capfd,
         "--prod pull --quiet",
         "Base images pulled from docker hub",
     )
