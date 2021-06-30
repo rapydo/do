@@ -141,7 +141,8 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "-s rabbit start",
-        f"Missing {image} image for rabbit service, execute rapydo build",
+        # f"Missing {image} image for rabbit service, execute rapydo build",
+        " image for rabbit service, execute rapydo build",
     )
 
     # Selected a very fast service to speed up tests
