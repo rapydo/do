@@ -219,8 +219,8 @@ def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
     if service == "neo4j":
         return "neo4j"
 
-    # if service == "rabbit":
-    #     return "rabbitmq"
+    if service == "rabbit":
+        return "rabbitmq"
 
     return None
 

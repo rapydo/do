@@ -124,7 +124,7 @@ def ssl(
             #       Please see diagnostics information and suggestions below.
             dc.exec_command(
                 "rabbit",
-                command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
+                command="/usr/local/bin/reload_certificate",
                 disable_tty=no_tty,
             )
 
