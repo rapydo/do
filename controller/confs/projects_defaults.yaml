@@ -267,6 +267,7 @@ variables:
     RABBITMQ_SSL_KEYFILE:
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT:
     RABBITMQ_SSL_ENABLED: 0 # it is used by Celery
+    RABBITMQ_CTL_ERL_ARGS: "" # modified in production mode
 
     REDIS_ENABLE_CONNECTOR: 1
     REDIS_EXPIRATION_TIME: 86400

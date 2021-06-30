@@ -747,7 +747,7 @@ services:
       RABBITMQ_MANAGEMENT_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
       RABBITMQ_MANAGEMENT_SSL_FAIL_IF_NO_PEER_CERT: ${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}
 
-      RABBITMQ_CTL_ERL_ARGS: "-proto_dist inet_tls"
+      RABBITMQ_CTL_ERL_ARGS: "${RABBITMQ_CTL_ERL_ARGS}"
 
     volumes:
       - rabbitdata:/var/lib/rabbitmq
