@@ -57,7 +57,6 @@ def pull(
             if image:
                 images.add(image)
 
-    log.critical(images)
     docker = Docker()
     docker.client.pull(list(images), quiet=quiet)
 
