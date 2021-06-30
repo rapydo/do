@@ -975,6 +975,13 @@ services:
   smtp:
     restart: always
     image: namshi/smtp:latest
+    healthcheck:
+      # Display the number of email messages in the queue
+      test: "exim -bpc"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
