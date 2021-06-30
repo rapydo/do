@@ -5,6 +5,7 @@ import typer
 
 from controller import log
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.utilities import system
 
@@ -37,6 +38,12 @@ def tuning(
     log.info("Suggested settings:")
 
     if service_name == Services.neo4j:
+
+        verify_available_images(
+            [service_name],
+            Application.data.compose_config,
+            Application.data.base_services,
+        )
 
         dc = Compose(files=Application.data.files)
 
