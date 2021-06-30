@@ -73,6 +73,18 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "no matching entries in passwd file",
     )
 
+    exec_command(
+        capfd,
+        "volatile maintenance",
+        "image for proxy service, execute rapydo pull",
+    )
+
+    exec_command(
+        capfd,
+        "-s proxy pull",
+        "Base images pulled from docker hub",
+    )
+
     signal.signal(signal.SIGALRM, signal_handler)
     signal.alarm(4)
     exec_command(
