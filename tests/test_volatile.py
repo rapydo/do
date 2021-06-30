@@ -11,6 +11,7 @@ from tests import (
     exec_command,
     random_project_name,
     signal_handler,
+    start_project,
 )
 
 
@@ -23,8 +24,8 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         frontend="angular",
         init=True,
         pull=True,
-        start=True,
     )
+    start_project(capfd)
 
     exec_command(
         capfd,

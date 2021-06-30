@@ -15,6 +15,7 @@ from tests import (
     exec_command,
     random_project_name,
     service_verify,
+    start_project,
 )
 
 
@@ -30,8 +31,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["redis"],
         init=True,
         pull=True,
-        start=True,
     )
+
+    start_project(capfd)
 
     service_verify(capfd, "redis")
 

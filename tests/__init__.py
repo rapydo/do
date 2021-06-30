@@ -136,7 +136,6 @@ def create_project(
     extra="",
     init=False,
     pull=False,
-    start=False,
 ):
 
     opt = "--current --origin-url https://your_remote_git/your_project.git"
@@ -165,11 +164,12 @@ def create_project(
             "Base images pulled from docker hub",
         )
 
-    if start:
-        exec_command(
-            capfd,
-            "start",
-            "docker-compose command: 'up'",
-            "Stack started",
-        )
-        time.sleep(5)
+
+def start_project(capfd):
+    exec_command(
+        capfd,
+        "start",
+        "docker-compose command: 'up'",
+        "Stack started",
+    )
+    time.sleep(5)
