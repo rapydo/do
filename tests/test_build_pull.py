@@ -155,6 +155,12 @@ RUN mkdir xyz
         "Custom images built",
     )
 
+    exec_command(
+        capfd,
+        f"-e ACTIVATE_RABBIT=0 -p {project2} -s rabbit build --core",
+        "Configuration error: rabbit service is not enabled",
+    )
+
     # Rebuild core rabbit image => custom rabbit is now obsolete
     # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild

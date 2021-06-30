@@ -3,7 +3,7 @@ from typing import List
 import typer
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
     find_templates_override,
@@ -33,10 +33,14 @@ def build(
 
     enabled_services: List[str] = []
     for service in Application.data.active_services:
-        if Configuration.services_list and service not in Configuration.services_list:
+        if Application.data.services and service not in Application.data.services:
             continue
 
         enabled_services.append(service)
+
+    for service in Application.data.services.copy():
+        if service not in Application.data.active_services:
+            Application.exit("Configuration error: {} service is not enabled", service)
 
     docker = Docker()
     if core:
@@ -73,7 +77,7 @@ def build(
 
     targets: List[str] = []
     for service in Application.data.active_services:
-        if Configuration.services_list and service not in Configuration.services_list:
+        if Application.data.services and service not in Application.data.services:
             continue
 
         if service in services_with_custom_builds:
