@@ -79,9 +79,22 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "image for proxy service, execute rapydo pull",
     )
 
+    # The proxy image is only pulled in production mode
     exec_command(
         capfd,
         "-s proxy pull",
+        "Base images pulled from docker hub",
+    )
+
+    exec_command(
+        capfd,
+        "volatile maintenance",
+        "image for proxy service, execute rapydo pull",
+    )
+
+    exec_command(
+        capfd,
+        "-s proxy --prod pull",
         "Base images pulled from docker hub",
     )
 
