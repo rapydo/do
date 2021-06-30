@@ -117,9 +117,10 @@ def ssl(
             # But RabbitMQ does not. Probably in the future releases this command will
             # No longer be required. To test it after the creation of the new cert:
             #   echo -n | openssl s_client -showcerts -connect hostname:5671
+            # Please note that this command can fail if RabbitMQ is still starting
             dc.exec_command(
                 "rabbit",
-                command="rabbitmqctl eval 'ssl:clear_pem_cache().'",
+                command="/usr/local/bin/reload_certificate",
                 disable_tty=no_tty,
             )
 
