@@ -36,7 +36,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend start",
-        "image for proxy backend, execute rapydo pull",
+        "image for backend image, execute rapydo pull",
     )
 
     pull_images(capfd)
