@@ -112,11 +112,10 @@ def test_all(capfd: Capture) -> None:
         "shell --no-tty frontend whoami",
         "node",
     )
-    # No default user for rabbit container
     exec_command(
         capfd,
         "shell --no-tty rabbit whoami",
-        "root",
+        "rabbitmq",
     )
     exec_command(
         capfd,
