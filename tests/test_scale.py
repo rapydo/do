@@ -16,6 +16,13 @@ def test_scale(capfd: Capture) -> None:
         services=["rabbit"],
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "scale rabbit=2",
+        "image for rabbit service, execute rapydo pull",
+    )
+
     pull_images(capfd)
 
     exec_command(

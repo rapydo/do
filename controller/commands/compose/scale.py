@@ -2,6 +2,7 @@ import typer
 from glom import glom
 
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 
 # scaling should be a "Multiple Value"
@@ -32,6 +33,12 @@ def scale(
 
     if isinstance(nreplicas, str) and not nreplicas.isnumeric():
         Application.exit("Invalid number of replicas: {}", nreplicas)
+
+    verify_available_images(
+        [service],
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     dc = Compose(files=Application.data.files)
     dc.start_containers([service], scale=[scaling], skip_dependencies=True)
