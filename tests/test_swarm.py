@@ -138,7 +138,7 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend start",
-        "image for backend image, execute rapydo pull",
+        "image for backend service, execute rapydo pull",
     )
 
     exec_command(
