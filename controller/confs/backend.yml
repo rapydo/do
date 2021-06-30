@@ -502,6 +502,12 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
     command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    healthcheck:
+      test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -d celery@$$PROJECT_NAME-$$HOSTNAME"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
     # user: developer
     working_dir: /code
@@ -626,6 +632,12 @@ services:
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
     command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    healthcheck:
+      test: "pgrep --pidfile /tmp/celerybeat.pid"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
     # user: developer
     working_dir: /code
