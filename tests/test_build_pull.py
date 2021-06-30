@@ -44,6 +44,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "-e ACTIVATE_RABBIT=0 -s rabbit pull --quiet",
+        "Configuration error: rabbit service is not enabled",
+    )
+
+    exec_command(
+        capfd,
+        "-s proxy pull --quiet",
+        "Configuration error: proxy service is not enabled",
+    )
+
+    exec_command(
+        capfd,
         "-s rabbit pull --quiet",
         "Base images pulled from docker hub",
     )

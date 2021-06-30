@@ -33,9 +33,19 @@ def pull(
     base_image: str = ""
     image: str = ""
     images: Set[str] = set()
+
+    # pre-check to verify if all requested service are activated:
+    if Application.data.services:
+        for service in Application.data.services:
+            if service not in Application.data.active_services:
+                Application.exit(
+                    "Configuration error: {} service is not enabled", service
+                )
+
     for service in Application.data.active_services:
-        if Configuration.services_list and service not in Configuration.services_list:
+        if Application.data.services and service not in Application.data.services:
             continue
+
         base_image = glom(
             Application.data.base_services, f"{service}.image", default=""
         )
@@ -52,6 +62,7 @@ def pull(
             if image:
                 images.add(image)
 
+    log.critical(images)
     docker = Docker()
     docker.client.pull(list(images), quiet=quiet)
 
