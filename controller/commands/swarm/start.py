@@ -2,6 +2,7 @@ import typer
 
 from controller import log
 from controller.app import Application
+from controller.deploy.builds import verify_available_images
 from controller.deploy.swarm import Swarm
 
 
@@ -16,6 +17,12 @@ def start(
     ),
 ) -> None:
     Application.get_controller().controller_init()
+
+    verify_available_images(
+        Application.data.services,
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     if force:
         log.warning("Force flag is not yet implemented")

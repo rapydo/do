@@ -137,6 +137,12 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "-s backend start",
+        "image for proxy backend, execute rapydo pull",
+    )
+
+    exec_command(
+        capfd,
         "pull --quiet",
         "Base images pulled from docker hub",
     )

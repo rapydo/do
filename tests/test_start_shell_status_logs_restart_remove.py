@@ -32,6 +32,13 @@ def test_all(capfd: Capture) -> None:
         services=["rabbit", "neo4j"],
     )
     init_project(capfd)
+
+    exec_command(
+        capfd,
+        "-s backend start",
+        "image for proxy backend, execute rapydo pull",
+    )
+
     pull_images(capfd)
 
     exec_command(
