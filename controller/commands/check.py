@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List
+from typing import Any, List, Optional, Tuple
 
 import typer
 from python_on_whales.utils import DockerException
@@ -95,9 +95,10 @@ def check(
                     log.warning("Missing {} image, execute rapydo build", image_tag)
                 continue
 
+            image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
-            obsolete, d1, d2 = build_is_obsolete(image_tag, build, Application.gits)
-            if obsolete:
+            d1, d2 = build_is_obsolete(image_creation, build, Application.gits)
+            if d1 and d2:
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
             # if FROM image is newer, this build should be re-built
@@ -117,18 +118,17 @@ def check(
                         from_img,
                     )
 
+                from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
-                obsolete, d1, d2 = build_is_obsolete(
-                    image_tag, from_build, Application.gits
-                )
-                if obsolete:  # pragma: no cover
+                d1, d2 = build_is_obsolete(from_timestamp, from_build, Application.gits)
+                if d1 and d2:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
-                from_timestamp = from_build["creation"]
-                build_timestamp = build["creation"]
+                # from_timestamp = from_build["creation"]
+                # build_timestamp = build["creation"]
 
-                if from_timestamp > build_timestamp:
-                    b = build_timestamp.strftime(DATE_FORMAT)
+                if from_timestamp > image_creation:
+                    b = image_creation.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
                     print_obsolete(image_tag, b, c, build.get("service"), from_img)
 
@@ -164,7 +164,9 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def build_is_obsolete(image_tag, build, gits):
+def build_is_obsolete(
+    image_creation: datetime, build: Any, gits: git.GitRepoType
+) -> Tuple[Optional[str], Optional[str]]:
     # compare dates between git and docker
     path = build.get("path")
     build_templates = gits.get("build-templates")
@@ -178,7 +180,6 @@ def build_is_obsolete(image_tag, build, gits):
         Application.exit("Unable to find git repo {}", path)
 
     # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
-    image_creation = get_image_creation(image_tag)
 
     build_timestamp = image_creation.timestamp() if image_creation else 0.0
 
@@ -194,6 +195,6 @@ def build_is_obsolete(image_tag, build, gits):
             log.info("File changed: {}", f)
             build_ts_f = datetime.fromtimestamp(build_ts).strftime(DATE_FORMAT)
             last_commit_str = last_commit.strftime(DATE_FORMAT)
-            return True, build_ts_f, last_commit_str
+            return build_ts_f, last_commit_str
 
-    return False, 0, 0
+    return None, None

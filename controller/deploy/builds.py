@@ -49,12 +49,12 @@ def name_priority(name1: str, name2: str) -> str:
 # Build: Dict[str, Dict[str, ]]
 
 
-def get_image_creation(image_name: str) -> Optional[datetime]:
+def get_image_creation(image_name: str) -> datetime:
     try:
         docker = Docker()
         return cast(datetime, docker.client.image.inspect(image_name).created)
     except DockerException:
-        return None
+        return datetime.fromtimestamp(0)
 
 
 def find_templates_build(
