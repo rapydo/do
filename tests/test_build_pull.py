@@ -125,15 +125,6 @@ services:
         "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
     )
 
-    # Not a RAPyDo childi but build is possibile
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
-        f.write("FROM ubuntu")
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        "Custom images built",
-    )
-
     # Invalid RAPyDo template
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write("FROM rapydo/invalid")
@@ -143,6 +134,23 @@ services:
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
+    )
+
+    image = f"testbuild/rabbit:${__version__}"
+    exec_command(
+        capfd,
+        "-s rabbit start",
+        # f"Missing {image} image for rabbit service, execute rapydo build",
+        " image for rabbit service, execute rapydo build",
+    )
+
+    # Not a RAPyDo child but build is possibile
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM ubuntu")
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        "Custom images built",
     )
 
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
@@ -158,16 +166,6 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
-    image = f"testbuild/rabbit:${__version__}"
-    exec_command(
-        capfd,
-        "-s rabbit start",
-        # f"Missing {image} image for rabbit service, execute rapydo build",
-        " image for rabbit service, execute rapydo build",
-    )
-
-    # Selected a very fast service to speed up tests
-    # Build custom rabbit image from pulled image
     exec_command(
         capfd,
         "-s rabbit build",
