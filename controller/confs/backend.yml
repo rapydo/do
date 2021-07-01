@@ -293,8 +293,6 @@ services:
       MAX_REQUESTS_PER_SECOND_API: ${SET_MAX_REQUESTS_PER_SECOND_API}
       MAX_REQUESTS_PER_SECOND_ASSETS: ${SET_MAX_REQUESTS_PER_SECOND_ASSETS}
       GA_TRACKING_CODE: ${GA_TRACKING_CODE}
-    # depends_on:
-    #   - backend
 
   maintenance:
     # restart: always

@@ -4,11 +4,7 @@ import typer
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application
-from controller.deploy.builds import (
-    find_templates_build,
-    find_templates_override,
-    get_non_redundant_services,
-)
+from controller.deploy.builds import find_templates_build, get_non_redundant_services
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
@@ -66,14 +62,13 @@ def build(
     dc.dump_config(compose_config, COMPOSE_FILE, Application.data.active_services)
     log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-    templates = find_templates_build(Application.data.base_services)
-    template_builds, _ = find_templates_override(
-        Application.data.compose_config, templates
-    )
+    core_builds = find_templates_build(Application.data.base_services)
+    all_builds = find_templates_build(Application.data.compose_config)
 
     services_with_custom_builds: List[str] = []
-    for b in template_builds.values():
-        services_with_custom_builds.extend(b["services"])
+    for image, build in all_builds.items():
+        if image not in core_builds:
+            services_with_custom_builds.extend(build["services"])
 
     targets: List[str] = []
     for service in Application.data.active_services:
@@ -87,7 +82,7 @@ def build(
         log.info("No custom images to build")
         return False
 
-    clean_targets = get_non_redundant_services(templates, targets)
+    clean_targets = get_non_redundant_services(all_builds, targets)
 
     # import socket
     # if MULTI_HOST_MODE and local_registry_images:
