@@ -27,8 +27,6 @@ jobs:
 
           for lib in \
             git \
-            python_on_whales \
-            python_on_whales.utils \
             docker.errors \
             compose \
             plumbum \
