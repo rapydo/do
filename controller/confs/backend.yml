@@ -879,8 +879,7 @@ services:
     networks:
       db_net:
       worker_net:
-    # depends_on:
-    #   - rabbit
+
     environment:
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}

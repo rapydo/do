@@ -85,6 +85,7 @@ class Configuration:
 
     @staticmethod
     def set_action(action: Optional[str]) -> None:
+        log.debug("Requested command: {}", action)
         Configuration.action = action
         Configuration.initialize = Configuration.action == "init"
         Configuration.update = Configuration.action == "update"
