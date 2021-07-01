@@ -1,18 +1,17 @@
 """
 This module will test the volatile command
 """
-import signal
+# import signal
 
 from faker import Faker
 
-from tests import (
+from tests import (  # signal_handler,
     Capture,
     create_project,
     exec_command,
     init_project,
     pull_images,
     random_project_name,
-    signal_handler,
     start_project,
 )
 
@@ -85,11 +84,11 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "Base images pulled from docker hub",
     )
 
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
-    exec_command(
-        capfd,
-        "volatile maintenance",
-        # "Maintenance server is up and waiting for connections",
-        "Time is up",
-    )
+    # signal.signal(signal.SIGALRM, signal_handler)
+    # signal.alarm(4)
+    # exec_command(
+    #     capfd,
+    #     "volatile maintenance",
+    #     # "Maintenance server is up and waiting for connections",
+    #     "Time is up",
+    # )
