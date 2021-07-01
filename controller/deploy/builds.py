@@ -8,7 +8,7 @@ Parse dockerfiles and check for builds
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, Dict, List, Set, cast
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales.utils import DockerException
@@ -26,6 +26,8 @@ name_priorities = [
     "maintenance",
     "bot",
 ]
+
+docker = Docker()
 
 
 def name_priority(name1: str, name2: str) -> str:
@@ -51,10 +53,17 @@ def name_priority(name1: str, name2: str) -> str:
 
 def get_image_creation(image_name: str) -> datetime:
     try:
-        docker = Docker()
         return cast(datetime, docker.client.image.inspect(image_name).created)
     except DockerException:
         return datetime.fromtimestamp(0)
+
+
+def image_exists(image_name: str) -> bool:
+    try:
+        docker.client.image.inspect(image_name)
+        return True
+    except DockerException:
+        return False
 
 
 def find_templates_build(
@@ -183,12 +192,6 @@ def verify_available_images(
     services: List[str], compose_config: ComposeConfig, base_services: ComposeConfig
 ) -> None:
 
-    docker = Docker()
-    images: List[str] = []
-
-    for image in docker.client.images():
-        images.extend(image.repo_tags)
-
     # All template builds (core only)
     templates = find_templates_build(base_services, include_image=True)
     clean_core_services = get_non_redundant_services(templates, services)
@@ -198,7 +201,7 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
-            if image not in images:
+            if not image_exists(image):
                 Application.exit(
                     "Missing {} image for {} service, execute rapydo pull",
                     image,
@@ -214,7 +217,7 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
-            if image not in images:
+            if not image_exists(image):
                 action = "build" if data["path"] else "pull"
                 Application.exit(
                     "Missing {} image for {} service, execute rapydo {}",
