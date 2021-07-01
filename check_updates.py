@@ -21,6 +21,8 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # by providing relative links
 os.chdir(os.path.dirname(__file__))
 
+DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
+
 # https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
 changelogs = {
     # ## NPM
@@ -68,7 +70,7 @@ def load_yaml_file(filepath: Path) -> Any:
 
 
 def check_updates(
-    category: str, lib: str, npm_timeout: int, dockerhub_timeout: int
+    service: str, category: str, lib: str, npm_timeout: int, dockerhub_timeout: int
 ) -> None:
 
     if category == "pip":
@@ -136,6 +138,13 @@ def check_updates(
                 tokens = lib.split("@")
         else:
             tokens = [lib, ""]
+
+        # Resolve ENV variable like ${ANGULAR_VERSION} and ${CYPRESS_VERSION}
+        if "$" in tokens[1]:
+            tokens[1] = tokens[1].replace("$", "")
+            tokens[1] = tokens[1].replace("{", "")
+            tokens[1] = tokens[1].replace("}", "")
+            tokens[1] = DOCKERFILE_ENVS.get(service, {}).get(tokens[1], tokens[1])
 
         url = f"https://www.npmjs.com/package/{tokens[0]}"
         latest = parse_npm(url, tokens[0], npm_timeout, tokens[1])
@@ -210,6 +219,7 @@ SEMVER2 = r"^[0-9]+\.[0-9]+$"
 def get_latest_version(
     tags: List[str],
     regexp: str = SEMVER3,
+    prefix: str = "",
     suffix: str = "",
     ignores: Optional[List[str]] = None,
 ) -> str:
@@ -220,7 +230,13 @@ def get_latest_version(
     latest = "0.0.0"
     for t in tags:
 
-        clean_t = t.replace(suffix, "")
+        if not t.startswith(prefix):
+            continue
+
+        if not t.endswith(suffix):
+            continue
+
+        clean_t = t.removeprefix(prefix).removesuffix(suffix)
 
         if clean_t in ignores:
             continue
@@ -228,7 +244,7 @@ def get_latest_version(
         if not re.match(regexp, clean_t):
             continue
 
-        clean_latest = latest.replace(suffix, "")
+        clean_latest = latest.removeprefix(prefix).removesuffix(suffix)
         if LooseVersion(clean_t) > LooseVersion(clean_latest):
             latest = t
 
@@ -280,6 +296,9 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
     if lib == "library/nginx":
         return get_latest_version(tags, suffix="-alpine")
 
+    if lib == "swaggerapi/swagger-ui":
+        return get_latest_version(tags, prefix="v")
+
     return get_latest_version(tags)
 
 
@@ -303,6 +322,12 @@ def parseDockerfile(
             if not skip_docker and "FROM" in line:
                 line = line.replace("FROM", "").strip()
                 dependencies[service]["Dockerfile"] = [line]
+            elif line.startswith("ENV "):
+                env = line.strip().split(" ")
+                if len(env) == 3:
+                    DOCKERFILE_ENVS.setdefault(service, {})
+                    DOCKERFILE_ENVS[service][env[1]] = env[2]
+
             elif not skip_angular and (
                 "RUN npm install" in line
                 or "RUN yarn add" in line
@@ -445,10 +470,10 @@ def check_versions(
                     skipped = True
                 elif "==" in d or ":" in d:
                     filtered_dependencies[service][category].append(d)
-                    check_updates(category, d, npm_timeout, dockerhub_timeout)
+                    check_updates(service, category, d, npm_timeout, dockerhub_timeout)
                 elif "@" in d:
                     filtered_dependencies[service][category].append(d)
-                    check_updates(category, d, npm_timeout, dockerhub_timeout)
+                    check_updates(service, category, d, npm_timeout, dockerhub_timeout)
                 else:
                     skipped = True
 
