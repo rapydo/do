@@ -4,7 +4,11 @@ import typer
 
 from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
 from controller.app import Application
-from controller.deploy.builds import find_templates_build, get_non_redundant_services
+from controller.deploy.builds import (
+    find_templates_build,
+    get_dockerfile_base_image,
+    get_non_redundant_services,
+)
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
@@ -68,6 +72,9 @@ def build(
     services_with_custom_builds: List[str] = []
     for image, build in all_builds.items():
         if image not in core_builds:
+
+            # this is used to validate the taregt Dockerfile:
+            get_dockerfile_base_image(build.get("path"), core_builds)
             services_with_custom_builds.extend(build["services"])
 
     targets: List[str] = []

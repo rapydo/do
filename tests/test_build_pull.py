@@ -87,13 +87,21 @@ services:
     """
         )
 
+    # Missing folder
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        # Errors from docker compose
+        " either does not exist, is not accessible, or is not a valid URL.",
+    )
+
     os.makedirs("projects/testbuild/builds/rabbit")
 
     # Missing Dockerfile
     exec_command(
         capfd,
         "-s rabbit build",
-        "No such file or directory: ",
+        "Build path not found: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
@@ -103,7 +111,7 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "Build failed, is ",
+        "Invalid build, is ",
         "projects/testbuild/builds/rabbit/Dockerfile empty?",
     )
 

@@ -7,6 +7,7 @@ Parse dockerfiles and check for builds
 
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, cast
 
 from dockerfile_parse import DockerfileParser
@@ -96,6 +97,42 @@ def find_templates_build(
     return templates
 
 
+def get_dockerfile_base_image(path: str, templates: Dict[str, Any]) -> str:
+
+    if not Path(path, "Dockerfile").exists():
+        log.critical("Build path not found: {}/Dockerfile", path)
+        sys.exit(1)
+
+    dfp = DockerfileParser(path)
+
+    try:
+        cont = dfp.content
+        if not cont:
+            log.critical("Invalid build, is {}/Dockerfile empty?", path)
+            sys.exit(1)
+    except FileNotFoundError as e:
+        log.critical(e)
+        sys.exit(1)
+
+    if dfp.baseimage is None:
+        log.critical(
+            "No base image found in {}/Dockerfile, unable to build",
+            path,
+        )
+        sys.exit(1)
+
+    if dfp.baseimage.startswith("rapydo/") and dfp.baseimage not in templates:
+        log.critical(
+            "Unable to find {} in this project"
+            "\nPlease inspect the FROM image in {}/Dockerfile",
+            dfp.baseimage,
+            path,
+        )
+        sys.exit(1)
+
+    return str(dfp.baseimage)
+
+
 def find_templates_override(
     services: ComposeConfig, templates: Dict[str, Any]
 ) -> Dict[str, str]:
@@ -105,42 +142,17 @@ def find_templates_override(
     for service in services.values():
 
         builder = service.get("build")
-        if builder is not None:
+        image = service.get("image")
+        if builder is not None and image not in templates:
 
-            dfp = DockerfileParser(builder.get("context"))
+            baseimage = get_dockerfile_base_image(builder.get("context"), templates)
 
-            try:
-                cont = dfp.content
-                if not cont:
-                    log.critical(
-                        "Build failed, is {}/Dockerfile empty?", builder.get("context")
-                    )
-                    sys.exit(1)
-            except FileNotFoundError as e:
-                log.critical(e)
-                sys.exit(1)
-
-            if dfp.baseimage is None:
-                log.critical(
-                    "No base image found in {}/Dockerfile, unable to build",
-                    builder.get("context"),
-                )
-                sys.exit(1)
-
-            if not dfp.baseimage.startswith("rapydo/"):
+            log.critical(baseimage)
+            if not baseimage.startswith("rapydo/"):
                 continue
 
-            if dfp.baseimage not in templates:
-                log.critical(
-                    "Unable to find {} in this project"
-                    "\nPlease inspect the FROM image in {}/Dockerfile",
-                    dfp.baseimage,
-                    builder.get("context"),
-                )
-                sys.exit(1)
-
             vanilla_img = service.get("image")
-            template_img = dfp.baseimage
+            template_img = baseimage
             log.debug("{} extends {}", vanilla_img, template_img)
             builds[vanilla_img] = template_img
 
