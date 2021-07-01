@@ -112,6 +112,7 @@ def ssl(
                 "rabbit",
                 command="/usr/local/bin/reload_certificate",
                 disable_tty=no_tty,
+                user="rabbitmq",
             )
 
         log.info("New certificate successfully enabled")
