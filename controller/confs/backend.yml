@@ -1014,7 +1014,7 @@ services:
 
   pushpin:
     restart: always
-    image: fanout/pushpin:1.32.1
+    image: fanout/pushpin:1.32.2
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
