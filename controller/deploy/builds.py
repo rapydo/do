@@ -78,12 +78,11 @@ def find_templates_build(
                 "Template builds must have a name, missing for {}", template_name
             )
             sys.exit(1)
-
         if template_image not in templates:
             templates[template_image] = {
                 "services": [],
                 "path": template_build.get("context") if template_build else None,
-                "creation": get_image_creation(template_image),
+                # "creation": get_image_creation(template_image),
             }
         if "service" not in templates[template_image]:
             templates[template_image]["service"] = template_name
@@ -147,7 +146,6 @@ def find_templates_override(
 
             baseimage = get_dockerfile_base_image(builder.get("context"), templates)
 
-            log.critical(baseimage)
             if not baseimage.startswith("rapydo/"):
                 continue
 

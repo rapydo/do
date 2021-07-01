@@ -7,7 +7,11 @@ from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, log
 from controller.app import Application
-from controller.deploy.builds import find_templates_build, find_templates_override
+from controller.deploy.builds import (
+    find_templates_build,
+    find_templates_override,
+    get_image_creation,
+)
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 from controller.templating import Templating
@@ -92,7 +96,7 @@ def check(
                 continue
 
             # Check if some recent commit modified the Dockerfile
-            obsolete, d1, d2 = build_is_obsolete(build, Application.gits)
+            obsolete, d1, d2 = build_is_obsolete(image_tag, build, Application.gits)
             if obsolete:
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
@@ -114,7 +118,9 @@ def check(
                     )
 
                 # Verify if template build is obsolete or not
-                obsolete, d1, d2 = build_is_obsolete(from_build, Application.gits)
+                obsolete, d1, d2 = build_is_obsolete(
+                    image_tag, from_build, Application.gits
+                )
                 if obsolete:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
@@ -158,7 +164,7 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def build_is_obsolete(build, gits):
+def build_is_obsolete(image_tag, build, gits):
     # compare dates between git and docker
     path = build.get("path")
     build_templates = gits.get("build-templates")
@@ -171,7 +177,10 @@ def build_is_obsolete(build, gits):
     else:  # pragma: no cover
         Application.exit("Unable to find git repo {}", path)
 
-    build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
+    # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
+    image_creation = get_image_creation(image_tag)
+
+    build_timestamp = image_creation.timestamp() if image_creation else 0.0
 
     for f in Path(path).rglob("*"):
         if f.is_dir():  # pragma: no cover
