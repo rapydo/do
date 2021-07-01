@@ -109,6 +109,15 @@ services:
     """
         )
 
+    os.makedirs("projects/third/builds/backend")
+    with open("projects/third/builds/backend/Dockerfile", "w+") as f:
+        f.write(
+            f"""
+FROM rapydo/backend:{__version__}
+RUN mkdir xyz
+"""
+        )
+
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd,
