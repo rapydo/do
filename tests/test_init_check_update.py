@@ -97,10 +97,24 @@ def test_base(capfd: Capture) -> None:
     r = git.get_repo("submodules/do")
     r.git().execute(["git", "checkout", "--", "setup.py"])
 
+    # Add a custom image to extend base backend image:
+    with open("projects/third/confs/commons.yml", "a") as f:
+        f.write(
+            """
+services:
+  backend:
+    build: ${PROJECT_DIR}/builds/backend
+    image: third/backend:${RAPYDO_VERSION}
+
+    """
+        )
+
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd,
         "check -i main",
+        " image, execute rapydo pull",
+        " image, execute rapydo build",
         "Checks completed",
     )
 

@@ -71,25 +71,24 @@ def check(
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        # All builds used for the current configuration (templates + custom)
-        builds = find_templates_build(Application.data.compose_config)
-
-        # All template builds
-        templates = find_templates_build(Application.data.base_services)
-
-        # Find templates that were extended in vanilla
-        template_builds, overriding_imgs = find_templates_override(
-            Application.data.compose_config, templates
+        all_builds = find_templates_build(Application.data.compose_config)
+        core_builds = find_templates_build(Application.data.base_services)
+        overriding_builds = find_templates_override(
+            Application.data.compose_config, core_builds
         )
 
-        for image_tag, build in builds.items():
-
-            if image_tag not in dimages:
-                continue
+        for image_tag, build in all_builds.items():
 
             if not any(
                 x in Application.data.active_services for x in build["services"]
-            ):  # pragma: no cover
+            ):
+                continue
+
+            if image_tag not in dimages:
+                if image_tag in core_builds:
+                    log.warning("Missing {} image, execute rapydo pull", image_tag)
+                else:
+                    log.warning("Missing {} image, execute rapydo build", image_tag)
                 continue
 
             # Check if some recent commit modified the Dockerfile
@@ -98,25 +97,16 @@ def check(
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
             # if FROM image is newer, this build should be re-built
-            elif image_tag in overriding_imgs:
-                from_img = overriding_imgs.get(image_tag, "")
-                from_build = template_builds.get(from_img)
+            elif image_tag in overriding_builds:
+                from_img = overriding_builds.get(image_tag, "")
+                from_build = core_builds.get(from_img, {})
 
-                # This check should not be needed, added to prevent errors from mypy
-                if not from_build:  # pragma: no cover
-                    continue
+                # # This check should not be needed, added to prevent errors from mypy
+                # if not from_build:  # pragma: no cover
+                #     continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
-
-                    # This is no longer an errore because custom images may be pulled
-                    # from the docker hub. In that case template images are not required
-                    # Application.exit(
-                    #     "Missing template build for {} ({})\n{}",
-                    #     from_build["services"],
-                    #     from_img,
-                    #     "Suggestion: execute the pull command",
-                    # )
                     log.warning(
                         "Missing template build for {} ({})\n{}",
                         from_build.get("services"),

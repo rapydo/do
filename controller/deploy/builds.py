@@ -7,7 +7,7 @@ Parse dockerfiles and check for builds
 
 import sys
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, cast
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales.utils import DockerException
@@ -98,11 +98,9 @@ def find_templates_build(
 
 def find_templates_override(
     services: ComposeConfig, templates: Dict[str, Any]
-) -> Tuple[Dict[str, Any], Dict[str, str]]:
+) -> Dict[str, str]:
 
-    # Template and vanilla builds involved in override
-    tbuilds: Dict[str, Any] = {}
-    vbuilds: Dict[str, str] = {}
+    builds: Dict[str, str] = {}
 
     for service in services.values():
 
@@ -144,10 +142,9 @@ def find_templates_override(
             vanilla_img = service.get("image")
             template_img = dfp.baseimage
             log.debug("{} extends {}", vanilla_img, template_img)
-            tbuilds[template_img] = templates.get(template_img)
-            vbuilds[vanilla_img] = template_img
+            builds[vanilla_img] = template_img
 
-    return tbuilds, vbuilds
+    return builds
 
 
 # templates is the return values of a find_templates_build
