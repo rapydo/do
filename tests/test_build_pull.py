@@ -125,13 +125,13 @@ services:
         "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
     )
 
-    # Not a RAPyDo child
+    # Not a RAPyDo childi but build is possibile
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
         f.write("FROM ubuntu")
     exec_command(
         capfd,
         "-s rabbit build",
-        "No custom images to build",
+        "Custom images built",
     )
 
     # Invalid RAPyDo template
