@@ -369,5 +369,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     #     "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
     #     "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
     # )
-
-    exec_command(capfd, "remove --all", "Stack removed")
