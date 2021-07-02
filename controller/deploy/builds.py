@@ -117,13 +117,21 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
             line = line.strip().lower()
             if line.startswith("from "):
                 # from python 3.9 it will be:
-                # line.removeprefix("from ")
-                line = line[5:]
-                line = "Pippo as peppe"
-                if " as " in line:
-                    line = line.split(" as ")[0]
+                # image = line.removeprefix("from ")
+                image = line[5:]
+                if " as " in image:
+                    image = image.split(" as ")[0]
 
-                return line
+                if image not in templates:
+                    log.critical(
+                        "Unable to find {} in this project"
+                        "\nPlease inspect the FROM image in {}/Dockerfile",
+                        image,
+                        dockerfile,
+                    )
+                    sys.exit(1)
+
+                return image
 
     log.critical("Invalid Dockerfile, no base image found in {}", dockerfile)
     sys.exit(1)
