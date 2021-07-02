@@ -117,7 +117,7 @@ def get_dockerfile_base_image(path: str, templates: Dict[str, Any]) -> str:
             line = line.strip().lower()
             if line.startswith("from "):
                 # from python 3.9 it will be:
-                line.removeprefix("from ")
+                # line.removeprefix("from ")
                 line = line[5:]
                 line = "Pippo as peppe"
                 if " as " in line:
