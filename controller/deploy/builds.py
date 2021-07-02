@@ -122,7 +122,7 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
                 if " as " in image:
                     image = image.split(" as ")[0]
 
-                if image not in templates:
+                if image.startswith("rapydo/") and image not in templates:
                     log.critical(
                         "Unable to find {} in this project"
                         "\nPlease inspect the FROM image in {}/Dockerfile",

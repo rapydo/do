@@ -79,7 +79,7 @@ repos:
             # This flag reports an error whenever it encounters a
             # function definition without type annotations.
             # -> xyz Function is missing a type annotation
-            # "--disallow-untyped-defs",
+            "--disallow-untyped-defs",
 
             # This flag reports an error whenever it encounters a
             # partly annotated function definition.
