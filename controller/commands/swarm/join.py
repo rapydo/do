@@ -25,7 +25,12 @@ def join(
         state = node.status.state
         availability = node.spec.availability
 
-        if role == "manager" and state == "ready" and availability == "active":
+        if (
+            role == "manager"
+            and state == "ready"
+            and availability == "active"
+            and node.manager_status
+        ):
             manager_address = node.manager_status.addr
 
     if manager:

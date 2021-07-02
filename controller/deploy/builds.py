@@ -8,7 +8,7 @@ Parse dockerfiles and check for builds
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Set, cast
+from typing import Any, Dict, List, Set
 
 from dockerfile_parse import DockerfileParser
 from python_on_whales.utils import DockerException
@@ -53,7 +53,7 @@ def name_priority(name1: str, name2: str) -> str:
 
 def get_image_creation(image_name: str) -> datetime:
     try:
-        return cast(datetime, docker.client.image.inspect(image_name).created)
+        return docker.client.image.inspect(image_name).created
     except DockerException:
         return datetime.fromtimestamp(0)
 

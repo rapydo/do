@@ -50,7 +50,7 @@ def check(
         docker = Docker()
         dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
     except DockerException as e:  # pragma: no cover
-        Application.exit(e)
+        Application.exit(str(e))
 
     Application.get_controller().controller_init()
 
