@@ -170,7 +170,7 @@ def load_yaml_file(
         try:
             if keep_order:
 
-                OrderedLoader.add_constructor(
+                OrderedLoader.add_constructor(  # type: ignore
                     yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
                 )
                 loader = yaml.load_all(fh, OrderedLoader)

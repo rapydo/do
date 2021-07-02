@@ -38,7 +38,7 @@ jobs:
           done
 
           export MYPYPATH='./stubs'
-          mypy --disallow-incomplete-defs --disallow-any-unimported --disallow-any-generics --check-untyped-defs --disallow-untyped-defs --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report report --html-report report controller/
+          mypy --disallow-incomplete-defs --disallow-any-unimported --disallow-any-generics --check-untyped-defs --disallow-untyped-calls --disallow-untyped-defs --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report report --html-report report controller/
           cat report/index.txt
 
       - name: Save Report
