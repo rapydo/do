@@ -6,6 +6,7 @@ and will only use the specific configuration needed by the test itself
 
 import os
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -338,7 +339,9 @@ def test_create(capfd: Capture) -> None:
     opt = "--frontend no --current --force --auth neo4j"
     project_configuration = "projects/testcelery/project_configuration.yaml"
 
-    def verify_celery_configuration(services_list, broker, backend):
+    def verify_celery_configuration(
+        services_list: List[str], broker: str, backend: str
+    ) -> None:
 
         services = "--service celery"
         if services_list:

@@ -54,7 +54,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # This will initialize mariadb
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
 
-    def exec_query(query):
+    def exec_query(query: str) -> str:
 
         command = 'shell --no-tty mariadb "'
         command += 'sh -c \'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D"$MYSQL_DATABASE" '

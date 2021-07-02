@@ -148,7 +148,7 @@ class OrderedLoader(yaml.SafeLoader):
     pass
 
 
-def construct_mapping(loader, node):
+def construct_mapping(loader, node):  # type: ignore
     loader.flatten_mapping(node)
     return dict(loader.construct_pairs(node))
 

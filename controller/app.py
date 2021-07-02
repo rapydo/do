@@ -557,9 +557,11 @@ You can use of one:
         except requests.ConnectionError:  # pragma: no cover
             Application.exit("Internet connection is unavailable")
 
-    # from_path: Optional[Path]
+    # from_path:
     @staticmethod
-    def working_clone(name, repo, from_path=None):
+    def working_clone(
+        name: str, repo: Dict[str, Any], from_path: Optional[Path] = None
+    ) -> Optional[git.GitRepoType]:
 
         # substitute values starting with '$$'
         myvars = {
@@ -595,10 +597,12 @@ You can use of one:
 
             os.symlink(local_path, submodule_path)
 
+        url = cast(str, repo.get("online_url"))
+        branch = cast(str, repo.get("branch"))
         return git.clone(
-            url=repo.get("online_url"),
-            path=name,
-            branch=repo.get("branch"),
+            url=url,
+            path=Path(name),
+            branch=branch,
             do=Configuration.initialize,
             check=not Configuration.install,
         )
@@ -607,11 +611,12 @@ You can use of one:
     def git_submodules(from_path: Optional[Path] = None) -> None:
         """Check and/or clone git projects"""
 
-        repos: Dict[str, str] = glom(
+        repos: Dict[str, Dict[str, Any]] = glom(
             Configuration.specs,
             "variables.submodules",
-            default=cast(Dict[str, str], {}),
+            default=cast(Dict[str, Dict[str, Any]], {}),
         ).copy()
+
         Application.gits["main"] = git.get_repo(".")
 
         for name, repo in repos.items():

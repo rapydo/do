@@ -140,7 +140,9 @@ def check(
     log.info("Checks completed")
 
 
-def print_obsolete(image, date1, date2, service, from_img=None):
+def print_obsolete(
+    image: str, date1: str, date2: str, service: str, from_img: Optional[str] = None
+) -> None:
     if from_img:
         log.warning(
             """Obsolete image {}

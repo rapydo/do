@@ -24,7 +24,7 @@ class Services(str, Enum):
 
 
 # Returned from a function just to be able to easily test it
-def get_date_pattern():
+def get_date_pattern() -> str:
     return (
         "[1-2][0-9][0-9][0-9]_"  # year
         "[0-1][0-9]_"  # month

@@ -6,7 +6,7 @@ from controller.app import Application, Configuration
 
 
 class Docker:
-    def __init__(self):
+    def __init__(self) -> None:
 
         self.client = DockerClient(host=self.get_engine())
 

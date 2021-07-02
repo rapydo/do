@@ -1,5 +1,6 @@
 import os
 from enum import Enum
+from typing import Dict
 
 import typer
 
@@ -66,8 +67,8 @@ def list_cmd(
                 print(f"{name:<18} {branch:<18} {path}")
 
 
-def read_env():
-    env = {}
+def read_env() -> Dict[str, str]:
+    env: Dict[str, str] = {}
     with open(COMPOSE_ENVIRONMENT_FILE) as f:
         for line in f.readlines():
             tokens = line.split("=")

@@ -2,7 +2,7 @@ import time
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, List, Optional, Type, TypeVar
 
 from faker import Faker
 from typer.testing import CliRunner
@@ -46,11 +46,11 @@ class Timeout(Exception):
     pass
 
 
-def signal_handler(signum, frame):
+def signal_handler(signum, frame):  # type: ignore
     raise Timeout("Time is up")
 
 
-def mock_KeyboardInterrupt(signum, frame):
+def mock_KeyboardInterrupt(signum, frame):  # type: ignore
     raise KeyboardInterrupt("Time is up")
 
 
@@ -128,13 +128,13 @@ def random_project_name(faker: Faker) -> str:
 
 
 def create_project(
-    capfd,
-    name=None,
-    auth="postgres",
-    frontend="angular",
-    services=None,
-    extra="",
-):
+    capfd: Any,
+    name: Optional[str] = None,
+    auth: str = "postgres",
+    frontend: str = "angular",
+    services: Optional[List[str]] = None,
+    extra: str = "",
+) -> None:
 
     opt = "--current --origin-url https://your_remote_git/your_project.git"
     s = ""
@@ -149,7 +149,7 @@ def create_project(
     )
 
 
-def init_project(capfd):
+def init_project(capfd: Any) -> None:
     exec_command(
         capfd,
         "init",
@@ -157,7 +157,7 @@ def init_project(capfd):
     )
 
 
-def pull_images(capfd):
+def pull_images(capfd: Any) -> None:
     exec_command(
         capfd,
         "pull --quiet",
@@ -165,7 +165,7 @@ def pull_images(capfd):
     )
 
 
-def start_project(capfd):
+def start_project(capfd: Any) -> None:
     exec_command(
         capfd,
         "start",
