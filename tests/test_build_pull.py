@@ -112,8 +112,8 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "Invalid build, is ",
-        "projects/testbuild/builds/rabbit/Dockerfile empty?",
+        "Invalid Dockerfile, no base image found in ",
+        "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
     # Missing base image
@@ -122,8 +122,8 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "No base image found ",
-        "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
+        "Invalid Dockerfile, no base image found in ",
+        "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
     # Invalid RAPyDo template

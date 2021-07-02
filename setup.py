@@ -18,7 +18,6 @@ setup(
     install_requires=[
         "docker-compose==1.29.2",
         "python-on-whales==0.20.2",
-        "dockerfile-parse==1.2.0",
         "python-dateutil",
         "pytz",
         "loguru",

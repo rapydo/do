@@ -10,7 +10,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
-from dockerfile_parse import DockerfileParser
 from python_on_whales.utils import DockerException
 
 from controller import ComposeConfig, log
@@ -107,38 +106,27 @@ def find_templates_build(
 
 def get_dockerfile_base_image(path: str, templates: Dict[str, Any]) -> str:
 
-    if not Path(path, "Dockerfile").exists():
-        log.critical("Build path not found: {}/Dockerfile", path)
+    dockerfile = Path(path, "Dockerfile")
+
+    if not Path(dockerfile).exists():
+        log.critical("Build path not found: {}", dockerfile)
         sys.exit(1)
 
-    dfp = DockerfileParser(path)
+    with open(dockerfile) as f:
+        for line in reversed(f.readlines()):
+            line = line.strip().lower()
+            if line.startswith("from "):
+                # from python 3.9 it will be:
+                line.removeprefix("from ")
+                line = line[5:]
+                line = "Pippo as peppe"
+                if " as " in line:
+                    line = line.split(" as ")[0]
 
-    try:
-        cont = dfp.content
-        if not cont:
-            log.critical("Invalid build, is {}/Dockerfile empty?", path)
-            sys.exit(1)
-    except FileNotFoundError as e:
-        log.critical(e)
-        sys.exit(1)
+                return line
 
-    if dfp.baseimage is None:
-        log.critical(
-            "No base image found in {}/Dockerfile, unable to build",
-            path,
-        )
-        sys.exit(1)
-
-    if dfp.baseimage.startswith("rapydo/") and dfp.baseimage not in templates:
-        log.critical(
-            "Unable to find {} in this project"
-            "\nPlease inspect the FROM image in {}/Dockerfile",
-            dfp.baseimage,
-            path,
-        )
-        sys.exit(1)
-
-    return str(dfp.baseimage)
+    log.critical("Invalid build, is {}/Dockerfile empty?", path)
+    sys.exit(1)
 
 
 def find_templates_override(
