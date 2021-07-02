@@ -104,11 +104,11 @@ def find_templates_build(
     return templates
 
 
-def get_dockerfile_base_image(path: str, templates: Dict[str, Any]) -> str:
+def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
 
-    dockerfile = Path(path, "Dockerfile")
+    dockerfile = path.joinpath("Dockerfile")
 
-    if not Path(dockerfile).exists():
+    if not dockerfile.exists():
         log.critical("Build path not found: {}", dockerfile)
         sys.exit(1)
 
@@ -125,7 +125,7 @@ def get_dockerfile_base_image(path: str, templates: Dict[str, Any]) -> str:
 
                 return line
 
-    log.critical("Invalid build, is {}/Dockerfile empty?", path)
+    log.critical("Invalid Dockerfile, no base image found in {}", dockerfile)
     sys.exit(1)
 
 
@@ -141,7 +141,9 @@ def find_templates_override(
         image = service.get("image")
         if builder is not None and image not in templates:
 
-            baseimage = get_dockerfile_base_image(builder.get("context"), templates)
+            baseimage = get_dockerfile_base_image(
+                Path(builder.get("context")), templates
+            )
 
             if not baseimage.startswith("rapydo/"):
                 continue
