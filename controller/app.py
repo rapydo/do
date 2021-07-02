@@ -10,6 +10,8 @@ from typing import Any, Dict, List, Optional, Set, Union, cast
 import requests
 import typer
 from glom import glom
+from python_on_whales import docker
+from python_on_whales.utils import DockerException
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -428,6 +430,14 @@ class Application:
         Packages.check_program(
             "docker", min_version="20.10.0", min_recommended_version="20.10.0"
         )
+
+        try:
+            docker.buildx.version()
+        except DockerException:  # pragma: no cover
+            Application.exit(
+                "A mandatory dependency is missing: docker buildx not found"
+            )
+
         Packages.check_program("git")
 
         Packages.check_python_package("compose", min_version="1.18")
