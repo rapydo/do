@@ -434,8 +434,9 @@ class Application:
         try:
             docker.buildx.version()
         except DockerException:  # pragma: no cover
+            hint = "Installation guide: https://github.com/docker/buildx#binary-release"
             Application.exit(
-                "A mandatory dependency is missing: docker buildx not found"
+                "A mandatory dependency is missing: docker buildx not found.\n{}", hint
             )
 
         Packages.check_program("git")
