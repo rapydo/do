@@ -69,7 +69,7 @@ jobs:
             export SWARM_MODE="1"
           fi
 
-          py.test --timeout=300 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
           cp coverage.xml ..
           cd ..
 
