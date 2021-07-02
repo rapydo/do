@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import List
 
 import typer
@@ -74,7 +75,7 @@ def build(
         if image not in core_builds:
 
             # this is used to validate the taregt Dockerfile:
-            get_dockerfile_base_image(build.get("path"), core_builds)
+            get_dockerfile_base_image(Path(build.get("path")), core_builds)
             services_with_custom_builds.extend(build["services"])
 
     targets: List[str] = []
