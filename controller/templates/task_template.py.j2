@@ -29,6 +29,6 @@ def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
 # celery_ext = celery.get_instance()
 # task = celery_ext.celery_app.send_task(
 #     "{{name}}",
-#     args=[...]
+#     args=(...,)
 # )
 # log.debug("Task id={}", task.id)

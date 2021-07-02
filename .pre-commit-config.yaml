@@ -47,6 +47,7 @@ repos:
             "types-pytz",
             "types-requests",
             "types-python-dateutil",
+            "types-click",
           ]
 
         args: [
