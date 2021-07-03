@@ -851,7 +851,7 @@ services:
 
     entrypoint: docker-entrypoint-celery
     # user: root
-    command: flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -A restapi.connectors.celery.worker.celery_app -n flower_monitor
+    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -n flower_monitor
     hostname: flower
     working_dir: /code
     expose:

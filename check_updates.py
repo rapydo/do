@@ -39,7 +39,7 @@ changelogs = {
 }
 
 
-skip_versions = {"flower": "0.9.7", "typescript": "4.3.2"}
+skip_versions = {"typescript": "4.3.2"}
 
 
 # This Any is required because yaml.load_all is untyped
