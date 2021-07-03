@@ -81,8 +81,8 @@ def apply_variables(
 
 
 vars_to_services_mapping: Dict[str, List[str]] = {
-    "CELERYUI_USER": ["flower"],
-    "CELERYUI_PASSWORD": ["flower"],
+    "FLOWER_USER": ["flower"],
+    "FLOWER_PASSWORD": ["flower"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
     "REDIS_PASSWORD": ["redis"],

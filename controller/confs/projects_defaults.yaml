@@ -99,8 +99,8 @@ variables:
     ACTIVATE_REDIS: 0
 
     ACTIVATE_CELERY: 0
-    ACTIVATE_CELERYUI: 0
     ACTIVATE_CELERYBEAT: 0
+    ACTIVATE_FLOWER: 0
     ACTIVATE_FTP: 0
     ACTIVATE_PUSHPIN: 0
     ACTIVATE_SMTP: 1
@@ -298,11 +298,11 @@ variables:
     CELERY_BACKEND: RABBIT
 
     # Flower
-    CELERYUI_USER: "flower" # This default is invalidated in production mode
-    CELERYUI_PASSWORD: "D3vMode!" # This default is invalidated in production mode
-    CELERYUI_DBDIR: /var/flower
-    CELERYUI_PORT: 5555
-    CELERYUI_SSL_OPTIONS:
+    FLOWER_USER: "flower" # This default is invalidated in production mode
+    FLOWER_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+    FLOWER_DBDIR: /var/flower
+    FLOWER_PORT: 5555
+    FLOWER_SSL_OPTIONS:
 
     # Pushpin
     PUSHPIN_ENABLE_CONNECTOR: 1

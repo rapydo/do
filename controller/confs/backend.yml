@@ -851,13 +851,13 @@ services:
 
     entrypoint: docker-entrypoint-celery
     # user: root
-    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -n flower_monitor
+    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
     hostname: flower
     working_dir: /code
     expose:
-      - ${CELERYUI_PORT}
+      - ${FLOWER_PORT}
     ports:
-      - ${CELERYUI_PORT}:${CELERYUI_PORT}
+      - ${FLOWER_PORT}:${FLOWER_PORT}
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
@@ -875,7 +875,7 @@ services:
       # Logs
       - ${DATA_DIR}/logs:/logs
       # DB
-      - flower_db:${CELERYUI_DBDIR}
+      - flower_db:${FLOWER_DBDIR}
     networks:
       db_net:
       worker_net:
@@ -885,7 +885,7 @@ services:
       LOGURU_LEVEL: ${LOG_LEVEL}
       LOG_RETENTION: ${LOG_RETENTION}
       FILE_LOGLEVEL: ${FILE_LOGLEVEL}
-      ACTIVATE: ${ACTIVATE_CELERYUI}
+      ACTIVATE: ${ACTIVATE_FLOWER}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
 
@@ -919,10 +919,10 @@ services:
       MONGO_USER: ${MONGO_USER}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
 
-      CELERYUI_PORT: ${CELERYUI_PORT}
-      CELERYUI_USER: ${CELERYUI_USER}
-      CELERYUI_PASSWORD: ${CELERYUI_PASSWORD}
-      CELERYUI_DBDIR: ${CELERYUI_DBDIR}
+      FLOWER_PORT: ${FLOWER_PORT}
+      FLOWER_USER: ${FLOWER_USER}
+      FLOWER_PASSWORD: ${FLOWER_PASSWORD}
+      FLOWER_DBDIR: ${FLOWER_DBDIR}
 
   swaggerui:
     build:

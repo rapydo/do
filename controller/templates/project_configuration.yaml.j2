@@ -51,7 +51,7 @@ variables:
     {% if enable_celery -%}
     ACTIVATE_CELERY: 1
     CELERY_ENABLE_CONNECTOR: 1
-    ACTIVATE_CELERYUI: 1
+    ACTIVATE_FLOWER: 1
     {% if enable_mongo or enable_redis -%}
     ACTIVATE_CELERYBEAT: 1
     {% endif -%}

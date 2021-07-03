@@ -24,7 +24,7 @@ variables:
     # RABBITMQ_SSL_VERIFY
     RABBITMQ_SSL_ENABLED: 1 # it is used by Celery
 
-    CELERYUI_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
+    FLOWER_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     TELEGRAM_WORKERS: 4
 
     POSTGRES_MAX_CONNECTIONS: 250
@@ -48,8 +48,8 @@ variables:
     RABBITMQ_USER: "**PLACEHOLDER**"
     RABBITMQ_PASSWORD: "**PLACEHOLDER**"
     REDIS_PASSWORD: "**PLACEHOLDER**"
-    CELERYUI_USER: "**PLACEHOLDER**"
-    CELERYUI_PASSWORD: "**PLACEHOLDER**"
+    FLOWER_USER: "**PLACEHOLDER**"
+    FLOWER_PASSWORD: "**PLACEHOLDER**"
 
     MONGO_USER: "**PLACEHOLDER**"
     MONGO_PASSWORD: "**PLACEHOLDER**"

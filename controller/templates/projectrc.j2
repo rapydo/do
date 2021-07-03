@@ -36,8 +36,8 @@ project_configuration:
       MONGOUI_USER: mongo
       {% endif -%}
       {% if service == "flower" -%}
-      CELERYUI_PASSWORD: {{ "RANDOM"| password }}
-      CELERYUI_USER: {{ "RANDOM"| username }}
+      FLOWER_PASSWORD: {{ "RANDOM"| password }}
+      FLOWER_USER: {{ "RANDOM"| username }}
       {% endif -%}
       {% if service == "rabbit" -%}
       RABBITMQ_USER: {{ "RANDOM"| username }}
