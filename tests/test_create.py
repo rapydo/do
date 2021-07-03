@@ -313,9 +313,7 @@ def test_create(capfd: Capture) -> None:
         elif service == "mongo":
             active_services = ["backend", "mongodb"]
         elif service == "celery":
-            # Flower is temporary disabled due to incompatibilities with Celery 5+
-            # active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
-            active_services = ["backend", "celery", "postgres", "rabbit"]
+            active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
         elif service == "rabbit":
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
