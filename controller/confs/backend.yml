@@ -331,7 +331,7 @@ services:
     image: rapydo/postgres:${RAPYDO_VERSION}
     command: postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=${POSTGRES_SHARED_BUFFERS} -c wal_buffers=${POSTGRES_WAL_BUFFERS} -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE} -c work_mem=${POSTGRES_WORK_MEM} -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM} -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY} -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES} -c max_parallel_workers=${POSTGRES_MAX_WORKER_PROCESSES}
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${ALCHEMY_USER}"]
+      test: ["CMD", "pg_isready", "-U", "$$POSTGRES_USER"]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 20s
       retries: 3
@@ -757,7 +757,7 @@ services:
     image: redis:6.2.4
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: "redis-cli --pass ${REDIS_PASSWORD} -h 127.0.0.1 ping"
+      test: "redis-cli --pass $$REDIS_PASSWORD -h 127.0.0.1 ping"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
@@ -846,6 +846,12 @@ services:
     entrypoint: docker-entrypoint-celery
     # user: root
     command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate http://$$FLOWER_USER:$$FLOWER_PASSWORD@localhost:$$FLOWER_PORT -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     hostname: flower
     working_dir: /code
     expose:
