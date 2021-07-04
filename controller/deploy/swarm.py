@@ -1,7 +1,7 @@
 """
 Integration with Docker swarmg
 """
-
+import sys
 from typing import Any, Dict, List, Optional
 
 from glom import glom
@@ -189,33 +189,38 @@ class Swarm:
         self, services: List[str], follow: bool, tail: int, timestamps: bool
     ) -> None:
 
-        log.warning(
-            "Due to limitations of the underlying packages, "
-            "the logs command is not yet implemented"
+        if len(services) > 1:
+            log.critical(
+                "Due to limitations of the underlying packages, the logs command "
+                " is only supported for single services"
+            )
+            sys.exit(1)
+
+        service = services[0]
+
+        container = self.get_container(service, 1)
+
+        if not container:
+            log.critical("No such service: {}", service)
+            sys.exit(1)
+
+        if follow:
+
+            log.critical(
+                "Due to limitations of the underlying packages, the logs command "
+                " does not support the --follow flag yet"
+            )
+            sys.exit(1)
+
+        print(
+            self.docker.container.logs(
+                container, tail=tail, details=False, timestamps=timestamps
+            )
         )
-
-        print("")
-        print("You can execute by yourself the following command(s):")
-
-        for service in services:
-            container = self.get_container(service, 1)
-
-            if not container:
-                log.error("Service {} not found", service)
-                continue
-
-            logs_command = f"docker logs --tail {tail} "
-            if follow:
-                logs_command += "--follow "
-            if timestamps:
-                logs_command += "--timestamps "
-
-            logs_command += f"{container}"
-
-            print(logs_command)
-            print("")
-
-        return None
+        log.warning(
+            "Due to limitations of the underlying packages, the logs command "
+            "only prints stdout, stderr is ignored"
+        )
 
     def check_resources(self) -> None:
         total_cpus = 0.0

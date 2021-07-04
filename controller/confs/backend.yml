@@ -254,6 +254,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
+    working_dir: /etc/nginx
     # logging:
     #   driver: syslog
     healthcheck:

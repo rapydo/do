@@ -196,42 +196,29 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s invalid logs",
-        "Due to limitations of the underlying packages, "
-        "the logs command is not yet implemented",
-        "You can execute by yourself the following command(s):",
-        "Service invalid not found",
+        "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend logs",
-        "Due to limitations of the underlying packages, "
-        "the logs command is not yet implemented",
-        "You can execute by yourself the following command(s):",
-        "docker logs --tail 500 swarm_backend.1.",
-    )
-
-    exec_command(
-        capfd, "-s backend logs --tail 123", "docker logs --tail 123 swarm_backend.1."
+        "-s backend,frontend logs",
+        "Due to limitations of the underlying packages, the logs command"
+        "is only supported for single services",
     )
 
     exec_command(
         capfd,
         "-s backend logs --follow",
-        "docker logs --tail 500 --follow swarm_backend.1.",
+        "Due to limitations of the underlying packages, the logs command"
+        "does not support the --follow flag yet",
     )
 
     exec_command(
         capfd,
-        "-s frontend logs",
-        "docker logs --tail 500 --timestamps swarm_frontend.1.",
-    )
-
-    exec_command(
-        capfd,
-        "logs",
-        "docker logs --tail 500 swarm_backend.1.",
-        "docker logs --tail 500 swarm_frontend.1.",
+        "-s backend logs",
+        "Development mode",
+        "Due to limitations of the underlying packages, the logs command"
+        "only prints stdout, stderr is ignored",
     )
 
     exec_command(

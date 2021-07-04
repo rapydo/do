@@ -20,7 +20,6 @@ def logs(
         "-t",
         help="Number of lines to show",
     ),
-    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
 ) -> None:
     Application.get_controller().controller_init()
 
