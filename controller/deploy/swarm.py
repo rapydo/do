@@ -192,7 +192,7 @@ class Swarm:
         if len(services) > 1:
             log.critical(
                 "Due to limitations of the underlying packages, the logs command "
-                " is only supported for single services"
+                "is only supported for single services"
             )
             sys.exit(1)
 
@@ -208,7 +208,7 @@ class Swarm:
 
             log.critical(
                 "Due to limitations of the underlying packages, the logs command "
-                " does not support the --follow flag yet"
+                "does not support the --follow flag yet"
             )
             sys.exit(1)
 
