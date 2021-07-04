@@ -216,7 +216,7 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend logs",
-        "Development mode",
+        "REST API backend server is ready to be launched",
         "Due to limitations of the underlying packages, the logs command "
         "only prints stdout, stderr is ignored",
     )
