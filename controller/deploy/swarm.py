@@ -126,19 +126,8 @@ class Swarm:
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
 
-        service_id: Optional[str] = None
-        services = self.docker.service.list()
-        for s in services:
-            if s.spec.name == f"{Configuration.project}_{service}":
-                service_id = s.id
-                break
-
-        if not service_id:
-            return None
-
-        for task in self.docker.stack.ps(Configuration.project):
-            if task.service_id != service_id:
-                continue
+        service_name = f"{Configuration.project}_{service}"
+        for task in self.docker.service.ps(service_name):
             if task.slot != slot:
                 continue
 
