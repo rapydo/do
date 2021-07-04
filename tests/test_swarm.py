@@ -202,14 +202,14 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend,frontend logs",
-        "Due to limitations of the underlying packages, the logs command"
+        "Due to limitations of the underlying packages, the logs command "
         "is only supported for single services",
     )
 
     exec_command(
         capfd,
         "-s backend logs --follow",
-        "Due to limitations of the underlying packages, the logs command"
+        "Due to limitations of the underlying packages, the logs command "
         "does not support the --follow flag yet",
     )
 
@@ -217,7 +217,7 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "-s backend logs",
         "Development mode",
-        "Due to limitations of the underlying packages, the logs command"
+        "Due to limitations of the underlying packages, the logs command "
         "only prints stdout, stderr is ignored",
     )
 
