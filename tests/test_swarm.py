@@ -213,6 +213,8 @@ def test_swarm(capfd: Capture) -> None:
         "does not support the --follow flag yet",
     )
 
+    time.sleep(2)
+
     exec_command(
         capfd,
         "-s backend logs",
