@@ -21,7 +21,7 @@ services:
       start_period: 30s
     hostname: angular
     networks:
-      app_net:
+      default:
         aliases:
           - frontend.dockerized.io
     environment:

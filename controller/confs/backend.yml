@@ -15,25 +15,25 @@ networks:
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  app_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # app_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  proxy_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # proxy_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  worker_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # worker_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  ftp_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # ftp_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  db_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # db_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
 # #####################
 # SERVICES
@@ -235,12 +235,7 @@ services:
       # Projects can then map a different folder and change the UPLOAD_PATH accordingly
       - ${DATA_DIR}/uploads:/uploads
     networks:
-      app_net:
-        aliases:
-          - ${FLASK_HOST}
-      db_net:
-      worker_net:
-      proxy_net:
+      default:
         aliases:
           - ${FLASK_HOST}
 
@@ -267,10 +262,10 @@ services:
     volumes:
       - ssl_certs:/etc/letsencrypt
     networks:
-      proxy_net:
+      default:
         aliases:
           - ${PROXY_HOST}
-      app_net:
+
     ports:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
@@ -311,10 +306,10 @@ services:
     volumes:
       - ssl_certs:/etc/letsencrypt
     networks:
-      proxy_net:
+      default:
         aliases:
           - ${PROXY_HOST}
-      app_net:
+
     ports:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
@@ -352,7 +347,7 @@ services:
       POSTGRES_DBS: ${ALCHEMY_DBS}
       PGDATA: /var/lib/postgresql/current
     networks:
-      db_net:
+      default:
         aliases:
           - ${ALCHEMY_HOST}
 
@@ -376,7 +371,7 @@ services:
       MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
       MYSQL_DATABASE: ${ALCHEMY_DB}
     networks:
-      db_net:
+      default:
         aliases:
           - ${ALCHEMY_HOST}
 
@@ -405,7 +400,7 @@ services:
       - data_imports:/var/lib/neo4j/import
       - ${DATA_DIR}/backup:/backup
     networks:
-      db_net:
+      default:
         aliases:
           - ${NEO4J_HOST}
     environment:
@@ -477,7 +472,7 @@ services:
     volumes:
       - mongodata:/data/db
     networks:
-      db_net:
+      default:
         aliases:
           - ${MONGO_HOST}
     environment:
@@ -618,8 +613,7 @@ services:
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
       - ${DATA_DIR}/uploads:/uploads
     networks:
-      db_net:
-      worker_net:
+      default:
 
   celery-beat:
     restart: always
@@ -709,8 +703,7 @@ services:
       # Logs
       - ${DATA_DIR}/logs:/logs
     networks:
-      db_net:
-      worker_net:
+      default:
 
   rabbit:
     restart: always
@@ -755,7 +748,7 @@ services:
       - ssl_certs:/ssl
       - ${DATA_DIR}/backup:/backup
     networks:
-      worker_net:
+      default:
         aliases:
           - ${RABBITMQ_HOST}
 
@@ -774,7 +767,7 @@ services:
       - redisdata:/data
       - ${DATA_DIR}/backup:/backup
     networks:
-      db_net:
+      default:
         aliases:
           - ${REDIS_HOST}
     environment:
@@ -834,7 +827,7 @@ services:
       # Logs
       - ${DATA_DIR}/logs:/logs
     networks:
-      app_net:
+      default:
 
   ##########################
   ### SERVICE INTERFACES ###
@@ -878,8 +871,7 @@ services:
       # DB
       - flower_db:${FLOWER_DBDIR}
     networks:
-      db_net:
-      worker_net:
+      default:
 
     environment:
       APP_MODE: ${APP_MODE}
@@ -957,7 +949,7 @@ services:
     image: rapydo/adminer:${RAPYDO_VERSION}
     # user: adminer
     networks:
-      db_net:
+      default:
     environment:
       ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
       APP_MODE: ${APP_MODE}
@@ -986,7 +978,7 @@ services:
       PUBLICHOST: ${PROJECT_DOMAIN}
       ADDED_FLAGS: -d -d
     networks:
-      ftp_net:
+      default:
 
   ###################
   ### SMTP SERVER  ###
@@ -1004,10 +996,7 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
-      app_net:
-        aliases:
-          - ${SMTP_SERVER_HOST}
-      worker_net:
+      default:
         aliases:
           - ${SMTP_SERVER_HOST}
 
@@ -1021,10 +1010,7 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
-      app_net:
-        aliases:
-          - ${PUSHPIN_HOST}
-      worker_net:
+      default:
         aliases:
           - ${PUSHPIN_HOST}
 
