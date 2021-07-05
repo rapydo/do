@@ -88,7 +88,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         # --no-tty is needed on GitHub Actions
         # to be able to execute commands on the running containers
-        "ssl --volatile --no-tty",
+        "ssl --no-tty",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
         "Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.",
