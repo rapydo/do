@@ -147,13 +147,6 @@ def test_swarm(capfd: Capture) -> None:
         "Base images pulled from docker hub",
     )
 
-    exec_command(
-        capfd,
-        "start --force",
-        "Force flag is not yet implemented",
-        "Stack started",
-    )
-
     time.sleep(2)
 
     exec_command(

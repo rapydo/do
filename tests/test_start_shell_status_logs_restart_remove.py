@@ -56,13 +56,6 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend start --force",
-        "docker-compose command: 'up'",
-        "Stack started",
-    )
-
-    exec_command(
-        capfd,
         "status",
         "docker-compose command: 'ps'",
         # "first_backend_1",

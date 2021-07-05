@@ -1,21 +1,12 @@
-import typer
-
-from controller import log
+from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
+from controller.deploy.compose import Compose
 from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Start services for this configuration")
-def start(
-    force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Recreate containers even if their configuration/image haven't changed",
-        show_default=False,
-    ),
-) -> None:
+def start() -> None:
     Application.get_controller().controller_init()
 
     verify_available_images(
@@ -24,10 +15,11 @@ def start(
         Application.data.base_services,
     )
 
-    if force:
-        log.warning("Force flag is not yet implemented")
-
-    swarm = Swarm()
-    swarm.deploy()
+    if SWARM_MODE:
+        swarm = Swarm()
+        swarm.deploy()
+    else:
+        dc = Compose(files=Application.data.files)
+        dc.start_containers(Application.data.services, force_recreate=False)
 
     log.info("Stack started")
