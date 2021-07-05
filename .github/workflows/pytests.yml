@@ -65,15 +65,15 @@ jobs:
           mkdir rapydo_tests
           cd rapydo_tests
 
-          if [[ $TEST == swarm/* ]]; then
+          if [[ "${{ matrix.test }}" == swarm/* ]]; then
             export SWARM_MODE="1"
-            export TEST_NAME="${{ matrix.test }}"
+            TEST_NAME="${{ matrix.test }}"
             TEST_NAME=${TEST_NAME/swarm\//}
-          elif [[ $TEST == compose/* ]]; then
-            export TEST_NAME="${{ matrix.test }}"
+          elif [[ "${{ matrix.test }}" == compose/* ]]; then
+            TEST_NAME="${{ matrix.test }}"
             TEST_NAME=${TEST_NAME/compose\//}
           else
-            export TEST_NAME="${{ matrix.test }}"
+            TEST_NAME="${{ matrix.test }}"
           fi
 
           py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ TEST_NAME }}.py
