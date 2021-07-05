@@ -14,30 +14,43 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        test:
-          [
-            add_upgrade,
-            backup_restore_tuning_mariadb,
-            backup_restore_tuning_neo4j,
-            backup_restore_tuning_postgres,
-            backup_restore_tuning_rabbit,
-            backup_restore_tuning_redis,
-            base,
-            build_pull,
-            create,
-            cronjobs,
-            dump,
-            install,
-            init_check_update,
-            interfaces,
-            libs,
-            list,
-            passwords_invalid_characters,
-            scale,
-            ssl,
-            start_shell_status_logs_restart_remove,
+        test: [
+            # Both Compose and Swarm
+            compose/add_upgrade,
+            swarm/add_upgrade,
+            compose/base,
+            swarm/base,
+            compose/build_pull,
+            swarm/build_pull,
+            compose/create,
+            swarm/create,
+            compose/install,
+            swarm/install,
+            compose/libs,
+            swarm/libs,
+            compose/passwords_invalid_characters,
+            swarm/passwords_invalid_characters,
+
+            # Swarm only
             swarm/swarm,
-            volatile,
+
+            # Compose only
+            compose/backup_restore_tuning_mariadb,
+            compose/backup_restore_tuning_neo4j,
+            compose/backup_restore_tuning_postgres,
+            compose/backup_restore_tuning_rabbit,
+            compose/backup_restore_tuning_redis,
+            compose/cronjobs,
+            compose/dump,
+            compose/interfaces,
+            compose/ssl,
+            compose/volatile,
+            compose/list,
+
+            # Currently Compose only, to be generalized
+            init_check_update,
+            scale,
+            start_shell_status_logs_restart_remove,
           ]
 
     steps:
