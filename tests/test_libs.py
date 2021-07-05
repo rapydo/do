@@ -116,7 +116,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         pytest.fail("ExecutionException not raised!")  # pragma: no cover
     except system.ExecutionException:
         pass
-    except BaseException:  # pragma: no cover
+    except Exception:  # pragma: no cover
         pytest.fail("Unexpected exception raised")
 
     assert system.bytes_to_str(0) == "0"

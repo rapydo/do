@@ -63,7 +63,7 @@ def load_yaml_file(filepath: Path) -> Any:
 
             return docs[0]
 
-        except BaseException as e:
+        except Exception as e:
 
             log.warning("Failed to read YAML file [{}]: {}", filepath, e)
             return {}

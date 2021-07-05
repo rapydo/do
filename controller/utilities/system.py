@@ -12,7 +12,7 @@ MB = 1_048_576
 KB = 1024
 
 
-class ExecutionException(BaseException):
+class ExecutionException(Exception):
     pass
 
 

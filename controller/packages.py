@@ -58,7 +58,7 @@ class Packages:
                     print(r)
 
                 return bool(result.rc == 0)
-        except BaseException as e:  # pragma: no cover
+        except Exception as e:  # pragma: no cover
             log.critical(e)
             sys.exit(1)
 
