@@ -39,7 +39,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     image = f"rapydo/rabbitmq:{__version__}"
     exec_command(
         capfd,
-        "-s rabbit start",
+        "start",
         f"Missing {image} image for rabbit service, execute rapydo pull",
     )
 
@@ -140,7 +140,7 @@ services:
     image = f"testbuild/rabbit:${__version__}"
     exec_command(
         capfd,
-        "-s rabbit start",
+        "start",
         # f"Missing {image} image for rabbit service, execute rapydo build",
         " image for rabbit service, execute rapydo build",
     )
