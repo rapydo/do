@@ -73,7 +73,7 @@ jobs:
             TEST_NAME=${TEST_NAME/compose\//}
           fi
 
-          py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ TEST_NAME }}.py
+          py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
           cp coverage.xml ..
           cd ..
 
