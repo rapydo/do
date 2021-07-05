@@ -1,5 +1,5 @@
 from controller import SWARM_MODE, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.deploy.swarm import Swarm
@@ -8,6 +8,9 @@ from controller.deploy.swarm import Swarm
 @Application.app.command(help="Start services for this configuration")
 def start() -> None:
     Application.get_controller().controller_init()
+
+    if SWARM_MODE and Configuration.services_list is not None:
+        Application.exit("The start command no longer support -s/--services option")
 
     verify_available_images(
         Application.data.services,
