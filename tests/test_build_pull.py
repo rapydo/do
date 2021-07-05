@@ -57,7 +57,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-s rabbit pull --quiet",
+        "pull --quiet",
         "Base images pulled from docker hub",
     )
 
