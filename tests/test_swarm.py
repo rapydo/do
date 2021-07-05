@@ -147,6 +147,12 @@ def test_swarm(capfd: Capture) -> None:
         "Base images pulled from docker hub",
     )
 
+    exec_command(
+        capfd,
+        "start",
+        "Stack started",
+    )
+
     time.sleep(2)
 
     exec_command(
