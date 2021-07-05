@@ -327,8 +327,7 @@ def test_create(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "-p testservices list services",
-            "List of active services:",
+            "-p testservices check -i main --no-git --no-builds",
             f"Enabled services: {sorted(active_services)}",
         )
 
