@@ -194,7 +194,7 @@ def verify_available_images(
     templates = find_templates_build(base_services, include_image=True)
     clean_core_services = get_non_redundant_services(templates, services)
 
-    for service in clean_core_services:
+    for service in sorted(clean_core_services):
         for image, data in templates.items():
             if data["service"] != service and service not in data["services"]:
                 continue
