@@ -36,7 +36,7 @@ jobs:
             scale,
             ssl,
             start_shell_status_logs_restart_remove,
-            swarm,
+            swarm/swarm,
             volatile,
           ]
 
@@ -65,11 +65,18 @@ jobs:
           mkdir rapydo_tests
           cd rapydo_tests
 
-          if [[ "${{ matrix.test }}" == "swarm" ]]; then
+          if [[ $TEST == swarm/* ]]; then
             export SWARM_MODE="1"
+            TEST_NAME = "${{ matrix.test }}"
+            TEST_NAME=${TEST_NAME/swarm\//}
+          elif [[ $TEST == compose/* ]]; then
+            TEST_NAME = "${{ matrix.test }}"
+            TEST_NAME=${TEST_NAME/compose\//}
+          else
+            TEST_NAME = "${{ matrix.test }}"
           fi
 
-          py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+          py.test --timeout=360 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ TEST_NAME }}.py
           cp coverage.xml ..
           cd ..
 
