@@ -36,12 +36,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-s backend start",
-        "The start command no longer support -s/--services option",
-    )
-
-    exec_command(
-        capfd,
-        "start",
         "image for backend service, execute rapydo pull",
     )
 
