@@ -71,10 +71,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Generating DH parameters, 1024 bit long safe prime, generator 2",
     )
 
-    # Start neo4j and rabbit to verify certificate creation while services are running
+    # Start to verify certificate creation while services are running
     exec_command(
         capfd,
-        "--prod -s backend,rabbit,neo4j start",
+        "--prod start",
     )
 
     # Needed because the next command requires rabbit already started

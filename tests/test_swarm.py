@@ -140,6 +140,11 @@ def test_swarm(capfd: Capture) -> None:
         "-s backend start",
         "The start command no longer support -s/--services option",
     )
+    exec_command(
+        capfd,
+        "-S backend start",
+        "The start command no longer supports -S/--skip-services option",
+    )
 
     exec_command(
         capfd,
