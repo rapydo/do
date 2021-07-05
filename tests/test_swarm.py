@@ -294,9 +294,7 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "remove --all", "rm_all flag is not implemented yet", "Not implemented"
     )
 
-    exec_command(
-        capfd, "remove", "rm_networks is currently always enabled", "Stack removed"
-    )
+    exec_command(capfd, "remove", "Stack removed")
 
     time.sleep(2)
 
