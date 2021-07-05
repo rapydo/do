@@ -7,13 +7,6 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Stop and remove services")
 def remove(
-    rm_networks: bool = typer.Option(
-        False,
-        "--networks",
-        "--net",
-        help="Also remove containers networks",
-        show_default=False,
-    ),
     rm_all: bool = typer.Option(
         False,
         "--all",
@@ -25,24 +18,18 @@ def remove(
 
     swarm = Swarm()
 
-    if not rm_networks:
-        log.warning("rm_networks is currently always enabled")
-
     if rm_all:
         log.warning("rm_all flag is not implemented yet")
 
-    if rm_networks or rm_all:
+    if rm_all:
 
         if Configuration.services_list is not None:
 
-            opt = "--networks" if rm_networks else "--all"
-
             Application.exit(
-                "Incompatibile options {opt} and --service\n"
-                + "rapydo remove {opt} is ALWAYS applied to EVERY container of the "
-                + "stack due to the underlying docker-compose implementation. "
-                + "If you want to continue remove --service option",
-                opt=opt,
+                "Incompatibile options --all and --service\n"
+                + "rapydo remove --all is ALWAYS applied to EVERY container of the "
+                + "stack due to the underlying implementation. "
+                + "If you want to continue remove --service option"
             )
         else:
 
