@@ -301,10 +301,6 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "restart", "Restarting services", "swarm_frontend", "Stack restarted"
     )
 
-    exec_command(
-        capfd, "remove --all", "rm_all flag is not implemented yet", "Not implemented"
-    )
-
     exec_command(capfd, "remove", "Stack removed")
 
     time.sleep(2)
