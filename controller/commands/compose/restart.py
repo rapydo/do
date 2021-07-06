@@ -7,9 +7,7 @@ from controller.deploy.compose import Compose
 def restart() -> None:
     Application.get_controller().controller_init()
 
-    options = {"SERVICE": Application.data.services}
-
     dc = Compose(files=Application.data.files)
-    dc.command("restart", options)
+    dc.start_containers(Application.data.services, force_recreate=True)
 
     log.info("Stack restarted")
