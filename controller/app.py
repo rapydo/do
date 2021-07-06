@@ -15,7 +15,6 @@ from python_on_whales.utils import DockerException
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
-    COMPOSE_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
     DATAFILE,
@@ -672,11 +671,6 @@ You can use of one:
         self.compose_config = cast(ComposeConfig, dc.config().get("services", {}))
 
         self.set_active_services()
-
-        if SWARM_MODE:
-            compose_config = dc.config(relative_paths=True)
-            dc.dump_config(compose_config, COMPOSE_FILE, self.enabled_services)
-            log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     def set_active_services(self) -> None:
         self.active_services = services.find_active(self.compose_config)

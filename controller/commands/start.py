@@ -1,4 +1,4 @@
-from controller import SWARM_MODE, log
+from controller import COMPOSE_FILE, SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -19,7 +19,12 @@ def start() -> None:
         Application.data.base_services,
     )
 
+    dc = Compose(files=Application.data.files)
+
     if SWARM_MODE:
+        compose_config = dc.config(relative_paths=True)
+        dc.dump_config(compose_config, COMPOSE_FILE, Application.data.services)
+        log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
         swarm = Swarm()
         if Application.data.services != Application.data.active_services:
@@ -28,7 +33,6 @@ def start() -> None:
 
         swarm.deploy()
     else:
-        dc = Compose(files=Application.data.files)
         dc.start_containers(Application.data.services, force_recreate=False)
 
     log.info("Stack started")
