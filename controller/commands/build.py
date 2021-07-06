@@ -19,14 +19,14 @@ def build(
     core: bool = typer.Option(
         False,
         "--core",
-        help="force the build of all images including core builds",
+        help="Include core images to the build list",
         show_default=False,
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="remove the cache to force a rebuilding",
+        help="remove the cache to force the build",
         show_default=False,
     ),
 ) -> bool:

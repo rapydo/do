@@ -46,13 +46,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "-e ACTIVATE_RABBIT=0 -s rabbit pull --quiet",
-        "Configuration error: rabbit",
+        "No such service: rabbit",
     )
 
     exec_command(
         capfd,
         "-s proxy pull --quiet",
-        "Configuration error: proxy",
+        "No such service: proxy",
     )
 
     exec_command(
@@ -65,7 +65,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "-s xxx pull",
-        "Configuration error: xxx",
+        "No such service: xxx",
     )
 
     # --all is useless here... added just to include the parameter in some tests.
@@ -177,7 +177,7 @@ RUN mkdir xyz
     exec_command(
         capfd,
         f"-e ACTIVATE_RABBIT=0 -p {project2} -s rabbit build --core",
-        "Configuration error: rabbit",
+        "No such service: rabbit",
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
