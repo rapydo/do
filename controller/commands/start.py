@@ -1,4 +1,4 @@
-from controller import COMPOSE_FILE, SWARM_MODE, log
+from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -25,10 +25,6 @@ def start() -> None:
         if Application.data.services != Application.data.active_services:
             if swarm.docker.stack.list():
                 Application.exit("A stack is already running")
-
-            dc = Compose(files=Application.data.files)
-            compose_config = dc.config(relative_paths=True)
-            dc.dump_config(compose_config, COMPOSE_FILE, Application.data.services)
 
         swarm.deploy()
     else:

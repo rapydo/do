@@ -675,7 +675,7 @@ You can use of one:
 
         if SWARM_MODE:
             compose_config = dc.config(relative_paths=True)
-            dc.dump_config(compose_config, COMPOSE_FILE, self.active_services)
+            dc.dump_config(compose_config, COMPOSE_FILE, self.enabled_services)
             log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     def set_active_services(self) -> None:
