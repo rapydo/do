@@ -102,9 +102,13 @@ class Swarm:
 
                 if task.status.state == "shutdown" or task.status.state == "complete":
                     COLOR = Fore.BLUE
-                elif task.status.state == "running" or task.status.state == "starting":
+                elif task.status.state == "running":
                     COLOR = Fore.GREEN
                     running_tasks += 1
+                elif task.status.state == "starting" or task.status.state == "ready":
+                    COLOR = Fore.YELLOW
+                elif task.status.state == "failed":
+                    COLOR = Fore.RED
                 else:
                     COLOR = Fore.RESET
 
@@ -133,9 +137,7 @@ class Swarm:
 
             replicas = service.spec.mode["Replicated"]["Replicas"]  # type: ignore
 
-            if not tasks_lines:
-                COLOR = Fore.RED
-            elif replicas == 0:
+            if replicas == 0:
                 COLOR = Fore.YELLOW
             elif replicas != running_tasks:
                 COLOR = Fore.RED
