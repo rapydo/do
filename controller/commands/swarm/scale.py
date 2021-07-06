@@ -1,5 +1,8 @@
+from typing import Dict
+
 import typer
 from glom import glom
+from python_on_whales.components.service.cli_wrapper import ValidService
 
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
@@ -42,7 +45,8 @@ def scale(
         swarm = Swarm()
 
         service_name = swarm.get_service(service)
-        swarm.docker.service.scale({service_name: nreplicas}, detach=not wait)
+        scales: Dict[ValidService, int] = {service_name: nreplicas}
+        swarm.docker.service.scale(scales, detach=not wait)
 
     else:  # pragma: no cover
         Application.exit("Number of replica is missing")
