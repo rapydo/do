@@ -46,7 +46,7 @@ def scale(
 
         service_name = swarm.get_service(service)
         scales: Dict[Union[str, Service], int] = {}
-        scales[service_name] = nreplicas
+        scales[service_name] = int(nreplicas)
         swarm.docker.service.scale(scales, detach=not wait)
 
     else:  # pragma: no cover

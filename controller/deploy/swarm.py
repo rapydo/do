@@ -8,7 +8,6 @@ from colorama import Fore
 from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
-from python_on_whales import Task
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
@@ -109,21 +108,24 @@ class Swarm:
                 else:
                     COLOR = Fore.RESET
 
+                slot = f" \\_ [{task.slot}]"
+                node_name = nodes.get(task.node_id, "")
+                status = f"{COLOR}{task.status.state:8}{Fore.RESET}"
+                errors = f"err={task.status.err}" if task.status.err else ""
+                labels = ",".join(task.labels)
+                ts = task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S")
+
                 tasks_lines.append(
-                    COLOR
-                    + "\t".join(
+                    "\t".join(
                         (
-                            f" \\_ [{task.slot}]",
-                            # task.id[0:12],
-                            nodes.get(task.node_id, ""),
-                            # task.status.message,  # started
-                            task.status.state,
-                            task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S"),
-                            f"err={task.status.err}" if task.status.err else "",
-                            ",".join(task.labels),
+                            slot,
+                            status,
+                            ts,
+                            node_name,
+                            errors,
+                            labels,
                         )
                     )
-                    + Fore.RESET
                 )
 
             # Very ugly, to reset the color with \r
@@ -140,28 +142,18 @@ class Swarm:
             else:
                 COLOR = Fore.GREEN
 
-            ports = []
             if service.endpoint.ports:
-                ports = [
+                ports_list = [
                     f"{p.published_port}->{p.target_port}"
                     for p in service.endpoint.ports
                 ]
+            else:
+                ports_list = []
 
+            service_name = service.spec.name
             image = service.spec.task_template.container_spec.image.split("@")[0]
-            print(
-                COLOR
-                + "\t".join(
-                    (
-                        service.spec.name,
-                        image,
-                        str(replicas),
-                        ",".join(ports),
-                    )
-                )
-            )
-
-            if not tasks_lines:
-                print(COLOR + "! no task is running")
+            ports = ",".join(ports_list)
+            print(f"{COLOR}{service_name:23}{Fore.RESET} [{replicas}] {image}\t{ports}")
 
             for line in tasks_lines:
                 print(line)

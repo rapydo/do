@@ -285,14 +285,6 @@ def test_swarm(capfd: Capture) -> None:
         "swarm_backend scaled to 0",
     )
 
-    time.sleep(2)
-
-    exec_command(
-        capfd,
-        "status",
-        "! no task is running",
-    )
-
     exec_command(
         capfd,
         "stop",
