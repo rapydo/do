@@ -31,6 +31,7 @@ jobs:
             compose \
             plumbum \
             sultan \
+            colorama \
             ; do
             echo "[mypy-${lib}.*]" >> mypy.ini
             echo "ignore_missing_imports = True" >> mypy.ini

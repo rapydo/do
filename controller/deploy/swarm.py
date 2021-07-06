@@ -4,6 +4,9 @@ Integration with Docker swarmg
 import sys
 from typing import Dict, List, Optional
 
+from colorama import Fore
+from colorama import deinit as deinit_colorama
+from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Task
 from python_on_whales.utils import DockerException
@@ -47,6 +50,8 @@ class Swarm:
         self.docker.service.update(service_name, force=True, detach=True)
 
     def status(self) -> None:
+
+        init_colorama()
         nodes: Dict[str, str] = {}
         print("====== Nodes ======")
         for node in self.docker.node.list():
@@ -56,16 +61,25 @@ class Swarm:
             cpu = round(node.description.resources.nano_cpus / 1000000000)
             ram = system.bytes_to_str(node.description.resources.memory_bytes)
             resources = f"{cpu} CPU {ram} RAM"
+
+            if state == "Ready+Active":
+                COLOR = Fore.GREEN
+            else:
+                COLOR = Fore.RED
+
             print(
-                # node.id[0:12],
-                node.spec.role.title(),
-                state,
-                node.description.hostname,
-                node.status.addr,
-                resources,
-                ",".join(node.spec.labels),
-                f"v{node.description.engine.engine_version}",
-                sep="\t",
+                COLOR
+                + "\t".join(
+                    (
+                        node.spec.role.title(),
+                        state,
+                        node.description.hostname,
+                        node.status.addr,
+                        resources,
+                        ",".join(node.spec.labels),
+                        f"v{node.description.engine.engine_version}",
+                    )
+                )
             )
 
         services = self.docker.service.list()
@@ -76,19 +90,56 @@ class Swarm:
             log.info("No service is running")
             return
 
-        tasks: Dict[str, List[Task]] = {}
-
-        try:
-            for task in self.docker.stack.ps(Configuration.project):
-                tasks.setdefault(task.service_id, [])
-                tasks[task.service_id].append(task)
-        except DockerException:  # pragma: no cover
-            pass
-
-        print("====== Services ======")
+        print(Fore.RESET + "====== Services ======")
 
         for service in services:
-            # replicas = service.spec.mode["Replicated"]["Replicas"]
+
+            print(f"{Fore.RESET}Inspecting {service.spec.name}...", end="\r")
+
+            tasks_lines: List[str] = []
+
+            running_tasks = 0
+            for task in self.docker.service.ps(service.spec.name):
+
+                if task.status.state == "shutdown" or task.status.state == "complete":
+                    COLOR = Fore.BLUE
+                elif task.status.state == "running" or task.status.state == "starting":
+                    COLOR = Fore.GREEN
+                    running_tasks += 1
+                else:
+                    COLOR = Fore.RESET
+
+                tasks_lines.append(
+                    COLOR
+                    + "\t".join(
+                        (
+                            f" \\_ [{task.slot}]",
+                            # task.id[0:12],
+                            nodes.get(task.node_id, ""),
+                            # task.status.message,  # started
+                            task.status.state,
+                            task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S"),
+                            f"err={task.status.err}" if task.status.err else "",
+                            ",".join(task.labels),
+                        )
+                    )
+                    + Fore.RESET
+                )
+
+            # Very ugly, to reset the color with \r
+            print("                                                         ", end="\r")
+
+            replicas = service.spec.mode["Replicated"]["Replicas"]  # type: ignore
+
+            if not tasks_lines:
+                COLOR = Fore.RED
+            elif replicas == 0:
+                COLOR = Fore.YELLOW
+            elif replicas != running_tasks:
+                COLOR = Fore.RED
+            else:
+                COLOR = Fore.GREEN
+
             ports = []
             if service.endpoint.ports:
                 ports = [
@@ -97,33 +148,27 @@ class Swarm:
                 ]
 
             image = service.spec.task_template.container_spec.image.split("@")[0]
-            tasks_list = tasks.get(service.id, [])
             print(
-                # service.id[0:12],
-                f"{service.spec.name} ({image})",
-                # f"[x {replicas}]",
-                ",".join(ports),
-                # ",".join(service.spec.labels),
-                sep="\t",
+                COLOR
+                + "\t".join(
+                    (
+                        service.spec.name,
+                        image,
+                        str(replicas),
+                        ",".join(ports),
+                    )
+                )
             )
 
-            if not tasks_list:
-                print("! no task is running")
+            if not tasks_lines:
+                print(COLOR + "! no task is running")
 
-            for task in tasks_list:
-                print(
-                    f" \\_ [{task.slot}]",
-                    # task.id[0:12],
-                    nodes.get(task.node_id, ""),
-                    # task.status.message,  # started
-                    task.status.state,
-                    task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S"),
-                    f"err={task.status.err}" if task.status.err else "",
-                    ",".join(task.labels),
-                    sep="\t",
-                )
+            for line in tasks_lines:
+                print(line)
 
             print("")
+
+        deinit_colorama()
 
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
