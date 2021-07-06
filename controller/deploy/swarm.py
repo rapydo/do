@@ -124,10 +124,6 @@ class Swarm:
                     sep="\t",
                 )
 
-    def scale(self, service: str, nreplicas: int) -> None:
-        service_name = self.get_service(service)
-        self.docker.service.scale({service_name: nreplicas}, detach=False)
-
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
 
