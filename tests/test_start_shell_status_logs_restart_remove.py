@@ -246,13 +246,6 @@ def test_all(capfd: Capture) -> None:
         "No such service: invalid",
     )
 
-    # Invalid services in -S are simply ignored
-    exec_command(
-        capfd,
-        "-S frontend,postgres,neo4j,invalid logs --tail 1",
-        "Enabled services: ['backend', 'rabbit']",
-    )
-
     exec_command(
         capfd,
         "-s backend remove --net",

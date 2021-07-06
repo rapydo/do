@@ -1,55 +1,30 @@
-import typer
+from typing import Dict
+
+from python_on_whales.components.service.cli_wrapper import ValidService
 
 from controller import log
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Stop and remove services")
-def remove(
-    rm_all: bool = typer.Option(
-        False,
-        "--all",
-        help="Also remove networks and persistent data stored in docker volumes",
-        show_default=False,
-    ),
-) -> None:
+def remove() -> None:
     Application.get_controller().controller_init()
 
     swarm = Swarm()
 
-    if rm_all:
+    all_services = Application.data.services == Application.data.active_services
 
-        log.warning("rm_all flag is not implemented yet")
-
-        if Configuration.services_list is not None:
-
-            Application.exit(
-                "Incompatibile options --all and --service\n"
-                + "rapydo remove --all is ALWAYS applied to EVERY container of the "
-                + "stack due to the underlying implementation. "
-                + "If you want to continue remove --service option"
-            )
-        else:
-
-            # options = {
-            #     "--volumes": rm_all,
-            #     "--remove-orphans": False,
-            #     "--rmi": "local",  # 'all'
-            # }
-            # dc.command("down", options)
-            log.warning("Not implemented")
+    if all_services:
+        swarm.remove()
+        log.info("Stack removed")
     else:
 
-        # options = {
-        #     "SERVICE": Application.data.services,
-        #     # '--stop': True,  # BUG? not working
-        #     "--force": True,
-        #     "-v": False,  # dangerous?
-        # }
-        # dc.command("stop", options)
-        # dc.command("rm", options)
+        scales: Dict[ValidService, int] = {}
+        for service in Application.data.services:
+            service_name = swarm.get_service(service)
+            scales[service_name] = 0
 
-        swarm.remove()
+        swarm.docker.service.scale(scales, detach=False)
 
-    log.info("Stack removed")
+        log.info("Services removed")

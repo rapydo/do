@@ -35,9 +35,8 @@ def scale(
     if nreplicas is not None:
         swarm = Swarm()
 
-        swarm.docker.service.scale(
-            {swarm.get_service(service): nreplicas}, detach=False
-        )
+        service_name = swarm.get_service(service)
+        swarm.docker.service.scale({service_name: nreplicas}, detach=False)
 
     else:  # pragma: no cover
         Application.exit("Number of replica is missing")

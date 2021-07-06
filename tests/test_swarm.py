@@ -301,6 +301,13 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "restart", "Restarting services", "swarm_frontend", "Stack restarted"
     )
 
+    exec_command(
+        capfd,
+        "-s frontend remove",
+        "swarm_frontend scaled to 0",
+        "verify: Service converged",
+        "Services removed",
+    )
     exec_command(capfd, "remove", "Stack removed")
 
     time.sleep(2)
