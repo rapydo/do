@@ -1,6 +1,6 @@
-from typing import Dict
+from typing import Dict, Union
 
-from python_on_whales.components.service.cli_wrapper import ValidService
+from python_on_whales import Service
 
 from controller import log
 from controller.app import Application
@@ -20,7 +20,7 @@ def remove() -> None:
         log.info("Stack removed")
     else:
 
-        scales: Dict[ValidService, int] = {}
+        scales: Dict[Union[str, Service], int] = {}
         for service in Application.data.services:
             service_name = swarm.get_service(service)
             scales[service_name] = 0

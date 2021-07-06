@@ -281,7 +281,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "scale backend=0",
+        "scale backend=0 --wait",
         "swarm_backend scaled to 0",
     )
 

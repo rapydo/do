@@ -1,8 +1,8 @@
-from typing import Dict
+from typing import Dict, Union
 
 import typer
 from glom import glom
-from python_on_whales.components.service.cli_wrapper import ValidService
+from python_on_whales import Service
 
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
@@ -45,7 +45,7 @@ def scale(
         swarm = Swarm()
 
         service_name = swarm.get_service(service)
-        scales: Dict[ValidService, int] = {service_name: nreplicas}
+        scales: Dict[Union[str, Service], int] = {service_name: nreplicas}
         swarm.docker.service.scale(scales, detach=not wait)
 
     else:  # pragma: no cover

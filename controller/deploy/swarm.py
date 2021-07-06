@@ -2,9 +2,10 @@
 Integration with Docker swarmg
 """
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from glom import glom
+from python_on_whales import Task
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
@@ -75,9 +76,7 @@ class Swarm:
             log.info("No service is running")
             return
 
-        # This Any should be python_on_whales.Task but:
-        # Type of variable becomes Any due to an unfollowed import
-        tasks: Dict[str, List[Any]] = {}
+        tasks: Dict[str, List[Task]] = {}
 
         try:
             for task in self.docker.stack.ps(Configuration.project):
@@ -89,6 +88,7 @@ class Swarm:
         print("====== Services ======")
 
         for service in services:
+            # replicas = service.spec.mode["Replicated"]["Replicas"]
             ports = []
             if service.endpoint.ports:
                 ports = [
@@ -96,17 +96,16 @@ class Swarm:
                     for p in service.endpoint.ports
                 ]
 
-            print("")
             image = service.spec.task_template.container_spec.image.split("@")[0]
+            tasks_list = tasks.get(service.id, [])
             print(
                 # service.id[0:12],
                 f"{service.spec.name} ({image})",
+                # f"[x {replicas}]",
                 ",".join(ports),
                 # ",".join(service.spec.labels),
                 sep="\t",
             )
-
-            tasks_list = tasks.get(service.id, [])
 
             if not tasks_list:
                 print("! no task is running")
@@ -119,10 +118,12 @@ class Swarm:
                     # task.status.message,  # started
                     task.status.state,
                     task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S"),
-                    f"err={task.status.err}",
+                    f"err={task.status.err}" if task.status.err else "",
                     ",".join(task.labels),
                     sep="\t",
                 )
+
+            print("")
 
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
