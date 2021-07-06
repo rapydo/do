@@ -1,5 +1,5 @@
-from controller import SWARM_MODE, log
-from controller.app import Application, Configuration
+from controller import COMPOSE_FILE, SWARM_MODE, log
+from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.deploy.swarm import Swarm
@@ -9,13 +9,9 @@ from controller.deploy.swarm import Swarm
 def start() -> None:
     Application.get_controller().controller_init()
 
-    if SWARM_MODE and Configuration.services_list is not None:
-        Application.exit("The start command no longer supports -s/--services option")
-
-    if Configuration.excluded_services_list is not None:
-        Application.exit(
-            "The start command no longer supports -S/--skip-services option"
-        )
+    for service in Application.data.services:
+        if service not in Application.data.services:
+            Application.exit("No such service {}", service)
 
     verify_available_images(
         Application.data.services,
@@ -24,7 +20,16 @@ def start() -> None:
     )
 
     if SWARM_MODE:
+
         swarm = Swarm()
+        if Application.data.services != Application.data.active_services:
+            if swarm.docker.stack.list():
+                Application.exit("A stack is already running")
+
+            dc = Compose(files=Application.data.files)
+            compose_config = dc.config(relative_paths=True)
+            dc.dump_config(compose_config, COMPOSE_FILE, Application.data.services)
+
         swarm.deploy()
     else:
         dc = Compose(files=Application.data.files)

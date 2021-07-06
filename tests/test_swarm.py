@@ -137,19 +137,8 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend start",
-        "The start command no longer supports -s/--services option",
-    )
-    exec_command(
-        capfd,
-        "-S backend start",
-        "The start command no longer supports -S/--skip-services option",
-    )
-
-    exec_command(
-        capfd,
-        "start",
-        "image for backend service, execute rapydo pull",
+        "-s rabbit start",
+        "image for rabbit service, execute rapydo pull",
     )
 
     exec_command(
@@ -158,10 +147,26 @@ def test_swarm(capfd: Capture) -> None:
         "Base images pulled from docker hub",
     )
 
+    # Deploy a sub-stack
+    exec_command(
+        capfd,
+        "-s rabbit start",
+        "Stack started",
+    )
+
+    # Deploy the full stack
     exec_command(
         capfd,
         "start",
         "Stack started",
+    )
+
+    # Once started a stack in swarm mode, it's not possible
+    # to re-deploy a sub-stack
+    exec_command(
+        capfd,
+        "-s rabbit start",
+        "A stack is already running",
     )
 
     time.sleep(2)

@@ -220,7 +220,7 @@ def read_composer_yamls(
             # This is to verify that mandatory files exist and yml syntax is valid
             conf = load_yaml_file(file=path, is_optional=not mandatory)
 
-            if conf.get("version") != COMPOSE_FILE_VERSION:
+            if conf.get("version") != COMPOSE_FILE_VERSION:  # pragma: no cover
                 log.warning(
                     "Compose file version in {} is {}, expected {}",
                     f,

@@ -33,18 +33,6 @@ def test_all(capfd: Capture) -> None:
     )
     init_project(capfd)
 
-    # exec_command(
-    #     capfd,
-    #     "-s backend start",
-    #     "The start command no longer supports -s/--services option",
-    # )
-
-    exec_command(
-        capfd,
-        "-S backend start",
-        "The start command no longer supports -S/--skip-services option",
-    )
-
     exec_command(
         capfd,
         "-s backend start",
