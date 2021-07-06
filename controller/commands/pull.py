@@ -25,14 +25,6 @@ def pull(
 ) -> None:
     Application.get_controller().controller_init()
 
-    # pre-check to verify if all requested service are activated:
-    if Application.data.services:
-        for service in Application.data.services:
-            if service not in Application.data.active_services:
-                Application.exit(
-                    "Configuration error: {} service is not enabled", service
-                )
-
     base_image: str = ""
     image: str = ""
     images: Set[str] = set()

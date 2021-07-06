@@ -32,17 +32,6 @@ def build(
 ) -> bool:
     Application.get_controller().controller_init()
 
-    enabled_services: List[str] = []
-    for service in Application.data.active_services:
-        if Application.data.services and service not in Application.data.services:
-            continue
-
-        enabled_services.append(service)
-
-    for service in Application.data.services.copy():
-        if service not in Application.data.active_services:
-            Application.exit("Configuration error: {} service is not enabled", service)
-
     docker = Docker()
     if core:
         log.debug("Forcing rebuild of core builds")
@@ -53,7 +42,7 @@ def build(
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
         docker.client.buildx.bake(
-            targets=enabled_services,
+            targets=Application.data.services,
             files=[COMPOSE_FILE],
             pull=True,
             push=MULTI_HOST_MODE,
