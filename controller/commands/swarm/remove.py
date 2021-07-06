@@ -19,9 +19,8 @@ def remove(
     swarm = Swarm()
 
     if rm_all:
-        log.warning("rm_all flag is not implemented yet")
 
-    if rm_all:
+        log.warning("rm_all flag is not implemented yet")
 
         if Configuration.services_list is not None:
 

@@ -17,7 +17,14 @@ def get_services(
     if excluded_services_list:
 
         splitted = excluded_services_list.split(",")
-        return sorted(s for s in default if s not in splitted)
+        return_list: List[str] = []
+        for service in splitted:
+            if service not in default:
+                log.critical("No such service: {}", service)
+                sys.exit(1)
+
+            return_list.append(service)
+        return sorted(return_list)
 
     return sorted(default)
 
