@@ -9,10 +9,6 @@ from controller.deploy.swarm import Swarm
 def start() -> None:
     Application.get_controller().controller_init()
 
-    for service in Application.data.services:
-        if service not in Application.data.active_services:
-            Application.exit("No such service: {}", service)
-
     verify_available_images(
         Application.data.services,
         Application.data.compose_config,

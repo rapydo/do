@@ -681,6 +681,10 @@ You can use of one:
             default=self.active_services,
         )
 
+        for service in self.enabled_services:
+            if service not in self.active_services:
+                Application.exit("No such service: {}", service)
+
         log.debug("Enabled services: {}", self.enabled_services)
 
         self.create_datafile()

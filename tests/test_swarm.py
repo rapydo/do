@@ -295,6 +295,10 @@ def test_swarm(capfd: Capture) -> None:
         "Or you can scale all the services to zero => rapydo scale service=0",
     )
 
+    exec_command("-s invalid restart", "No such service: invalid")
+
+    exec_command("restart", "Restarting services", "swarm_frontend", "Stack restarted")
+
     exec_command(
         capfd, "remove --all", "rm_all flag is not implemented yet", "Not implemented"
     )

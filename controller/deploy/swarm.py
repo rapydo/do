@@ -34,8 +34,16 @@ class Swarm:
             # log.debug(e)
             return None
 
+    @staticmethod
+    def get_service(service: str) -> str:
+        return f"{Configuration.project}_{service}"
+
     def deploy(self) -> None:
         self.docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
+
+    def restart(self, service: str) -> None:
+        service_name = self.get_service(service)
+        self.docker.service.update(service_name, force=True, detach=True)
 
     def status(self) -> None:
         nodes: Dict[str, str] = {}
@@ -117,22 +125,21 @@ class Swarm:
                 )
 
     def scale(self, service: str, nreplicas: int) -> None:
-        self.docker.service.scale(
-            {f"{Configuration.project}_{service}": nreplicas}, detach=False
-        )
+        service_name = self.get_service(service)
+        self.docker.service.scale({service_name: nreplicas}, detach=False)
 
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
 
-        service_name = f"{Configuration.project}_{service}"
+        service_name = self.get_service(service)
         try:
             for task in self.docker.service.ps(service_name):
                 if task.slot != slot:
                     continue
 
-                return f"{Configuration.project}_{service}.{slot}.{task.id}"
+                return f"{service_name}.{slot}.{task.id}"
         except DockerException:
             return None
 
