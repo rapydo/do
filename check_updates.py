@@ -15,6 +15,14 @@ import yaml
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
+if sys.version_info.major == 3 and sys.version_info.minor <= 8:
+    log.critical(
+        "This script is not compatible with Python {}.{}",
+        sys.version_info.major,
+        sys.version_info.minor,
+    )
+    sys.exit(1)
+
 Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
 # this way the script will be allowed to access all required files
