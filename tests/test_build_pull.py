@@ -224,7 +224,7 @@ RUN mkdir xyz
         "Update it with: rapydo --services backend pull",
     )
 
-    exec_command(capfd, "remove --all", "Stack removed")
+    exec_command(capfd, "remove", "Stack removed")
 
     assert image_exists(f"rapydo/backend:{__version__}")
     assert not image_exists("invalid")

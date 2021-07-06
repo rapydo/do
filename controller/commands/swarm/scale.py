@@ -9,7 +9,13 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Scale the number of replicas for a service")
 def scale(
-    scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
+    scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA"),
+    wait: bool = typer.Option(
+        False,
+        "--wait",
+        help="Wait service convergence",
+        show_default=False,
+    ),
 ) -> None:
     Application.get_controller().controller_init()
 
@@ -36,7 +42,7 @@ def scale(
         swarm = Swarm()
 
         service_name = swarm.get_service(service)
-        swarm.docker.service.scale({service_name: nreplicas}, detach=False)
+        swarm.docker.service.scale({service_name: nreplicas}, detach=not wait)
 
     else:  # pragma: no cover
         Application.exit("Number of replica is missing")

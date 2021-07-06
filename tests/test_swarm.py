@@ -239,7 +239,10 @@ def test_swarm(capfd: Capture) -> None:
     )
 
     exec_command(
-        capfd, "scale backend=2", "swarm_backend scaled to 2", "Service converged"
+        capfd,
+        "scale backend=2 --wait",
+        "swarm_backend scaled to 2",
+        "Service converged",
     )
 
     exec_command(
@@ -250,7 +253,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-e DEFAULT_SCALE_BACKEND=3 scale backend",
+        "-e DEFAULT_SCALE_BACKEND=3 scale backend --wait",
         "swarm_backend scaled to 3",
         "Service converged",
     )
@@ -271,11 +274,15 @@ def test_swarm(capfd: Capture) -> None:
         f.write("\n      DEFAULT_SCALE_BACKEND: 4\n")
 
     exec_command(
-        capfd, "scale backend", "swarm_backend scaled to 4", "Service converged"
+        capfd,
+        "scale backend",
+        "swarm_backend scaled to 4",
     )
 
     exec_command(
-        capfd, "scale backend=0", "swarm_backend scaled to 0", "Service converged"
+        capfd,
+        "scale backend=0",
+        "swarm_backend scaled to 0",
     )
 
     time.sleep(2)
