@@ -35,6 +35,12 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "-s backend,invalid start",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
         "-s backend start",
         "image for backend service, execute rapydo pull",
     )

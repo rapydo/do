@@ -137,8 +137,14 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s rabbit start",
-        "image for rabbit service, execute rapydo pull",
+        "-s backend,invalid start",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend start",
+        "image for backend service, execute rapydo pull",
     )
 
     exec_command(
@@ -150,7 +156,7 @@ def test_swarm(capfd: Capture) -> None:
     # Deploy a sub-stack
     exec_command(
         capfd,
-        "-s rabbit start",
+        "-s backend start",
         "Stack started",
     )
 
@@ -165,7 +171,7 @@ def test_swarm(capfd: Capture) -> None:
     # to re-deploy a sub-stack
     exec_command(
         capfd,
-        "-s rabbit start",
+        "-s backend start",
         "A stack is already running",
     )
 
