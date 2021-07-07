@@ -22,7 +22,6 @@ def scale(
 ) -> None:
     Application.get_controller().controller_init()
 
-    nreplicas: str = "1"
     options = scaling.split("=")
     if len(options) == 2:
         service, nreplicas = options
@@ -31,12 +30,12 @@ def scale(
         nreplicas = glom(Configuration.specs, f"variables.env.{scale_var}", default="1")
         service = scaling
 
-    if not nreplicas.isnumeric():
-        Application.exit("Invalid number of replicas: {}", nreplicas)
-
     swarm = Swarm()
 
     service_name = swarm.get_service(service)
     scales: Dict[Union[str, Service], int] = {}
-    scales[service_name] = int(nreplicas)
+    try:
+        scales[service_name] = int(nreplicas)
+    except ValueError:
+        Application.exit("Invalid number of replicas: {}", nreplicas)
     swarm.docker.service.scale(scales, detach=not wait)
