@@ -276,5 +276,13 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "shell --no-tty backend hostname",
+        "Requested command: hostname with user: developer",
+        "No container found for backend_1",
+    )
+
+    exec_command(
+        capfd,
+        "shell --no-tty backend --default",
+        "Requested command: restapi launch with user: developer",
         "No container found for backend_1",
     )
