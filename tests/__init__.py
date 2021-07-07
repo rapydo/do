@@ -30,8 +30,8 @@ class TemporaryRemovePath:
 
     def __exit__(
         self,
-        _type: Optional[Type[BaseException]],
-        value: Optional[BaseException],
+        _type: Optional[Type[Exception]],
+        value: Optional[Exception],
         tb: Optional[TracebackType],
     ) -> bool:
         self.tmp_path.rename(self.path)
