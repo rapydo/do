@@ -17,15 +17,7 @@ def scale(
     options = scaling.split("=")
     if len(options) != 2:
         scale_var = f"DEFAULT_SCALE_{scaling.upper()}"
-        nreplicas = glom(
-            Configuration.specs, f"variables.env.{scale_var}", default=None
-        )
-        if nreplicas is None:
-            hints = f"You can also set a {scale_var} variable in your .projectrc file"
-
-            Application.exit(
-                "Please specify how to scale: SERVICE=NUM_REPLICA\n\n{}", hints
-            )
+        nreplicas = glom(Configuration.specs, f"variables.env.{scale_var}", default="1")
         service = scaling
         scaling = f"{service}={nreplicas}"
     else:

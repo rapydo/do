@@ -247,13 +247,6 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "scale backend",
-        "Please specify how to scale: SERVICE=NUM_REPLICA",
-        "You can also set a DEFAULT_SCALE_BACKEND variable in your .projectrc file",
-    )
-
-    exec_command(
-        capfd,
         "scale backend=2 --wait",
         "swarm_backend scaled to 2",
         "Service converged",
@@ -263,6 +256,12 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "status",
         " [2]",
+    )
+
+    exec_command(
+        capfd,
+        "scale backend",
+        "swarm_backend scaled to 1",
     )
 
     exec_command(

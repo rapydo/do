@@ -28,8 +28,6 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "scale rabbit",
-        "Please specify how to scale: SERVICE=NUM_REPLICA",
-        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
     )
     exec_command(
         capfd,
