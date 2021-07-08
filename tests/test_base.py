@@ -7,7 +7,7 @@ import tempfile
 
 from faker import Faker
 
-from controller import __version__
+from controller import SWARM_MODE, __version__
 from tests import (
     Capture,
     create_project,
@@ -103,8 +103,16 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "Invalid remote host invalid, expected user@ip-or-hostname",
     )
 
-    exec_command(
-        capfd,
-        "--remote invalid@invalid check -i main --no-git",
-        "Could not resolve hostname invalid: Temporary failure in name resolution",
-    )
+    # This is because python on whales raises only a generic DockerException
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "--remote invalid@invalid check -i main --no-git",
+            "Swarm is not initialized, please execute rapydo init",
+        )
+    else:
+        exec_command(
+            capfd,
+            "--remote invalid@invalid check -i main --no-git",
+            "Could not resolve hostname invalid: Temporary failure in name resolution",
+        )

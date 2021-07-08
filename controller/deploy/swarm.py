@@ -33,8 +33,8 @@ class Swarm:
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
             return str(self.docker.swarm.join_token(node_type))
-        except DockerException:
-            # log.debug(e)
+        except DockerException as e:
+            log.debug(e)
             return None
 
     @staticmethod
