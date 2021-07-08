@@ -99,7 +99,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--remote invalid check -i main --no-gits",
+        "--remote invalid check -i main --no-git",
         "Invalid remote host invalid, expected user@ip-or-hostname",
     )
 
