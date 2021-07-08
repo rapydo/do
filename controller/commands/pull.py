@@ -41,13 +41,13 @@ def pull(
         if base_image:
             images.add(base_image)
 
-        if include_all:
-            image = glom(
-                Application.data.compose_config, f"{service}.image", default=""
-            )
-            # from py38 use walrus here
-            if image:
-                images.add(image)
+        image = glom(Application.data.compose_config, f"{service}.image", default="")
+
+        # include custom services without a bulid to base images
+        build = glom(Application.data.compose_config, f"{service}.build", default="")
+
+        if image and (include_all or not build):
+            images.add(image)
 
     docker = Docker()
     docker.client.pull(list(images), quiet=quiet)
