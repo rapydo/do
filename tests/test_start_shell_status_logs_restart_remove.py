@@ -108,7 +108,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "shell --no-tty rabbit whoami",
-        "root",
+        "rabbitmq",
     )
     exec_command(
         capfd,
