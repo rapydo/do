@@ -433,11 +433,22 @@ class Application:
         try:
             docker.buildx.version()
         except DockerException:  # pragma: no cover
-            hint = "Installation guide: https://github.com/docker/buildx#binary-release"
             Application.exit(
-                "A mandatory dependency is missing: docker buildx not found.\n{}", hint
+                "A mandatory dependency is missing: docker buildx not found"
+                "\nInstallation guide: https://github.com/docker/buildx#binary-release"
             )
 
+        if SWARM_MODE and docker.compose.is_installed():  # pragma: no cover
+            # Application.exit(
+            #     "A mandatory dependency is missing: docker compose not found"
+            #     "\nInstallation guide: "
+            #     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+            # )
+            log.warning(
+                "Docker Compose V2 will be soon mandatory and is not installed"
+                "\nInstallation guide: "
+                "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+            )
         Packages.check_program("git")
 
         Packages.check_python_package("compose", min_version="1.18")

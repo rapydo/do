@@ -31,6 +31,7 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
+        "Docker Compose V2 will be soon mandatory and is not installed",
         "Swarm is now initialized",
         "Project initialized",
     )
