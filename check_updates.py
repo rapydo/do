@@ -31,22 +31,6 @@ os.chdir(os.path.dirname(__file__))
 
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
-# https://raw.githubusercontent.com/antirez/redis/6.0/00-RELEASENOTES
-changelogs = {
-    # ## NPM
-    "@ng-bootstrap/ng-bootstrap": "https://github.com/ng-bootstrap/ng-bootstrap/blob/master/CHANGELOG.md",
-    "ngx-spinner": "https://github.com/Napster2210/ngx-spinner/releases",
-    "ngx-formly": "https://github.com/ngx-formly/ngx-formly/releases",
-    "ajv": "https://github.com/ajv-validator/ajv/releases",
-    "dotenv": "https://github.com/motdotla/dotenv/blob/HEAD/CHANGELOG.md",
-    "ngx-uploadx": "https://github.com/kukhariev/ngx-uploadx/releases",
-    "karma": "https://github.com/karma-runner/karma/blob/master/CHANGELOG.md",
-    # ## PYPI
-    "schemathesis": "https://schemathesis.readthedocs.io/en/stable/changelog.html",
-    # ## DockerHub
-}
-
-
 skip_versions = {"typescript": "4.3.2"}
 
 
@@ -106,8 +90,6 @@ def check_updates(
         if latest != tokens[1]:
             print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
-            if changelog := changelogs.get(tokens[0]):
-                print(changelog)
             print("")
 
     elif category in ["compose", "Dockerfile"]:
@@ -131,8 +113,6 @@ def check_updates(
         if latest != tokens[1]:
             print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
-            if changelog := changelogs.get(tokens[0]):
-                print(changelog)
             print("")
     elif category in ["package.json", "dev-package.json", "npm"]:
         lib = lib.strip()
@@ -165,8 +145,6 @@ def check_updates(
         if latest != tokens[1]:
             print(f"# [{tokens[0]}]: {tokens[1]} -> {latest}")
             print(url)
-            if changelog := changelogs.get(tokens[0]):
-                print(changelog)
             print("")
 
     else:
