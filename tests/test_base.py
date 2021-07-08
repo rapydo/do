@@ -99,12 +99,12 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--remote invalid check -i main --no-git --no-builds",
+        "--remote invalid check -i main --no-gits",
         "Invalid remote host invalid, expected user@ip-or-hostname",
     )
 
     exec_command(
         capfd,
-        "--remote invalid@invalid check -i main --no-git --no-builds",
+        "--remote invalid@invalid check -i main --no-git",
         "Could not resolve hostname invalid: Temporary failure in name resolution",
     )
