@@ -449,7 +449,7 @@ class Application:
                 #     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
                 # )
                 log.warning(
-                    "Docker Compose V2 will be soon mandatory and is not installed"
+                    "Docker Compose V2 will be soon mandatory and it is not installed"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
                 )
