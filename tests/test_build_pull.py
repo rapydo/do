@@ -230,3 +230,30 @@ RUN mkdir xyz
     assert not image_exists("invalid")
     assert not image_exists("invalid/invalid")
     assert not image_exists("invalid/invalid:invalid")
+
+    # Add a third service without a build to verify that pull includes it
+    # to be the base image even if defined in custom part
+    with open("projects/testbuild/confs/commons.yml", "a") as f:
+        f.write(
+            """
+  rabbit3:
+    image: alpine:latest
+    environment:
+      ACTIVATE: 1
+    """
+        )
+
+    exec_command(
+        capfd,
+        "-s rabbit3 pull --quiet",
+        "Base images pulled from docker hub",
+    )
+
+    # Now this should fail because pull does not include custom services
+    exec_command(
+        capfd,
+        "-s rabbit3 start",
+        "Stack started",
+    )
+
+    exec_command(capfd, "remove", "Stack removed")
