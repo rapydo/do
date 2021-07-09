@@ -302,6 +302,14 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "-s backend restart",
+        "Restarting services:",
+        "swarm_backend scaled to 1",
+        "Stack restarted",
+    )
+
+    exec_command(
+        capfd,
         "stop",
         "Stop command is not implemented in Swarm Mode",
         "Stop is in contrast with the Docker Swarm approach",
