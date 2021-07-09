@@ -455,10 +455,6 @@ class Application:
                 )
         Packages.check_program("git")
 
-        Packages.check_python_package("compose", min_version="1.18")
-        Packages.check_python_package("requests", min_version="2.6.1")
-        Packages.check_python_package("pip", min_version="10.0.0")
-
     def read_specs(self, read_extended: bool = True) -> None:
         """Read project configuration"""
 

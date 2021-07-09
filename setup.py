@@ -28,6 +28,7 @@ setup(
         "GitPython==3.1.18",
         "PyYAML==5.4.1",
         "pip>=10.0.0",
+        "requests>=2.6.1",
         "typer[all]==0.3.2",
     ],
     keywords=["http", "api", "rest", "web", "backend", "rapydo"],
