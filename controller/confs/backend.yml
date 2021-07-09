@@ -847,7 +847,7 @@ services:
     # user: root
     command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
     healthcheck:
-      test: "wget -t 1 --quiet --no-check-certificate http://$$FLOWER_USER:$$FLOWER_PASSWORD@localhost:$$FLOWER_PORT -O - > /dev/null"
+      test: "wget -t 1 --quiet --no-check-certificate $$FLOWER_PROTOCOL://$$FLOWER_USER:$$FLOWER_PASSWORD@localhost:$$FLOWER_PORT -O - > /dev/null"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3

@@ -306,6 +306,7 @@ variables:
     FLOWER_DBDIR: /var/flower
     FLOWER_PORT: 5555
     FLOWER_SSL_OPTIONS:
+    FLOWER_PROTOCOL: http # https in production mode, used for healthchecks
 
     # Pushpin
     PUSHPIN_ENABLE_CONNECTOR: 1
