@@ -32,7 +32,8 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
         "docker buildx is installed",
-        "docker compose is installed",
+        # "docker compose is installed",
+        "Docker Compose V2 will be soon mandatory and it is not installed",
         "Swarm is now initialized",
         "Project initialized",
     )
