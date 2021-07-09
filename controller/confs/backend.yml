@@ -922,6 +922,7 @@ services:
       FLOWER_USER: ${FLOWER_USER}
       FLOWER_PASSWORD: ${FLOWER_PASSWORD}
       FLOWER_DBDIR: ${FLOWER_DBDIR}
+      FLOWER_PROTOCOL: ${FLOWER_PROTOCOL}
 
   swaggerui:
     build:
