@@ -3,7 +3,7 @@ from typing import Dict, Union
 from python_on_whales import Service
 
 from controller import log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
 
@@ -19,6 +19,12 @@ def remove() -> None:
         swarm.remove()
         log.info("Stack removed")
     else:
+
+        if not swarm.stack_is_running(Configuration.project):
+            Application.exit(
+                "Stack {} is not running, deploy it with rapydo start",
+                Configuration.project,
+            )
 
         scales: Dict[Union[str, Service], int] = {}
         for service in Application.data.services:

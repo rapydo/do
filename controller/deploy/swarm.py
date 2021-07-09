@@ -42,13 +42,27 @@ class Swarm:
     def get_service(service: str) -> str:
         return f"{Configuration.project}_{service}"
 
+    @staticmethod
+    def get_replicas(service: Service) -> int:
+        if not service.spec.mode:  # pragma: no cover
+            return 0
+
+        return glom(service.spec.mode, "Replicated.Replicas", default=0)  # type: ignore
+
+    def stack_is_running(self, stack: str) -> bool:
+        for s in self.docker.stack.list():
+            if s.name == stack:
+                return True
+        return False
+
     def deploy(self) -> None:
         self.docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
 
     def restart(self, service: str) -> None:
         service_name = self.get_service(service)
         service_instance = self.docker.service.inspect(service_name)
-        replicas = glom(service_instance.spec.mode, "Replicated.Replicas", default=0)
+
+        replicas = self.get_replicas(service_instance)
         if replicas == 0:
             scales: Dict[Union[str, Service], int] = {}
             scales[service_name] = 1
@@ -143,7 +157,7 @@ class Swarm:
             # Very ugly, to reset the color with \r
             print("                                                         ", end="\r")
 
-            replicas = glom(service.spec.mode, "Replicated.Replicas", default=0)
+            replicas = self.get_replicas(service)
 
             if replicas == 0:
                 COLOR = Fore.YELLOW

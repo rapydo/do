@@ -1,5 +1,5 @@
 from controller import SWARM_MODE, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 from controller.deploy.swarm import Swarm
 
@@ -10,6 +10,12 @@ def restart() -> None:
 
     if SWARM_MODE:
         swarm = Swarm()
+        if not swarm.stack_is_running(Configuration.project):
+            Application.exit(
+                "Stack {} is not running, deploy it with rapydo start",
+                Configuration.project,
+            )
+
         log.info("Restarting services:")
         for service in Application.data.services:
             swarm.restart(service)
