@@ -332,9 +332,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert len(cmd[1]) == 1
     assert cmd[1][0] == "b c"
 
-    assert Packages.import_package("invalid") is None
-    assert Packages.package_version("invalid") is None
-
     assert Packages.get_bin_version("invalid") is None
 
     v = Packages.get_bin_version("git")
@@ -366,36 +363,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert isinstance(vv.version[0], int)
     assert isinstance(vv.version[1], int)
     assert isinstance(vv.version[2], int)
-
-    try:
-        Packages.check_python_package("invalid")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    v = Packages.check_python_package("pip")
-    assert v is not None
-
-    try:
-        Packages.check_python_package("pip", min_version="99999.99")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    try:
-        Packages.check_python_package("pip", max_version="0.0")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    v = Packages.check_python_package("pip", min_version="0.0")
-    assert v is not None
-
-    v = Packages.check_python_package("pip", max_version="99999.99")
-    assert v is not None
-
-    v = Packages.check_python_package("pip", min_version="0.0", max_version="99999.99")
-    assert v is not None
 
     try:
         Packages.check_program("invalid")

@@ -4,9 +4,7 @@
 import re
 import sys
 from distutils.version import LooseVersion
-from importlib import import_module
 from pathlib import Path
-from types import ModuleType
 from typing import List, Optional, Union
 
 from sultan.api import Sultan
@@ -61,62 +59,6 @@ class Packages:
         except Exception as e:  # pragma: no cover
             log.critical(e)
             sys.exit(1)
-
-    @staticmethod
-    def import_package(package_name: str) -> Optional[ModuleType]:
-
-        try:
-            return import_module(package_name)
-        except (ModuleNotFoundError, ImportError):
-            return None
-
-    @staticmethod
-    def package_version(package_name: str) -> Optional[str]:
-        package = Packages.import_package(package_name)
-        if package is None:
-            return None
-        return str(package.__version__)  # type: ignore
-
-    @staticmethod
-    def check_python_package(
-        package_name: str,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-    ) -> Optional[str]:
-
-        found_version = Packages.package_version(package_name)
-        if found_version is None:
-            log.critical(
-                "Could not find the following python package: {}", package_name
-            )
-            sys.exit(1)
-
-        try:
-            if min_version is not None:
-                if LooseVersion(min_version) > LooseVersion(found_version):
-                    log.critical(
-                        "Minimum supported version for {} is {}, found {}",
-                        package_name,
-                        min_version,
-                        found_version,
-                    )
-                    sys.exit(1)
-
-            if max_version is not None:
-                if LooseVersion(max_version) < LooseVersion(found_version):
-                    log.critical(
-                        "Maximum supported version for {} is {}, found {}",
-                        package_name,
-                        max_version,
-                        found_version,
-                    )
-                    sys.exit(1)
-
-            log.debug("{} version: {}", package_name, found_version)
-            return found_version
-        except TypeError as e:  # pragma: no cover
-            log.error("{}: {}", e, found_version)
-            return None
 
     @staticmethod
     def check_program(
