@@ -334,3 +334,11 @@ def test_swarm(capfd: Capture) -> None:
         "Ready+Active",
         "No service is running",
     )
+
+    exec_command(
+        capfd,
+        "-s frontend restart",
+        "Restarting services:",
+        "swarm_frontend scaled to 1",
+        "Stack restarted",
+    )

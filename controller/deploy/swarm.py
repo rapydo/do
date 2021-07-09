@@ -2,12 +2,13 @@
 Integration with Docker swarmg
 """
 import sys
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from colorama import Fore
 from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
+from python_on_whales import Service
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
@@ -33,8 +34,8 @@ class Swarm:
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
             return str(self.docker.swarm.join_token(node_type))
-        except DockerException as e:
-            log.debug(e)
+        except DockerException:
+            # log.debug(e)
             return None
 
     @staticmethod
@@ -46,7 +47,14 @@ class Swarm:
 
     def restart(self, service: str) -> None:
         service_name = self.get_service(service)
-        self.docker.service.update(service_name, force=True, detach=True)
+        service_instance = self.docker.service.inspect(service_name)
+        replicas = glom(service_instance.spec.mode, "Replicated.Replicas", default=0)
+        if replicas == 0:
+            scales: Dict[Union[str, Service], int] = {}
+            scales[service_name] = 1
+            self.docker.service.scale(scales, detach=True)
+        else:
+            self.docker.service.update(service_name, force=True, detach=True)
 
     def status(self) -> None:
 
@@ -135,7 +143,7 @@ class Swarm:
             # Very ugly, to reset the color with \r
             print("                                                         ", end="\r")
 
-            replicas = service.spec.mode["Replicated"]["Replicas"]  # type: ignore
+            replicas = glom(service.spec.mode, "Replicated.Replicas", default=0)
 
             if replicas == 0:
                 COLOR = Fore.YELLOW
