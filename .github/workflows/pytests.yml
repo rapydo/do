@@ -68,6 +68,7 @@ jobs:
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
           curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
+          docker compose --help
       - name: Run Tests
         env:
           LOGURU_LEVEL: DEBUG
