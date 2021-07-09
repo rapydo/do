@@ -47,7 +47,7 @@ class Swarm:
         if not service.spec.mode:  # pragma: no cover
             return 0
 
-        return glom(service.spec.mode, "Replicated.Replicas", default=0)  # type: ignore
+        return glom(service.spec.mode, "Replicated.Replicas", default=0)
 
     def stack_is_running(self, stack: str) -> bool:
         for s in self.docker.stack.list():
