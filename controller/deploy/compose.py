@@ -32,7 +32,7 @@ from controller import COMPOSE_ENVIRONMENT_FILE, log
 
 
 class Compose:
-    def __init__(self, files: List[Path]):
+    def __init__(self, files: List[Path]) -> None:
         self.files = files
         self.options = {
             "--file": self.files,
