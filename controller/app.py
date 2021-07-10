@@ -445,16 +445,12 @@ class Application:
                 # v = docker.compose.version()
                 log.debug("docker compose is installed")
             else:  # pragma: no cover
-                # Application.exit(
-                #     "A mandatory dependency is missing: docker compose not found"
-                #     "\nInstallation guide: "
-                #     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                # )
-                log.warning(
-                    "Docker Compose V2 will be soon mandatory and it is not installed"
+                Application.exit(
+                    "A mandatory dependency is missing: docker compose not found"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
                 )
+
         Packages.check_program("git")
 
     def read_specs(self, read_extended: bool = True) -> None:
