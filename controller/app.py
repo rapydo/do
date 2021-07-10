@@ -439,14 +439,21 @@ class Application:
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
             )
 
-        if SWARM_MODE:
-            if docker.compose.is_installed():
-                # NotImplementedError
-                # v = docker.compose.version()
-                log.debug("docker compose is installed")
-            else:  # pragma: no cover
+        if docker.compose.is_installed():
+            # NotImplementedError
+            # v = docker.compose.version()
+            log.debug("docker compose is installed")
+        else:  # pragma: no cover
+
+            if SWARM_MODE:
                 Application.exit(
                     "A mandatory dependency is missing: docker compose not found"
+                    "\nInstallation guide: "
+                    "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+                )
+            else:
+                log.warning(
+                    "Docker Compose V2 will be soon mandatory and it is not installed"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
                 )
