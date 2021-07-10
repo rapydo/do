@@ -18,12 +18,12 @@ def start() -> None:
 
     if SWARM_MODE:
         swarm = Swarm()
-        compose = ComposeV2()
+        compose = ComposeV2(Application.data.files)
         if Application.data.services != Application.data.active_services:
             if swarm.docker.stack.list():
                 Application.exit("A stack is already running")
 
-        compose.dump_config(Application.data.files, Application.data.services)
+        compose.dump_config(Application.data.services)
         swarm.deploy()
     else:
         dc = Compose(files=Application.data.files)
