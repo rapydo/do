@@ -431,8 +431,8 @@ class Application:
         )
 
         try:
-            docker.buildx.version()
-            log.debug("docker buildx is installed")
+            v = docker.buildx.version()
+            log.debug("docker buildx is installed: {}", v)
         except DockerException:  # pragma: no cover
             Application.exit(
                 "A mandatory dependency is missing: docker buildx not found"
@@ -441,6 +441,8 @@ class Application:
 
         if SWARM_MODE:
             if docker.compose.is_installed():
+                # NotImplementedError
+                # v = docker.compose.version()
                 log.debug("docker compose is installed")
             else:  # pragma: no cover
                 # Application.exit(
