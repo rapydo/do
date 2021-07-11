@@ -61,7 +61,6 @@ class Compose:
 
         for b in binds:
             p = Path(b)
-            log.critical(p)
             if p.exists():
                 continue
             try:

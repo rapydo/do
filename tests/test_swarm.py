@@ -388,6 +388,7 @@ def test_swarm(capfd: Capture) -> None:
 
     # Needed to be able to try to start again
     exec_command(capfd, "remove", "Stack removed")
+    time.sleep(2)
 
     # Delete again but remove write permissions
     shutil.rmtree(karma_folder)
