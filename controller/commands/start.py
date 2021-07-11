@@ -21,7 +21,10 @@ def start() -> None:
         compose = ComposeV2(Application.data.files)
         if Application.data.services != Application.data.active_services:
             if swarm.docker.stack.list():
-                Application.exit("A stack is already running")
+                Application.exit(
+                    "A stack is already running. "
+                    "Stop it with rapydo remove if you want to start a new stack"
+                )
 
         compose.dump_config(Application.data.services)
         swarm.deploy()
