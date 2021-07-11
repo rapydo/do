@@ -2,7 +2,9 @@
 This module will test the swarm mode
 """
 import random
+import shutil
 import time
+from pathlib import Path
 
 from controller.deploy.swarm import Swarm
 from tests import Capture, create_project, exec_command
@@ -366,3 +368,39 @@ def test_swarm(capfd: Capture) -> None:
         "-s frontend restart",
         "Stack swarm is not running, deploy it with rapydo start",
     )
+
+    # Verify bind volumes checks
+    data_folder = Path("data")
+    backup_folder = data_folder.joinpath("backup")
+    assert backup_folder.exists()
+
+    # Delete data/backup and it will be recreated
+    shutil.rmtree(backup_folder)
+    assert not backup_folder.exists()
+    exec_command(
+        capfd,
+        "-s backend start",
+        "A bind folder was missing and was automatically created: ",
+        "data/backup",
+        "Stack started",
+    )
+    assert backup_folder.exists()
+
+    # Delete again but remove write permissions
+    shutil.rmtree(backup_folder)
+    assert not backup_folder.exists()
+
+    # set the data folder read only
+    data_folder.chmod(0o550)
+
+    # The missing folder can't be recreated due to permissions denied
+    exec_command(
+        capfd,
+        "-s backend start",
+        "A bind folder is missing and can't be automatically created: " "data/backup",
+        "Stack started",
+    )
+    assert backup_folder.exists()
+
+    # Restore RW permissions
+    data_folder.chmod(0o770)

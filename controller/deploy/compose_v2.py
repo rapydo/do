@@ -6,6 +6,7 @@ from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 
 from controller import COMPOSE_ENVIRONMENT_FILE, COMPOSE_FILE, log
+from controller.app import Application
 
 
 class Compose:
@@ -36,6 +37,7 @@ class Compose:
         }
         networks = set()
         volumes = set()
+        binds = set()
         # Remove unused services, networks and volumes from compose configuration
         for key, value in compose_config.get("services", {}).items():
             if key not in services:
@@ -47,9 +49,29 @@ class Compose:
 
             for k in value.get("volumes", []):
                 source = k.get("source", "")
-                if source and k.get("type", "") == "volume":
-
+                volume_type = k.get("type", "")
+                if source and volume_type == "volume":
                     volumes.add(source.split(":")[0])
+                elif source and volume_type == "bind":
+                    binds.add(source.split(":")[0])
+
+        # Missing folders are then automatically created by the docker engine
+        # the runs with root privileges and so create folders as root
+        # and this can often lead to issues with permissions.
+
+        for b in binds:
+            p = Path(b)
+            if p.exists():
+                continue
+            try:
+                p.mkdir(parents=True)
+                log.warning(
+                    "A bind folder was missing and was automatically created: {}", b
+                )
+            except PermissionError:
+                Application.exit(
+                    "A bind folder is missing and can't be automatically created: {}", b
+                )
 
         for net in networks:
             clean_config["networks"][net] = compose_config["networks"].get(net)

@@ -24,7 +24,7 @@ def start() -> None:
                 Application.exit("A stack is already running")
 
         compose.dump_config(Application.data.services)
-        swarm.deploy()
+        # swarm.deploy()
     else:
         dc = Compose(files=Application.data.files)
         dc.start_containers(Application.data.services, force_recreate=False)
