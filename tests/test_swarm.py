@@ -369,28 +369,14 @@ def test_swarm(capfd: Capture) -> None:
         "-s frontend restart",
         "Stack swarm is not running, deploy it with rapydo start",
     )
-    # Verify bind volumes checks
-    data_folder = Path("data")
-    karma_folder = data_folder.joinpath("swarm", "karma")
-    assert karma_folder.exists()
+    # ############################
+    # Verify bind volumes checks #
+    # ############################
+    data_folder = Path("data", "swarm")
+    karma_folder = data_folder.joinpath("karma")
 
     # Delete data/swarm/karma and it will be recreated
-    shutil.rmtree(karma_folder)
-    assert not karma_folder.exists()
-    exec_command(
-        capfd,
-        "-s frontend start",
-        "A bind folder was missing and was automatically created: ",
-        "/data/swarm/karma",
-        "Stack started",
-    )
     assert karma_folder.exists()
-
-    # Needed to be able to try to start again
-    exec_command(capfd, "remove", "Stack removed")
-    time.sleep(2)
-
-    # Delete again but remove write permissions
     shutil.rmtree(karma_folder)
     assert not karma_folder.exists()
 
@@ -404,7 +390,16 @@ def test_swarm(capfd: Capture) -> None:
         "A bind folder is missing and can't be automatically created: ",
         "/data/swarm/karma",
     )
-    assert karma_folder.exists()
+    assert not karma_folder.exists()
 
     # Restore RW permissions
     data_folder.chmod(0o770)
+
+    exec_command(
+        capfd,
+        "-s frontend start",
+        "A bind folder was missing and was automatically created: ",
+        "/data/swarm/karma",
+        "Stack started",
+    )
+    assert karma_folder.exists()
