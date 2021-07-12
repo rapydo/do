@@ -51,9 +51,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd, "install docker", "Docker current version:", "Docker installed version:"
     )
-    exec_command(
-        capfd, "install compose", "Installing CLI...", "Docker compose is installed"
-    )
+    exec_command(capfd, "install compose", "Docker compose is installed")
     exec_command(
         capfd,
         "install buildx",
