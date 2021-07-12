@@ -14,6 +14,11 @@ from controller.app import Application, Configuration
 from controller.packages import Packages
 from controller.utilities import git
 
+# https://github.com/docker/compose-cli/releases
+COMPOSE_VERSION = "v2.0.0-beta.6"
+# https://github.com/docker/buildx/releases
+BUILDX_VERSION = "v0.5.1"
+
 
 def download(url: str) -> Path:
     r = requests.get(url)
@@ -72,7 +77,7 @@ def install(
         compose_bin = cli_plugin.joinpath("docker-compose")
 
         url = "https://github.com/docker/compose-cli/releases/download/"
-        url += "v2.0.0-beta.3/docker-compose-linux-amd64"
+        url += f"{COMPOSE_VERSION}/docker-compose-linux-amd64"
 
         f = download(url)
         f.rename(compose_bin)
@@ -97,7 +102,7 @@ def install(
         buildx_bin = cli_plugin.joinpath("docker-buildx")
 
         url = "https://github.com/docker/buildx/releases/download/"
-        url += "v0.5.1/buildx-v0.5.1.linux-amd64"
+        url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
 
         f = download(url)
         f.rename(buildx_bin)
