@@ -18,7 +18,6 @@ def install(
         show_default=False,
     ),
 ) -> None:
-    Application.get_controller().controller_init()
 
     if version == "docker":
         log.info("Installation script: https://get.docker.com")
@@ -34,6 +33,8 @@ def install(
     if version == "buildx":
         log.info("Installation guide: https://github.com/docker/buildx#binary-release")
         return None
+
+    Application.get_controller().controller_init()
 
     if version == "auto":
         version = Configuration.rapydo_version
