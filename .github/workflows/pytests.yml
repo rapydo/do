@@ -68,11 +68,8 @@ jobs:
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
 
-          mkdir -p $HOME/.docker/cli-plugins
-          wget --quiet https://github.com/docker/compose-cli/releases/download/v2.0.0-beta.3/docker-compose-linux-amd64 -O $HOME/.docker/cli-plugins/docker-compose
-          chmod +x $HOME/.docker/cli-plugins/docker-compose
+          rapydo install compose
 
-          # curl -L https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh | sh
       - name: Run Tests
         env:
           LOGURU_LEVEL: DEBUG

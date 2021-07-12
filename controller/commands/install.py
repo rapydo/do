@@ -67,6 +67,17 @@ def install(
             for r in result.stdout + result.stderr:
                 print(r)
 
+        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+        cli_plugin.mkdir(parents=True, exist_ok=True)
+        compose_bin = cli_plugin.joinpath("docker-compose")
+
+        url = "https://github.com/docker/compose-cli/releases/download/"
+        url += "v2.0.0-beta.3/docker-compose-linux-amd64"
+
+        f = download(url)
+        f.rename(compose_bin)
+        compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
+
         if docker.compose.is_installed():
             log.info("Docker compose is installed")
         else:  # pragma: no cover
