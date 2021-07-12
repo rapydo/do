@@ -48,6 +48,10 @@ def test_install(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "install 100.0", "Invalid version")
 
+    exec_command(capfd, "install docker", "Installation script")
+    exec_command(capfd, "install compose", "Installation guide")
+    exec_command(capfd, "install buildx", "Installation guide")
+
     exec_command(capfd, "install auto")
 
     r = git.get_repo("submodules/do")

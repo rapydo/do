@@ -20,6 +20,21 @@ def install(
 ) -> None:
     Application.get_controller().controller_init()
 
+    if version == "docker":
+        log.info("Installation script: https://get.docker.com")
+        return None
+
+    if version == "compose":
+        log.info(
+            "Installation guide: "
+            "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+        )
+        return None
+
+    if version == "buildx":
+        log.info("Installation guide: https://github.com/docker/buildx#binary-release")
+        return None
+
     if version == "auto":
         version = Configuration.rapydo_version
         log.info("Detected version {} to be installed", version)
