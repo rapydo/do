@@ -47,6 +47,7 @@ def install(
         log.info("Docker current version: {}", Packages.get_bin_version("docker"))
         url = "https://get.docker.com"
         f = download(url)
+        log.info("The installation script contains a wait, please be patient")
         with Sultan.load(sudo=True) as sultan:
             result = sultan.sh(f).run()
 
@@ -76,9 +77,9 @@ def install(
 
         try:
             v = docker.buildx.version()
-            log.info("docker buildx current version: {}", v)
+            log.info("Docker buildx current version: {}", v)
         except DockerException:  # pragma: no cover
-            log.info("docker buildx current version: N/A")
+            log.info("Docker buildx current version: N/A")
 
         cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
         cli_plugin.mkdir(parents=True, exist_ok=True)
@@ -92,7 +93,7 @@ def install(
         buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
 
         v = docker.buildx.version()
-        log.info("docker buildx installed version: {}", v)
+        log.info("Docker buildx installed version: {}", v)
         return None
 
     Application.get_controller().controller_init()
