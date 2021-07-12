@@ -196,8 +196,8 @@ services:
       SMTP_PASSWORD: ${SMTP_PASSWORD}
 
       TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
-      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
+      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
+      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
       TELEGRAM_USERS: ${TELEGRAM_USERS}
       TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
       TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
@@ -411,24 +411,24 @@ services:
       NEO4J_USERNAME: ${NEO4J_USER}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       SECURE_FILE_PERMISSIONS: "yes"
-      NEO4J_dbms_allow__upgrade: ${NEO4J_ALLOW_UPGRADE}
+      NEO4J_dbms_allow__upgrade: "${NEO4J_ALLOW_UPGRADE}"
       NEO4J_dbms_memory_heap_max__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
       # Useful in case of corrupted transaction logs
-      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: ${NEO4J_RECOVERY_MODE}
-      NEO4J_dbms_recovery_fail__on__missing__files: ${NEO4J_RECOVERY_MODE}
+      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "${NEO4J_RECOVERY_MODE}"
+      NEO4J_dbms_recovery_fail__on__missing__files: "${NEO4J_RECOVERY_MODE}"
 
       # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
-      NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
-      NEO4J_dbms_ssl_policy_https_enabled: ${NEO4J_SSL_ENABLED}
+      NEO4J_dbms_ssl_policy_bolt_enabled: "${NEO4J_SSL_ENABLED}"
+      NEO4J_dbms_ssl_policy_https_enabled: "${NEO4J_SSL_ENABLED}"
       NEO4J_dbms_ssl_policy_bolt_base__directory: /ssl/real
       NEO4J_dbms_ssl_policy_https_base__directory: /ssl/real
       NEO4J_dbms_ssl_policy_bolt_private__key: privkey1.pem
       NEO4J_dbms_ssl_policy_https_private__key: privkey1.pem
       NEO4J_dbms_ssl_policy_bolt_public__certificate: fullchain1.pem
       NEO4J_dbms_ssl_policy_https_public__certificate: fullchain1.pem
-      NEO4J_dbms_connector_https_enabled: ${NEO4J_SSL_ENABLED}
+      NEO4J_dbms_connector_https_enabled: "${NEO4J_SSL_ENABLED}"
       NEO4J_dbms_connector_bolt_listen__address: ":7687"
       NEO4J_dbms_connector_http_listen__address: ":7474"
       NEO4J_dbms_connector_https_listen__address: ":7473"
@@ -802,8 +802,8 @@ services:
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       DOMAIN: ${PROJECT_DOMAIN}
       TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
-      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
+      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
+      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
       TELEGRAM_USERS: ${TELEGRAM_USERS}
       TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
       TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
