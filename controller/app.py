@@ -437,6 +437,7 @@ class Application:
             Application.exit(
                 "A mandatory dependency is missing: docker buildx not found"
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
+                "\n\nor try the automated installation with rapydo install builx"
             )
 
         if docker.compose.is_installed():
@@ -450,12 +451,14 @@ class Application:
                     "A mandatory dependency is missing: docker compose not found"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+                    "\n\nor try the automated installation with rapydo install builx"
                 )
             else:
                 log.warning(
                     "Docker Compose V2 will be soon mandatory and it is not installed"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+                    "\n\nor try the automated installation with rapydo install builx"
                 )
 
         Packages.check_program("git")
