@@ -1,11 +1,35 @@
+import stat
+import tempfile
 import time
+from pathlib import Path
 
+import requests
 import typer
+from python_on_whales import docker
+from python_on_whales.utils import DockerException
+from sultan.api import Sultan
 
 from controller import SUBMODULES_DIR, log
 from controller.app import Application, Configuration
 from controller.packages import Packages
 from controller.utilities import git
+
+
+def download(url: str) -> Path:
+    r = requests.get(url)
+    if r.status_code != 200:
+        Application.exit(
+            "Can't download {}, invalid status code {}", url, str(r.status_code)
+        )
+
+    file: Path = Path(tempfile.NamedTemporaryFile().name)
+
+    with open(file, "wb") as f:
+        for chunk in r.iter_content(chunk_size=1024):
+            if chunk:  # filter out keep-alive new chunks
+                f.write(chunk)
+
+    return file
 
 
 @Application.app.command(help="Install the specified version of rapydo")
@@ -20,18 +44,55 @@ def install(
 ) -> None:
 
     if version == "docker":
-        log.info("Installation script: https://get.docker.com")
+        log.info("Docker current version: {}", Packages.get_bin_version("docker"))
+        url = "https://get.docker.com"
+        f = download(url)
+        with Sultan.load(sudo=True) as sultan:
+            result = sultan.sh(f).run()
+
+            for r in result.stdout + result.stderr:
+                print(r)
+
+        log.info("Docker installed version: {}", Packages.get_bin_version("docker"))
         return None
 
     if version == "compose":
-        log.info(
-            "Installation guide: "
-            "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+        f = download(
+            "https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh"
         )
+        with Sultan.load(sudo=True) as sultan:
+            result = sultan.sh(f).run()
+
+            for r in result.stdout + result.stderr:
+                print(r)
+
+        if docker.compose.is_installed():
+            log.info("Docker compose is installed")
+        else:  # pragma: no cover
+            log.error("Docker compose is NOT installed")
         return None
 
     if version == "buildx":
-        log.info("Installation guide: https://github.com/docker/buildx#binary-release")
+
+        try:
+            v = docker.buildx.version()
+            log.info("docker buildx current version: {}", v)
+        except DockerException:  # pragma: no cover
+            log.info("docker buildx current version: N/A")
+
+        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+        cli_plugin.mkdir(parents=True, exist_ok=True)
+        buildx_bin = cli_plugin.joinpath("docker-buildx")
+
+        url = "https://github.com/docker/buildx/releases/download/"
+        url += "v0.5.1/buildx-v0.5.1.linux-amd64"
+
+        f = download(url)
+        f.rename(buildx_bin)
+        buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
+
+        v = docker.buildx.version()
+        log.info("docker buildx installed version: {}", v)
         return None
 
     Application.get_controller().controller_init()

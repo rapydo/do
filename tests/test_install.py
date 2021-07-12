@@ -48,9 +48,16 @@ def test_install(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "install 100.0", "Invalid version")
 
-    exec_command(capfd, "install docker", "Installation script")
-    exec_command(capfd, "install compose", "Installation guide")
-    exec_command(capfd, "install buildx", "Installation guide")
+    exec_command(
+        capfd, "install docker", "Docker current version:", "Docker installed version:"
+    )
+    exec_command(capfd, "install compose", "Docker compose is installed")
+    exec_command(
+        capfd,
+        "install buildx",
+        "Docker buildx current version:",
+        "Docker buildx installed version:",
+    )
 
     exec_command(capfd, "install auto")
 
