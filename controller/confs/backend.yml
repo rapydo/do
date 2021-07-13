@@ -450,10 +450,6 @@ services:
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
 
-    # ports:
-    #   - 9090:${NEO4J_WEB_INTERFACE_PORT}
-    #   - 7687:7687
-
   mongodb:
     restart: always
     build:

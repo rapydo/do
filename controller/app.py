@@ -655,6 +655,8 @@ You can use of one:
             "backend": Configuration.load_backend,
             ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
             "commons": Configuration.load_commons,
+            "development": not Configuration.production,
+            "production": Configuration.production,
             "extended-commons": self.extended_project is not None
             and Configuration.load_commons,
             "mode": f"{Configuration.stack}.yml",
@@ -777,6 +779,10 @@ You can use of one:
         )
 
         Application.env["DOCKER_NETWORK_MODE"] = "bridge"
+
+        if Configuration.load_frontend:
+            if Configuration.frontend == ANGULAR:
+                Application.env["ACTIVATE_ANGULAR"] = "1"
 
         services.check_rabbit_password(Application.env.get("RABBITMQ_PASSWORD"))
         services.check_redis_password(Application.env.get("REDIS_PASSWORD"))

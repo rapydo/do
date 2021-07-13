@@ -25,7 +25,7 @@ services:
         aliases:
           - frontend.dockerized.io
     environment:
-      ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
+      ACTIVATE: ${ACTIVATE_ANGULAR}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       APP_MODE: ${APP_MODE}
