@@ -789,8 +789,6 @@ You can use of one:
             Application.env
         )
 
-        Application.env["DOCKER_NETWORK_MODE"] = "bridge"
-
         if Configuration.load_frontend:
             if Configuration.frontend == ANGULAR:
                 Application.env["ACTIVATE_ANGULAR"] = "1"
