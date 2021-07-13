@@ -21,67 +21,56 @@ variables:
   composers:
     backend:
       file: backend.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$backend
     angular:
       file: angular.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$angular
     development-mode:
       file: development.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$development
     production-mode:
       file: production.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$production
     extended-commons:
       file: commons.yml
-      base: False
       path: $$extendedproject
       mandatory: True
       if: $$extended-commons
     extended-mode:
       file: $$mode
-      base: False
       path: $$extendedproject
       mandatory: False
       if: $$extended-mode
     commons:
       file: commons.yml
-      base: False
       path: $$customconf
       mandatory: True
       if: $$commons
     mode:
       file: $$mode
-      base: False
       path: $$customconf
       mandatory: True
       if: True
     local_volumes:
       file: volumes_local.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$local_volumes
     nfs_volumes:
       file: volumes_nfs.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$nfs_volumes
     swarm_options:
       file: swarm_options.yml
-      base: True
       path: $$baseconf
       mandatory: True
       if: $$swarm_options

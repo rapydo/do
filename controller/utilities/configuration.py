@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from controller import COMPOSE_FILE_VERSION, log
+from controller import COMPOSE_FILE_VERSION, CONFS_DIR, log
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
@@ -210,10 +210,10 @@ def read_composer_yamls(
             continue
 
         mandatory = composer.pop("mandatory", False)
-        base = composer.pop("base", False)
 
         try:
             p = Path(str(composer.get("path")))
+            base = p == CONFS_DIR
             f = str(composer.get("file"))
             path = p.joinpath(f)
 
