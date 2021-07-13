@@ -197,14 +197,14 @@ def load_yaml_file(
 
 
 def read_composer_yamls(
-    composers: Dict[str, Dict[str, Any]]
+    composers: List[Dict[str, Any]]
 ) -> Tuple[List[Path], List[Path]]:
 
     base_files: List[Path] = []
     all_files: List[Path] = []
 
     # YAML CHECK UP
-    for composer in composers.values():
+    for composer in composers:
 
         if not composer.pop("if", False):
             continue

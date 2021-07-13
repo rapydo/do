@@ -674,13 +674,13 @@ You can use of one:
                 CONTAINERS_YAML_DIRNAME
             )
 
-        compose_files = {}
+        compose_files: List[Dict[str, Any]] = []
 
         confs: Dict[str, Any] = glom(
             Configuration.specs, "variables.composers", default={}
         )
         for name, conf in confs.items():
-            compose_files[name] = services.apply_variables(conf, myvars)
+            compose_files.append(services.apply_variables(conf, myvars))
 
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
