@@ -649,26 +649,34 @@ You can use of one:
 
         MODE = f"{Configuration.stack}.yml"
         customconf = Configuration.ABS_PROJECT_PATH.joinpath(CONTAINERS_YAML_DIRNAME)
+        angular_loaded = False
+
+        def add(p: Path, f: str) -> None:
+            compose_files.append(p.joinpath(f))
 
         if Configuration.load_backend:
-            compose_files.append(CONFS_DIR.joinpath("backend.yml"))
+            add(CONFS_DIR, "backend.yml")
 
         if Configuration.load_frontend:
             if Configuration.frontend == ANGULAR:
-                compose_files.append(CONFS_DIR.joinpath("angular.yml"))
+                add(CONFS_DIR, "angular.yml")
+                angular_loaded = True
 
         if SWARM_MODE:
-            compose_files.append(CONFS_DIR.joinpath("swarm_options.yml"))
+            add(CONFS_DIR, "swarm_options.yml")
 
         if MULTI_HOST_MODE:
-            compose_files.append(CONFS_DIR.joinpath("volumes_nfs.yml"))
+            add(CONFS_DIR, "volumes_nfs.yml")
         else:
-            compose_files.append(CONFS_DIR.joinpath("volumes_local.yml"))
+            add(CONFS_DIR, "volumes_local.yml")
 
         if Configuration.production:
-            compose_files.append(CONFS_DIR.joinpath("production.yml"))
+            add(CONFS_DIR, "production.yml")
         else:
-            compose_files.append(CONFS_DIR.joinpath("development.yml"))
+            add(CONFS_DIR, "development.yml")
+
+            if angular_loaded:
+                add(CONFS_DIR, "angular-development.yml")
 
         if self.extended_project and self.extended_project_path:
             extendedconf = self.extended_project_path.joinpath(CONTAINERS_YAML_DIRNAME)
@@ -678,12 +686,12 @@ You can use of one:
                 compose_files.append(extended_mode_conf)
 
             if Configuration.load_commons:
-                compose_files.append(extendedconf.joinpath("commons.yml"))
+                add(extendedconf, "commons.yml")
 
         if Configuration.load_commons:
-            compose_files.append(customconf.joinpath("commons.yml"))
+            add(customconf, "commons.yml")
 
-        compose_files.append(customconf.joinpath(MODE))
+        add(customconf, MODE)
 
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
