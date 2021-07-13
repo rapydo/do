@@ -585,11 +585,12 @@ You can use of one:
         myvars = {
             ANGULAR: Configuration.frontend == ANGULAR,
         }
-        repo = services.apply_variables(repo, myvars)
 
-        # Is this single repo enabled?
-        if not repo.pop("if", True):
-            return None
+        condition = repo.get("if", None)
+        if isinstance(condition, str) and condition.startswith("$$"):
+            # Is this repo enabled?
+            if not myvars.get(condition.lstrip("$"), None):
+                return None
 
         repo.setdefault(
             "branch",
@@ -644,43 +645,45 @@ You can use of one:
 
     def get_compose_configuration(self) -> None:
 
-        # Find configuration that tells us which files have to be read
+        compose_files: List[Path] = []
 
-        # substitute values starting with '$$'
+        MODE = f"{Configuration.stack}.yml"
+        customconf = Configuration.ABS_PROJECT_PATH.joinpath(CONTAINERS_YAML_DIRNAME)
 
-        myvars = {
-            "local_volumes": not MULTI_HOST_MODE,
-            "nfs_volumes": MULTI_HOST_MODE,
-            "swarm_options": SWARM_MODE,
-            "backend": Configuration.load_backend,
-            ANGULAR: Configuration.frontend == ANGULAR and Configuration.load_frontend,
-            "commons": Configuration.load_commons,
-            "development": not Configuration.production,
-            "production": Configuration.production,
-            "extended-commons": self.extended_project is not None
-            and Configuration.load_commons,
-            "mode": f"{Configuration.stack}.yml",
-            "extended-mode": self.extended_project is not None,
-            "baseconf": CONFS_DIR,
-            "customconf": Configuration.ABS_PROJECT_PATH.joinpath(
-                CONTAINERS_YAML_DIRNAME
-            ),
-        }
+        if Configuration.load_backend:
+            compose_files.append(CONFS_DIR.joinpath("backend.yml"))
 
-        if self.extended_project_path is None:
-            myvars["extendedproject"] = None
+        if Configuration.load_frontend:
+            if Configuration.frontend == ANGULAR:
+                compose_files.append(CONFS_DIR.joinpath("angular.yml"))
+
+        if SWARM_MODE:
+            compose_files.append(CONFS_DIR.joinpath("swarm_options.yml"))
+
+        if MULTI_HOST_MODE:
+            compose_files.append(CONFS_DIR.joinpath("volumes_nfs.yml"))
         else:
-            myvars["extendedproject"] = self.extended_project_path.joinpath(
-                CONTAINERS_YAML_DIRNAME
-            )
+            compose_files.append(CONFS_DIR.joinpath("volumes_local.yml"))
 
-        compose_files: List[Dict[str, Any]] = []
+        if Configuration.production:
+            compose_files.append(CONFS_DIR.joinpath("production.yml"))
+        else:
+            compose_files.append(CONFS_DIR.joinpath("development.yml"))
 
-        confs: Dict[str, Any] = glom(
-            Configuration.specs, "variables.composers", default={}
-        )
-        for name, conf in confs.items():
-            compose_files.append(services.apply_variables(conf, myvars))
+        if self.extended_project and self.extended_project_path:
+            extendedconf = self.extended_project_path.joinpath(CONTAINERS_YAML_DIRNAME)
+            # Only added if exists, this is the only non mandatory conf file
+            extended_mode_conf = extendedconf.joinpath(MODE)
+            if extended_mode_conf.exists():
+                compose_files.append(extended_mode_conf)
+
+            if Configuration.load_commons:
+                compose_files.append(extendedconf.joinpath("commons.yml"))
+
+        if Configuration.load_commons:
+            compose_files.append(customconf.joinpath("commons.yml"))
+
+        compose_files.append(customconf.joinpath(MODE))
 
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)

@@ -70,21 +70,6 @@ def find_active(services: ComposeConfig) -> List[str]:
     return active_services
 
 
-def apply_variables(
-    dictionary: Dict[str, Any], variables: Dict[str, Any]
-) -> Dict[str, Any]:
-
-    new_dict: Dict[str, Any] = {}
-    for key, value in dictionary.items():
-        if isinstance(value, str) and value.startswith("$$"):
-            value = variables.get(value.lstrip("$"), None)
-        else:
-            pass
-        new_dict[key] = value
-
-    return new_dict
-
-
 vars_to_services_mapping: Dict[str, List[str]] = {
     "FLOWER_USER": ["flower"],
     "FLOWER_PASSWORD": ["flower"],

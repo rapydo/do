@@ -17,64 +17,6 @@ variables:
     normal_user: User
     default: normal_user
 
-  # The list of files to be considered
-  composers:
-    backend:
-      file: backend.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$backend
-    angular:
-      file: angular.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$angular
-    development-mode:
-      file: development.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$development
-    production-mode:
-      file: production.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$production
-    extended-commons:
-      file: commons.yml
-      path: $$extendedproject
-      mandatory: True
-      if: $$extended-commons
-    extended-mode:
-      file: $$mode
-      path: $$extendedproject
-      mandatory: False
-      if: $$extended-mode
-    commons:
-      file: commons.yml
-      path: $$customconf
-      mandatory: True
-      if: $$commons
-    mode:
-      file: $$mode
-      path: $$customconf
-      mandatory: True
-      if: True
-    local_volumes:
-      file: volumes_local.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$local_volumes
-    nfs_volumes:
-      file: volumes_nfs.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$nfs_volumes
-    swarm_options:
-      file: swarm_options.yml
-      path: $$baseconf
-      mandatory: True
-      if: $$swarm_options
-
   env:
     BACKEND_BUILD_MODE: backend
     FRONTEND_FRAMEWORK: nofrontend

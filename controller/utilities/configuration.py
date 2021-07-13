@@ -196,34 +196,23 @@ def load_yaml_file(
             sys.exit(1)
 
 
-def read_composer_yamls(
-    composers: List[Dict[str, Any]]
-) -> Tuple[List[Path], List[Path]]:
+def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path]]:
 
     base_files: List[Path] = []
     all_files: List[Path] = []
 
     # YAML CHECK UP
-    for composer in composers:
-
-        if not composer.pop("if", False):
-            continue
-
-        mandatory = composer.pop("mandatory", False)
+    for path in config_files:
 
         try:
-            p = Path(str(composer.get("path")))
-            base = p == CONFS_DIR
-            f = str(composer.get("file"))
-            path = p.joinpath(f)
 
             # This is to verify that mandatory files exist and yml syntax is valid
-            conf = load_yaml_file(file=path, is_optional=not mandatory)
+            conf = load_yaml_file(file=path, is_optional=False)
 
             if conf.get("version") != COMPOSE_FILE_VERSION:  # pragma: no cover
                 log.warning(
                     "Compose file version in {} is {}, expected {}",
-                    f,
+                    path,
                     conf.get("version"),
                     COMPOSE_FILE_VERSION,
                 )
@@ -231,7 +220,8 @@ def read_composer_yamls(
             if path.exists():
                 all_files.append(path)
 
-                if base:
+                # Base files are those loaded from CONFS_DIR
+                if CONFS_DIR in path.parents:
                     base_files.append(path)
 
         except KeyError as e:  # pragma: no cover
