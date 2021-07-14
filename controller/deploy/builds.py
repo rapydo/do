@@ -57,6 +57,7 @@ def get_image_creation(image_name: str) -> datetime:
         return datetime.fromtimestamp(0)
 
 
+# No longer needed starting from the next python on whales version
 def image_exists(image_name: str) -> bool:
     try:
         docker.client.image.inspect(image_name)
@@ -199,6 +200,8 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
+            # From next python on whales version
+            # if not docker.client.image.exists(image):
             if not image_exists(image):
                 Application.exit(
                     "Missing {} image for {} service, execute rapydo pull",
@@ -215,6 +218,8 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
+            # From next python on whales version
+            # if not docker.client.image.exists(image):
             if not image_exists(image):
                 action = "build" if data["path"] else "pull"
                 Application.exit(

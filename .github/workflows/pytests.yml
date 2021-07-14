@@ -65,7 +65,7 @@ jobs:
           pip install setuptools pytest pytest-cov pytest-timeout Faker
           pip install --upgrade --no-cache-dir --editable .
           # Install latest (unrelased) version of python-on-whales
-          pip install git+https://github.com/gabrieldemarmiesse/python-on-whales.git
+          # pip install git+https://github.com/gabrieldemarmiesse/python-on-whales.git
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
