@@ -26,6 +26,7 @@ from controller import (
     SUBMODULES_DIR,
     SWARM_MODE,
     ComposeConfig,
+    EnvType,
     __version__,
     log,
 )
@@ -40,7 +41,6 @@ warnings.simplefilter("always", DeprecationWarning)
 
 # From python 3.8 it could be a TypedDict
 DataFileStub = Dict[str, List[str]]
-EnvType = Union[None, str, int, float]
 
 ROOT_UID = 0
 BASE_UID = 1000

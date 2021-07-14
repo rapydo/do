@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Union
 
 from loguru import logger as log
 
@@ -63,3 +63,5 @@ ComposeConfig = Dict[str, Any]
 
 SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
 MULTI_HOST_MODE = os.environ.get("MULTI_HOST_MODE", "0") == "1"
+
+EnvType = Union[None, str, int, float]
