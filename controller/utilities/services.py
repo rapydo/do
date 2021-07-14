@@ -1,9 +1,10 @@
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 from glom import glom
 
 from controller import ComposeConfig, log
+from controller.app import EnvType
 from controller.project import ANGULAR
 
 
@@ -136,7 +137,7 @@ def normalize_placeholder_variable(key: str) -> str:
     return key
 
 
-def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
+def get_celerybeat_scheduler(env: Dict[str, EnvType]) -> str:
 
     if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
         return "Unknown"
@@ -155,10 +156,10 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
     return "Unknown"
 
 
-def check_rabbit_password(pwd: Optional[str]) -> None:
+def check_rabbit_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["£", "§", "”", "’"]
-        if any(c in pwd for c in invalid_characters):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
@@ -168,10 +169,10 @@ def check_rabbit_password(pwd: Optional[str]) -> None:
             sys.exit(1)
 
 
-def check_redis_password(pwd: Optional[str]) -> None:
+def check_redis_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any(c in pwd for c in invalid_characters):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "
@@ -181,10 +182,10 @@ def check_redis_password(pwd: Optional[str]) -> None:
             sys.exit(1)
 
 
-def check_mongodb_password(pwd: Optional[str]) -> None:
+def check_mongodb_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any(c in pwd for c in invalid_characters):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in MONGO_PASSWORD.")
             log.critical(
                 "Some special characters, including {}, are not allowed "

@@ -38,8 +38,9 @@ from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
 
-DataFileStub = Dict[str, List[str]]
 # From python 3.8 it could be a TypedDict
+DataFileStub = Dict[str, List[str]]
+EnvType = Union[None, str, int, float]
 
 ROOT_UID = 0
 BASE_UID = 1000
@@ -277,7 +278,7 @@ class Application:
     project_scaffold = Project()
     data = CommandsData()
     gits: Dict[str, git.GitRepoType] = {}
-    env: Dict[str, str] = {}
+    env: Dict[str, EnvType] = {}
 
     def __init__(self) -> None:
 
@@ -840,7 +841,7 @@ You can use of one:
                     Configuration.production
                     and key.endswith("_PASSWORD")
                     and value
-                    and len(value) < 8
+                    and len(str(value)) < 8
                 ):
                     log.warning("{} is set with a short password", key)
 
@@ -863,6 +864,10 @@ You can use of one:
                                 DeprecationWarning,
                             )
 
+                if value is None:
+                    value = ""
+                else:
+                    value = str(value)
                 if " " in value:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
