@@ -277,7 +277,7 @@ class Application:
     project_scaffold = Project()
     data = CommandsData()
     gits: Dict[str, git.GitRepoType] = {}
-    env: Dict[str, Any] = {}
+    env: Dict[str, str] = {}
 
     def __init__(self) -> None:
 
@@ -756,31 +756,37 @@ You can use of one:
         Application.env["PROJECT_DOMAIN"] = Configuration.hostname
         Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
 
-        Application.env["DATA_DIR"] = Path("data").resolve()
-        Application.env["SUBMODULE_DIR"] = SUBMODULES_DIR.resolve()
-        Application.env["PROJECT_DIR"] = PROJECT_DIR.joinpath(
-            Configuration.project
-        ).resolve()
+        Application.env["DATA_DIR"] = str(Path("data").resolve())
+        Application.env["SUBMODULE_DIR"] = str(SUBMODULES_DIR.resolve())
+        Application.env["PROJECT_DIR"] = str(
+            PROJECT_DIR.joinpath(Configuration.project).resolve()
+        )
 
         if self.extended_project_path is None:
             Application.env["BASE_PROJECT_DIR"] = Application.env["PROJECT_DIR"]
         else:
-            Application.env["BASE_PROJECT_DIR"] = self.extended_project_path.resolve()
+            Application.env["BASE_PROJECT_DIR"] = str(
+                self.extended_project_path.resolve()
+            )
 
         if self.extended_project is None:
             Application.env["EXTENDED_PROJECT"] = EXTENDED_PROJECT_DISABLED
             Application.env["BASE_PROJECT"] = Application.env["COMPOSE_PROJECT_NAME"]
         else:
-            Application.env["EXTENDED_PROJECT"] = self.extended_project
+            Application.env["EXTENDED_PROJECT"] = str(self.extended_project)
             Application.env["BASE_PROJECT"] = Application.env["EXTENDED_PROJECT"]
 
         Application.env["RAPYDO_VERSION"] = __version__
         Application.env["PROJECT_VERSION"] = Configuration.version
-        Application.env["CURRENT_UID"] = self.current_uid
-        Application.env["CURRENT_GID"] = self.current_gid
-        Application.env["PROJECT_TITLE"] = Configuration.project_title
-        Application.env["PROJECT_DESCRIPTION"] = Configuration.project_description
-        Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords
+        Application.env["CURRENT_UID"] = str(self.current_uid)
+        Application.env["CURRENT_GID"] = str(self.current_gid)
+        Application.env["PROJECT_TITLE"] = (
+            Configuration.project_title or "Unknown title"
+        )
+        Application.env["PROJECT_DESCRIPTION"] = (
+            Configuration.project_description or "Unknown description"
+        )
+        Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords or ""
 
         if Configuration.testing:
             Application.env["APP_MODE"] = "test"
@@ -856,22 +862,7 @@ You can use of one:
                                 f"Deprecated value for {key}, convert {value} to 0",
                                 DeprecationWarning,
                             )
-                    elif isinstance(value, bool):
-                        if value:
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 1",
-                                DeprecationWarning,
-                            )
-                        else:
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 0",
-                                DeprecationWarning,
-                            )
 
-                if value is None:
-                    value = ""
-                else:
-                    value = str(value)
                 if " " in value:
                     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
