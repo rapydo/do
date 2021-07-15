@@ -124,9 +124,8 @@ variables:
     SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
     # if empty will be automatically replaced with DOMAIN in proxy entrypoint
     CORS_ALLOWED_ORIGIN:
-    # on | off | optional | optional_no_ca;
     # if enabled, make sure to copy client certificates in /etc/letsencrypt/client_certs
-    SSL_VERIFY_CLIENT: "off"
+    SSL_VERIFY_CLIENT: 0
 
     ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
