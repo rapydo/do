@@ -253,7 +253,7 @@ services:
     # logging:
     #   driver: syslog
     healthcheck:
-      test: "wget -t 1 --quiet --no-check-certificate http://localhost -O - > /dev/null"
+      test: "wget -t 1 --quiet --no-check-certificate --certificate=/etc/letsencrypt/local_client.crt --private-key=/etc/letsencrypt/local_client.key http://localhost -O - > /dev/null"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
