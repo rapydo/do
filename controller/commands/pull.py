@@ -4,7 +4,7 @@ import typer
 from glom import glom
 
 from controller import log
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.docker import Docker
 
 
