@@ -8,7 +8,7 @@ import re
 import tempfile
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import pytest
 from faker import Faker
@@ -232,7 +232,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert short1(key) == key
 
     short2 = services.get_celerybeat_scheduler
-    env: Dict[str, str] = {}
+    env: Dict[str, Union[None, str, int, float]] = {}
     assert short2(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required

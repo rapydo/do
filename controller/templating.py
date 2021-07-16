@@ -4,15 +4,17 @@ import string
 import sys
 from filecmp import cmp
 from pathlib import Path
-from typing import Any, Dict
+from typing import Dict, List, Union
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
 
 from controller import TEMPLATE_DIR, log
 
+TemplateDataType = Dict[str, Union[bool, float, str, List[str], Dict[str, str], None]]
 
-def username(param_not_used: Any, length: int = 8) -> str:
+
+def username(param_not_used: str, length: int = 8) -> str:
     rand = random.SystemRandom()
     charset = string.ascii_lowercase
     random_string = rand.choice(charset)
@@ -22,7 +24,7 @@ def username(param_not_used: Any, length: int = 8) -> str:
     return random_string
 
 
-def password(param_not_used: Any, length: int = 12) -> str:
+def password(param_not_used: str, length: int = 12) -> str:
     rand = random.SystemRandom()
     charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
@@ -63,7 +65,7 @@ class Templating:
 
         return f"{filename}.j2"
 
-    def get_template(self, filename: str, data: Dict[str, Any]) -> str:
+    def get_template(self, filename: str, data: TemplateDataType) -> str:
         try:
             template_name = self.get_template_name(filename)
             template = self.env.get_template(template_name)
