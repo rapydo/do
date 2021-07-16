@@ -579,7 +579,7 @@ You can use of one:
     # from_path:
     @staticmethod
     def working_clone(
-        name: str, repo: Dict[str, Any], from_path: Optional[Path] = None
+        name: str, repo: Dict[str, str], from_path: Optional[Path] = None
     ) -> Optional[git.GitRepoType]:
 
         # substitute values starting with '$$'
@@ -587,8 +587,8 @@ You can use of one:
             ANGULAR: Configuration.frontend == ANGULAR,
         }
 
-        condition = repo.get("if", None)
-        if isinstance(condition, str) and condition.startswith("$$"):
+        condition = repo.get("if", "")
+        if condition.startswith("$$"):
             # Is this repo enabled?
             if not myvars.get(condition.lstrip("$"), None):
                 return None
@@ -631,10 +631,10 @@ You can use of one:
     def git_submodules(from_path: Optional[Path] = None) -> None:
         """Check and/or clone git projects"""
 
-        repos: Dict[str, Dict[str, Any]] = glom(
+        repos: Dict[str, Dict[str, str]] = glom(
             Configuration.specs,
             "variables.submodules",
-            default=cast(Dict[str, Dict[str, Any]], {}),
+            default=cast(Dict[str, Dict[str, str]], {}),
         ).copy()
 
         Application.gits["main"] = git.get_repo(".")
