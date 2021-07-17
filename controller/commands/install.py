@@ -95,7 +95,7 @@ def install(
             v = docker.buildx.version()
             log.info("Docker buildx current version: {}", v)
         except DockerException as e:  # pragma: no cover
-            log.critical("To be replaced with: {}", type(e))
+            log.critical("Raised exception is: {}", type(e))
             log.info("Docker buildx current version: N/A")
 
         cli_plugin = Path.home().joinpath(".docker", "cli-plugins")

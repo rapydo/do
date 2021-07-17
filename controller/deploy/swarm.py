@@ -9,6 +9,7 @@ from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Service
+from python_on_whales.exceptions import NoSuchService
 from python_on_whales.utils import DockerException
 
 from controller import COMPOSE_FILE, log
@@ -35,7 +36,7 @@ class Swarm:
         try:
             return str(self.docker.swarm.join_token(node_type))
         except DockerException as e:
-            log.critical("To be replaced with: {}", type(e))
+            log.critical("Raised exception is: {}", type(e))
             # log.debug(e)
             return None
 
@@ -199,8 +200,7 @@ class Swarm:
                     continue
 
                 return f"{service_name}.{slot}.{task.id}"
-        except DockerException as e:
-            log.critical("To be replaced with: {}", type(e))
+        except NoSuchService:
             return None
 
         return None

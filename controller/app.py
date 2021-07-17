@@ -435,7 +435,7 @@ class Application:
             v = docker.buildx.version()
             log.debug("docker buildx is installed: {}", v)
         except DockerException as e:  # pragma: no cover
-            log.critical("To be replaced with: {}", type(e))
+            log.critical("Raised exception is: {}", type(e))
             Application.exit(
                 "A mandatory dependency is missing: docker buildx not found"
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
