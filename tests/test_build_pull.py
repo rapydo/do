@@ -7,7 +7,6 @@ from faker import Faker
 from git import Repo
 
 from controller import __version__
-from controller.deploy.builds import image_exists
 from tests import (
     Capture,
     create_project,
@@ -225,11 +224,6 @@ RUN mkdir xyz
     )
 
     exec_command(capfd, "remove", "Stack removed")
-
-    assert image_exists(f"rapydo/backend:{__version__}")
-    assert not image_exists("invalid")
-    assert not image_exists("invalid/invalid")
-    assert not image_exists("invalid/invalid:invalid")
 
     # Add a third service without a build to verify that pull includes it
     # to be the base image even if defined in custom part
