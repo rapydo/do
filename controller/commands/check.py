@@ -74,6 +74,7 @@ def check(
                 img.repo_tags[0] for img in docker.client.images() if img.repo_tags
             ]
         except DockerException as e:  # pragma: no cover
+            log.critical("To be replaced with: {}", type(e))
             Application.exit(str(e))
 
         all_builds = find_templates_build(Application.data.compose_config)

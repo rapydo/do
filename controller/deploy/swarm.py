@@ -34,7 +34,8 @@ class Swarm:
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
             return str(self.docker.swarm.join_token(node_type))
-        except DockerException:
+        except DockerException as e:
+            log.critical("To be replaced with: {}", type(e))
             # log.debug(e)
             return None
 
@@ -198,7 +199,8 @@ class Swarm:
                     continue
 
                 return f"{service_name}.{slot}.{task.id}"
-        except DockerException:
+        except DockerException as e:
+            log.critical("To be replaced with: {}", type(e))
             return None
 
         return None

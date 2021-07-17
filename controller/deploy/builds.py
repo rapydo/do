@@ -10,7 +10,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
-from python_on_whales.utils import DockerException
+from python_on_whales.exceptions import NoSuchImage
 
 from controller import ComposeConfig, log
 from controller.app import Application
@@ -43,7 +43,7 @@ def name_priority(name1: str, name2: str) -> str:
 def get_image_creation(image_name: str) -> datetime:
     try:
         return docker.client.image.inspect(image_name).created
-    except DockerException:
+    except NoSuchImage:
         return datetime.fromtimestamp(0)
 
 
@@ -72,7 +72,6 @@ def find_templates_build(
             templates[template_image] = {
                 "services": [],
                 "path": template_build.get("context") if template_build else None,
-                # "creation": get_image_creation(template_image),
             }
         if "service" not in templates[template_image]:
             templates[template_image]["service"] = template_name

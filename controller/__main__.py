@@ -14,6 +14,7 @@ def main() -> None:
         controller = Application()
         controller.app()
     except DockerException as e:
+        log.critical("To be replaced with: {}", type(e))
         print("")
         log.critical(e)
 
