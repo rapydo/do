@@ -300,6 +300,10 @@ class Project:
 
     @staticmethod
     def check_invalid_characters(project: str) -> None:
+        if len(project) <= 1:
+            log.critical("Wrong project name, expected at least two characters")
+            sys.exit(1)
+
         if not re.match("^[a-z][a-z0-9]+$", project):
 
             # First character is expected to be a-z

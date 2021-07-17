@@ -14,7 +14,7 @@ def main() -> None:
         controller = Application()
         controller.app()
     except DockerException as e:
-        log.critical("Raised exception is: {}", type(e))
+        log.critical("Uncatched exception: {}", type(e))
         print("")
         log.critical(e)
 

@@ -55,6 +55,13 @@ def test_create(capfd: Capture) -> None:
     # Please note that --current is required because data folder is already created
     # to be able to tests logs
 
+    # Expected at least two characters for project name
+    exec_command(
+        capfd,
+        "create a --auth postgres --frontend angular --current",
+        "Wrong project name, expected at least two characters",
+    )
+
     exec_command(
         capfd,
         "create test_celery --auth postgres --frontend angular --current",
