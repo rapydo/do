@@ -40,16 +40,6 @@ def name_priority(name1: str, name2: str) -> str:
     return name2
 
 
-# -> Dict[str, Dict[str, Any]]
-# Shoud be a TypedDict istead of Dict[str, Any] with:
-#     'services': List[str],
-#     'path': str,
-#     'timestamp': Optional[str],
-#     'service': str
-
-# Build: Dict[str, Dict[str, ]]
-
-
 def get_image_creation(image_name: str) -> datetime:
     try:
         return docker.client.image.inspect(image_name).created

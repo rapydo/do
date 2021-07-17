@@ -17,7 +17,7 @@ from controller.utilities import git
 # https://github.com/docker/compose-cli/releases
 COMPOSE_VERSION = "v2.0.0-beta.6"
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.5.1"
+BUILDX_VERSION = "v0.6.0"
 
 
 def download(url: str) -> Path:
