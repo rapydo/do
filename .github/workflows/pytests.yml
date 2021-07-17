@@ -70,6 +70,7 @@ jobs:
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
 
+          rapydo install buildx
           rapydo install compose
 
       - name: Run Tests
