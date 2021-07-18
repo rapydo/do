@@ -111,13 +111,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     out = system.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
-    try:
+    with pytest.raises(system.ExecutionException):
         assert system.execute_command("ls", ["doesnotexistforsure"])
-        pytest.fail("ExecutionException not raised!")  # pragma: no cover
-    except system.ExecutionException:
-        pass
-    except Exception:  # pragma: no cover
-        pytest.fail("Unexpected exception raised")
 
     assert system.bytes_to_str(0) == "0"
     assert system.bytes_to_str(1) == "1"
@@ -155,56 +150,35 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert system.str_to_bytes("1GB") == 1024 * 1024 * 1024
     assert system.str_to_bytes("1gb") == 1024 * 1024 * 1024
 
-    try:
+    with pytest.raises(AttributeError):
         system.str_to_bytes("x")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except AttributeError:
-        pass
 
-    try:
+    with pytest.raises(AttributeError):
         system.str_to_bytes("1T")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except AttributeError:
-        pass
 
-    try:
+    with pytest.raises(AttributeError):
         system.str_to_bytes("1TB")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except AttributeError:
-        pass
 
     # Invalid file / path
-    try:
+    with pytest.raises(SystemExit):
         load_yaml_file(file=Path("path", "invalid"))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     y = load_yaml_file(file=Path("path", "invalid"), is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
-    try:
+    with pytest.raises(SystemExit):
         load_yaml_file(file=Path("projects", "invalid"))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     # Valid path, but not in yaml format
-    try:
+    with pytest.raises(SystemExit):
         load_yaml_file(file=Path("pyproject.toml"))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     # File is empty
     f = tempfile.NamedTemporaryFile()
-    try:
+    with pytest.raises(SystemExit):
         load_yaml_file(file=Path(f.name))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
     f.close()
 
     y = mix_configuration(None, None)
@@ -271,26 +245,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
     assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
-    # os.rename(
-    #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
-    # )
-    # try:
-    #     Templating()
-    #     pytest.fail("No exception raised")  # pragma: no cover
-    # except SystemExit:
-    #     pass
-
-    # os.rename(
-    #     "submodules/do/controller/templates.bak", "submodules/do/controller/templates"
-    # )
 
     templating = Templating()
 
-    try:
+    with pytest.raises(SystemExit):
         templating.get_template("invalid", {})
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     cmd = Compose.split_command(None)
     assert len(cmd) == 2
@@ -364,26 +323,17 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert isinstance(vv.version[1], int)
     assert isinstance(vv.version[2], int)
 
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("invalid")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     v = Packages.check_program("docker")
     assert v is not None
 
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("docker", min_version="99999.99")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("docker", max_version="0.0")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     v = Packages.check_program("docker", min_version="0.0")
     assert v is not None
