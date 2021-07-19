@@ -11,7 +11,6 @@ import requests
 import typer
 from glom import glom
 from python_on_whales import docker
-from python_on_whales.utils import DockerException
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -431,11 +430,10 @@ class Application:
             "docker", min_version="20.10.0", min_recommended_version="20.10.0"
         )
 
-        try:
+        if docker.buildx.is_installed():
             v = docker.buildx.version()
             log.debug("docker buildx is installed: {}", v)
-        except DockerException as e:  # pragma: no cover
-            log.critical("Raised exception is: {}", type(e))
+        else:  # pragma: no cover
             Application.exit(
                 "A mandatory dependency is missing: docker buildx not found"
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
