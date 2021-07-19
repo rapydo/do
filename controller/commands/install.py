@@ -6,7 +6,6 @@ from pathlib import Path
 import requests
 import typer
 from python_on_whales import docker
-from python_on_whales.utils import DockerException
 from sultan.api import Sultan
 
 from controller import SUBMODULES_DIR, log
@@ -91,11 +90,10 @@ def install(
 
     if version == "buildx":
 
-        try:
+        if docker.buildx.is_installed():
             v = docker.buildx.version()
             log.info("Docker buildx current version: {}", v)
-        except DockerException as e:  # pragma: no cover
-            log.critical("Raised exception is: {}", type(e))
+        else:  # pragma: no cover
             log.info("Docker buildx current version: N/A")
 
         cli_plugin = Path.home().joinpath(".docker", "cli-plugins")

@@ -103,12 +103,12 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "Invalid remote host invalid, expected user@ip-or-hostname",
     )
 
-    # This is because python on whales raises only a generic DockerException
+    # This is because python on whales raises a generic DockerException
     if SWARM_MODE:
         exec_command(
             capfd,
             "--remote invalid@invalid check -i main --no-git",
-            "Swarm is not initialized, please execute rapydo init",
+            "Uncatched exception:",
         )
     else:
         exec_command(

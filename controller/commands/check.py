@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import typer
-from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, log
 from controller.app import Application
@@ -68,14 +67,8 @@ def check(
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        try:
-            docker = Docker()
-            dimages = [
-                img.repo_tags[0] for img in docker.client.images() if img.repo_tags
-            ]
-        except DockerException as e:  # pragma: no cover
-            log.critical("Raised exception is: {}", type(e))
-            Application.exit(str(e))
+        docker = Docker()
+        dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
 
         all_builds = find_templates_build(Application.data.compose_config)
         core_builds = find_templates_build(Application.data.base_services)

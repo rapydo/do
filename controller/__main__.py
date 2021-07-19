@@ -13,7 +13,7 @@ def main() -> None:
         Application.load_projectrc()
         controller = Application()
         controller.app()
-    except DockerException as e:
+    except DockerException as e:  # pragma: no cover
         log.critical("Uncatched exception: {}", type(e))
         print("")
         log.critical(e)

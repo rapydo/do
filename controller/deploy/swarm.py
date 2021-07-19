@@ -9,8 +9,7 @@ from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Service
-from python_on_whales.exceptions import NoSuchService
-from python_on_whales.utils import DockerException
+from python_on_whales.exceptions import NoSuchService, NotASwarmManager
 
 from controller import COMPOSE_FILE, log
 from controller.app import Application, Configuration
@@ -35,9 +34,8 @@ class Swarm:
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
             return str(self.docker.swarm.join_token(node_type))
-        except DockerException as e:
-            log.critical("Raised exception is: {}", type(e))
-            # log.debug(e)
+        except NotASwarmManager:
+
             return None
 
     @staticmethod
