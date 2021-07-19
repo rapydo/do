@@ -103,16 +103,8 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "Invalid remote host invalid, expected user@ip-or-hostname",
     )
 
-    # This is because python on whales raises a generic DockerException
-    if SWARM_MODE:
-        exec_command(
-            capfd,
-            "--remote invalid@invalid check -i main --no-git",
-            "Uncatched exception:",
-        )
-    else:
-        exec_command(
-            capfd,
-            "--remote invalid@invalid check -i main --no-git",
-            "Could not resolve hostname invalid: Temporary failure in name resolution",
-        )
+    exec_command(
+        capfd,
+        "--remote invalid@invalid check -i main --no-git",
+        "Could not resolve hostname invalid: Temporary failure in name resolution",
+    )

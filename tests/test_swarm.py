@@ -239,15 +239,11 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "-s backend logs",
         "*** RESTful HTTP API ***",
-        "Due to limitations of the underlying packages, the logs command "
-        "only prints stdout, stderr is ignored",
     )
 
     exec_command(
         capfd,
         "-s frontend logs",
-        "Due to limitations of the underlying packages, the logs command "
-        "only prints stdout, stderr is ignored",
     )
 
     exec_command(

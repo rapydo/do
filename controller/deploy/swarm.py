@@ -274,10 +274,6 @@ class Swarm:
                 container, tail=tail, details=False, timestamps=timestamps
             )
         )
-        log.warning(
-            "Due to limitations of the underlying packages, the logs command "
-            "only prints stdout, stderr is ignored"
-        )
 
     def check_resources(self) -> None:
         total_cpus = 0.0
