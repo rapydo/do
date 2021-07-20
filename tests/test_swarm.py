@@ -228,6 +228,9 @@ def test_swarm(capfd: Capture) -> None:
         "is only supported for single services",
     )
 
+    # Wait for the bakend startup
+    time.sleep(2)
+
     start = datetime.now()
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
     signal.alarm(3)
