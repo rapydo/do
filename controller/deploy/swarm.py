@@ -262,13 +262,15 @@ class Swarm:
             sys.exit(1)
 
         try:
+            # lines: Iterable[Tuple[str, bytes]] due to stream=True
+            # without stream=True the type would be :str
             lines = self.docker.container.logs(
                 container,
                 tail=tail,
                 details=False,
                 timestamps=timestamps,
                 follow=follow,
-                stream=follow,
+                stream=True,
             )
         except NoSuchContainer:
             log.critical(
@@ -276,25 +278,18 @@ class Swarm:
             )
             sys.exit(1)
 
-        if follow:
+        for log_line in lines:
+            # 'stdout' or 'stderr'
+            # Both out and err are collapsed in stdout
+            # Maybe in the future would be useful to keep them separated?
+            # stdstream = log_line[0]
 
-            # lines: Iterable[Tuple[str, bytes]]
-            for log_line in lines:
-                # 'stdout' or 'stderr'
-                # Both out and err are collapsed in stdout
-                # Maybe in the future would be useful to keep them separated?
-                # stdstream = log_line[0]
+            line = log_line[1]
 
-                line = log_line[1]
+            if isinstance(line, bytes):
+                line = line.decode("UTF-8")
 
-                if isinstance(line, bytes):
-                    line = line.decode("UTF-8")
-
-                print(line.strip())
-
-        else:
-            # lines: str
-            print(lines)
+            print(line.strip())
 
     def check_resources(self) -> None:
         total_cpus = 0.0
