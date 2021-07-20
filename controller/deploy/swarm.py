@@ -9,7 +9,7 @@ from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Service
-from python_on_whales.exceptions import NoSuchService, NotASwarmManager
+from python_on_whales.exceptions import NoSuchContainer, NoSuchService, NotASwarmManager
 
 from controller import COMPOSE_FILE, log
 from controller.app import Application, Configuration
@@ -261,19 +261,40 @@ class Swarm:
             log.critical("No such service: {}", service)
             sys.exit(1)
 
-        if follow:
-
+        try:
+            lines = self.docker.container.logs(
+                container,
+                tail=tail,
+                details=False,
+                timestamps=timestamps,
+                follow=follow,
+                stream=follow,
+            )
+        except NoSuchContainer:
             log.critical(
-                "Due to limitations of the underlying packages, the logs command "
-                "does not support the --follow flag yet"
+                "No such container {}, is the stack still starting up?", container
             )
             sys.exit(1)
 
-        print(
-            self.docker.container.logs(
-                container, tail=tail, details=False, timestamps=timestamps
-            )
-        )
+        if follow:
+
+            # lines: Iterable[Tuple[str, bytes]]
+            for log_line in lines:
+                # 'stdout' or 'stderr'
+                # Both out and err are collapsed in stdout
+                # Maybe in the future would be useful to keep them separated?
+                # stdstream = log_line[0]
+
+                line = log_line[1]
+
+                if isinstance(line, bytes):
+                    line = line.decode("UTF-8")
+
+                print(line.strip())
+
+        else:
+            # lines: str
+            print(lines)
 
     def check_resources(self) -> None:
         total_cpus = 0.0

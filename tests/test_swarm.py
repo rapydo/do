@@ -3,11 +3,13 @@ This module will test the swarm mode
 """
 import random
 import shutil
+import signal
 import time
+from datetime import datetime
 from pathlib import Path
 
 from controller.deploy.swarm import Swarm
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, mock_KeyboardInterrupt
 
 
 def test_swarm(capfd: Capture) -> None:
@@ -226,14 +228,18 @@ def test_swarm(capfd: Capture) -> None:
         "is only supported for single services",
     )
 
+    start = datetime.now()
+    signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
+    signal.alarm(3)
+    # Here using main services option
     exec_command(
         capfd,
-        "-s backend logs --follow",
-        "Due to limitations of the underlying packages, the logs command "
-        "does not support the --follow flag yet",
+        "-s backend logs --tail 10 --follow",
+        "*** RESTful HTTP API ***",
     )
+    end = datetime.now()
 
-    time.sleep(2)
+    assert (end - start).seconds >= 2
 
     exec_command(
         capfd,
