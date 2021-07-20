@@ -42,6 +42,17 @@ class Compose:
         for key, value in compose_config.get("services", {}).items():
             if key not in services:
                 continue
+
+            if "healthcheck" in value and "test" in value["healthcheck"]:
+                # healtcheck commands can contain env variables double-escaped ($$)
+                # When dumped to docker-compose.yml the double escape is removed
+                # and when started the single escaped variable is not resolved
+                # and breaks the command. Let's double all the $ to restore the
+                # expected behavior and counteract the consumed $
+                value["healthcheck"]["test"] = [
+                    t.replace("$", "$$") for t in value["healthcheck"]["test"]
+                ]
+
             clean_config["services"][key] = value
 
             for k in value.get("networks", {}).keys():
