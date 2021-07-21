@@ -1,6 +1,4 @@
-"""
-    Command line script: main function
-"""
+import sys
 
 from python_on_whales.utils import DockerException
 
@@ -15,8 +13,7 @@ def main() -> None:
         controller.app()
     except DockerException as e:  # pragma: no cover
         log.critical("Uncatched exception: {}", type(e))
-        print("")
-        log.critical(e)
+        sys.exit(str(e))
 
 
 if __name__ == "__main__":
