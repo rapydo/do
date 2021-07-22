@@ -842,7 +842,7 @@ services:
 
     entrypoint: docker-entrypoint-celery
     # user: root
-    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --state_save_interval=5 --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
+    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --state_save_interval=10000 --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
     healthcheck:
       test: "wget -t 1 --quiet --no-check-certificate $$FLOWER_PROTOCOL://$$FLOWER_USER:$$FLOWER_PASSWORD@localhost:$$FLOWER_PORT -O - > /dev/null"
       interval: ${HEALTHCHECK_INTERVAL}
