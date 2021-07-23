@@ -9,7 +9,7 @@ setup(
     url="https://rapydo.github.io/docs",
     license="MIT",
     packages=find_packages(where=".", exclude=["tests*"]),
-    package_data={"controller": ["templates/*", "confs/*"]},
+    package_data={"controller": ["templates/*", "confs/*", "py.typed"]},
     python_requires=">=3.7.0",
     entry_points={
         "console_scripts": ["rapydo=controller.__main__:main"],
