@@ -103,7 +103,7 @@ jobs:
 
             sudo apt-get install --yes virtualbox
             docker swarm init
-            JOIN_COMMAND = $(docker swarm  join-token  worker | tail -2 | head)
+            JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
 
             # Currently not working due to lack of nested virtualization:
             # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
