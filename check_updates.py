@@ -7,7 +7,7 @@ import time
 from distutils.version import LooseVersion
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import click
 import requests
@@ -34,8 +34,7 @@ DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 skip_versions = {"typescript": "4.3.2"}
 
 
-# This Any is required because yaml.load_all is untyped
-def load_yaml_file(filepath: Path) -> Any:
+def load_yaml_file(filepath: Path) -> Dict[str, Any]:
 
     log.debug("Reading file {}", filepath)
 
@@ -53,7 +52,7 @@ def load_yaml_file(filepath: Path) -> Any:
                 log.critical("YAML file is empty: {}", filepath)
                 sys.exit(1)
 
-            return docs[0]
+            return cast(Dict[str, Any], docs[0])
 
         except Exception as e:
 

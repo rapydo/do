@@ -56,7 +56,12 @@ class Swarm:
         return False
 
     def deploy(self) -> None:
-        self.docker.stack.deploy(name=Configuration.project, compose_files=COMPOSE_FILE)
+
+        self.docker.stack.deploy(
+            name=Configuration.project,
+            compose_files=COMPOSE_FILE,
+            resolve_image="never",
+        )
 
     def restart(self, service: str) -> None:
         service_name = self.get_service(service)
