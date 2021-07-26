@@ -16,6 +16,7 @@ from faker import Faker
 from controller import __version__
 from controller.app import Application
 from controller.commands.compose.backup import get_date_pattern
+from controller.commands.install import download
 from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
@@ -363,3 +364,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     d = faker.date("%Y_%m_%d-%H_%M_%S")
     for _ in range(20):
         assert re.match(date_pattern, f"{d}.bak")
+
+    invalid_url = "https://www.invalid.url/test.txt"
+    with pytest.raises(
+        SystemExit, match=rf"Can't download {invalid_url}, invalid status code 404"
+    ):
+        download(invalid_url)
