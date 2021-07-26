@@ -102,11 +102,16 @@ jobs:
             docker-machine --version
 
             sudo apt-get install --yes virtualbox
-            docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
             docker swarm init
             JOIN_COMMAND $(docker swarm  join-token  worker | tail -2 | head)
-            eval $JOIN_COMMAND
-            docker node ls
+
+            # Currently not working due to lack of nested virtualization:
+            # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
+            # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
+            # docker-machine ssh test $JOIN_COMMAND
+            # docker node ls
+
+            export MULTI_HOST_MODE="1"
           fi
 
 
