@@ -101,7 +101,7 @@ jobs:
 
             docker-machine --version
 
-            apt-get install --yes virtualbox
+            sudo apt-get install --yes virtualbox
             docker-machine create --driver virtualbox test
             docker swarm init
             JOIN_COMMAND $(docker swarm  join-token  worker | tail -2 | head)
