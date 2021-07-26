@@ -94,5 +94,5 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         # "running",
         # This is because NFS is not installed/configured for this test...
         # to be completed
-        "failed to mount local volume:",
+        # "failed to mount local volume:",
     )
