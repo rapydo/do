@@ -100,6 +100,13 @@ jobs:
               && chmod +x /usr/local/bin/docker-machine
 
             docker-machine --version
+
+            apt-get install --yes virtualbox
+            docker-machine create --driver virtualbox test
+            docker swarm init
+            JOIN_COMMAND $(docker swarm  join-token  worker | tail -2 | head)
+            eval $JOIN_COMMAND
+            docker node ls
           fi
 
 
