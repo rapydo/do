@@ -1,7 +1,10 @@
 """
 This module will test the swarm mode
 """
+import os
 import random
+
+from python_on_whales import docker
 
 from tests import Capture, create_project, exec_command
 
@@ -26,6 +29,31 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         frontend="no",
         services=["rabbit", "redis"],
     )
+
+    for node in docker.node.list():
+        if node.spec.role.lower() == "manager":
+            MANAGER_ADDRESS = node.status.addr
+
+    assert MANAGER_ADDRESS is not None
+    # IP=$(echo $TOKEN | awk {'print $6'} | awk -F: {'print $1'})
+    # REGISTRY_HOST="${IP}:5000"
+    # NFS_HOST="${IP}
+
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s init",
+        "MultiHost is enabled but registry host is missing. "
+        "Expected value: REGISTRY_HOST=manager.host:5000/",
+    )
+    os.environ["REGISTRY_HOST"] = f"{MANAGER_ADDRESS}:5000/"
+
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s init",
+        "MultiHost is enabled but nfs host is missing. "
+        "Expected value: NFS_HOST=manager.host",
+    )
+    os.environ["NFS_HOST"] = MANAGER_ADDRESS
 
     exec_command(
         capfd,
