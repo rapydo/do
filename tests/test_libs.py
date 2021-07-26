@@ -365,7 +365,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     for _ in range(20):
         assert re.match(date_pattern, f"{d}.bak")
 
-    invalid_url = "https://www.invalid.url/test.txt"
+    invalid_url = "https://www.google.com/test"
     with pytest.raises(
         SystemExit, match=rf"Can't download {invalid_url}, invalid status code 404"
     ):
