@@ -1,6 +1,7 @@
 import typer
 from glom import glom
 
+from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -24,7 +25,7 @@ def scale(
         service, nreplicas = options
 
     if isinstance(nreplicas, str) and not nreplicas.isnumeric():
-        Application.exit("Invalid number of replicas: {}", nreplicas)
+        print_and_exit("Invalid number of replicas: {}", nreplicas)
 
     verify_available_images(
         [service],

@@ -5,8 +5,7 @@ import yaml
 from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 
-from controller import COMPOSE_ENVIRONMENT_FILE, COMPOSE_FILE, log
-from controller.app import Application
+from controller import COMPOSE_ENVIRONMENT_FILE, COMPOSE_FILE, log, print_and_exit
 
 
 class Compose:
@@ -80,7 +79,7 @@ class Compose:
                     "A bind folder was missing and was automatically created: {}", b
                 )
             except PermissionError:
-                Application.exit(
+                print_and_exit(
                     "A bind folder is missing and can't be automatically created: {}", b
                 )
 

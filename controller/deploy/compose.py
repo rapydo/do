@@ -28,7 +28,7 @@ from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
 
-from controller import COMPOSE_ENVIRONMENT_FILE, log
+from controller import COMPOSE_ENVIRONMENT_FILE, log, print_and_exit
 
 
 class Compose:
@@ -114,17 +114,13 @@ class Compose:
                 sys.exit(e.code)
 
         except (clierrors.UserError, cerrors.OperationFailedError, BuildError) as e:
-            log.critical("Failed command execution:\n{}", e)
-            sys.exit(1)
+            print_and_exit("Failed command execution:\n{}", e)
         except (clierrors.ConnectionError, APIError) as e:  # pragma: no cover
-            log.critical("Failed docker container:\n{}", e)
-            sys.exit(1)
+            print_and_exit("Failed docker container:\n{}", e)
         except ShutdownException as e:  # pragma: no cover
-            log.info("ShutdownException {}", e)
-            sys.exit(1)
+            print_and_exit("ShutdownException {}", e)
         except (ProjectError, NoSuchService) as e:
-            log.critical(e)
-            sys.exit(1)
+            print_and_exit(e)
 
     @staticmethod
     def split_command(command: Optional[str]) -> Tuple[Optional[str], List[str]]:
@@ -180,13 +176,12 @@ class Compose:
         try:
             self.command("up", options)
         except NetworkConfigChangedError as e:  # pragma: no cover
-            log.critical(
+            print_and_exit(
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
                 "you can use rapydo remove --networks or docker system prune",
             )
-            sys.exit(1)
 
     def create_volatile_container(
         self,

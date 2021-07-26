@@ -8,7 +8,7 @@ import typer
 from python_on_whales import docker
 from sultan.api import Sultan
 
-from controller import SUBMODULES_DIR, log
+from controller import SUBMODULES_DIR, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.packages import Packages
 from controller.utilities import git
@@ -22,7 +22,7 @@ BUILDX_VERSION = "v0.6.0"
 def download(url: str) -> Path:
     r = requests.get(url)
     if r.status_code != 200:
-        Application.exit(
+        print_and_exit(
             "Can't download {}, invalid status code {}", url, str(r.status_code)
         )
 
@@ -171,7 +171,7 @@ sudo pip3 install --upgrade --editable {}
     elif git.switch_branch(do_repo, version):
         log.info("Controller repository switched to {}", version)
     else:
-        Application.exit("Invalid version")
+        print_and_exit("Invalid version")
 
     installed = Packages.install(do_path, editable=True, user=False)
 

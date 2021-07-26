@@ -1,4 +1,3 @@
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
@@ -8,7 +7,7 @@ import pytz
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from controller import SUBMODULES_DIR, log
+from controller import SUBMODULES_DIR, log, print_and_exit
 
 # This Any should be Repo, but GitPython is lacking typings
 GitRepoType = Any
@@ -111,28 +110,24 @@ def clone(
         gitobj = Repo.clone_from(url=url, to_path=local_path)
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
-        log.critical(
+        print_and_exit(
             "Repo {} missing as {}. You should init your project",
             url,
             local_path,
         )
-        sys.exit(1)
 
     if do:
         ret = switch_branch(gitobj, branch)
         if not ret:  # pragma: no cover
-            log.critical("Cannot switch repo {} to version {}", local_path, branch)
-            sys.exit(1)
+            print_and_exit("Cannot switch repo {} to version {}", local_path, branch)
 
     if check:
-        compare_repository(gitobj, branch, online_url=url, path=path)
+        compare_repository(gitobj, branch, online_url=url)
 
     return gitobj
 
 
-def compare_repository(
-    gitobj: GitRepoType, branch: str, online_url: str, path: Optional[Path] = None
-) -> bool:
+def compare_repository(gitobj: GitRepoType, branch: str, online_url: str) -> bool:
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -158,7 +153,7 @@ def compare_repository(
             url_match = True
 
         if not url_match:
-            log.critical(
+            print_and_exit(
                 """Unmatched local remote
 Found: {}\nExpected: {}
 Suggestion: remove {} and execute the init command
@@ -167,19 +162,17 @@ Suggestion: remove {} and execute the init command
                 online_url,
                 gitobj.working_dir,
             )
-            sys.exit(1)
 
     active_branch = get_active_branch(gitobj)
 
     if active_branch is not None:
         if branch != active_branch:
-            log.critical(
+            print_and_exit(
                 "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
-                path,
+                Path(gitobj.working_dir).stem,
                 active_branch,
                 branch,
             )
-            sys.exit(1)
     return True
 
 
@@ -197,8 +190,7 @@ def check_file_younger_than(
     try:
         commits = gitobj.blame(rev="HEAD", file=filename)
     except GitCommandError as e:  # pragma: no cover
-        log.critical("Failed 'blame' operation on {}.\n{}", filename, e)
-        sys.exit(1)
+        print_and_exit("Failed 'blame' operation on {}.\n{}", filename, e)
 
     dates = []
     for commit in commits:
@@ -274,8 +266,7 @@ def update(path: str, gitobj: GitRepoType) -> None:
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
             except TypeError as e:  # pragma: no cover
-                log.critical("Unable to update {} repo, {}", path, e)
-                sys.exit(1)
+                print_and_exit("Unable to update {} repo, {}", path, str(e))
 
 
 def check_unstaged(path: str, gitobj: GitRepoType) -> None:
@@ -293,8 +284,7 @@ def fetch(path: str, gitobj: GitRepoType) -> None:
             try:
                 remote.fetch()
             except GitCommandError as e:  # pragma: no cover
-                log.critical(e)
-                sys.exit(1)
+                print_and_exit(str(e))
 
 
 def check_updates(path: str, gitobj: GitRepoType) -> bool:

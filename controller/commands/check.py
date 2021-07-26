@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Tuple
 
 import typer
 
-from controller import SWARM_MODE, log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
@@ -174,7 +174,7 @@ def build_is_obsolete(
     elif path.startswith(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
-        Application.exit("Unable to find git repo {}", path)
+        print_and_exit("Unable to find git repo {}", path)
 
     # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
 

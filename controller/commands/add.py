@@ -5,7 +5,7 @@ from typing import Callable, List
 import typer
 from glom import glom
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.project import Project
 from controller.templating import Templating
@@ -96,7 +96,7 @@ def create_template(
 ) -> None:
 
     if not force and target_path.exists():
-        Application.exit("{} already exists", target_path)
+        print_and_exit("{} already exists", target_path)
 
     template = templating.get_template(
         template_name,
@@ -371,7 +371,7 @@ def create_integration_test(
 ) -> None:
 
     if add_tests:
-        Application.exit("Add integration_test does not support --add-tests flag")
+        print_and_exit("Add integration_test does not support --add-tests flag")
 
     path = project_scaffold.p_path("frontend", "integration")
 
@@ -412,11 +412,11 @@ def create_workflow(
 ) -> None:
 
     if add_tests:
-        Application.exit("Add workflow does not support --add-tests flag")
+        print_and_exit("Add workflow does not support --add-tests flag")
 
     workflows = ["backend", "frontend", "cypress", "mypy"]
     if name not in workflows:
-        Application.exit("Invalid workflow name, expected: {}", ", ".join(workflows))
+        print_and_exit("Invalid workflow name, expected: {}", ", ".join(workflows))
 
     path = Path(".github", "workflows")
 

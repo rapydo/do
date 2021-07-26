@@ -1,4 +1,4 @@
-from controller import SWARM_MODE, log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -21,7 +21,7 @@ def start() -> None:
         compose = ComposeV2(Application.data.files)
         if Application.data.services != Application.data.active_services:
             if swarm.docker.stack.list():
-                Application.exit(
+                print_and_exit(
                     "A stack is already running. "
                     "Stop it with rapydo remove if you want to start a new stack"
                 )

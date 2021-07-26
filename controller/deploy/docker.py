@@ -2,7 +2,8 @@ from typing import Optional
 
 from python_on_whales import DockerClient
 
-from controller.app import Application, Configuration
+from controller import print_and_exit
+from controller.app import Configuration
 
 
 class Docker:
@@ -16,7 +17,7 @@ class Docker:
             return None
 
         if not cls.validate_remote_engine(Configuration.remote_engine):
-            Application.exit(
+            print_and_exit(
                 "Invalid remote host {}, expected user@ip-or-hostname",
                 Configuration.remote_engine,
             )

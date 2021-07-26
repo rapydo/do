@@ -1,10 +1,9 @@
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
-from controller import COMPOSE_FILE_VERSION, CONFS_DIR, log
+from controller import COMPOSE_FILE_VERSION, CONFS_DIR, log, print_and_exit
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
@@ -41,13 +40,12 @@ def read_configuration(
         # Can't be tested because it is included in default configuration
         if project.get(key) is None:  # pragma: no cover
 
-            log.critical(
+            print_and_exit(
                 "Project not configured, missing key '{}' in file {}/{}",
                 key,
                 base_project_path,
                 PROJECT_CONF_FILENAME,
             )
-            sys.exit(1)
 
     base_configuration = load_yaml_file(
         file=default_file_path.joinpath(PROJECTS_DEFAULTS_FILE), keep_order=True
@@ -75,20 +73,17 @@ def read_configuration(
     elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
-            log.critical("Invalid repository name in extends-from, name is empty")
-            sys.exit(1)
+            print_and_exit("Invalid repository name in extends-from, name is empty")
 
         extend_path = submodules_path.joinpath(
             repository_name, projects_path, extended_project
         )
     else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
-        log.critical("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
-        sys.exit(1)
+        print_and_exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
 
     if not extend_path.exists():  # pragma: no cover
-        log.critical("From project not found: {}", extend_path)
-        sys.exit(1)
+        print_and_exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
         file=extend_path.joinpath(PROJECT_CONF_FILENAME), keep_order=True
@@ -162,8 +157,7 @@ def load_yaml_file(
 
     if not file.exists():
         if not is_optional:
-            log.critical("Failed to read {}: File does not exist", file)
-            sys.exit(1)
+            print_and_exit("Failed to read {}: File does not exist", file)
         return {}
 
     with open(file) as fh:
@@ -180,8 +174,7 @@ def load_yaml_file(
             docs = list(loader)
 
             if len(docs) == 0:
-                log.critical("YAML file is empty: {}", file)
-                sys.exit(1)
+                print_and_exit("YAML file is empty: {}", file)
 
             # Return value of yaml.load_all is un-annotated and considered as Any
             # But we known that it is a Dict Configuration-compliant
@@ -192,8 +185,7 @@ def load_yaml_file(
             # import codecs
             # error, _ = codecs.getdecoder("unicode_escape")(str(error))
 
-            log.critical("Failed to read [{}]: {}", file, e)
-            sys.exit(1)
+            print_and_exit("Failed to read [{}]: {}", file, str(e))
 
 
 def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path]]:
@@ -226,7 +218,6 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
 
         except KeyError as e:  # pragma: no cover
 
-            log.critical("Error reading {}: {}", path, e)
-            sys.exit(1)
+            print_and_exit("Error reading {}: {}", path, str(e))
 
     return all_files, base_files

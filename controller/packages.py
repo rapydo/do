@@ -2,14 +2,13 @@
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
 import re
-import sys
 from distutils.version import LooseVersion
 from pathlib import Path
 from typing import List, Optional, Union
 
 from sultan.api import Sultan
 
-from controller import log
+from controller import log, print_and_exit
 from controller.utilities import system
 
 
@@ -57,8 +56,7 @@ class Packages:
 
                 return bool(result.rc == 0)
         except Exception as e:  # pragma: no cover
-            log.critical(e)
-            sys.exit(1)
+            print_and_exit(str(e))
 
     @staticmethod
     def check_program(
@@ -75,21 +73,19 @@ class Packages:
             if program == "docker":  # pragma: no cover
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.critical(
+            print_and_exit(
                 "A mandatory dependency is missing: {} not found{}", program, hints
             )
-            sys.exit(1)
 
         v = LooseVersion(found_version)
         if min_version is not None:
             if LooseVersion(min_version) > v:
-                log.critical(
+                print_and_exit(
                     "Minimum supported version for {} is {}, found {}",
                     program,
                     min_version,
                     found_version,
                 )
-                sys.exit(1)
 
         if min_recommended_version is not None:
             if LooseVersion(min_recommended_version) > v:
@@ -102,13 +98,12 @@ class Packages:
 
         if max_version is not None:
             if LooseVersion(max_version) < v:
-                log.critical(
+                print_and_exit(
                     "Maximum supported version for {} is {}, found {}",
                     program,
                     max_version,
                     found_version,
                 )
-                sys.exit(1)
 
         log.debug("{} version: {}", program, found_version)
         return found_version

@@ -3,7 +3,7 @@ from typing import Optional
 
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 
@@ -64,7 +64,7 @@ def interfaces(
     try:
         current_ports = info.get("ports", []).pop(0)
     except IndexError:  # pragma: no cover
-        Application.exit("No default port found?")
+        print_and_exit("No default port found?")
 
     port = port or current_ports["published"]
     target = current_ports["target"]

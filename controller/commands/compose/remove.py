@@ -1,6 +1,6 @@
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 
@@ -31,7 +31,7 @@ def remove(
 
             opt = "--networks" if rm_networks else "--all"
 
-            Application.exit(
+            print_and_exit(
                 "Incompatibile options {opt} and --service\n"
                 + "rapydo remove {opt} is ALWAYS applied to EVERY container of the "
                 + "stack due to the underlying docker-compose implementation. "

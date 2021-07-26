@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 
-from controller import SWARM_MODE, log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
@@ -52,7 +52,7 @@ def init(
 
     if submodules_path is not None:
         if not submodules_path.exists():
-            Application.exit("Local path not found: {}", submodules_path)
+            print_and_exit("Local path not found: {}", submodules_path)
 
     Application.git_submodules(from_path=submodules_path)
 

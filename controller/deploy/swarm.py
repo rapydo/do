@@ -1,7 +1,6 @@
 """
 Integration with Docker swarmg
 """
-import sys
 from typing import Dict, List, Optional, Union
 
 from colorama import Fore
@@ -11,7 +10,7 @@ from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchContainer, NoSuchService, NotASwarmManager
 
-from controller import COMPOSE_FILE, log
+from controller import COMPOSE_FILE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -23,7 +22,7 @@ class Swarm:
         self.docker = Docker().client
 
         if check_initialization and not self.get_token():
-            Application.exit("Swarm is not initialized, please execute rapydo init")
+            print_and_exit("Swarm is not initialized, please execute rapydo init")
 
     def init(self) -> None:
         self.docker.swarm.init()
@@ -252,19 +251,17 @@ class Swarm:
     ) -> None:
 
         if len(services) > 1:
-            log.critical(
+            print_and_exit(
                 "Due to limitations of the underlying packages, the logs command "
                 "is only supported for single services"
             )
-            sys.exit(1)
 
         service = services[0]
 
         container = self.get_container(service, 1)
 
         if not container:
-            log.critical("No such service: {}", service)
-            sys.exit(1)
+            print_and_exit("No such service: {}", service)
 
         try:
             # lines: Iterable[Tuple[str, bytes]] due to stream=True
@@ -278,10 +275,9 @@ class Swarm:
                 stream=True,
             )
         except NoSuchContainer:
-            log.critical(
+            print_and_exit(
                 "No such container {}, is the stack still starting up?", container
             )
-            sys.exit(1)
 
         for log_line in lines:
             # 'stdout' or 'stderr'

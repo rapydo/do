@@ -98,7 +98,7 @@ def build(
     #             result = -1
 
     #         if result != 0:
-    #             Application.exit(
+    #             print_and_exit(
     #                 "Multi Host Mode is enabled, but registry at {} not reachable",
     #                 registry_host,
     #             )

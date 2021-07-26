@@ -5,7 +5,7 @@ from typing import List
 
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -103,7 +103,7 @@ def backup(
     now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     if service_name == Services.neo4j:
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "Neo4j is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -127,7 +127,7 @@ def backup(
     if service_name == Services.postgres:
 
         if not container_is_running:
-            Application.exit(
+            print_and_exit(
                 "The backup procedure requires {} running, please start your stack",
                 service_name,
             )
@@ -169,7 +169,7 @@ def backup(
     if service_name == Services.mariadb:
 
         if not container_is_running:
-            Application.exit(
+            print_and_exit(
                 "The backup procedure requires {} running, please start your stack",
                 service_name,
             )
@@ -221,7 +221,7 @@ def backup(
 
     if service_name == Services.rabbit:
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "RabbitMQ is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )

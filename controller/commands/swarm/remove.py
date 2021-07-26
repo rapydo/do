@@ -2,7 +2,7 @@ from typing import Dict, Union
 
 from python_on_whales import Service
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
@@ -21,7 +21,7 @@ def remove() -> None:
     else:
 
         if not swarm.stack_is_running(Configuration.project):
-            Application.exit(
+            print_and_exit(
                 "Stack {} is not running, deploy it with rapydo start",
                 Configuration.project,
             )

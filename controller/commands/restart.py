@@ -1,4 +1,4 @@
-from controller import SWARM_MODE, log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 from controller.deploy.swarm import Swarm
@@ -11,7 +11,7 @@ def restart() -> None:
     if SWARM_MODE:
         swarm = Swarm()
         if not swarm.stack_is_running(Configuration.project):
-            Application.exit(
+            print_and_exit(
                 "Stack {} is not running, deploy it with rapydo start",
                 Configuration.project,
             )

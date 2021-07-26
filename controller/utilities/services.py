@@ -1,9 +1,8 @@
-import sys
 from typing import Dict, List, Optional
 
 from glom import glom
 
-from controller import ComposeConfig, EnvType, log
+from controller import ComposeConfig, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
@@ -19,8 +18,7 @@ def get_services(
         splitted = excluded_services_list.split(",")
         for service in splitted:
             if service not in default:
-                log.critical("No such service: {}", service)
-                sys.exit(1)
+                print_and_exit("No such service: {}", service)
 
         return sorted(s for s in default if s not in splitted)
 
@@ -160,12 +158,11 @@ def check_rabbit_password(pwd: Optional[EnvType]) -> None:
         invalid_characters = ["£", "§", "”", "’"]
         if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make RabbitMQ crash at startup",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
 def check_redis_password(pwd: Optional[EnvType]) -> None:
@@ -173,12 +170,11 @@ def check_redis_password(pwd: Optional[EnvType]) -> None:
         invalid_characters = ["#"]
         if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
 def check_mongodb_password(pwd: Optional[EnvType]) -> None:
@@ -186,12 +182,11 @@ def check_mongodb_password(pwd: Optional[EnvType]) -> None:
         invalid_characters = ["#"]
         if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in MONGO_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:

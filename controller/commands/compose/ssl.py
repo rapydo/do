@@ -4,7 +4,7 @@ from typing import Optional
 
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -52,14 +52,14 @@ def ssl(
 
     if chain_file is not None or key_file is not None:
         if chain_file is None:
-            Application.exit("Invalid chain file (you provided none)")
+            print_and_exit("Invalid chain file (you provided none)")
         elif not chain_file.exists():
-            Application.exit("Invalid chain file (you provided {})", chain_file)
+            print_and_exit("Invalid chain file (you provided {})", chain_file)
 
         if key_file is None:
-            Application.exit("Invalid key file (you provided none)")
+            print_and_exit("Invalid key file (you provided none)")
         elif not key_file.exists():
-            Application.exit("Invalid key file (you provided {})", key_file)
+            print_and_exit("Invalid key file (you provided {})", key_file)
 
     service = "proxy"
 

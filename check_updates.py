@@ -15,13 +15,14 @@ import yaml
 from bs4 import BeautifulSoup
 from loguru import logger as log
 
+from controller import print_and_exit
+
 if sys.version_info.major == 3 and sys.version_info.minor <= 8:
-    log.critical(
+    print_and_exit(
         "This script is not compatible with Python {}.{}",
-        sys.version_info.major,
-        sys.version_info.minor,
+        str(sys.version_info.major),
+        str(sys.version_info.minor),
     )
-    sys.exit(1)
 
 Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
@@ -49,8 +50,7 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
             docs = list(loader)
 
             if not docs:
-                log.critical("YAML file is empty: {}", filepath)
-                sys.exit(1)
+                print_and_exit("YAML file is empty: {}", filepath)
 
             return cast(Dict[str, Any], docs[0])
 
@@ -71,8 +71,7 @@ def check_updates(
             return
             # tokens = lib.split(">=")
         else:
-            log.critical("Invalid lib format: {}", lib)
-            sys.exit(1)
+            print_and_exit("Invalid lib format: {}", lib)
 
         if "[" in tokens[0]:
             tokens[0] = tokens[0].split("[")[0]
@@ -255,8 +254,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
     token = resp.json()["token"]
 
     if not token:
-        log.critical("Invalid docker hub token")
-        sys.exit(1)
+        print_and_exit("Invalid docker hub token")
 
     headers = {"Authorization": f"Bearer {token}"}
 

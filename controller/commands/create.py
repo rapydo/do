@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 import typer
 
-from controller import PROJECT_DIR, __version__, log
+from controller import PROJECT_DIR, __version__, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.project import NO_AUTHENTICATION, NO_FRONTEND, Project
 from controller.templating import Templating
@@ -92,10 +92,10 @@ def create(
 
     if extend is not None:
         if project_name == extend:
-            Application.exit("A project cannot extend itself")
+            print_and_exit("A project cannot extend itself")
 
         if not PROJECT_DIR.joinpath(extend).is_dir():
-            Application.exit("Invalid extend value: project {} not found", extend)
+            print_and_exit("Invalid extend value: project {} not found", extend)
 
     services_list: List[str] = [service.value for service in services]
     create_project(
@@ -169,7 +169,7 @@ def create_project(
     if not force_current:
         dirs = os.listdir(".")
         if dirs and dirs != [".git"]:
-            Application.exit(
+            print_and_exit(
                 "Current folder is not empty, cannot create a new project here.\n"
                 "Found: {}\n"
                 "Use --current to force the creation here",
@@ -206,7 +206,7 @@ def create_project(
     project_scaffold.check_invalid_characters(project_name)
 
     if project_name in project_scaffold.reserved_project_names:
-        Application.exit(
+        print_and_exit(
             "You selected a reserved name, invalid project name: {}", project_name
         )
 
@@ -222,7 +222,7 @@ def create_project(
             log.debug("Project folder already exists: {}", f)
             continue
         if not auto:
-            Application.exit("\nmkdir -p {}", f)
+            print_and_exit("\nmkdir -p {}", f)
 
         f.mkdir(parents=True, exist_ok=True)
 
@@ -235,7 +235,7 @@ def create_project(
 
     if path:
         if path not in files:
-            Application.exit("Invalid path, cannot upgrade {}", path)
+            print_and_exit("Invalid path, cannot upgrade {}", path)
         else:
             files = [path]
 
@@ -280,7 +280,7 @@ def create_project(
             log.info("Project file already exists: {}", p)
         else:
             print(f"\n{template}")
-            Application.exit(str(p))
+            print_and_exit(str(p))
 
     if not path:
         for p in project_scaffold.raw_files:
@@ -297,7 +297,7 @@ def create_project(
                 log.info("Project file already exists: {}", p)
             else:
                 # print(f"Missing file: {p}")
-                Application.exit("File is missing: {}", p)
+                print_and_exit("File is missing: {}", p)
 
 
 def parse_env_variables(envs: Optional[List[str]]) -> Dict[str, str]:
@@ -309,7 +309,7 @@ def parse_env_variables(envs: Optional[List[str]]) -> Dict[str, str]:
     for env in envs:
         e = env.split("=")
         if len(e) != 2:
-            Application.exit("Invalid env {}, expected: K1=V1", env)
+            print_and_exit("Invalid env {}, expected: K1=V1", env)
         k = e[0].upper()
         v = e[1]
         env_variables[k] = v

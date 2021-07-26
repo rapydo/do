@@ -5,7 +5,7 @@ from typing import List, Optional
 
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -71,7 +71,7 @@ def restore(
 
     backup_dir = Path("data", "backup", service_name)
     if not backup_dir.exists():
-        Application.exit(
+        print_and_exit(
             "No backup found, the following folder does not exist: {}", backup_dir
         )
 
@@ -82,7 +82,7 @@ def restore(
         filtered_files.sort()
 
         if not len(filtered_files):
-            Application.exit("No backup found, {} is empty", backup_dir)
+            print_and_exit("No backup found, {} is empty", backup_dir)
 
         log.info("Please specify one of the following backup:")
         for f in filtered_files:
@@ -92,11 +92,11 @@ def restore(
 
     backup_host_path = backup_dir.joinpath(backup_file)
     if not backup_host_path.exists():
-        Application.exit("Invalid backup file, {} does not exist", backup_host_path)
+        print_and_exit("Invalid backup file, {} does not exist", backup_host_path)
 
     if service_name == Services.neo4j:
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "Neo4j is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -120,7 +120,7 @@ def restore(
     if service_name == Services.postgres:
 
         if not container_is_running:
-            Application.exit(
+            print_and_exit(
                 "The restore procedure requires {} running, please start your stack",
                 service_name,
             )
@@ -154,7 +154,7 @@ def restore(
     if service_name == Services.mariadb:
 
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "MariaDB is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -202,7 +202,7 @@ def restore(
 
     if service_name == Services.rabbit:
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "RabbitMQ is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
@@ -226,7 +226,7 @@ def restore(
     if service_name == Services.redis:
 
         if container_is_running and not force:
-            Application.exit(
+            print_and_exit(
                 "Redis is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )

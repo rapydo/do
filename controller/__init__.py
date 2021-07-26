@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, NoReturn, Union
 
 from loguru import logger as log
 
@@ -65,3 +65,10 @@ SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
 MULTI_HOST_MODE = os.environ.get("MULTI_HOST_MODE", "0") == "1"
 
 EnvType = Union[None, str, int, float]
+
+
+def print_and_exit(
+    message: str, *args: Union[str, Path], **kwargs: Union[str, Path]
+) -> NoReturn:
+    log.critical(message, *args, **kwargs)
+    sys.exit(1)

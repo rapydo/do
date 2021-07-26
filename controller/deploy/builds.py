@@ -5,15 +5,13 @@ Parse dockerfiles and check for builds
 # https://docker-py.readthedocs.io/en/stable/
 """
 
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Set
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import ComposeConfig, log
-from controller.app import Application
+from controller import ComposeConfig, log, print_and_exit
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -64,10 +62,9 @@ def find_templates_build(
         template_image = base_service.get("image")
 
         if template_image is None:  # pragma: no cover
-            log.critical(
+            print_and_exit(
                 "Template builds must have a name, missing for {}", template_name
             )
-            sys.exit(1)
         if template_image not in templates:
             templates[template_image] = {
                 "services": [],
@@ -90,8 +87,7 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
     dockerfile = path.joinpath("Dockerfile")
 
     if not dockerfile.exists():
-        log.critical("Build path not found: {}", dockerfile)
-        sys.exit(1)
+        print_and_exit("Build path not found: {}", dockerfile)
 
     with open(dockerfile) as f:
         for line in reversed(f.readlines()):
@@ -104,18 +100,16 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
                     image = image.split(" as ")[0]
 
                 if image.startswith("rapydo/") and image not in templates:
-                    log.critical(
+                    print_and_exit(
                         "Unable to find {} in this project"
                         "\nPlease inspect the FROM image in {}/Dockerfile",
                         image,
                         dockerfile,
                     )
-                    sys.exit(1)
 
                 return image
 
-    log.critical("Invalid Dockerfile, no base image found in {}", dockerfile)
-    sys.exit(1)
+    print_and_exit("Invalid Dockerfile, no base image found in {}", dockerfile)
 
 
 def find_templates_override(
@@ -181,7 +175,7 @@ def verify_available_images(
                 continue
 
             if not docker.client.image.exists(image):
-                Application.exit(
+                print_and_exit(
                     "Missing {} image for {} service, execute rapydo pull",
                     image,
                     service,
@@ -198,7 +192,7 @@ def verify_available_images(
 
             if not docker.client.image.exists(image):
                 action = "build" if data["path"] else "pull"
-                Application.exit(
+                print_and_exit(
                     "Missing {} image for {} service, execute rapydo {}",
                     image,
                     service,

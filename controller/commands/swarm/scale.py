@@ -4,6 +4,7 @@ import typer
 from glom import glom
 from python_on_whales import Service
 
+from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
@@ -37,5 +38,5 @@ def scale(
     try:
         scales[service_name] = int(nreplicas)
     except ValueError:
-        Application.exit("Invalid number of replicas: {}", nreplicas)
+        print_and_exit("Invalid number of replicas: {}", nreplicas)
     swarm.docker.service.scale(scales, detach=not wait)

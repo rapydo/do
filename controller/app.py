@@ -5,7 +5,7 @@ import sys
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, cast
 
 import requests
 import typer
@@ -28,6 +28,7 @@ from controller import (
     EnvType,
     __version__,
     log,
+    print_and_exit,
 )
 from controller.commands import load_commands
 from controller.deploy.compose import Compose
@@ -219,7 +220,7 @@ def controller_cli_options(
     Configuration.set_action(ctx.invoked_subcommand)
 
     if services_list and excluded_services_list:
-        Application.exit(
+        print_and_exit(
             "Incompatibile use of both --services/-s and --skip-services/-S options"
         )
 
@@ -296,11 +297,6 @@ class Application:
         Application.load_projectrc()
 
     @staticmethod
-    def exit(message: str, *args: Union[str, Path], **kwargs: Union[str, Path]) -> None:
-        log.critical(message, *args, **kwargs)
-        sys.exit(1)
-
-    @staticmethod
     def get_controller() -> "Application":
         if not Application.controller:  # pragma: no cover
             raise AttributeError("Application.controller not initialized")
@@ -314,7 +310,7 @@ class Application:
         main_folder_error = Application.project_scaffold.check_main_folder()
 
         if main_folder_error:
-            Application.exit(main_folder_error)
+            print_and_exit(main_folder_error)
 
         if not Configuration.print_version:
             Application.check_installed_software()
@@ -434,7 +430,7 @@ class Application:
             v = docker.buildx.version()
             log.debug("docker buildx is installed: {}", v)
         else:  # pragma: no cover
-            Application.exit(
+            print_and_exit(
                 "A mandatory dependency is missing: docker buildx not found"
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
                 "\nor try the automated installation with rapydo install buildx"
@@ -447,7 +443,7 @@ class Application:
         else:  # pragma: no cover
 
             if SWARM_MODE:
-                Application.exit(
+                print_and_exit(
                     "A mandatory dependency is missing: docker compose not found"
                     "\nInstallation guide: "
                     "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
@@ -483,7 +479,7 @@ class Application:
             self.extended_project_path = confs[2]
 
         except AttributeError as e:  # pragma: no cover
-            Application.exit(str(e))
+            print_and_exit(str(e))
 
         Configuration.frontend = glom(
             Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
@@ -509,7 +505,7 @@ class Application:
         )
 
         if not Configuration.rapydo_version:  # pragma: no cover
-            Application.exit(
+            print_and_exit(
                 "RAPyDo version not found in your project_configuration file"
             )
 
@@ -561,8 +557,7 @@ You can use of one:
 
 """
 
-            log.critical(msg)
-            sys.exit(1)
+            print_and_exit(msg)
 
     @staticmethod
     def check_internet_connection() -> None:
@@ -573,7 +568,7 @@ You can use of one:
             if Configuration.check:
                 log.info("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover
-            Application.exit("Internet connection is unavailable")
+            print_and_exit("Internet connection is unavailable")
 
     # from_path:
     @staticmethod
@@ -603,7 +598,7 @@ You can use of one:
 
             local_path = from_path.joinpath(name)
             if not local_path.exists():
-                Application.exit("Submodule {} not found in {}", name, local_path)
+                print_and_exit("Submodule {} not found in {}", name, local_path)
 
             submodule_path = Path(SUBMODULES_DIR, name)
 
@@ -715,7 +710,7 @@ You can use of one:
 
         for service in self.enabled_services:
             if service not in self.active_services:
-                Application.exit("No such service: {}", service)
+                print_and_exit("No such service: {}", service)
 
         log.debug("Enabled services: {}", self.enabled_services)
 
@@ -813,12 +808,12 @@ You can use of one:
 
         if MULTI_HOST_MODE:
             if not Application.env.get("REGISTRY_HOST"):
-                Application.exit(
+                print_and_exit(
                     "MultiHost is enabled but registry host is missing. "
                     "Expected value: REGISTRY_HOST=manager.host:5000/"
                 )
             if not Application.env.get("NFS_HOST"):
-                Application.exit(
+                print_and_exit(
                     "MultiHost is enabled but nfs host is missing. "
                     "Expected value: NFS_HOST=manager.host"
                 )
@@ -933,7 +928,7 @@ You can use of one:
     def check_placeholders(self) -> Set[str]:
 
         if len(self.active_services) == 0:  # pragma: no cover
-            Application.exit(
+            print_and_exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
 and add the variable "ACTIVATE_DESIREDSERVICE: 1"
@@ -975,13 +970,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 if key.startswith("INJECT_"):
                     key = key[len("INJECT_") :]
 
-                Application.exit(
+                print_and_exit(
                     "Missing variable: {}: cannot find a service mapping this variable",
                     key,
                 )
 
         if len(placeholders) > 0:
-            Application.exit(
+            print_and_exit(
                 "The following variables are missing in your configuration:\n\n{}"
                 "\n\nYou can fix this error by updating your .projectrc file\n",
                 "\n".join(placeholders),
@@ -998,7 +993,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 continue
 
             if gitobj and not git.can_be_updated(name, gitobj):
-                Application.exit("Can't continue with updates")
+                print_and_exit("Can't continue with updates")
 
         controller_is_updated = False
         for name, gitobj in Application.gits.items():
