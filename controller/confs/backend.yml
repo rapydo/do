@@ -49,7 +49,8 @@ services:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
-    image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    # image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    image: ${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     healthcheck:
       test: ${HEALTHCHECK_BACKEND_CMD}
       interval: ${HEALTHCHECK_INTERVAL}

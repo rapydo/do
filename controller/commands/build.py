@@ -45,7 +45,7 @@ def build(
             targets=Application.data.services,
             files=[COMPOSE_FILE],
             pull=True,
-            push=MULTI_HOST_MODE,
+            # push=MULTI_HOST_MODE,
             load=True,
             cache=not force,
         )
