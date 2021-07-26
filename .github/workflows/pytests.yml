@@ -33,6 +33,7 @@ jobs:
 
             # Swarm only
             swarm/swarm,
+            swarm/multi_host,
 
             # Compose only
             compose/backup_restore_tuning_mariadb,
@@ -91,6 +92,16 @@ jobs:
           elif [[ "${TEST_NAME}" == compose/* ]]; then
             TEST_NAME=${TEST_NAME/compose\//}
           fi
+
+          if [[ "${TEST_NAME}" == "multi_host" ]]; then
+            base=https://github.com/docker/machine/releases/download/v0.16.0 \
+              && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
+              && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
+              && chmod +x /usr/local/bin/docker-machine
+
+            docker-machine --version
+          fi
+
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
           cp coverage.xml ..
