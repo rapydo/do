@@ -1,6 +1,7 @@
 """
 Integration with Docker swarmg
 """
+import os
 from typing import Dict, List, Optional, Union
 
 from colorama import Fore
@@ -25,7 +26,13 @@ class Swarm:
             print_and_exit("Swarm is not initialized, please execute rapydo init")
 
     def init(self) -> None:
-        self.docker.swarm.init()
+
+        manager_address = (
+            os.environ.get("SWARM_MANAGER_ADDRESS") or system.get_local_ip()
+        )
+
+        log.info("Initializing Swarm with manager IP {}", manager_address)
+        self.docker.swarm.init(advertise_address=manager_address)
 
     def leave(self) -> None:
         self.docker.swarm.leave(force=True)

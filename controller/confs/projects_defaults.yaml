@@ -311,6 +311,11 @@ variables:
     # To be enabled with "manager.host:5000/"
     REGISTRY_HOST:
 
+    # To be enabled with "manager.host"
+    # defaulted to local IP of active network interface
+    # Note: can only be modified as env variable, not projectrc/-e :\
+    SWARM_MANAGER_ADDRESS:
+
     # Smtp
     SMTP_ENABLE_CONNECTOR: 1
     SMTP_EXPIRATION_TIME: 7200

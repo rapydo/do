@@ -1,6 +1,7 @@
 """
 This module will test the swarm mode
 """
+import os
 import random
 import shutil
 import signal
@@ -9,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 
 from controller.deploy.swarm import Swarm
+from controller.utilities import system
 from tests import Capture, create_project, exec_command, mock_KeyboardInterrupt
 
 
@@ -29,12 +31,28 @@ def test_swarm(capfd: Capture) -> None:
         capfd=capfd, name="swarm", auth=auth, frontend="angular", services=["redis"]
     )
 
+    os.environ["SWARM_MANAGER_ADDRESS"] = "127.0.0.1"
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s init",
+        "docker buildx is installed",
+        "docker compose is installed",
+        "Initializing Swarm with manager IP 127.0.0.1",
+        "Swarm is now initialized",
+        "Project initialized",
+    )
+
+    swarm = Swarm()
+    swarm.leave()
+    os.environ["SWARM_MANAGER_ADDRESS"] = ""
+    local_ip = system.get_local_ip()
     exec_command(
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
         "docker buildx is installed",
         "docker compose is installed",
         "Swarm is now initialized",
+        f"Initializing Swarm with manager IP {local_ip}",
         "Project initialized",
     )
 
@@ -61,7 +79,6 @@ def test_swarm(capfd: Capture) -> None:
         "Checks completed",
     )
 
-    swarm = Swarm()
     swarm.leave()
 
     exec_command(

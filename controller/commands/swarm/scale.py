@@ -9,6 +9,8 @@ from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
+# RabbitMQ:
+# https://www.erlang-solutions.com/blog/scaling-rabbitmq-on-a-coreos-cluster-through-docker/
 supported_services = [
     "adminer",
     "backend",

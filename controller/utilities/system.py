@@ -1,5 +1,6 @@
 import os
 import pwd
+import socket
 from typing import List
 
 from plumbum import local
@@ -111,3 +112,9 @@ def str_to_bytes(text: str) -> float:
         raise AttributeError(f"Invalid float value {value}")
 
     return float(value) * unit
+
+
+def get_local_ip() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return str(s.getsockname()[0])

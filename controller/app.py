@@ -806,6 +806,10 @@ You can use of one:
 
         Application.env.update(Configuration.environment)
 
+        # No need to pre-calculate local ip, since it is used only by init
+        # if SWARM_MODE and not Application.env.get("SWARM_MANAGER_ADDRESS"):
+        #     Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip()
+
         if MULTI_HOST_MODE:
             if not Application.env.get("REGISTRY_HOST"):
                 print_and_exit(
