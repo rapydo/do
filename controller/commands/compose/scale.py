@@ -6,10 +6,8 @@ from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 
-# scaling should be a "Multiple Value"
 
-
-@Application.app.command(help="Scale the number of containers for one service")
+@Application.app.command(help="Scale the number of containers for a service")
 def scale(
     scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
 ) -> None:

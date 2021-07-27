@@ -26,10 +26,7 @@ def test_swarm(capfd: Capture) -> None:
     )
 
     create_project(
-        capfd=capfd,
-        name="swarm",
-        auth=auth,
-        frontend="angular",
+        capfd=capfd, name="swarm", auth=auth, frontend="angular", services=["redis"]
     )
 
     exec_command(
@@ -151,6 +148,12 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "pull --quiet",
         "Base images pulled from docker hub",
+    )
+
+    exec_command(
+        capfd,
+        "scale backend=2",
+        "No such service: swarm_backend, have you started your stack?",
     )
 
     # Deploy a sub-stack
@@ -307,6 +310,13 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "scale backend=0 --wait",
         "swarm_backend scaled to 0",
+    )
+
+    exec_command(
+        capfd,
+        "scale redis=2",
+        "Service redis is not guaranteed to support the scale, "
+        "can't accept the request",
     )
 
     exec_command(
