@@ -66,7 +66,8 @@ class Swarm:
         self.docker.stack.deploy(
             name=Configuration.project,
             compose_files=COMPOSE_FILE,
-            resolve_image="never",
+            resolve_image="always",
+            prune=True,
         )
 
     def restart(self, service: str) -> None:
@@ -126,12 +127,13 @@ class Swarm:
 
         for service in services:
 
-            print(f"{Fore.RESET}Inspecting {service.spec.name}...", end="\r")
+            service_name = service.spec.name
+            print(f"{Fore.RESET}Inspecting {service_name}...", end="\r")
 
             tasks_lines: List[str] = []
 
             running_tasks = 0
-            for task in self.docker.service.ps(service.spec.name):
+            for task in self.docker.service.ps(service_name):
 
                 if task.status.state == "shutdown" or task.status.state == "complete":
                     COLOR = Fore.BLUE
@@ -147,6 +149,7 @@ class Swarm:
 
                 slot = f" \\_ [{task.slot}]"
                 node_name = nodes.get(task.node_id, "")
+                container_name = f"{service_name}.{task.slot}.{task.id}"
                 status = f"{COLOR}{task.status.state:8}{Fore.RESET}"
                 errors = f"err={task.status.err}" if task.status.err else ""
                 labels = ",".join(task.labels)
@@ -159,6 +162,7 @@ class Swarm:
                             status,
                             ts,
                             node_name,
+                            container_name,
                             errors,
                             labels,
                         )
@@ -185,7 +189,6 @@ class Swarm:
             else:
                 ports_list = []
 
-            service_name = service.spec.name
             image = service.spec.task_template.container_spec.image.split("@")[0]
             ports = ",".join(ports_list)
             print(f"{COLOR}{service_name:23}{Fore.RESET} [{replicas}] {image}\t{ports}")

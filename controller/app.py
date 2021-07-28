@@ -875,6 +875,8 @@ You can use of one:
                     value = str(value)
                 if " " in value:
                     value = f"'{value}'"
+                # if len(value) == 0:
+                #     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
 
     def create_datafile(self) -> None:
