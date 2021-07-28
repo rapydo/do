@@ -152,7 +152,7 @@ Suggestion: remove {} and execute the init command
             """,
                 url,
                 online_url,
-                gitobj.working_dir or "N/A",
+                str(gitobj.working_dir or "N/A"),
             )
 
     active_branch = get_active_branch(gitobj)
