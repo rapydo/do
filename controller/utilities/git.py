@@ -9,11 +9,8 @@ from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from controller import SUBMODULES_DIR, log, print_and_exit
 
-# This Any should be Repo, but GitPython is lacking typings
-GitRepoType = Any
 
-
-def get_repo(path: str) -> GitRepoType:
+def get_repo(path: str) -> Optional[Repo]:
     try:
         return Repo(path)
     except NoSuchPathError:
@@ -22,11 +19,11 @@ def get_repo(path: str) -> GitRepoType:
         return None
 
 
-def init(path: str) -> GitRepoType:
+def init(path: str) -> Repo:
     return Repo.init(path)
 
 
-def get_origin(gitobj: GitRepoType) -> Optional[str]:
+def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
     try:
         if gitobj is None:
             return None
@@ -40,7 +37,7 @@ def get_origin(gitobj: GitRepoType) -> Optional[str]:
         return None
 
 
-def get_active_branch(gitobj: GitRepoType) -> Optional[str]:
+def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
 
     if gitobj is None:
         log.error("git object is None, cannot retrieve active branch")
@@ -53,7 +50,7 @@ def get_active_branch(gitobj: GitRepoType) -> Optional[str]:
 
 
 def switch_branch(
-    gitobj: GitRepoType, branch_name: Optional[str] = "master", remote: bool = True
+    gitobj: Repo, branch_name: Optional[str] = "master", remote: bool = True
 ) -> bool:
 
     if branch_name is None:
@@ -61,7 +58,7 @@ def switch_branch(
         return False
 
     current_branch = gitobj.active_branch.name
-    if current_branch == branch_name:
+    if current_branch == branch_name and gitobj.working_dir:
         path = Path(gitobj.working_dir).name
         log.info("{} already set on branch {}", path, branch_name)
         return True
@@ -82,7 +79,7 @@ def switch_branch(
         if branch_found:
             break
 
-    if not branch_found or branch is None:
+    if not branch_found or not branch:
         log.warning("Branch {} not found", branch_name)
         return False
 
@@ -99,7 +96,7 @@ def switch_branch(
 
 def clone(
     url: str, path: Path, branch: str, do: bool = False, check: bool = True
-) -> GitRepoType:
+) -> Repo:
 
     local_path = SUBMODULES_DIR.joinpath(path)
 
@@ -127,7 +124,7 @@ def clone(
     return gitobj
 
 
-def compare_repository(gitobj: GitRepoType, branch: str, online_url: str) -> bool:
+def compare_repository(gitobj: Repo, branch: str, online_url: str) -> bool:
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -184,13 +181,13 @@ def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
 
 
 def check_file_younger_than(
-    gitobj: GitRepoType, filename: Path, timestamp: Union[str, float]
+    gitobj: Repo, filename: Path, timestamp: Union[str, float]
 ) -> Tuple[bool, float, datetime]:
 
     try:
         commits = gitobj.blame(rev="HEAD", file=filename)
     except GitCommandError as e:  # pragma: no cover
-        print_and_exit("Failed 'blame' operation on {}.\n{}", filename, e)
+        print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
 
     dates = []
     for commit in commits:
@@ -205,7 +202,7 @@ def check_file_younger_than(
     )
 
 
-def get_unstaged_files(gitobj: GitRepoType) -> Dict[str, List[Any]]:
+def get_unstaged_files(gitobj: Repo) -> Dict[str, List[Any]]:
     """
     ref:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
@@ -217,7 +214,7 @@ def get_unstaged_files(gitobj: GitRepoType) -> Dict[str, List[Any]]:
     return {"changed": diff, "untracked": gitobj.untracked_files}
 
 
-def print_diff(gitobj: GitRepoType, unstaged: Dict[str, List[Any]]) -> bool:
+def print_diff(gitobj: Repo, unstaged: Dict[str, List[Any]]) -> bool:
 
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
@@ -244,7 +241,7 @@ def print_diff(gitobj: GitRepoType, unstaged: Dict[str, List[Any]]) -> bool:
     return True
 
 
-def can_be_updated(path: str, gitobj: GitRepoType, do_print: bool = True) -> bool:
+def can_be_updated(path: str, gitobj: Repo, do_print: bool = True) -> bool:
     unstaged = get_unstaged_files(gitobj)
     updatable = len(unstaged["changed"]) == 0 and len(unstaged["untracked"]) == 0
 
@@ -255,7 +252,7 @@ def can_be_updated(path: str, gitobj: GitRepoType, do_print: bool = True) -> boo
     return updatable
 
 
-def update(path: str, gitobj: GitRepoType) -> None:
+def update(path: str, gitobj: Repo) -> None:
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
@@ -269,7 +266,7 @@ def update(path: str, gitobj: GitRepoType) -> None:
                 print_and_exit("Unable to update {} repo, {}", path, str(e))
 
 
-def check_unstaged(path: str, gitobj: GitRepoType) -> None:
+def check_unstaged(path: str, gitobj: Repo) -> None:
 
     unstaged = get_unstaged_files(gitobj)
     if len(unstaged["changed"]) > 0 or len(unstaged["untracked"]) > 0:
@@ -277,7 +274,7 @@ def check_unstaged(path: str, gitobj: GitRepoType) -> None:
     print_diff(gitobj, unstaged)
 
 
-def fetch(path: str, gitobj: GitRepoType) -> None:
+def fetch(path: str, gitobj: Repo) -> None:
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
@@ -287,7 +284,7 @@ def fetch(path: str, gitobj: GitRepoType) -> None:
                 print_and_exit(str(e))
 
 
-def check_updates(path: str, gitobj: GitRepoType) -> bool:
+def check_updates(path: str, gitobj: Repo) -> bool:
 
     fetch(path, gitobj)
 

@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Set, cast
 
 import requests
 import typer
+from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
 
@@ -277,7 +278,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data = CommandsData()
-    gits: Dict[str, git.GitRepoType] = {}
+    gits: Dict[str, GitRepo] = {}
     env: Dict[str, EnvType] = {}
 
     def __init__(self) -> None:
@@ -574,7 +575,7 @@ You can use of one:
     @staticmethod
     def working_clone(
         name: str, repo: Dict[str, str], from_path: Optional[Path] = None
-    ) -> Optional[git.GitRepoType]:
+    ) -> Optional[GitRepo]:
 
         # substitute values starting with '$$'
         myvars = {

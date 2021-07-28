@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import typer
+from git import Repo as GitRepo
 
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
@@ -162,12 +163,12 @@ Update it with: rapydo --services {} pull""",
 
 
 def build_is_obsolete(
-    image_creation: datetime, build: Any, gits: git.GitRepoType
+    image_creation: datetime, build: Any, repo: GitRepo
 ) -> Tuple[Optional[str], Optional[str]]:
     # compare dates between git and docker
     path = build.get("path")
-    build_templates = gits.get("build-templates")
-    vanilla = gits.get("main")
+    build_templates = repo.get("build-templates")
+    vanilla = repo.get("main")
 
     if path.startswith(build_templates.working_dir):
         git_repo = build_templates
