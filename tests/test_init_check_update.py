@@ -33,8 +33,8 @@ def test_base(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    r = git.get_repo("submodules/http-api")
-    git.switch_branch(r, "0.7.6")
+    repo = git.get_repo("submodules/http-api")
+    git.switch_branch(repo, "0.7.6")
     exec_command(
         capfd,
         "check -i main",
@@ -94,8 +94,9 @@ def test_base(capfd: Capture) -> None:
         "Can't continue with updates",
     )
     os.remove("submodules/do/temp.file")
-    r = git.get_repo("submodules/do")
-    r.git().execute(["git", "checkout", "--", "setup.py"])
+    repo = git.get_repo("submodules/do")
+    if repo:
+        repo.git().execute(["git", "checkout", "--", "setup.py"])
 
     # Add a custom image to extend base backend image:
     with open("projects/third/confs/commons.yml", "a") as f:

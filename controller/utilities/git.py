@@ -1,10 +1,11 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import pytz
 from git import Repo
+from git.diff import Diff
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from controller import SUBMODULES_DIR, log, print_and_exit
@@ -43,7 +44,8 @@ def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
         log.error("git object is None, cannot retrieve active branch")
         return None
     try:
-        return str(gitobj.active_branch)
+        # active_branch.name is still unannotated
+        return cast(str, gitobj.active_branch.name)
     except AttributeError as e:
         log.warning(e)
         return None
@@ -195,19 +197,23 @@ def check_file_younger_than(
     )
 
 
-def get_unstaged_files(gitobj: Repo) -> Dict[str, List[Any]]:
+def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
     """
     ref:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
     """
 
-    diff: List[str] = []
+    diff: List[Diff] = []
     diff.extend(gitobj.index.diff(gitobj.head.commit))
     diff.extend(gitobj.index.diff(None))
-    return {"changed": diff, "untracked": gitobj.untracked_files}
+
+    return {
+        "changed": [d.a_path for d in diff if d.a_path],
+        "untracked": gitobj.untracked_files,
+    }
 
 
-def print_diff(gitobj: Repo, unstaged: Dict[str, List[Any]]) -> bool:
+def print_diff(gitobj: Repo, unstaged: Dict[str, List[str]]) -> bool:
 
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
@@ -226,7 +232,7 @@ def print_diff(gitobj: Repo, unstaged: Dict[str, List[Any]]) -> bool:
     if changed:
         print("\nChanges not staged for commit:")
         for f in unstaged["changed"]:
-            print(f"\t{repo_folder}{f.a_path}")
+            print(f"\t{repo_folder}{f}")
         print("")
     if untracked:
         print("\nUntracked files:")
@@ -257,7 +263,7 @@ def update(path: str, gitobj: Repo) -> None:
     for remote in gitobj.remotes:
         if remote.name == "origin":
             try:
-                branch = gitobj.active_branch
+                branch = gitobj.active_branch.name
                 log.info("Updating {} {}@{}", remote, path, branch)
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
@@ -284,14 +290,14 @@ def fetch(path: str, gitobj: Repo) -> None:
                 print_and_exit(str(e))
 
 
-def check_updates(path: str, gitobj: Repo) -> bool:
+def check_updates(path: str, gitobj: Repo) -> None:
 
     fetch(path, gitobj)
 
     branch = get_active_branch(gitobj)
     if branch is None:  # pragma: no cover
         log.warning("Is {} repo detached? Unable to verify updates", path)
-        return False
+        return None
 
     max_remote = 20
 
@@ -314,7 +320,7 @@ def check_updates(path: str, gitobj: Repo) -> bool:
         else:  # pragma: no cover
             log.warning("{} repo should be updated!", path)
             for c in commits_behind_list:
-                message = c.message.strip().replace("\n", "")
+                message = str(c.message).strip().replace("\n", "")
 
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
@@ -336,16 +342,9 @@ def check_updates(path: str, gitobj: Repo) -> bool:
         else:
             log.debug("You pushed all commits on {} repo", path)
         for c in commits_ahead_list:
-            message = c.message.strip().replace("\n", "")
-            log.critical(message)
-            log.critical(type(message))
-            log.critical(type(c.message))
-            log.critical(type(c.message.strip()))
-            log.critical(type(c.message.strip()).replace("\n", ""))
+            message = str(c.message).strip().replace("\n", "")
 
             sha = c.hexsha[0:7]
             if len(message) > 60:  # pragma: no cover
                 message = message[0:57] + "..."
             log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
-
-    return True

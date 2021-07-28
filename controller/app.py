@@ -626,18 +626,24 @@ You can use of one:
     def git_submodules(from_path: Optional[Path] = None) -> None:
         """Check and/or clone git projects"""
 
-        repos: Dict[str, Dict[str, str]] = glom(
+        submodules: Dict[str, Dict[str, str]] = glom(
             Configuration.specs,
             "variables.submodules",
             default=cast(Dict[str, Dict[str, str]], {}),
         ).copy()
 
-        Application.gits["main"] = git.get_repo(".")
+        main_repo = git.get_repo(".")
+        # This is to reassure mypy, but this is check is already done
+        # in preliminary checks, so it can never happen
+        if not main_repo:  # pragma: no cover
+            print_and_exit("Current folder is not a git main_repository")
 
-        for name, repo in repos.items():
-            Application.gits[name] = Application.working_clone(
-                name, repo, from_path=from_path
-            )
+        Application.gits["main"] = main_repo
+
+        for name, submodule in submodules.items():
+            repo = Application.working_clone(name, submodule, from_path=from_path)
+            if repo:
+                Application.gits[name] = repo
 
     def get_compose_configuration(self) -> None:
 
@@ -1013,7 +1019,15 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         if controller_is_updated:
             installation_path = Packages.get_installation_path("rapydo")
-            if installation_path:
+
+            # Can't be tested on GA since rapydo is alway installed from a folder
+            if not installation_path:  # pragma: no cover
+                log.warning(
+                    "Controller is not installed in editable mode, "
+                    "rapydo is unable to update it"
+                )
+
+            elif Application.gits["do"].working_dir:
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.resolve()
@@ -1031,12 +1045,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         installation_path,
                         do_dir,
                     )
-            # Can't be tested on GA since rapydo is alway installed from a folder
             else:  # pragma: no cover
-                log.warning(
-                    "Controller is not installed in editable mode, "
-                    "rapydo is unable to update it"
-                )
+                log.warning("Controller submodule folder can't be found")
 
     @staticmethod
     def git_checks(ignore_submodule: List[str]) -> None:

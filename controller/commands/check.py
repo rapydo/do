@@ -93,7 +93,7 @@ def check(
 
             image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
-            d1, d2 = build_is_obsolete(image_creation, build, Application.gits)
+            d1, d2 = build_is_obsolete(image_creation, build)
             if d1 and d2:
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
@@ -116,7 +116,7 @@ def check(
 
                 from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
-                d1, d2 = build_is_obsolete(from_timestamp, from_build, Application.gits)
+                d1, d2 = build_is_obsolete(from_timestamp, from_build)
                 if d1 and d2:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
@@ -163,16 +163,16 @@ Update it with: rapydo --services {} pull""",
 
 
 def build_is_obsolete(
-    image_creation: datetime, build: Any, repo: GitRepo
+    image_creation: datetime, build: Any
 ) -> Tuple[Optional[str], Optional[str]]:
     # compare dates between git and docker
     path = build.get("path")
-    build_templates = repo.get("build-templates")
-    vanilla = repo.get("main")
+    btempl = Application.gits.get("build-templates")
+    vanilla = Application.gits.get("main")
 
-    if path.startswith(build_templates.working_dir):
-        git_repo = build_templates
-    elif path.startswith(vanilla.working_dir):
+    if btempl and btempl.working_dir and path.startswith(btempl.working_dir):
+        git_repo = btempl
+    elif vanilla and vanilla.working_dir and path.startswith(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)
