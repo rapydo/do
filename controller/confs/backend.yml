@@ -957,7 +957,7 @@ services:
     networks:
       default:
     environment:
-      ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
+      ACTIVATE: ${ACTIVATE_ADMINER}
       APP_MODE: ${APP_MODE}
       # https://github.com/vrana/adminer/tree/master/designs
       # some choices: brade, ng9, pepa-linha
