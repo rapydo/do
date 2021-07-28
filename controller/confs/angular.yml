@@ -18,7 +18,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     hostname: angular
     networks:
       default:

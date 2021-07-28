@@ -56,7 +56,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     hostname: backend-server
     environment:
@@ -258,7 +258,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     volumes:
       - ssl_certs:/etc/letsencrypt
@@ -337,7 +337,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 20s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     volumes:
       - sqldata:/var/lib/postgresql
       - ${DATA_DIR}/backup:/backup
@@ -361,7 +361,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 20s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     volumes:
       - mariadb:/var/lib/mysql
       - ${DATA_DIR}/backup:/backup
@@ -393,7 +393,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     volumes:
       - graphdata:/data
@@ -466,7 +466,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     volumes:
       - mongodata:/data/db
     networks:
@@ -501,7 +501,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     # user: developer
     working_dir: /code
@@ -630,7 +630,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     # user: developer
     working_dir: /code
@@ -717,7 +717,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     hostname: rabbit
     environment:
@@ -759,7 +759,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
 
     volumes:
       - redisdata:/data
@@ -849,7 +849,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     hostname: flower
     working_dir: /code
     expose:
@@ -998,7 +998,7 @@ services:
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 5m
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
