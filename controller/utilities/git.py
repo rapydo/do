@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import pytz
@@ -25,7 +25,7 @@ def init(path: str) -> Repo:
 
 def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
     try:
-        if gitobj is None:
+        if not gitobj:
             return None
 
         if len(gitobj.remotes) == 0:
@@ -39,7 +39,7 @@ def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
 
 def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
 
-    if gitobj is None:
+    if not gitobj:
         log.error("git object is None, cannot retrieve active branch")
         return None
     try:
@@ -49,37 +49,31 @@ def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
         return None
 
 
-def switch_branch(
-    gitobj: Repo, branch_name: Optional[str] = "master", remote: bool = True
-) -> bool:
+def switch_branch(gitobj: Optional[Repo], branch_name: str) -> bool:
 
-    if branch_name is None:
-        log.error("Unable to switch to a none branch")
+    if not gitobj:
+        log.error("git object is None, cannot switch the active branch")
         return False
 
     current_branch = gitobj.active_branch.name
-    if current_branch == branch_name and gitobj.working_dir:
+
+    path: str = "N/A"
+    if gitobj.working_dir:
         path = Path(gitobj.working_dir).name
+
+    if current_branch == branch_name:
         log.info("{} already set on branch {}", path, branch_name)
         return True
 
-    if remote:
-        branches = gitobj.remotes[0].fetch()
-    else:
-        branches = gitobj.branches
+    branches = gitobj.remotes[0].fetch()
 
     branch = None
-    branch_found = False
-    for branch in branches:
-        if remote:
-            branch_found = branch.name.endswith(f"/{branch_name}")
-        else:
-            branch_found = branch.name == branch_name
-
-        if branch_found:
+    for b in branches:
+        if b.name.endswith(f"/{branch_name}"):
+            branch = b
             break
 
-    if not branch_found or not branch:
+    if not branch:
         log.warning("Branch {} not found", branch_name)
         return False
 
@@ -89,7 +83,6 @@ def switch_branch(
         log.error(e)
         return False
 
-    path = Path(gitobj.working_dir).name
     log.info("Switched {} branch from {} to {}", path, current_branch, branch_name)
     return True
 
@@ -157,19 +150,18 @@ Suggestion: remove {} and execute the init command
             """,
                 url,
                 online_url,
-                gitobj.working_dir,
+                gitobj.working_dir or "N/A",
             )
 
     active_branch = get_active_branch(gitobj)
 
-    if active_branch is not None:
-        if branch != active_branch:
-            print_and_exit(
-                "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
-                Path(gitobj.working_dir).stem,
-                active_branch,
-                branch,
-            )
+    if active_branch and active_branch != branch and gitobj.working_dir:
+        print_and_exit(
+            "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
+            Path(gitobj.working_dir).stem,
+            active_branch,
+            branch,
+        )
     return True
 
 
@@ -190,15 +182,16 @@ def check_file_younger_than(
         print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
 
     dates = []
-    for commit in commits:
-        current_blame = gitobj.commit(rev=str(commit[0]))
-        dates.append(current_blame.committed_datetime)
+    if commits:
+        for commit in commits:
+            current_blame = gitobj.commit(rev=str(commit[0]))
+            dates.append(current_blame.committed_datetime)
 
-    m = max(dates)
+    max_date = max(dates)
     return (
-        bool(timestamp_from_string(timestamp) < m),
+        bool(timestamp_from_string(timestamp) < max_date),
         float(timestamp),
-        cast(datetime, m),
+        max_date,
     )
 
 
@@ -208,7 +201,7 @@ def get_unstaged_files(gitobj: Repo) -> Dict[str, List[Any]]:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
     """
 
-    diff = []
+    diff: List[str] = []
     diff.extend(gitobj.index.diff(gitobj.head.commit))
     diff.extend(gitobj.index.diff(None))
     return {"changed": diff, "untracked": gitobj.untracked_files}
@@ -219,6 +212,9 @@ def print_diff(gitobj: Repo, unstaged: Dict[str, List[Any]]) -> bool:
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
     if not changed and not untracked:
+        return False
+
+    if not gitobj.working_dir:  # pragma: no cover
         return False
 
     repo_folder = str(Path(gitobj.working_dir).relative_to(Path.cwd()))
@@ -253,6 +249,10 @@ def can_be_updated(path: str, gitobj: Repo, do_print: bool = True) -> bool:
 
 
 def update(path: str, gitobj: Repo) -> None:
+
+    if not gitobj.active_branch:  # pragma: no cover
+        log.error("Can't update {}, no active branch found", path)
+        return None
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
@@ -337,6 +337,11 @@ def check_updates(path: str, gitobj: Repo) -> bool:
             log.debug("You pushed all commits on {} repo", path)
         for c in commits_ahead_list:
             message = c.message.strip().replace("\n", "")
+            log.critical(message)
+            log.critical(type(message))
+            log.critical(type(c.message))
+            log.critical(type(c.message.strip()))
+            log.critical(type(c.message.strip()).replace("\n", ""))
 
             sha = c.hexsha[0:7]
             if len(message) > 60:  # pragma: no cover

@@ -81,7 +81,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert do_repo is not None
     assert git.get_active_branch(None) is None
     assert git.get_active_branch(do_repo) == __version__
-    assert not git.switch_branch(do_repo, branch_name=None)
+    assert not git.switch_branch(None, branch_name="0.7.3")
     # Same branch => no change => return True
     assert git.switch_branch(do_repo, branch_name=__version__)
     assert not git.switch_branch(do_repo, branch_name="XYZ")
@@ -92,8 +92,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert git.get_active_branch(do_repo) == __version__
 
     assert git.get_origin(None) is None
-    assert git.get_origin("not-a-git-object") is None
-    assert git.get_active_branch("not-a-git-object") is None
 
     r = git.get_repo(".")
     assert git.get_origin(r) == "https://your_remote_git/your_project.git"

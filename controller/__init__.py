@@ -68,7 +68,7 @@ EnvType = Union[None, str, int, float]
 
 
 def print_and_exit(
-    message: str, *args: Union[str, Path], **kwargs: Union[str, Path]
+    message: str, *args: Union[str, Path, os.PathLike[str]], **kwargs: Union[str, Path]
 ) -> NoReturn:
     log.critical(message, *args, **kwargs)
     sys.exit(1)
