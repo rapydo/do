@@ -165,7 +165,11 @@ def start_registry(capfd: Any) -> None:
         "registry",
         "Creating registry",
     )
-    time.sleep(2)
+    time.sleep(3)
+
+    from python_on_whales import docker
+
+    print(docker.logs("registry"))
 
 
 def pull_images(capfd: Any) -> None:
