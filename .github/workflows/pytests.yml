@@ -90,11 +90,11 @@ jobs:
           if [[ "${TEST_NAME}" == swarm/* ]]; then
 
             IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
-            echo "{" > /etc/docker/daemon.json
-            echo "    \"insecure-registries\" : [\"${IP}\"]" >> /etc/docker/daemon.json
-            echo "}" >> /etc/docker/daemon.json
+            sudo echo "{" > /etc/docker/daemon.json
+            sudo echo "    \"insecure-registries\" : [\"${IP}\"]" >> /etc/docker/daemon.json
+            sudo echo "}" >> /etc/docker/daemon.json
 
-            cat /etc/docker/daemon.json
+            sudo cat /etc/docker/daemon.json
 
             sudo service docker restart
 
