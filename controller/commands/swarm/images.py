@@ -59,7 +59,7 @@ def images() -> None:
         h1 = "Image"
         h2 = "Version"
         h3 = "Creation date"
-        print(f"{h0:13}{h1:18}{h2:10}{h3}")
+        print(f"{h0:13}{h1:24}{h2:10}{h3}")
         for img in images:
             _id = img[0]
             # to be replaced with removeprefix starting from py39
@@ -71,4 +71,4 @@ def images() -> None:
             tag = img[2]
             d = img[3]
             creation_date = d.strftime("%Y-%m-%d %H:%M:%S") if d else "N/A"
-            print(f"{_id:13}{repository:18}{tag:10}{creation_date}")
+            print(f"{_id:13}{repository:24}{tag:10}{creation_date}")
