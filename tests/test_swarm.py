@@ -48,8 +48,6 @@ def test_swarm(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    start_registry(capfd)
-
     swarm = Swarm()
     swarm.leave()
     os.environ["SWARM_MANAGER_ADDRESS"] = ""
@@ -70,6 +68,8 @@ def test_swarm(capfd: Capture) -> None:
         "Swarm is already initialized",
         "Project initialized",
     )
+
+    start_registry(capfd)
 
     # Skipping main because we are on a fake git repository
     exec_command(
