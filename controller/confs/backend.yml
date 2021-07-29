@@ -1054,12 +1054,11 @@ services:
       REGISTRY_AUTH_HTPASSWD_PATH: /auth
       REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
       # REGISTRY_HTTP_ADDR=0.0.0.0:5000
-      REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
-      REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      REGISTRY_HTTP_TLS_CERTIFICATE: /var/lib/registry/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /var/lib/registry/registry.key
       # VIRTUAL_HOST: docker.domain.com
       # VIRTUAL_PROTO: https
       # VIRTUAL_PORT: 5000
 
     volumes:
-      - ssl_certs:/certs
       - registry:/var/lib/registry
