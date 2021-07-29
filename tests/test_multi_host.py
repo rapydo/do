@@ -42,22 +42,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
-        "MultiHost is enabled but registry host is missing. "
-        "Expected value: REGISTRY_HOST=manager.host:5000/",
-    )
-    os.environ["REGISTRY_HOST"] = f"{MANAGER_ADDRESS}:5000/"
-
-    exec_command(
-        capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
-        "MultiHost is enabled but nfs host is missing. "
-        "Expected value: NFS_HOST=manager.host",
-    )
-    os.environ["NFS_HOST"] = MANAGER_ADDRESS
-
-    exec_command(
-        capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
         "docker buildx is installed",
         "docker compose is installed",
         # already initialized before the test, in the workflow yml

@@ -19,7 +19,6 @@ from controller import (
     CONTAINERS_YAML_DIRNAME,
     DATAFILE,
     EXTENDED_PROJECT_DISABLED,
-    MULTI_HOST_MODE,
     PLACEHOLDER,
     PROJECT_DIR,
     PROJECTRC,
@@ -667,7 +666,7 @@ You can use of one:
         if SWARM_MODE:
             add(CONFS_DIR, "swarm_options.yml")
 
-        if MULTI_HOST_MODE:
+        if Application.env.get("NFS_HOST"):
             add(CONFS_DIR, "volumes_nfs.yml")
         else:
             add(CONFS_DIR, "volumes_local.yml")
@@ -813,23 +812,17 @@ You can use of one:
 
         Application.env.update(Configuration.environment)
 
-        # No need to pre-calculate local ip, since it is used only by init
-        # if SWARM_MODE and not Application.env.get("SWARM_MANAGER_ADDRESS"):
-        #     Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip()
+        if SWARM_MODE:
 
-        if MULTI_HOST_MODE:
+            if not Application.env.get("SWARM_MANAGER_ADDRESS"):
+                Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip()
+
             if not Application.env.get("REGISTRY_HOST"):
-                print_and_exit(
-                    "MultiHost is enabled but registry host is missing. "
-                    "Expected value: REGISTRY_HOST=manager.host:5000/"
-                )
-            if not Application.env.get("NFS_HOST"):
-                print_and_exit(
-                    "MultiHost is enabled but nfs host is missing. "
-                    "Expected value: NFS_HOST=manager.host"
-                )
+                Application.env["REGISTRY_HOST"] = Application.env[
+                    "SWARM_MANAGER_ADDRESS"
+                ]
 
-            Application.env["ACTIVATE_REGISTRY"] = "1"
+            # Application.env["ACTIVATE_REGISTRY"] = "1"
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false

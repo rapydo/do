@@ -112,7 +112,8 @@ jobs:
             # docker-machine ssh test $JOIN_COMMAND
             # docker node ls
 
-            export MULTI_HOST_MODE="1"
+            # NFS to be added
+            export NFS_HOST="127.0.0.1"
           fi
 
 
