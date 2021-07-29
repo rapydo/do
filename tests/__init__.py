@@ -165,7 +165,7 @@ def start_registry(capfd: Any) -> None:
         "registry",
         "Creating registry",
     )
-    time.sleep(1)
+    time.sleep(2)
 
 
 def pull_images(capfd: Any) -> None:
