@@ -13,6 +13,7 @@ from tests import (
     exec_command,
     init_project,
     random_project_name,
+    start_registry,
 )
 
 
@@ -36,11 +37,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     if SWARM_MODE:
-        exec_command(
-            capfd,
-            "registry",
-            "Creating registry",
-        )
+        start_registry(capfd)
 
     image = f"rapydo/backend:{__version__}"
     exec_command(

@@ -159,14 +159,19 @@ def init_project(capfd: Any) -> None:
     )
 
 
+def start_registry(capfd: Any) -> None:
+    exec_command(
+        capfd,
+        "registry",
+        "Creating registry",
+    )
+    time.sleep(1)
+
+
 def pull_images(capfd: Any) -> None:
 
     if SWARM_MODE:
-        exec_command(
-            capfd,
-            "registry",
-            "Creating registry",
-        )
+        start_registry(capfd)
 
     exec_command(
         capfd,
