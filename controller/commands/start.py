@@ -3,12 +3,17 @@ from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.deploy.compose_v2 import Compose as ComposeV2
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Start services for this configuration")
 def start() -> None:
     Application.get_controller().controller_init()
+
+    if SWARM_MODE:
+        docker = Docker()
+        docker.ping_registry()
 
     verify_available_images(
         Application.data.services,

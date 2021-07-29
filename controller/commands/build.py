@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 import typer
 
-from controller import COMPOSE_FILE, MULTI_HOST_MODE, log
+from controller import COMPOSE_FILE, SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
@@ -33,6 +33,11 @@ def build(
     Application.get_controller().controller_init()
 
     docker = Docker()
+
+    if SWARM_MODE:
+        docker.ping_registry()
+
+    images: Set[str] = set()
     if core:
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with only core files
@@ -45,11 +50,12 @@ def build(
             targets=Application.data.services,
             files=[COMPOSE_FILE],
             pull=True,
-            # push=MULTI_HOST_MODE,
             load=True,
             cache=not force,
         )
         log.info("Core images built")
+        if SWARM_MODE:
+            log.warning("Local registry push is not implemented yet for core images")
 
     dc = Compose(files=Application.data.files)
     compose_config = dc.config(relative_paths=True)
@@ -66,6 +72,7 @@ def build(
             # this is used to validate the taregt Dockerfile:
             get_dockerfile_base_image(Path(build.get("path")), core_builds)
             services_with_custom_builds.extend(build["services"])
+            images.add(image)
 
     targets: List[str] = []
     for service in Application.data.active_services:
@@ -81,37 +88,31 @@ def build(
 
     clean_targets = get_non_redundant_services(all_builds, targets)
 
-    # import socket
-    # if MULTI_HOST_MODE and local_registry_images:
-    #     log.info("Multi Host Mode is enabled, verifying if the registry is reachable")
-    #     # manager.host:port/ => (managaer.host, port)
-    #     tokens = registry_host.replace("/", "").split(":")
-    #     host = tokens[0]
-    #     port = int(tokens[1])
-    #     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-    #         sock.settimeout(1)
-    #         try:
-    #             result = sock.connect_ex((host, port))
-    #         except socket.gaierror:
-    #             # The error is not important, let's use a generic -1
-    #             # result = errno.ESRCH
-    #             result = -1
-
-    #         if result != 0:
-    #             print_and_exit(
-    #                 "Multi Host Mode is enabled, but registry at {} not reachable",
-    #                 registry_host,
-    #             )
-
     docker.client.buildx.bake(
         targets=list(clean_targets),
         files=[COMPOSE_FILE],
         load=True,
         pull=True,
-        push=MULTI_HOST_MODE,
         cache=not force,
     )
 
-    log.info("Custom images built")
+    if SWARM_MODE:
+        docker.login()
+        registry = docker.get_registry()
+
+        local_images: List[str] = []
+        for img in images:
+            new_tag = f"{registry}/{img}"
+            docker.client.tag(img, new_tag)
+            local_images.append(new_tag)
+
+        # push to the local registry
+        docker.client.image.push(local_images, quiet=False)
+        # remove local tags
+        docker.client.image.remove(local_images, prune=True)  # type: ignore
+
+        log.info("Custom images built and pushed into the local registry")
+    else:
+        log.info("Custom images built")
 
     return True

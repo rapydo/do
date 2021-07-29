@@ -68,6 +68,7 @@ class Swarm:
             compose_files=COMPOSE_FILE,
             resolve_image="always",
             prune=True,
+            with_registry_auth=True,
         )
 
     def restart(self, service: str) -> None:

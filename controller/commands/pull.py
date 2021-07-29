@@ -1,9 +1,9 @@
-from typing import Set
+from typing import List, Set
 
 import typer
 from glom import glom
 
-from controller import log
+from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.docker import Docker
 
@@ -24,6 +24,11 @@ def pull(
     ),
 ) -> None:
     Application.get_controller().controller_init()
+
+    docker = Docker()
+
+    if SWARM_MODE:
+        docker.ping_registry()
 
     base_image: str = ""
     image: str = ""
@@ -49,10 +54,30 @@ def pull(
         if image and (include_all or not build):
             images.add(image)
 
-    docker = Docker()
-    docker.client.pull(list(images), quiet=quiet)
+    docker.client.image.pull(list(images), quiet=quiet)
+
+    if SWARM_MODE:
+        docker.login()
+        registry = docker.get_registry()
+
+        local_images: List[str] = []
+        for img in images:
+            new_tag = f"{registry}/{img}"
+            docker.client.tag(img, new_tag)
+            local_images.append(new_tag)
+        # push to the local registry
+        docker.client.image.push(local_images, quiet=quiet)
+        # remove local tags
+        docker.client.image.remove(local_images, prune=True)  # type: ignore
 
     if include_all:
-        log.info("Images pulled from docker hub")
+        target = "Images"
     else:
-        log.info("Base images pulled from docker hub")
+        target = "Base images"
+
+    if SWARM_MODE:
+        extra = " and pushed into the local registry"
+    else:
+        extra = ""
+
+    log.info("{} pulled from docker hub{}", target, extra)

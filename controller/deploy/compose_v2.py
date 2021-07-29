@@ -5,7 +5,14 @@ import yaml
 from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 
-from controller import COMPOSE_ENVIRONMENT_FILE, COMPOSE_FILE, log, print_and_exit
+from controller import (
+    COMPOSE_ENVIRONMENT_FILE,
+    COMPOSE_FILE,
+    SWARM_MODE,
+    log,
+    print_and_exit,
+)
+from controller.deploy.docker import Docker
 
 
 class Compose:
@@ -37,10 +44,15 @@ class Compose:
         networks = set()
         volumes = set()
         binds = set()
+
+        registry = Docker.get_registry()
         # Remove unused services, networks and volumes from compose configuration
         for key, value in compose_config.get("services", {}).items():
             if key not in services:
                 continue
+
+            if SWARM_MODE and key != "registry":
+                value["image"] = f"{registry}/{value['image']}"
 
             if "healthcheck" in value and "test" in value["healthcheck"]:
                 # healtcheck commands can contain env variables double-escaped ($$)

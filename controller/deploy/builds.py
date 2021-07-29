@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Set
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import ComposeConfig, log, print_and_exit
+from controller import SWARM_MODE, ComposeConfig, log, print_and_exit
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -174,7 +174,12 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
-            if not docker.client.image.exists(image):
+            if SWARM_MODE:
+                image_exists = docker.verify_registry_image(image)
+            else:
+                image_exists = docker.client.image.exists(image)
+
+            if not image_exists:
                 print_and_exit(
                     "Missing {} image for {} service, execute rapydo pull",
                     image,
@@ -190,7 +195,11 @@ def verify_available_images(
             if data["service"] != service and service not in data["services"]:
                 continue
 
-            if not docker.client.image.exists(image):
+            if SWARM_MODE:
+                image_exists = docker.verify_registry_image(image)
+            else:
+                image_exists = docker.client.image.exists(image)
+            if not image_exists:
                 action = "build" if data["path"] else "pull"
                 print_and_exit(
                     "Missing {} image for {} service, execute rapydo {}",
