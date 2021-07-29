@@ -165,7 +165,7 @@ def start_registry(capfd: Any) -> None:
         "registry",
         "Creating registry",
     )
-    time.sleep(3)
+    time.sleep(2)
 
     from python_on_whales import docker
 

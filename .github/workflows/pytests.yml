@@ -88,6 +88,16 @@ jobs:
           cd rapydo_tests
 
           if [[ "${TEST_NAME}" == swarm/* ]]; then
+
+            IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
+            echo "{" > /etc/docker/daemon.json
+            echo "    \"insecure-registries\" : [\"${IP}\"]" >>  > /etc/docker/daemon.json
+            echo "}" >>  > /etc/docker/daemon.json
+
+            cat /etc/docker/daemon.json
+
+            sudo service docker restart
+
             export SWARM_MODE="1"
 
             # Temporary added this to prevent fileno error when starting the registry
