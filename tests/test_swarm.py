@@ -69,8 +69,6 @@ def test_swarm(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    start_registry(capfd)
-
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd,
@@ -156,6 +154,8 @@ def test_swarm(capfd: Capture) -> None:
         "To add a manager to this swarm, run the following command:",
         "docker swarm join --token ",
     )
+
+    start_registry(capfd)
 
     exec_command(
         capfd,
