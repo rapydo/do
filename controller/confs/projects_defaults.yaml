@@ -308,8 +308,11 @@ variables:
 
     # Local docker registry
     ACTIVATE_REGISTRY: 0
-    # To be enabled with "manager.host:5000/"
+    # To be enabled with "manager.host"
     REGISTRY_HOST:
+    REGISTRY_PORT: 5000
+    REGISTRY_USERNAME: docker
+    REGISTRY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # To be enabled with "manager.host"
     # defaulted to local IP of active network interface

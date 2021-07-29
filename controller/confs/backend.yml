@@ -49,7 +49,7 @@ services:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
-    # image: ${REGISTRY_HOST}rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    # image: ${REGISTRY_HOST}:${REGISTRY_PORT}/rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     healthcheck:
       test: ${HEALTHCHECK_BACKEND_CMD}
@@ -1039,10 +1039,18 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_REGISTRY}
       # Used to issue the certificate
-      REGISTRY_ADDRESS: ${REGISTRY_HOST}
+      REGISTRY_HOST: ${REGISTRY_HOST}
+      REGISTRY_USERNAME: ${REGISTRY_USERNAME}
+      REGISTRY_PASSWORD: ${REGISTRY_PASSWORD}
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
       # REGISTRY_HTTP_ADDR=0.0.0.0:5000
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/registry.crt
       REGISTRY_HTTP_TLS_KEY: /certs/registry.key
+      # VIRTUAL_HOST: docker.domain.com
+      # VIRTUAL_PROTO: https
+      # VIRTUAL_PORT: 5000
 
     volumes:
       - ssl_certs:/certs

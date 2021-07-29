@@ -226,4 +226,8 @@ def get_default_command(service: str) -> str:
 
     if service == "mariadb":
         return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''
+
+    if service == "registry":
+        return "ash"
+
     return "bash"

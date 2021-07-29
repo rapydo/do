@@ -51,6 +51,8 @@ variables:
     REDIS_PASSWORD: "**PLACEHOLDER**"
     FLOWER_USER: "**PLACEHOLDER**"
     FLOWER_PASSWORD: "**PLACEHOLDER**"
+    REGISTRY_USERNAME: "**PLACEHOLDER**"
+    REGISTRY_PASSWORD: "**PLACEHOLDER**"
 
     # Autoreload disabled in production mode
     CELERY_AUTORELOAD:
