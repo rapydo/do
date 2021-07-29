@@ -5,7 +5,7 @@ import random
 
 from python_on_whales import docker
 
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, start_registry
 
 
 def test_swarm_multi_host(capfd: Capture) -> None:
@@ -47,6 +47,8 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         "Swarm is already initialized",
         "Project initialized",
     )
+
+    start_registry(capfd)
 
     exec_command(
         capfd,

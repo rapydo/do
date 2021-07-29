@@ -11,7 +11,13 @@ from pathlib import Path
 
 from controller.deploy.swarm import Swarm
 from controller.utilities import system
-from tests import Capture, create_project, exec_command, mock_KeyboardInterrupt
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    mock_KeyboardInterrupt,
+    start_registry,
+)
 
 
 def test_swarm(capfd: Capture) -> None:
@@ -41,6 +47,8 @@ def test_swarm(capfd: Capture) -> None:
         "Swarm is now initialized",
         "Project initialized",
     )
+
+    start_registry(capfd)
 
     swarm = Swarm()
     swarm.leave()
