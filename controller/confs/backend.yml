@@ -4,7 +4,13 @@ version: "3.8"
 # VOLUMES
 # #####################
 
-# Moved on volumes_local.yml and volumes_nfs.yml
+volumes:
+  registry:
+    driver: local
+    # make it common to all projects
+    name: registry
+
+# All other volumes are moved on volumes_local.yml and volumes_nfs.yml
 
 # #####################
 # NETWORKS
@@ -1034,6 +1040,8 @@ services:
     build: ${SUBMODULE_DIR}/build-templates/registry
     image: rapydo/registry:${RAPYDO_VERSION}
     hostname: registry
+    # make it common to all projects
+    container_name: registry
     ports:
       - 5000:5000
     environment:
@@ -1054,3 +1062,4 @@ services:
 
     volumes:
       - ssl_certs:/certs
+      - registry:/var/lib/registry
