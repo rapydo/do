@@ -92,7 +92,7 @@ jobs:
             IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
             echo "{" > /etc/docker/daemon.json
             echo "    \"insecure-registries\" : [\"${IP}\"]" >> /etc/docker/daemon.json
-            echo "}" >>  > /etc/docker/daemon.json
+            echo "}" >> /etc/docker/daemon.json
 
             cat /etc/docker/daemon.json
 
