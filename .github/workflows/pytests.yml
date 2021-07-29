@@ -33,6 +33,7 @@ jobs:
 
             # Swarm only
             swarm/swarm,
+            swarm/registry,
             swarm/multi_host,
 
             # Compose only

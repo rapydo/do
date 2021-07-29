@@ -1,7 +1,6 @@
 """
-This module will test the swarm mode
+This module will test the swarm multi host mode
 """
-import os
 import random
 
 from python_on_whales import docker

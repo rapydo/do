@@ -6,7 +6,7 @@ import os
 from faker import Faker
 from git import Repo
 
-from controller import __version__
+from controller import SWARM_MODE, __version__
 from tests import (
     Capture,
     create_project,
@@ -34,6 +34,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         frontend="no",
         services=["rabbit"],
     )
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "registry",
+            "Creating registry",
+        )
 
     image = f"rapydo/backend:{__version__}"
     exec_command(
