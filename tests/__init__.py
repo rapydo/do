@@ -7,6 +7,8 @@ from typing import Any, List, Optional, Type, TypeVar
 from faker import Faker
 from typer.testing import CliRunner
 
+from controller import SWARM_MODE
+
 runner = CliRunner()
 
 
@@ -158,6 +160,14 @@ def init_project(capfd: Any) -> None:
 
 
 def pull_images(capfd: Any) -> None:
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "registry",
+            "Creating registry",
+        )
+
     exec_command(
         capfd,
         "pull --quiet",

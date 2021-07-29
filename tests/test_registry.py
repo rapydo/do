@@ -26,3 +26,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         frontend="no",
         services=["rabbit", "redis"],
     )
+
+    # This is a temporary command and will probably be merged
+    #  with interfaces and volatile commands in a near future

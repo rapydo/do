@@ -89,6 +89,11 @@ jobs:
 
           if [[ "${TEST_NAME}" == swarm/* ]]; then
             export SWARM_MODE="1"
+
+            # Temporary added this to prevent fileno error when starting the registry
+            # BUG probably due to compose 1.29, to be removed once migrated to compose 2
+            docker pull rapydo/registry:2.0
+
             TEST_NAME=${TEST_NAME/swarm\//}
           elif [[ "${TEST_NAME}" == compose/* ]]; then
             TEST_NAME=${TEST_NAME/compose\//}
