@@ -29,6 +29,7 @@ def pull(
 
     if SWARM_MODE:
         docker.ping_registry()
+        docker.login()
 
     base_image: str = ""
     image: str = ""
@@ -57,7 +58,6 @@ def pull(
     docker.client.image.pull(list(images), quiet=quiet)
 
     if SWARM_MODE:
-        docker.login()
         registry = docker.get_registry()
 
         local_images: List[str] = []

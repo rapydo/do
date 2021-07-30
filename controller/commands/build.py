@@ -36,6 +36,7 @@ def build(
 
     if SWARM_MODE:
         docker.ping_registry()
+        docker.login()
 
     images: Set[str] = set()
     if core:
@@ -97,7 +98,6 @@ def build(
     )
 
     if SWARM_MODE:
-        docker.login()
         registry = docker.get_registry()
 
         local_images: List[str] = []
