@@ -48,6 +48,7 @@ repos:
             "types-requests",
             "types-python-dateutil",
             "types-click",
+            "Faker",
           ]
 
         args: [

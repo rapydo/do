@@ -174,9 +174,6 @@ def start_registry(capfd: Any) -> None:
 
 def pull_images(capfd: Any) -> None:
 
-    if SWARM_MODE:
-        start_registry(capfd)
-
     exec_command(
         capfd,
         "pull --quiet",
