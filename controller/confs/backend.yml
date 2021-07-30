@@ -1043,6 +1043,13 @@ services:
     hostname: registry
     # make it common to all projects
     container_name: registry
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate http://localhost:5001/debug/health -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     ports:
       - 5000:5000
     environment:
@@ -1057,6 +1064,7 @@ services:
       # REGISTRY_HTTP_ADDR=0.0.0.0:5000
       REGISTRY_HTTP_TLS_CERTIFICATE: /var/lib/registry/registry.crt
       REGISTRY_HTTP_TLS_KEY: /var/lib/registry/registry.key
+      REGISTRY_HTTP_DEBUG_ADDR: localhost:5001
       # VIRTUAL_HOST: docker.domain.com
       # VIRTUAL_PROTO: https
       # VIRTUAL_PORT: 5000
