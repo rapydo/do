@@ -18,6 +18,7 @@ volumes:
 
 networks:
   default:
+    name: ${COMPOSE_PROJECT_NAME}_${DEPLOY_ENGINE}_default
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
 

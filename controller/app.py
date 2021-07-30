@@ -85,6 +85,9 @@ class Configuration:
     # It will be replaced with PROJECT_DIR/project
     ABS_PROJECT_PATH: Path = PROJECT_DIR
 
+    # used by single-container commands (interfaces, ssl, volatile, ...) in swarm mode
+    FORCE_COMPOSE_ENGINE: bool = False
+
     @staticmethod
     def set_action(action: Optional[str]) -> None:
         log.debug("Requested command: {}", action)
@@ -823,6 +826,11 @@ You can use of one:
                 ]
 
             # Application.env["ACTIVATE_REGISTRY"] = "1"
+
+        if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
+            Application.env["DEPLOY_ENGINE"] = "compose"
+        else:
+            Application.env["DEPLOY_ENGINE"] = "swarm"
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false

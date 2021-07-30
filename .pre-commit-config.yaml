@@ -71,6 +71,7 @@ repos:
             "--warn-unused-ignores",
             "--warn-return-any",
             "--warn-unreachable",
+            "--warn-unused-configs",
 
             # This flag reports an error whenever a function with type annotations
             # calls a function defined without annotations

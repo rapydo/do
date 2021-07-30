@@ -1,7 +1,7 @@
 # from typing import Optional, List, Tuple
 
 from controller import log, print_and_exit
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
@@ -9,6 +9,7 @@ from controller.deploy.docker import Docker
 @Application.app.command(help="Start the local registry [TEMPORARY COMMAND]")
 def registry() -> None:
 
+    Configuration.FORCE_COMPOSE_ENGINE = True
     Application.get_controller().controller_init()
 
     log.warning(
