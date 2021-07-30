@@ -23,9 +23,12 @@ def username(param_not_used: str, length: int = 8) -> str:
     return random_string
 
 
-def password(param_not_used: str, length: int = 12) -> str:
+def password(param_not_used: str, length: int = 12, add_symbols=False) -> str:
     rand = random.SystemRandom()
     charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
+
+    if add_symbols:
+        charset += " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
     random_string = rand.choice(charset)
     charset += string.digits

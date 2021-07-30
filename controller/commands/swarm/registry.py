@@ -1,15 +1,20 @@
 # from typing import Optional, List, Tuple
+import os
 
 from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
+from controller.templating import password
 
 
 @Application.app.command(help="Start the local registry [TEMPORARY COMMAND]")
 def registry() -> None:
 
     Configuration.FORCE_COMPOSE_ENGINE = True
+    os.environ["REGISTRY_HTTP_SECRET"] = password(
+        param_not_used="", length=96, add_symbols=True
+    )
     Application.get_controller().controller_init()
 
     log.warning(

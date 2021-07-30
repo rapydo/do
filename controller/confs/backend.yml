@@ -1065,6 +1065,7 @@ services:
       REGISTRY_HTTP_TLS_CERTIFICATE: /var/lib/registry/registry.crt
       REGISTRY_HTTP_TLS_KEY: /var/lib/registry/registry.key
       REGISTRY_HTTP_DEBUG_ADDR: localhost:5001
+      REGISTRY_HTTP_SECRET: ${REGISTRY_HTTP_SECRET}
       # VIRTUAL_HOST: docker.domain.com
       # VIRTUAL_PROTO: https
       # VIRTUAL_PORT: 5000

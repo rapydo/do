@@ -313,6 +313,8 @@ variables:
     REGISTRY_PORT: 5000
     REGISTRY_USERNAME: docker
     REGISTRY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+    # Automatically set before creating the registry
+    REGISTRY_HTTP_SECRET:
 
     # To be enabled with "manager.host"
     # defaulted to local IP of active network interface
