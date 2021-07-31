@@ -50,6 +50,7 @@ def install(
     if version == "docker":
         log.info("Docker current version: {}", Packages.get_bin_version("docker"))
         url = "https://get.docker.com"
+        log.info("Downloading installation script: {}", url)
         f = download(url)
         log.info("The installation script contains a wait, please be patient")
         with Sultan.load(sudo=True) as sultan:
@@ -62,10 +63,11 @@ def install(
         return None
 
     if version == "compose":
-        f = download(
-            "https://raw.githubusercontent.com/docker/compose-cli/"
-            "main/scripts/install/install_linux.sh"
-        )
+        url = "https://raw.githubusercontent.com/docker/compose-cli/"
+        url += "main/scripts/install/install_linux.sh"
+        log.info("Downloading installation script: {}", url)
+
+        f = download(url)
         with Sultan.load(sudo=True) as sultan:
             result = sultan.sh(f).run()
 
@@ -104,6 +106,7 @@ def install(
         url = "https://github.com/docker/buildx/releases/download/"
         url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
 
+        log.info("Downloading installation script: {}", url)
         f = download(url)
         f.rename(buildx_bin)
         buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
