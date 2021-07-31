@@ -16,7 +16,7 @@ from controller.utilities import git
 # https://github.com/docker/compose-cli/releases
 COMPOSE_VERSION = "v2.0.0-beta.6"
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.6.0"
+BUILDX_VERSION = "v0.6.1"
 
 
 def download(url: str) -> Path:
@@ -63,7 +63,8 @@ def install(
 
     if version == "compose":
         f = download(
-            "https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh"
+            "https://raw.githubusercontent.com/docker/compose-cli/"
+            "main/scripts/install/install_linux.sh"
         )
         with Sultan.load(sudo=True) as sultan:
             result = sultan.sh(f).run()
