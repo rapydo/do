@@ -41,7 +41,9 @@ def download(url: str, expected_checksum: str) -> Path:
                 f.write(chunk)
 
     md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
-    if md5 != expected_checksum:
+    if md5 == expected_checksum:
+        log.info("Checksum verified: {}", md5)
+    else:
         print_and_exit(
             "Checksum of download file ({}) does not match the expected value ({})" "",
             md5,
