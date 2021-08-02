@@ -1,3 +1,4 @@
+import hashlib
 import stat
 import tempfile
 import time
@@ -19,7 +20,13 @@ COMPOSE_VERSION = "v2.0.0-beta.6"
 BUILDX_VERSION = "v0.6.1"
 
 
-def download(url: str) -> Path:
+EXPECTED_DOCKER_SCRIPT_MD5 = "2e7644d0fdc23b8df90d7d136a793248"
+EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
+EXPECTED_COMPOSE_BIN_MD5 = "72c895b551d12e5093ef3285b9d4309f"
+EXPECTED_BUILDX_BIN_MD5 = "caae05fcabd62f4e0708ea95c7c6b85f"
+
+
+def download(url: str, expected_checksum: str) -> Path:
     r = requests.get(url)
     if r.status_code != 200:
         print_and_exit(
@@ -32,6 +39,14 @@ def download(url: str) -> Path:
         for chunk in r.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
+
+    md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
+    if md5 != expected_checksum:
+        print_and_exit(
+            "Checksum of download file ({}) does not match the expected value ({})" "",
+            md5,
+            expected_checksum,
+        )
 
     return file
 
@@ -51,7 +66,8 @@ def install(
         log.info("Docker current version: {}", Packages.get_bin_version("docker"))
         url = "https://get.docker.com"
         log.info("Downloading installation script: {}", url)
-        f = download(url)
+        f = download(url, EXPECTED_DOCKER_SCRIPT_MD5)
+
         log.info("The installation script contains a wait, please be patient")
         with Sultan.load(sudo=True) as sultan:
             result = sultan.sh(f).run()
@@ -66,8 +82,8 @@ def install(
         url = "https://raw.githubusercontent.com/docker/compose-cli/"
         url += "main/scripts/install/install_linux.sh"
         log.info("Downloading installation script: {}", url)
+        f = download(url, EXPECTED_COMPOSE_SCRIPT_MD5)
 
-        f = download(url)
         with Sultan.load(sudo=True) as sultan:
             result = sultan.sh(f).run()
 
@@ -81,7 +97,8 @@ def install(
         url = "https://github.com/docker/compose-cli/releases/download/"
         url += f"{COMPOSE_VERSION}/docker-compose-linux-amd64"
 
-        f = download(url)
+        log.info("Downloading compose binary: {}", url)
+        f = download(url, EXPECTED_COMPOSE_BIN_MD5)
         f.rename(compose_bin)
         compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
 
@@ -106,8 +123,9 @@ def install(
         url = "https://github.com/docker/buildx/releases/download/"
         url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
 
-        log.info("Downloading installation script: {}", url)
-        f = download(url)
+        log.info("Downloading buildx binary: {}", url)
+        f = download(url, EXPECTED_BUILDX_BIN_MD5)
+
         f.rename(buildx_bin)
         buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
 

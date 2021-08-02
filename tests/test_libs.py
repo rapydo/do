@@ -360,4 +360,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         assert re.match(date_pattern, f"{d}.bak")
 
     with pytest.raises(SystemExit):
-        download("https://www.google.com/test")
+        download("https://www.google.com/test", "")
+
+    with pytest.raises(SystemExit):
+        download(
+            "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
+            "thisisawrongchecksum",
+        )
+
+    downloaded = download(
+        "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
+        "dc07bef0d12a7a9cfd0f383452cbcb6d",
+    )
+    assert downloaded is not None
