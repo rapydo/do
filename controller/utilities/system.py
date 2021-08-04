@@ -31,6 +31,10 @@ def execute_command(command: str, parameters: List[str]) -> str:
             f"Cannot execute command: {command} {' '.join(parameters)}"
         )
 
+    # raised on Windows
+    except OSError:  # pragma: no cover
+        raise ExecutionException(f"Cannot execute: {command}")
+
 
 def get_username(uid: int) -> str:
     try:
