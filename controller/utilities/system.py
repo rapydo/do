@@ -1,5 +1,4 @@
 import os
-import pwd
 import socket
 from typing import List
 
@@ -35,10 +34,12 @@ def execute_command(command: str, parameters: List[str]) -> str:
 
 def get_username(uid: int) -> str:
     try:
+        import pwd
+
         return pwd.getpwuid(uid).pw_name
     # Can fail on Windows
     except ImportError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return str(uid)
 
 
@@ -47,7 +48,7 @@ def get_current_uid() -> int:
         return os.getuid()
     # Can fail on Windows
     except AttributeError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return 0
 
 
@@ -56,7 +57,7 @@ def get_current_gid() -> int:
         return os.getgid()
     # Can fail on Windows
     except AttributeError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return 0
 
 
