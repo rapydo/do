@@ -12,8 +12,11 @@ from controller.templating import password
 def registry() -> None:
 
     Configuration.FORCE_COMPOSE_ENGINE = True
+    # @ symbol in secrets is not working
+    # https://github.com/bitnami/charts/issues/1954
+    # Other symbols like # and " also lead to configuration errors
     os.environ["REGISTRY_HTTP_SECRET"] = password(
-        param_not_used="", length=96, add_symbols=True
+        param_not_used="", length=96, symbols="%'()*,-./:;<=>?[]^_`{|}~"
     )
     Application.get_controller().controller_init()
 
