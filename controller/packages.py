@@ -122,7 +122,9 @@ class Packages:
 
         try:
 
+            log.info("OS Name = {}", os.name)
             if os.name == "nt":  # pragma: no cover
+                log.warning("Converting command to win32")
                 exec_cmd = cls.convert_bin_to_win32(exec_cmd)
 
             output = system.execute_command(exec_cmd, option)
