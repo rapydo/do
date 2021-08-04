@@ -16,7 +16,8 @@ def registry() -> None:
     # https://github.com/bitnami/charts/issues/1954
     # Other symbols like # and " also lead to configuration errors
     os.environ["REGISTRY_HTTP_SECRET"] = password(
-        param_not_used="", length=96, symbols="%*,-.=?[]^_~"
+        param_not_used="", length=96
+        # , symbols="%*,-.=?[]^_~"
     )
     Application.get_controller().controller_init()
 
