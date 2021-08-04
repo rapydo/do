@@ -37,6 +37,9 @@ class Packages:
             # sudo does not work on travis
             if Configuration.testing:
                 sudo = False
+            # sudo does not work on Windows
+            if os.name == "nt":  # pragma: no cover
+                sudo = False
 
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
@@ -122,9 +125,7 @@ class Packages:
 
         try:
 
-            log.info("OS Name = {}", os.name)
             if os.name == "nt":  # pragma: no cover
-                log.warning("Converting command to win32")
                 exec_cmd = cls.convert_bin_to_win32(exec_cmd)
 
             output = system.execute_command(exec_cmd, option)
