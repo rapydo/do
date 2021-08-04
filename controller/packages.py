@@ -1,6 +1,7 @@
 # BEWARE: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
+import os
 import re
 from distutils.version import LooseVersion
 from pathlib import Path
@@ -109,11 +110,21 @@ class Packages:
         return found_version
 
     @staticmethod
+    def convert_bin_to_win32(exec_cmd: str) -> str:
+        if exec_cmd == "docker":
+            return "docker.exe"
+        return exec_cmd
+
+    @classmethod
     def get_bin_version(
-        exec_cmd: str, option: List[str] = ["--version"]
+        cls, exec_cmd: str, option: List[str] = ["--version"]
     ) -> Optional[str]:
 
         try:
+
+            if os.name == "nt":  # pragma: no cover
+                exec_cmd = cls.convert_bin_to_win32(exec_cmd)
+
             output = system.execute_command(exec_cmd, option)
 
             # then last element on spaces
