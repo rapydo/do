@@ -300,7 +300,7 @@ class Compose:
             if not status.startswith("Up"):
                 continue
 
-            if status == "Up (unhealthy)":
+            if status == "Up (unhealthy)":  # pragma: no cover
                 log.error("Status of {} container is unhealthy", name)
 
             containers.add(name)

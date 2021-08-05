@@ -66,6 +66,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         " with interfaces and volatile commands in a near future",
         "Creating registry",
     )
+
     exec_command(
         capfd,
         "images",
@@ -83,4 +84,10 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         "images",
         "This registry contains 1 image(s):",
         "rapydo/backend",
+    )
+
+    exec_command(
+        capfd,
+        "registry",
+        "The registry is already running at 127.0.0.1:5000",
     )

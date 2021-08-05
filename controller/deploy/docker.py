@@ -48,7 +48,7 @@ class Docker:
     def ping_registry(self, do_exit: bool = True) -> bool:
 
         registry_host = Application.env["REGISTRY_HOST"]
-        registry_port = Application.env["REGISTRY_PORT"]
+        registry_port = int(Application.env["REGISTRY_PORT"])
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(1)
