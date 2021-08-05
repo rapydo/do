@@ -1,7 +1,6 @@
 """
-Integration with Docker swarmg
+Integration with Docker swarm
 """
-import os
 from typing import Dict, List, Optional, Union
 
 from colorama import Fore
@@ -27,8 +26,8 @@ class Swarm:
 
     def init(self) -> None:
 
-        manager_address = (
-            os.environ.get("SWARM_MANAGER_ADDRESS") or system.get_local_ip()
+        manager_address = str(
+            Application.env.get("SWARM_MANAGER_ADDRESS") or system.get_local_ip()
         )
 
         log.info("Initializing Swarm with manager IP {}", manager_address)

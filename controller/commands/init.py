@@ -24,14 +24,6 @@ def init(
 ) -> None:
     Application.get_controller().controller_init()
 
-    if SWARM_MODE:
-        swarm = Swarm(check_initialization=False)
-        if not swarm.get_token():
-            swarm.init()
-            log.info("Swarm is now initialized")
-        else:
-            log.debug("Swarm is already initialized")
-
     for p in Application.project_scaffold.data_folders:
         if not p.exists():
             p.mkdir(parents=True, exist_ok=True)
@@ -68,6 +60,14 @@ def init(
         Application.get_controller().create_projectrc()
         Application.get_controller().read_specs(read_extended=True)
         Application.get_controller().make_env()
+
+    if SWARM_MODE:
+        swarm = Swarm(check_initialization=False)
+        if not swarm.get_token():
+            swarm.init()
+            log.info("Swarm is now initialized")
+        else:
+            log.debug("Swarm is already initialized")
 
     # Application.get_controller().check_placeholders()
     log.info("Project initialized")
