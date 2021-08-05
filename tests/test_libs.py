@@ -6,6 +6,7 @@ to verify cases not easly testable through cli commands
 import os
 import re
 import tempfile
+from datetime import datetime
 from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Dict, Union
@@ -17,6 +18,7 @@ from controller import __version__
 from controller.app import Application
 from controller.commands.compose.backup import get_date_pattern
 from controller.commands.install import download
+from controller.deploy.builds import get_image_creation
 from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
@@ -238,6 +240,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_command("backend") == "restapi launch"
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
+    assert services.get_default_command("registry") == "ash"
     assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
 
@@ -351,6 +354,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert Packages.get_installation_path("rapydo") is not None
     assert Packages.get_installation_path("pip") is None
 
+    assert Packages.convert_bin_to_win32("test") == "test"
+    assert Packages.convert_bin_to_win32("compose") == "compose"
+    assert Packages.convert_bin_to_win32("buildx") == "buildx"
+    assert Packages.convert_bin_to_win32("git") == "git"
+    rand_str = faker.pystr()
+    assert Packages.convert_bin_to_win32(rand_str) == rand_str
+    assert Packages.convert_bin_to_win32("docker") == "docker.exe"
+
     date_pattern = get_date_pattern()
     # just a trick to transform a glob-like expression into a valid regular expression
     date_pattern.replace(".*", "\\.+")
@@ -373,3 +384,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "dc07bef0d12a7a9cfd0f383452cbcb6d",
     )
     assert downloaded is not None
+
+    _1970 = datetime.fromtimestamp(0)
+    assert get_image_creation("invalid") == _1970

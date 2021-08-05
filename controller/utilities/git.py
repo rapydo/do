@@ -34,7 +34,7 @@ def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
 
         url: str = gitobj.remotes.origin.url
         return url
-    except AttributeError:
+    except AttributeError:  # pragma: no cover
         return None
 
 
@@ -46,7 +46,7 @@ def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
     try:
         # active_branch.name is still unannotated
         return cast(str, gitobj.active_branch.name)
-    except AttributeError as e:
+    except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return None
 

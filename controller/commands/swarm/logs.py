@@ -35,5 +35,5 @@ def logs(
     swarm = Swarm()
     try:
         swarm.logs(services, follow, tail, timestamps)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         log.info("Stopped by keyboard")

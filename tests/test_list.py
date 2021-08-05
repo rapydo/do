@@ -20,7 +20,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
-        services=["rabbit", "neo4j"],
+        services=["rabbit", "redis"],
         extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
     )
     init_project(capfd)
@@ -54,6 +54,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "frontend",
         "postgres",
         "rabbit",
+        "redis",
     )
 
     exec_command(

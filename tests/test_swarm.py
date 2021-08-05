@@ -156,6 +156,12 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "-s backend remove",
+        "Stack swarm is not running, deploy it with rapydo start",
+    )
+
+    exec_command(
+        capfd,
         "-s backend,invalid start",
         "No such service: invalid",
     )
