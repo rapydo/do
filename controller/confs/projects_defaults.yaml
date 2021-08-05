@@ -116,12 +116,12 @@ variables:
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
     SET_CSP_CONNECT_SRC:
-    # Used with an additional burst of 2 requests
     SET_MAX_REQUESTS_PER_SECOND_AUTH: 2
-    # Used with an additional burst of 5 requests
+    SET_MAX_REQUESTS_BURST_AUTH: 2
     SET_MAX_REQUESTS_PER_SECOND_API: 3
-    # Used with an additional burst of 10 requests
+    SET_MAX_REQUESTS_BURST_API: 10
     SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
+    SET_MAX_REQUESTS_BURST_ASSETS: 30
     # if empty will be automatically replaced with DOMAIN in proxy entrypoint
     CORS_ALLOWED_ORIGIN:
     # if enabled, make sure to copy client certificates in /etc/letsencrypt/client_certs
