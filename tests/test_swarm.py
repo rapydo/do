@@ -51,7 +51,7 @@ def test_swarm(capfd: Capture) -> None:
     local_ip = system.get_local_ip()
     exec_command(
         capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
+        "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS= init",
         "docker buildx is installed",
         "docker compose is installed",
         "Swarm is now initialized",
