@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Any, List, Optional, Tuple
 
 import typer
-from git import Repo as GitRepo
 
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application

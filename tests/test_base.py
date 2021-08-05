@@ -7,7 +7,7 @@ import tempfile
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__
+from controller import __version__
 from tests import (
     Capture,
     create_project,

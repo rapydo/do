@@ -3,7 +3,7 @@ This module will test the registry service
 """
 import random
 
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project
 
 
 def test_swarm_multi_host(capfd: Capture) -> None:
