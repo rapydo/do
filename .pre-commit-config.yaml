@@ -46,6 +46,7 @@ repos:
             "types-PyYAML",
             "types-pytz",
             "types-requests",
+            "types-setuptools",
             "types-python-dateutil",
             "types-click",
             "Faker",
