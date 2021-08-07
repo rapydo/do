@@ -1,10 +1,10 @@
 import os
 import re
-import sys
 from pathlib import Path
 from typing import List, Optional
 
-from controller import PROJECT_DIR, gitter, log
+from controller import PROJECT_DIR, log, print_and_exit
+from controller.utilities import git
 
 NO_AUTHENTICATION = "NO_AUTHENTICATION"
 NO_FRONTEND = "nofrontend"
@@ -59,6 +59,8 @@ class Project:
 
         self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
         self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath("logs", GITKEEP))
+        self.suggested_gitkeep.append(DATA.joinpath("backup", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "cron", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
@@ -161,6 +163,10 @@ class Project:
             )
 
             self.suggested_gitkeep.append(
+                DATA.joinpath(self.project, "frontend", GITKEEP)
+            )
+
+            self.suggested_gitkeep.append(
                 self.p_path("frontend", "integration", GITKEEP)
             )
 
@@ -259,40 +265,39 @@ class Project:
         if project is None:
 
             if len(projects) == 0:
-                log.critical("No project found ({} folder is empty?)", PROJECT_DIR)
-                sys.exit(1)
+                print_and_exit("No project found ({} folder is empty?)", PROJECT_DIR)
 
             if len(projects) > 1:
-                log.critical(
+                print_and_exit(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
                     ", ".join(projects),
                 )
-                sys.exit(1)
 
             project = projects.pop()
 
         elif project not in projects:
-            log.critical(
+            print_and_exit(
                 "Wrong project {}\nSelect one of the following: {}\n",
                 project,
                 ", ".join(projects),
             )
-            sys.exit(1)
 
         # In case of errors this function will exit
         Project.check_invalid_characters(project)
 
         if project in Project.reserved_project_names:
-            log.critical(
+            print_and_exit(
                 "You selected a reserved name, invalid project name: {}", project
             )
-            sys.exit(1)
 
         return project
 
     @staticmethod
     def check_invalid_characters(project: str) -> None:
+        if len(project) <= 1:
+            print_and_exit("Wrong project name, expected at least two characters")
+
         if not re.match("^[a-z][a-z0-9]+$", project):
 
             # First character is expected to be a-z
@@ -303,13 +308,12 @@ class Project:
             invalid_list.sort()
             invalid_chars = "".join(str(e) for e in invalid_list)
 
-            log.critical(
+            print_and_exit(
                 "Wrong project name, found invalid characters: {}", invalid_chars
             )
-            sys.exit(1)
 
     def check_main_folder(self) -> Optional[str]:
-        folder = Path(os.getcwd())
+        folder = Path.cwd()
         first_level_error = self.inspect_main_folder(folder)
         # No error raised: the current folder is a valid rapydo root
         if first_level_error is None:
@@ -344,11 +348,11 @@ class Project:
         on file existence. Further checks are performed in the following steps
         """
 
-        r = gitter.get_repo(str(folder))
-        if r is None or gitter.get_origin(r) is None:
+        r = git.get_repo(str(folder))
+        if r is None or git.get_origin(r) is None:
             return f"""You are not in a git repository
 \nPlease note that this command only works from inside a rapydo-like repository
-Verify that you are in the right folder, now you are in: {os.getcwd()}
+Verify that you are in the right folder, now you are in: {Path.cwd()}
                 """
 
         for fpath in self.expected_main_folders:
@@ -365,30 +369,27 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
 
         for fpath in self.expected_folders:
             if not fpath.is_dir():
-                log.critical(
+                print_and_exit(
                     "Project {} is invalid: required folder not found {}",
                     self.project,
                     fpath,
                 )
-                sys.exit(1)
 
         for fpath in self.expected_files + self.raw_files:
             if not fpath.is_file():
-                log.critical(
+                print_and_exit(
                     "Project {} is invalid: required file not found {}",
                     self.project,
                     fpath,
                 )
-                sys.exit(1)
 
         for fpath in self.obsolete_files:
             if fpath.exists():
-                log.critical(
+                print_and_exit(
                     "Project {} contains an obsolete file or folder: {}",
                     self.project,
                     fpath,
                 )
-                sys.exit(1)
 
     # issues/57
     # I'm temporary here... to be decided how to handle me

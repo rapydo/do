@@ -1,5 +1,5 @@
 import os
-import pwd
+import socket
 from typing import List
 
 from plumbum import local
@@ -12,7 +12,7 @@ MB = 1_048_576
 KB = 1024
 
 
-class ExecutionException(BaseException):
+class ExecutionException(Exception):
     pass
 
 
@@ -31,13 +31,19 @@ def execute_command(command: str, parameters: List[str]) -> str:
             f"Cannot execute command: {command} {' '.join(parameters)}"
         )
 
+    # raised on Windows
+    except OSError:  # pragma: no cover
+        raise ExecutionException(f"Cannot execute: {command}")
+
 
 def get_username(uid: int) -> str:
     try:
+        import pwd
+
         return pwd.getpwuid(uid).pw_name
     # Can fail on Windows
     except ImportError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return str(uid)
 
 
@@ -46,7 +52,7 @@ def get_current_uid() -> int:
         return os.getuid()
     # Can fail on Windows
     except AttributeError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return 0
 
 
@@ -55,7 +61,7 @@ def get_current_gid() -> int:
         return os.getgid()
     # Can fail on Windows
     except AttributeError as e:  # pragma: no cover
-        log.warning(e)
+        log.debug(e)
         return 0
 
 
@@ -74,3 +80,46 @@ def bytes_to_str(value: float) -> str:
         unit = ""
 
     return f"{int(round(value, 0))}{unit}"
+
+
+def str_to_bytes(text: str) -> float:
+
+    text = text.upper()
+
+    value: str = text
+    unit: int = 1
+
+    if text.endswith("G"):
+        value = text[:-1]
+        unit = GB
+
+    if text.endswith("M"):
+        value = text[:-1]
+        unit = MB
+
+    if text.endswith("K"):
+        value = text[:-1]
+        unit = KB
+
+    if text.endswith("GB"):
+        value = text[:-2]
+        unit = GB
+
+    if text.endswith("MB"):
+        value = text[:-2]
+        unit = MB
+
+    if text.endswith("KB"):
+        value = text[:-2]
+        unit = KB
+
+    if not value.isnumeric():
+        raise AttributeError(f"Invalid float value {value}")
+
+    return float(value) * unit
+
+
+def get_local_ip() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    return str(s.getsockname()[0])

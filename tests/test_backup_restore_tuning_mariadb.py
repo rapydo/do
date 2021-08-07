@@ -12,7 +12,11 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
+    service_verify,
+    start_project,
 )
 
 
@@ -25,12 +29,24 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="mysql",
         frontend="no",
-        init=True,
-        pull=True,
-        start=True,
+    )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup mariadb",
+        "image for mariadb service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore mariadb",
+        "image for mariadb service, execute rapydo pull",
     )
 
-    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "sqlalchemy")
 
     # Just some delay extra delay. restapi init alone not always is enough...
     # time.sleep(5)
@@ -38,7 +54,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # This will initialize mariadb
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
 
-    def exec_query(query):
+    def exec_query(query: str) -> str:
 
         command = 'shell --no-tty mariadb "'
         command += 'sh -c \'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -D"$MYSQL_DATABASE" '

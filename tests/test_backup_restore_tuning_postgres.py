@@ -11,7 +11,11 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
+    service_verify,
+    start_project,
 )
 
 
@@ -24,12 +28,24 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="no",
-        init=True,
-        pull=True,
-        start=True,
+    )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup postgres",
+        "image for postgres service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore postgres",
+        "image for postgres service, execute rapydo pull",
     )
 
-    exec_command(capfd, "verify --no-tty sqlalchemy", "Service sqlalchemy is reachable")
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "sqlalchemy")
 
     # Just some delay extra delay. restapi init alone not always is enough...
     # time.sleep(5)

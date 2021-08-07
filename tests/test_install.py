@@ -6,12 +6,14 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import __version__, gitter
+from controller import __version__
+from controller.utilities import git
 from tests import (
     Capture,
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
     random_project_name,
 )
 
@@ -24,10 +26,8 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         name=project,
         auth="postgres",
         frontend="angular",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     # Initially the controller is installed from pip
     exec_command(
@@ -48,10 +48,21 @@ def test_install(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "install 100.0", "Invalid version")
 
+    exec_command(
+        capfd, "install docker", "Docker current version:", "Docker installed version:"
+    )
+    exec_command(capfd, "install compose", "Docker compose is installed")
+    exec_command(
+        capfd,
+        "install buildx",
+        "Docker buildx current version:",
+        "Docker buildx installed version:",
+    )
+
     exec_command(capfd, "install auto")
 
-    r = gitter.get_repo("submodules/do")
-    gitter.switch_branch(r, "0.7.6")
+    r = git.get_repo("submodules/do")
+    git.switch_branch(r, "0.7.6")
 
     exec_command(
         capfd,

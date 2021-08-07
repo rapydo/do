@@ -1,0 +1,164 @@
+version: "3.8"
+
+# This file may be marged with backend.yml when swarm mode will no longer be optional
+
+services:
+  backend:
+    deploy:
+      replicas: ${DEFAULT_SCALE_BACKEND}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_BACKEND}"
+          memory: ${ASSIGNED_MEMORY_BACKEND}
+
+  proxy:
+    deploy:
+      replicas: ${DEFAULT_SCALE_PROXY}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_PROXY}"
+          memory: ${ASSIGNED_MEMORY_PROXY}
+
+  postgres:
+    deploy:
+      # is postgres supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_POSTGRES}"
+          memory: ${ASSIGNED_MEMORY_POSTGRES}
+
+  mariadb:
+    deploy:
+      # Is mariadb supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_MARIADB}"
+          memory: ${ASSIGNED_MEMORY_MARIADB}
+
+  neo4j:
+    deploy:
+      # Replicas are not supported for sure
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_NEO4J}"
+          memory: ${ASSIGNED_MEMORY_NEO4J}
+
+  mongodb:
+    deploy:
+      # Is mongo supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_MONGODB}"
+          memory: ${ASSIGNED_MEMORY_MONGODB}
+
+  celery:
+    deploy:
+      replicas: ${DEFAULT_SCALE_CELERY}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_CELERY}"
+          memory: ${ASSIGNED_MEMORY_CELERY}
+
+  celery-beat:
+    deploy:
+      replicas: ${DEFAULT_SCALE_CELERYBEAT}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_CELERYBEAT}"
+          memory: ${ASSIGNED_MEMORY_CELERYBEAT}
+
+  rabbit:
+    deploy:
+      # Is rabbit supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_RABBIT}"
+          memory: ${ASSIGNED_MEMORY_RABBIT}
+
+  redis:
+    deploy:
+      # Is redis supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_REDIS}"
+          memory: ${ASSIGNED_MEMORY_REDIS}
+
+  bot:
+    deploy:
+      # Can't support replicas for sure
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_BOT}"
+          memory: ${ASSIGNED_MEMORY_BOT}
+
+  flower:
+    deploy:
+      # Are replicas needed? And supported?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_FLOWER}"
+          memory: ${ASSIGNED_MEMORY_FLOWER}
+
+  swaggerui:
+    deploy:
+      replicas: ${DEFAULT_SCALE_SWAGGERUI}
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_SWAGGERUI}"
+          memory: ${ASSIGNED_MEMORY_SWAGGERUI}
+
+  adminer:
+    deploy:
+      # Are replicas needed? And supported?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_ADMINER}"
+          memory: ${ASSIGNED_MEMORY_ADMINER}
+
+  ftp:
+    deploy:
+      # Is proftp supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_FTP}"
+          memory: ${ASSIGNED_MEMORY_FTP}
+
+  smtp:
+    deploy:
+      # Is smtp supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_SMTP}"
+          memory: ${ASSIGNED_MEMORY_SMTP}
+
+  pushpin:
+    deploy:
+      # Is pushpin supporting replicas?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_PUSHPIN}"
+          memory: ${ASSIGNED_MEMORY_PUSHPIN}
+
+  registry:
+    deploy:
+      # Are replicas needed?
+      replicas: 1
+      resources:
+        reservations:
+          cpus: "${ASSIGNED_CPU_REGISTRY}"
+          memory: ${ASSIGNED_MEMORY_REGISTRY}
+      placement:
+        constraints:
+          - "node.role==manager"

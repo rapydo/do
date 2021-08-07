@@ -13,7 +13,11 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
+    service_verify,
+    start_project,
 )
 
 
@@ -27,15 +31,24 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        init=True,
-        pull=True,
-        start=True,
+    )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup rabbit",
+        "image for rabbit service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore rabbit",
+        "image for rabbit service, execute rapydo pull",
     )
 
-    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
+    pull_images(capfd)
+    start_project(capfd)
 
-    # # This will initialize rabbit
-    # exec_command(capfd, "shell --no-tty backend 'restapi init'")
+    service_verify(capfd, "rabbitmq")
 
     # Just some delay extra delay, rabbit is a slow starter
     time.sleep(5)
@@ -283,7 +296,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait rabbit to completely startup
-    exec_command(capfd, "verify --no-tty rabbitmq", "Service rabbitmq is reachable")
+    service_verify(capfd, "rabbitmq")
 
     exec_command(capfd, query_queue, "restapi.connectors.rabbitmq True")
 

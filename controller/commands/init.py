@@ -2,8 +2,9 @@ from pathlib import Path
 
 import typer
 
-from controller import log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
+from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Initialize current RAPyDo project")
@@ -43,7 +44,7 @@ def init(
 
     if submodules_path is not None:
         if not submodules_path.exists():
-            Application.exit("Local path not found: {}", submodules_path)
+            print_and_exit("Local path not found: {}", submodules_path)
 
     Application.git_submodules(from_path=submodules_path)
 
@@ -51,8 +52,7 @@ def init(
     Application.get_controller().make_env()
 
     # Compose services and variables
-    Application.get_controller().read_composers()
-    Application.get_controller().set_active_services()
+    Application.get_controller().get_compose_configuration()
     # We have to create the .projectrc twice
     # One generic with main options and another here
     # when services are available to set specific configurations
@@ -60,6 +60,14 @@ def init(
         Application.get_controller().create_projectrc()
         Application.get_controller().read_specs(read_extended=True)
         Application.get_controller().make_env()
+
+    if SWARM_MODE:
+        swarm = Swarm(check_initialization=False)
+        if not swarm.get_token():
+            swarm.init()
+            log.info("Swarm is now initialized")
+        else:
+            log.debug("Swarm is already initialized")
 
     # Application.get_controller().check_placeholders()
     log.info("Project initialized")

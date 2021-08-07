@@ -13,7 +13,11 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
+    service_verify,
+    start_project,
 )
 
 
@@ -27,12 +31,24 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["redis"],
-        init=True,
-        pull=True,
-        start=True,
+    )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup redis",
+        "image for redis service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore redis",
+        "image for redis service, execute rapydo pull",
     )
 
-    exec_command(capfd, "verify --no-tty redis", "Service redis is reachable")
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "redis")
 
     # # This will initialize redis
     # exec_command(capfd, "shell --no-tty backend 'restapi init'")
@@ -273,7 +289,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait redis to completely startup
-    exec_command(capfd, "verify --no-tty redis", "Service redis is reachable")
+    service_verify(capfd, "redis")
 
     exec_command(capfd, get_key, value1)
 

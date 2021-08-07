@@ -3,7 +3,7 @@ This module will test the scale command
 """
 import os
 
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, init_project, pull_images
 
 
 def test_scale(capfd: Capture) -> None:
@@ -14,16 +14,20 @@ def test_scale(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
         services=["rabbit"],
-        init=True,
-        pull=True,
-        start=False,
     )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "scale rabbit=2",
+        "image for rabbit service, execute rapydo pull",
+    )
+
+    pull_images(capfd)
 
     exec_command(
         capfd,
         "scale rabbit",
-        "Please specify how to scale: SERVICE=NUM_REPLICA",
-        "You can also set a DEFAULT_SCALE_RABBIT variable in your .projectrc file",
     )
     exec_command(
         capfd,

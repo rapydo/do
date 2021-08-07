@@ -5,7 +5,14 @@ import time
 
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    pull_images,
+    random_project_name,
+)
 
 
 def test_cronjobs(capfd: Capture, faker: Faker) -> None:
@@ -16,11 +23,9 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         name=project,
         auth="postgres",
         frontend="no",
-        init=True,
-        pull=True,
-        start=False,
     )
-
+    init_project(capfd)
+    pull_images(capfd)
     exec_command(
         capfd,
         "-e CRONTAB_ENABLE=1 start",
@@ -33,7 +38,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "logs -s backend --tail 50 --no-color",
+        "-s backend logs --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Found no cronjob to be enabled, skipping crontab setup",
@@ -47,13 +52,13 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     # Restart to enable to cronjobs
     exec_command(
         capfd,
-        "-s backend restart",
+        "-e CRONTAB_ENABLE=1 -s backend restart",
         "Stack restarted",
     )
 
     exec_command(
         capfd,
-        "logs -s backend --tail 50 --no-color",
+        "-s backend logs --tail 50 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         # "Testing mode",

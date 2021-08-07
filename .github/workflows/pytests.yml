@@ -9,36 +9,50 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        test:
-          [
-            add_upgrade,
-            backup_restore_tuning_mariadb,
-            backup_restore_tuning_neo4j,
-            backup_restore_tuning_postgres,
-            backup_restore_tuning_rabbit,
-            backup_restore_tuning_redis,
-            base,
-            build_pull,
-            create,
-            cronjobs,
-            diagnostic,
-            dump,
-            install,
+        python-version: [3.7, 3.8, 3.9]
+        test: [
+            # Both Compose and Swarm
+            compose/add_upgrade,
+            swarm/add_upgrade,
+            compose/base,
+            swarm/base,
+            compose/build_pull,
+            swarm/build_pull,
+            compose/create,
+            swarm/create,
+            compose/install,
+            swarm/install,
+            compose/libs,
+            swarm/libs,
+            compose/passwords_invalid_characters,
+            swarm/passwords_invalid_characters,
+
+            # Swarm only
+            swarm/swarm,
+            swarm/registry,
+            swarm/multi_host,
+
+            # Compose only
+            compose/backup_restore_tuning_mariadb,
+            compose/backup_restore_tuning_neo4j,
+            compose/backup_restore_tuning_postgres,
+            compose/backup_restore_tuning_rabbit,
+            compose/backup_restore_tuning_redis,
+            compose/cronjobs,
+            compose/dump,
+            compose/interfaces,
+            compose/ssl,
+            compose/volatile,
+            compose/list,
+
+            # Currently Compose only, to be generalized
             init_check_update,
-            interfaces,
-            libs,
-            list,
-            passwords_invalid_characters,
             scale,
-            ssl_dhparam,
             start_shell_status_logs_restart_remove,
-            verify,
-            volatile,
           ]
 
     steps:
@@ -52,20 +66,72 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools pytest pytest-cov pytest-timeout Faker
           pip install --upgrade --no-cache-dir --editable .
+          # Install latest (unrelased) version of python-on-whales
+          # pip install git+https://github.com/gabrieldemarmiesse/python-on-whales.git
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
+
+          rapydo install buildx
+          rapydo install compose
+
       - name: Run Tests
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
+          TEST_NAME: ${{ matrix.test }}
         run: |
           # This works well for all tests... except for install... that is not covered :o
           # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
 
           mkdir rapydo_tests
           cd rapydo_tests
-          py.test --timeout=300 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${{ matrix.test }}.py
+
+          if [[ "${TEST_NAME}" == swarm/* ]]; then
+
+            IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
+
+            sudo cat /etc/docker/daemon.json
+            sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP}:5000\"]}' >  /etc/docker/daemon.json"
+            sudo cat /etc/docker/daemon.json
+            sudo systemctl restart docker.service
+
+            export SWARM_MODE="1"
+
+            # Temporary added this to prevent fileno error when starting the registry
+            # BUG probably due to compose 1.29, to be removed once migrated to compose 2
+            docker pull rapydo/registry:2.0
+
+            TEST_NAME=${TEST_NAME/swarm\//}
+          elif [[ "${TEST_NAME}" == compose/* ]]; then
+            TEST_NAME=${TEST_NAME/compose\//}
+          fi
+
+          if [[ "${TEST_NAME}" == "multi_host" ]]; then
+            base=https://github.com/docker/machine/releases/download/v0.16.0 \
+              && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
+              && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
+              && chmod +x /usr/local/bin/docker-machine
+
+            docker-machine --version
+
+            sudo apt-get install --yes virtualbox
+            docker swarm init
+            JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
+            echo "Join command = ${JOIN_COMMAND}"
+
+            # Currently not working due to lack of nested virtualization:
+            # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
+            # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
+            # docker-machine ssh test $JOIN_COMMAND
+            # docker node ls
+
+            # NFS to be added
+            export NFS_HOST="127.0.0.1"
+          fi
+
+
+          py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
           cp coverage.xml ..
           cd ..
 

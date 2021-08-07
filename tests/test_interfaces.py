@@ -3,7 +3,13 @@ This module will test the interfaces command
 """
 from faker import Faker
 
-from tests import Capture, create_project, exec_command, random_project_name
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+)
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
@@ -13,10 +19,8 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="no",
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
 
     exec_command(capfd, "remove --all", "Stack removed")
 

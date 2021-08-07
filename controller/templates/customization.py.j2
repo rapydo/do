@@ -1,7 +1,9 @@
-from typing import Any, Tuple
+from typing import Tuple
 
+from restapi.connectors import Connector
 from restapi.customizer import BaseCustomizer, FlaskRequest, Props, User
 from restapi.rest.definition import EndpointResource
+# from restapi.models import fields
 
 # from restapi.utilities.logs import log
 
@@ -30,7 +32,7 @@ class Customizer(BaseCustomizer):
 
     @staticmethod
     def custom_user_properties_post(
-        user: User, properties: Props, extra_properties: Props, db: Any
+        user: User, properties: Props, extra_properties: Props, db: Connector
     ) -> None:
         """
         executed just after user creation
@@ -120,6 +122,9 @@ class Customizer(BaseCustomizer):
         return {
             'authmethod': fields.String()
         }
+        {% else -%}
+        # return {
+        #     'custom_field': fields.Int()
+        # }
         {% endif -%}
-
-        return Customizer.get_custom_input_fields(request, scope=BaseCustomizer.ADMIN)
+        return {}

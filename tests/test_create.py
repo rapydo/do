@@ -6,6 +6,7 @@ and will only use the specific configuration needed by the test itself
 
 import os
 from pathlib import Path
+from typing import List
 
 import pytest
 
@@ -53,6 +54,13 @@ def test_create(capfd: Capture) -> None:
 
     # Please note that --current is required because data folder is already created
     # to be able to tests logs
+
+    # Expected at least two characters for project name
+    exec_command(
+        capfd,
+        "create a --auth postgres --frontend angular --current",
+        "Wrong project name, expected at least two characters",
+    )
 
     exec_command(
         capfd,
@@ -312,9 +320,7 @@ def test_create(capfd: Capture) -> None:
         elif service == "mongo":
             active_services = ["backend", "mongodb"]
         elif service == "celery":
-            # Flower is temporary disabled due to incompatibilities with Celery 5+
-            # active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
-            active_services = ["backend", "celery", "postgres", "rabbit"]
+            active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
         elif service == "rabbit":
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
@@ -328,8 +334,7 @@ def test_create(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "-p testservices list services",
-            "List of active services:",
+            "-p testservices check -i main --no-git --no-builds",
             f"Enabled services: {sorted(active_services)}",
         )
 
@@ -338,7 +343,9 @@ def test_create(capfd: Capture) -> None:
     opt = "--frontend no --current --force --auth neo4j"
     project_configuration = "projects/testcelery/project_configuration.yaml"
 
-    def verify_celery_configuration(services_list, broker, backend):
+    def verify_celery_configuration(
+        services_list: List[str], broker: str, backend: str
+    ) -> None:
 
         services = "--service celery"
         if services_list:

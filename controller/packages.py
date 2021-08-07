@@ -1,17 +1,15 @@
 # BEWARE: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
+import os
 import re
-import sys
 from distutils.version import LooseVersion
-from importlib import import_module
 from pathlib import Path
-from types import ModuleType
 from typing import List, Optional, Union
 
 from sultan.api import Sultan
 
-from controller import log
+from controller import log, print_and_exit
 from controller.utilities import system
 
 
@@ -39,6 +37,9 @@ class Packages:
             # sudo does not work on travis
             if Configuration.testing:
                 sudo = False
+            # sudo does not work on Windows
+            if os.name == "nt":  # pragma: no cover
+                sudo = False
 
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
@@ -58,65 +59,8 @@ class Packages:
                     print(r)
 
                 return bool(result.rc == 0)
-        except BaseException as e:  # pragma: no cover
-            log.critical(e)
-            sys.exit(1)
-
-    @staticmethod
-    def import_package(package_name: str) -> Optional[ModuleType]:
-
-        try:
-            return import_module(package_name)
-        except (ModuleNotFoundError, ImportError):
-            return None
-
-    @staticmethod
-    def package_version(package_name: str) -> Optional[str]:
-        package = Packages.import_package(package_name)
-        if package is None:
-            return None
-        return str(package.__version__)  # type: ignore
-
-    @staticmethod
-    def check_python_package(
-        package_name: str,
-        min_version: Optional[str] = None,
-        max_version: Optional[str] = None,
-    ) -> Optional[str]:
-
-        found_version = Packages.package_version(package_name)
-        if found_version is None:
-            log.critical(
-                "Could not find the following python package: {}", package_name
-            )
-            sys.exit(1)
-
-        try:
-            if min_version is not None:
-                if LooseVersion(min_version) > LooseVersion(found_version):
-                    log.critical(
-                        "Minimum supported version for {} is {}, found {}",
-                        package_name,
-                        min_version,
-                        found_version,
-                    )
-                    sys.exit(1)
-
-            if max_version is not None:
-                if LooseVersion(max_version) < LooseVersion(found_version):
-                    log.critical(
-                        "Maximum supported version for {} is {}, found {}",
-                        package_name,
-                        max_version,
-                        found_version,
-                    )
-                    sys.exit(1)
-
-            log.debug("{} version: {}", package_name, found_version)
-            return found_version
-        except TypeError as e:  # pragma: no cover
-            log.error("{}: {}", e, found_version)
-            return None
+        except Exception as e:  # pragma: no cover
+            print_and_exit(str(e))
 
     @staticmethod
     def check_program(
@@ -133,21 +77,19 @@ class Packages:
             if program == "docker":  # pragma: no cover
                 hints = "\n\nTo install docker visit: https://get.docker.com"
 
-            log.critical(
+            print_and_exit(
                 "A mandatory dependency is missing: {} not found{}", program, hints
             )
-            sys.exit(1)
 
         v = LooseVersion(found_version)
         if min_version is not None:
             if LooseVersion(min_version) > v:
-                log.critical(
+                print_and_exit(
                     "Minimum supported version for {} is {}, found {}",
                     program,
                     min_version,
                     found_version,
                 )
-                sys.exit(1)
 
         if min_recommended_version is not None:
             if LooseVersion(min_recommended_version) > v:
@@ -160,23 +102,32 @@ class Packages:
 
         if max_version is not None:
             if LooseVersion(max_version) < v:
-                log.critical(
+                print_and_exit(
                     "Maximum supported version for {} is {}, found {}",
                     program,
                     max_version,
                     found_version,
                 )
-                sys.exit(1)
 
         log.debug("{} version: {}", program, found_version)
         return found_version
 
     @staticmethod
+    def convert_bin_to_win32(exec_cmd: str) -> str:
+        if exec_cmd == "docker":
+            return "docker.exe"
+        return exec_cmd
+
+    @classmethod
     def get_bin_version(
-        exec_cmd: str, option: List[str] = ["--version"]
+        cls, exec_cmd: str, option: List[str] = ["--version"]
     ) -> Optional[str]:
 
         try:
+
+            if os.name == "nt":  # pragma: no cover
+                exec_cmd = cls.convert_bin_to_win32(exec_cmd)
+
             output = system.execute_command(exec_cmd, option)
 
             # then last element on spaces

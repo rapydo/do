@@ -15,7 +15,9 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    init_project,
     mock_KeyboardInterrupt,
+    pull_images,
     signal_handler,
 )
 
@@ -28,27 +30,26 @@ def test_all(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
         services=["rabbit", "neo4j"],
-        init=True,
-        pull=True,
-        start=False,
     )
+    init_project(capfd)
 
     exec_command(
         capfd,
-        "-s invalid start",
+        "-s backend,invalid start",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "start",
-        "docker-compose command: 'up'",
-        "Stack started",
+        "-s backend start",
+        "image for backend service, execute rapydo pull",
     )
+
+    pull_images(capfd)
 
     exec_command(
         capfd,
-        "-s backend start --force",
+        "start",
         "docker-compose command: 'up'",
         "Stack started",
     )
@@ -104,11 +105,10 @@ def test_all(capfd: Capture) -> None:
         "shell --no-tty frontend whoami",
         "node",
     )
-    # No default user for rabbit container
     exec_command(
         capfd,
         "shell --no-tty rabbit whoami",
-        "root",
+        "rabbitmq",
     )
     exec_command(
         capfd,
@@ -134,7 +134,7 @@ def test_all(capfd: Capture) -> None:
         capfd,
         # logs with tail 200 needed due to the spam of Requirement installation
         # after the Collecting ... /http-api.git
-        "logs -s backend --tail 200 --no-color",
+        "-s backend logs --tail 200 --no-color",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Testing mode",
@@ -164,7 +164,7 @@ def test_all(capfd: Capture) -> None:
     )
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    signal.alarm(3)
+    signal.alarm(5)
     # Here using main services option
     exec_command(
         capfd,
@@ -177,6 +177,19 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "-s backend -S frontend logs",
         "Incompatibile use of both --services/-s and --skip-services/-S options",
+    )
+
+    # Invalid services in -s and -S are refused
+    exec_command(
+        capfd,
+        "-s invalid logs --tail 1",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
+        "-S invalid logs --tail 1",
+        "No such service: invalid",
     )
 
     exec_command(
@@ -227,24 +240,10 @@ def test_all(capfd: Capture) -> None:
         "Enabled services: ['backend', 'rabbit']",
     )
 
-    # Invalid services in -s are refused
-    exec_command(
-        capfd,
-        "-s invalid logs --tail 1",
-        "No such service: invalid",
-    )
-
     exec_command(
         capfd,
         "-s backend,invalid logs --tail 1",
         "No such service: invalid",
-    )
-
-    # Invalid services in -S are simply ignored
-    exec_command(
-        capfd,
-        "-S frontend,postgres,neo4j,invalid logs --tail 1",
-        "Enabled services: ['backend', 'rabbit']",
     )
 
     exec_command(
@@ -277,5 +276,13 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "shell --no-tty backend hostname",
+        "Requested command: hostname with user: developer",
+        "No container found for backend_1",
+    )
+
+    exec_command(
+        capfd,
+        "shell --no-tty backend --default",
+        "Requested command: restapi launch with user: developer",
         "No container found for backend_1",
     )

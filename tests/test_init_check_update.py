@@ -6,7 +6,8 @@ import os
 import shutil
 from pathlib import Path
 
-from controller import __version__, gitter
+from controller import __version__
+from controller.utilities import git
 from tests import Capture, TemporaryRemovePath, create_project, exec_command
 
 
@@ -17,9 +18,6 @@ def test_base(capfd: Capture) -> None:
         name="third",
         auth="postgres",
         frontend="angular",
-        init=False,
-        pull=False,
-        start=False,
     )
 
     # Basic initialization
@@ -35,8 +33,8 @@ def test_base(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    r = gitter.get_repo("submodules/http-api")
-    gitter.switch_branch(r, "0.7.6")
+    repo = git.get_repo("submodules/http-api")
+    git.switch_branch(repo, "0.7.6")
     exec_command(
         capfd,
         "check -i main",
@@ -96,13 +94,37 @@ def test_base(capfd: Capture) -> None:
         "Can't continue with updates",
     )
     os.remove("submodules/do/temp.file")
-    r = gitter.get_repo("submodules/do")
-    r.git().execute(["git", "checkout", "--", "setup.py"])
+    repo = git.get_repo("submodules/do")
+    if repo:
+        repo.git().execute(["git", "checkout", "--", "setup.py"])
+
+    # Add a custom image to extend base backend image:
+    with open("projects/third/confs/commons.yml", "a") as f:
+        f.write(
+            """
+services:
+  backend:
+    build: ${PROJECT_DIR}/builds/backend
+    image: third/backend:${RAPYDO_VERSION}
+
+    """
+        )
+
+    os.makedirs("projects/third/builds/backend")
+    with open("projects/third/builds/backend/Dockerfile", "w+") as f:
+        f.write(
+            f"""
+FROM rapydo/backend:{__version__}
+RUN mkdir xyz
+"""
+        )
 
     # Skipping main because we are on a fake git repository
     exec_command(
         capfd,
         "check -i main",
+        " image, execute rapydo pull",
+        " image, execute rapydo build",
         "Checks completed",
     )
 
@@ -167,9 +189,6 @@ def test_base(capfd: Capture) -> None:
         name="justanother",
         auth="postgres",
         frontend="no",
-        init=False,
-        pull=False,
-        start=False,
     )
 
     os.remove(".projectrc")

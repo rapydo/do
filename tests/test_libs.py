@@ -6,22 +6,25 @@ to verify cases not easly testable through cli commands
 import os
 import re
 import tempfile
+from datetime import datetime
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Union
 
 import pytest
 from faker import Faker
 
-from controller import __version__, gitter
+from controller import __version__
 from controller.app import Application
-from controller.commands.backup import get_date_pattern
-from controller.compose import Compose
+from controller.commands.compose.backup import get_date_pattern
+from controller.commands.install import download
+from controller.deploy.builds import get_image_creation
+from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.templating import Templating
-from controller.utilities import services, system
+from controller.utilities import git, services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
-from tests import Capture, create_project, random_project_name
+from tests import Capture, create_project, init_project, random_project_name
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -29,8 +32,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        init=True,
     )
+    init_project(capfd)
 
     app = Application()
 
@@ -75,35 +78,29 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     values = app.autocomplete_submodule("")
     assert len(values) == 0
 
-    assert gitter.get_repo("does/not/exist") is None
-    do_repo = gitter.get_repo("submodules/do")
+    assert git.get_repo("does/not/exist") is None
+    do_repo = git.get_repo("submodules/do")
     assert do_repo is not None
-    assert gitter.get_active_branch(None) is None
-    assert gitter.get_active_branch(do_repo) == __version__
-    assert not gitter.switch_branch(do_repo, branch_name=None)
+    assert git.get_active_branch(None) is None
+    assert git.get_active_branch(do_repo) == __version__
+    assert not git.switch_branch(None, branch_name="0.7.3")
     # Same branch => no change => return True
-    assert gitter.switch_branch(do_repo, branch_name=__version__)
-    assert not gitter.switch_branch(do_repo, branch_name="XYZ")
-    # non remote branch is not found, because we only fetched current version
-    # 0.7.3 is already test for automatic switch in editable mode,
-    # i.e. local branch already exists and remote=False fails... let's use 0.7.2
-    assert not gitter.switch_branch(do_repo, branch_name="0.7.2", remote=False)
+    assert git.switch_branch(do_repo, branch_name=__version__)
+    assert not git.switch_branch(do_repo, branch_name="XYZ")
 
-    assert gitter.switch_branch(do_repo, branch_name="0.7.3")
-    assert gitter.get_active_branch(do_repo) == "0.7.3"
-    assert gitter.switch_branch(do_repo, branch_name=__version__)
-    assert gitter.get_active_branch(do_repo) == __version__
+    assert git.switch_branch(do_repo, branch_name="0.7.3")
+    assert git.get_active_branch(do_repo) == "0.7.3"
+    assert git.switch_branch(do_repo, branch_name=__version__)
+    assert git.get_active_branch(do_repo) == __version__
 
-    assert gitter.get_origin(None) is None
-    assert gitter.get_origin("not-a-git-object") is None
-    assert gitter.get_active_branch("not-a-git-object") is None
+    assert git.get_origin(None) is None
 
-    r = gitter.get_repo(".")
-    assert gitter.get_origin(r) == "https://your_remote_git/your_project.git"
+    r = git.get_repo(".")
+    assert git.get_origin(r) == "https://your_remote_git/your_project.git"
 
     # Create an invalid repo (i.e. without any remote)
-    r = gitter.init("../justatest")
-    assert gitter.get_origin(r) is None
+    r = git.init("../justatest")
+    assert git.get_origin(r) is None
 
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
@@ -111,13 +108,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     out = system.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
-    try:
+    with pytest.raises(system.ExecutionException):
         assert system.execute_command("ls", ["doesnotexistforsure"])
-        pytest.fail("ExecutionException not raised!")  # pragma: no cover
-    except system.ExecutionException:
-        pass
-    except BaseException:  # pragma: no cover
-        pytest.fail("Unexpected exception raised")
 
     assert system.bytes_to_str(0) == "0"
     assert system.bytes_to_str(1) == "1"
@@ -136,38 +128,54 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024) == "1024GB"
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
 
-    # Invalid file / path
-    try:
-        load_yaml_file(Path("invalid"), Path("path"))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
+    assert system.str_to_bytes("0") == 0
+    assert system.str_to_bytes("1") == 1
+    assert system.str_to_bytes("42") == 42
 
-    y = load_yaml_file(Path("invalid"), Path("path"), is_optional=True)
+    assert system.str_to_bytes("1K") == 1024
+    assert system.str_to_bytes("1k") == 1024
+    assert system.str_to_bytes("1KB") == 1024
+    assert system.str_to_bytes("1kb") == 1024
+
+    assert system.str_to_bytes("1M") == 1024 * 1024
+    assert system.str_to_bytes("1m") == 1024 * 1024
+    assert system.str_to_bytes("1MB") == 1024 * 1024
+    assert system.str_to_bytes("1mb") == 1024 * 1024
+
+    assert system.str_to_bytes("1G") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1g") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1GB") == 1024 * 1024 * 1024
+    assert system.str_to_bytes("1gb") == 1024 * 1024 * 1024
+
+    with pytest.raises(AttributeError):
+        system.str_to_bytes("x")
+
+    with pytest.raises(AttributeError):
+        system.str_to_bytes("1T")
+
+    with pytest.raises(AttributeError):
+        system.str_to_bytes("1TB")
+
+    # Invalid file / path
+    with pytest.raises(SystemExit):
+        load_yaml_file(file=Path("path", "invalid"))
+
+    y = load_yaml_file(file=Path("path", "invalid"), is_optional=True)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
-    try:
-        load_yaml_file(Path("invalid"), Path("projects"))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
+    with pytest.raises(SystemExit):
+        load_yaml_file(file=Path("projects", "invalid"))
 
     # Valid path, but not in yaml format
-    try:
-        load_yaml_file(Path("pyproject.toml"), Path(os.curdir))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
+    with pytest.raises(SystemExit):
+        load_yaml_file(file=Path("pyproject.toml"))
 
     # File is empty
     f = tempfile.NamedTemporaryFile()
-    try:
-        load_yaml_file(Path(f.name), Path(os.curdir))
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
+    with pytest.raises(SystemExit):
+        load_yaml_file(file=Path(f.name))
     f.close()
 
     y = mix_configuration(None, None)
@@ -195,7 +203,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert short1(key) == key
 
     short2 = services.get_celerybeat_scheduler
-    env: Dict[str, str] = {}
+    env: Dict[str, Union[None, str, int, float]] = {}
     assert short2(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required
@@ -232,28 +240,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_command("backend") == "restapi launch"
     assert services.get_default_command("bot") == "restapi bot"
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
-    assert services.get_default_command("postgres") == "psql"
+    assert services.get_default_command("registry") == "ash"
+    assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
-    # os.rename(
-    #     "submodules/do/controller/templates", "submodules/do/controller/templates.bak"
-    # )
-    # try:
-    #     Templating()
-    #     pytest.fail("No exception raised")  # pragma: no cover
-    # except SystemExit:
-    #     pass
-
-    # os.rename(
-    #     "submodules/do/controller/templates.bak", "submodules/do/controller/templates"
-    # )
 
     templating = Templating()
 
-    try:
+    with pytest.raises(SystemExit):
         templating.get_template("invalid", {})
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     cmd = Compose.split_command(None)
     assert len(cmd) == 2
@@ -295,9 +289,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert len(cmd[1]) == 1
     assert cmd[1][0] == "b c"
 
-    assert Packages.import_package("invalid") is None
-    assert Packages.package_version("invalid") is None
-
     assert Packages.get_bin_version("invalid") is None
 
     v = Packages.get_bin_version("git")
@@ -330,56 +321,17 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert isinstance(vv.version[1], int)
     assert isinstance(vv.version[2], int)
 
-    try:
-        Packages.check_python_package("invalid")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    v = Packages.check_python_package("pip")
-    assert v is not None
-
-    try:
-        Packages.check_python_package("pip", min_version="99999.99")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    try:
-        Packages.check_python_package("pip", max_version="0.0")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
-
-    v = Packages.check_python_package("pip", min_version="0.0")
-    assert v is not None
-
-    v = Packages.check_python_package("pip", max_version="99999.99")
-    assert v is not None
-
-    v = Packages.check_python_package("pip", min_version="0.0", max_version="99999.99")
-    assert v is not None
-
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("invalid")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     v = Packages.check_program("docker")
     assert v is not None
 
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("docker", min_version="99999.99")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
-    try:
+    with pytest.raises(SystemExit):
         Packages.check_program("docker", max_version="0.0")
-        pytest.fail("No exception raised")  # pragma: no cover
-    except SystemExit:
-        pass
 
     v = Packages.check_program("docker", min_version="0.0")
     assert v is not None
@@ -402,6 +354,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert Packages.get_installation_path("rapydo") is not None
     assert Packages.get_installation_path("pip") is None
 
+    assert Packages.convert_bin_to_win32("test") == "test"
+    assert Packages.convert_bin_to_win32("compose") == "compose"
+    assert Packages.convert_bin_to_win32("buildx") == "buildx"
+    assert Packages.convert_bin_to_win32("git") == "git"
+    rand_str = faker.pystr()
+    assert Packages.convert_bin_to_win32(rand_str) == rand_str
+    assert Packages.convert_bin_to_win32("docker") == "docker.exe"
+
     date_pattern = get_date_pattern()
     # just a trick to transform a glob-like expression into a valid regular expression
     date_pattern.replace(".*", "\\.+")
@@ -409,3 +369,21 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     d = faker.date("%Y_%m_%d-%H_%M_%S")
     for _ in range(20):
         assert re.match(date_pattern, f"{d}.bak")
+
+    with pytest.raises(SystemExit):
+        download("https://www.google.com/test", "")
+
+    with pytest.raises(SystemExit):
+        download(
+            "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
+            "thisisawrongchecksum",
+        )
+
+    downloaded = download(
+        "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
+        "dc07bef0d12a7a9cfd0f383452cbcb6d",
+    )
+    assert downloaded is not None
+
+    _1970 = datetime.fromtimestamp(0)
+    assert get_image_creation("invalid") == _1970

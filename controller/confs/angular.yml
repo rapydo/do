@@ -1,8 +1,11 @@
-version: "3.2"
+version: "3.8"
 
 services:
+  proxy:
+    volumes:
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
+
   frontend:
-    # restart: no
     build:
       context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
       args:
@@ -10,25 +13,30 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${FRONTEND_BUILD_MODE}:${RAPYDO_VERSION}
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate http://localhost:8080 -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
     hostname: angular
-    # user: node
-    privileged: ${DOCKER_PRIVILEGED_MODE}
     networks:
-      app_net:
+      default:
         aliases:
           - frontend.dockerized.io
     environment:
-      ACTIVATE: 1 # fixed, because it is enabled by frontend.framework variable
+      ACTIVATE: ${ACTIVATE_ANGULAR}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       APP_MODE: ${APP_MODE}
       VERSION: ${PROJECT_VERSION}
       RAPYDO_VERSION: ${RAPYDO_VERSION}
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
-      PROJECT_TITLE: ${PROJECT_TITLE}
-      PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
-      PROJECT_KEYWORDS: ${PROJECT_KEYWORDS}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+      PROJECT_TITLE: "${PROJECT_TITLE}"
+      PROJECT_DESCRIPTION: "${PROJECT_DESCRIPTION}"
+      PROJECT_KEYWORDS: "${PROJECT_KEYWORDS}"
       ENABLE_ANGULAR_SSR: ${ENABLE_ANGULAR_SSR}
+      FORCE_SSR_SERVER_MODE: ${FORCE_SSR_SERVER_MODE}
       SHOW_LOGIN: ${SHOW_LOGIN}
       ENABLE_FOOTER: ${ENABLE_FOOTER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
@@ -36,10 +44,10 @@ services:
       ALLOW_TERMS_OF_USE: ${ALLOW_TERMS_OF_USE}
       AUTH_ENABLE: ${ACTIVATE_AUTH}
       AUTH_MIN_PASSWORD_LENGTH: ${AUTH_MIN_PASSWORD_LENGTH}
-      BACKEND_URI: ${BACKEND_URI}
+      BACKEND_URI: "${BACKEND_URI}"
       BACKEND_PORT: ${BACKEND_API_PORT}
       BACKEND_HOST: ${PROJECT_DOMAIN}
-      BACKEND_PREFIX: ${BACKEND_PREFIX}
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
       BASE_HREF: ${PROJECT_DOMAIN}
       FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       PUSHPIN_HOST: ${PROJECT_DOMAIN}
@@ -66,8 +74,6 @@ services:
       CYPRESS_BACKEND_HOST: ${FLASK_HOST}
       CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
       # FROM ENV, USED BY CYPRESS TO RECORD RESULTS:
-      TRAVIS:
-      TRAVIS_BUILD_ID:
       GITHUB_ACTIONS:
       GITHUB_RUN_ID:
       CYPRESS_RECORD_KEY:
@@ -94,10 +100,10 @@ services:
       # - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - ${SUBMODULE_DIR}/rapydo-angular/utility:/rapydo
 
-      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
-      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/karma:/coverage
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/karma:/coverage
       # Output folder, configured in cypress.json
-      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/cypress:/cypress
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
       - ${SUBMODULE_DIR}/rapydo-angular/polyfills.ts:/app/polyfills.ts
@@ -108,8 +114,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
-      - ${BASE_PROJECT_DIR}/frontend:/app/app/custom
-      - ${PROJECT_DIR}/frontend:/app/app/subproject
+      - ${PROJECT_DIR}/frontend:/app/app/custom
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
@@ -118,11 +123,6 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
-      - ${BASE_PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
 
-      - ${VANILLA_DIR}/data/logs:/logs
-
-  ###############################
-  proxy:
-    volumes:
-      - ${VANILLA_DIR}/data/${COMPOSE_PROJECT_NAME}/frontend:/app
+      - ${DATA_DIR}/logs:/logs

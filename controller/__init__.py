@@ -1,13 +1,14 @@
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, NoReturn, Union
 
 from loguru import logger as log
 
-__version__ = "1.2"
+__version__ = "2.0"
 
-DATA_FOLDER = Path("data").resolve()
-LOGS_FOLDER = DATA_FOLDER.joinpath("logs")
+LOGS_FOLDER = Path("data", "logs").resolve()
+LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
 
 LOGS_FILE = None
 if LOGS_FOLDER.is_dir():
@@ -32,7 +33,12 @@ log.add(sys.stderr, colorize=colorize, format=fmt)
 
 if LOGS_FILE is not None:
     try:
-        log.add(LOGS_FILE, level="WARNING", rotation="1 week", retention="4 weeks")
+        log.add(
+            LOGS_FILE,
+            level="WARNING",
+            rotation="1 week",
+            retention=f"{LOG_RETENTION} days",
+        )
     except PermissionError as e:  # pragma: no cover
         log.error(e)
         LOGS_FILE = None
@@ -50,3 +56,18 @@ PROJECTRC = Path(".projectrc")
 DATAFILE = Path(".rapydo")
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = "confs"
+COMPOSE_FILE = Path("docker-compose.yml")
+COMPOSE_FILE_VERSION = "3.8"
+
+ComposeConfig = Dict[str, Any]
+
+SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
+
+EnvType = Union[None, str, int, float]
+
+
+def print_and_exit(
+    message: str, *args: Union[str, Path], **kwargs: Union[str, Path]
+) -> NoReturn:
+    log.critical(message, *args, **kwargs)
+    sys.exit(1)

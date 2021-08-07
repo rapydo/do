@@ -22,6 +22,7 @@ class TestApp(BaseTests):
         r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
         assert r.status_code == 200
         uuid = self.get_content(r)
+        assert isinstance(uuid, str)
 
         r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
         assert r.status_code == 409
@@ -29,6 +30,7 @@ class TestApp(BaseTests):
         r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
         assert r.status_code == 200
         content = self.get_content(r)
+        assert isinstance(content, list)
         assert len(content) > 0
 
         r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data)

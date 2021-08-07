@@ -6,8 +6,15 @@ import os
 from faker import Faker
 from git import Repo
 
-from controller import __version__
-from tests import Capture, create_project, exec_command, random_project_name
+from controller import SWARM_MODE, __version__
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+    start_registry,
+)
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
@@ -19,24 +26,41 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        init=True,
-        pull=False,
-        start=False,
     )
+    init_project(capfd)
     create_project(
         capfd=capfd,
         name=project2,
         auth="postgres",
         frontend="no",
         services=["rabbit"],
-        init=False,
-        pull=False,
-        start=False,
+    )
+
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    image = f"rapydo/backend:{__version__}"
+    exec_command(
+        capfd,
+        "start",
+        f"Missing {image} image for backend service, execute rapydo pull",
     )
 
     exec_command(
         capfd,
-        "-s rabbit pull --quiet",
+        "-e ACTIVATE_RABBIT=0 -s rabbit pull --quiet",
+        "No such service: rabbit",
+    )
+
+    exec_command(
+        capfd,
+        "-s proxy pull --quiet",
+        "No such service: proxy",
+    )
+
+    exec_command(
+        capfd,
+        "pull --quiet",
         "Base images pulled from docker hub",
     )
 
@@ -44,7 +68,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "-s xxx pull",
-        "Invalid service name: xxx",
+        "No such service: xxx",
     )
 
     # --all is useless here... added just to include the parameter in some tests.
@@ -62,10 +86,18 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 services:
   rabbit:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+    image: testbuild/rabbit:${RAPYDO_VERSION}
 
     """
         )
+
+    # Missing folder
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        # Errors from docker compose
+        " either does not exist, is not accessible, or is not a valid URL.",
+    )
 
     os.makedirs("projects/testbuild/builds/rabbit")
 
@@ -73,7 +105,7 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "No such file or directory: ",
+        "Build path not found: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
@@ -83,8 +115,8 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "Build failed, is ",
-        "projects/testbuild/builds/rabbit/Dockerfile empty?",
+        "Invalid Dockerfile, no base image found in ",
+        "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
     # Missing base image
@@ -93,17 +125,8 @@ services:
     exec_command(
         capfd,
         "-s rabbit build",
-        "No base image found ",
-        "projects/testbuild/builds/rabbit/Dockerfile, unable to build",
-    )
-
-    # Not a RAPyDo child
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
-        f.write("FROM ubuntu")
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        "No custom images to build",
+        "Invalid Dockerfile, no base image found in ",
+        "projects/testbuild/builds/rabbit/Dockerfile",
     )
 
     # Invalid RAPyDo template
@@ -115,6 +138,23 @@ services:
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
+    )
+
+    image = f"testbuild/rabbit:${__version__}"
+    exec_command(
+        capfd,
+        "start",
+        # f"Missing {image} image for rabbit service, execute rapydo build",
+        " image for rabbit service, execute rapydo build",
+    )
+
+    # Not a RAPyDo child but build is possibile
+    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+        f.write("FROM ubuntu")
+    exec_command(
+        capfd,
+        "-s rabbit build",
+        "Custom images built",
     )
 
     with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
@@ -130,17 +170,17 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
-    # Selected a very fast service to speed up tests
-    # Build custom rabbit image from pulled image
     exec_command(
         capfd,
         "-s rabbit build",
-        "Successfully built",
-        # before buildkit:
-        # f"Successfully tagged testbuild/rabbit:{__version__}",
-        # with buildkit:
         f"naming to docker.io/testbuild/rabbit:{__version__}",
         "Custom images built",
+    )
+
+    exec_command(
+        capfd,
+        f"-e ACTIVATE_RABBIT=0 -p {project2} -s rabbit build --core",
+        "No such service: rabbit",
     )
 
     # Rebuild core rabbit image => custom rabbit is now obsolete
@@ -168,113 +208,10 @@ RUN mkdir xyz
             """
   rabbit2:
     build: ${PROJECT_DIR}/builds/rabbit
-    image: ${COMPOSE_PROJECT_NAME}/rabbit:${RAPYDO_VERSION}
+    image: testbuild/rabbit:${RAPYDO_VERSION}
 
     """
         )
-
-    exec_command(
-        capfd,
-        "-s rabbit,rabbit2 build",
-        "Cannot determine build priority between rabbit and rabbit2",
-        "Removed redundant builds from ['rabbit', 'rabbit2'] -> ['rabbit2']",
-    )
-
-    # Let's test builds with running containers
-    exec_command(capfd, "-s rabbit start")
-
-    you_asked = f"You asked to build testbuild/rabbit:{__version__}"
-    but_running = "but the following containers are running: rabbit"
-    do_you_want_to = "Do you want to continue? y/n:"
-
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Unknown response invalid, respond yes or no",
-        "Build aborted",
-        input_text="invalid\nno\n",
-    )
-
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Build aborted",
-        input_text="no\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Build aborted",
-        input_text="n\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Build aborted",
-        input_text="N\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Build aborted",
-        input_text="NO\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Successfully built",
-        input_text="y\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Successfully built",
-        input_text="yes\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Successfully built",
-        input_text="Y\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build",
-        you_asked,
-        but_running,
-        do_you_want_to,
-        "Successfully built",
-        input_text="YES\n",
-    )
-    exec_command(
-        capfd,
-        "-s rabbit build --yes",
-        "Successfully built",
-    )
 
     fin = open("submodules/build-templates/backend/Dockerfile", "a")
     fin.write("xyz")
@@ -290,4 +227,31 @@ RUN mkdir xyz
         "Update it with: rapydo --services backend pull",
     )
 
-    exec_command(capfd, "remove --all", "Stack removed")
+    exec_command(capfd, "remove", "Stack removed")
+
+    # Add a third service without a build to verify that pull includes it
+    # to be the base image even if defined in custom part
+    with open("projects/testbuild/confs/commons.yml", "a") as f:
+        f.write(
+            """
+  rabbit3:
+    image: alpine:latest
+    environment:
+      ACTIVATE: 1
+    """
+        )
+
+    exec_command(
+        capfd,
+        "-s rabbit3 pull --quiet",
+        "Base images pulled from docker hub",
+    )
+
+    # Now this should fail because pull does not include custom services
+    exec_command(
+        capfd,
+        "-s rabbit3 start",
+        "Stack started",
+    )
+
+    exec_command(capfd, "remove", "Stack removed")

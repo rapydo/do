@@ -1,10 +1,8 @@
-import sys
-from collections import OrderedDict
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 from glom import glom
 
-from controller import log
+from controller import ComposeConfig, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
@@ -18,7 +16,11 @@ def get_services(
     if excluded_services_list:
 
         splitted = excluded_services_list.split(",")
-        return sorted([s for s in default if s not in splitted])
+        for service in splitted:
+            if service not in default:
+                print_and_exit("No such service: {}", service)
+
+        return sorted(s for s in default if s not in splitted)
 
     return sorted(default)
 
@@ -42,20 +44,17 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
+def find_active(services: ComposeConfig) -> List[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
     """
 
     dependencies: Dict[str, List[str]] = {}
-    all_services: Dict[str, List[Any]] = {}
     base_actives: List[str] = []
 
-    for service in services:
+    for name, service in services.items():
 
-        name = service.get("name")
-        all_services[name] = service
         dependencies[name] = list(service.get("depends_on", {}).keys())
 
         ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
@@ -66,27 +65,12 @@ def find_active(services: List[Any]) -> Tuple[Dict[str, List[Any]], List[str]]:
     log.debug("Base active services = {}", base_actives)
     log.debug("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
-    return all_services, active_services
-
-
-def apply_variables(
-    dictionary: "OrderedDict[str, Any]", variables: Dict[str, Any]
-) -> Dict[str, Any]:
-
-    new_dict: Dict[str, Any] = {}
-    for key, value in dictionary.items():
-        if isinstance(value, str) and value.startswith("$$"):
-            value = variables.get(value.lstrip("$"), None)
-        else:
-            pass
-        new_dict[key] = value
-
-    return new_dict
+    return active_services
 
 
 vars_to_services_mapping: Dict[str, List[str]] = {
-    "CELERYUI_USER": ["flower"],
-    "CELERYUI_PASSWORD": ["flower"],
+    "FLOWER_USER": ["flower"],
+    "FLOWER_PASSWORD": ["flower"],
     "RABBITMQ_USER": ["rabbit"],
     "RABBITMQ_PASSWORD": ["rabbit"],
     "REDIS_PASSWORD": ["redis"],
@@ -150,7 +134,7 @@ def normalize_placeholder_variable(key: str) -> str:
     return key
 
 
-def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
+def get_celerybeat_scheduler(env: Dict[str, EnvType]) -> str:
 
     if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
         return "Unknown"
@@ -169,43 +153,40 @@ def get_celerybeat_scheduler(env: Dict[str, str]) -> str:
     return "Unknown"
 
 
-def check_rabbit_password(pwd: Optional[str]) -> None:
+def check_rabbit_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["£", "§", "”", "’"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in RABBITMQ_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make RabbitMQ crash at startup",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
-def check_redis_password(pwd: Optional[str]) -> None:
+def check_redis_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
-def check_mongodb_password(pwd: Optional[str]) -> None:
+def check_mongodb_password(pwd: Optional[EnvType]) -> None:
     if pwd:
         invalid_characters = ["#"]
-        if any([c in pwd for c in invalid_characters]):
+        if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in MONGO_PASSWORD.")
-            log.critical(
+            print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",
                 " ".join(invalid_characters),
             )
-            sys.exit(1)
 
 
 def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
@@ -223,6 +204,9 @@ def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
     if service == "neo4j":
         return "neo4j"
 
+    if service == "rabbit":
+        return "rabbitmq"
+
     return None
 
 
@@ -238,8 +222,12 @@ def get_default_command(service: str) -> str:
         return "bin/cypher-shell"
 
     if service == "postgres":
-        return "psql"
+        return 'sh -c \'psql -U "$POSTGRES_USER" "$POSTGRES_DEFAULT_DB"\''
 
     if service == "mariadb":
         return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''
+
+    if service == "registry":
+        return "ash"
+
     return "bash"

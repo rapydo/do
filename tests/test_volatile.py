@@ -1,16 +1,18 @@
 """
 This module will test the volatile command
 """
-import signal
+# import signal
 
 from faker import Faker
 
-from tests import (
+from tests import (  # signal_handler,
     Capture,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
-    signal_handler,
+    start_project,
 )
 
 
@@ -21,27 +23,18 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="postgres",
         frontend="angular",
-        init=True,
-        pull=True,
-        start=True,
     )
+    init_project(capfd)
 
     exec_command(
         capfd,
-        "volatile backend hostname",
-        "Bind for 0.0.0.0:8080 failed: port is already allocated",
+        "volatile backend",
+        "image for backend service, execute rapydo pull",
     )
 
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
-    exec_command(
-        capfd,
-        "-s backend start --no-detach",
-        # "REST API backend server is ready to be launched",
-        "Time is up",
-    )
+    pull_images(capfd)
+    start_project(capfd)
 
-    # This is because after start --no-detach the container in still in exited status
     exec_command(
         capfd,
         "volatile backend hostname",
@@ -79,11 +72,23 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "no matching entries in passwd file",
     )
 
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(4)
     exec_command(
         capfd,
         "volatile maintenance",
-        # "Maintenance server is up and waiting for connections",
-        "Time is up",
+        "image for proxy service, execute rapydo pull",
     )
+
+    exec_command(
+        capfd,
+        "-s proxy -e ACTIVATE_PROXY=1 pull",
+        "Base images pulled from docker hub",
+    )
+
+    # signal.signal(signal.SIGALRM, signal_handler)
+    # signal.alarm(4)
+    # exec_command(
+    #     capfd,
+    #     "volatile maintenance",
+    #     # "Maintenance server is up and waiting for connections",
+    #     "Time is up",
+    # )

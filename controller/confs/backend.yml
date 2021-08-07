@@ -1,36 +1,16 @@
-version: "3.2"
+version: "3.8"
 
 # #####################
 # VOLUMES
 # #####################
 
 volumes:
-  secrets:
+  registry:
     driver: local
-  rabbitdata:
-    driver: local
-  sqldata:
-    driver: local
-  mariadb:
-    driver: local
-  graphdata:
-    driver: local
-  mongodata:
-    driver: local
-  data_imports:
-    driver: local
-  pureftpd:
-    driver: local
-  letsencrypt_certs:
-    driver: local
-  ssl_dhparam:
-    driver: local
-  flower_db:
-    driver: local
-  celerybeat:
-    driver: local
-  redisdata:
-    driver: local
+    # make it common to all projects
+    name: registry
+
+# All other volumes are moved on volumes_local.yml and volumes_nfs.yml
 
 # #####################
 # NETWORKS
@@ -38,43 +18,35 @@ volumes:
 
 networks:
   default:
+    name: ${COMPOSE_PROJECT_NAME}_${DEPLOY_ENGINE}_default
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  app_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # app_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  proxy_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # proxy_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  worker_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # worker_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  ftp_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
+  # ftp_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  db_net:
-    driver_opts:
-      com.docker.network.driver.mtu: ${NETWORK_MTU}
-    # # driver: bridge
-    # ipam:
-    #   driver: default
-    #   config:
-    #     # Note: use this configuration to match inside internal rules
-    #     # TOFIX: make this an env variable
-    #     - subnet: ${DB_SUBNET}/16
+  # db_net:
+  #   driver_opts:
+  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
 
 # #####################
 # SERVICES
 # #####################
+
 services:
-  ########################
-  ###  MAIN CONTAINER  ###
-  ########################
   backend:
     # restart: on-failure:5
     restart: always
@@ -84,13 +56,22 @@ services:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
+    # image: ${REGISTRY_HOST}:${REGISTRY_PORT}/rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    healthcheck:
+      test: ${HEALTHCHECK_BACKEND_CMD}
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     hostname: backend-server
-    privileged: ${DOCKER_PRIVILEGED_MODE}
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
+      LOG_RETENTION: ${LOG_RETENTION}
+      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
@@ -101,26 +82,26 @@ services:
 
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
       FLASK_ENV: ${FLASK_ENV}
+      API_AUTOSTART: ${API_AUTOSTART}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
       GUNICORN_WORKERS: ${GUNICORN_WORKERS}
       GUNICORN_WORKERS_PER_CORE: ${GUNICORN_WORKERS_PER_CORE}
       GUNICORN_MAX_NUM_WORKERS: ${GUNICORN_MAX_NUM_WORKERS}
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
       UPLOAD_PATH: ${UPLOAD_PATH}
       DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
 
-      # enable /auth/login and /api/admin/users methods
+      # enable /auth/login and /api/admin/users methods
       MAIN_LOGIN_ENABLE: 1
       # base the user/role mechanism on some database
       AUTH_ENABLE: ${ACTIVATE_AUTH}
       AUTH_SERVICE: ${AUTH_SERVICE}
       AUTH_MIN_PASSWORD_LENGTH: ${AUTH_MIN_PASSWORD_LENGTH}
       AUTH_FORCE_FIRST_PASSWORD_CHANGE: ${AUTH_FORCE_FIRST_PASSWORD_CHANGE}
-      AUTH_VERIFY_PASSWORD_STRENGTH: ${AUTH_VERIFY_PASSWORD_STRENGTH}
       AUTH_MAX_PASSWORD_VALIDITY: ${AUTH_MAX_PASSWORD_VALIDITY}
       AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: ${AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER}
       AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
@@ -136,6 +117,7 @@ services:
       ALLOW_ACCESS_TOKEN_PARAMETER: ${ALLOW_ACCESS_TOKEN_PARAMETER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
+      PROXIED_CONNECTION: ${PROXIED_CONNECTION}
 
       REGISTRATION_NOTIFICATIONS: ${REGISTRATION_NOTIFICATIONS}
       DEBUG_ENDPOINTS: 0
@@ -161,6 +143,8 @@ services:
       NEO4J_HOST: ${NEO4J_HOST}
       NEO4J_PORT: ${NEO4J_BOLT_PORT}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      # Experimental... to be tuned / configured
+      NEOMODEL_SLOW_QUERIES: "0.09"
 
       MONGO_ENABLE: ${ACTIVATE_MONGODB}
       MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
@@ -168,8 +152,8 @@ services:
       MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_USER: "${MONGO_USER}"
+      MONGO_PASSWORD: "${MONGO_PASSWORD}"
       MONGO_DATABASE: ${MONGO_DATABASE}
 
       CELERY_ENABLE: ${ACTIVATE_CELERY}
@@ -179,7 +163,6 @@ services:
       CELERY_BROKER: ${CELERY_BROKER}
       CELERY_BACKEND: ${CELERY_BACKEND}
       CELERYBEAT_ENABLED: ${ACTIVATE_CELERYBEAT}
-      # CELERYBEAT_ENABLE_CONNECTOR: ${CELERYBEAT_ENABLE_CONNECTOR}
 
       RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_ENABLE_CONNECTOR: ${RABBITMQ_ENABLE_CONNECTOR}
@@ -213,17 +196,17 @@ services:
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
       SMTP_EXPIRATION_TIME: ${SMTP_EXPIRATION_TIME}
       SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
-      SMTP_ADMIN: ${SMTP_ADMIN}
-      SMTP_NOREPLY: ${SMTP_NOREPLY}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_ADMIN: "${SMTP_ADMIN}"
+      SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_PORT: "${SMTP_PORT}"
+      SMTP_USERNAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
 
       TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
-      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
-      TELEGRAM_USERS: ${TELEGRAM_USERS}
+      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
+      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
+      TELEGRAM_USERS: "${TELEGRAM_USERS}"
       TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
       TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
       TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
@@ -231,7 +214,7 @@ services:
       TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
       TELETHON_SESSION: ${TELETHON_SESSION}
 
-      SENTRY_URL: ${SENTRY_URL}
+      SENTRY_URL: "${SENTRY_URL}"
       RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
       MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
 
@@ -240,7 +223,7 @@ services:
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
       - secrets:${APP_SECRETS}
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       - data_imports:${DATA_IMPORT_FOLDER}
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
@@ -253,18 +236,14 @@ services:
       - ${SUBMODULE_DIR}/http-api/tests:/code/tests
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
-      - ${VANILLA_DIR}/data/uploads:/uploads
+      # Projects can then map a different folder and change the UPLOAD_PATH accordingly
+      - ${DATA_DIR}/uploads:/uploads
     networks:
-      app_net:
-        aliases:
-          - ${FLASK_HOST}
-      db_net:
-      worker_net:
-      proxy_net:
+      default:
         aliases:
           - ${FLASK_HOST}
 
@@ -278,14 +257,23 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
+    working_dir: /etc/nginx
+    # logging:
+    #   driver: syslog
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate --certificate=/etc/letsencrypt/local_client.crt --private-key=/etc/letsencrypt/local_client.key http://localhost -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     networks:
-      proxy_net:
+      default:
         aliases:
           - ${PROXY_HOST}
-      app_net:
+
     ports:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
@@ -296,23 +284,25 @@ services:
       ACTIVATE: ${ACTIVATE_PROXY}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
-      SMTP_ADMIN: ${SMTP_ADMIN}
+      SMTP_ADMIN: "${SMTP_ADMIN}"
       DEFAULT_DHLEN: ${DEFAULT_DHLEN}
       FRONTEND: ${FRONTEND_FRAMEWORK}
       UNSAFE_EVAL: ${SET_UNSAFE_EVAL}
       UNSAFE_INLINE: ${SET_UNSAFE_INLINE}
       STYLE_UNSAFE_INLINE: ${SET_STYLE_UNSAFE_INLINE}
-      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN}
-      CSP_SCRIPT_SRC: ${SET_CSP_SCRIPT_SRC}
-      CSP_IMG_SRC: ${SET_CSP_IMG_SRC}
-      CSP_FONT_SRC: ${SET_CSP_FONT_SRC}
-      CSP_CONNECT_SRC: ${SET_CSP_CONNECT_SRC}
+      CORS_ALLOWED_ORIGIN: "${CORS_ALLOWED_ORIGIN}"
+      CSP_SCRIPT_SRC: "${SET_CSP_SCRIPT_SRC}"
+      CSP_IMG_SRC: "${SET_CSP_IMG_SRC}"
+      CSP_FONT_SRC: "${SET_CSP_FONT_SRC}"
+      CSP_CONNECT_SRC: "${SET_CSP_CONNECT_SRC}"
+      SSL_VERIFY_CLIENT: "${SSL_VERIFY_CLIENT}"
       MAX_REQUESTS_PER_SECOND_AUTH: ${SET_MAX_REQUESTS_PER_SECOND_AUTH}
+      MAX_REQUESTS_BURST_AUTH: ${SET_MAX_REQUESTS_BURST_AUTH}
       MAX_REQUESTS_PER_SECOND_API: ${SET_MAX_REQUESTS_PER_SECOND_API}
+      MAX_REQUESTS_BURST_API: ${SET_MAX_REQUESTS_BURST_API}
       MAX_REQUESTS_PER_SECOND_ASSETS: ${SET_MAX_REQUESTS_PER_SECOND_ASSETS}
-      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
-    # depends_on:
-    #   - backend
+      MAX_REQUESTS_BURST_ASSETS: ${SET_MAX_REQUESTS_BURST_ASSETS}
+      GA_TRACKING_CODE: "${GA_TRACKING_CODE}"
 
   maintenance:
     # restart: always
@@ -326,13 +316,12 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     networks:
-      proxy_net:
+      default:
         aliases:
           - ${PROXY_HOST}
-      app_net:
+
     ports:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
       - ${PROXY_PROD_PORT}:443 # 443 SSL
@@ -352,28 +341,40 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/postgres:${RAPYDO_VERSION}
-
     command: postgres -c max_connections=${POSTGRES_MAX_CONNECTIONS} -c shared_buffers=${POSTGRES_SHARED_BUFFERS} -c wal_buffers=${POSTGRES_WAL_BUFFERS} -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE} -c work_mem=${POSTGRES_WORK_MEM} -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM} -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY} -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES} -c max_parallel_workers=${POSTGRES_MAX_WORKER_PROCESSES}
+    healthcheck:
+      test: "pg_isready -U $$POSTGRES_USER"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 20s
+      retries: 3
+      start_period: 5m
     volumes:
       - sqldata:/var/lib/postgresql
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
       POSTGRES_USER: "${ALCHEMY_USER}"
       POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
+      POSTGRES_DEFAULT_DB: ${ALCHEMY_DB}
       POSTGRES_DBS: ${ALCHEMY_DBS}
       PGDATA: /var/lib/postgresql/current
     networks:
-      db_net:
+      default:
         aliases:
           - ${ALCHEMY_HOST}
 
   mariadb:
     restart: always
-    image: mariadb:10.5.9
+    image: mariadb:10.6.2
+    healthcheck:
+      test: "mysqladmin ping -h localhost"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 20s
+      retries: 3
+      start_period: 5m
     volumes:
       - mariadb:/var/lib/mysql
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_MYSQL}
       # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
@@ -382,7 +383,7 @@ services:
       MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
       MYSQL_DATABASE: ${ALCHEMY_DB}
     networks:
-      db_net:
+      default:
         aliases:
           - ${ALCHEMY_HOST}
 
@@ -395,14 +396,23 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/neo4j:${RAPYDO_VERSION}
+
+    healthcheck:
+      # test: ["CMD", "cypher-shell", "'match (n) WITH n LIMIT 1 return count(n)'"]
+      test: "cypher-shell 'match (n) WITH n LIMIT 1 return count(n)'"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     volumes:
       - graphdata:/data
       # it is used to enable SSL in production mode
-      - letsencrypt_certs:/ssl
+      - ssl_certs:/ssl
       - data_imports:/var/lib/neo4j/import
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     networks:
-      db_net:
+      default:
         aliases:
           - ${NEO4J_HOST}
     environment:
@@ -413,24 +423,24 @@ services:
       NEO4J_USERNAME: ${NEO4J_USER}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       SECURE_FILE_PERMISSIONS: "yes"
-      NEO4J_dbms_allow__upgrade: ${NEO4J_ALLOW_UPGRADE}
+      NEO4J_dbms_allow__upgrade: "${NEO4J_ALLOW_UPGRADE}"
       NEO4J_dbms_memory_heap_max__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_heap_initial__size: ${NEO4J_HEAP_SIZE}
       NEO4J_dbms_memory_pagecache_size: ${NEO4J_PAGECACHE_SIZE}
       # Useful in case of corrupted transaction logs
-      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: ${NEO4J_RECOVERY_MODE}
-      NEO4J_dbms_recovery_fail__on__missing__files: ${NEO4J_RECOVERY_MODE}
+      NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "${NEO4J_RECOVERY_MODE}"
+      NEO4J_dbms_recovery_fail__on__missing__files: "${NEO4J_RECOVERY_MODE}"
 
       # If the following variables will ever change, fix the check_ssl.sh script in neo4j build
-      NEO4J_dbms_ssl_policy_bolt_enabled: ${NEO4J_SSL_ENABLED}
-      NEO4J_dbms_ssl_policy_https_enabled: ${NEO4J_SSL_ENABLED}
+      NEO4J_dbms_ssl_policy_bolt_enabled: "${NEO4J_SSL_ENABLED}"
+      NEO4J_dbms_ssl_policy_https_enabled: "${NEO4J_SSL_ENABLED}"
       NEO4J_dbms_ssl_policy_bolt_base__directory: /ssl/real
       NEO4J_dbms_ssl_policy_https_base__directory: /ssl/real
       NEO4J_dbms_ssl_policy_bolt_private__key: privkey1.pem
       NEO4J_dbms_ssl_policy_https_private__key: privkey1.pem
       NEO4J_dbms_ssl_policy_bolt_public__certificate: fullchain1.pem
       NEO4J_dbms_ssl_policy_https_public__certificate: fullchain1.pem
-      NEO4J_dbms_connector_https_enabled: ${NEO4J_SSL_ENABLED}
+      NEO4J_dbms_connector_https_enabled: "${NEO4J_SSL_ENABLED}"
       NEO4J_dbms_connector_bolt_listen__address: ":7687"
       NEO4J_dbms_connector_http_listen__address: ":7474"
       NEO4J_dbms_connector_https_listen__address: ":7473"
@@ -452,10 +462,6 @@ services:
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
 
-    # ports:
-    #   - 9090:${NEO4J_WEB_INTERFACE_PORT}
-    #   - 7687:7687
-
   mongodb:
     restart: always
     build:
@@ -465,10 +471,16 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/mongodb:${RAPYDO_VERSION}
+    healthcheck:
+      test: 'mongo --eval ''db.runCommand("ping").ok'' 127.0.0.1:27017/test --quiet'
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
     volumes:
       - mongodata:/data/db
     networks:
-      db_net:
+      default:
         aliases:
           - ${MONGO_HOST}
     environment:
@@ -476,8 +488,8 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD}"
 
   #########################
   ###  QUEUE MANAGEMENT ###
@@ -493,19 +505,27 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
-    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    command: ${CELERY_AUTORELOAD} celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    healthcheck:
+      test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -d celery@$$PROJECT_NAME-$$HOSTNAME"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
 
     # user: developer
     working_dir: /code
     environment:
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
+      LOG_RETENTION: ${LOG_RETENTION}
+      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
       ACTIVATE: ${ACTIVATE_CELERY}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       UPLOAD_PATH: ${UPLOAD_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
       FORCE_PRODUCTION_TESTS: ${FORCE_PRODUCTION_TESTS}
@@ -563,8 +583,8 @@ services:
       MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_USER: "${MONGO_USER}"
+      MONGO_PASSWORD: "${MONGO_PASSWORD}"
       MONGO_DATABASE: ${MONGO_DATABASE}
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
@@ -578,17 +598,17 @@ services:
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
       SMTP_EXPIRATION_TIME: ${SMTP_EXPIRATION_TIME}
       SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
-      SMTP_ADMIN: ${SMTP_ADMIN}
-      SMTP_NOREPLY: ${SMTP_NOREPLY}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_ADMIN: "${SMTP_ADMIN}"
+      SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_PORT: "${SMTP_PORT}"
+      SMTP_USERNAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -597,12 +617,11 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
-      - ${VANILLA_DIR}/data/uploads:/uploads
+      - ${DATA_DIR}/uploads:/uploads
     networks:
-      db_net:
-      worker_net:
+      default:
 
   celery-beat:
     restart: always
@@ -615,18 +634,26 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     hostname: celery-beat
     entrypoint: docker-entrypoint-celery
-    command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --schedule /beat/celerybeat-schedule --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    command: celery --app restapi.connectors.celery.beat.celery_app beat --pidfile /tmp/celerybeat.pid --loglevel DEBUG --max-interval 30 --scheduler ${CELERYBEAT_SCHEDULER}
+    healthcheck:
+      test: "pgrep --pidfile /tmp/celerybeat.pid"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
 
     # user: developer
     working_dir: /code
     environment:
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
+      LOG_RETENTION: ${LOG_RETENTION}
+      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
       ACTIVATE: ${ACTIVATE_CELERYBEAT}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       DOMAIN: ${PROJECT_DOMAIN}
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
 
@@ -635,14 +662,14 @@ services:
       CELERYBEAT_SCHEDULER: ${CELERYBEAT_SCHEDULER}
 
       CELERY_BROKER: ${CELERY_BROKER}
+
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
-
-      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
 
       REDIS_ENABLE: ${ACTIVATE_REDIS}
       REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
@@ -655,26 +682,25 @@ services:
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_USER: "${MONGO_USER}"
+      MONGO_PASSWORD: "${MONGO_PASSWORD}"
       MONGO_DATABASE: ${MONGO_DATABASE}
 
       PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
       PUSHPIN_HOST: ${PUSHPIN_HOST}
       PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
-      SMTP_ADMIN: ${SMTP_ADMIN}
-      SMTP_NOREPLY: ${SMTP_NOREPLY}
-      SMTP_HOST: ${SMTP_HOST}
-      SMTP_PORT: ${SMTP_PORT}
-      SMTP_USERNAME: ${SMTP_USERNAME}
-      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_ADMIN: "${SMTP_ADMIN}"
+      SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_PORT: "${SMTP_PORT}"
+      SMTP_USERNAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
     volumes:
-      - celerybeat:/beat
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
@@ -683,10 +709,9 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
     networks:
-      db_net:
-      worker_net:
+      default:
 
   rabbit:
     restart: always
@@ -697,6 +722,13 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/rabbitmq:${RAPYDO_VERSION}
+    healthcheck:
+      test: "rabbitmq-diagnostics status"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     hostname: rabbit
     environment:
       # CAN BE locally changed by ovverride with:
@@ -707,41 +739,52 @@ services:
       RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
 
       # If the following variables will ever change, fix the check_ssl.sh script in rabbitmq build
-      RABBITMQ_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
-      RABBITMQ_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
-      RABBITMQ_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
-      RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: ${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}
+      RABBITMQ_SSL_CACERTFILE: "${RABBITMQ_SSL_CERTFILE}"
+      RABBITMQ_SSL_CERTFILE: "${RABBITMQ_SSL_CERTFILE}"
+      RABBITMQ_SSL_KEYFILE: "${RABBITMQ_SSL_KEYFILE}"
+      RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}"
 
-      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: ${RABBITMQ_SSL_CERTFILE}
-      RABBITMQ_MANAGEMENT_SSL_CERTFILE: ${RABBITMQ_SSL_CERTFILE}
-      RABBITMQ_MANAGEMENT_SSL_KEYFILE: ${RABBITMQ_SSL_KEYFILE}
-      RABBITMQ_MANAGEMENT_SSL_FAIL_IF_NO_PEER_CERT: ${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}
+      RABBITMQ_MANAGEMENT_SSL_CACERTFILE: "${RABBITMQ_SSL_CERTFILE}"
+      RABBITMQ_MANAGEMENT_SSL_CERTFILE: "${RABBITMQ_SSL_CERTFILE}"
+      RABBITMQ_MANAGEMENT_SSL_KEYFILE: "${RABBITMQ_SSL_KEYFILE}"
+      RABBITMQ_MANAGEMENT_SSL_FAIL_IF_NO_PEER_CERT: "${RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT}"
 
-      RABBITMQ_CTL_ERL_ARGS: "-proto_dist inet_tls"
+      RABBITMQ_CTL_ERL_ARGS: "${RABBITMQ_CTL_ERL_ARGS}"
 
     volumes:
       - rabbitdata:/var/lib/rabbitmq
-      - letsencrypt_certs:/ssl
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ssl_certs:/ssl
+      - ${DATA_DIR}/backup:/backup
     networks:
-      worker_net:
+      default:
         aliases:
           - ${RABBITMQ_HOST}
 
   redis:
     restart: always
-    image: redis:6.2.2
+    image: redis:6.2.4
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    healthcheck:
+      test: "redis-cli --pass $$REDIS_PASSWORD -h 127.0.0.1 ping"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
     volumes:
       - redisdata:/data
-      - ${VANILLA_DIR}/data/backup:/backup
+      - ${DATA_DIR}/backup:/backup
     networks:
-      db_net:
+      default:
         aliases:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  #################
+  ###    BOT    ###
+  #################
 
   bot:
     restart: always
@@ -754,27 +797,28 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-bot
     hostname: telegram-bot
-    privileged: ${DOCKER_PRIVILEGED_MODE}
     environment:
       ACTIVATE: ${ACTIVATE_TELEGRAM}
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
+      LOG_RETENTION: ${LOG_RETENTION}
+      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       PYTHON_PATH: ${PYTHON_PATH}
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       DOMAIN: ${PROJECT_DOMAIN}
       TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
-      TELEGRAM_ADMINS: ${TELEGRAM_ADMINS}
-      TELEGRAM_USERS: ${TELEGRAM_USERS}
+      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
+      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
+      TELEGRAM_USERS: "${TELEGRAM_USERS}"
       TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
       TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
-      TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
-      TELEGRAM_APP_ID: ${TELEGRAM_APP_ID}
-      TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
-      TELETHON_SESSION: ${TELETHON_SESSION}
+      TELEGRAM_APP_HASH: "${TELEGRAM_APP_HASH}"
+      TELEGRAM_APP_ID: "${TELEGRAM_APP_ID}"
+      TELEGRAM_BOTNAME: "${TELEGRAM_BOTNAME}"
+      TELETHON_SESSION: "${TELETHON_SESSION}"
 
     volumes:
       # configuration files
@@ -789,9 +833,9 @@ services:
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
     networks:
-      app_net:
+      default:
 
   ##########################
   ### SERVICE INTERFACES ###
@@ -806,60 +850,68 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+
     entrypoint: docker-entrypoint-celery
     # user: root
-    command: flower --basic_auth=${CELERYUI_USER}:${CELERYUI_PASSWORD} --port=${CELERYUI_PORT} --persistent --db=${CELERYUI_DBDIR}/flower ${CELERYUI_SSL_OPTIONS} -A restapi.connectors.celery.worker.celery_app -n flower_monitor
+    command: celery --app restapi.connectors.celery.worker.celery_app flower --basic_auth=${FLOWER_USER}:${FLOWER_PASSWORD} --port=${FLOWER_PORT} --persistent --state_save_interval=10000 --db=${FLOWER_DBDIR}/flower ${FLOWER_SSL_OPTIONS} -n flower_monitor
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate $$FLOWER_PROTOCOL://$$FLOWER_USER:$$FLOWER_PASSWORD@localhost:$$FLOWER_PORT -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
     hostname: flower
     working_dir: /code
     expose:
-      - ${CELERYUI_PORT}
+      - ${FLOWER_PORT}
     ports:
-      - ${CELERYUI_PORT}:${CELERYUI_PORT}
+      - ${FLOWER_PORT}:${FLOWER_PORT}
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
       - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - letsencrypt_certs:/etc/letsencrypt
+      - ssl_certs:/etc/letsencrypt
       # Vanilla code
       - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
       # From project, if any
       - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # it is used to enable SSL in production mode
-      - letsencrypt_certs:/ssl
+      - ssl_certs:/ssl
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
-      - ${VANILLA_DIR}/data/logs:/logs
+      - ${DATA_DIR}/logs:/logs
       # DB
-      - flower_db:${CELERYUI_DBDIR}
+      - flower_db:${FLOWER_DBDIR}
     networks:
-      db_net:
-      worker_net:
-    # depends_on:
-    #   - rabbit
+      default:
+
     environment:
       APP_MODE: ${APP_MODE}
       LOGURU_LEVEL: ${LOG_LEVEL}
-      ACTIVATE: ${ACTIVATE_CELERYUI}
+      LOG_RETENTION: ${LOG_RETENTION}
+      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
+      ACTIVATE: ${ACTIVATE_FLOWER}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
 
-      VANILLA_PACKAGE: ${COMPOSE_PROJECT_NAME}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
+      DOMAIN: ${PROJECT_DOMAIN}
 
       CELERY_ENABLE: 1
 
       CELERY_BROKER: ${CELERY_BROKER}
+
+      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_SSL_ENABLED: ${RABBITMQ_SSL_ENABLED}
-
-      RABBITMQ_ENABLE: ${ACTIVATE_RABBIT}
 
       REDIS_ENABLE: ${ACTIVATE_REDIS}
       REDIS_ENABLE_CONNECTOR: ${REDIS_ENABLE_CONNECTOR}
@@ -872,13 +924,14 @@ services:
       CELERY_BACKEND: ${CELERY_BACKEND}
       MONGO_HOST: ${MONGO_HOST}
       MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_USER: "${MONGO_USER}"
+      MONGO_PASSWORD: "${MONGO_PASSWORD}"
 
-      CELERYUI_PORT: ${CELERYUI_PORT}
-      CELERYUI_USER: ${CELERYUI_USER}
-      CELERYUI_PASSWORD: ${CELERYUI_PASSWORD}
-      CELERYUI_DBDIR: ${CELERYUI_DBDIR}
+      FLOWER_PORT: ${FLOWER_PORT}
+      FLOWER_USER: "${FLOWER_USER}"
+      FLOWER_PASSWORD: "${FLOWER_PASSWORD}"
+      FLOWER_DBDIR: ${FLOWER_DBDIR}
+      FLOWER_PROTOCOL: ${FLOWER_PROTOCOL}
 
   swaggerui:
     build:
@@ -896,8 +949,7 @@ services:
       PROJECT_TITLE: ${PROJECT_TITLE}
 
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     ports:
       - 7777:8080
 
@@ -913,16 +965,15 @@ services:
     image: rapydo/adminer:${RAPYDO_VERSION}
     # user: adminer
     networks:
-      db_net:
+      default:
     environment:
-      ACTIVATE: ${ACTIVATE_SQLALCHEMYUI}
+      ACTIVATE: ${ACTIVATE_ADMINER}
       APP_MODE: ${APP_MODE}
-      # https://github.com/vrana/adminer/tree/master/designs
+      # https://github.com/vrana/adminer/tree/master/designs
       # some choices: brade, ng9, pepa-linha
       ADMINER_DESIGN: pepa-linha
     volumes:
-      - letsencrypt_certs:/etc/letsencrypt
-      - ssl_dhparam:/etc/nginx/ssl/
+      - ssl_certs:/etc/letsencrypt
     ports:
       - 7777:80
 
@@ -943,7 +994,7 @@ services:
       PUBLICHOST: ${PROJECT_DOMAIN}
       ADDED_FLAGS: -d -d
     networks:
-      ftp_net:
+      default:
 
   ###################
   ### SMTP SERVER  ###
@@ -951,12 +1002,17 @@ services:
   smtp:
     restart: always
     image: namshi/smtp:latest
-    # volumes:
-    #   - ...
+    healthcheck:
+      # Display the number of email messages in the queue
+      test: "exim -bpc"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
-      app_net:
+      default:
         aliases:
           - ${SMTP_SERVER_HOST}
 
@@ -966,14 +1022,11 @@ services:
 
   pushpin:
     restart: always
-    image: fanout/pushpin:1.31.0
+    image: fanout/pushpin:1.32.2
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
-      app_net:
-        aliases:
-          - ${PUSHPIN_HOST}
-      worker_net:
+      default:
         aliases:
           - ${PUSHPIN_HOST}
 
@@ -981,3 +1034,44 @@ services:
       - 7999:7999
     volumes:
       - ${SUBMODULE_DIR}/do/controller/confs/pushpin/routes:/etc/pushpin/routes
+
+  #############################
+  ### LOCAL DOCKER REGISTRY ###
+  #############################
+
+  registry:
+    restart: always
+    build: ${SUBMODULE_DIR}/build-templates/registry
+    image: rapydo/registry:${RAPYDO_VERSION}
+    hostname: registry
+    # make it common to all projects
+    container_name: registry
+    healthcheck:
+      test: "wget -t 1 --quiet --no-check-certificate http://localhost:5001/debug/health -O - > /dev/null"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+
+    ports:
+      - 5000:5000
+    environment:
+      ACTIVATE: ${ACTIVATE_REGISTRY}
+      # Used to issue the certificate
+      REGISTRY_HOST: ${REGISTRY_HOST}
+      REGISTRY_USERNAME: ${REGISTRY_USERNAME}
+      REGISTRY_PASSWORD: ${REGISTRY_PASSWORD}
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      # REGISTRY_HTTP_ADDR=0.0.0.0:5000
+      REGISTRY_HTTP_TLS_CERTIFICATE: /var/lib/registry/registry.crt
+      REGISTRY_HTTP_TLS_KEY: /var/lib/registry/registry.key
+      REGISTRY_HTTP_DEBUG_ADDR: localhost:5001
+      REGISTRY_HTTP_SECRET: ${REGISTRY_HTTP_SECRET}
+      # VIRTUAL_HOST: docker.domain.com
+      # VIRTUAL_PROTO: https
+      # VIRTUAL_PORT: 5000
+
+    volumes:
+      - registry:/var/lib/registry

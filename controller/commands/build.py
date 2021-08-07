@@ -1,9 +1,17 @@
+from pathlib import Path
+from typing import List, Set
+
 import typer
 
-from controller import log
-from controller.app import Application, Configuration
-from controller.builds import locate_builds, remove_redundant_services
-from controller.compose import Compose
+from controller import COMPOSE_FILE, SWARM_MODE, log
+from controller.app import Application
+from controller.deploy.builds import (
+    find_templates_build,
+    get_dockerfile_base_image,
+    get_non_redundant_services,
+)
+from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Force building of one or more services docker images")
@@ -11,118 +19,100 @@ def build(
     core: bool = typer.Option(
         False,
         "--core",
-        help="force the build of all images including core builds",
+        help="Include core images to the build list",
         show_default=False,
     ),
     force: bool = typer.Option(
         False,
         "--force",
         "-f",
-        help="remove the cache to force a rebuilding",
-        show_default=False,
-    ),
-    yes: bool = typer.Option(
-        False,
-        "--yes",
-        help="assume 'yes' as answer to all prompts and run non-interactively",
+        help="remove the cache to force the build",
         show_default=False,
     ),
 ) -> bool:
     Application.get_controller().controller_init()
 
-    builds, template_builds, overriding_imgs = locate_builds(
-        Application.data.base_services, Application.data.compose_config
-    )
+    docker = Docker()
 
+    if SWARM_MODE:
+        docker.ping_registry()
+        docker.login()
+
+    images: Set[str] = set()
     if core:
         log.debug("Forcing rebuild of core builds")
-
-        options = {
-            "SERVICE": remove_redundant_services(
-                Application.data.services, template_builds
-            ),
-            "--no-cache": force,
-            "--force-rm": True,
-            "--pull": True,
-            "--parallel": True,
-        }
+        # Create merged compose file with only core files
         dc = Compose(files=Application.data.base_files)
-        dc.command("build", options)
+        compose_config = dc.config(relative_paths=True)
+        dc.dump_config(compose_config, COMPOSE_FILE, Application.data.active_services)
+        log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
+
+        docker.client.buildx.bake(
+            targets=Application.data.services,
+            files=[COMPOSE_FILE],
+            pull=True,
+            load=True,
+            cache=not force,
+        )
         log.info("Core images built")
+        if SWARM_MODE:
+            log.warning("Local registry push is not implemented yet for core images")
 
-    # Only build images defined at project level, overriding core images
-    # Core images should only be pulled or built by specificing --core
-    custom_services = []
-    service2img = {}
-    img2services = {}
-    for img, build in builds.items():
-        if img in overriding_imgs:
-            services = build.get("services", [])
-            custom_services.extend(build.get("services", []))
+    dc = Compose(files=Application.data.files)
+    compose_config = dc.config(relative_paths=True)
+    dc.dump_config(compose_config, COMPOSE_FILE, Application.data.active_services)
+    log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-            # These will be used to verify running images
-            img2services[img] = services
-            for service in services:
-                service2img[service] = img
+    core_builds = find_templates_build(Application.data.base_services)
+    all_builds = find_templates_build(Application.data.compose_config)
 
-    # Remove services not selected at project level, i.e. restricted by --service
-    build_services = [i for i in custom_services if i in Application.data.services]
+    services_with_custom_builds: List[str] = []
+    for image, build in all_builds.items():
+        if image not in core_builds:
 
-    build_services = remove_redundant_services(build_services, builds)
+            # this is used to validate the taregt Dockerfile:
+            get_dockerfile_base_image(Path(build.get("path")), core_builds)
+            services_with_custom_builds.extend(build["services"])
+            images.add(image)
 
-    if not build_services:
+    targets: List[str] = []
+    for service in Application.data.active_services:
+        if Application.data.services and service not in Application.data.services:
+            continue
+
+        if service in services_with_custom_builds:
+            targets.append(service)
+
+    if not targets:
         log.info("No custom images to build")
         return False
 
-    options = {
-        "SERVICE": build_services,
-        "--no-cache": force,
-        "--force-rm": True,
-        "--pull": not core,
-        # In case of warning:
-        # Flag '--parallel' is ignored when building with COMPOSE_DOCKER_CLI_BUILD=1
-        # See: https://github.com/docker/compose/issues/7901
-        "--parallel": True,
-    }
-    dc = Compose(files=Application.data.files)
+    clean_targets = get_non_redundant_services(all_builds, targets)
 
-    if not yes:
-        running_containers = dc.get_running_containers(Configuration.project)
+    docker.client.buildx.bake(
+        targets=list(clean_targets),
+        files=[COMPOSE_FILE],
+        load=True,
+        pull=True,
+        cache=not force,
+    )
 
-        # Expand the list of build services with all services using the same image
-        # and verify if any of them is running
-        for s in build_services:
-            # This the image that will be built for this service:
-            img = service2img.get(s)
-            # Get the list of services using the same image (img2services.get(img))
-            # and check if any of these services is running
-            running = [
-                i for i in img2services.get(img, "N/A") if i in running_containers
-            ]
+    if SWARM_MODE:
+        registry = docker.get_registry()
 
-            if not running:
-                continue
+        local_images: List[str] = []
+        for img in images:
+            new_tag = f"{registry}/{img}"
+            docker.client.tag(img, new_tag)
+            local_images.append(new_tag)
 
-            log.warning(
-                "You asked to build {} but the following containers are running: {}",
-                img,
-                ", ".join(running),
-            )
+        # push to the local registry
+        docker.client.image.push(local_images, quiet=False)
+        # remove local tags
+        docker.client.image.remove(local_images, prune=True)  # type: ignore
 
-            print("If you continue, the current build will be kept with a <none> tag\n")
+        log.info("Custom images built and pushed into the local registry")
+    else:
+        log.info("Custom images built")
 
-            while True:
-                response = typer.prompt("Do you want to continue? y/n")
-                if response.lower() in ["n", "no"]:
-                    Application.exit("Build aborted")
-
-                if response.lower() in ["y", "yes"]:
-                    break
-
-                log.warning("Unknown response {}, respond yes or no", response)
-                # In any other case, as again
-
-    dc.command("build", options)
-
-    log.info("Custom images built")
     return True

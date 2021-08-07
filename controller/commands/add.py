@@ -1,11 +1,11 @@
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Callable, List
 
 import typer
 from glom import glom
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.project import Project
 from controller.templating import Templating
@@ -22,7 +22,7 @@ class ElementTypes(str, Enum):
 
 def get_function(
     element: ElementTypes,
-) -> Callable[[Project, str, Any, str, bool, bool], None]:
+) -> Callable[[Project, str, List[str], str, bool, bool], None]:
 
     if element == "endpoint":
         return create_endpoint
@@ -89,14 +89,14 @@ def create_template(
     template_name: str,
     target_path: Path,
     name: str,
-    services: Dict[str, str],
+    services: List[str],
     auth: str,
     force: bool,
     project: str,
 ) -> None:
 
     if not force and target_path.exists():
-        Application.exit("{} already exists", target_path)
+        print_and_exit("{} already exists", target_path)
 
     template = templating.get_template(
         template_name,
@@ -109,7 +109,7 @@ def create_template(
 def create_endpoint(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
@@ -152,7 +152,7 @@ def create_endpoint(
 def create_task(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
@@ -181,7 +181,7 @@ def create_task(
 def create_component(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
@@ -298,7 +298,7 @@ def create_component(
 def create_service(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
@@ -364,14 +364,14 @@ def create_service(
 def create_integration_test(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
 ) -> None:
 
     if add_tests:
-        Application.exit("Add integration_test does not support --add-tests flag")
+        print_and_exit("Add integration_test does not support --add-tests flag")
 
     path = project_scaffold.p_path("frontend", "integration")
 
@@ -405,20 +405,20 @@ def create_integration_test(
 def create_workflow(
     project_scaffold: Project,
     name: str,
-    services: Any,
+    services: List[str],
     auth: str,
     force: bool,
     add_tests: bool,
 ) -> None:
 
     if add_tests:
-        Application.exit("Add workflow does not support --add-tests flag")
+        print_and_exit("Add workflow does not support --add-tests flag")
 
     workflows = ["backend", "frontend", "cypress", "mypy"]
     if name not in workflows:
-        Application.exit("Invalid workflow name, expected: {}", ", ".join(workflows))
+        print_and_exit("Invalid workflow name, expected: {}", ", ".join(workflows))
 
-    path = Path(".github").joinpath("workflows")
+    path = Path(".github", "workflows")
 
     if not path.exists():
         path.mkdir(parents=True)

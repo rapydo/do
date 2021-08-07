@@ -1,8 +1,11 @@
-import typer
+from typing import List, Set
 
-from controller import log
-from controller.app import Application, Configuration
-from controller.compose import Compose
+import typer
+from glom import glom
+
+from controller import SWARM_MODE, log
+from controller.app import Application
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Pull available images from docker hub")
@@ -22,28 +25,59 @@ def pull(
 ) -> None:
     Application.get_controller().controller_init()
 
-    if include_all:
-        dc = Compose(files=Application.data.files)
-        services_intersection = Application.data.services
-    else:
-        dc = Compose(files=Application.data.base_files)
-        base_services_list = []
-        for s in Application.data.base_services:
-            base_services_list.append(s.get("name"))
+    docker = Docker()
 
-        if Configuration.services_list:
-            for s in Application.data.services:
-                if s not in base_services_list:
-                    Application.exit("Invalid service name: {}", s)
-        # List of BASE active services (i.e. remove services not in base)
-        services_intersection = list(
-            set(Application.data.services).intersection(base_services_list)
+    if SWARM_MODE:
+        docker.ping_registry()
+        docker.login()
+
+    base_image: str = ""
+    image: str = ""
+    images: Set[str] = set()
+
+    for service in Application.data.active_services:
+        if Application.data.services and service not in Application.data.services:
+            continue
+
+        base_image = glom(
+            Application.data.base_services, f"{service}.image", default=""
         )
 
-    options = {"SERVICE": services_intersection, "--quiet": quiet}
-    dc.command("pull", options)
+        # from py38 use walrus here
+        if base_image:
+            images.add(base_image)
+
+        image = glom(Application.data.compose_config, f"{service}.image", default="")
+
+        # include custom services without a bulid to base images
+        build = glom(Application.data.compose_config, f"{service}.build", default="")
+
+        if image and (include_all or not build):
+            images.add(image)
+
+    docker.client.image.pull(list(images), quiet=quiet)
+
+    if SWARM_MODE:
+        registry = docker.get_registry()
+
+        local_images: List[str] = []
+        for img in images:
+            new_tag = f"{registry}/{img}"
+            docker.client.tag(img, new_tag)
+            local_images.append(new_tag)
+        # push to the local registry
+        docker.client.image.push(local_images, quiet=quiet)
+        # remove local tags
+        docker.client.image.remove(local_images, prune=True)  # type: ignore
 
     if include_all:
-        log.info("Images pulled from docker hub")
+        target = "Images"
     else:
-        log.info("Base images pulled from docker hub")
+        target = "Base images"
+
+    if SWARM_MODE:
+        extra = " and pushed into the local registry"
+    else:
+        extra = ""
+
+    log.info("{} pulled from docker hub{}", target, extra)

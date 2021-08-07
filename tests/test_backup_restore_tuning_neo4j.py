@@ -12,7 +12,11 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
+    pull_images,
     random_project_name,
+    service_verify,
+    start_project,
 )
 
 
@@ -25,12 +29,29 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="neo4j",
         frontend="no",
-        init=True,
-        pull=True,
-        start=True,
+    )
+    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "backup neo4j",
+        "image for neo4j service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "restore neo4j",
+        "image for neo4j service, execute rapydo pull",
+    )
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "image for neo4j service, execute rapydo pull",
     )
 
-    exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "neo4j")
 
     # This will initialize neo4j
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
@@ -329,7 +350,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Wait neo4j to completely startup
-    exec_command(capfd, "verify --no-tty neo4j", "Service neo4j is reachable")
+    service_verify(capfd, "neo4j")
 
     # 4) verify data match again point 1 (restore completed)
     exec_command(
@@ -348,5 +369,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     #     "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
     #     "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
     # )
-
-    exec_command(capfd, "remove --all", "Stack removed")

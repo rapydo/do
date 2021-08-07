@@ -1,15 +1,20 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, List, Optional, Tuple
 
-import dateutil.parser
 import typer
 
-from controller import gitter, log
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
-from controller.builds import locate_builds
-from controller.dockerizing import Dock
+from controller.deploy.builds import (
+    find_templates_build,
+    find_templates_override,
+    get_image_creation,
+)
+from controller.deploy.docker import Docker
+from controller.deploy.swarm import Swarm
 from controller.templating import Templating
+from controller.utilities import git
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -38,7 +43,18 @@ def check(
         autocompletion=Application.autocomplete_submodule,
     ),
 ) -> None:
+
     Application.get_controller().controller_init()
+
+    if SWARM_MODE:
+        # This is to verify if swarm is working. It will verify in the constructor
+        # if the node has joined a swarm cluster by requesting for a swarm token
+        # If not, the execution will halt
+        swarm = Swarm()
+        # this is true, otherwise during the Swarm initialization the app will be halt
+        log.debug("Swarm is correctly initialized")
+
+        swarm.check_resources()
 
     if no_git:
         log.info("Skipping git checks")
@@ -51,60 +67,63 @@ def check(
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        # Compare builds depending on templates (slow operation!)
-        builds, template_builds, overriding_imgs = locate_builds(
-            Application.data.base_services, Application.data.compose_config
+        docker = Docker()
+        dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
+
+        all_builds = find_templates_build(Application.data.compose_config)
+        core_builds = find_templates_build(Application.data.base_services)
+        overriding_builds = find_templates_override(
+            Application.data.compose_config, core_builds
         )
 
-        dimages = Dock().images()
-
-        for image_tag, build in builds.items():
-
-            if image_tag not in dimages:
-                continue
+        for image_tag, build in all_builds.items():
 
             if not any(
                 x in Application.data.active_services for x in build["services"]
-            ):  # pragma: no cover
+            ):
                 continue
 
+            if image_tag not in dimages:
+                if image_tag in core_builds:
+                    log.warning("Missing {} image, execute rapydo pull", image_tag)
+                else:
+                    log.warning("Missing {} image, execute rapydo build", image_tag)
+                continue
+
+            image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
-            obsolete, d1, d2 = build_is_obsolete(build, Application.gits)
-            if obsolete:
+            d1, d2 = build_is_obsolete(image_creation, build)
+            if d1 and d2:
                 print_obsolete(image_tag, d1, d2, build.get("service"))
 
             # if FROM image is newer, this build should be re-built
-            elif image_tag in overriding_imgs:
-                from_img = overriding_imgs.get(image_tag)
-                from_build = template_builds.get(from_img)
+            elif image_tag in overriding_builds:
+                from_img = overriding_builds.get(image_tag, "")
+                from_build = core_builds.get(from_img, {})
+
+                # # This check should not be needed, added to prevent errors from mypy
+                # if not from_build:  # pragma: no cover
+                #     continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
-
-                    # This is no longer an errore because custom images may be pulled
-                    # from the docker hub. In that case template images are not required
-                    # Application.exit(
-                    #     "Missing template build for {} ({})\n{}",
-                    #     from_build["services"],
-                    #     from_img,
-                    #     "Suggestion: execute the pull command",
-                    # )
                     log.warning(
                         "Missing template build for {} ({})\n{}",
-                        from_build["services"],
+                        from_build.get("services"),
                         from_img,
                     )
 
+                from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
-                obsolete, d1, d2 = build_is_obsolete(from_build, Application.gits)
-                if obsolete:  # pragma: no cover
+                d1, d2 = build_is_obsolete(from_timestamp, from_build)
+                if d1 and d2:  # pragma: no cover
                     print_obsolete(from_img, d1, d2, from_build.get("service"))
 
-                from_timestamp = get_build_date(from_build)
-                build_timestamp = get_build_date(build)
+                # from_timestamp = from_build["creation"]
+                # build_timestamp = build["creation"]
 
-                if from_timestamp > build_timestamp:
-                    b = build_timestamp.strftime(DATE_FORMAT)
+                if from_timestamp > image_creation:
+                    b = image_creation.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
                     print_obsolete(image_tag, b, c, build.get("service"), from_img)
 
@@ -116,7 +135,9 @@ def check(
     log.info("Checks completed")
 
 
-def print_obsolete(image, date1, date2, service, from_img=None):
+def print_obsolete(
+    image: str, date1: str, date2: str, service: str, from_img: Optional[str] = None
+) -> None:
     if from_img:
         log.warning(
             """Obsolete image {}
@@ -140,40 +161,30 @@ Update it with: rapydo --services {} pull""",
         )
 
 
-def get_build_date(build: Dict[str, str]) -> datetime:
-
-    # timestamp is like: 2017-09-22T07:10:35.822772835Z
-    timestamp = build.get("timestamp") or "0"
-
-    return dateutil.parser.parse(timestamp)
-
-
-def get_build_timestamp(build: Dict[str, str]) -> float:
-
-    d = get_build_date(build)
-    return d.timestamp()
-
-
-def build_is_obsolete(build, gits):
+def build_is_obsolete(
+    image_creation: datetime, build: Any
+) -> Tuple[Optional[str], Optional[str]]:
     # compare dates between git and docker
     path = build.get("path")
-    build_templates = gits.get("build-templates")
-    vanilla = gits.get("main")
+    btempl = Application.gits.get("build-templates")
+    vanilla = Application.gits.get("main")
 
-    if path.startswith(build_templates.working_dir):
-        git_repo = build_templates
-    elif path.startswith(vanilla.working_dir):
+    if btempl and btempl.working_dir and path.startswith(btempl.working_dir):
+        git_repo = btempl
+    elif vanilla and vanilla.working_dir and path.startswith(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
-        Application.exit("Unable to find git repo {}", path)
+        print_and_exit("Unable to find git repo {}", path)
 
-    build_timestamp = get_build_timestamp(build)
+    # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
+
+    build_timestamp = image_creation.timestamp() if image_creation else 0.0
 
     for f in Path(path).rglob("*"):
         if f.is_dir():  # pragma: no cover
             continue
 
-        obsolete, build_ts, last_commit = gitter.check_file_younger_than(
+        obsolete, build_ts, last_commit = git.check_file_younger_than(
             gitobj=git_repo, filename=f, timestamp=build_timestamp
         )
 
@@ -181,6 +192,6 @@ def build_is_obsolete(build, gits):
             log.info("File changed: {}", f)
             build_ts_f = datetime.fromtimestamp(build_ts).strftime(DATE_FORMAT)
             last_commit_str = last_commit.strftime(DATE_FORMAT)
-            return True, build_ts_f, last_commit_str
+            return build_ts_f, last_commit_str
 
-    return False, 0, 0
+    return None, None

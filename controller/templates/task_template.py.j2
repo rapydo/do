@@ -1,11 +1,12 @@
-from restapi.connectors.celery import CeleryExt, Ignore
+from celery.app.task import Task
 
+from restapi.connectors.celery import CeleryExt, Ignore
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth}}
 
 
 @CeleryExt.task()
-def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
+def {{name}}(self: Task, myinput: str) -> str:
     log.info("Task ID: {}", self.request.id)
 
     db = {{auth}}.get_instance()
@@ -29,6 +30,6 @@ def {{name}}(self: CeleryExt.TaskType, myinput: str) -> str:
 # celery_ext = celery.get_instance()
 # task = celery_ext.celery_app.send_task(
 #     "{{name}}",
-#     args=[...]
+#     args=(...,)
 # )
 # log.debug("Task id={}", task.id)
