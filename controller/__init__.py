@@ -5,7 +5,7 @@ from typing import Any, Dict, NoReturn, Union
 
 from loguru import logger as log
 
-__version__ = "2.0"
+__version__ = "2.1"
 
 LOGS_FOLDER = Path("data", "logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
