@@ -133,7 +133,6 @@ def controller_cli_options(
     ),
     services_list: Optional[str] = typer.Option(
         None,
-        "--services",
         "-s",
         help="Comma separated list of services to be included",
         callback=projectrc_values,
@@ -215,7 +214,7 @@ def controller_cli_options(
     Configuration.set_action(ctx.invoked_subcommand)
 
     if services_list:
-        warnings.warn("-s/--services option is going to be replaced")
+        warnings.warn("-s option is going to be replaced by rapydo command service")
 
     Configuration.services_list = services_list
     Configuration.production = production
