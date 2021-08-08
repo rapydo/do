@@ -30,7 +30,7 @@ def remove(
 
     if rm_networks or rm_all:
 
-        if Configuration.services_list is not None:
+        if Configuration.services_list is not None or services:
 
             opt = "--networks" if rm_networks else "--all"
 
