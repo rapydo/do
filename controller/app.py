@@ -312,7 +312,7 @@ class Application:
             raise AttributeError("Application.controller not initialized")
         return Application.controller
 
-    def controller_init(self, read_extended: bool = True) -> None:
+    def controller_init(self) -> None:
         if Configuration.create:
             Application.check_installed_software()
             return None
@@ -361,7 +361,7 @@ class Application:
         Application.preliminary_version_check()
 
         # read project configuration
-        self.read_specs(read_extended=read_extended)
+        self.read_specs(read_extended=True)
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
