@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 
 import typer
 
@@ -13,10 +13,12 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Start services for this configuration")
 def start(
-    services: Tuple[str] = typer.Argument(None, help="Services to be started")
+    services: List[str] = typer.Argument(None, help="Services to be started")
 ) -> None:
 
-    Application.get_controller().controller_init(services)
+    # list() is needed because even if defined as List[str], values are represented
+    # by a tuple. Can't use Tuple as typer.Argument because tuples are fixed in size
+    Application.get_controller().controller_init(list(services))
 
     if SWARM_MODE:
         docker = Docker()

@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Union
 
 from glom import glom
 
@@ -8,7 +8,7 @@ from controller.project import ANGULAR
 
 # Removed str once dropped -s option
 def get_services(
-    services: Optional[Union[str, Tuple[str]]],
+    services: Optional[Union[str, List[str]]],
     default: List[str],
 ) -> List[str]:
 
@@ -20,8 +20,14 @@ def get_services(
     else:
         return_list = sorted(services)
 
-    excluded_services_list: List[str] = []
+    excluded_services_list: List[str] = [
+        s[1:] for s in return_list if s.startswith("_")
+    ]
+
     if excluded_services_list:
+
+        # Filter out _ services from return_list
+        return_list = [s for s in return_list if not s.startswith("_")]
 
         for service in excluded_services_list:
             if service not in return_list:
