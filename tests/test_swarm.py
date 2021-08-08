@@ -252,13 +252,6 @@ def test_swarm(capfd: Capture) -> None:
         "No such service: invalid",
     )
 
-    exec_command(
-        capfd,
-        "logs backend frontend",
-        "Due to limitations of the underlying packages, the logs command "
-        "is only supported for single services",
-    )
-
     # Wait for the bakend startup
     time.sleep(2)
 

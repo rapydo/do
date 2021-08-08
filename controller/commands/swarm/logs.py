@@ -7,6 +7,7 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Watch log tails of services")
 def logs(
+    service: str = typer.Argument(..., help="Service to be inspected"),
     follow: bool = typer.Option(
         False,
         "--follow",
@@ -23,17 +24,13 @@ def logs(
 ) -> None:
     Application.get_controller().controller_init()
 
-    services = Application.data.services
-
-    if len(services) > 1:
-        timestamps = False
-    elif services[0] in "frontend":
+    if service == "frontend":
         timestamps = True
     else:
         timestamps = False
 
     swarm = Swarm()
     try:
-        swarm.logs(services, follow, tail, timestamps)
+        swarm.logs(service, follow, tail, timestamps)
     except KeyboardInterrupt:  # pragma: no cover
         log.info("Stopped by keyboard")

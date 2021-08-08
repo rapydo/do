@@ -256,17 +256,7 @@ class Swarm:
 
         return None
 
-    def logs(
-        self, services: List[str], follow: bool, tail: int, timestamps: bool
-    ) -> None:
-
-        if len(services) > 1:
-            print_and_exit(
-                "Due to limitations of the underlying packages, the logs command "
-                "is only supported for single services"
-            )
-
-        service = services[0]
+    def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
 
         container = self.get_container(service, 1)
 
