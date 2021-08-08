@@ -12,13 +12,11 @@ from controller.deploy.swarm import Swarm
 def remove(
     services: List[str] = typer.Argument(None, help="Services to be removed"),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.get_controller().controller_init(services)
 
     swarm = Swarm()
 
-    all_services = (
-        Application.data.services == Application.data.active_services and not services
-    )
+    all_services = Application.data.services == Application.data.active_services
 
     if all_services:
         swarm.remove()

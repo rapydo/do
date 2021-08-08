@@ -12,7 +12,7 @@ from controller.deploy.swarm import Swarm
 def restart(
     services: List[str] = typer.Argument(None, help="Services to be restarted"),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.get_controller().controller_init(services)
 
     if SWARM_MODE:
         swarm = Swarm()
