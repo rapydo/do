@@ -59,7 +59,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     # Deploy a sub-stack
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "Stack started",
     )
 

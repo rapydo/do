@@ -156,19 +156,19 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend remove",
+        "remove backend",
         "Stack swarm is not running, deploy it with rapydo start",
     )
 
     exec_command(
         capfd,
-        "-s backend,invalid start",
+        "start backend invalid",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "image for backend service, execute rapydo pull",
     )
 
@@ -187,7 +187,7 @@ def test_swarm(capfd: Capture) -> None:
     # Deploy a sub-stack
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "Stack started",
     )
 
@@ -202,7 +202,7 @@ def test_swarm(capfd: Capture) -> None:
     # to re-deploy a sub-stack
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "A stack is already running",
         "Stop it with rapydo remove if you want to start a new stack",
     )
@@ -248,13 +248,13 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s invalid logs",
+        "logs invalid",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend,frontend logs",
+        "logs backend frontend",
         "Due to limitations of the underlying packages, the logs command "
         "is only supported for single services",
     )
@@ -268,7 +268,7 @@ def test_swarm(capfd: Capture) -> None:
     # Here using main services option
     exec_command(
         capfd,
-        "-s backend logs --tail 10 --follow",
+        "logs --tail 10 --follow backend",
         # uhmm... nothing shown on GA ... problems with tty?
         # "*** RESTful HTTP API ***",
     )
@@ -278,13 +278,13 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend logs",
+        "logs backend",
         "*** RESTful HTTP API ***",
     )
 
     exec_command(
         capfd,
-        "-s frontend logs",
+        "logs frontend",
     )
 
     exec_command(
@@ -349,7 +349,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend restart",
+        "restart backend",
         "Restarting services:",
         "swarm_backend scaled to 1",
         "Stack restarted",
@@ -357,13 +357,13 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend remove",
+        "remove backend",
         "swarm_backend scaled to 0",
     )
 
     exec_command(
         capfd,
-        "-s backend restart",
+        "restart backend",
         "Restarting services:",
         "swarm_backend scaled to 1",
         "Stack restarted",
@@ -378,7 +378,7 @@ def test_swarm(capfd: Capture) -> None:
         "Or you can scale all the services to zero => rapydo scale service=0",
     )
 
-    exec_command(capfd, "-s invalid restart", "No such service: invalid")
+    exec_command(capfd, "restart invalid", "No such service: invalid")
 
     exec_command(
         capfd, "restart", "Restarting services", "swarm_frontend", "Stack restarted"
@@ -386,7 +386,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s frontend remove",
+        "remove frontend",
         "swarm_frontend scaled to 0",
         "verify: Service converged",
         "Services removed",
@@ -410,7 +410,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s frontend restart",
+        "restart frontend",
         "Stack swarm is not running, deploy it with rapydo start",
     )
     # ############################
@@ -430,7 +430,7 @@ def test_swarm(capfd: Capture) -> None:
     # The missing folder can't be recreated due to permissions denied
     exec_command(
         capfd,
-        "-s frontend start",
+        "start frontend",
         "A bind folder is missing and can't be automatically created: ",
         "/data/swarm/karma",
     )
@@ -441,7 +441,7 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s frontend start",
+        "start frontend",
         "A bind folder was missing and was automatically created: ",
         "/data/swarm/karma",
         "Stack started",

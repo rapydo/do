@@ -1,3 +1,7 @@
+from typing import List
+
+import typer
+
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose import Compose
@@ -5,7 +9,9 @@ from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Restart running containers")
-def restart() -> None:
+def restart(
+    services: List[str] = typer.Argument(None, help="Services to be restarted"),
+) -> None:
     Application.get_controller().controller_init()
 
     if SWARM_MODE:

@@ -16,6 +16,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Force building of one or more services docker images")
 def build(
+    services: List[str] = typer.Argument(None, help="Services to be built"),
     core: bool = typer.Option(
         False,
         "--core",
@@ -30,7 +31,7 @@ def build(
         show_default=False,
     ),
 ) -> bool:
-    Application.get_controller().controller_init()
+    Application.get_controller().controller_init(services)
 
     docker = Docker()
 

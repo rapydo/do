@@ -1,5 +1,6 @@
-from typing import Dict, Union
+from typing import Dict, List, Union
 
+import typer
 from python_on_whales import Service
 
 from controller import log, print_and_exit
@@ -8,7 +9,9 @@ from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Stop and remove services")
-def remove() -> None:
+def remove(
+    services: List[str] = typer.Argument(None, help="Services to be removed"),
+) -> None:
     Application.get_controller().controller_init()
 
     swarm = Swarm()

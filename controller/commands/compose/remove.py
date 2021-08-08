@@ -1,3 +1,5 @@
+from typing import List
+
 import typer
 
 from controller import log, print_and_exit
@@ -7,6 +9,7 @@ from controller.deploy.compose import Compose
 
 @Application.app.command(help="Stop and remove containers")
 def remove(
+    services: List[str] = typer.Argument(None, help="Services to be removed"),
     rm_networks: bool = typer.Option(
         False,
         "--networks",
@@ -21,7 +24,7 @@ def remove(
         show_default=False,
     ),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.get_controller().controller_init(services)
 
     dc = Compose(files=Application.data.files)
 

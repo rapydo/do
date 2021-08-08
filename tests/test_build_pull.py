@@ -48,13 +48,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-e ACTIVATE_RABBIT=0 -s rabbit pull --quiet",
+        "-e ACTIVATE_RABBIT=0 pull --quiet rabbit",
         "No such service: rabbit",
     )
 
     exec_command(
         capfd,
-        "-s proxy pull --quiet",
+        "pull --quiet proxy",
         "No such service: proxy",
     )
 
@@ -67,7 +67,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Basic pull
     exec_command(
         capfd,
-        "-s xxx pull",
+        "pull xxx",
         "No such service: xxx",
     )
 
@@ -75,7 +75,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # A true test on such parameter would be quite complicated...
     exec_command(
         capfd,
-        "-s backend pull --all --quiet",
+        "pull --all --quiet backend",
         "Images pulled from docker hub",
     )
 
@@ -94,7 +94,7 @@ services:
     # Missing folder
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         # Errors from docker compose
         " either does not exist, is not accessible, or is not a valid URL.",
     )
@@ -104,7 +104,7 @@ services:
     # Missing Dockerfile
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         "Build path not found: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -114,7 +114,7 @@ services:
         pass
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -124,7 +124,7 @@ services:
         f.write("RUN ls")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -134,7 +134,7 @@ services:
         f.write("FROM rapydo/invalid")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
@@ -153,7 +153,7 @@ services:
         f.write("FROM ubuntu")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         "Custom images built",
     )
 
@@ -172,14 +172,14 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
         f"naming to docker.io/testbuild/rabbit:{__version__}",
         "Custom images built",
     )
 
     exec_command(
         capfd,
-        f"-e ACTIVATE_RABBIT=0 -p {project2} -s rabbit build --core",
+        f"-e ACTIVATE_RABBIT=0 -p {project2} build --core rabbit",
         "No such service: rabbit",
     )
 
@@ -189,7 +189,7 @@ RUN mkdir xyz
     # This simulate a pull updating a core image making the custom image obsolete
     exec_command(
         capfd,
-        f"-p {project2} -s rabbit build --core",
+        f"-p {project2} build --core rabbit",
         "Core images built",
         "No custom images to build",
     )
@@ -199,7 +199,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --services rabbit build",
+        "Update it with: rapydo build rabbit",
     )
 
     # Add a second service with the same image to test redundant builds
@@ -224,7 +224,7 @@ RUN mkdir xyz
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo --services backend pull",
+        "Update it with: rapydo pull backend",
     )
 
     exec_command(capfd, "remove", "Stack removed")
@@ -243,14 +243,14 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "-s rabbit3 pull --quiet",
+        "pull --quiet rabbit3",
         "Base images pulled from docker hub",
     )
 
     # Now this should fail because pull does not include custom services
     exec_command(
         capfd,
-        "-s rabbit3 start",
+        "start rabbit3",
         "Stack started",
     )
 

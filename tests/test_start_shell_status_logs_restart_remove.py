@@ -35,13 +35,13 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend,invalid start",
+        "start backend invalid",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "image for backend service, execute rapydo pull",
     )
 
@@ -134,7 +134,7 @@ def test_all(capfd: Capture) -> None:
         capfd,
         # logs with tail 200 needed due to the spam of Requirement installation
         # after the Collecting ... /http-api.git
-        "-s backend logs --tail 200 --no-color",
+        "logs --tail 200 --no-color backend",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Testing mode",
@@ -146,7 +146,7 @@ def test_all(capfd: Capture) -> None:
     # Frontend logs are always timestamped
     exec_command(
         capfd,
-        "-s frontend logs --tail 10 --no-color",
+        "logs --tail 10 --no-color frontend",
         "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         f"{timestamp}",
@@ -155,7 +155,7 @@ def test_all(capfd: Capture) -> None:
     # With multiple services logs are not timestamped
     exec_command(
         capfd,
-        "-s frontend,backend logs --tail 10 --no-color",
+        "logs --tail 10 --no-color frontend backend",
         "docker-compose command: 'logs'",
         # Logs are prefixed because more than one service is shown
         "backend_1      | Testing mode",
@@ -168,15 +168,15 @@ def test_all(capfd: Capture) -> None:
     # Here using main services option
     exec_command(
         capfd,
-        "-s backend logs --tail 10 --follow",
+        "logs --tail 10 --follow backend",
         "docker-compose command: 'logs'",
         "Stopped by keyboard",
     )
 
-    # Invalid services in -s are refused
+    # Invalid services are refused
     exec_command(
         capfd,
-        "-s invalid logs --tail 1",
+        "logs --tail 1 invalid",
         "No such service: invalid",
     )
 
@@ -188,43 +188,43 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend logs --tail 1",
+        "logs --tail 1 backend",
         "Enabled services: ['backend']",
     )
 
     exec_command(
         capfd,
-        "-s frontend logs --tail 1",
+        "logs --tail 1 frontend",
         "Enabled services: ['frontend']",
     )
 
     exec_command(
         capfd,
-        "-s backend,frontend logs --tail 1",
+        "logs --tail 1 backend frontend",
         "Enabled services: ['backend', 'frontend']",
     )
 
     exec_command(
         capfd,
-        "-s frontend,backend logs --tail 1",
+        "logs --tail 1 frontend backend",
         "Enabled services: ['backend', 'frontend']",
     )
 
     exec_command(
         capfd,
-        "-s backend,invalid logs --tail 1",
+        "logs --tail 1 backend invalid",
         "No such service: invalid",
     )
 
     exec_command(
         capfd,
-        "-s backend remove --net",
+        "remove --net backend",
         "Incompatibile options --networks and --service",
     )
 
     exec_command(
         capfd,
-        "-s backend remove --all",
+        "remove --all backend",
         "Incompatibile options --all and --service",
     )
 

@@ -37,19 +37,19 @@ def test_swarm_multi_host(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend pull",
+        "pull backend",
         "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
     )
 
     exec_command(
         capfd,
-        "-s backend build",
+        "build backend",
         "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
     )
 
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
         "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
     )
 
@@ -75,7 +75,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "-s backend pull",
+        "pull backend",
         "Base images pulled from docker hub and pushed into the local registry",
     )
 

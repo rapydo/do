@@ -26,10 +26,10 @@ jobs:
 
       - name: Run Karma
         run: |
-          rapydo -s frontend pull --quiet
-          rapydo -s frontend start
+          rapydo pull --quiet frontend
+          rapydo start frontend
           sleep 5
-          rapydo -s frontend logs
+          rapydo logs frontend
           rapydo shell --no-tty frontend "yarn install"
           rapydo shell --no-tty frontend "reload-types"
           rapydo shell --no-tty frontend "yarn run test:single"
@@ -40,11 +40,11 @@ jobs:
         run: |
           rapydo remove --all
           rapydo --prod init --force
-          rapydo -s frontend,proxy pull --quiet
+          rapydo pull --quiet frontend proxy
 
-          rapydo -s frontend,proxy start
+          rapydo start frontend proxy
           rapydo dump
-          rapydo -s frontend logs --follow
+          rapydo logs --follow frontend
           docker-compose logs --tail 2 frontend 2>&1 | grep "files have been compressed."
           docker-compose logs --tail 20 proxy
           curl --insecure -X GET https://localhost

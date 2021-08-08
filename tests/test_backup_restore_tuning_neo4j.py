@@ -192,7 +192,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/neo4j/",
     )
 
-    exec_command(capfd, "-s neo4j start")
+    exec_command(capfd, "start neo4j")
 
     # Restore command
     exec_command(
@@ -269,7 +269,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
         '"normal_user", "normal_user"',
     )
-    exec_command(capfd, "-s neo4j remove")
+    exec_command(capfd, "remove neo4j")
     # 3) restore the dump
     exec_command(
         capfd,
@@ -297,7 +297,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Total size of data and native indexes in all databases:",
     )
 
-    exec_command(capfd, "-s neo4j start")
+    exec_command(capfd, "start neo4j")
     # 4) verify data match again point 1 (restore completed)
     # postponed because neo4j needs time to start...
 

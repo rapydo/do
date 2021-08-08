@@ -80,7 +80,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-s proxy -e ACTIVATE_PROXY=1 pull",
+        "-e ACTIVATE_PROXY=1 pull proxy",
         "Base images pulled from docker hub",
     )
 

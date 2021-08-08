@@ -1,3 +1,5 @@
+from typing import List
+
 import typer
 
 from controller import log
@@ -7,6 +9,7 @@ from controller.deploy.compose import Compose
 
 @Application.app.command(help="Watch log tails of all or specified containers")
 def logs(
+    services: List[str] = typer.Argument(None, help="Services to be inspected"),
     follow: bool = typer.Option(
         False,
         "--follow",
@@ -20,9 +23,9 @@ def logs(
         "-t",
         help="Number of lines to show",
     ),
-    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome outpu"),
+    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome output"),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.get_controller().controller_init(services)
 
     services = Application.data.services
 

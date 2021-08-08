@@ -187,7 +187,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/redis/",
     )
 
-    exec_command(capfd, "-s redis start")
+    exec_command(capfd, "start redis")
 
     # Probably a sleep is needed here
 
@@ -261,7 +261,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     redis_dump_file = files[-1]
 
-    exec_command(capfd, "-s redis remove")
+    exec_command(capfd, "remove redis")
     # 3) restore the dump
     exec_command(
         capfd,
@@ -270,7 +270,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/redis/{redis_dump_file} completed",
     )
 
-    exec_command(capfd, "-s redis start")
+    exec_command(capfd, "start redis")
     # 4) verify data match again point 1 (restore completed)
     # postponed because redis needs time to start...
 

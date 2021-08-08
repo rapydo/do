@@ -1,3 +1,4 @@
+import warnings
 from typing import Dict, Iterable, List, Optional, Union
 
 from glom import glom
@@ -6,7 +7,6 @@ from controller import ComposeConfig, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
-# Removed str once dropped -s option
 def get_services(
     services: Optional[Union[str, Iterable[str]]],
     default: List[str],
@@ -16,6 +16,7 @@ def get_services(
     if not services:
         return_list = sorted(default)
     elif isinstance(services, str):
+        warnings.warn("Deprecated use of -s option")
         return_list = sorted(services.split(","))
     else:
         return_list = sorted(services)
