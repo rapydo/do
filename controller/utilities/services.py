@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 from glom import glom
 
@@ -8,7 +8,7 @@ from controller.project import ANGULAR
 
 # Removed str once dropped -s option
 def get_services(
-    services: Optional[Union[str, List[str]]],
+    services: Optional[Union[str, Iterable[str]]],
     default: List[str],
 ) -> List[str]:
 

@@ -16,9 +16,7 @@ def start(
     services: List[str] = typer.Argument(None, help="Services to be started")
 ) -> None:
 
-    # list() is needed because even if defined as List[str], values are represented
-    # by a tuple. Can't use Tuple as typer.Argument because tuples are fixed in size
-    Application.get_controller().controller_init(list(services))
+    Application.get_controller().controller_init(services)
 
     if SWARM_MODE:
         docker = Docker()

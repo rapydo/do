@@ -5,7 +5,7 @@ import sys
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, Dict, Iterable, List, Optional, Set, cast
 
 import requests
 import typer
@@ -295,7 +295,7 @@ class Application:
             raise AttributeError("Application.controller not initialized")
         return Application.controller
 
-    def controller_init(self, services: Optional[List[str]] = None) -> None:
+    def controller_init(self, services: Optional[Iterable[str]] = None) -> None:
         if Configuration.create:
             Application.check_installed_software()
             return None
@@ -639,7 +639,7 @@ You can use of one:
                 Application.gits[name] = repo
 
     def get_compose_configuration(
-        self, enabled_services: Optional[List[str]] = None
+        self, enabled_services: Optional[Iterable[str]] = None
     ) -> None:
 
         compose_files: List[Path] = []
