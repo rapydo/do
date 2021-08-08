@@ -227,6 +227,12 @@ def controller_cli_options(
             "Incompatibile use of both --services/-s and --skip-services/-S options"
         )
 
+    if services_list:
+        warnings.warn("-s/--services option is going to be replaced")
+
+    if excluded_services_list:
+        warnings.warn("-S/--skip-services option is going to be replaced")
+
     Configuration.services_list = services_list
     Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
@@ -348,13 +354,14 @@ class Application:
             self.read_specs(read_extended=False)
             return None
 
-        # Auth is not yet available, will be read by read_specs
+        # Auth is not available yet, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
             Configuration.project, auth=None
         )
         Application.preliminary_version_check()
 
-        self.read_specs(read_extended=read_extended)  # read project configuration
+        # read project configuration
+        self.read_specs(read_extended=read_extended)
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
@@ -707,9 +714,6 @@ You can use of one:
         dc = Compose(files=self.files)
         self.compose_config = cast(ComposeConfig, dc.config().get("services", {}))
 
-        self.set_active_services()
-
-    def set_active_services(self) -> None:
         self.active_services = services.find_active(self.compose_config)
 
         self.enabled_services = services.get_services(
