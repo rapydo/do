@@ -214,7 +214,7 @@ def controller_cli_options(
     Configuration.set_action(ctx.invoked_subcommand)
 
     if services_list:
-        warnings.warn("-s option is going to be replaced by rapydo command service")
+        warnings.warn("-s option is going to be replaced by rapydo <command> service")
 
     Configuration.services_list = services_list
     Configuration.production = production
