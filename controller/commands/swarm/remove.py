@@ -17,7 +17,7 @@ def remove(
     swarm = Swarm()
 
     all_services = (
-        Application.data.services == Application.data.active_services or not services
+        Application.data.services == Application.data.active_services and not services
     )
 
     if all_services:
