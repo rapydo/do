@@ -1,3 +1,7 @@
+from typing import Tuple
+
+import typer
+
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
@@ -8,8 +12,11 @@ from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Start services for this configuration")
-def start() -> None:
-    Application.get_controller().controller_init()
+def start(
+    services: Tuple[str] = typer.Argument(None, help="Services to be started")
+) -> None:
+
+    Application.get_controller().controller_init(services)
 
     if SWARM_MODE:
         docker = Docker()

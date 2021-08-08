@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 from glom import glom
 
@@ -6,23 +6,30 @@ from controller import ComposeConfig, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
+# Removed str once dropped -s option
 def get_services(
-    services: Optional[str], excluded_services_list: Optional[str], default: List[str]
+    services: Optional[Union[str, Tuple[str]]],
+    default: List[str],
 ) -> List[str]:
 
-    if services:
-        return sorted(services.split(","))
+    return_list: List[str] = []
+    if not services:
+        return_list = sorted(default)
+    elif isinstance(services, str):
+        return_list = sorted(services.split(","))
+    else:
+        return_list = sorted(services)
 
+    excluded_services_list: List[str] = []
     if excluded_services_list:
 
-        splitted = excluded_services_list.split(",")
-        for service in splitted:
-            if service not in default:
+        for service in excluded_services_list:
+            if service not in return_list:
                 print_and_exit("No such service: {}", service)
 
-        return sorted(s for s in default if s not in splitted)
+        return sorted(s for s in return_list if s not in excluded_services_list)
 
-    return sorted(default)
+    return return_list
 
 
 def walk_services(

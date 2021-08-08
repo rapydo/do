@@ -5,7 +5,7 @@ import sys
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import requests
 import typer
@@ -53,7 +53,6 @@ class Configuration:
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
     specs: Dict[str, str] = {}
     services_list: Optional[str]
-    excluded_services_list: Optional[str]
     environment: Dict[str, str]
 
     action: Optional[str] = None
@@ -139,13 +138,6 @@ def controller_cli_options(
         help="Comma separated list of services to be included",
         callback=projectrc_values,
     ),
-    excluded_services_list: Optional[str] = typer.Option(
-        None,
-        "--skip-services",
-        "-S",
-        help="Comma separated list of services to be exluded",
-        callback=projectrc_values,
-    ),
     hostname: str = typer.Option(
         "localhost",
         "--hostname",
@@ -222,19 +214,10 @@ def controller_cli_options(
 
     Configuration.set_action(ctx.invoked_subcommand)
 
-    if services_list and excluded_services_list:
-        print_and_exit(
-            "Incompatibile use of both --services/-s and --skip-services/-S options"
-        )
-
     if services_list:
         warnings.warn("-s/--services option is going to be replaced")
 
-    if excluded_services_list:
-        warnings.warn("-S/--skip-services option is going to be replaced")
-
     Configuration.services_list = services_list
-    Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
     Configuration.testing = testing
     Configuration.project = project
@@ -312,7 +295,7 @@ class Application:
             raise AttributeError("Application.controller not initialized")
         return Application.controller
 
-    def controller_init(self) -> None:
+    def controller_init(self, services: Optional[Tuple[str]] = None) -> None:
         if Configuration.create:
             Application.check_installed_software()
             return None
@@ -391,7 +374,7 @@ class Application:
         self.make_env()
 
         # Compose services and variables
-        self.get_compose_configuration()
+        self.get_compose_configuration(services)
 
         self.check_placeholders()
 
@@ -655,7 +638,9 @@ You can use of one:
             if repo:
                 Application.gits[name] = repo
 
-    def get_compose_configuration(self) -> None:
+    def get_compose_configuration(
+        self, enabled_services: Optional[Tuple[str]] = None
+    ) -> None:
 
         compose_files: List[Path] = []
 
@@ -717,8 +702,7 @@ You can use of one:
         self.active_services = services.find_active(self.compose_config)
 
         self.enabled_services = services.get_services(
-            Configuration.services_list,
-            Configuration.excluded_services_list,
+            Configuration.services_list or enabled_services,
             default=self.active_services,
         )
 

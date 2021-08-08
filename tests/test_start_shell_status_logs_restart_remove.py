@@ -173,22 +173,10 @@ def test_all(capfd: Capture) -> None:
         "Stopped by keyboard",
     )
 
-    exec_command(
-        capfd,
-        "-s backend -S frontend logs",
-        "Incompatibile use of both --services/-s and --skip-services/-S options",
-    )
-
-    # Invalid services in -s and -S are refused
+    # Invalid services in -s are refused
     exec_command(
         capfd,
         "-s invalid logs --tail 1",
-        "No such service: invalid",
-    )
-
-    exec_command(
-        capfd,
-        "-S invalid logs --tail 1",
         "No such service: invalid",
     )
 
@@ -220,24 +208,6 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "-s frontend,backend logs --tail 1",
         "Enabled services: ['backend', 'frontend']",
-    )
-
-    exec_command(
-        capfd,
-        "-S frontend logs --tail 1",
-        "Enabled services: ['backend', 'neo4j', 'postgres', 'rabbit']",
-    )
-
-    exec_command(
-        capfd,
-        "-S frontend,postgres logs --tail 1",
-        "Enabled services: ['backend', 'neo4j', 'rabbit']",
-    )
-
-    exec_command(
-        capfd,
-        "-S frontend,postgres,neo4j logs --tail 1",
-        "Enabled services: ['backend', 'rabbit']",
     )
 
     exec_command(
