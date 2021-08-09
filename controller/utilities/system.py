@@ -120,6 +120,13 @@ def str_to_bytes(text: str) -> float:
 
 
 def get_local_ip() -> str:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    return str(s.getsockname()[0])
+    # Do not import outside, otherwise it will lead to a circular import:
+    # cannot import name 'Configuration' from partially initialized module
+    from controller.app import Configuration
+
+    if Configuration.production:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        return str(s.getsockname()[0])
+
+    return "127.0.0.1"
