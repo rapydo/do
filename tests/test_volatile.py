@@ -29,7 +29,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "volatile backend",
-        "image for backend service, execute rapydo pull",
+        "image, execute rapydo pull backend",
     )
 
     pull_images(capfd)
@@ -75,7 +75,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "volatile maintenance",
-        "image for proxy service, execute rapydo pull",
+        "image, execute rapydo pull proxy",
     )
 
     exec_command(

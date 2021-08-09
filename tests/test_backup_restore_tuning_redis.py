@@ -37,12 +37,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup redis",
-        "image for redis service, execute rapydo pull",
+        "image, execute rapydo pull redis",
     )
     exec_command(
         capfd,
         "restore redis",
-        "image for redis service, execute rapydo pull",
+        "image, execute rapydo pull redis",
     )
 
     pull_images(capfd)

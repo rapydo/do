@@ -20,7 +20,7 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "scale rabbit=2",
-        "image for rabbit service, execute rapydo pull",
+        "image, execute rapydo pull rabbit",
     )
 
     pull_images(capfd)

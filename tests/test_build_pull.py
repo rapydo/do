@@ -43,7 +43,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "start",
-        f"Missing {image} image for backend service, execute rapydo pull",
+        f"Missing {image} image, execute rapydo pull backend",
     )
 
     exec_command(
@@ -144,8 +144,7 @@ services:
     exec_command(
         capfd,
         "start",
-        # f"Missing {image} image for rabbit service, execute rapydo build",
-        " image for rabbit service, execute rapydo build",
+        " image, execute rapydo build rabbit",
     )
 
     # Not a RAPyDo child but build is possibile

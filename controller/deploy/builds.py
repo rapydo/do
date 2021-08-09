@@ -181,7 +181,7 @@ def verify_available_images(
 
             if not image_exists:
                 print_and_exit(
-                    "Missing {} image for {} service, execute rapydo pull",
+                    "Missing {} image, execute rapydo pull {}",
                     image,
                     service,
                 )
@@ -202,8 +202,8 @@ def verify_available_images(
             if not image_exists:
                 action = "build" if data["path"] else "pull"
                 print_and_exit(
-                    "Missing {} image for {} service, execute rapydo {}",
+                    "Missing {} image, execute rapydo {} {}",
                     image,
-                    service,
                     action,
+                    service,
                 )

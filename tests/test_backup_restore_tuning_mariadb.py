@@ -35,12 +35,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup mariadb",
-        "image for mariadb service, execute rapydo pull",
+        "image, execute rapydo pull mariadb",
     )
     exec_command(
         capfd,
         "restore mariadb",
-        "image for mariadb service, execute rapydo pull",
+        "image, execute rapydo pull mariadb",
     )
 
     pull_images(capfd)

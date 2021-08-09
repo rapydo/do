@@ -35,17 +35,17 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j",
-        "image for neo4j service, execute rapydo pull",
+        "image, execute rapydo pull neo4j",
     )
     exec_command(
         capfd,
         "restore neo4j",
-        "image for neo4j service, execute rapydo pull",
+        "image, execute rapydo pull neo4j",
     )
     exec_command(
         capfd,
         "tuning neo4j",
-        "image for neo4j service, execute rapydo pull",
+        "image, execute rapydo pull neo4j",
     )
 
     pull_images(capfd)

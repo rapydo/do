@@ -34,12 +34,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres",
-        "image for postgres service, execute rapydo pull",
+        "image, execute rapydo pull postgres",
     )
     exec_command(
         capfd,
         "restore postgres",
-        "image for postgres service, execute rapydo pull",
+        "image, execute rapydo pull postgres",
     )
 
     pull_images(capfd)

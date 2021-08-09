@@ -34,7 +34,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "ssl",
-        "image for proxy service, execute rapydo pull",
+        "image, execute rapydo pull proxy",
     )
 
     exec_command(
