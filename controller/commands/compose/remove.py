@@ -9,7 +9,11 @@ from controller.deploy.compose import Compose
 
 @Application.app.command(help="Stop and remove containers")
 def remove(
-    services: List[str] = typer.Argument(None, help="Services to be removed"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be removed",
+        autocompletion=Application.autocomplete_service,
+    ),
     rm_networks: bool = typer.Option(
         False,
         "--networks",

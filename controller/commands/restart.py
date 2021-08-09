@@ -10,7 +10,11 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Restart running containers")
 def restart(
-    services: List[str] = typer.Argument(None, help="Services to be restarted"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be restarted",
+        autocompletion=Application.autocomplete_service,
+    ),
 ) -> None:
     Application.get_controller().controller_init(services)
 

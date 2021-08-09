@@ -10,7 +10,11 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Stop and remove services")
 def remove(
-    services: List[str] = typer.Argument(None, help="Services to be removed"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be removed",
+        autocompletion=Application.autocomplete_service,
+    ),
 ) -> None:
     Application.get_controller().controller_init(services)
 

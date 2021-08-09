@@ -10,7 +10,11 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Pull available images from docker hub")
 def pull(
-    services: List[str] = typer.Argument(None, help="Services to be pulled"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be pulled",
+        autocompletion=Application.autocomplete_service,
+    ),
     include_all: bool = typer.Option(
         False,
         "--all",

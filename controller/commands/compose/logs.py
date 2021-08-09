@@ -9,7 +9,11 @@ from controller.deploy.compose import Compose
 
 @Application.app.command(help="Watch log tails of all or specified containers")
 def logs(
-    services: List[str] = typer.Argument(None, help="Services to be inspected"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be inspected",
+        autocompletion=Application.autocomplete_service,
+    ),
     follow: bool = typer.Option(
         False,
         "--follow",

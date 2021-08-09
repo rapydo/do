@@ -16,7 +16,11 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Force building of one or more services docker images")
 def build(
-    services: List[str] = typer.Argument(None, help="Services to be built"),
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be built",
+        autocompletion=Application.autocomplete_service,
+    ),
     core: bool = typer.Option(
         False,
         "--core",

@@ -13,7 +13,11 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Start services for this configuration")
 def start(
-    services: List[str] = typer.Argument(None, help="Services to be started")
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be started",
+        autocompletion=Application.autocomplete_service,
+    )
 ) -> None:
 
     Application.get_controller().controller_init(services)

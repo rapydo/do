@@ -7,7 +7,11 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Watch log tails of services")
 def logs(
-    service: str = typer.Argument(..., help="Service to be inspected"),
+    service: str = typer.Argument(
+        ...,
+        help="Service to be inspected",
+        autocompletion=Application.autocomplete_service,
+    ),
     follow: bool = typer.Option(
         False,
         "--follow",
