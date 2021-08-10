@@ -246,7 +246,7 @@ class Swarm:
 
         log.warning(
             "Due to limitations of the underlying packages, "
-            "the shell command is not yet implemented"
+            "the shell command is not implemented yet"
         )
 
         print("")

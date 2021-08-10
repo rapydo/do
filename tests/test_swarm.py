@@ -228,7 +228,7 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "shell backend",
         "Due to limitations of the underlying packages, "
-        "the shell command is not yet implemented",
+        "the shell command is not implemented yet",
         "You can execute by yourself the following command",
         "docker exec --interactive --tty --user developer swarm_backend.1.",
         "bash",
@@ -238,7 +238,7 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "shell backend --default",
         "Due to limitations of the underlying packages, "
-        "the shell command is not yet implemented",
+        "the shell command is not implemented yet",
         "You can execute by yourself the following command",
         "docker exec --interactive --tty --user developer swarm_backend.1.",
         "restapi launch",
