@@ -34,6 +34,7 @@ jobs:
           cd rapydo_tests
           rapydo create composetest --auth neo4j --frontend angular --service celery --service redis --service rabbit --origin-url https://your_remote_git/your_project.git
           rapydo init
+          rapydo install compose
           rapydo dump
 
           docker-compose pull --quiet
