@@ -15,14 +15,16 @@ from controller.packages import Packages
 from controller.utilities import git
 
 # https://github.com/docker/compose-cli/releases
-COMPOSE_VERSION = "v2.0.0-rc.1"
+COMPOSE_VERSION = "v2.0.0-beta.6"
+# COMPOSE_VERSION = "v2.0.0-rc.1"
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.6.1"
 
 
 EXPECTED_DOCKER_SCRIPT_MD5 = "2e7644d0fdc23b8df90d7d136a793248"
 EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
-EXPECTED_COMPOSE_BIN_MD5 = "3d23cd343038fdfaae651634e36de3b0"
+EXPECTED_COMPOSE_BIN_MD5 = "72c895b551d12e5093ef3285b9d4309f"
+# EXPECTED_COMPOSE_BIN_MD5 = "3d23cd343038fdfaae651634e36de3b0"
 EXPECTED_BUILDX_BIN_MD5 = "caae05fcabd62f4e0708ea95c7c6b85f"
 
 
