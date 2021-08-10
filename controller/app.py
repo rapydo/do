@@ -434,21 +434,12 @@ class Application:
             # v = docker.compose.version()
             log.debug("docker compose is installed")
         else:  # pragma: no cover
-
-            if SWARM_MODE:
-                print_and_exit(
-                    "A mandatory dependency is missing: docker compose not found"
-                    "\nInstallation guide: "
-                    "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                    "\nor try the automated installation with rapydo install compose"
-                )
-            else:
-                log.warning(
-                    "Docker Compose V2 will be soon mandatory and it is not installed"
-                    "\nInstallation guide: "
-                    "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                    "\nor try the automated installation with rapydo install compose"
-                )
+            print_and_exit(
+                "A mandatory dependency is missing: docker compose not found"
+                "\nInstallation guide: "
+                "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+                "\nor try the automated installation with rapydo install compose"
+            )
 
         Packages.check_program("git")
 
