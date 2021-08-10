@@ -28,6 +28,8 @@ def update(
     # Compose services and variables
     Application.get_controller().get_compose_configuration()
 
-    Application.get_controller().check_placeholders()
+    Application.get_controller().check_placeholders(
+        Application.data.compose_config, Application.active_services
+    )
 
     log.info("All updated")

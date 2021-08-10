@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Set
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import SWARM_MODE, ComposeConfig, log, print_and_exit
+from controller import SWARM_MODE, ComposeServices, log, print_and_exit
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -46,7 +46,7 @@ def get_image_creation(image_name: str) -> datetime:
 
 
 def find_templates_build(
-    base_services: ComposeConfig, include_image: bool = False
+    base_services: ComposeServices, include_image: bool = False
 ) -> Dict[str, Any]:
 
     # From python 3.8 could be converted in a TypedDict
@@ -54,12 +54,12 @@ def find_templates_build(
 
     for template_name, base_service in base_services.items():
 
-        template_build = base_service.get("build")
+        template_build = base_service.build
 
         if not template_build and not include_image:
             continue
 
-        template_image = base_service.get("image")
+        template_image = base_service.image
 
         if template_image is None:  # pragma: no cover
             print_and_exit(
@@ -113,25 +113,23 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
 
 
 def find_templates_override(
-    services: ComposeConfig, templates: Dict[str, Any]
+    services: ComposeServices, templates: Dict[str, Any]
 ) -> Dict[str, str]:
 
     builds: Dict[str, str] = {}
 
     for service in services.values():
 
-        builder = service.get("build")
-        image = service.get("image")
-        if builder is not None and image not in templates:
+        if service.build is not None and service.image not in templates:
 
             baseimage = get_dockerfile_base_image(
-                Path(builder.get("context")), templates
+                Path(service.build.get("context")), templates
             )
 
             if not baseimage.startswith("rapydo/"):
                 continue
 
-            vanilla_img = service.get("image")
+            vanilla_img = service.image
             template_img = baseimage
             log.debug("{} extends {}", vanilla_img, template_img)
             builds[vanilla_img] = template_img
@@ -162,7 +160,7 @@ def get_non_redundant_services(
 
 
 def verify_available_images(
-    services: List[str], compose_config: ComposeConfig, base_services: ComposeConfig
+    services: List[str], compose_config: ComposeServices, base_services: ComposeServices
 ) -> None:
 
     # All template builds (core only)

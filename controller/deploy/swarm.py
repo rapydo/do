@@ -299,13 +299,13 @@ class Swarm:
             config = Application.data.compose_config[service]
 
             # frontend container has no deploy options
-            if "deploy" not in config:
+            if not config.deploy:
                 continue
 
-            replicas = int(glom(config, "deploy.replicas", default=1))
-            cpus = float(glom(config, "deploy.resources.reservations.cpus", default=0))
+            replicas = config.deploy.replicas  # default=1
+            cpus = float(glom(config.deploy.resources, "reservations.cpus", default=0))
             memory = system.str_to_bytes(
-                glom(config, "deploy.resources.reservations.memory", default="0")
+                glom(config.deploy.resources, "reservations.memory", default="0")
             )
 
             total_cpus += replicas * cpus

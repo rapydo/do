@@ -40,8 +40,8 @@ def list_cmd(
         print("{:<12} {:<8} {:<24} Path".format("Name", "Status", "Image"))
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
-                image = service.get("image")
-                build = service.get("build")
+                image = service.image
+                build = service.build
                 status = containers_status.get(name, "-")
 
                 if build is None:

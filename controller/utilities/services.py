@@ -1,9 +1,7 @@
 import warnings
 from typing import Dict, Iterable, List, Optional, Union
 
-from glom import glom
-
-from controller import ComposeConfig, EnvType, log, print_and_exit
+from controller import ComposeServices, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
@@ -58,7 +56,7 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: ComposeConfig) -> List[str]:
+def find_active(services: ComposeServices) -> List[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
@@ -69,11 +67,9 @@ def find_active(services: ComposeConfig) -> List[str]:
 
     for name, service in services.items():
 
-        dependencies[name] = list(service.get("depends_on", {}).keys())
+        dependencies[name] = list(service.depends_on.keys())
 
-        ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
-        is_active = str(ACTIVATE) == "1"
-        if is_active:
+        if service.environment.get("ACTIVATE", "0") == "1":
             base_actives.append(name)
 
     log.debug("Base active services = {}", base_actives)

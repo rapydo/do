@@ -61,8 +61,11 @@ def interfaces(
         return False
 
     info = Application.data.compose_config.get(service.value, None)
+    if not info:  # pragma: no cover
+        print_and_exit("Services misconfiguration, can't find {}", service.value)
+
     try:
-        current_ports = info.get("ports", []).pop(0)
+        current_ports = info.ports.pop(0)
     except IndexError:  # pragma: no cover
         print_and_exit("No default port found?")
 

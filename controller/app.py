@@ -5,7 +5,7 @@ import sys
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, cast
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, cast
 
 import requests
 import typer
@@ -24,14 +24,13 @@ from controller import (
     PROJECTRC,
     SUBMODULES_DIR,
     SWARM_MODE,
-    ComposeConfig,
+    ComposeServices,
     EnvType,
     __version__,
     log,
     print_and_exit,
 )
 from controller.commands import load_commands
-from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
@@ -241,12 +240,12 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files: List[Path] = [],
-        base_files: List[Path] = [],
-        services: List[str] = [],
-        active_services: List[str] = [],
-        base_services: ComposeConfig = {},
-        compose_config: ComposeConfig = {},
+        files: List[Path],
+        base_files: List[Path],
+        services: List[str],
+        active_services: List[str],
+        base_services: ComposeServices,
+        compose_config: ComposeServices,
     ):
         self.files = files
         self.base_files = base_files
@@ -267,10 +266,13 @@ class Application:
     # controller app
     controller: Optional["Application"] = None
     project_scaffold = Project()
-    data = CommandsData()
+    data: CommandsData
     # type ignore to be removed once the new gitpython version will be released
     gits: Dict[str, GitRepo] = {}  # type: ignore
     env: Dict[str, EnvType] = {}
+
+    base_services: ComposeServices
+    compose_config: ComposeServices
 
     def __init__(self) -> None:
 
@@ -281,9 +283,6 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        self.base_services: ComposeConfig = {}
-        self.compose_config: ComposeConfig = {}
-
         load_commands()
 
         Application.load_projectrc()
@@ -373,9 +372,9 @@ class Application:
         self.make_env()
 
         # Compose services and variables
-        self.get_compose_configuration(services)
+        base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders()
+        self.check_placeholders(compose_config, self.active_services)
 
         # Final step, launch the command
 
@@ -384,8 +383,8 @@ class Application:
             base_files=self.base_files,
             services=self.enabled_services,
             active_services=self.active_services,
-            base_services=self.base_services,
-            compose_config=self.compose_config,
+            base_services=base_services,
+            compose_config=compose_config,
         )
 
         return None
@@ -630,7 +629,7 @@ You can use of one:
 
     def get_compose_configuration(
         self, enabled_services: Optional[Iterable[str]] = None
-    ) -> None:
+    ) -> Tuple[ComposeServices, ComposeServices]:
 
         compose_files: List[Path] = []
 
@@ -683,13 +682,16 @@ You can use of one:
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
         # to build the config with files and variables
-        dc = Compose(files=self.base_files)
-        self.base_services = cast(ComposeConfig, dc.config().get("services", {}))
 
-        dc = Compose(files=self.files)
-        self.compose_config = cast(ComposeConfig, dc.config().get("services", {}))
+        from controller.deploy.compose_v2 import Compose
 
-        self.active_services = services.find_active(self.compose_config)
+        compose = Compose(files=self.base_files)
+        base_services = compose.get_config().services
+
+        compose = Compose(files=self.files)
+        compose_config = compose.get_config().services
+
+        self.active_services = services.find_active(compose_config)
 
         self.enabled_services = services.get_services(
             Configuration.services_list or enabled_services,
@@ -702,7 +704,9 @@ You can use of one:
 
         log.debug("Enabled services: {}", self.enabled_services)
 
-        self.create_datafile()
+        self.create_datafile(list(compose_config.keys()), self.active_services)
+
+        return base_services, compose_config
 
     def create_projectrc(self) -> None:
         templating = Templating()
@@ -859,7 +863,8 @@ You can use of one:
                 #     value = f"'{value}'"
                 whandle.write(f"{key}={value}\n")
 
-    def create_datafile(self) -> None:
+    @staticmethod
+    def create_datafile(services: List[str], active_services: List[str]) -> None:
         try:
             DATAFILE.unlink()
         except FileNotFoundError:
@@ -867,8 +872,8 @@ You can use of one:
 
         data: DataFileStub = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
-            "services": self.active_services,
-            "allservices": list(self.compose_config.keys()),
+            "services": active_services,
+            "allservices": services,
         }
 
         with open(DATAFILE, "w+") as outfile:
@@ -918,9 +923,12 @@ You can use of one:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def check_placeholders(self) -> Set[str]:
+    @staticmethod
+    def check_placeholders(
+        compose_services: ComposeServices, active_services: List[str]
+    ) -> Set[str]:
 
-        if len(self.active_services) == 0:  # pragma: no cover
+        if len(active_services) == 0:  # pragma: no cover
             print_and_exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
@@ -928,16 +936,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         elif Configuration.check:
-            log.info("Active services: {}", self.active_services)
+            log.info("Active services: {}", active_services)
 
         missing = set()
-        for service_name in self.active_services:
-            service = self.compose_config.get(service_name)
+        for service_name in active_services:
+            service = compose_services[service_name]
 
             if service:
-                for key, value in (
-                    cast(Dict[str, Any], service).get("environment", {}).items()
-                ):
+                for key, value in service.environment.items():
                     if PLACEHOLDER in str(value):
                         key = services.normalize_placeholder_variable(key)
                         missing.add(key)
@@ -950,7 +956,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             if serv:
                 active_serv = []
                 for i in serv:
-                    if i in self.active_services:
+                    if i in active_services:
                         active_serv.append(i)
 
                 if active_serv:

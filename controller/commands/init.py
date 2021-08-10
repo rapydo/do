@@ -69,5 +69,4 @@ def init(
         else:
             log.debug("Swarm is already initialized")
 
-    # Application.get_controller().check_placeholders()
     log.info("Project initialized")
