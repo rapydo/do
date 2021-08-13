@@ -82,6 +82,7 @@ def bytes_to_str(value: float) -> str:
     return f"{int(round(value, 0))}{unit}"
 
 
+# This is no longer needed
 def str_to_bytes(text: str) -> float:
 
     text = text.upper()

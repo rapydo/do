@@ -60,17 +60,17 @@ def interfaces(
         log.warning("Deprecated interface mongo, use adminer instead")
         return False
 
-    info = Application.data.compose_config.get(service.value, None)
-    if not info:  # pragma: no cover
+    service_config = Application.data.compose_config.get(service.value, None)
+    if not service_config:  # pragma: no cover
         print_and_exit("Services misconfiguration, can't find {}", service.value)
 
     try:
-        current_ports = info.ports.pop(0)
+        current_ports = service_config.ports.pop(0)
     except IndexError:  # pragma: no cover
         print_and_exit("No default port found?")
 
-    port = port or current_ports["published"]
-    target = current_ports["target"]
+    port = port or current_ports.published
+    target = current_ports.target
 
     publish = [f"{port}:{target}"]
 

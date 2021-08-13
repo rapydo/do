@@ -44,14 +44,11 @@ def list_cmd(
                 build = service.build
                 status = containers_status.get(name, "-")
 
-                if build is None:
-                    print(f"{name:<12} {status:<8} {image:<24}")
+                if build:
+                    build_path = build.context.relative_to(os.getcwd())
+                    print(f"{name:<12} {status:<8} {image:<24} {build_path}")
                 else:
-                    path = build.get("context")
-                    path = path.replace(os.getcwd(), "")
-                    if path.startswith("/"):
-                        path = path[1:]
-                    print(f"{name:<12} {status:<8} {image:<24} {path}")
+                    print(f"{name:<12} {status:<8} {image:<24}")
 
     if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")

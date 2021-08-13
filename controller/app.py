@@ -860,6 +860,8 @@ You can use of one:
                 if " " in value:
                     value = f"'{value}'"
 
+                # This is needed to prevent:
+                # yaml: did not find expected alphabetic or numeric character
                 if value == PLACEHOLDER:
                     value = f'"\\"{value}\\""'
                 # if len(value) == 0:

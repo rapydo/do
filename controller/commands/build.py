@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Set
+from typing import List, Set, cast
 
 import typer
 
@@ -75,9 +75,11 @@ def build(
     for image, build in all_builds.items():
         if image not in core_builds:
 
-            # this is used to validate the taregt Dockerfile:
-            get_dockerfile_base_image(Path(build.get("path")), core_builds)
-            services_with_custom_builds.extend(build["services"])
+            # this is used to validate the target Dockerfile:
+            # from py38 a typed dict will replace this cast
+            get_dockerfile_base_image(cast(Path, build.get("path")), core_builds)
+            # from py38 a typed dict will replace this cast
+            services_with_custom_builds.extend(cast(List[str], build["services"]))
             images.add(image)
 
     targets: List[str] = []

@@ -7,7 +7,7 @@ Parse dockerfiles and check for builds
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set, Union, cast
 
 from python_on_whales.exceptions import NoSuchImage
 
@@ -47,10 +47,13 @@ def get_image_creation(image_name: str) -> datetime:
 
 def find_templates_build(
     base_services: ComposeServices, include_image: bool = False
-) -> Dict[str, Any]:
+) -> Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]]:
 
     # From python 3.8 could be converted in a TypedDict
-    templates = {}
+    # service -> str
+    # services -> List[str]
+    # path -> Optional[Path]
+    templates: Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]] = {}
 
     for template_name, base_service in base_services.items():
 
@@ -68,16 +71,18 @@ def find_templates_build(
         if template_image not in templates:
             templates[template_image] = {
                 "services": [],
-                "path": template_build.get("context") if template_build else None,
+                "path": template_build.context if template_build else None,
             }
         if "service" not in templates[template_image]:
             templates[template_image]["service"] = template_name
         else:
             templates[template_image]["service"] = name_priority(
-                templates[template_image]["service"],
+                # from py38 a typed dict will replace this cast
+                cast(str, templates[template_image]["service"]),
                 template_name,
             )
-        templates[template_image]["services"].append(template_name)
+        # from py38 a typed dict will replace this cast
+        cast(List[str], templates[template_image]["services"]).append(template_name)
 
     return templates
 
@@ -122,9 +127,7 @@ def find_templates_override(
 
         if service.build is not None and service.image not in templates:
 
-            baseimage = get_dockerfile_base_image(
-                Path(service.build.get("context")), templates
-            )
+            baseimage = get_dockerfile_base_image(service.build.context, templates)
 
             if not baseimage.startswith("rapydo/"):
                 continue
@@ -169,7 +172,9 @@ def verify_available_images(
 
     for service in sorted(clean_core_services):
         for image, data in templates.items():
-            if data["service"] != service and service not in data["services"]:
+            # from py38 a typed dict will replace this cast
+            services = cast(List[str], data["services"])
+            if data["service"] != service and service not in services:
                 continue
 
             if SWARM_MODE:
@@ -190,7 +195,9 @@ def verify_available_images(
 
     for service in clean_services:
         for image, data in builds.items():
-            if data["service"] != service and service not in data["services"]:
+            # from py38 a typed dict will replace this cast
+            services = cast(List[str], data["services"])
+            if data["service"] != service and service not in services:
                 continue
 
             if SWARM_MODE:

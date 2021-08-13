@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, cast
 
 import typer
 
@@ -78,9 +78,9 @@ def check(
 
         for image_tag, build in all_builds.items():
 
-            if not any(
-                x in Application.data.active_services for x in build["services"]
-            ):
+            # from py38 a typed dict will replace this cast
+            services = cast(List[str], build["services"])
+            if not any(x in Application.data.active_services for x in services):
                 continue
 
             if image_tag not in dimages:
@@ -94,7 +94,8 @@ def check(
             # Check if some recent commit modified the Dockerfile
             d1, d2 = build_is_obsolete(image_creation, build)
             if d1 and d2:
-                print_obsolete(image_tag, d1, d2, build.get("service"))
+                # from py38 a typed dict will replace this cast
+                print_obsolete(image_tag, d1, d2, cast(str, build.get("service")))
 
             # if FROM image is newer, this build should be re-built
             elif image_tag in overriding_builds:
@@ -117,7 +118,10 @@ def check(
                 # Verify if template build is obsolete or not
                 d1, d2 = build_is_obsolete(from_timestamp, from_build)
                 if d1 and d2:  # pragma: no cover
-                    print_obsolete(from_img, d1, d2, from_build.get("service"))
+                    # from py38 a typed dict will replace this cast
+                    print_obsolete(
+                        from_img, d1, d2, cast(str, from_build.get("service"))
+                    )
 
                 # from_timestamp = from_build["creation"]
                 # build_timestamp = build["creation"]
@@ -125,7 +129,10 @@ def check(
                 if from_timestamp > image_creation:
                     b = image_creation.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
-                    print_obsolete(image_tag, b, c, build.get("service"), from_img)
+                    # from py38 a typed dict will replace this cast
+                    print_obsolete(
+                        image_tag, b, c, cast(str, build.get("service")), from_img
+                    )
 
     templating = Templating()
     for f in Application.project_scaffold.fixed_files:
@@ -169,9 +176,9 @@ def build_is_obsolete(
     btempl = Application.gits.get("build-templates")
     vanilla = Application.gits.get("main")
 
-    if btempl and btempl.working_dir and path.startswith(btempl.working_dir):
+    if btempl and btempl.working_dir and path.is_relative_to(btempl.working_dir):
         git_repo = btempl
-    elif vanilla and vanilla.working_dir and path.startswith(vanilla.working_dir):
+    elif vanilla and vanilla.working_dir and path.is_relative_to(vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)

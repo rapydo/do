@@ -303,10 +303,8 @@ class Swarm:
                 continue
 
             replicas = config.deploy.replicas  # default=1
-            cpus = float(glom(config.deploy.resources, "reservations.cpus", default=0))
-            memory = system.str_to_bytes(
-                glom(config.deploy.resources, "reservations.memory", default="0")
-            )
+            cpus = config.deploy.resources.reservations.cpus or 0
+            memory = config.deploy.resources.reservations.memory
 
             total_cpus += replicas * cpus
             total_memory += replicas * memory
