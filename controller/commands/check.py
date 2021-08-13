@@ -168,6 +168,19 @@ Update it with: rapydo pull {}""",
         )
 
 
+def is_relative_to(path: Path, rel: str) -> bool:
+    # This works from py39
+    try:
+        return path.is_relative_to(rel)
+    # py37 and py38 compatibility fix
+    except Exception:
+        try:
+            path.relative_to(rel)
+            return True
+        except ValueError:
+            return False
+
+
 def build_is_obsolete(
     image_creation: datetime, build: Any
 ) -> Tuple[Optional[str], Optional[str]]:
@@ -176,9 +189,9 @@ def build_is_obsolete(
     btempl = Application.gits.get("build-templates")
     vanilla = Application.gits.get("main")
 
-    if btempl and btempl.working_dir and path.is_relative_to(btempl.working_dir):
+    if btempl and btempl.working_dir and is_relative_to(path, btempl.working_dir):
         git_repo = btempl
-    elif vanilla and vanilla.working_dir and path.is_relative_to(vanilla.working_dir):
+    elif vanilla and vanilla.working_dir and is_relative_to(path, vanilla.working_dir):
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)
