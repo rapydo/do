@@ -4,6 +4,7 @@ import typer
 
 from controller import log
 from controller.app import Application
+from controller.utilities import services
 
 
 @Application.app.command(help="Update the current project")
@@ -26,10 +27,9 @@ def update(
     Application.get_controller().make_env()
 
     # Compose services and variables
-    Application.get_controller().get_compose_configuration()
+    base_services, config = Application.get_controller().get_compose_configuration()
+    active_services = services.find_active(config)
 
-    Application.get_controller().check_placeholders(
-        Application.data.compose_config, Application.active_services
-    )
+    Application.get_controller().check_placeholders(config, active_services)
 
     log.info("All updated")
