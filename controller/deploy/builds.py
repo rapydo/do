@@ -173,8 +173,8 @@ def verify_available_images(
     for service in sorted(clean_core_services):
         for image, data in templates.items():
             # from py38 a typed dict will replace this cast
-            services = cast(List[str], data["services"])
-            if data["service"] != service and service not in services:
+            data_services = cast(List[str], data["services"])
+            if data["service"] != service and service not in data_services:
                 continue
 
             if SWARM_MODE:
@@ -196,8 +196,8 @@ def verify_available_images(
     for service in clean_services:
         for image, data in builds.items():
             # from py38 a typed dict will replace this cast
-            services = cast(List[str], data["services"])
-            if data["service"] != service and service not in services:
+            data_services = cast(List[str], data["services"])
+            if data["service"] != service and service not in data_services:
                 continue
 
             if SWARM_MODE:
