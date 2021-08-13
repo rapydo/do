@@ -3,6 +3,7 @@ from restapi import decorators
 from restapi.connectors import {{auth}}
 from restapi.models import Schema, fields  # ,  validate
 from restapi.rest.definition import EndpointResource, Response
+from restapi.services.authentication import User
 from restapi.utilities.logs import log
 # from restapi.services.authentication import Role
 
@@ -28,10 +29,9 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
         }
     )
     # @decorators.cache(timeout=300)
-    def get(self) -> Response:
+    def get(self, user: User) -> Response:
 
         db = {{auth}}.get_instance()
-        # user = self.get_user()
         # self.log_event(self.events.access, your-obj)
 
         data = {}
@@ -46,10 +46,9 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "200": "..."
         }
     )
-    def post(self, **kwargs: Any) -> Response:
+    def post(self, user: User, **kwargs: Any) -> Response:
 
         db = {{auth}}.get_instance()
-        # user = self.get_user()
         log.info("Created")
 
         # Assign with the uuid of newly created resource
@@ -68,10 +67,9 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def put(self, uuid: str, **kwargs: Any) -> Response:
+    def put(self, uuid: str, user: User, **kwargs: Any) -> Response:
 
         db = {{auth}}.get_instance()
-        # user = self.get_user()
         # db.update_properties(myobj, kwargs)
         log.info("Updated")
         # self.log_event(self.events.modify, your-obj, kwargs)
@@ -87,11 +85,10 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def patch(self, uuid: str, **kwargs: Any) -> Response:
+    def patch(self, uuid: str, user: User, **kwargs: Any) -> Response:
         """ Update profile for current user """
 
         db = {{auth}}.get_instance()
-        # user = self.get_user()
 
         # db.update_properties(user, kwargs)
 
