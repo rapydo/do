@@ -69,7 +69,7 @@ def find_active(services: ComposeServices) -> List[str]:
 
         dependencies[name] = list(service.depends_on.keys())
 
-        if service.environment.get("ACTIVATE", "0") == "1":
+        if service.environment and service.environment.get("ACTIVATE", "0") == "1":
             base_actives.append(name)
 
     log.debug("Base active services = {}", base_actives)
