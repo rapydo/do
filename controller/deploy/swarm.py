@@ -8,7 +8,7 @@ from colorama import deinit as deinit_colorama
 from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Service
-from python_on_whales.exceptions import NoSuchContainer, NoSuchService, NotASwarmManager
+from python_on_whales.exceptions import NoSuchService, NotASwarmManager
 
 from controller import COMPOSE_FILE, log, print_and_exit
 from controller.app import Application, Configuration
@@ -258,25 +258,29 @@ class Swarm:
 
     def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
 
-        container = self.get_container(service, 1)
-
-        if not container:
+        if service not in Application.data.active_services:
             print_and_exit("No such service: {}", service)
+
+        service_name = self.get_service(service)
 
         try:
             # lines: Iterable[Tuple[str, bytes]] due to stream=True
             # without stream=True the type would be :str
-            lines = self.docker.container.logs(
-                container,
+            lines = self.docker.service.logs(
+                service_name,
+                task_ids=False,
+                resolve=True,
+                truncate=True,
+                # since=None,
                 tail=tail,
                 details=False,
                 timestamps=timestamps,
                 follow=follow,
                 stream=True,
             )
-        except NoSuchContainer:
+        except NoSuchService:
             print_and_exit(
-                "No such container {}, is the stack still starting up?", container
+                "No such service {}, is the stack still starting up?", service
             )
 
         for log_line in lines:
