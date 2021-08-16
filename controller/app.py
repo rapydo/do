@@ -949,7 +949,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
             if service:
                 for key, value in service.environment.items():
-                    if PLACEHOLDER in str(value):
+                    if str(value) == PLACEHOLDER:
                         key = services.normalize_placeholder_variable(key)
                         missing.add(key)
 

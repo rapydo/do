@@ -22,6 +22,10 @@ def registry() -> None:
     )
     Application.get_controller().controller_init()
 
+    Application.get_controller().check_placeholders(
+        Application.data.compose_config, ["registry"]
+    )
+
     log.warning(
         "This is a temporary command and will probably be merged"
         " with interfaces and volatile commands in a near future"
