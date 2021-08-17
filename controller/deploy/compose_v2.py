@@ -64,6 +64,13 @@ class Compose:
                     t.replace("$", "$$") for t in value["healthcheck"]["test"]
                 ]
 
+            for k, v in value.get("environment", {}).items():
+                # Empty variables are converted to None...
+                # and None variables are not passed to the container
+                # This check can be removed when will be no longer covered
+                if v is None:
+                    value["environment"][k] = ""
+
             clean_config["services"][key] = value
 
             for k in value.get("networks", {}).keys():
