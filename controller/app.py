@@ -647,6 +647,8 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
+                if SWARM_MODE and Configuration.production:
+                    add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
         if SWARM_MODE:
             add(CONFS_DIR, "swarm_options.yml")
