@@ -342,23 +342,15 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "restart backend",
-        "Restarting services:",
-        "swarm_backend scaled to 1",
-        "Stack restarted",
-    )
-
-    exec_command(
-        capfd,
         "remove backend",
         "swarm_backend scaled to 0",
     )
 
     exec_command(
         capfd,
-        "restart backend",
+        "restart",
         "Restarting services:",
-        "swarm_backend scaled to 1",
+        "Updating service swarm_backend",
         "Stack restarted",
     )
 
@@ -369,12 +361,6 @@ def test_swarm(capfd: Capture) -> None:
         "Stop is in contrast with the Docker Swarm approach",
         "You can remove the stack => rapydo remove",
         "Or you can scale all the services to zero => rapydo scale service=0",
-    )
-
-    exec_command(capfd, "restart invalid", "No such service: invalid")
-
-    exec_command(
-        capfd, "restart", "Restarting services", "swarm_frontend", "Stack restarted"
     )
 
     exec_command(
@@ -401,11 +387,6 @@ def test_swarm(capfd: Capture) -> None:
         capfd, "restart", "Stack swarm is not running, deploy it with rapydo start"
     )
 
-    exec_command(
-        capfd,
-        "restart frontend",
-        "Stack swarm is not running, deploy it with rapydo start",
-    )
     # ############################
     # Verify bind volumes checks #
     # ############################
