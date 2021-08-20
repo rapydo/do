@@ -7,7 +7,7 @@ Parse dockerfiles and check for builds
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Dict, List, Optional, Set, Union, cast
 
 from python_on_whales.exceptions import NoSuchImage
 
@@ -25,6 +25,12 @@ name_priorities = [
 ]
 
 docker = Docker()
+
+# From python 3.8 could be converted in a TypedDict
+# service -> str
+# services -> List[str]
+# path -> Optional[Path]
+BuildInfo = Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]]
 
 
 def name_priority(name1: str, name2: str) -> str:
@@ -47,13 +53,9 @@ def get_image_creation(image_name: str) -> datetime:
 
 def find_templates_build(
     base_services: ComposeServices, include_image: bool = False
-) -> Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]]:
+) -> BuildInfo:
 
-    # From python 3.8 could be converted in a TypedDict
-    # service -> str
-    # services -> List[str]
-    # path -> Optional[Path]
-    templates: Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]] = {}
+    templates: BuildInfo = {}
 
     for template_name, base_service in base_services.items():
 
@@ -87,7 +89,7 @@ def find_templates_build(
     return templates
 
 
-def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
+def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
 
     dockerfile = path.joinpath("Dockerfile")
 
@@ -118,7 +120,7 @@ def get_dockerfile_base_image(path: Path, templates: Dict[str, Any]) -> str:
 
 
 def find_templates_override(
-    services: ComposeServices, templates: Dict[str, Any]
+    services: ComposeServices, templates: BuildInfo
 ) -> Dict[str, str]:
 
     builds: Dict[str, str] = {}
@@ -140,17 +142,16 @@ def find_templates_override(
     return builds
 
 
-# templates is the return values of a find_templates_build
-def get_non_redundant_services(
-    templates: Dict[str, Any], targets: List[str]
-) -> Set[str]:
+def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[str]:
 
     # Removed redundant services
     services_normalization_mapping: Dict[str, str] = {}
 
     for s in templates.values():
-        for s1 in s["services"]:
-            s0 = s["service"]
+        # from py38 a typed dict will replace this cast
+        for s1 in cast(List[str], s["services"]):
+            # from py38 a typed dict will replace this cast
+            s0 = cast(str, s["service"])
             services_normalization_mapping[s1] = s0
 
     clean_targets: Set[str] = set()

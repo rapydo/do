@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 import typer
 
@@ -92,7 +92,11 @@ def check(
 
             image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
-            d1, d2 = build_is_obsolete(image_creation, build)
+
+            # from py38 a typed dict will replace this cast
+            d1, d2 = build_is_obsolete(
+                image_creation, cast(Optional[Path], build.get("path"))
+            )
             if d1 and d2:
                 # from py38 a typed dict will replace this cast
                 print_obsolete(image_tag, d1, d2, cast(str, build.get("service")))
@@ -116,7 +120,11 @@ def check(
 
                 from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
-                d1, d2 = build_is_obsolete(from_timestamp, from_build)
+
+                # from py38 a typed dict will replace this cast
+                d1, d2 = build_is_obsolete(
+                    from_timestamp, cast(Optional[Path], from_build.get("path"))
+                )
                 if d1 and d2:  # pragma: no cover
                     # from py38 a typed dict will replace this cast
                     print_obsolete(
@@ -182,10 +190,13 @@ def is_relative_to(path: Path, rel: str) -> bool:
 
 
 def build_is_obsolete(
-    image_creation: datetime, build: Any
+    image_creation: datetime, path: Optional[Path]
 ) -> Tuple[Optional[str], Optional[str]]:
+
+    if not path:  # pragma: no cover
+        return None, None
+
     # compare dates between git and docker
-    path = build.get("path")
     btempl = Application.gits.get("build-templates")
     vanilla = Application.gits.get("main")
 
@@ -195,8 +206,6 @@ def build_is_obsolete(
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)
-
-    # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
 
     build_timestamp = image_creation.timestamp() if image_creation else 0.0
 
