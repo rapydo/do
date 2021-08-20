@@ -118,9 +118,9 @@ def normalize_placeholder_variable(key: str) -> str:
     if key == "MYSQL_PASSWORD":
         return "ALCHEMY_PASSWORD"
 
-    if key == "RABBITMQ_DEFAULT_USER":
+    if key == "DEFAULT_USER":
         return "RABBITMQ_USER"
-    if key == "RABBITMQ_DEFAULT_PASS":
+    if key == "DEFAULT_PASS":
         return "RABBITMQ_PASSWORD"
 
     if key == "NEO4J_dbms_memory_heap_max__size":

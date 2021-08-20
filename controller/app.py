@@ -933,7 +933,7 @@ You can use of one:
     @staticmethod
     def check_placeholders(
         compose_services: ComposeServices, active_services: List[str]
-    ) -> Set[str]:
+    ) -> None:
 
         if len(active_services) == 0:  # pragma: no cover
             print_and_exit(
@@ -945,7 +945,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         elif Configuration.check:
             log.info("Active services: {}", active_services)
 
-        missing = set()
+        missing: Dict[str, Set[str]] = {}
         for service_name in active_services:
             service = compose_services[service_name]
 
@@ -953,42 +953,28 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 for key, value in service.environment.items():
                     if str(value) == PLACEHOLDER:
                         key = services.normalize_placeholder_variable(key)
-                        missing.add(key)
+                        missing.setdefault(key, set())
+                        missing[key].add(service_name)
 
         placeholders = []
-        for key in missing:
+        for key, raw_services in missing.items():
 
-            serv = services.vars_to_services_mapping.get(key)
+            serv = services.vars_to_services_mapping.get(key) or raw_services
+            active_serv = [s for s in serv if s in active_services]
 
-            if serv:
-                active_serv = []
-                for i in serv:
-                    if i in active_services:
-                        active_serv.append(i)
-
-                if active_serv:
-                    placeholders.append(
-                        "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
-                    )
-            # Should never happens since all services are configured, cannot be tested
-            else:  # pragma: no cover
-                # with py39 it would be key.removeprefix('INJECT_')
-                if key.startswith("INJECT_"):
-                    key = key[len("INJECT_") :]
-
-                print_and_exit(
-                    "Missing variable: {}: cannot find a service mapping this variable",
-                    key,
+            if active_serv:
+                placeholders.append(
+                    "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
                 )
 
-        if len(placeholders) > 0:
+        if placeholders:
             print_and_exit(
                 "The following variables are missing in your configuration:\n\n{}"
                 "\n\nYou can fix this error by updating your .projectrc file\n",
                 "\n".join(placeholders),
             )
 
-        return missing
+        return None
 
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:
