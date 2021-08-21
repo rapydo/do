@@ -6,7 +6,7 @@ import random
 from tests import Capture, create_project, exec_command
 
 
-def test_swarm_multi_host(capfd: Capture) -> None:
+def test_docker_registry(capfd: Capture) -> None:
 
     rand = random.SystemRandom()
 
