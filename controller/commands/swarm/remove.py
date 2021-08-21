@@ -3,10 +3,28 @@ from typing import Dict, List, Union
 
 import typer
 from python_on_whales import Service
+from python_on_whales.exceptions import DockerException
 
 from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
+
+
+def wait_network_removal(swarm: Swarm, network: str) -> None:
+    for _ in range(0, 60):
+        try:
+            for n in swarm.docker.network.list():
+                if n.driver == "overlay" and n.name == network:
+                    break
+            else:
+                break
+            log.debug("{} still removing, waiting...", network)
+            time.sleep(1)
+        # Can happens when the network is near to be removed and
+        # returned by list but no longer available for inspect
+        # It is assumed to be removed
+        except DockerException:  # pragma: no cover
+            break
 
 
 @Application.app.command(help="Stop and remove services")
@@ -25,10 +43,10 @@ def remove(
 
     if all_services:
         swarm.remove()
-        # This sleep is added to add a delay before completing the command
-        # This way even if swarm remove is asynchronous, the command can be
-        # chained with a start command without raising errors
-        time.sleep(1)
+        # This is needed because docker stack remove does not support a --wait flag
+        # To make the remove command sync and chainable with a start command
+        network_name = f"{Configuration.project}_swarm_default"
+        wait_network_removal(swarm, network_name)
         log.info("Stack removed")
     else:
 
