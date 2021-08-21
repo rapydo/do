@@ -95,8 +95,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
-        # Errors from docker compose
-        " either does not exist, is not accessible, or is not a valid URL.",
+        "Build path not found",
     )
 
     os.makedirs("projects/testbuild/builds/rabbit")
