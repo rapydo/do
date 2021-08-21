@@ -108,7 +108,9 @@ def build(
         local_images: List[str] = []
         for img in images:
             new_tag = f"{registry}/{img}"
-            docker.client.tag(img, new_tag)
+            # explicit tagis no longer needed since automatically assigned
+            # when dumping the compose configuration by using v2 wrapper
+            # docker.client.tag(img, new_tag)
             local_images.append(new_tag)
 
         # push to the local registry
