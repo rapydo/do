@@ -9,6 +9,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple, cast
 
 import requests
 import typer
+from colorama import Fore
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
@@ -409,6 +410,16 @@ class Application:
             sys.version_info.minor,
             sys.version_info.micro,
         )
+
+        # Deprecated since 2.1
+        if sys.version_info.major == 3 and sys.version_info.minor == 7:
+            warnings.warn(
+                Fore.YELLOW + "Support for Python 3.7 is deprecated "
+                "and will be dropped in a future release. Please upgrade to python 3.8+"
+            )
+            import time
+
+            time.sleep(1)
 
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
@@ -935,7 +946,7 @@ You can use of one:
         compose_services: ComposeServices, active_services: List[str]
     ) -> None:
 
-        if len(active_services) == 0:  # pragma: no cover
+        if not active_services:  # pragma: no cover
             print_and_exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration

@@ -4,8 +4,6 @@ Integration with Docker swarm
 from typing import Dict, List, Optional, Union
 
 from colorama import Fore
-from colorama import deinit as deinit_colorama
-from colorama import init as init_colorama
 from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
@@ -84,7 +82,6 @@ class Swarm:
 
     def status(self) -> None:
 
-        init_colorama()
         nodes: Dict[str, str] = {}
         print("====== Nodes ======")
         for node in self.docker.node.list():
@@ -197,8 +194,6 @@ class Swarm:
                 print(line)
 
             print("")
-
-        deinit_colorama()
 
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
