@@ -30,6 +30,8 @@ jobs:
             swarm/libs,
             compose/passwords_invalid_characters,
             swarm/passwords_invalid_characters,
+            compose/list,
+            swarm/list,
 
             # Swarm only
             swarm/swarm,
@@ -47,7 +49,6 @@ jobs:
             compose/interfaces,
             compose/ssl,
             compose/volatile,
-            compose/list,
 
             # Currently Compose only, to be generalized
             init_check_update,

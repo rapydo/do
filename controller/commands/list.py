@@ -5,8 +5,7 @@ from typing import Dict
 import typer
 
 from controller import COMPOSE_ENVIRONMENT_FILE, log
-from controller.app import Application, Configuration
-from controller.deploy.compose import Compose
+from controller.app import Application
 from controller.utilities import git
 
 
@@ -34,21 +33,17 @@ def list_cmd(
     if element_type == ElementTypes.services:
         log.info("List of active services:\n")
 
-        dc = Compose(files=Application.data.files)
-        containers_status = dc.get_containers_status(Configuration.project)
-
-        print("{:<12} {:<8} {:<24} Path".format("Name", "Status", "Image"))
+        print("{:<12} {:<24} Path".format("Name", "Image"))
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
                 image = service.image
                 build = service.build
-                status = containers_status.get(name, "-")
 
                 if build:
                     build_path = build.context.relative_to(os.getcwd())
-                    print(f"{name:<12} {status:<8} {image:<24} {build_path}")
+                    print(f"{name:<12} {image:<24} {build_path}")
                 else:
-                    print(f"{name:<12} {status:<8} {image:<24}")
+                    print(f"{name:<12} {image:<24}")
 
     if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")
