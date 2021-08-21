@@ -108,6 +108,7 @@ jobs:
           fi
 
           if [[ "${TEST_NAME}" == "multi_host" ]]; then
+
             base=https://github.com/docker/machine/releases/download/v0.16.0 \
               && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
               && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
@@ -115,6 +116,7 @@ jobs:
 
             docker-machine --version
 
+            sudo apt-get update
             sudo apt-get install --yes virtualbox
             docker swarm init
             JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
