@@ -31,7 +31,7 @@ class Compose:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
         return self.docker.compose.config(return_json=True)  # type: ignore
 
-    def dump_config(self, services: List[str]) -> None:
+    def dump_config(self, services: List[str], set_registry: bool = True) -> None:
 
         compose_config = self.get_config_json()
 
@@ -51,7 +51,7 @@ class Compose:
             if key not in services:
                 continue
 
-            if SWARM_MODE and key != "registry":
+            if SWARM_MODE and set_registry and key != "registry":
                 value["image"] = f"{registry}/{value['image']}"
 
             if "healthcheck" in value and "test" in value["healthcheck"]:

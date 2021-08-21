@@ -48,7 +48,7 @@ def build(
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with core files only
         compose = ComposeV2(Application.data.base_files)
-        compose.dump_config(Application.data.services)
+        compose.dump_config(Application.data.services, set_registry=False)
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
         docker.client.buildx.bake(
@@ -63,7 +63,7 @@ def build(
             log.warning("Local registry push is not implemented yet for core images")
 
     compose = ComposeV2(Application.data.files)
-    compose.dump_config(Application.data.services)
+    compose.dump_config(Application.data.services, set_registry=False)
     log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     core_builds = find_templates_build(Application.data.base_services)
@@ -108,9 +108,7 @@ def build(
         local_images: List[str] = []
         for img in images:
             new_tag = f"{registry}/{img}"
-            # explicit tagis no longer needed since automatically assigned
-            # when dumping the compose configuration by using v2 wrapper
-            # docker.client.tag(img, new_tag)
+            docker.client.tag(img, new_tag)
             local_images.append(new_tag)
 
         # push to the local registry
