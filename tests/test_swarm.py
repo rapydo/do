@@ -191,6 +191,20 @@ def test_swarm(capfd: Capture) -> None:
         "Stack started",
     )
 
+    # Once started a stack in swarm mode, it's not possible
+    # to re-deploy another stack
+    exec_command(
+        capfd,
+        "start",
+        "A stack is already running",
+        "Stop it with rapydo remove if you want to start a new stack",
+    )
+
+    exec_command(
+        capfd,
+        "remove",
+    )
+
     # Deploy the full stack
     exec_command(
         capfd,
@@ -199,7 +213,7 @@ def test_swarm(capfd: Capture) -> None:
     )
 
     # Once started a stack in swarm mode, it's not possible
-    # to re-deploy a sub-stack
+    # to re-deploy another stack
     exec_command(
         capfd,
         "start backend",
