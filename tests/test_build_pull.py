@@ -168,10 +168,14 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
+    if SWARM_MODE:
+        registry = "127.0.0.1:5000"
+    else:
+        registry = "docker.io"
     exec_command(
         capfd,
         "build rabbit",
-        f"naming to docker.io/testbuild/rabbit:{__version__}",
+        f"naming to {registry}/testbuild/rabbit:{__version__}",
         "Custom images built",
     )
 
