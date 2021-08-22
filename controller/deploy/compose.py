@@ -129,7 +129,7 @@ class Compose:
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
-                "you can use rapydo remove --networks or docker system prune",
+                "you can use rapydo remove or docker system prune",
             )
 
     def create_volatile_container(

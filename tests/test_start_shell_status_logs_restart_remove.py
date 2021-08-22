@@ -215,12 +215,6 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "remove --net backend",
-        "Incompatibile options --networks and --service",
-    )
-
-    exec_command(
-        capfd,
         "remove --all backend",
         "Incompatibile options --all and --service",
     )
@@ -232,12 +226,8 @@ def test_all(capfd: Capture) -> None:
     )
 
     exec_command(
-        capfd,
-        "remove --networks",
-        "Stack removed",
+        capfd, "remove --all", "--all option not implemented yet", "Stack removed"
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")
 
     exec_command(
         capfd,
