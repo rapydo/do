@@ -22,7 +22,7 @@ def restart() -> None:
 
     Application.get_controller().controller_init(services)
 
-    # log.info("Restarting services:")
+    log.info("Restarting services:")
     # for service in Application.data.services:
     #     swarm.restart(service)
 
