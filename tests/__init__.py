@@ -7,8 +7,6 @@ from typing import Any, List, Optional, Type, TypeVar
 from faker import Faker
 from typer.testing import CliRunner
 
-from controller import SWARM_MODE
-
 runner = CliRunner()
 
 
@@ -163,7 +161,8 @@ def start_registry(capfd: Any) -> None:
     exec_command(
         capfd,
         "registry",
-        "Creating registry",
+        "Starting services (registry)...",
+        "Services started (registry)",
     )
     time.sleep(2)
 
