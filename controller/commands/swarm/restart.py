@@ -23,17 +23,9 @@ def restart() -> None:
     Application.get_controller().controller_init(services)
 
     log.info("Restarting services:")
-    # for service in Application.data.services:
-    #     swarm.restart(service)
 
     compose = ComposeV2(Application.data.files)
-    # if Application.data.services != Application.data.active_services:
-    #     if swarm.docker.stack.list():
-    #         print_and_exit(
-    #             "A stack is already running. "
-    #             "Stop it with rapydo remove if you want to start a new stack"
-    #         )
-
     compose.dump_config(Application.data.services)
     swarm.deploy()
+
     log.info("Stack restarted")

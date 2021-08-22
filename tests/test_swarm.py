@@ -370,15 +370,6 @@ def test_swarm(capfd: Capture) -> None:
         "Stack restarted",
     )
 
-    exec_command(
-        capfd,
-        "stop",
-        "Stop command is not implemented in Swarm Mode",
-        "Stop is in contrast with the Docker Swarm approach",
-        "You can remove the stack => rapydo remove",
-        "Or you can scale all the services to zero => rapydo scale service=0",
-    )
-
     exec_command(capfd, "remove", "Stack removed")
 
     exec_command(

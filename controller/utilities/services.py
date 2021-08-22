@@ -73,7 +73,7 @@ def find_active(services: ComposeServices) -> List[str]:
             base_actives.append(name)
 
     log.debug("Base active services = {}", base_actives)
-    log.debug("Services dependencies = {}", dependencies)
+    # log.debug("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
     return active_services
 
