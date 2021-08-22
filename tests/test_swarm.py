@@ -358,6 +358,8 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "remove backend",
         "swarm_backend scaled to 0",
+        "verify: Service converged",
+        "Services removed",
     )
 
     exec_command(
@@ -377,13 +379,6 @@ def test_swarm(capfd: Capture) -> None:
         "Or you can scale all the services to zero => rapydo scale service=0",
     )
 
-    exec_command(
-        capfd,
-        "remove frontend",
-        "swarm_frontend scaled to 0",
-        "verify: Service converged",
-        "Services removed",
-    )
     exec_command(capfd, "remove", "Stack removed")
 
     exec_command(

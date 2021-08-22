@@ -144,4 +144,4 @@ class Compose:
             ts = container.created.strftime("%d-%m-%Y %H:%M:%S")
 
             cname = f"{COLOR}{name:23}{Fore.RESET}"
-            print(f"{container_id} {cname} {status:8} {ts:20} {image:16}\t{ports}")
+            print(f"{container_id} {cname} {status:8} {ts:20} {image:24}\t{ports}")
