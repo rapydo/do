@@ -57,8 +57,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "status",
-        "docker-compose command: 'ps'",
-        # "first_backend_1",
+        "first_backend_1",
     )
 
     # Added for GitHub Actions
@@ -124,8 +123,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "status",
-        "docker-compose command: 'ps'",
-        # "first_backend_1",
+        "first_backend_1",
     )
 
     time.sleep(5)
