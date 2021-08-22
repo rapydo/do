@@ -50,7 +50,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "start",
-        "docker-compose command: 'up'",
         "Stack started",
     )
 

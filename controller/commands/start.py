@@ -5,8 +5,7 @@ import typer
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose import Compose
-from controller.deploy.compose_v2 import Compose as ComposeV2
+from controller.deploy.compose_v2 import Compose as Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
@@ -32,9 +31,9 @@ def start(
         Application.data.base_services,
     )
 
+    compose = Compose(Application.data.files)
     if SWARM_MODE:
         swarm = Swarm()
-        compose = ComposeV2(Application.data.files)
         if swarm.stack_is_running(Configuration.project):
             print_and_exit(
                 "A stack is already running. "
@@ -45,7 +44,6 @@ def start(
         compose.dump_config(Application.data.services)
         swarm.deploy()
     else:
-        dc = Compose(files=Application.data.files)
-        dc.start_containers(Application.data.services, force_recreate=False)
+        compose.start_containers(Application.data.services)
 
     log.info("Stack started")

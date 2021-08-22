@@ -65,7 +65,7 @@ def test_docker_registry(capfd: Capture) -> None:
         "This is a temporary command and will probably be merged"
         " with interfaces and volatile commands in a near future",
         "Starting services (registry)...",
-        "Services started (registry)",
+        "Services started: registry",
     )
 
     exec_command(

@@ -162,7 +162,7 @@ def start_registry(capfd: Any) -> None:
         capfd,
         "registry",
         "Starting services (registry)...",
-        "Services started (registry)",
+        "Services started: registry",
     )
     time.sleep(2)
 

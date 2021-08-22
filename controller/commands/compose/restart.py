@@ -7,7 +7,7 @@ from controller.app import Application
 from controller.deploy.compose import Compose
 
 
-@Application.app.command(help="Restart running containers")
+@Application.app.command(help="Restart modified running containers")
 def restart(
     services: List[str] = typer.Argument(
         None,

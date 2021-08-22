@@ -116,7 +116,7 @@ class Compose:
 
     def start_containers(self, services: List[str]) -> None:
 
-        services_list = ",".join(services)
+        services_list = ", ".join(services)
         log.info("Starting services ({})...", services_list)
         self.docker.compose.up(
             services=services,
@@ -124,7 +124,7 @@ class Compose:
             detach=True,
             abort_on_container_exit=False,
         )
-        log.info("Services started ({})", services_list)
+        log.info("Services started: {}", services_list)
 
     def status(self) -> None:
         print("")
