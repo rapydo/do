@@ -3,7 +3,7 @@ import os
 
 from controller import log, print_and_exit
 from controller.app import Application, Configuration
-from controller.deploy.compose import Compose
+from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
@@ -36,7 +36,5 @@ def registry() -> None:
         registry = docker.get_registry()
         print_and_exit("The registry is already running at {}", registry)
 
-    # Not implemented yet with compose v2
     compose = Compose(Application.data.files)
-    # compose.docker.compose.up(detach=True)
     compose.start_containers(["registry"])

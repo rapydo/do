@@ -32,8 +32,6 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
-        # "Starting first_rabbit_1",
-        # "Creating first_rabbit_2",
     )
     exec_command(
         capfd,
@@ -44,8 +42,6 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "scale rabbit=2",
-        # "Starting first_rabbit_1",
-        # "Starting first_rabbit_2",
     )
 
     with open(".projectrc", "a") as f:
@@ -54,17 +50,11 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "scale rabbit",
-        # "Starting first_rabbit_1",
-        # "Starting first_rabbit_2",
-        # "Creating first_rabbit_3",
     )
 
     exec_command(
         capfd,
         "scale rabbit=1",
-        # "Starting first_rabbit_1",
-        # "Stopping and removing first_rabbit_2",
-        # "Stopping and removing first_rabbit_3",
     )
 
     # We modified projectrc to contain: DEFAULT_SCALE_RABBIT: 3

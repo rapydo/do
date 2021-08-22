@@ -114,6 +114,13 @@ class Compose:
 
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
+    def start_containers(self, services: List[str]) -> None:
+
+        services_list = ",".join(services)
+        log.info("Starting services ({})...", services_list)
+        self.docker.compose.up(services=services, detach=True)
+        log.info("Services started ({})", services_list)
+
     def status(self) -> None:
         print("")
 
