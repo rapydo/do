@@ -184,7 +184,6 @@ def start_project(capfd: Any) -> None:
     exec_command(
         capfd,
         "start",
-        "docker-compose command: 'up'",
         "Stack started",
     )
     time.sleep(5)

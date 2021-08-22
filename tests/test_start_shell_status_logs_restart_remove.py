@@ -228,7 +228,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "remove",
-        "docker-compose command: 'stop'",
         "Stack removed",
     )
 

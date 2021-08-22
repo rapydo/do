@@ -29,7 +29,6 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "-e CRONTAB_ENABLE=1 start",
-        "docker-compose command: 'up'",
         "Stack started",
     )
 
