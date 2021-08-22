@@ -45,7 +45,8 @@ def remove(
         swarm.remove()
         # This is needed because docker stack remove does not support a --wait flag
         # To make the remove command sync and chainable with a start command
-        network_name = f"{Configuration.project}_swarm_default"
+        engine = Application.env.get("DEPLOY_ENGINE", "swarm")
+        network_name = f"{Configuration.project}_{engine}_default"
         wait_network_removal(swarm, network_name)
         log.info("Stack removed")
     else:
