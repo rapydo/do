@@ -44,6 +44,12 @@ def start(
         compose.dump_config(Application.data.services)
         swarm.deploy()
     else:
+        if compose.get_running_services(Configuration.project):
+            print_and_exit(
+                "A stack is already running. "
+                "Stop it with rapydo remove if you want to start a new stack "
+                "or use rapydo restart to update it"
+            )
         compose.start_containers(Application.data.services)
 
     log.info("Stack started")

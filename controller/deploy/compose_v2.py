@@ -1,9 +1,9 @@
 from pathlib import Path
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, Set, Union, cast
 
 import yaml
 from colorama import Fore
-from python_on_whales import Container, DockerClient
+from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 
 from controller import (
@@ -125,6 +125,26 @@ class Compose:
             abort_on_container_exit=False,
         )
         log.info("Services started: {}", services_list)
+
+    def get_running_services(self, prefix: str) -> Set[str]:
+
+        prefix += "_"
+        containers = set()
+        for container in self.docker.compose.ps():
+            name = container.name
+            if not name.startswith(prefix):
+                continue
+
+            status = container.state.status
+            if status != "running" and status != "starting" and status != "ready":
+                continue
+
+            # to be replaced with removeprefix
+            name = name[len(prefix) :]
+            # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+            name = name[0 : name.index("_")]
+            containers.add(name)
+        return containers
 
     def status(self) -> None:
         print("")

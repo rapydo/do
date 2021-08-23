@@ -18,7 +18,7 @@ def wait_network_removal(swarm: Swarm, network: str) -> None:
                     break
             else:
                 break
-            log.debug("{} still removing, waiting...", network)
+            log.debug("{} is still removing, waiting...", network)
             time.sleep(1)
         # Can happens when the network is near to be removed and
         # returned by list but no longer available for inspect

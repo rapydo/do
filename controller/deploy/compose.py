@@ -234,6 +234,7 @@ class Compose:
                 name = row_tokens[0]
 
                 # Removed the prefix (i.e. project name)
+                # to be replaced with removeprefix
                 name = name[1 + len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
                 name = name[0 : name.index("_")]

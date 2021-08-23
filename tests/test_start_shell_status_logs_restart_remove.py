@@ -55,6 +55,12 @@ def test_all(capfd: Capture) -> None:
 
     exec_command(
         capfd,
+        "start",
+        "A stack is already running.",
+    )
+
+    exec_command(
+        capfd,
         "status",
         "first_backend_1",
     )
