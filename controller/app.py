@@ -870,7 +870,7 @@ You can use of one:
                     value = ""
                 else:
                     value = str(value)
-                if " " in value:
+                if " " in value or value == "":
                     value = f"'{value}'"
 
                 # This is needed to prevent:
