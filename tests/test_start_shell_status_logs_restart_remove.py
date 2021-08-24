@@ -222,7 +222,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "remove --all backend",
-        "Incompatibile options --all and --service",
+        "Stack removed",
     )
 
     exec_command(
