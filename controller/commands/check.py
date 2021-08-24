@@ -1,6 +1,7 @@
 from datetime import datetime
+from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, Union, cast
 
 import typer
 
@@ -176,7 +177,8 @@ Update it with: rapydo pull {}""",
         )
 
 
-def is_relative_to(path: Path, rel: str) -> bool:
+# rel has same type of working_dir from GitRepo
+def is_relative_to(path: Path, rel: Union[str, PathLike[str]]) -> bool:
     # This works from py39
     try:
         return path.is_relative_to(rel)

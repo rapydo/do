@@ -50,10 +50,10 @@ def list_cmd(
         print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
         for name in Application.gits:
             repo = Application.gits.get(name)
-            if repo:
+            if repo and repo.working_dir:
                 branch = git.get_active_branch(repo)
-                path = repo.working_dir
-                path = path.replace(os.getcwd(), "")
+                path = str(repo.working_dir).replace(os.getcwd(), "")
+                # to be replacecd with removeprefix
                 if path.startswith("/"):
                     path = path[1:]
                 print(f"{name:<18} {branch:<18} {path}")
