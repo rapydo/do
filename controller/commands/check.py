@@ -1,7 +1,6 @@
 from datetime import datetime
-from os import PathLike
 from pathlib import Path
-from typing import List, Optional, Tuple, Union, cast
+from typing import List, Optional, Tuple, cast
 
 import typer
 
@@ -177,8 +176,7 @@ Update it with: rapydo pull {}""",
         )
 
 
-# rel has same type of working_dir from GitRepo
-def is_relative_to(path: Path, rel: Union[str, PathLike[str]]) -> bool:
+def is_relative_to(path: Path, rel: str) -> bool:
     # This works from py39
     try:
         return path.is_relative_to(rel)
@@ -202,9 +200,13 @@ def build_is_obsolete(
     btempl = Application.gits.get("build-templates")
     vanilla = Application.gits.get("main")
 
-    if btempl and btempl.working_dir and is_relative_to(path, btempl.working_dir):
+    if btempl and btempl.working_dir and is_relative_to(path, str(btempl.working_dir)):
         git_repo = btempl
-    elif vanilla and vanilla.working_dir and is_relative_to(path, vanilla.working_dir):
+    elif (
+        vanilla
+        and vanilla.working_dir
+        and is_relative_to(path, str(vanilla.working_dir))
+    ):
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)
