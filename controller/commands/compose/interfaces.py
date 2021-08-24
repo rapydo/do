@@ -15,11 +15,8 @@ class ServiceTypes(str, Enum):
     adminer = "adminer"
     flower = "flower"
 
-    # Old values
-    swagger = "swagger"
-    celery = "celery"
+    # Deprecated since 1.2
     sqlalchemy = "sqlalchemy"
-    mongo = "mongo"
 
 
 @Application.app.command(help="Execute predefined interfaces to services")
@@ -44,20 +41,8 @@ def interfaces(
     Application.get_controller().controller_init()
 
     # Deprecated since 1.2
-    if service.value == "celery":
-        log.warning("Deprecated interface celery, use flower instead")
-        return False
-
-    if service.value == "swagger":
-        log.warning("Deprecated interface swagger, use swaggerui instead")
-        return False
-
     if service.value == "sqlalchemy":
         log.warning("Deprecated interface sqlalchemy, use adminer instead")
-        return False
-
-    if service.value == "mongo":
-        log.warning("Deprecated interface mongo, use adminer instead")
         return False
 
     service_config = Application.data.compose_config.get(service.value, None)
