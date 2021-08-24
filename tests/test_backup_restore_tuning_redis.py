@@ -268,7 +268,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/redis/{redis_dump_file} completed",
     )
 
-    exec_command(capfd, "start redis")
+    exec_command(capfd, "restart")
     # 4) verify data match again point 1 (restore completed)
     # postponed because redis needs time to start...
 
