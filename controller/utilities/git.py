@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 from urllib.parse import urlparse
 
 import pytz
@@ -10,10 +10,8 @@ from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from controller import SUBMODULES_DIR, log, print_and_exit
 
-# Replace all Any with Repo when GitPython typed version will be released
 
-
-def get_repo(path: str) -> Optional[Any]:
+def get_repo(path: str) -> Optional[Repo]:
     try:
         return Repo(path)
     except NoSuchPathError:
@@ -22,11 +20,11 @@ def get_repo(path: str) -> Optional[Any]:
         return None
 
 
-def init(path: str) -> Any:
+def init(path: str) -> Repo:
     return Repo.init(path)
 
 
-def get_origin(gitobj: Optional[Any]) -> Optional[str]:
+def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
     try:
         if not gitobj:
             return None
@@ -40,7 +38,7 @@ def get_origin(gitobj: Optional[Any]) -> Optional[str]:
         return None
 
 
-def get_active_branch(gitobj: Optional[Any]) -> Optional[str]:
+def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
 
     if not gitobj:
         log.error("git object is None, cannot retrieve active branch")
@@ -53,7 +51,7 @@ def get_active_branch(gitobj: Optional[Any]) -> Optional[str]:
         return None
 
 
-def switch_branch(gitobj: Optional[Any], branch_name: str) -> bool:
+def switch_branch(gitobj: Optional[Repo], branch_name: str) -> bool:
 
     if not gitobj:
         log.error("git object is None, cannot switch the active branch")
@@ -93,7 +91,7 @@ def switch_branch(gitobj: Optional[Any], branch_name: str) -> bool:
 
 def clone(
     url: str, path: Path, branch: str, do: bool = False, check: bool = True
-) -> Any:
+) -> Repo:
 
     local_path = SUBMODULES_DIR.joinpath(path)
 
@@ -121,7 +119,7 @@ def clone(
     return gitobj
 
 
-def compare_repository(gitobj: Any, branch: str, online_url: str) -> bool:
+def compare_repository(gitobj: Repo, branch: str, online_url: str) -> bool:
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -177,7 +175,7 @@ def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
 
 
 def check_file_younger_than(
-    gitobj: Any, filename: Path, timestamp: Union[str, float]
+    gitobj: Repo, filename: Path, timestamp: Union[str, float]
 ) -> Tuple[bool, float, datetime]:
 
     try:
@@ -199,14 +197,13 @@ def check_file_younger_than(
     )
 
 
-def get_unstaged_files(gitobj: Any) -> Dict[str, List[str]]:
+def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
     """
     ref:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
     """
 
-    # type ignore to be removed once the new gitpython version will be released
-    diff: List[Diff] = []  # type: ignore
+    diff: List[Diff] = []
     diff.extend(gitobj.index.diff(gitobj.head.commit))
     diff.extend(gitobj.index.diff(None))
 
@@ -216,7 +213,7 @@ def get_unstaged_files(gitobj: Any) -> Dict[str, List[str]]:
     }
 
 
-def print_diff(gitobj: Any, unstaged: Dict[str, List[str]]) -> bool:
+def print_diff(gitobj: Repo, unstaged: Dict[str, List[str]]) -> bool:
 
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
@@ -246,7 +243,7 @@ def print_diff(gitobj: Any, unstaged: Dict[str, List[str]]) -> bool:
     return True
 
 
-def can_be_updated(path: str, gitobj: Any, do_print: bool = True) -> bool:
+def can_be_updated(path: str, gitobj: Repo, do_print: bool = True) -> bool:
     unstaged = get_unstaged_files(gitobj)
     updatable = len(unstaged["changed"]) == 0 and len(unstaged["untracked"]) == 0
 
@@ -257,7 +254,7 @@ def can_be_updated(path: str, gitobj: Any, do_print: bool = True) -> bool:
     return updatable
 
 
-def update(path: str, gitobj: Any) -> None:
+def update(path: str, gitobj: Repo) -> None:
 
     if not gitobj.active_branch:  # pragma: no cover
         log.error("Can't update {}, no active branch found", path)
@@ -275,7 +272,7 @@ def update(path: str, gitobj: Any) -> None:
                 print_and_exit("Unable to update {} repo, {}", path, str(e))
 
 
-def check_unstaged(path: str, gitobj: Any) -> None:
+def check_unstaged(path: str, gitobj: Repo) -> None:
 
     unstaged = get_unstaged_files(gitobj)
     if len(unstaged["changed"]) > 0 or len(unstaged["untracked"]) > 0:
@@ -283,7 +280,7 @@ def check_unstaged(path: str, gitobj: Any) -> None:
     print_diff(gitobj, unstaged)
 
 
-def fetch(path: str, gitobj: Any) -> None:
+def fetch(path: str, gitobj: Repo) -> None:
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
@@ -293,7 +290,7 @@ def fetch(path: str, gitobj: Any) -> None:
                 print_and_exit(str(e))
 
 
-def check_updates(path: str, gitobj: Any) -> None:
+def check_updates(path: str, gitobj: Repo) -> None:
 
     fetch(path, gitobj)
 

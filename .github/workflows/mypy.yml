@@ -27,7 +27,6 @@ jobs:
           echo "mypy_path = ./stubs" >> mypy.ini
 
           for lib in \
-            git \
             urllib3 \
             docker.errors \
             compose \

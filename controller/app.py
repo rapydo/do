@@ -268,8 +268,7 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data: CommandsData
-    # type ignore to be removed once the new gitpython version will be released
-    gits: Dict[str, GitRepo] = {}  # type: ignore
+    gits: Dict[str, GitRepo] = {}
     env: Dict[str, EnvType] = {}
 
     base_services: ComposeServices
@@ -564,9 +563,8 @@ You can use of one:
         except requests.ConnectionError:  # pragma: no cover
             print_and_exit("Internet connection is unavailable")
 
-    # type ignore to be removed once the new gitpython version will be released
     @staticmethod
-    def working_clone(  # type: ignore
+    def working_clone(
         name: str, repo: Dict[str, str], from_path: Optional[Path] = None
     ) -> Optional[GitRepo]:
 
