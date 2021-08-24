@@ -268,7 +268,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     rabbit_dump_file = files[-1]
 
-    exec_command(capfd, "remove rabbit")
+    exec_command(capfd, "remove")
     # 3) restore the dump
     exec_command(
         capfd,
@@ -277,7 +277,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
     )
 
-    exec_command(capfd, "start rabbit")
+    exec_command(capfd, "start")
     # 4) verify data match again point 1 (restore completed)
     # postponed because rabbit needs time to start...
 
