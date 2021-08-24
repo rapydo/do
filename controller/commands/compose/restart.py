@@ -18,6 +18,6 @@ def restart(
     Application.get_controller().controller_init(services)
 
     dc = Compose(files=Application.data.files)
-    dc.start_containers(Application.data.services, force_recreate=True)
+    dc.start_containers(Application.data.services)
 
     log.info("Stack restarted")

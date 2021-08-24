@@ -96,8 +96,6 @@ class Compose:
         scale: Optional[List[str]] = None,
         # used by scale
         skip_dependencies: bool = False,
-        # used by start
-        force_recreate: bool = False,
     ) -> None:
         """
         Start containers (docker-compose up)
@@ -116,7 +114,7 @@ class Compose:
             "--remove-orphans": False,
             "--abort-on-container-exit": False,
             "--no-recreate": False,
-            "--force-recreate": force_recreate,
+            "--force-recreate": False,
             "--always-recreate-deps": False,
             "--no-build": False,
             "--scale": scale,

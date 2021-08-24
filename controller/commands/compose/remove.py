@@ -25,20 +25,13 @@ def remove(
 
     dc = Compose(Application.data.files)
 
-    if rm_all:
+    all_services = Application.data.services == Application.data.active_services
 
-        if Configuration.services_list is not None or services:
-
-            print_and_exit(
-                "Incompatibile options --all and service list\n"
-                + "rapydo remove --all is ALWAYS applied to EVERY container of the "
-                + "stack due to the underlying docker-compose implementation. "
-                + "If you want to continue remove service option",
-            )
-        else:
-            log.warning("--all option not implemented yet")
-
-    # "--volumes": rm_all,
-    dc.docker.compose.down(remove_orphans=False, remove_images="local")
+    if all_services:
+        # "--volumes": rm_all,
+        log.warning("--all option not implemented yet")
+        dc.docker.compose.down(remove_orphans=False, remove_images="local")
+    else:
+        dc.docker.compose.rm(Application.data.services, stop=True, volumes=rm_all)
 
     log.info("Stack removed")
