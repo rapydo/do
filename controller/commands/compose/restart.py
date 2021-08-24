@@ -8,14 +8,8 @@ from controller.deploy.compose import Compose
 
 
 @Application.app.command(help="Restart modified running containers")
-def restart(
-    services: List[str] = typer.Argument(
-        None,
-        help="Services to be restarted",
-        autocompletion=Application.autocomplete_service,
-    ),
-) -> None:
-    Application.get_controller().controller_init(services)
+def restart() -> None:
+    Application.get_controller().controller_init()
 
     dc = Compose(files=Application.data.files)
     dc.start_containers(Application.data.services)
