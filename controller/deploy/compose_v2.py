@@ -5,6 +5,7 @@ import yaml
 from colorama import Fore
 from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
+from python_on_whales.utils import DockerException
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -130,21 +131,29 @@ class Compose:
 
         prefix += "_"
         containers = set()
-        for container in self.docker.compose.ps():
-            name = container.name
-            if not name.startswith(prefix):
-                continue
+        try:
+            for container in self.docker.compose.ps():
+                name = container.name
+                if not name.startswith(prefix):
+                    continue
 
-            status = container.state.status
-            if status != "running" and status != "starting" and status != "ready":
-                continue
+                status = container.state.status
+                if status != "running" and status != "starting" and status != "ready":
+                    continue
 
-            # to be replaced with removeprefix
-            name = name[len(prefix) :]
-            # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-            name = name[0 : name.index("_")]
-            containers.add(name)
-        return containers
+                # to be replaced with removeprefix
+                name = name[len(prefix) :]
+                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+                name = name[0 : name.index("_")]
+                containers.add(name)
+            return containers
+        # An exception is raised when no service is running.
+        # The same happens with:
+        # `docker compose ps`
+        # that fails with a "not found" and it seems to be a bug of compose-cli.
+        # In case it is a feature a specific exception would be helpful here
+        except DockerException:
+            return containers
 
     def status(self) -> None:
         print("")
