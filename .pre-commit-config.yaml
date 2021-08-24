@@ -33,7 +33,6 @@ repos:
         additional_dependencies: [
             "docker-compose==1.29.2",
             "python-on-whales==0.24.0",
-            "dockerfile-parse==1.2.0",
             "python-dateutil",
             "pytz",
             "loguru",

@@ -187,9 +187,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/redis/",
     )
 
-    exec_command(capfd, "start")
-
-    # Probably a sleep is needed here
+    exec_command(capfd, "start backend redis")
 
     exec_command(
         capfd,
