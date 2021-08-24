@@ -51,7 +51,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     # Restart to enable to cronjobs
     exec_command(
         capfd,
-        "-e CRONTAB_ENABLE=1 restart backend",
+        "-e CRONTAB_ENABLE=1 restart",
         "Stack restarted",
     )
 
