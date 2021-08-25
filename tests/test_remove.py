@@ -48,7 +48,7 @@ def test_remove(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove backend",
-            "swarm_backend scaled to 0",
+            "rem_backend scaled to 0",
             "verify: Service converged",
             "Services removed",
         )
