@@ -23,9 +23,10 @@ def test_all(capfd: Capture) -> None:
         )
     )
 
+    project_name = "first"
     create_project(
         capfd=capfd,
-        name="first",
+        name=project_name,
         auth=auth,
         frontend="angular",
         services=["neo4j"],
@@ -110,10 +111,10 @@ def test_all(capfd: Capture) -> None:
             "Stack removed",
         )
 
-        data_folder = Path("data", "swarm")
+        data_folder = Path("data", project_name)
         karma_folder = data_folder.joinpath("karma")
 
-        # Delete data/swarm/karma and it will be recreated
+        # Delete data/project_name/karma and it will be recreated
         assert karma_folder.exists()
         shutil.rmtree(karma_folder)
         assert not karma_folder.exists()
@@ -126,7 +127,7 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "start frontend",
             "A bind folder is missing and can't be automatically created: ",
-            "/data/swarm/karma",
+            f"/data/{project_name}/karma",
         )
         assert not karma_folder.exists()
 
@@ -137,7 +138,7 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "start frontend",
             "A bind folder was missing and was automatically created: ",
-            "/data/swarm/karma",
+            f"/data/{project_name}/karma",
             "Stack started",
         )
         assert karma_folder.exists()
