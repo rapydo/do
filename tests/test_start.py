@@ -81,6 +81,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove",
+            "Stack removed",
         )
 
         # Deploy the full stack
@@ -102,6 +103,13 @@ def test_all(capfd: Capture) -> None:
         # ############################
         # Verify bind volumes checks #
         # ############################
+
+        exec_command(
+            capfd,
+            "remove",
+            "Stack removed",
+        )
+
         data_folder = Path("data", "swarm")
         karma_folder = data_folder.joinpath("karma")
 
