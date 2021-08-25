@@ -1,13 +1,15 @@
 """
 This module will test the status command
 """
+import time
+
+from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
     exec_command,
     init_project,
     pull_images,
-    signal_handler,
     start_project,
 )
 
@@ -22,10 +24,37 @@ def test_all(capfd: Capture) -> None:
     )
     init_project(capfd)
     pull_images(capfd)
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "status",
+            "====== Nodes ======",
+            "Manager",
+            "Ready+Active",
+            "No service is running",
+        )
+
     start_project(capfd)
 
-    exec_command(
-        capfd,
-        "status",
-        "first_backend_1",
-    )
+    if SWARM_MODE:
+        time.sleep(2)
+
+        exec_command(
+            capfd,
+            "status",
+            "====== Nodes ======",
+            "Manager",
+            "Ready+Active",
+            "====== Services ======",
+            "first_backend",
+            "first_postgres",
+            " [1]",
+            "running",
+        )
+    else:
+        exec_command(
+            capfd,
+            "status",
+            "first_backend_1",
+        )

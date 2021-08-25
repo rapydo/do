@@ -192,21 +192,6 @@ def test_swarm(capfd: Capture) -> None:
         "Stop it with rapydo remove if you want to start a new stack",
     )
 
-    time.sleep(2)
-
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "====== Services ======",
-        "swarm_backend",
-        "swarm_frontend",
-        " [1]",
-        "running",
-    )
-
     exec_command(
         capfd,
         "logs invalid",
@@ -299,17 +284,6 @@ def test_swarm(capfd: Capture) -> None:
         "scale redis=2",
         "Service redis is not guaranteed to support the scale, "
         "can't accept the request",
-    )
-
-    exec_command(capfd, "remove", "Stack removed")
-
-    exec_command(
-        capfd,
-        "status",
-        "====== Nodes ======",
-        "Manager",
-        "Ready+Active",
-        "No service is running",
     )
 
     # ############################

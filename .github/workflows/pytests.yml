@@ -25,7 +25,6 @@ jobs:
             logs,
             scale,
             start,
-            status,
 
             # Both Compose and Swarm
             compose/add_upgrade,
@@ -42,6 +41,8 @@ jobs:
             compose/remove,
             swarm/restart,
             compose/restart,
+            swarm/status,
+            compose/status,
             compose/create,
             swarm/create,
             compose/install,
