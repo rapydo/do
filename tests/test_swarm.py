@@ -133,12 +133,6 @@ def test_swarm(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "remove backend",
-        "Stack swarm is not running, deploy it with rapydo start",
-    )
-
-    exec_command(
-        capfd,
         "start backend invalid",
         "No such service: invalid",
     )
@@ -307,22 +301,6 @@ def test_swarm(capfd: Capture) -> None:
         "can't accept the request",
     )
 
-    exec_command(
-        capfd,
-        "remove backend",
-        "swarm_backend scaled to 0",
-        "verify: Service converged",
-        "Services removed",
-    )
-
-    exec_command(
-        capfd,
-        "restart",
-        "Restarting services:",
-        "Updating service swarm_backend",
-        "Stack restarted",
-    )
-
     exec_command(capfd, "remove", "Stack removed")
 
     exec_command(
@@ -332,10 +310,6 @@ def test_swarm(capfd: Capture) -> None:
         "Manager",
         "Ready+Active",
         "No service is running",
-    )
-
-    exec_command(
-        capfd, "restart", "Stack swarm is not running, deploy it with rapydo start"
     )
 
     # ############################

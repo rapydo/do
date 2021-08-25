@@ -28,7 +28,10 @@ def test_all(capfd: Capture) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    exec_command(capfd, "shell invalid", "Service invalid not found")
+    if SWARM_MODE:
+        exec_command(capfd, "shell invalid", "Service invalid not found")
+    else:
+        exec_command(capfd, "shell invalid", "No such service: invalid")
 
     if SWARM_MODE:
 
