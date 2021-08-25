@@ -24,7 +24,8 @@ jobs:
             check,
             scale,
             shell,
-            start_status_logs_restart_remove,
+            start_logs_restart_remove,
+            status,
 
             # Both Compose and Swarm
             compose/add_upgrade,

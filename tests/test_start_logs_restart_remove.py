@@ -2,8 +2,7 @@
 This module will test the interaction with containers
 by executing the following commands:
 - start
-- status and logs
-- shell
+- logs
 - restart
 - remove
 """
@@ -57,12 +56,6 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "start",
         "A stack is already running.",
-    )
-
-    exec_command(
-        capfd,
-        "status",
-        "first_backend_1",
     )
 
     # Added for GitHub Actions
@@ -123,12 +116,6 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "shell --no-tty neo4j whoami",
         "neo4j",
-    )
-
-    exec_command(
-        capfd,
-        "status",
-        "first_backend_1",
     )
 
     time.sleep(5)

@@ -1,11 +1,5 @@
 """
-This module will test the interaction with containers
-by executing the following commands:
-- start
-- status and logs
-- shell
-- restart
-- remove
+This module will test the shell command
 """
 import signal
 
