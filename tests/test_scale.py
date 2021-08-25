@@ -32,7 +32,7 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale backend=2",
-            "Registry 127.0.0.1 not reachable.",
+            "Registry 127.0.0.1:5000 not reachable.",
         )
 
         start_registry(capfd)

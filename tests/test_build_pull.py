@@ -41,13 +41,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "pull",
-            "Registry 127.0.0.1 not reachable.",
+            "Registry 127.0.0.1:5000 not reachable.",
         )
 
         exec_command(
             capfd,
             "build",
-            "Registry 127.0.0.1 not reachable.",
+            "Registry 127.0.0.1:5000 not reachable.",
         )
 
         start_registry(capfd)
