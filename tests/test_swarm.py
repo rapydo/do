@@ -213,30 +213,6 @@ def test_swarm(capfd: Capture) -> None:
         "running",
     )
 
-    exec_command(capfd, "shell invalid", "Service invalid not found")
-
-    exec_command(
-        capfd,
-        "shell backend",
-        "Due to limitations of the underlying packages, "
-        "the shell command is not implemented yet",
-        "You can execute by yourself the following command",
-        "docker exec --interactive --tty --user developer swarm_backend.1.",
-        "bash",
-    )
-
-    exec_command(
-        capfd,
-        "shell backend --default",
-        "Due to limitations of the underlying packages, "
-        "the shell command is not implemented yet",
-        "You can execute by yourself the following command",
-        "docker exec --interactive --tty --user developer swarm_backend.1.",
-        "restapi launch",
-    )
-
-    exec_command(capfd, "shell backend -u aRandomUser", "--user aRandomUser")
-
     exec_command(
         capfd,
         "logs invalid",
