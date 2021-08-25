@@ -22,9 +22,10 @@ jobs:
 
             # Currently Compose only, to be generalized
             check,
+            logs,
             scale,
             shell,
-            start_logs_restart_remove,
+            start_restart_remove,
             status,
 
             # Both Compose and Swarm

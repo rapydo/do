@@ -1,10 +1,5 @@
 """
-This module will test the interaction with containers
-by executing the following commands:
-- start
-- logs
-- restart
-- remove
+This module will test the logs command
 """
 import signal
 import time
@@ -17,7 +12,7 @@ from tests import (
     init_project,
     mock_KeyboardInterrupt,
     pull_images,
-    signal_handler,
+    start_project,
 )
 
 
@@ -31,92 +26,8 @@ def test_all(capfd: Capture) -> None:
         services=["rabbit", "neo4j"],
     )
     init_project(capfd)
-
-    exec_command(
-        capfd,
-        "start backend invalid",
-        "No such service: invalid",
-    )
-
-    exec_command(
-        capfd,
-        "start backend",
-        "image, execute rapydo pull backend",
-    )
-
     pull_images(capfd)
-
-    exec_command(
-        capfd,
-        "start",
-        "Stack started",
-    )
-
-    exec_command(
-        capfd,
-        "start",
-        "A stack is already running.",
-    )
-
-    # Added for GitHub Actions
-    exec_command(
-        capfd,
-        "shell backend hostname",
-        "the input device is not a TTY",
-    )
-
-    exec_command(
-        capfd,
-        "shell --no-tty backend hostname",
-        "backend-server",
-    )
-
-    signal.signal(signal.SIGALRM, signal_handler)
-    signal.alarm(2)
-    exec_command(
-        capfd,
-        "shell --no-tty backend --default-command",
-        # "*** RESTful HTTP API ***",
-        # "Serving Flask app",
-        "Time is up",
-    )
-
-    # This can't work on GitHub Actions due to the lack of tty
-    # signal.signal(signal.SIGALRM, handler)
-    # signal.alarm(2)
-    # exec_command(
-    #     capfd,
-    #     "shell --no-tty backend",
-    #     # "developer@backend-server:[/code]",
-    #     "Time is up",
-    # )
-
-    # Testing default users
-    exec_command(
-        capfd,
-        "shell --no-tty backend whoami",
-        "developer",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty frontend whoami",
-        "node",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty rabbit whoami",
-        "rabbitmq",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty postgres whoami",
-        "postgres",
-    )
-    exec_command(
-        capfd,
-        "shell --no-tty neo4j whoami",
-        "neo4j",
-    )
+    start_project(capfd)
 
     time.sleep(5)
     # Backend logs are never timestamped
@@ -210,28 +121,4 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "remove --all backend",
         "Stack removed",
-    )
-
-    exec_command(
-        capfd,
-        "remove",
-        "Stack removed",
-    )
-
-    exec_command(
-        capfd, "remove --all", "--all option not implemented yet", "Stack removed"
-    )
-
-    exec_command(
-        capfd,
-        "shell --no-tty backend hostname",
-        "Requested command: hostname with user: developer",
-        "No container found for backend_1",
-    )
-
-    exec_command(
-        capfd,
-        "shell --no-tty backend --default",
-        "Requested command: restapi launch with user: developer",
-        "No container found for backend_1",
     )
