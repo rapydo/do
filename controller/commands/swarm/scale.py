@@ -8,6 +8,7 @@ from python_on_whales.exceptions import NoSuchService
 from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
 # RabbitMQ:
@@ -61,6 +62,9 @@ def scale(
                 "can't accept the request",
                 service,
             )
+
+    docker = Docker()
+    docker.ping_registry()
 
     verify_available_images(
         [service],

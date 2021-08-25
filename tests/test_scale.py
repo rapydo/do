@@ -27,14 +27,21 @@ def test_scale(capfd: Capture) -> None:
     )
     init_project(capfd)
 
+    if SWARM_MODE:
+
+        exec_command(
+            capfd,
+            "scale backend=2",
+            "Registry 127.0.0.1 not reachable.",
+        )
+
+        start_registry(capfd)
+
     exec_command(
         capfd,
         "scale backend=2",
         "image, execute rapydo pull backend",
     )
-
-    if SWARM_MODE:
-        start_registry(capfd)
 
     pull_images(capfd)
 

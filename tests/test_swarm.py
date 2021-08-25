@@ -130,6 +130,12 @@ def test_swarm(capfd: Capture) -> None:
         "docker swarm join --token ",
     )
 
+    exec_command(
+        capfd,
+        "start",
+        "Registry 127.0.0.1 not reachable.",
+    )
+
     start_registry(capfd)
 
     ###################################################

@@ -37,6 +37,19 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     if SWARM_MODE:
+
+        exec_command(
+            capfd,
+            "pull",
+            "Registry 127.0.0.1 not reachable.",
+        )
+
+        exec_command(
+            capfd,
+            "build",
+            "Registry 127.0.0.1 not reachable.",
+        )
+
         start_registry(capfd)
 
     image = f"rapydo/backend:{__version__}"
