@@ -1,12 +1,11 @@
 """
-This module test the backup and restore commands + (tuning not implemented) mariadb
+This module test the backup and restore commands mariadb
 """
 import os
 from pathlib import Path
 
 from faker import Faker
 
-# from controller import log
 from tests import (
     Capture,
     TemporaryRemovePath,

@@ -1,6 +1,5 @@
 """
-This module will test the backup and restore commands on Redis
-+ (tuning not implemented)
+This module will test the backup and restore commands on rabbitMQ
 """
 import os
 import time
@@ -23,63 +22,70 @@ from tests import (
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
-    backup_folder = Path("data/backup/redis")
+    backup_folder = Path("data/backup/rabbit")
 
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
         frontend="no",
-        services=["redis"],
+        services=["rabbit"],
     )
     init_project(capfd)
 
     exec_command(
         capfd,
-        "backup redis",
-        "image, execute rapydo pull redis",
+        "backup rabbit",
+        "image, execute rapydo pull rabbit",
     )
     exec_command(
         capfd,
-        "restore redis",
-        "image, execute rapydo pull redis",
+        "restore rabbit",
+        "image, execute rapydo pull rabbit",
     )
 
     pull_images(capfd)
     start_project(capfd)
 
-    service_verify(capfd, "redis")
+    service_verify(capfd, "rabbitmq")
 
-    # # This will initialize redis
-    # exec_command(capfd, "shell --no-tty backend 'restapi init'")
-
-    # Just some delay extra delay, redis is a slow starter
+    # Just some delay extra delay, rabbit is a slow starter
     time.sleep(5)
 
-    key = faker.pystr()
-    value1 = faker.pystr()
-    value2 = faker.pystr()
-    # NOTE: q = redis.__name__ is just to have a fixed name to be used to test the
+    # NOTE: q = rabbitmq.__name__ is just to have a fixed name to be used to test the
     # queue without the need to introdure further nested " or '
-    get_key = (
-        f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" get {key}\'"'
-    )
-    set_key1 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value1}\'"'
-    set_key2 = f'shell --no-tty redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value2}\'"'
+    query_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance();print(q, r.queue_exists(q));'\""
+    create_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.create_queue(q);'\""
+    delete_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.delete_queue(q);'\""
+
+    exec_command(capfd, query_queue, "restapi.connectors.rabbitmq False")
 
     exec_command(
         capfd,
-        set_key1,
+        create_queue,
     )
 
-    exec_command(capfd, get_key, value1)
+    exec_command(capfd, query_queue, "restapi.connectors.rabbitmq True")
 
-    # Backup command on a running Redis
+    # Backup command
     exec_command(
         capfd,
-        "backup redis",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "backup rabbit",
+        "RabbitMQ is running and the backup will temporary stop it. "
+        "If you want to continue add --force flag",
+    )
+    exec_command(
+        capfd,
+        "backup rabbit --force --restart backend",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
+    )
+    # This is to verify that --force restarted rabbit
+    exec_command(
+        capfd,
+        "backup rabbit",
+        "RabbitMQ is running and the backup will temporary stop it. "
+        "If you want to continue add --force flag",
     )
 
     exec_command(
@@ -94,57 +100,56 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Stack stopped",
     )
 
-    # Backup command on a stopped Redis
     exec_command(
         capfd,
-        "backup redis",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "backup rabbit",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
     # Test backup retention
     exec_command(
         capfd,
-        "backup redis --max 999 --dry-run",
+        "backup rabbit --max 999 --dry-run",
         "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
     # Verify that due to dry run, no backup is executed
     exec_command(
         capfd,
-        "backup redis --max 999 --dry-run",
+        "backup rabbit --max 999 --dry-run",
         "Dry run mode is enabled",
         "Found 2 backup files, maximum not reached",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
     exec_command(
         capfd,
-        "backup redis --max 1 --dry-run",
+        "backup rabbit --max 1 --dry-run",
         "Dry run mode is enabled",
         "deleted because exceeding the max number of backup files (1)",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
     # Verify that due to dry run, no backup is executed
     exec_command(
         capfd,
-        "backup redis --max 1 --dry-run",
+        "backup rabbit --max 1 --dry-run",
         "Dry run mode is enabled",
         "deleted because exceeding the max number of backup files (1)",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
     # Create an additional backup to the test deletion (now backups are 3)
     exec_command(
         capfd,
-        "backup redis",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "backup rabbit",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
     # Save the current number of backup files
@@ -153,10 +158,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Verify the deletion
     exec_command(
         capfd,
-        "backup redis --max 1",
+        "backup rabbit --max 1",
         "deleted because exceeding the max number of backup files (1)",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
     # Now the number of backups should be reduced by 1 (i.e. +1 -2)
@@ -179,116 +184,119 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "backup redis --max 999 --dry-run",
+        "backup rabbit --max 999 --dry-run",
         "Dry run mode is enabled",
         # Still finding 2, all files above are ignore because not matching the pattern
         "Found 2 backup files, maximum not reached",
-        "Starting backup on redis...",
-        "Backup completed: data/backup/redis/",
+        "Starting backup on rabbit...",
+        "Backup completed: data/backup/rabbit/",
     )
 
-    exec_command(capfd, "start backend redis")
+    exec_command(capfd, "start backend rabbit")
+
+    # Just some delay extra delay, rabbit is a slow starter
+    time.sleep(10)
 
     exec_command(
         capfd,
-        set_key2,
+        delete_queue,
     )
 
-    exec_command(capfd, get_key, value2)
+    exec_command(capfd, query_queue, "restapi.connectors.rabbitmq False")
 
     # Restore command
     exec_command(
         capfd,
-        "restore redis",
+        "restore rabbit",
         "Please specify one of the following backup:",
         ".tar.gz",
     )
 
     exec_command(
         capfd,
-        "restore redis invalid",
-        "Invalid backup file, data/backup/redis/invalid does not exist",
+        "restore rabbit invalid",
+        "Invalid backup file, data/backup/rabbit/invalid does not exist",
     )
 
     with TemporaryRemovePath(Path("data/backup")):
         exec_command(
             capfd,
-            "restore redis",
+            "restore rabbit",
             "No backup found, the following folder "
-            "does not exist: data/backup/redis",
+            "does not exist: data/backup/rabbit",
         )
 
     with TemporaryRemovePath(backup_folder):
         exec_command(
             capfd,
-            "restore redis",
+            "restore rabbit",
             f"No backup found, the following folder does not exist: {backup_folder}",
         )
 
-        os.mkdir("data/backup/redis")
+        os.mkdir("data/backup/rabbit")
 
         exec_command(
             capfd,
-            "restore redis",
-            "No backup found, data/backup/redis is empty",
+            "restore rabbit",
+            "No backup found, data/backup/rabbit is empty",
         )
 
-        open("data/backup/redis/test.gz", "a").close()
+        open("data/backup/rabbit/test.gz", "a").close()
 
         exec_command(
             capfd,
-            "restore redis",
-            "No backup found, data/backup/redis is empty",
+            "restore rabbit",
+            "No backup found, data/backup/rabbit is empty",
         )
 
-        open("data/backup/redis/test.tar.gz", "a").close()
+        open("data/backup/rabbit/test.tar.gz", "a").close()
 
         exec_command(
             capfd,
-            "restore redis",
+            "restore rabbit",
             "Please specify one of the following backup:",
             "test.tar.gz",
         )
 
-        os.remove("data/backup/redis/test.gz")
-        os.remove("data/backup/redis/test.tar.gz")
+        os.remove("data/backup/rabbit/test.gz")
+        os.remove("data/backup/rabbit/test.tar.gz")
 
-    # Test restore on redis (required redis to be down)
-    files = os.listdir("data/backup/redis")
+    # Test restore on rabbit (required rabbit to be down)
+    files = os.listdir("data/backup/rabbit")
     files = [f for f in files if f.endswith(".tar.gz")]
     files.sort()
-    redis_dump_file = files[-1]
+    rabbit_dump_file = files[-1]
 
-    exec_command(capfd, "remove redis")
+    exec_command(capfd, "remove")
     # 3) restore the dump
     exec_command(
         capfd,
-        f"restore redis {redis_dump_file}",
-        "Starting restore on redis...",
-        f"Restore from data/backup/redis/{redis_dump_file} completed",
+        f"restore rabbit {rabbit_dump_file}",
+        "Starting restore on rabbit...",
+        f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
     )
 
-    exec_command(capfd, "restart")
+    exec_command(capfd, "start")
     # 4) verify data match again point 1 (restore completed)
-    # postponed because redis needs time to start...
+    # postponed because rabbit needs time to start...
 
     exec_command(
         capfd,
-        f"restore redis {redis_dump_file}",
-        "Redis is running and the restore will temporary stop it.",
+        f"restore rabbit {rabbit_dump_file}",
+        "RabbitMQ is running and the restore will temporary stop it.",
         "If you want to continue add --force flag",
     )
 
     exec_command(
         capfd,
-        f"restore redis {redis_dump_file} --force --restart backend",
-        "Starting restore on redis...",
-        f"Restore from data/backup/redis/{redis_dump_file} completed",
+        f"restore rabbit {rabbit_dump_file} --force --restart backend",
+        "Starting restore on rabbit...",
+        f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
     )
 
-    # Wait redis to completely startup
-    service_verify(capfd, "redis")
+    # Wait rabbit to completely startup
+    service_verify(capfd, "rabbitmq")
 
-    exec_command(capfd, get_key, value1)
+    exec_command(capfd, query_queue, "restapi.connectors.rabbitmq True")
 
     exec_command(capfd, "remove --all", "Stack removed")

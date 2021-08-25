@@ -39,11 +39,12 @@ jobs:
             swarm/multi_host,
 
             # Compose only
-            compose/backup_restore_tuning_mariadb,
-            compose/backup_restore_tuning_neo4j,
-            compose/backup_restore_tuning_postgres,
-            compose/backup_restore_tuning_rabbit,
-            compose/backup_restore_tuning_redis,
+            compose/tuning,
+            compose/backup_restore_mariadb,
+            compose/backup_restore_neo4j,
+            compose/backup_restore_postgres,
+            compose/backup_restore_rabbit,
+            compose/backup_restore_redis,
             compose/cronjobs,
             compose/dump,
             compose/interfaces,

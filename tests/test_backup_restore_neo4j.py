@@ -1,5 +1,5 @@
 """
-This module will test the backup and restore commands + tuning neo4j
+This module will test the backup and restore commands on neo4j
 """
 import os
 import time
@@ -40,11 +40,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "restore neo4j",
-        "image, execute rapydo pull neo4j",
-    )
-    exec_command(
-        capfd,
-        "tuning neo4j",
         "image, execute rapydo pull neo4j",
     )
 
@@ -279,54 +274,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
-    # Tuning command with neo4j container OFF
-    exec_command(
-        capfd,
-        "tuning neo4j",
-        "Number of CPU(s): ",
-        "Amount of RAM: ",
-        "Suggested settings:",
-        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
-        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
-        "Memory settings recommendation from neo4j-admin memrec:",
-        "Based on the above, the following memory settings are recommended:",
-        "dbms.memory.heap.initial_size=",
-        "dbms.memory.heap.max_size=",
-        "dbms.memory.pagecache.size=",
-        "Total size of lucene indexes in all databases:",
-        "Total size of data and native indexes in all databases:",
-    )
-
     exec_command(capfd, "start neo4j")
     # 4) verify data match again point 1 (restore completed)
     # postponed because neo4j needs time to start...
-
-    # Tuning command with neo4j container ON
-    exec_command(
-        capfd,
-        "tuning neo4j",
-        "Number of CPU(s): ",
-        "Amount of RAM: ",
-        "Suggested settings:",
-        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
-        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
-        "Memory settings recommendation from neo4j-admin memrec:",
-        "Based on the above, the following memory settings are recommended:",
-        "dbms.memory.heap.initial_size=",
-        "dbms.memory.heap.max_size=",
-        "dbms.memory.pagecache.size=",
-        "Total size of lucene indexes in all databases:",
-        "Total size of data and native indexes in all databases:",
-    )
-
-    exec_command(
-        capfd,
-        "tuning backend",
-        "Number of CPU(s): ",
-        "Amount of RAM: ",
-        "Suggested settings:",
-        "GUNICORN_MAX_NUM_WORKERS",
-    )
 
     # exec_command(
     #     capfd,
@@ -358,14 +308,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
         '"normal_user", "User"',
     )
-
-    # # Test tuning neo4j with container already running
-    # exec_command(
-    #     capfd,
-    #     "tuning neo4j",
-    #     "Number of CPU(s): ",
-    #     "Amount of RAM: ",
-    #     "Suggested settings:",
-    #     "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
-    #     "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
-    # )

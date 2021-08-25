@@ -277,24 +277,4 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         " normal_user       | User",
     )
 
-    exec_command(
-        capfd,
-        "tuning postgres",
-        "Number of CPU(s): ",
-        "Amount of RAM: ",
-        "Suggested settings:",
-        "POSTGRES_SHARED_BUFFERS",
-        "POSTGRES_EFFECTIVE_CACHE_SIZE",
-        "POSTGRES_MAINTENANCE_WORK_MEM",
-        "POSTGRES_MAX_WORKER_PROCESSES",
-    )
-    exec_command(
-        capfd,
-        "tuning backend",
-        "Number of CPU(s): ",
-        "Amount of RAM: ",
-        "Suggested settings:",
-        "GUNICORN_MAX_NUM_WORKERS",
-    )
-
     exec_command(capfd, "remove --all", "Stack removed")
