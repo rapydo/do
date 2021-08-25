@@ -44,12 +44,6 @@ def test_remove(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    exec_command(
-        capfd,
-        "remove",
-        "Stack removed",
-    )
-
     if SWARM_MODE:
         exec_command(
             capfd,
@@ -58,7 +52,27 @@ def test_remove(capfd: Capture) -> None:
             "verify: Service converged",
             "Services removed",
         )
+
+        exec_command(
+            capfd,
+            "restart",
+            "Stack restarted",
+        )
+
+        exec_command(
+            capfd,
+            "remove",
+            "Stack removed",
+        )
+
     else:
+
+        exec_command(
+            capfd,
+            "remove",
+            "Stack removed",
+        )
+
         exec_command(
             capfd,
             "remove --all backend",
