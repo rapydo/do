@@ -1,5 +1,5 @@
 """
-This module will test combinations of init, check and update commands.
+This module will test the init command.
 Other module that will initialize projects will consider the init command fully working
 """
 import os

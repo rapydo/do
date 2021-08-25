@@ -53,7 +53,8 @@ jobs:
 
             # Currently Compose only, to be generalized
             init,
-            check_update,
+            check,
+            update,
             scale,
             start_shell_status_logs_restart_remove,
           ]

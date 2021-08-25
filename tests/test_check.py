@@ -1,6 +1,5 @@
 """
-This module will test combinations of init, check and update commands.
-Other module that will initialize projects will consider the init command fully working
+This module will test the check command
 """
 import os
 import shutil
@@ -63,32 +62,6 @@ def test_base(capfd: Capture) -> None:
             "check -i main --no-git --no-builds",
             "Project third is invalid: required file not found .gitignore",
         )
-
-    # Skipping main because we are on a fake git repository
-    exec_command(
-        capfd,
-        "update -i main",
-        "All updated",
-    )
-
-    open("submodules/do/temp.file", "a").close()
-    with open("submodules/do/setup.py", "a") as f:
-        f.write("# added from tests\n")
-
-    exec_command(
-        capfd,
-        "update -i main",
-        "Unable to update do repo, you have unstaged files",
-        "Untracked files:",
-        "submodules/do/temp.file",
-        "Changes not staged for commit:",
-        "submodules/do/setup.py",
-        "Can't continue with updates",
-    )
-    os.remove("submodules/do/temp.file")
-    repo = git.get_repo("submodules/do")
-    if repo:
-        repo.git().execute(["git", "checkout", "--", "setup.py"])
 
     # Add a custom image to extend base backend image:
     with open("projects/third/confs/commons.yml", "a") as f:
