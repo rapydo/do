@@ -1,9 +1,5 @@
 """
-This module will test the interaction with containers
-by executing the following commands:
-- start
-- restart
-- remove
+This module will test the start command
 """
 
 from tests import Capture, create_project, exec_command, init_project, pull_images
@@ -50,14 +46,4 @@ def test_all(capfd: Capture) -> None:
         capfd,
         "remove --all backend",
         "Stack removed",
-    )
-
-    exec_command(
-        capfd,
-        "remove",
-        "Stack removed",
-    )
-
-    exec_command(
-        capfd, "remove --all", "--all option not implemented yet", "Stack removed"
     )

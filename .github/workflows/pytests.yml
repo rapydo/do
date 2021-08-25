@@ -25,7 +25,9 @@ jobs:
             logs,
             scale,
             shell,
-            start_restart_remove,
+            start,
+            restart,
+            remove,
             status,
 
             # Both Compose and Swarm
