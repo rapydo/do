@@ -23,7 +23,8 @@ jobs:
             # Currently Compose only, to be generalized
             check,
             scale,
-            start_shell_status_logs_restart_remove,
+            shell,
+            start_status_logs_restart_remove,
 
             # Both Compose and Swarm
             compose/add_upgrade,
