@@ -15,11 +15,23 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
         test: [
+            # Swarm only (added first because are quite slow)
+            swarm/swarm,
+            swarm/registry,
+            swarm/multi_host,
+
+            # Currently Compose only, to be generalized
+            check,
+            scale,
+            start_shell_status_logs_restart_remove,
+
             # Both Compose and Swarm
             compose/add_upgrade,
             swarm/add_upgrade,
             compose/base,
             swarm/base,
+            compose/init,
+            swarm/init,
             compose/build_pull,
             swarm/build_pull,
             compose/create,
@@ -32,11 +44,8 @@ jobs:
             swarm/passwords_invalid_characters,
             compose/list,
             swarm/list,
-
-            # Swarm only
-            swarm/swarm,
-            swarm/registry,
-            swarm/multi_host,
+            compose/update,
+            swarm/update,
 
             # Compose only
             compose/backup_restore_mariadb,
@@ -50,13 +59,6 @@ jobs:
             compose/ssl,
             compose/tuning,
             compose/volatile,
-
-            # Currently Compose only, to be generalized
-            init,
-            check,
-            update,
-            scale,
-            start_shell_status_logs_restart_remove,
           ]
 
     steps:

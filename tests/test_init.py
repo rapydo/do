@@ -7,8 +7,9 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import __version__
-from controller.utilities import git
+from controller import SWARM_MODE, __version__
+from controller.deploy.swarm import Swarm
+from controller.utilities import git, system
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -34,11 +35,43 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         "You should init your project",
     )
 
-    exec_command(
-        capfd,
-        "init",
-        "Project initialized",
-    )
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS=127.0.0.1 init",
+            "docker buildx is installed",
+            "docker compose is installed",
+            "Initializing Swarm with manager IP 127.0.0.1",
+            "Swarm is now initialized",
+            "Project initialized",
+        )
+
+        swarm = Swarm()
+        swarm.leave()
+        local_ip = system.get_local_ip()
+        exec_command(
+            capfd,
+            "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS= init",
+            "docker buildx is installed",
+            "docker compose is installed",
+            "Swarm is now initialized",
+            f"Initializing Swarm with manager IP {local_ip}",
+            "Project initialized",
+        )
+
+        exec_command(
+            capfd,
+            "init",
+            "Swarm is already initialized",
+            "Project initialized",
+        )
+
+    else:
+        exec_command(
+            capfd,
+            "init",
+            "Project initialized",
+        )
 
     repo = git.get_repo("submodules/http-api")
     git.switch_branch(repo, "0.7.6")
