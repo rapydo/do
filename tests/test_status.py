@@ -18,8 +18,7 @@ def test_all(capfd: Capture) -> None:
         capfd=capfd,
         name="first",
         auth="postgres",
-        frontend="angular",
-        services=["rabbit", "neo4j"],
+        frontend="no",
     )
     init_project(capfd)
     pull_images(capfd)

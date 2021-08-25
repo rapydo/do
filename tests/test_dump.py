@@ -20,8 +20,7 @@ def test_dump(capfd: Capture, faker: Faker) -> None:
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
-        frontend="angular",
-        services=["rabbit", "neo4j"],
+        frontend="no",
     )
     init_project(capfd)
     pull_images(capfd)

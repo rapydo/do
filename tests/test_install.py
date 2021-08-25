@@ -25,7 +25,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         capfd=capfd,
         name=project,
         auth="postgres",
-        frontend="angular",
+        frontend="no",
     )
     init_project(capfd)
 

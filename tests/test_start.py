@@ -12,7 +12,7 @@ def test_all(capfd: Capture) -> None:
         name="first",
         auth="postgres",
         frontend="angular",
-        services=["rabbit", "neo4j"],
+        services=["neo4j"],
     )
     init_project(capfd)
 

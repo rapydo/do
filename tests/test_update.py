@@ -36,4 +36,4 @@ def test_base(capfd: Capture) -> None:
         "Can't continue with updates",
     )
 
-    exec_command(capfd, "remove --all", "Stack removed")
+    exec_command(capfd, "remove", "Stack removed")
