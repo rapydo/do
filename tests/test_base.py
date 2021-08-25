@@ -133,3 +133,49 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "start backend postgres _invalid",
         "No such service: invalid",
     )
+
+
+def test_invalid_password_characters(capfd: Capture, faker: Faker) -> None:
+
+    rabbit = "--env RABBITMQ_PASSWORD=invalid£password"
+    redis = "--env REDIS_PASSWORD=invalid#password"
+    mongo = "--env MONGO_PASSWORD=invalid#password"
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+        auth="postgres",
+        frontend="no",
+        services=["rabbit", "redis", "mongo"],
+        extra=f"{rabbit} {redis} {mongo}",
+    )
+
+    informative = "Some special characters, including £ § ” ’, are not allowed "
+    informative += "because make RabbitMQ crash at startup"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in RABBITMQ_PASSWORD.",
+        informative,
+    )
+
+    informative = "Some special characters, including #, are not allowed "
+    informative += "because make some clients to fail to connect"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in REDIS_PASSWORD.",
+        informative,
+    )
+
+    informative = "Some special characters, including #, are not allowed "
+    informative += "because make some clients to fail to connect"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in MONGO_PASSWORD.",
+        informative,
+    )

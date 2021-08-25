@@ -48,13 +48,12 @@ def test_all(capfd: Capture) -> None:
     timestamp = now.strftime("%Y-%m-%dT")
 
     signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    signal.alarm(3)
+    signal.alarm(10)
     # Here using main services option
     exec_command(
         capfd,
         "logs --tail 10 --follow backend",
-        # uhmm... nothing shown on GA ... problems with tty?
-        # "*** RESTful HTTP API ***",
+        "REST API backend server is ready to be launched",
     )
     end = datetime.now()
 
@@ -63,7 +62,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs backend",
-        "*** RESTful HTTP API ***",
+        "REST API backend server is ready to be launched",
     )
 
     exec_command(

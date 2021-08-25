@@ -273,6 +273,7 @@ class Swarm:
                 follow=follow,
                 stream=True,
             )
+
         except NoSuchService:
             print_and_exit(
                 "No such service {}, is the stack still starting up?", service

@@ -19,22 +19,21 @@ jobs:
             # Both Compose and Swarm
             add_upgrade,
             base,
-            init,
-            check,
             build_pull,
-            shell,
-            start,
-            restart,
-            remove,
-            status,
-            logs,
+            check,
             create,
+            init,
             install,
             libs,
-            passwords_invalid_characters,
             list,
-            update,
+            logs,
+            restart,
+            remove,
             scale,
+            shell,
+            start,
+            status,
+            update,
 
             # Swarm only
             registry,
@@ -102,33 +101,32 @@ jobs:
             # BUG probably due to compose 1.29, to be removed once migrated to compose 2
             docker pull rapydo/registry:2.1
 
+            if [[ "${TEST_NAME}" == "multi_host" ]]; then
+
+              base=https://github.com/docker/machine/releases/download/v0.16.0 \
+                && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
+                && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
+                && chmod +x /usr/local/bin/docker-machine
+
+              docker-machine --version
+
+              sudo apt-get update
+              sudo apt-get install --yes virtualbox
+              docker swarm init
+              JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
+              echo "Join command = ${JOIN_COMMAND}"
+
+              # Currently not working due to lack of nested virtualization:
+              # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
+              # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
+              # docker-machine ssh test $JOIN_COMMAND
+              # docker node ls
+
+              # NFS to be added
+              export NFS_HOST="127.0.0.1"
+            fi
+
           fi
-
-          if [[ "${TEST_NAME}" == "multi_host" ]]; then
-
-            base=https://github.com/docker/machine/releases/download/v0.16.0 \
-              && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
-              && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
-              && chmod +x /usr/local/bin/docker-machine
-
-            docker-machine --version
-
-            sudo apt-get update
-            sudo apt-get install --yes virtualbox
-            docker swarm init
-            JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
-            echo "Join command = ${JOIN_COMMAND}"
-
-            # Currently not working due to lack of nested virtualization:
-            # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
-            # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
-            # docker-machine ssh test $JOIN_COMMAND
-            # docker node ls
-
-            # NFS to be added
-            export NFS_HOST="127.0.0.1"
-          fi
-
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
           cp coverage.xml ..

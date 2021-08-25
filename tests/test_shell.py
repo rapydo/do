@@ -79,8 +79,6 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell --no-tty backend --default-command",
-            # "*** RESTful HTTP API ***",
-            # "Serving Flask app",
             "Time is up",
         )
 
