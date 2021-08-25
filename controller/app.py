@@ -131,6 +131,7 @@ def controller_cli_options(
         help="Name of the project",
         callback=projectrc_values,
     ),
+    # Deprecated since 2.1
     services_list: Optional[str] = typer.Option(
         None,
         "-s",
@@ -213,6 +214,7 @@ def controller_cli_options(
 
     Configuration.set_action(ctx.invoked_subcommand)
 
+    # Deprecated since 2.1
     if services_list:
         warnings.warn("-s option is going to be replaced by rapydo <command> service")
 

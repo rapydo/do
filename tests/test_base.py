@@ -102,3 +102,33 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "--remote invalid@invalid check -i main --no-git",
         "Could not resolve hostname invalid: Temporary failure in name resolution",
     )
+
+    exec_command(
+        capfd,
+        "-s backend check -i main --no-git --no-builds",
+        "-s option is going to be replaced by rapydo <command> service",
+    )
+
+    exec_command(
+        capfd,
+        "start backend",
+        "Enabled services: ['backend']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend redis",
+        "Enabled services: ['backend', 'redis']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend redis _backend",
+        "Enabled services: ['redis']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend redis _invalid",
+        "No such service: invalid",
+    )
