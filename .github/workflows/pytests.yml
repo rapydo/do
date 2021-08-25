@@ -14,7 +14,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
-        deploy: [compose, swarm]
         test: [
             # Both Compose and Swarm
             add_upgrade,
@@ -53,6 +52,7 @@ jobs:
             tuning,
             volatile,
           ]
+        deploy: [compose, swarm]
 
     steps:
       - uses: actions/checkout@v2
