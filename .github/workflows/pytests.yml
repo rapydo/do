@@ -15,13 +15,8 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
         test: [
-            # Swarm only (added first because are quite slow)
+            # Currently Compose or Swarm only, to be generalized
             swarm/swarm,
-            swarm/registry,
-            swarm/multi_host,
-
-            # Currently Compose only, to be generalized
-            check,
             logs,
             start,
 
@@ -32,6 +27,8 @@ jobs:
             swarm/base,
             compose/init,
             swarm/init,
+            compose/check,
+            swarm/check,
             compose/build_pull,
             swarm/build_pull,
             compose/shell,
@@ -56,6 +53,11 @@ jobs:
             swarm/update,
             compose/scale,
             swarm/scale,
+
+            # Swarm only
+            swarm/registry,
+            swarm/join,
+            swarm/multi_host,
 
             # Compose only
             compose/backup_restore_mariadb,

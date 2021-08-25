@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-from controller.deploy.swarm import Swarm
 from tests import (
     Capture,
     create_project,
@@ -42,93 +41,9 @@ def test_swarm(capfd: Capture) -> None:
         "Swarm is now initialized",
         "Project initialized",
     )
-
     ###################################################
-    # ################## CHECK ########################
+    # ################## START ########################
     ###################################################
-
-    # Skipping main because we are on a fake git repository
-    exec_command(
-        capfd,
-        "check -i main",
-        "Swarm is correctly initialized",
-        "Checks completed",
-    )
-
-    swarm = Swarm()
-    swarm.leave()
-
-    exec_command(
-        capfd,
-        "check -i main",
-        "Swarm is not initialized, please execute rapydo init",
-    )
-    exec_command(
-        capfd,
-        "init",
-        "Swarm is now initialized",
-        "Project initialized",
-    )
-    exec_command(
-        capfd,
-        "check -i main",
-        "Swarm is correctly initialized",
-        "Checks completed",
-    )
-
-    check = "check -i main --no-git --no-builds"
-
-    exec_command(
-        capfd,
-        f"-e ASSIGNED_MEMORY_BACKEND=50G {check}",
-        "Your deployment requires 50GB of RAM but your nodes only have",
-        # The error does not halt the checks execution
-        "Checks completed",
-    )
-
-    # exec_command(
-    #     capfd,
-    #     f"-e ASSIGNED_CPU_BACKEND=50 {check}",
-    #     "Your deployment requires ",
-    #     " cpus but your nodes only have ",
-    #     # The error does not halt the checks execution
-    #     "Checks completed",
-    # )
-
-    exec_command(
-        capfd,
-        f"-e DEFAULT_SCALE_BACKEND=55 -e ASSIGNED_MEMORY_BACKEND=1G {check}",
-        "Your deployment requires 55GB of RAM but your nodes only have",
-        # The error does not halt the checks execution
-        "Checks completed",
-    )
-
-    # exec_command(
-    #     capfd,
-    #     f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1 {check}",
-    #     "Your deployment requires ",
-    #     " cpus but your nodes only have ",
-    #     # The error does not halt the checks execution
-    #     "Checks completed",
-    # )
-
-    ###################################################
-    # ################### JOIN ########################
-    ###################################################
-
-    exec_command(
-        capfd,
-        "join",
-        "To add a worker to this swarm, run the following command:",
-        "docker swarm join --token ",
-    )
-
-    exec_command(
-        capfd,
-        "join --manager",
-        "To add a manager to this swarm, run the following command:",
-        "docker swarm join --token ",
-    )
 
     exec_command(
         capfd,
@@ -137,10 +52,6 @@ def test_swarm(capfd: Capture) -> None:
     )
 
     start_registry(capfd)
-
-    ###################################################
-    # ################## START ########################
-    ###################################################
 
     exec_command(
         capfd,
@@ -193,6 +104,41 @@ def test_swarm(capfd: Capture) -> None:
         "Stop it with rapydo remove if you want to start a new stack",
     )
 
+    # ############################
+    # Verify bind volumes checks #
+    # ############################
+    data_folder = Path("data", "swarm")
+    karma_folder = data_folder.joinpath("karma")
+
+    # Delete data/swarm/karma and it will be recreated
+    assert karma_folder.exists()
+    shutil.rmtree(karma_folder)
+    assert not karma_folder.exists()
+
+    # set the data folder read only
+    data_folder.chmod(0o550)
+
+    # The missing folder can't be recreated due to permissions denied
+    exec_command(
+        capfd,
+        "start frontend",
+        "A bind folder is missing and can't be automatically created: ",
+        "/data/swarm/karma",
+    )
+    assert not karma_folder.exists()
+
+    # Restore RW permissions
+    data_folder.chmod(0o770)
+
+    exec_command(
+        capfd,
+        "start frontend",
+        "A bind folder was missing and was automatically created: ",
+        "/data/swarm/karma",
+        "Stack started",
+    )
+    assert karma_folder.exists()
+
     ###################################################
     # ################### LOGS ########################
     ###################################################
@@ -230,42 +176,3 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "logs frontend",
     )
-
-    ###################################################
-    # ############## START AGAIN ######################
-    ###################################################
-
-    # ############################
-    # Verify bind volumes checks #
-    # ############################
-    data_folder = Path("data", "swarm")
-    karma_folder = data_folder.joinpath("karma")
-
-    # Delete data/swarm/karma and it will be recreated
-    assert karma_folder.exists()
-    shutil.rmtree(karma_folder)
-    assert not karma_folder.exists()
-
-    # set the data folder read only
-    data_folder.chmod(0o550)
-
-    # The missing folder can't be recreated due to permissions denied
-    exec_command(
-        capfd,
-        "start frontend",
-        "A bind folder is missing and can't be automatically created: ",
-        "/data/swarm/karma",
-    )
-    assert not karma_folder.exists()
-
-    # Restore RW permissions
-    data_folder.chmod(0o770)
-
-    exec_command(
-        capfd,
-        "start frontend",
-        "A bind folder was missing and was automatically created: ",
-        "/data/swarm/karma",
-        "Stack started",
-    )
-    assert karma_folder.exists()

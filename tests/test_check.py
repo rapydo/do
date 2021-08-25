@@ -5,7 +5,8 @@ import os
 import shutil
 from pathlib import Path
 
-from controller import __version__
+from controller import SWARM_MODE, __version__
+from controller.deploy.swarm import Swarm
 from controller.utilities import git
 from tests import (
     Capture,
@@ -242,3 +243,69 @@ RUN mkdir xyz
         "--prod check -i main --no-git --no-builds",
         "Checks completed",
     )
+
+    if SWARM_MODE:
+        # Skipping main because we are on a fake git repository
+        exec_command(
+            capfd,
+            "check -i main",
+            "Swarm is correctly initialized",
+            "Checks completed",
+        )
+
+        swarm = Swarm()
+        swarm.leave()
+
+        exec_command(
+            capfd,
+            "check -i main",
+            "Swarm is not initialized, please execute rapydo init",
+        )
+        exec_command(
+            capfd,
+            "init",
+            "Swarm is now initialized",
+            "Project initialized",
+        )
+        exec_command(
+            capfd,
+            "check -i main",
+            "Swarm is correctly initialized",
+            "Checks completed",
+        )
+
+        check = "check -i main --no-git --no-builds"
+
+        exec_command(
+            capfd,
+            f"-e ASSIGNED_MEMORY_BACKEND=50G {check}",
+            "Your deployment requires 50GB of RAM but your nodes only have",
+            # The error does not halt the checks execution
+            "Checks completed",
+        )
+
+        # exec_command(
+        #     capfd,
+        #     f"-e ASSIGNED_CPU_BACKEND=50 {check}",
+        #     "Your deployment requires ",
+        #     " cpus but your nodes only have ",
+        #     # The error does not halt the checks execution
+        #     "Checks completed",
+        # )
+
+        exec_command(
+            capfd,
+            f"-e DEFAULT_SCALE_BACKEND=55 -e ASSIGNED_MEMORY_BACKEND=1G {check}",
+            "Your deployment requires 55GB of RAM but your nodes only have",
+            # The error does not halt the checks execution
+            "Checks completed",
+        )
+
+        # exec_command(
+        #     capfd,
+        #     f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1 {check}",
+        #     "Your deployment requires ",
+        #     " cpus but your nodes only have ",
+        #     # The error does not halt the checks execution
+        #     "Checks completed",
+        # )
