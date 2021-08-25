@@ -12,6 +12,7 @@ from tests import (
     pull_images,
     signal_handler,
     start_project,
+    start_registry,
 )
 
 
@@ -25,6 +26,8 @@ def test_all(capfd: Capture) -> None:
         services=["rabbit", "neo4j"],
     )
     init_project(capfd)
+    if SWARM_MODE:
+        start_registry(capfd)
     pull_images(capfd)
     start_project(capfd)
 

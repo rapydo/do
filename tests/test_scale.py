@@ -12,6 +12,7 @@ from tests import (
     init_project,
     pull_images,
     start_project,
+    start_registry,
 )
 
 
@@ -31,6 +32,9 @@ def test_scale(capfd: Capture) -> None:
         "scale rabbit=2",
         "image, execute rapydo pull rabbit",
     )
+
+    if SWARM_MODE:
+        start_registry(capfd)
 
     pull_images(capfd)
 

@@ -9,6 +9,7 @@ from tests import (
     init_project,
     pull_images,
     start_project,
+    start_registry,
 )
 
 
@@ -21,6 +22,8 @@ def test_all(capfd: Capture) -> None:
         frontend="no",
     )
     init_project(capfd)
+    if SWARM_MODE:
+        start_registry(capfd)
     pull_images(capfd)
 
     if SWARM_MODE:
