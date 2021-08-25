@@ -2,6 +2,7 @@
 This module will test the registry service
 """
 import random
+import time
 
 from controller import SWARM_MODE
 from tests import Capture, create_project, exec_command
@@ -71,6 +72,8 @@ def test_docker_registry(capfd: Capture) -> None:
         "Starting services (registry)...",
         "Services started: registry",
     )
+
+    time.sleep(1)
 
     exec_command(
         capfd,
