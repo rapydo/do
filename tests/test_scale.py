@@ -29,8 +29,8 @@ def test_scale(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "scale rabbit=2",
-        "image, execute rapydo pull rabbit",
+        "scale backend=2",
+        "image, execute rapydo pull backend",
     )
 
     if SWARM_MODE:
