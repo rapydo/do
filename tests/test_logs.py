@@ -23,7 +23,6 @@ def test_all(capfd: Capture) -> None:
         name="first",
         auth="postgres",
         frontend="angular",
-        services=["rabbit", "neo4j"],
     )
     init_project(capfd)
     pull_images(capfd)
@@ -36,7 +35,6 @@ def test_all(capfd: Capture) -> None:
         # logs with tail 200 needed due to the spam of Requirement installation
         # after the Collecting ... /http-api.git
         "logs --tail 200 --no-color backend",
-        "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         "Testing mode",
     )
@@ -48,7 +46,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs --tail 10 --no-color frontend",
-        "docker-compose command: 'logs'",
         # Logs are not prefixed because only one service is shown
         f"{timestamp}",
     )
@@ -57,7 +54,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs --tail 10 --no-color frontend backend",
-        "docker-compose command: 'logs'",
         # Logs are prefixed because more than one service is shown
         "backend_1      | Testing mode",
         # "backend_1       | Development mode",
@@ -70,7 +66,6 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs --tail 10 --follow backend",
-        "docker-compose command: 'logs'",
         "Stopped by keyboard",
     )
 
@@ -84,7 +79,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs --tail 1",
-        "Enabled services: ['backend', 'frontend', 'neo4j', 'postgres', 'rabbit']",
+        "Enabled services: ['backend', 'frontend', 'postgres']",
     )
 
     exec_command(
