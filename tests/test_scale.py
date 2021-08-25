@@ -1,7 +1,6 @@
 """
 This module will test the scale command
 """
-import os
 import time
 
 from controller import SWARM_MODE
@@ -146,16 +145,3 @@ def test_scale(capfd: Capture) -> None:
             capfd,
             "scale rabbit=1",
         )
-
-    # We modified projectrc to contain: DEFAULT_SCALE_RABBIT: 3
-    with open(".env") as env:
-        content = [line.rstrip("\n") for line in env]
-    assert "DEFAULT_SCALE_RABBIT=3" in content
-
-    # Now we set an env variable to change this value:
-    os.environ["DEFAULT_SCALE_RABBIT"] = "2"
-    exec_command(capfd, "check -i main")
-    with open(".env") as env:
-        content = [line.rstrip("\n") for line in env]
-    assert "DEFAULT_SCALE_RABBIT=3" not in content
-    assert "DEFAULT_SCALE_RABBIT=2" in content
