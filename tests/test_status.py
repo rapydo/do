@@ -59,7 +59,6 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "-e HEALTHCHECK_INTERVAL=1s init -f",
-            "Swarm is now initialized",
             "Project initialized",
         )
 
