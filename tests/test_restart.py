@@ -28,7 +28,7 @@ def test_all(capfd: Capture) -> None:
 
     if SWARM_MODE:
         exec_command(
-            capfd, "restart", "Stack swarm is not running, deploy it with rapydo start"
+            capfd, "restart", "Stack first is not running, deploy it with rapydo start"
         )
 
     start_project(capfd)
@@ -43,7 +43,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove backend",
-            "swarm_backend scaled to 0",
+            "first_backend scaled to 0",
             "verify: Service converged",
             "Services removed",
         )
@@ -52,7 +52,7 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "restart",
             "Restarting services:",
-            "Updating service swarm_backend",
+            "Updating service first_backend",
             "Stack restarted",
         )
 
