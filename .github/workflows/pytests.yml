@@ -39,7 +39,6 @@ jobs:
             swarm/multi_host,
 
             # Compose only
-            compose/tuning,
             compose/backup_restore_mariadb,
             compose/backup_restore_neo4j,
             compose/backup_restore_postgres,
@@ -49,10 +48,12 @@ jobs:
             compose/dump,
             compose/interfaces,
             compose/ssl,
+            compose/tuning,
             compose/volatile,
 
             # Currently Compose only, to be generalized
-            init_check_update,
+            init,
+            check_update,
             scale,
             start_shell_status_logs_restart_remove,
           ]

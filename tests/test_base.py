@@ -118,18 +118,18 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start backend redis",
-        "Enabled services: ['backend', 'redis']",
+        "start backend postgres",
+        "Enabled services: ['backend', 'postgres']",
     )
 
     exec_command(
         capfd,
-        "start backend redis _backend",
-        "Enabled services: ['redis']",
+        "start backend postgres _backend",
+        "Enabled services: ['postgres']",
     )
 
     exec_command(
         capfd,
-        "start backend redis _invalid",
+        "start backend postgres _invalid",
         "No such service: invalid",
     )
