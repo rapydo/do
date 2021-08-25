@@ -41,7 +41,7 @@ def test_all(capfd: Capture) -> None:
     start_project(capfd)
 
     if SWARM_MODE:
-        time.sleep(2)
+        time.sleep(1)
 
         exec_command(
             capfd,
@@ -53,8 +53,30 @@ def test_all(capfd: Capture) -> None:
             "first_backend",
             "first_postgres",
             " [1]",
+            "starting",
+        )
+
+        exec_command(
+            capfd,
+            "-e HEALTHCHECK_INTERVAL=1s init -f",
+            "Swarm is now initialized",
+            "Project initialized",
+        )
+
+        exec_command(
+            capfd,
+            "restart",
+            "Stack restarted",
+        )
+
+        exec_command(
+            capfd,
+            "status",
             "running",
         )
+
+        time.sleep(2)
+
     else:
         exec_command(
             capfd,
