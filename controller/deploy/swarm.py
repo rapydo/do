@@ -301,12 +301,13 @@ class Swarm:
             if not config.deploy:
                 continue
 
-            replicas = config.deploy.replicas  # default=1
-            cpus = config.deploy.resources.reservations.cpus or 0
-            memory = config.deploy.resources.reservations.memory
+            if config.deploy.resources.reservations:
+                cpus = config.deploy.resources.reservations.cpus or 0
+                memory = config.deploy.resources.reservations.memory
+                replicas = config.deploy.replicas  # default=1
 
-            total_cpus += replicas * cpus
-            total_memory += replicas * memory
+                total_cpus += replicas * cpus
+                total_memory += replicas * memory
 
         nodes_cpus = 0.0
         nodes_memory = 0.0

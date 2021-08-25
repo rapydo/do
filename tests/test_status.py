@@ -68,13 +68,13 @@ def test_all(capfd: Capture) -> None:
             "Stack restarted",
         )
 
+        time.sleep(2)
+
         exec_command(
             capfd,
             "status",
             "running",
         )
-
-        time.sleep(2)
 
     else:
         exec_command(

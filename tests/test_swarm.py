@@ -3,19 +3,9 @@ This module will test the swarm mode
 """
 import random
 import shutil
-import signal
-import time
-from datetime import datetime
 from pathlib import Path
 
-from tests import (
-    Capture,
-    create_project,
-    exec_command,
-    mock_KeyboardInterrupt,
-    pull_images,
-    start_registry,
-)
+from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
 def test_swarm(capfd: Capture) -> None:
@@ -138,41 +128,3 @@ def test_swarm(capfd: Capture) -> None:
         "Stack started",
     )
     assert karma_folder.exists()
-
-    ###################################################
-    # ################### LOGS ########################
-    ###################################################
-
-    exec_command(
-        capfd,
-        "logs invalid",
-        "No such service: invalid",
-    )
-
-    # Wait for the backend startup
-    time.sleep(2)
-
-    start = datetime.now()
-    signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    signal.alarm(3)
-    # Here using main services option
-    exec_command(
-        capfd,
-        "logs --tail 10 --follow backend",
-        # uhmm... nothing shown on GA ... problems with tty?
-        # "*** RESTful HTTP API ***",
-    )
-    end = datetime.now()
-
-    assert (end - start).seconds >= 2
-
-    exec_command(
-        capfd,
-        "logs backend",
-        "*** RESTful HTTP API ***",
-    )
-
-    exec_command(
-        capfd,
-        "logs frontend",
-    )

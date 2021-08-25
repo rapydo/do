@@ -2,19 +2,49 @@
 This module will test the start command
 """
 
-from tests import Capture, create_project, exec_command, init_project, pull_images
+import random
+import shutil
+from pathlib import Path
+
+from controller import SWARM_MODE
+from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
 def test_all(capfd: Capture) -> None:
 
+    rand = random.SystemRandom()
+
+    auth = rand.choice(
+        (
+            "postgres",
+            "mysql",
+            "neo4j",
+            "mongo",
+        )
+    )
+
     create_project(
         capfd=capfd,
         name="first",
-        auth="postgres",
+        auth=auth,
         frontend="angular",
         services=["neo4j"],
     )
-    init_project(capfd)
+
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s init",
+        "Project initialized",
+    )
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "start",
+            "Registry 127.0.0.1:5000 not reachable.",
+        )
+
+        start_registry(capfd)
 
     exec_command(
         capfd,
@@ -30,14 +60,88 @@ def test_all(capfd: Capture) -> None:
 
     pull_images(capfd)
 
-    exec_command(
-        capfd,
-        "start",
-        "Stack started",
-    )
+    if SWARM_MODE:
 
-    exec_command(
-        capfd,
-        "start",
-        "A stack is already running.",
-    )
+        # Deploy a sub-stack
+        exec_command(
+            capfd,
+            "start backend",
+            "Stack started",
+        )
+
+        # Once started a stack in swarm mode, it's not possible
+        # to re-deploy another stack
+        exec_command(
+            capfd,
+            "start",
+            "A stack is already running",
+            "Stop it with rapydo remove if you want to start a new stack",
+        )
+
+        exec_command(
+            capfd,
+            "remove",
+        )
+
+        # Deploy the full stack
+        exec_command(
+            capfd,
+            "start",
+            "Stack started",
+        )
+
+        # Once started a stack in swarm mode, it's not possible
+        # to re-deploy another stack
+        exec_command(
+            capfd,
+            "start backend",
+            "A stack is already running",
+            "Stop it with rapydo remove if you want to start a new stack",
+        )
+
+        # ############################
+        # Verify bind volumes checks #
+        # ############################
+        data_folder = Path("data", "swarm")
+        karma_folder = data_folder.joinpath("karma")
+
+        # Delete data/swarm/karma and it will be recreated
+        assert karma_folder.exists()
+        shutil.rmtree(karma_folder)
+        assert not karma_folder.exists()
+
+        # set the data folder read only
+        data_folder.chmod(0o550)
+
+        # The missing folder can't be recreated due to permissions denied
+        exec_command(
+            capfd,
+            "start frontend",
+            "A bind folder is missing and can't be automatically created: ",
+            "/data/swarm/karma",
+        )
+        assert not karma_folder.exists()
+
+        # Restore RW permissions
+        data_folder.chmod(0o770)
+
+        exec_command(
+            capfd,
+            "start frontend",
+            "A bind folder was missing and was automatically created: ",
+            "/data/swarm/karma",
+            "Stack started",
+        )
+        assert karma_folder.exists()
+    else:
+        exec_command(
+            capfd,
+            "start",
+            "Stack started",
+        )
+
+        exec_command(
+            capfd,
+            "start",
+            "A stack is already running.",
+        )

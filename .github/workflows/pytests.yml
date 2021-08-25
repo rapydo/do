@@ -15,11 +15,6 @@ jobs:
       matrix:
         python-version: [3.7, 3.8, 3.9]
         test: [
-            # Currently Compose or Swarm only, to be generalized
-            swarm/swarm,
-            logs,
-            start,
-
             # Both Compose and Swarm
             compose/add_upgrade,
             swarm/add_upgrade,
@@ -33,12 +28,16 @@ jobs:
             swarm/build_pull,
             compose/shell,
             swarm/shell,
-            swarm/remove,
-            compose/remove,
+            swarm/start,
+            compose/start,
             swarm/restart,
             compose/restart,
+            swarm/remove,
+            compose/remove,
             swarm/status,
             compose/status,
+            swarm/logs,
+            compose/logs,
             compose/create,
             swarm/create,
             compose/install,
