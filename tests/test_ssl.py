@@ -3,6 +3,7 @@ This module will test the ssl command
 """
 from faker import Faker
 
+from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -13,6 +14,9 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
+
+    if SWARM_MODE:
+        return None
 
     project = random_project_name(faker)
     create_project(

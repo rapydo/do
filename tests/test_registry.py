@@ -3,10 +3,14 @@ This module will test the registry service
 """
 import random
 
+from controller import SWARM_MODE
 from tests import Capture, create_project, exec_command
 
 
 def test_docker_registry(capfd: Capture) -> None:
+
+    if not SWARM_MODE:
+        return None
 
     rand = random.SystemRandom()
 

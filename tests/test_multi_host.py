@@ -5,10 +5,14 @@ import random
 
 from python_on_whales import docker
 
+from controller import SWARM_MODE
 from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
 def test_swarm_multi_host(capfd: Capture) -> None:
+
+    if not SWARM_MODE:
+        return None
 
     rand = random.SystemRandom()
 

@@ -14,6 +14,7 @@ from tests import (
     mock_KeyboardInterrupt,
     pull_images,
     start_project,
+    start_registry,
 )
 
 
@@ -26,6 +27,10 @@ def test_all(capfd: Capture) -> None:
         frontend="angular",
     )
     init_project(capfd)
+
+    if SWARM_MODE:
+        start_registry(capfd)
+
     pull_images(capfd)
     start_project(capfd)
 

@@ -14,62 +14,45 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7, 3.8, 3.9]
+        deploy: [compose, swarm]
         test: [
             # Both Compose and Swarm
-            compose/add_upgrade,
-            swarm/add_upgrade,
-            compose/base,
-            swarm/base,
-            compose/init,
-            swarm/init,
-            compose/check,
-            swarm/check,
-            compose/build_pull,
-            swarm/build_pull,
-            compose/shell,
-            swarm/shell,
-            swarm/start,
-            compose/start,
-            swarm/restart,
-            compose/restart,
-            swarm/remove,
-            compose/remove,
-            swarm/status,
-            compose/status,
-            swarm/logs,
-            compose/logs,
-            compose/create,
-            swarm/create,
-            compose/install,
-            swarm/install,
-            compose/libs,
-            swarm/libs,
-            compose/passwords_invalid_characters,
-            swarm/passwords_invalid_characters,
-            compose/list,
-            swarm/list,
-            compose/update,
-            swarm/update,
-            compose/scale,
-            swarm/scale,
+            add_upgrade,
+            base,
+            init,
+            check,
+            build_pull,
+            shell,
+            start,
+            restart,
+            remove,
+            status,
+            logs,
+            create,
+            install,
+            libs,
+            passwords_invalid_characters,
+            list,
+            update,
+            scale,
 
             # Swarm only
-            swarm/registry,
-            swarm/join,
-            swarm/multi_host,
+            registry,
+            join,
+            multi_host,
 
             # Compose only
-            compose/backup_restore_mariadb,
-            compose/backup_restore_neo4j,
-            compose/backup_restore_postgres,
-            compose/backup_restore_rabbit,
-            compose/backup_restore_redis,
-            compose/cronjobs,
-            compose/dump,
-            compose/interfaces,
-            compose/ssl,
-            compose/tuning,
-            compose/volatile,
+            backup_restore_mariadb,
+            backup_restore_neo4j,
+            backup_restore_postgres,
+            backup_restore_rabbit,
+            backup_restore_redis,
+            cronjobs,
+            dump,
+            interfaces,
+            ssl,
+            tuning,
+            volatile,
           ]
 
     steps:
@@ -104,7 +87,7 @@ jobs:
           mkdir rapydo_tests
           cd rapydo_tests
 
-          if [[ "${TEST_NAME}" == swarm/* ]]; then
+          if [[ "${{ matrix.deploy }}" == "swarm" ]]; then
 
             IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
 
@@ -119,9 +102,6 @@ jobs:
             # BUG probably due to compose 1.29, to be removed once migrated to compose 2
             docker pull rapydo/registry:2.1
 
-            TEST_NAME=${TEST_NAME/swarm\//}
-          elif [[ "${TEST_NAME}" == compose/* ]]; then
-            TEST_NAME=${TEST_NAME/compose\//}
           fi
 
           if [[ "${TEST_NAME}" == "multi_host" ]]; then

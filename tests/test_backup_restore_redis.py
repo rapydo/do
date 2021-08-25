@@ -7,6 +7,7 @@ from pathlib import Path
 
 from faker import Faker
 
+from controller import SWARM_MODE
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -21,6 +22,9 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
+
+    if SWARM_MODE:
+        return None
 
     backup_folder = Path("data/backup/redis")
 
