@@ -23,7 +23,6 @@ jobs:
             # Currently Compose only, to be generalized
             check,
             logs,
-            scale,
             start,
 
             # Both Compose and Swarm
@@ -55,6 +54,8 @@ jobs:
             swarm/list,
             compose/update,
             swarm/update,
+            compose/scale,
+            swarm/scale,
 
             # Compose only
             compose/backup_restore_mariadb,

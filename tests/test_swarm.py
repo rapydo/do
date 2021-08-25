@@ -149,12 +149,6 @@ def test_swarm(capfd: Capture) -> None:
         "Base images pulled from docker hub",
     )
 
-    exec_command(
-        capfd,
-        "scale backend=2",
-        "No such service: swarm_backend, have you started your stack?",
-    )
-
     # Deploy a sub-stack
     exec_command(
         capfd,
@@ -198,7 +192,7 @@ def test_swarm(capfd: Capture) -> None:
         "No such service: invalid",
     )
 
-    # Wait for the bakend startup
+    # Wait for the backend startup
     time.sleep(2)
 
     start = datetime.now()
@@ -224,66 +218,6 @@ def test_swarm(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs frontend",
-    )
-
-    exec_command(
-        capfd,
-        "scale backend=2 --wait",
-        "swarm_backend scaled to 2",
-        "Service converged",
-    )
-
-    exec_command(
-        capfd,
-        "status",
-        " [2]",
-    )
-
-    exec_command(
-        capfd,
-        "scale backend",
-        "swarm_backend scaled to 1",
-    )
-
-    exec_command(
-        capfd,
-        "-e DEFAULT_SCALE_BACKEND=3 scale backend --wait",
-        "swarm_backend scaled to 3",
-        "Service converged",
-    )
-
-    exec_command(
-        capfd,
-        "status",
-        " [3]",
-    )
-
-    exec_command(
-        capfd,
-        "scale backend=x",
-        "Invalid number of replicas: x",
-    )
-
-    with open(".projectrc", "a") as f:
-        f.write("\n      DEFAULT_SCALE_BACKEND: 4\n")
-
-    exec_command(
-        capfd,
-        "scale backend",
-        "swarm_backend scaled to 4",
-    )
-
-    exec_command(
-        capfd,
-        "scale backend=0 --wait",
-        "swarm_backend scaled to 0",
-    )
-
-    exec_command(
-        capfd,
-        "scale redis=2",
-        "Service redis is not guaranteed to support the scale, "
-        "can't accept the request",
     )
 
     # ############################
