@@ -14,6 +14,7 @@ from tests import (
     create_project,
     exec_command,
     mock_KeyboardInterrupt,
+    pull_images,
     start_registry,
 )
 
@@ -42,13 +43,9 @@ def test_swarm(capfd: Capture) -> None:
         "Project initialized",
     )
 
-    # Skipping main because we are on a fake git repository
-    exec_command(
-        capfd,
-        "check -i main",
-        "Swarm is correctly initialized",
-        "Checks completed",
-    )
+    ###################################################
+    # ################## CHECK ########################
+    ###################################################
 
     # Skipping main because we are on a fake git repository
     exec_command(
@@ -115,6 +112,10 @@ def test_swarm(capfd: Capture) -> None:
     #     "Checks completed",
     # )
 
+    ###################################################
+    # ################### JOIN ########################
+    ###################################################
+
     exec_command(
         capfd,
         "join",
@@ -131,6 +132,10 @@ def test_swarm(capfd: Capture) -> None:
 
     start_registry(capfd)
 
+    ###################################################
+    # ################## START ########################
+    ###################################################
+
     exec_command(
         capfd,
         "start backend invalid",
@@ -143,11 +148,7 @@ def test_swarm(capfd: Capture) -> None:
         "image, execute rapydo pull backend",
     )
 
-    exec_command(
-        capfd,
-        "pull --quiet",
-        "Base images pulled from docker hub",
-    )
+    pull_images(capfd)
 
     # Deploy a sub-stack
     exec_command(
@@ -186,6 +187,10 @@ def test_swarm(capfd: Capture) -> None:
         "Stop it with rapydo remove if you want to start a new stack",
     )
 
+    ###################################################
+    # ################### LOGS ########################
+    ###################################################
+
     exec_command(
         capfd,
         "logs invalid",
@@ -219,6 +224,10 @@ def test_swarm(capfd: Capture) -> None:
         capfd,
         "logs frontend",
     )
+
+    ###################################################
+    # ############## START AGAIN ######################
+    ###################################################
 
     # ############################
     # Verify bind volumes checks #

@@ -7,6 +7,7 @@ from python_on_whales.exceptions import NoSuchService
 
 from controller import print_and_exit
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.swarm import Swarm
 
 # RabbitMQ:
@@ -60,6 +61,12 @@ def scale(
                 "can't accept the request",
                 service,
             )
+
+    verify_available_images(
+        [service],
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     try:
         swarm.docker.service.scale(scales, detach=not wait)
