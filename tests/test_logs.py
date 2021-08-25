@@ -37,7 +37,7 @@ def test_all(capfd: Capture) -> None:
     # Wait for the backend startup
     # In compose mode this sleep was 3 seconds,
     # but in swarm it is not enough due to the slow deployment phase
-    time.sleep(10)
+    time.sleep(20)
 
     # Invalid services are refused
     exec_command(
