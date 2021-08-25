@@ -55,9 +55,3 @@ def test_all(capfd: Capture) -> None:
             "Updating service first_backend",
             "Stack restarted",
         )
-
-    exec_command(
-        capfd,
-        "remove --all backend",
-        "Stack removed",
-    )

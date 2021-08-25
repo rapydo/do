@@ -289,5 +289,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     service_verify(capfd, "redis")
 
     exec_command(capfd, get_key, value1)
-
-    exec_command(capfd, "remove --all", "Stack removed")

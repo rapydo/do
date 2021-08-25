@@ -276,5 +276,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f'{psql} "select name, description from role"\'',
         " normal_user       | User",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

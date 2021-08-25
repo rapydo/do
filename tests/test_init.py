@@ -141,5 +141,3 @@ def test_init(capfd: Capture, faker: Faker) -> None:
     with open(".projectrc") as projectrc:
         lines = [line.strip() for line in projectrc.readlines()]
         assert "MYVAR: MYVAL" in lines
-
-    exec_command(capfd, "remove", "Stack removed")

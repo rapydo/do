@@ -242,4 +242,3 @@ RUN mkdir xyz
         "--prod check -i main --no-git --no-builds",
         "Checks completed",
     )
-    exec_command(capfd, "remove --all", "Stack removed")

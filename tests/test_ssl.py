@@ -123,5 +123,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

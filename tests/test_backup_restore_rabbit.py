@@ -298,5 +298,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     service_verify(capfd, "rabbitmq")
 
     exec_command(capfd, query_queue, "restapi.connectors.rabbitmq True")
-
-    exec_command(capfd, "remove --all", "Stack removed")

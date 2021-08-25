@@ -82,5 +82,3 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "--prod interfaces swaggerui --port 124 --detach",
         "You can access SwaggerUI web page here: https://localhost:124",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

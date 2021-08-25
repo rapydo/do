@@ -41,9 +41,3 @@ def test_all(capfd: Capture) -> None:
         "start",
         "A stack is already running.",
     )
-
-    exec_command(
-        capfd,
-        "remove --all backend",
-        "Stack removed",
-    )

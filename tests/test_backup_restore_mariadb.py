@@ -294,5 +294,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         exec_query("select name, description from role"),
         "normal_user\tUser",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

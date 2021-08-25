@@ -111,9 +111,3 @@ def test_all(capfd: Capture) -> None:
         "logs --tail 1 backend invalid",
         "No such service: invalid",
     )
-
-    exec_command(
-        capfd,
-        "remove --all backend",
-        "Stack removed",
-    )

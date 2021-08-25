@@ -264,5 +264,3 @@ RUN mkdir xyz
         "start rabbit3",
         "Stack started",
     )
-
-    exec_command(capfd, "remove", "Stack removed")

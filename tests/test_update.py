@@ -35,5 +35,3 @@ def test_base(capfd: Capture) -> None:
         "submodules/do/setup.py",
         "Can't continue with updates",
     )
-
-    exec_command(capfd, "remove", "Stack removed")

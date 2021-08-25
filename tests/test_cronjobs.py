@@ -68,5 +68,3 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         # this is the output of crontab -l that verifies the cronjob installation
         "* * * * * echo 'Hello world'",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

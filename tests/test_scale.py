@@ -159,5 +159,3 @@ def test_scale(capfd: Capture) -> None:
         content = [line.rstrip("\n") for line in env]
     assert "DEFAULT_SCALE_RABBIT=3" not in content
     assert "DEFAULT_SCALE_RABBIT=2" in content
-
-    exec_command(capfd, "remove", "Stack removed")
