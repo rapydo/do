@@ -49,7 +49,7 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale backend=2",
-            "No such service: swarm_backend, have you started your stack?",
+            "No such service: first_backend, have you started your stack?",
         )
 
     start_project(capfd)
@@ -67,7 +67,7 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale backend=2 --wait",
-            "swarm_backend scaled to 2",
+            "first_backend scaled to 2",
             "Service converged",
         )
 
@@ -80,13 +80,13 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale backend",
-            "swarm_backend scaled to 1",
+            "first_backend scaled to 1",
         )
 
         exec_command(
             capfd,
             "-e DEFAULT_SCALE_BACKEND=3 scale backend --wait",
-            "swarm_backend scaled to 3",
+            "first_backend scaled to 3",
             "Service converged",
         )
 
@@ -102,13 +102,13 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale backend",
-            "swarm_backend scaled to 4",
+            "first_backend scaled to 4",
         )
 
         exec_command(
             capfd,
             "scale backend=0 --wait",
-            "swarm_backend scaled to 0",
+            "first_backend scaled to 0",
         )
 
         exec_command(
