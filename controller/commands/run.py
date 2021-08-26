@@ -104,7 +104,7 @@ def run(
     compose = Compose(files=Application.data.files)
 
     if pull:
-        compose.command("pull", {"SERVICE": [service]})
+        compose.command("pull", {"SERVICE": [service], "quiet": True})
     elif service != "registry":
         verify_available_images(
             [service],
