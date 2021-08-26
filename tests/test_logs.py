@@ -82,11 +82,6 @@ def test_all(capfd: Capture) -> None:
     if SWARM_MODE:
         exec_command(capfd, "logs --tail 1 backend", "first_backend", "Testing mode")
 
-        exec_command(
-            capfd,
-            "logs --tail 1 frontend",
-            "first_frontend",
-        )
     else:
         exec_command(
             capfd,
@@ -114,17 +109,17 @@ def test_all(capfd: Capture) -> None:
             "Enabled services: ['backend', 'frontend']",
         )
 
-    exec_command(
-        capfd,
-        "logs --tail 1 frontend backend",
-        "Enabled services: ['backend', 'frontend']",
-    )
+        exec_command(
+            capfd,
+            "logs --tail 1 frontend backend",
+            "Enabled services: ['backend', 'frontend']",
+        )
 
-    exec_command(
-        capfd,
-        "logs --tail 1 backend invalid",
-        "No such service: invalid",
-    )
+        exec_command(
+            capfd,
+            "logs --tail 1 backend invalid",
+            "No such service: invalid",
+        )
 
     if not SWARM_MODE:
 
