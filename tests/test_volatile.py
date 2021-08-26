@@ -5,7 +5,7 @@ This module will test the volatile command
 
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller import __version__
 from tests import (  # signal_handler,
     Capture,
     create_project,
@@ -19,9 +19,6 @@ from tests import (  # signal_handler,
 
 def test_volatile(capfd: Capture, faker: Faker) -> None:
 
-    if SWARM_MODE:
-        return None
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
@@ -33,7 +30,13 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "volatile backend",
-        "image, execute rapydo pull backend",
+        "Volatile command is replaced by rapydo run --debug backend",
+    )
+
+    exec_command(
+        capfd,
+        "run --debug backend",
+        f"Missing rapydo/backend:{__version__} image, add --pull option",
     )
 
     pull_images(capfd)
@@ -41,36 +44,36 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "volatile backend hostname",
+        "run --debug backend --command hostname",
         "Bind for 0.0.0.0:8080 failed: port is already allocated",
     )
 
     exec_command(
         capfd,
-        "remove --all",
+        "remove",
         "Stack removed",
     )
 
     exec_command(
         capfd,
-        "volatile backend hostname",
+        "run --debug backend --command hostname",
         "backend-server",
     )
 
     exec_command(
         capfd,
-        "volatile backend whoami",
+        "run --debug backend --command whoami",
         "root",
     )
     exec_command(
         capfd,
-        "volatile backend -u developer whoami",
+        "run --debug backend -u developer --command whoami",
         "Please remember that users in volatile containers are not mapped on current ",
         "developer",
     )
     exec_command(
         capfd,
-        "volatile backend -u invalid whoami",
+        "run --debug backend -u invalid --command whoami",
         "Error response from daemon:",
         "unable to find user invalid:",
         "no matching entries in passwd file",
@@ -78,8 +81,8 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "volatile maintenance",
-        "image, execute rapydo pull proxy",
+        "run --debug maintenance",
+        f"Missing rapydo/proxy:{__version__} image, add --pull option",
     )
 
     exec_command(
@@ -92,7 +95,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     # signal.alarm(4)
     # exec_command(
     #     capfd,
-    #     "volatile maintenance",
+    #     "run maintenance",
     #     # "Maintenance server is up and waiting for connections",
     #     "Time is up",
     # )

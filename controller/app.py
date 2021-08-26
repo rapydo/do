@@ -84,7 +84,7 @@ class Configuration:
     # It will be replaced with PROJECT_DIR/project
     ABS_PROJECT_PATH: Path = PROJECT_DIR
 
-    # used by single-container commands (interfaces, ssl, volatile, ...) in swarm mode
+    # used by single-container commands (i.e. run) in swarm mode
     FORCE_COMPOSE_ENGINE: bool = False
 
     @staticmethod

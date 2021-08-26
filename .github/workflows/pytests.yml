@@ -33,6 +33,7 @@ jobs:
             start,
             status,
             update,
+            volatile,
 
             # Swarm only
             registry,
@@ -50,7 +51,6 @@ jobs:
             interfaces,
             ssl,
             tuning,
-            volatile,
           ]
         deploy: [compose, swarm]
 
