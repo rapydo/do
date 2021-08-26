@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import typer
 
@@ -13,7 +13,7 @@ from controller.templating import password
 interfaces = ["swaggerui", "adminer", "flower"]
 
 
-def get_publish_port(service: str, port: Optional[int]) -> List[str]:
+def get_publish_port(service: str, port: Optional[int]) -> Tuple[List[str], int]:
     service_config = Application.data.compose_config.get(service, None)
     if not service_config:  # pragma: no cover
         print_and_exit("Services misconfiguration, can't find {}", service)
@@ -28,7 +28,7 @@ def get_publish_port(service: str, port: Optional[int]) -> List[str]:
 
     publish = [f"{port}:{target}"]
 
-    return publish
+    return publish, port
 
 
 # This command replaces volatile, interfaces and registry
@@ -140,6 +140,17 @@ def run(
             # , symbols="%*,-.=?[]^_~"
         )
 
-    publish = get_publish_port(service, port)
+    publish, port = get_publish_port(service, port)
 
     compose.create_volatile_container(service, detach=True, publish=publish)
+
+    if service == "swaggerui":
+        if Configuration.production:
+            prot = "https"
+        else:
+            prot = "http"
+
+        log.info(
+            "You can access SwaggerUI web page here: {}\n",
+            f"{prot}://{Configuration.hostname}:{port}",
+        )

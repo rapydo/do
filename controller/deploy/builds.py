@@ -181,7 +181,7 @@ def verify_available_images(
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE:
+            if SWARM_MODE and not is_run_command:
                 image_exists = docker.verify_registry_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
@@ -207,7 +207,7 @@ def verify_available_images(
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE:
+            if SWARM_MODE and not is_run_command:
                 image_exists = docker.verify_registry_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
