@@ -50,11 +50,23 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "run adminer",
         f"Missing rapydo/adminer:{__version__} image, add --pull option",
     )
+
+    # Launch Adminer UI with default port
     exec_command(
         capfd,
-        "run adminer --port 123 --pull",
-        "Pulling adminer",
-        f"Creating {project_name}_adminer_run",
+        "run adminer --pull",
+        # "Pulling adminer",
+        # f"Creating {project_name}_adminer_run",
+        "You can access Adminer interface on: http://localhost:7777",
+    )
+
+    # Launch Adminer UI with custom port
+    exec_command(
+        capfd,
+        "run adminer --port 123",
+        # "Pulling adminer",
+        # f"Creating {project_name}_adminer_run",
+        "You can access Adminer interface on: http://localhost:123",
     )
 
     # Launch Swagger UI with default port
@@ -71,6 +83,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access SwaggerUI web page here: http://localhost:124",
     )
 
+    # Test Swagger UI and Admin in production mode
     exec_command(
         capfd,
         "--prod init -f",
@@ -82,4 +95,10 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         capfd,
         "--prod run swaggerui --port 125",
         "You can access SwaggerUI web page here: https://localhost:125",
+    )
+
+    exec_command(
+        capfd,
+        "--prod run adminer --port 126",
+        "You can access Adminer interface on: https://localhost:126",
     )

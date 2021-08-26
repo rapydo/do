@@ -154,3 +154,14 @@ def run(
             "You can access SwaggerUI web page here: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
         )
+
+    if service == "adminer":
+        if Configuration.production:
+            prot = "https"
+        else:
+            prot = "http"
+
+        log.info(
+            "You can access Adminer interface on: {}\n",
+            f"{prot}://{Configuration.hostname}:{port}",
+        )
