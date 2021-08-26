@@ -3,6 +3,7 @@ This module will test the interfaces command
 """
 from faker import Faker
 
+from controller import __version__
 from tests import (
     Capture,
     create_project,
@@ -13,10 +14,10 @@ from tests import (
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
-
+    project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
-        name=random_project_name(faker),
+        name=project_name,
         auth="postgres",
         frontend="no",
     )
@@ -43,16 +44,23 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run adminer",
-        "Launching interface: adminer",
-        "docker-compose command: 'run'",
+        f"Missing rapydo/adminer:{__version__} image, add --pull option",
     )
     exec_command(
         capfd,
-        "run adminer --port 123",
-        "Launching interface: adminer",
-        "docker-compose command: 'run'",
+        "run adminer --port 123 --pull",
+        "Pulling adminer",
+        f"Creating {project_name}_adminer_run",
     )
 
+    # Launch Swagger UI with default port
+    exec_command(
+        capfd,
+        "run swaggerui --pull",
+        "You can access SwaggerUI web page here: http://localhost:7777",
+    )
+
+    # Launch Swagger UI with custom port
     exec_command(
         capfd,
         "run swaggerui --port 124",
@@ -68,6 +76,6 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod run swaggerui --port 124",
-        "You can access SwaggerUI web page here: https://localhost:124",
+        "--prod run swaggerui --port 125",
+        "You can access SwaggerUI web page here: https://localhost:125",
     )
