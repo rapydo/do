@@ -79,17 +79,26 @@ def test_all(capfd: Capture) -> None:
             "Enabled services: ['backend', 'frontend', 'postgres']",
         )
 
-    exec_command(
-        capfd,
-        "logs --tail 1 backend",
-        "Enabled services: ['backend']",
-    )
+    if SWARM_MODE:
+        exec_command(capfd, "logs --tail 1 backend", "first_backend", "Testing mode")
 
-    exec_command(
-        capfd,
-        "logs --tail 1 frontend",
-        "Enabled services: ['frontend']",
-    )
+        exec_command(
+            capfd,
+            "logs --tail 1 frontend",
+            "first_frontend",
+        )
+    else:
+        exec_command(
+            capfd,
+            "logs --tail 1 backend",
+            "Enabled services: ['backend']",
+        )
+
+        exec_command(
+            capfd,
+            "logs --tail 1 frontend",
+            "Enabled services: ['frontend']",
+        )
 
     # In swarm mode multiple services are not allowed
     if SWARM_MODE:
