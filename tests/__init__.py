@@ -161,8 +161,8 @@ def start_registry(capfd: Any) -> None:
     exec_command(
         capfd,
         "registry",
-        "Starting services (registry)...",
-        "Services started: registry",
+        "Creating",
+        "_registry_run",
     )
     time.sleep(2)
 
