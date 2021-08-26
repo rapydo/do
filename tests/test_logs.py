@@ -65,11 +65,19 @@ def test_all(capfd: Capture) -> None:
         "REST API backend server is ready to be launched",
     )
 
-    exec_command(
-        capfd,
-        "logs --tail 1",
-        "Enabled services: ['backend', 'frontend', 'postgres']",
-    )
+    # In swarm mode service is mandatory
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "logs --tail 1",
+            "Error: Missing argument 'SERVICE'",
+        )
+    else:
+        exec_command(
+            capfd,
+            "logs --tail 1",
+            "Enabled services: ['backend', 'frontend', 'postgres']",
+        )
 
     exec_command(
         capfd,
@@ -83,11 +91,19 @@ def test_all(capfd: Capture) -> None:
         "Enabled services: ['frontend']",
     )
 
-    exec_command(
-        capfd,
-        "logs --tail 1 backend frontend",
-        "Enabled services: ['backend', 'frontend']",
-    )
+    # In swarm mode multiple services are not allowed
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "logs --tail 1 backend frontend",
+            "Error: Got unexpected extra argument (frontend)",
+        )
+    else:
+        exec_command(
+            capfd,
+            "logs --tail 1 backend frontend",
+            "Enabled services: ['backend', 'frontend']",
+        )
 
     exec_command(
         capfd,
