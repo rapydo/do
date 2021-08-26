@@ -44,19 +44,19 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     )
 
     pull_images(capfd)
-    start_project(capfd)
+    # start_project(capfd)
 
-    exec_command(
-        capfd,
-        "run --debug backend --command hostname",
-        "Bind for 0.0.0.0:8080 failed: port is already allocated",
-    )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command hostname",
+    #     "Bind for 0.0.0.0:8080 failed: port is already allocated",
+    # )
 
-    exec_command(
-        capfd,
-        "remove",
-        "Stack removed",
-    )
+    # exec_command(
+    #     capfd,
+    #     "remove",
+    #     "Stack removed",
+    # )
 
     exec_command(
         capfd,
