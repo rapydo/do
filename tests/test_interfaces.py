@@ -3,7 +3,6 @@ This module will test the interfaces command
 """
 from faker import Faker
 
-from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -15,9 +14,6 @@ from tests import (
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
-    if SWARM_MODE:
-        return None
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
@@ -25,14 +21,6 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
-
-    exec_command(capfd, "remove --all", "Stack removed")
-
-    exec_command(
-        capfd,
-        "interfaces XYZ",
-        "invalid choice: XYZ",
-    )
 
     exec_command(
         capfd,
@@ -42,35 +30,32 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "interfaces",
-        "Missing argument",
-        "swaggerui,",
-        "adminer,",
-        "flower,",
+        "interfaces adminer",
+        "Interfaces command is replaced by rapydo run adminer",
     )
 
     exec_command(
         capfd,
-        "interfaces adminer --port XYZ --detach",
+        "run adminer --port XYZ",
         "Invalid value for '--port' / '-p': XYZ is not a valid integer",
     )
 
     exec_command(
         capfd,
-        "interfaces adminer --detach",
+        "run adminer",
         "Launching interface: adminer",
         "docker-compose command: 'run'",
     )
     exec_command(
         capfd,
-        "interfaces adminer --port 123 --detach",
+        "run adminer --port 123",
         "Launching interface: adminer",
         "docker-compose command: 'run'",
     )
 
     exec_command(
         capfd,
-        "interfaces swaggerui --port 124 --detach",
+        "run swaggerui --port 124",
         "You can access SwaggerUI web page here: http://localhost:124",
     )
 
@@ -83,6 +68,6 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod interfaces swaggerui --port 124 --detach",
+        "--prod run swaggerui --port 124",
         "You can access SwaggerUI web page here: https://localhost:124",
     )

@@ -23,6 +23,7 @@ jobs:
             create,
             init,
             install,
+            interfaces,
             libs,
             list,
             logs,
@@ -48,7 +49,6 @@ jobs:
             backup_restore_redis,
             cronjobs,
             dump,
-            interfaces,
             ssl,
             tuning,
           ]

@@ -23,4 +23,5 @@ def volatile(
         show_default=False,
     ),
 ) -> None:
+    # Deprecated since 2.1
     print_and_exit("Volatile command is replaced by rapydo run --debug {}", service)
