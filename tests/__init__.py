@@ -160,7 +160,7 @@ def init_project(capfd: Any, pre_options: str = "", post_options: str = "") -> N
 def start_registry(capfd: Any) -> None:
     exec_command(
         capfd,
-        "registry",
+        "run registry",
         "Creating",
         "_registry_run",
     )

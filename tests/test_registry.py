@@ -43,32 +43,40 @@ def test_docker_registry(capfd: Capture) -> None:
     exec_command(
         capfd,
         "pull backend",
-        "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
+        "Registry 127.0.0.1:5000 not reachable. "
+        "You can start it with rapydo run registry",
     )
 
     exec_command(
         capfd,
         "build backend",
-        "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
+        "Registry 127.0.0.1:5000 not reachable. "
+        "You can start it with rapydo run registry",
     )
 
     exec_command(
         capfd,
         "start backend",
-        "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
+        "Registry 127.0.0.1:5000 not reachable. "
+        "You can start it with rapydo run registry",
     )
 
     exec_command(
         capfd,
         "images",
-        "Registry 127.0.0.1:5000 not reachable. You can start it with rapydo registry",
+        "Registry 127.0.0.1:5000 not reachable. "
+        "You can start it with rapydo run registry",
     )
 
     exec_command(
         capfd,
         "registry",
-        "This is a temporary command and will probably be merged"
-        " with interfaces and volatile commands in a near future",
+        "Registry command is replaced by rapydo run registry",
+    )
+
+    exec_command(
+        capfd,
+        "run registry",
         "Creating",
         "_registry_run",
     )
@@ -96,6 +104,6 @@ def test_docker_registry(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "registry",
+        "run registry",
         "The registry is already running at 127.0.0.1:5000",
     )

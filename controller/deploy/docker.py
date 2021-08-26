@@ -64,7 +64,8 @@ class Docker:
 
             if do_exit:
                 print_and_exit(
-                    "Registry {} not reachable. You can start it with rapydo registry",
+                    "Registry {} not reachable. "
+                    "You can start it with rapydo run registry",
                     self.get_registry(),
                 )
 

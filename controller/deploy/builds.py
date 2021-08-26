@@ -164,7 +164,10 @@ def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[
 
 
 def verify_available_images(
-    services: List[str], compose_config: ComposeServices, base_services: ComposeServices
+    services: List[str],
+    compose_config: ComposeServices,
+    base_services: ComposeServices,
+    is_run_command: bool = False,
 ) -> None:
 
     # All template builds (core only)
@@ -184,11 +187,14 @@ def verify_available_images(
                 image_exists = docker.client.image.exists(image)
 
             if not image_exists:
-                print_and_exit(
-                    "Missing {} image, execute rapydo pull {}",
-                    image,
-                    service,
-                )
+                if is_run_command:
+                    print_and_exit("Missing {} image, add --pull option", image)
+                else:
+                    print_and_exit(
+                        "Missing {} image, execute rapydo pull {}",
+                        image,
+                        service,
+                    )
 
     # All builds used for the current configuration (core + custom)
     builds = find_templates_build(compose_config, include_image=True)
