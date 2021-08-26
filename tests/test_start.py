@@ -7,7 +7,14 @@ import shutil
 from pathlib import Path
 
 from controller import SWARM_MODE
-from tests import Capture, create_project, exec_command, pull_images, start_registry
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    pull_images,
+    start_registry,
+)
 
 
 def test_all(capfd: Capture) -> None:
@@ -32,11 +39,7 @@ def test_all(capfd: Capture) -> None:
         services=["neo4j"],
     )
 
-    exec_command(
-        capfd,
-        "-e HEALTHCHECK_INTERVAL=1s init",
-        "Project initialized",
-    )
+    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
 
     if SWARM_MODE:
         exec_command(

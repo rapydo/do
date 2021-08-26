@@ -26,7 +26,7 @@ def test_all(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
     )
-    init_project(capfd)
+    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
 
     if SWARM_MODE:
         start_registry(capfd)
@@ -34,10 +34,7 @@ def test_all(capfd: Capture) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    # Wait for the backend startup
-    # In compose mode this sleep was 3 seconds,
-    # but in swarm it is not enough due to the slow deployment phase
-    time.sleep(20)
+    time.sleep(3)
 
     # Invalid services are refused
     exec_command(

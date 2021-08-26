@@ -35,11 +35,7 @@ def test_base(capfd: Capture) -> None:
         f"http-api: wrong branch 0.7.6, expected {__version__}",
         "You can use rapydo init to fix it",
     )
-    exec_command(
-        capfd,
-        "init",
-        "Project initialized",
-    )
+    init_project(capfd)
 
     with TemporaryRemovePath(Path("data")):
         exec_command(
@@ -189,11 +185,8 @@ RUN mkdir xyz
     shutil.rmtree("data/logs")
     assert not os.path.isdir("data/logs")
     # Let's restore .projectrc and data/logs
-    exec_command(
-        capfd,
-        "--project third init",
-        "Project initialized",
-    )
+    init_project(capfd, "--project third")
+
     assert os.path.isdir("data/logs")
     exec_command(
         capfd,

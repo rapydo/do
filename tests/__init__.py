@@ -149,10 +149,10 @@ def create_project(
     )
 
 
-def init_project(capfd: Any) -> None:
+def init_project(capfd: Any, pre_options: str = "", post_options: str = "") -> None:
     exec_command(
         capfd,
-        "init",
+        f"{pre_options} init {post_options}",
         "Project initialized",
     )
 

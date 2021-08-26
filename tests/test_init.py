@@ -15,6 +15,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    init_project,
     random_project_name,
 )
 
@@ -67,11 +68,7 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         )
 
     else:
-        exec_command(
-            capfd,
-            "init",
-            "Project initialized",
-        )
+        init_project(capfd)
 
     repo = git.get_repo("submodules/http-api")
     git.switch_branch(repo, "0.7.6")
