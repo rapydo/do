@@ -3,13 +3,14 @@ This module will test the interfaces command
 """
 from faker import Faker
 
-from controller import __version__
+from controller import SWARM_MODE, __version__
 from tests import (
     Capture,
     create_project,
     exec_command,
     init_project,
     random_project_name,
+    start_registry,
 )
 
 
@@ -22,6 +23,9 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
+
+    if SWARM_MODE:
+        start_registry(capfd)
 
     exec_command(
         capfd,
