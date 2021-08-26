@@ -27,7 +27,7 @@ def remove(
 
     all_services = Application.data.services == Application.data.active_services
 
-    if all_services:
+    if all_services and rm_all:
         log.warning("--all option not implemented yet")
         # -v, --volumes volumes
         # Remove named volumes declared in the volumes section of the
