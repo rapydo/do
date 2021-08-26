@@ -163,7 +163,7 @@ class Compose:
             "--volume": [],
             "--rm": True,
             "--no-deps": True,
-            "--name": None,
+            "--name": service,
             "--user": user,
             "--workdir": None,
             "--entrypoint": None,
