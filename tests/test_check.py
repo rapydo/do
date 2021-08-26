@@ -277,14 +277,14 @@ RUN mkdir xyz
             "Checks completed",
         )
 
-        # exec_command(
-        #     capfd,
-        #     f"-e ASSIGNED_CPU_BACKEND=50 {check}",
-        #     "Your deployment requires ",
-        #     " cpus but your nodes only have ",
-        #     # The error does not halt the checks execution
-        #     "Checks completed",
-        # )
+        exec_command(
+            capfd,
+            f"-e ASSIGNED_CPU_BACKEND=50 {check}",
+            "Your deployment requires ",
+            " cpus but your nodes only have ",
+            # The error does not halt the checks execution
+            "Checks completed",
+        )
 
         exec_command(
             capfd,
@@ -294,11 +294,11 @@ RUN mkdir xyz
             "Checks completed",
         )
 
-        # exec_command(
-        #     capfd,
-        #     f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1 {check}",
-        #     "Your deployment requires ",
-        #     " cpus but your nodes only have ",
-        #     # The error does not halt the checks execution
-        #     "Checks completed",
-        # )
+        exec_command(
+            capfd,
+            f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1 {check}",
+            "Your deployment requires ",
+            " cpus but your nodes only have ",
+            # The error does not halt the checks execution
+            "Checks completed",
+        )
