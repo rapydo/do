@@ -14,16 +14,19 @@ from controller.app import Application, Configuration
 from controller.packages import Packages
 from controller.utilities import git
 
+# https://get.docker.com
+EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
+
+# https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh
+EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
+
 # https://github.com/docker/compose-cli/releases
 COMPOSE_VERSION = "v2.0.0-rc.2"
-# https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.6.1"
-
-
-EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
-EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
 EXPECTED_COMPOSE_BIN_MD5 = "8ae1c3688291a00e8498aa520225ddcd"
-EXPECTED_BUILDX_BIN_MD5 = "caae05fcabd62f4e0708ea95c7c6b85f"
+
+# https://github.com/docker/buildx/releases
+BUILDX_VERSION = "v0.6.2"
+EXPECTED_BUILDX_BIN_MD5 = "a15ad155cc7b3ab1112da4bea546bfd1"
 
 
 def download(url: str, expected_checksum: str) -> Path:
