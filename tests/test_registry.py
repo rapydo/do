@@ -4,7 +4,7 @@ This module will test the registry service
 import random
 import time
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import Capture, create_project, exec_command
 
 
@@ -44,28 +44,28 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         "pull backend",
         "Registry 127.0.0.1:5000 not reachable. "
-        "You can start it with rapydo run registry",
+        f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
         capfd,
         "build backend",
         "Registry 127.0.0.1:5000 not reachable. "
-        "You can start it with rapydo run registry",
+        f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
         capfd,
         "start backend",
         "Registry 127.0.0.1:5000 not reachable. "
-        "You can start it with rapydo run registry",
+        f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
         capfd,
         "images",
         "Registry 127.0.0.1:5000 not reachable. "
-        "You can start it with rapydo run registry",
+        f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
