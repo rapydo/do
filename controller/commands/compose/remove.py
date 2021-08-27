@@ -36,7 +36,7 @@ def remove(
         # "--volumes": rm_all,
         dc.docker.compose.down(remove_orphans=False, remove_images="local")
     else:
-        # Important note: volumes=True only destroy anonymous volumues,
+        # Important note: volumes=True only destroy anonymous volumes,
         # not named volumes like down should do
         dc.docker.compose.rm(Application.data.services, stop=True, volumes=rm_all)
 

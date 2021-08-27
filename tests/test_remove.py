@@ -45,6 +45,7 @@ def test_remove(capfd: Capture) -> None:
     start_project(capfd)
 
     if SWARM_MODE:
+        # In swarm mode remove single service is equivalent to scale 0
         exec_command(
             capfd,
             "remove backend",
