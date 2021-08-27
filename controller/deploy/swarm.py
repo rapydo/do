@@ -3,12 +3,11 @@ Integration with Docker swarm
 """
 from typing import Dict, List, Optional, Union
 
-from colorama import Fore
 from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
 
-from controller import COMPOSE_FILE, log, print_and_exit
+from controller import COMPOSE_FILE, colors, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -93,9 +92,9 @@ class Swarm:
             resources = f"{cpu} CPU {ram} RAM"
 
             if state == "Ready+Active":
-                COLOR = Fore.GREEN
+                COLOR = colors.GREEN
             else:
-                COLOR = Fore.RED
+                COLOR = colors.RED
 
             print(
                 COLOR
@@ -120,12 +119,12 @@ class Swarm:
             log.info("No service is running")
             return
 
-        print(Fore.RESET + "====== Services ======")
+        print(colors.RESET + "====== Services ======")
 
         for service in services:
 
             service_name = service.spec.name
-            print(f"{Fore.RESET}Inspecting {service_name}...", end="\r")
+            print(f"{colors.RESET}Inspecting {service_name}...", end="\r")
 
             tasks_lines: List[str] = []
 
@@ -133,21 +132,21 @@ class Swarm:
             for task in self.docker.service.ps(service_name):
 
                 if task.status.state == "shutdown" or task.status.state == "complete":
-                    COLOR = Fore.BLUE
+                    COLOR = colors.BLUE
                 elif task.status.state == "running":
-                    COLOR = Fore.GREEN
+                    COLOR = colors.GREEN
                     running_tasks += 1
                 elif task.status.state == "starting" or task.status.state == "ready":
-                    COLOR = Fore.YELLOW
+                    COLOR = colors.YELLOW
                 elif task.status.state == "failed":
-                    COLOR = Fore.RED
+                    COLOR = colors.RED
                 else:
-                    COLOR = Fore.RESET
+                    COLOR = colors.RESET
 
                 slot = f" \\_ [{task.slot}]"
                 node_name = nodes.get(task.node_id, "")
                 container_name = f"{service_name}.{task.slot}.{task.id}"
-                status = f"{COLOR}{task.status.state:8}{Fore.RESET}"
+                status = f"{COLOR}{task.status.state:8}{colors.RESET}"
                 errors = f"err={task.status.err}" if task.status.err else ""
                 labels = ",".join(task.labels)
                 ts = task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S")
@@ -172,11 +171,11 @@ class Swarm:
             replicas = self.get_replicas(service)
 
             if replicas == 0:
-                COLOR = Fore.YELLOW
+                COLOR = colors.YELLOW
             elif replicas != running_tasks:
-                COLOR = Fore.RED
+                COLOR = colors.RED
             else:
-                COLOR = Fore.GREEN
+                COLOR = colors.GREEN
 
             if service.endpoint.ports:
                 ports_list = [
@@ -188,7 +187,9 @@ class Swarm:
 
             image = service.spec.task_template.container_spec.image.split("@")[0]
             ports = ",".join(ports_list)
-            print(f"{COLOR}{service_name:23}{Fore.RESET} [{replicas}] {image}\t{ports}")
+            print(
+                f"{COLOR}{service_name:23}{colors.RESET} [{replicas}] {image}\t{ports}"
+            )
 
             for line in tasks_lines:
                 print(line)

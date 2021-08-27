@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Set, Union, cast
 
 import yaml
-from colorama import Fore
 from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
@@ -11,6 +10,7 @@ from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
     SWARM_MODE,
+    colors,
     log,
     print_and_exit,
 )
@@ -162,15 +162,15 @@ class Compose:
 
             status = container.state.status
             if status == "shutdown" or status == "complete":
-                COLOR = Fore.BLUE
+                COLOR = colors.BLUE
             elif status == "running":
-                COLOR = Fore.GREEN
+                COLOR = colors.GREEN
             elif status == "starting" or status == "ready":
-                COLOR = Fore.YELLOW
+                COLOR = colors.YELLOW
             elif status == "failed":
-                COLOR = Fore.RED
+                COLOR = colors.RED
             else:
-                COLOR = Fore.RESET
+                COLOR = colors.RESET
 
             ports_list = []
             for container_port, host_port in container.network_settings.ports.items():
@@ -184,5 +184,5 @@ class Compose:
             ports = ",".join(ports_list)
             ts = container.created.strftime("%d-%m-%Y %H:%M:%S")
 
-            cname = f"{COLOR}{name:23}{Fore.RESET}"
+            cname = f"{COLOR}{name:23}{colors.RESET}"
             print(f"{container_id} {cname} {status:8} {ts:20} {image:24}\t{ports}")

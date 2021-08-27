@@ -9,7 +9,6 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple, cast
 
 import requests
 import typer
-from colorama import Fore
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
@@ -28,6 +27,7 @@ from controller import (
     ComposeServices,
     EnvType,
     __version__,
+    colors,
     log,
     print_and_exit,
 )
@@ -415,7 +415,7 @@ class Application:
         # Deprecated since 2.1
         if sys.version_info.major == 3 and sys.version_info.minor == 7:
             warnings.warn(
-                Fore.YELLOW + "Support for Python 3.7 is deprecated "
+                colors.YELLOW + "Support for Python 3.7 is deprecated "
                 "and will be dropped in a future release. Please upgrade to python 3.8+"
             )
             import time
