@@ -661,7 +661,7 @@ You can use of one:
                 if SWARM_MODE and Configuration.production:
                     add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
-        if SWARM_MODE:
+        if SWARM_MODE and not Configuration.FORCE_COMPOSE_ENGINE:
             add(CONFS_DIR, "swarm_options.yml")
 
         if Application.env.get("NFS_HOST"):
