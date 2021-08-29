@@ -1,11 +1,13 @@
 import os
 from enum import Enum
-from typing import Dict
+from typing import Dict, Union
 
 import typer
 
-from controller import COMPOSE_ENVIRONMENT_FILE, log
-from controller.app import Application
+from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, log
+from controller.app import Application, Configuration
+from controller.deploy.compose_v2 import Compose
+from controller.deploy.swarm import Swarm
 from controller.utilities import git
 
 
@@ -33,17 +35,27 @@ def list_cmd(
     if element_type == ElementTypes.services:
         log.info("List of active services:\n")
 
-        print("{:<12} {:<24} Path".format("Name", "Image"))
+        header = ("Name", "Image", "Status", "Path")
+
+        if SWARM_MODE:
+            engine: Union[Swarm, Compose] = Swarm()
+        else:
+            engine = Compose(Application.data.files)
+
+        services_status = engine.get_services_status(Configuration.project)
+        print(f"{header[0]:<12} {header[1]:<24} {header[2]:<12} {header[3]}")
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
                 image = service.image
                 build = service.build
 
+                status = services_status.get(name, "N/A")
+
                 if build:
                     build_path = build.context.relative_to(os.getcwd())
-                    print(f"{name:<12} {image:<24} {build_path}")
+                    print(f"{name:<12} {image:<24} {status:12} {build_path}")
                 else:
-                    print(f"{name:<12} {image:<24}")
+                    print(f"{name:<12} {image:<24} {status:12}")
 
     if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")

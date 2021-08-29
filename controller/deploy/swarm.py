@@ -1,7 +1,7 @@
 """
 Integration with Docker swarm
 """
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Set, Union
 
 from glom import glom
 from python_on_whales import Service
@@ -56,6 +56,42 @@ class Swarm:
             if s.name == stack:
                 return True
         return False
+
+    def get_running_services(self, prefix: str) -> Set[str]:
+
+        prefix += "_"
+        containers = set()
+        for service in self.docker.service.list():
+            name = service.spec.name
+            if not name.startswith(prefix):
+                continue
+
+            for task in self.docker.service.ps(name):
+                status = task.status.state
+                if status != "running" and status != "starting" and status != "ready":
+                    continue
+
+                # to be replaced with removeprefix
+                name = name[len(prefix) :]
+                containers.add(name)
+        return containers
+
+    def get_services_status(self, prefix: str) -> Dict[str, str]:
+
+        prefix += "_"
+        services_status: Dict[str, str] = dict()
+        for service in self.docker.service.list():
+            name = service.spec.name
+            if not name.startswith(prefix):
+                continue
+
+            for task in self.docker.service.ps(name):
+                status = task.status.state
+
+                # to be replaced with removeprefix
+                name = name[len(prefix) :]
+                services_status[name] = status
+        return services_status
 
     def deploy(self) -> None:
 

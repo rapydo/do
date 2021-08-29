@@ -155,6 +155,32 @@ class Compose:
         except DockerException:
             return containers
 
+    def get_services_status(self, prefix: str) -> Dict[str, str]:
+
+        prefix += "_"
+        services_status: Dict[str, str] = dict()
+        try:
+            for container in self.docker.compose.ps():
+                name = container.name
+                if not name.startswith(prefix):
+                    continue
+
+                status = container.state.status
+
+                # to be replaced with removeprefix
+                name = name[len(prefix) :]
+                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
+                name = name[0 : name.index("_")]
+                services_status[name] = status
+            return services_status
+        # An exception is raised when no service is running.
+        # The same happens with:
+        # `docker compose ps`
+        # that fails with a "not found" and it seems to be a bug of compose-cli.
+        # In case it is a feature a specific exception would be helpful here
+        except DockerException:
+            return services_status
+
     def status(self) -> None:
         print("")
 

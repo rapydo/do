@@ -55,6 +55,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "postgres",
         "rabbit",
         "redis",
+        "running",
     )
 
     exec_command(
