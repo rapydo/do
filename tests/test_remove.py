@@ -191,7 +191,7 @@ def test_remove(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "remove --all backend",
+            "remove --all postgres",
             "Stack removed",
         )
 
