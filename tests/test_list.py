@@ -10,6 +10,7 @@ from tests import (
     exec_command,
     init_project,
     random_project_name,
+    start_project,
 )
 
 
@@ -31,6 +32,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "list",
         "Missing argument 'ELEMENT_TYPE:[env|services|submodules]'.  Choose from:",
     )
+
+    exec_command(
+        capfd,
+        "list invalid",
+        "Invalid value for 'ELEMENT_TYPE:[env|services|submodules]': ",
+        "invalid choice: invalid. (choose from env, services, submodules)",
+    )
+
     exec_command(
         capfd,
         "list env",
@@ -55,12 +64,20 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "postgres",
         "rabbit",
         "redis",
-        "running",
+        "N/A",
     )
+
+    start_project(capfd)
 
     exec_command(
         capfd,
-        "list invalid",
-        "Invalid value for 'ELEMENT_TYPE:[env|services|submodules]': ",
-        "invalid choice: invalid. (choose from env, services, submodules)",
+        "list services",
+        "List of active services:",
+        "backend",
+        "frontend",
+        "postgres",
+        "rabbit",
+        "redis",
+        # Probably not running yet, a sleep would be needed
+        "running",
     )
