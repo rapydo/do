@@ -41,6 +41,11 @@ def get_containers() -> List[str]:
     return sorted(containers)
 
 
+def get_networks() -> List[str]:
+
+    return [net.name for net in docker.network.list()]
+
+
 def count_volumes() -> Tuple[int, int]:
 
     named = 0
@@ -95,8 +100,12 @@ def test_remove(capfd: Capture) -> None:
 
     time.sleep(2)
 
-    NETWORKS_NUM = len(docker.network.list())
     NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
+
+    if SWARM_MODE:
+        NETWORK_NAME = "rem_swarm_default"
+    else:
+        NETWORK_NAME = "rem_compose_default"
 
     assert get_containers() == ALL
 
@@ -112,7 +121,7 @@ def test_remove(capfd: Capture) -> None:
 
         assert get_containers() == POSTGRES_ONLY
         # Single service remove does not remove the network
-        assert len(docker.network.list()) == NETWORKS_NUM
+        assert NETWORK_NAME in get_networks()
         # Single service remove does not remove any volume
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
@@ -134,7 +143,7 @@ def test_remove(capfd: Capture) -> None:
 
         assert get_containers() == NONE
         # Removal of all services also drop the network
-        assert len(docker.network.list()) == NETWORKS_NUM - 1
+        assert NETWORK_NAME not in get_networks()
         # Removal of all services does not remove any volume
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
@@ -149,7 +158,7 @@ def test_remove(capfd: Capture) -> None:
 
         assert get_containers() == POSTGRES_ONLY
         # Single service remove does not remove the network
-        assert len(docker.network.list()) == NETWORKS_NUM
+        assert NETWORK_NAME in get_networks()
         # Removal of all services does not remove any volume
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
@@ -163,7 +172,7 @@ def test_remove(capfd: Capture) -> None:
 
         assert get_containers() == NONE
         # Removal of all services also drop the network
-        assert len(docker.network.list()) == NETWORKS_NUM - 1
+        assert NETWORK_NAME not in get_networks()
         # Removal of all services does not remove any volume
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
