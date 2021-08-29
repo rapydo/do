@@ -4,13 +4,16 @@ This module will test the list command
 
 from faker import Faker
 
+from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
     exec_command,
     init_project,
+    pull_images,
     random_project_name,
     start_project,
+    start_registry,
 )
 
 
@@ -66,6 +69,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "redis",
         "N/A",
     )
+
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    pull_images(capfd)
 
     start_project(capfd)
 
