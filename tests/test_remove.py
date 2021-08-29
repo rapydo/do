@@ -35,6 +35,7 @@ def get_containers() -> List[str]:
 
         # in both cases now name is:
         # project_service
+        containers.append(name)
 
     # Return the containers sorted by name
     return sorted(containers)
