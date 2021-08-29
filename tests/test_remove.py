@@ -191,13 +191,15 @@ def test_remove(capfd: Capture) -> None:
 
         start_project(capfd)
 
+        assert get_containers() == ALL
+
         exec_command(
             capfd,
             "remove --all postgres",
             "Stack removed",
         )
 
-        assert get_containers() == NONE
+        assert get_containers() == BACKEND_ONLY
         # Removal of all services with --all flag remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
@@ -208,10 +210,13 @@ def test_remove(capfd: Capture) -> None:
 
         start_project(capfd)
 
+        assert get_containers() == ALL
+
         exec_command(
             capfd, "remove --all", "--all option not implemented yet", "Stack removed"
         )
 
+        assert get_containers() == NONE
         # Removal of all services does not remove any volume because it is:
         # NOT IMPLEMENTED YET
         n, u = count_volumes()
