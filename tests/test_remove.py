@@ -209,10 +209,6 @@ def test_remove(capfd: Capture) -> None:
         # New counts, after single service --all has removed some unnamed volume
         NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
-        start_project(capfd)
-
-        assert get_containers() == ALL
-
         exec_command(
             capfd, "remove --all", "--all option not implemented yet", "Stack removed"
         )
