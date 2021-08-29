@@ -77,22 +77,19 @@ def test_remove(capfd: Capture) -> None:
     pull_images(capfd)
 
     if SWARM_MODE:
+        # In swarm mode single service remove is not permitted if nothing is running
         exec_command(
             capfd,
             "remove postgres",
             "Stack rem is not running, deploy it with rapydo start",
         )
-        exec_command(
-            capfd,
-            "remove",
-            "Stack rem is not running, deploy it with rapydo start",
-        )
-    else:
-        exec_command(
-            capfd,
-            "remove",
-            "Stack removed",
-        )
+
+    # Even if nothing is running, remove is permitted both on Compose and Swarm
+    exec_command(
+        capfd,
+        "remove",
+        "Stack removed",
+    )
 
     NONE: List[str] = []
     BACKEND_ONLY = ["rem_backend"]
