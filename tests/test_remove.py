@@ -1,7 +1,8 @@
 """
 This module will test the remove command
 """
-from typing import List
+import time
+from typing import List, Tuple
 
 from python_on_whales import docker
 
@@ -37,6 +38,21 @@ def get_containers() -> List[str]:
 
     # Return the containers sorted by name
     return sorted(containers)
+
+
+def count_volumes() -> Tuple[int, int]:
+
+    named = 0
+    unnamed = 0
+
+    for volume in docker.volume.list():
+        name = volume.name
+        if "_" in name:
+            named += 1
+        else:
+            unnamed += 1
+
+    return named, unnamed
 
 
 def test_remove(capfd: Capture) -> None:
@@ -76,7 +92,10 @@ def test_remove(capfd: Capture) -> None:
 
     start_project(capfd)
 
+    time.sleep(2)
+
     NETWORKS_NUM = len(docker.network.list())
+    NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
     assert get_containers() == ALL
 
@@ -93,6 +112,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == POSTGRES_ONLY
         # Single service remove does not remove the network
         assert len(docker.network.list()) == NETWORKS_NUM
+        # Single service remove does not remove any volume
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM == u
 
         exec_command(
             capfd,
@@ -111,6 +134,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == NONE
         # Removal of all services also drop the network
         assert len(docker.network.list()) == NETWORKS_NUM - 1
+        # Removal of all services does not remove any volume
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM == u
     else:
 
         exec_command(
@@ -122,6 +149,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == POSTGRES_ONLY
         # Single service remove does not remove the network
         assert len(docker.network.list()) == NETWORKS_NUM
+        # Removal of all services does not remove any volume
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM == u
 
         exec_command(
             capfd,
@@ -132,6 +163,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == NONE
         # Removal of all services also drop the network
         assert len(docker.network.list()) == NETWORKS_NUM - 1
+        # Removal of all services does not remove any volume
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM == u
 
         exec_command(
             capfd,
@@ -140,7 +175,20 @@ def test_remove(capfd: Capture) -> None:
         )
 
         assert get_containers() == NONE
+        # Removal of all services with --all flag remove unnamed volumes
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM < u
+
+        # New counts, after single service --all has removed some unnamed volume
+        NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
         exec_command(
             capfd, "remove --all", "--all option not implemented yet", "Stack removed"
         )
+
+        # Removal of all services does not remove any volume because it is:
+        # NOT IMPLEMENTED YET
+        n, u = count_volumes()
+        assert NAMED_VOLUMES_NUM == n
+        assert UNNAMED_VOLUMES_NUM == u
