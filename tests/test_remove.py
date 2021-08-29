@@ -76,6 +76,8 @@ def test_remove(capfd: Capture) -> None:
 
     start_project(capfd)
 
+    NETWORKS_NUM = len(docker.network.list())
+
     assert get_containers() == ALL
 
     if SWARM_MODE:
@@ -89,6 +91,8 @@ def test_remove(capfd: Capture) -> None:
         )
 
         assert get_containers() == POSTGRES_ONLY
+        # Single service remove does not remove the network
+        assert len(docker.network.list()) == NETWORKS_NUM
 
         exec_command(
             capfd,
@@ -105,7 +109,19 @@ def test_remove(capfd: Capture) -> None:
         )
 
         assert get_containers() == NONE
+        # Removal of all services also drop the network
+        assert len(docker.network.list()) == NETWORKS_NUM - 1
     else:
+
+        exec_command(
+            capfd,
+            "remove backend",
+            "Stack removed",
+        )
+
+        assert get_containers() == POSTGRES_ONLY
+        # Single service remove does not remove the network
+        assert len(docker.network.list()) == NETWORKS_NUM
 
         exec_command(
             capfd,
@@ -114,6 +130,8 @@ def test_remove(capfd: Capture) -> None:
         )
 
         assert get_containers() == NONE
+        # Removal of all services also drop the network
+        assert len(docker.network.list()) == NETWORKS_NUM - 1
 
         exec_command(
             capfd,
