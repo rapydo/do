@@ -195,6 +195,7 @@ def test_remove(capfd: Capture) -> None:
             "Stack removed",
         )
 
+        time.sleep(1)
         assert get_containers() == NONE
         # Removal of all services with --all flag remove unnamed volumes
         n, u = count_volumes()
