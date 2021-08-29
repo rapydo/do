@@ -2,8 +2,8 @@ from typing import List
 
 import typer
 
-from controller import log, print_and_exit
-from controller.app import Application, Configuration
+from controller import log
+from controller.app import Application
 from controller.deploy.compose_v2 import Compose
 
 
@@ -34,6 +34,11 @@ def remove(
         # Compose file and anonymous volumes attached to containers.
 
         # "--volumes": rm_all,
+
+        # Networks are not removed, but based on docker compose down --help they should
+        # Also docker-compose down removes network from what I remember
+        # Should be reported as bug? If corrected a specific check in test_remove.py
+        # will start to fail
         dc.docker.compose.down(remove_orphans=False, remove_images="local")
     else:
         # Important note: volumes=True only destroy anonymous volumes,
