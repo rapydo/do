@@ -79,7 +79,12 @@ def test_remove(capfd: Capture) -> None:
     if SWARM_MODE:
         exec_command(
             capfd,
-            "remove backend",
+            "remove postgres",
+            "Stack rem is not running, deploy it with rapydo start",
+        )
+        exec_command(
+            capfd,
+            "remove",
             "Stack rem is not running, deploy it with rapydo start",
         )
     else:
@@ -90,8 +95,8 @@ def test_remove(capfd: Capture) -> None:
         )
 
     NONE: List[str] = []
-    # BACKEND_ONLY  = ["rem_backend"]
-    POSTGRES_ONLY = ["rem_postgres"]
+    BACKEND_ONLY = ["rem_backend"]
+    # POSTGRES_ONLY = ["rem_postgres"]
     ALL = ["rem_backend", "rem_postgres"]
 
     assert get_containers() == NONE
@@ -113,13 +118,13 @@ def test_remove(capfd: Capture) -> None:
         # In swarm mode remove single service is equivalent to scale 0
         exec_command(
             capfd,
-            "remove backend",
-            "rem_backend scaled to 0",
+            "remove postgres",
+            "rem_postgres scaled to 0",
             "verify: Service converged",
             "Services removed",
         )
 
-        assert get_containers() == POSTGRES_ONLY
+        assert get_containers() == BACKEND_ONLY
         # Single service remove does not remove the network
         assert NETWORK_NAME in get_networks()
         # Single service remove does not remove any volume
@@ -152,11 +157,11 @@ def test_remove(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "remove backend",
+            "remove postgres",
             "Stack removed",
         )
 
-        assert get_containers() == POSTGRES_ONLY
+        assert get_containers() == BACKEND_ONLY
         # Single service remove does not remove the network
         assert NETWORK_NAME in get_networks()
         # Removal of all services does not remove any volume
