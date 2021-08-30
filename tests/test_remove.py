@@ -138,6 +138,8 @@ def test_remove(capfd: Capture) -> None:
             "Stack restarted",
         )
 
+        time.sleep(2)
+
         assert get_containers() == ALL
 
         NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
