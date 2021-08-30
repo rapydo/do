@@ -24,7 +24,6 @@ def get_containers() -> List[str]:
     for container in docker.container.list():
         name = container.name
 
-        # project_service_slot
         if name == "registry":
             continue
 
@@ -33,9 +32,10 @@ def get_containers() -> List[str]:
         if "." in name:
             name = name[0 : name.index(".")]
         # this is compose mode:
-
-        index_of_second_underscore = name.index("_", name.index("_") + 1)
-        name = name[0:index_of_second_underscore]
+        # project_service_slot
+        else:
+            index_of_second_underscore = name.index("_", name.index("_") + 1)
+            name = name[0:index_of_second_underscore]
 
         # in both cases now name is:
         # project_service
