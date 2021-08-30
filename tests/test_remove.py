@@ -127,10 +127,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == BACKEND_ONLY
         # Single service remove does not remove the network
         assert NETWORK_NAME in get_networks()
-        # Single service remove does not remove any volume
+        # Single service remove also remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM == u
+        assert UNNAMED_VOLUMES_NUM == u - 1
 
         exec_command(
             capfd,
@@ -139,6 +139,8 @@ def test_remove(capfd: Capture) -> None:
         )
 
         assert get_containers() == ALL
+
+        NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
         exec_command(
             capfd,
@@ -149,10 +151,10 @@ def test_remove(capfd: Capture) -> None:
         assert get_containers() == NONE
         # Removal of all services also drop the network
         assert NETWORK_NAME not in get_networks()
-        # Removal of all services does not remove any volume
+        # Removal of all services also remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM == u
+        assert UNNAMED_VOLUMES_NUM < u
     else:
 
         exec_command(

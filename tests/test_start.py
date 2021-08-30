@@ -6,7 +6,7 @@ import random
 import shutil
 from pathlib import Path
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -59,7 +59,7 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "start backend",
-        "image, execute rapydo pull backend",
+        f"image, execute {colors.RED}rapydo pull backend",
     )
 
     pull_images(capfd)

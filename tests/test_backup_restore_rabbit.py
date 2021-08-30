@@ -7,7 +7,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -40,12 +40,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup rabbit",
-        "image, execute rapydo pull rabbit",
+        f"image, execute {colors.RED}rapydo pull rabbit",
     )
     exec_command(
         capfd,
         "restore rabbit",
-        "image, execute rapydo pull rabbit",
+        f"image, execute {colors.RED}rapydo pull rabbit",
     )
 
     pull_images(capfd)

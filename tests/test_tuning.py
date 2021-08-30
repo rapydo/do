@@ -1,6 +1,6 @@
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -30,7 +30,7 @@ def test_tuning(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "tuning neo4j",
-        "image, execute rapydo pull neo4j",
+        f"image, execute {colors.RED}rapydo pull neo4j",
     )
 
     pull_images(capfd)

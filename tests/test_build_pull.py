@@ -6,7 +6,7 @@ import os
 from faker import Faker
 from git import Repo
 
-from controller import SWARM_MODE, __version__
+from controller import SWARM_MODE, __version__, colors
 from tests import (
     Capture,
     create_project,
@@ -56,7 +56,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "start",
-        f"Missing {image} image, execute rapydo pull backend",
+        f"Missing {image} image, execute {colors.RED}rapydo pull backend",
     )
 
     exec_command(
@@ -156,7 +156,7 @@ services:
     exec_command(
         capfd,
         "start",
-        " image, execute rapydo build rabbit",
+        f" image, execute {colors.RED}rapydo build rabbit",
     )
 
     # Not a RAPyDo child but build is possibile

@@ -27,15 +27,15 @@ log.remove()
 
 if os.getenv("TESTING", "0") == "1":
     fmt = "{message}"
-    colorize = False
+    # colorize = False
 else:  # pragma: no cover
     fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
     fmt += "[<level>{level}</level> "
     fmt += "<fg #666>{name}:{line}</fg #666>] "
     fmt += "<fg #FFF>{message}</fg #FFF>"
-    colorize = True
+    # colorize = True
 
-log.add(sys.stderr, colorize=colorize, format=fmt)
+log.add(sys.stderr, colorize=True, format=fmt)
 
 if LOGS_FILE is not None:
     try:
@@ -44,6 +44,7 @@ if LOGS_FILE is not None:
             level="WARNING",
             rotation="1 week",
             retention=f"{LOG_RETENTION} days",
+            colorize=False,
         )
     except PermissionError as e:  # pragma: no cover
         log.error(e)

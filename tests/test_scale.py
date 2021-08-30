@@ -3,7 +3,7 @@ This module will test the scale command
 """
 import time
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -39,7 +39,7 @@ def test_scale(capfd: Capture) -> None:
     exec_command(
         capfd,
         "scale backend=2",
-        "image, execute rapydo pull backend",
+        f"image, execute {colors.RED}rapydo pull backend",
     )
 
     pull_images(capfd)

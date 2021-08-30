@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Set, Union, cast
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import SWARM_MODE, ComposeServices, log, print_and_exit
+from controller import SWARM_MODE, ComposeServices, colors, log, print_and_exit
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -191,9 +191,11 @@ def verify_available_images(
                     print_and_exit("Missing {} image, add --pull option", image)
                 else:
                     print_and_exit(
-                        "Missing {} image, execute rapydo pull {}",
+                        "Missing {} image, execute {red}rapydo pull {}{reset}",
                         image,
                         service,
+                        red=colors.RED,
+                        reset=colors.RESET,
                     )
 
     # All builds used for the current configuration (core + custom)
@@ -214,8 +216,10 @@ def verify_available_images(
             if not image_exists:
                 action = "build" if data["path"] else "pull"
                 print_and_exit(
-                    "Missing {} image, execute rapydo {} {}",
+                    "Missing {} image, execute {red}rapydo {} {}{reset}",
                     image,
                     action,
                     service,
+                    red=colors.RED,
+                    reset=colors.RESET,
                 )

@@ -3,7 +3,7 @@ This module will test the ssl command
 """
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -38,7 +38,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "ssl",
-        "image, execute rapydo pull proxy",
+        f"image, execute {colors.RED}rapydo pull proxy",
     )
 
     exec_command(

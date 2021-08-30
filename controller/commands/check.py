@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, cast
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import SWARM_MODE, colors, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
@@ -85,9 +85,19 @@ def check(
 
             if image_tag not in dimages:
                 if image_tag in core_builds:
-                    log.warning("Missing {} image, execute rapydo pull", image_tag)
+                    log.warning(
+                        "Missing {} image, execute {red}rapydo pull{reset}",
+                        image_tag,
+                        red=colors.RED,
+                        reset=colors.RESET,
+                    )
                 else:
-                    log.warning("Missing {} image, execute rapydo build", image_tag)
+                    log.warning(
+                        "Missing {} image, execute {red}rapydo build{reset}",
+                        image_tag,
+                        red=colors.RED,
+                        reset=colors.RESET,
+                    )
                 continue
 
             image_creation = get_image_creation(image_tag)

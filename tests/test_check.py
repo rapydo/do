@@ -5,7 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
-from controller import SWARM_MODE, __version__
+from controller import SWARM_MODE, __version__, colors
 from controller.deploy.swarm import Swarm
 from controller.utilities import git
 from tests import (
@@ -85,8 +85,8 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "check -i main",
-        " image, execute rapydo pull",
-        " image, execute rapydo build",
+        f" image, execute {colors.RED}rapydo pull",
+        f" image, execute {colors.RED}rapydo build",
         "Checks completed",
     )
 

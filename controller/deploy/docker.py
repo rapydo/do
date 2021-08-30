@@ -65,9 +65,10 @@ class Docker:
             if do_exit:
                 print_and_exit(
                     "Registry {} not reachable. "
-                    "You can start it with {red}rapydo run registry",
+                    "You can start it with {red}rapydo run registry{reset}",
                     self.get_registry(),
                     red=colors.RED,
+                    reset=colors.RESET,
                 )
 
             return False
