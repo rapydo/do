@@ -828,6 +828,8 @@ You can use of one:
         else:
             Application.env["DEPLOY_ENGINE"] = "swarm"
 
+        log.critical("Debug code, DEPLOY_ENGINE = {}", Application.env["DEPLOY_ENGINE"])
+
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false
             "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
