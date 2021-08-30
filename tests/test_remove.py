@@ -130,7 +130,7 @@ def test_remove(capfd: Capture) -> None:
         # Single service remove also remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM == u - 1
+        assert UNNAMED_VOLUMES_NUM < u
 
         exec_command(
             capfd,
