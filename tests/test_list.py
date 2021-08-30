@@ -2,6 +2,8 @@
 This module will test the list command
 """
 
+import time
+
 from faker import Faker
 
 from controller import SWARM_MODE
@@ -27,7 +29,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["rabbit", "redis"],
         extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
     )
-    init_project(capfd)
+    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
 
     # Some tests with list
     exec_command(
@@ -77,6 +79,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
+    time.sleep(2)
+
     exec_command(
         capfd,
         "list services",
@@ -86,6 +90,5 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "postgres",
         "rabbit",
         "redis",
-        # Probably not running yet, a sleep would be needed
         "running",
     )
