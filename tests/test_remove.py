@@ -130,7 +130,7 @@ def test_remove(capfd: Capture) -> None:
         # Single service remove also remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM < u
+        assert UNNAMED_VOLUMES_NUM > u
 
         exec_command(
             capfd,
@@ -154,7 +154,7 @@ def test_remove(capfd: Capture) -> None:
         # Removal of all services also remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM < u
+        assert UNNAMED_VOLUMES_NUM > u
     else:
 
         exec_command(
@@ -205,8 +205,7 @@ def test_remove(capfd: Capture) -> None:
         # Removal of all services with --all flag remove unnamed volumes
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
-        # This locally works... but not on GA ... mistery
-        # assert UNNAMED_VOLUMES_NUM < u
+        assert UNNAMED_VOLUMES_NUM > u
 
         # New counts, after single service --all has removed some unnamed volume
         NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
