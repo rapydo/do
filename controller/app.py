@@ -212,6 +212,11 @@ def controller_cli_options(
     ),
 ) -> None:
 
+    # This is needed because during tests both Application and Configuration
+    # are persistent and after a run (i.e. after starting the registry)
+    # FORCE_COMPOSE_ENGINE remains enabled
+    # It would not be needed during the normal use of the controller
+    Configuration.FORCE_COMPOSE_ENGINE = False
     Configuration.set_action(ctx.invoked_subcommand)
 
     # Deprecated since 2.1
@@ -827,12 +832,6 @@ You can use of one:
             Application.env["DEPLOY_ENGINE"] = "compose"
         else:
             Application.env["DEPLOY_ENGINE"] = "swarm"
-
-        log.critical("Debug code, SWARM_MODE = {}", SWARM_MODE)
-        log.critical(
-            "Debug code, FORCE_COMPOSE_ENGINE = {}", Configuration.FORCE_COMPOSE_ENGINE
-        )
-        log.critical("Debug code, DEPLOY_ENGINE = {}", Application.env["DEPLOY_ENGINE"])
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false
