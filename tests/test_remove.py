@@ -107,10 +107,18 @@ def test_remove(capfd: Capture) -> None:
 
     NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
+    exec_command(
+        capfd,
+        "list env",
+        "DEPLOY_ENGINE",
+    )
+
     if SWARM_MODE:
-        NETWORK_NAME = "rem_swarm_default"
+        DEPLOY_ENGINE = "swarm"
     else:
-        NETWORK_NAME = "rem_compose_default"
+        DEPLOY_ENGINE = "compose"
+
+    NETWORK_NAME = f"rem_{DEPLOY_ENGINE}_default"
 
     assert get_containers() == ALL
 
