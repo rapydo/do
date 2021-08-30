@@ -828,6 +828,10 @@ You can use of one:
         else:
             Application.env["DEPLOY_ENGINE"] = "swarm"
 
+        log.critical("Debug code, SWARM_MODE = {}", SWARM_MODE)
+        log.critical(
+            "Debug code, FORCE_COMPOSE_ENGINE = {}", Configuration.FORCE_COMPOSE_ENGINE
+        )
         log.critical("Debug code, DEPLOY_ENGINE = {}", Application.env["DEPLOY_ENGINE"])
 
         bool_envs = [
