@@ -23,15 +23,19 @@ def get_containers() -> List[str]:
 
     for container in docker.container.list():
         name = container.name
+
+        # project_service_slot
+        if name == "registry":
+            continue
+
         # this is swarm mode:
         # project_service.slot.id
         if "." in name:
             name = name[0 : name.index(".")]
         # this is compose mode:
-        # project_service_slot
-        elif name != "registry":
-            index_of_second_underscore = name.index("_", name.index("_") + 1)
-            name = name[0:index_of_second_underscore]
+
+        index_of_second_underscore = name.index("_", name.index("_") + 1)
+        name = name[0:index_of_second_underscore]
 
         # in both cases now name is:
         # project_service
@@ -92,12 +96,8 @@ def test_remove(capfd: Capture) -> None:
     )
 
     NONE: List[str] = []
-    if SWARM_MODE:
-        BACKEND_ONLY = ["registry", "rem_backend"]
-        ALL = ["registry", "rem_backend", "rem_postgres"]
-    else:
-        BACKEND_ONLY = ["rem_backend"]
-        ALL = ["rem_backend", "rem_postgres"]
+    BACKEND_ONLY = ["rem_backend"]
+    ALL = ["rem_backend", "rem_postgres"]
 
     assert get_containers() == NONE
 
