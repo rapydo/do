@@ -105,14 +105,14 @@ def test_remove(capfd: Capture) -> None:
 
     time.sleep(2)
 
-    NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
-
     if SWARM_MODE:
         NETWORK_NAME = "rem_swarm_default"
     else:
         NETWORK_NAME = "rem_compose_default"
 
     assert get_containers() == ALL
+
+    NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
     if SWARM_MODE:
         # In swarm mode remove single service is equivalent to scale 0
