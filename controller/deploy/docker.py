@@ -8,7 +8,7 @@ from python_on_whales.utils import DockerException
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
 
-from controller import colors, print_and_exit
+from controller import RED, print_and_exit
 from controller.app import Application, Configuration
 
 
@@ -64,11 +64,9 @@ class Docker:
 
             if do_exit:
                 print_and_exit(
-                    "Registry {} not reachable. "
-                    "You can start it with {red}rapydo run registry{reset}",
+                    "Registry {} not reachable. You can start it with {command}",
                     self.get_registry(),
-                    red=colors.RED,
-                    reset=colors.RESET,
+                    command=RED("rapydo run registry"),
                 )
 
             return False

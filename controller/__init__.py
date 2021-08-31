@@ -76,3 +76,7 @@ def print_and_exit(
 ) -> NoReturn:
     log.critical(message, *args, **kwargs)
     sys.exit(1)
+
+
+def RED(msg: str) -> str:
+    return f"{colors.RED}{msg}{colors.RESET}"
