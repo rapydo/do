@@ -356,9 +356,9 @@ class Application:
         Application.verify_rapydo_version()
         Application.project_scaffold.inspect_project_folder()
 
-        # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
         self.current_gid = system.get_current_gid()
+
         # Cannot be tested
         if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
@@ -528,7 +528,7 @@ class Application:
     @staticmethod
     def verify_rapydo_version(rapydo_version: str = "") -> bool:
         """
-        Verify if the installed rapydo version matches the current project requirement
+        Verify if the installed controller matches the current project requirement
         """
 
         if not rapydo_version:
