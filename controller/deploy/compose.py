@@ -22,7 +22,7 @@ from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
 
-from controller import COMPOSE_ENVIRONMENT_FILE, log, print_and_exit
+from controller import COMPOSE_ENVIRONMENT_FILE, RED, log, print_and_exit
 
 
 class Compose:
@@ -127,7 +127,9 @@ class Compose:
                 "{}.\n{} ({})",
                 e,
                 "Remove previously created networks and try again",
-                "you can use rapydo remove or docker system prune",
+                "you can use {command1} or {command2}",
+                command1=RED("rapydo remove"),
+                command2=RED("docker system prune"),
             )
 
     def create_volatile_container(

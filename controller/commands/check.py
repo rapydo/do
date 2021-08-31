@@ -151,9 +151,13 @@ def check(
                     )
 
     templating = Templating()
-    for f in Application.project_scaffold.fixed_files:
-        if templating.file_changed(str(f)):
-            log.warning("{f} changed, please execute rapydo upgrade --path {f}", f=f)
+    for filename in Application.project_scaffold.fixed_files:
+        if templating.file_changed(str(filename)):
+            log.warning(
+                "{} changed, please execute {command}",
+                filename,
+                command=RED(f"rapydo upgrade --path {filename}"),
+            )
 
     log.info("Checks completed")
 
@@ -165,22 +169,22 @@ def print_obsolete(
         log.warning(
             """Obsolete image {}
 built on {} FROM {} that changed on {}
-Update it with: rapydo build {}""",
+Update it with: {command}""",
             image,
             date1,
             from_img,
             date2,
-            service,
+            command=RED(f"rapydo build {service}"),
         )
     else:
         log.warning(
             """Obsolete image {}
 built on {} but changed on {}
-Update it with: rapydo pull {}""",
+Update it with: {command}""",
             image,
             date1,
             date2,
-            service,
+            command=RED(f"rapydo pull {service}"),
         )
 
 

@@ -1,4 +1,4 @@
-from controller import log, print_and_exit
+from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose as ComposeV2
 from controller.deploy.swarm import Swarm
@@ -11,8 +11,9 @@ def restart() -> None:
 
     if not swarm.stack_is_running(Configuration.project):
         print_and_exit(
-            "Stack {} is not running, deploy it with rapydo start",
+            "Stack {} is not running, deploy it with {command}",
             Configuration.project,
+            command=RED("rapydo start"),
         )
 
     # len of projectname and underscore

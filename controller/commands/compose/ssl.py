@@ -4,7 +4,7 @@ from typing import Optional
 
 import typer
 
-from controller import log, print_and_exit
+from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -97,7 +97,8 @@ def ssl(
 
         if not volatile:
             log.info(
-                "If your proxy container is not running, try with rapydo ssl --volatile"
+                "If your proxy container is not running, try with {command}",
+                command=RED("rapydo ssl --volatile"),
             )
         sys.exit(e.code)
     else:

@@ -5,7 +5,7 @@ import typer
 from python_on_whales import Service
 from python_on_whales.exceptions import DockerException
 
-from controller import log, print_and_exit
+from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
@@ -53,8 +53,9 @@ def remove(
 
         if not swarm.stack_is_running(Configuration.project):
             print_and_exit(
-                "Stack {} is not running, deploy it with rapydo start",
+                "Stack {} is not running, deploy it with {command}",
                 Configuration.project,
+                command=RED("rapydo start"),
             )
 
         scales: Dict[Union[str, Service], int] = {}

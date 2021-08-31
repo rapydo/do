@@ -79,7 +79,8 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "start",
             "A stack is already running",
-            "Stop it with rapydo remove if you want to start a new stack",
+            f"Stop it with {colors.RED}rapydo remove{colors.RESET} "
+            "if you want to start a new stack",
         )
 
         exec_command(
@@ -101,7 +102,8 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "start backend",
             "A stack is already running",
-            "Stop it with rapydo remove if you want to start a new stack",
+            f"Stop it with {colors.RED}rapydo remove{colors.RESET} "
+            "if you want to start a new stack",
         )
 
         # ############################

@@ -33,7 +33,7 @@ def test_base(capfd: Capture) -> None:
         capfd,
         "check -i main",
         f"http-api: wrong branch 0.7.6, expected {__version__}",
-        "You can use rapydo init to fix it",
+        f"You can use {colors.RED}rapydo init{colors.RESET} to fix it",
     )
     init_project(capfd)
 
@@ -252,7 +252,7 @@ RUN mkdir xyz
         exec_command(
             capfd,
             "check -i main",
-            "Swarm is not initialized, please execute rapydo init",
+            f"Swarm is not initialized, please execute {colors.RED}rapydo init",
         )
         exec_command(
             capfd,

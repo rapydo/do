@@ -8,7 +8,7 @@ from git import Repo
 from git.diff import Diff
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from controller import SUBMODULES_DIR, log, print_and_exit
+from controller import RED, SUBMODULES_DIR, log, print_and_exit
 
 
 def get_repo(path: str) -> Optional[Repo]:
@@ -159,10 +159,11 @@ Suggestion: remove {} and execute the init command
 
     if active_branch and active_branch != branch and gitobj.working_dir:
         print_and_exit(
-            "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
+            "{}: wrong branch {}, expected {}. You can use {command} to fix it",
             Path(gitobj.working_dir).stem,
             active_branch,
             branch,
+            command=RED("rapydo init"),
         )
     return True
 

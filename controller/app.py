@@ -22,6 +22,7 @@ from controller import (
     PLACEHOLDER,
     PROJECT_DIR,
     PROJECTRC,
+    RED,
     SUBMODULES_DIR,
     SWARM_MODE,
     ComposeServices,
@@ -442,7 +443,8 @@ class Application:
             print_and_exit(
                 "A mandatory dependency is missing: docker buildx not found"
                 "\nInstallation guide: https://github.com/docker/buildx#binary-release"
-                "\nor try the automated installation with rapydo install buildx"
+                "\nor try the automated installation with {command}",
+                command=RED("rapydo install buildx"),
             )
 
         if docker.compose.is_installed():
@@ -454,7 +456,8 @@ class Application:
                 "A mandatory dependency is missing: docker compose not found"
                 "\nInstallation guide: "
                 "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                "\nor try the automated installation with rapydo install compose"
+                "\nor try the automated installation with {command}",
+                command=RED("rapydo install compose"),
             )
 
         Packages.check_program("git")

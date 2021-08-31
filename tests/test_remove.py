@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 from python_on_whales import docker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -85,7 +85,7 @@ def test_remove(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove postgres",
-            "Stack rem is not running, deploy it with rapydo start",
+            f"Stack rem is not running, deploy it with {colors.RED}rapydo start",
         )
 
     # Even if nothing is running, remove is permitted both on Compose and Swarm

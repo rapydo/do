@@ -7,7 +7,7 @@ from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
 
-from controller import COMPOSE_FILE, colors, log, print_and_exit
+from controller import COMPOSE_FILE, RED, colors, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -19,7 +19,10 @@ class Swarm:
         self.docker = Docker().client
 
         if check_initialization and not self.get_token():
-            print_and_exit("Swarm is not initialized, please execute rapydo init")
+            print_and_exit(
+                "Swarm is not initialized, please execute {command}",
+                command=RED("rapydo init"),
+            )
 
     def init(self) -> None:
 

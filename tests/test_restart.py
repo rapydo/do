@@ -1,7 +1,7 @@
 """
 This module will test the restart command
 """
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -28,7 +28,9 @@ def test_all(capfd: Capture) -> None:
 
     if SWARM_MODE:
         exec_command(
-            capfd, "restart", "Stack first is not running, deploy it with rapydo start"
+            capfd,
+            "restart",
+            f"Stack first is not running, deploy it with {colors.RED}rapydo start",
         )
 
     start_project(capfd)

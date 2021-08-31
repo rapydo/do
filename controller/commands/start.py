@@ -2,7 +2,7 @@ from typing import List
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose_v2 import Compose as Compose
@@ -37,8 +37,10 @@ def start(
         if swarm.stack_is_running(Configuration.project):
             print_and_exit(
                 "A stack is already running. "
-                "Stop it with rapydo remove if you want to start a new stack "
-                "or use rapydo restart to update it"
+                "Stop it with {command1} if you want to start a new stack "
+                "or use {command2} to update it",
+                command1=RED("rapydo remove"),
+                command2=RED("rapydo restart"),
             )
 
         compose.dump_config(Application.data.services)
@@ -47,8 +49,10 @@ def start(
         if compose.get_running_services(Configuration.project):
             print_and_exit(
                 "A stack is already running. "
-                "Stop it with rapydo remove if you want to start a new stack "
-                "or use rapydo restart to update it"
+                "Stop it with {command1} if you want to start a new stack "
+                "or use {command2} to update it",
+                command1=RED("rapydo remove"),
+                command2=RED("rapydo restart"),
             )
         compose.start_containers(Application.data.services)
 

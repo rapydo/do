@@ -7,7 +7,7 @@ import tempfile
 
 from faker import Faker
 
-from controller import __version__
+from controller import __version__, colors
 from tests import (
     Capture,
     create_project,
@@ -46,8 +46,8 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "version",
-        f"rapydo: \033[1;32m{__version__}",
-        f"required rapydo: \033[1;32m{__version__}",
+        f"rapydo: {colors.GREEN}{__version__}",
+        f"required rapydo: {colors.GREEN}{__version__}",
     )
 
     auth_envs = "-e AUTH_DEFAULT_PASSWORD=short"
