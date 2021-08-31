@@ -210,7 +210,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo build rabbit",
+        f"Update it with: {colors.RED}rapydo build rabbit",
     )
 
     # Add a second service with the same image to test redundant builds
@@ -235,7 +235,7 @@ RUN mkdir xyz
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo pull backend",
+        f"Update it with: {colors.RED}rapydo pull backend",
     )
 
     exec_command(capfd, "remove", "Stack removed")
