@@ -215,7 +215,7 @@ RUN mkdir xyz
         capfd,
         "check -i main",
         ".gitattributes changed, "
-        "please execute rapydo upgrade --path .gitattributes",
+        f"please execute {colors.RED}rapydo upgrade --path .gitattributes",
     )
 
     exec_command(
