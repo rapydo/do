@@ -81,19 +81,27 @@ def test_all(capfd: Capture) -> None:
             "Stack restarted",
         )
 
-    exec_command(
-        capfd,
-        "restart --force",
-        "Stack restarted",
-    )
-
     if SWARM_MODE:
-        container_name = swarm.get_container("backend", slot=1)
+        exec_command(
+            capfd,
+            "restart --force",
+            "Stack restarted",
+        )
+
+        if SWARM_MODE:
+            container_name = swarm.get_container("backend", slot=1)
+        else:
+            container_name = "first_backend_1"
+        assert container_name is not None
+
+        container = swarm.docker.container.inspect(container_name)
+        start_date3 = container.state.started_at
+
+        assert start_date2 != start_date3
     else:
-        container_name = "first_backend_1"
-    assert container_name is not None
-
-    container = swarm.docker.container.inspect(container_name)
-    start_date3 = container.state.started_at
-
-    assert start_date2 != start_date3
+        exec_command(
+            capfd,
+            "restart --force",
+            "--force not implemented yet",
+            "Stack restarted",
+        )

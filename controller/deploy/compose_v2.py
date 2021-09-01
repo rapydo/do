@@ -127,6 +127,9 @@ class Compose:
 
     def start_containers(self, services: List[str], force: bool = False) -> None:
 
+        if force:
+            log.warning("--force not implemented yet")
+
         services_list = ", ".join(services)
         log.info("Starting services ({})...", services_list)
         self.docker.compose.up(
