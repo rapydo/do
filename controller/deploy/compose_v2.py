@@ -125,7 +125,7 @@ class Compose:
 
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-    def start_containers(self, services: List[str]) -> None:
+    def start_containers(self, services: List[str], force: bool = False) -> None:
 
         services_list = ", ".join(services)
         log.info("Starting services ({})...", services_list)

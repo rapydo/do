@@ -2,6 +2,7 @@
 This module will test the restart command
 """
 from controller import SWARM_MODE, colors
+from controller.deploy.swarm import Swarm
 from tests import (
     Capture,
     create_project,
@@ -35,11 +36,33 @@ def test_all(capfd: Capture) -> None:
 
     start_project(capfd)
 
+    swarm = Swarm()
+    if SWARM_MODE:
+        container_name = swarm.get_container("backend", slot=1)
+    else:
+        container_name = "first_backend_1"
+    assert container_name is not None
+
+    container = swarm.docker.container.inspect(container_name)
+    start_date1 = container.state.started_at
+
     exec_command(
         capfd,
         "restart",
         "Stack restarted",
     )
+
+    if SWARM_MODE:
+        container_name = swarm.get_container("backend", slot=1)
+    else:
+        container_name = "first_backend_1"
+    assert container_name is not None
+
+    container = swarm.docker.container.inspect(container_name)
+    start_date2 = container.state.started_at
+
+    # The service is not restarted because its definition is unchanged
+    assert start_date1 == start_date2
 
     if SWARM_MODE:
         exec_command(
@@ -57,3 +80,20 @@ def test_all(capfd: Capture) -> None:
             "Updating service first_backend",
             "Stack restarted",
         )
+
+    exec_command(
+        capfd,
+        "restart --force",
+        "Stack restarted",
+    )
+
+    if SWARM_MODE:
+        container_name = swarm.get_container("backend", slot=1)
+    else:
+        container_name = "first_backend_1"
+    assert container_name is not None
+
+    container = swarm.docker.container.inspect(container_name)
+    start_date3 = container.state.started_at
+
+    assert start_date2 != start_date3
