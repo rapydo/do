@@ -33,7 +33,12 @@ class Compose:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
         return self.docker.compose.config(return_json=True)  # type: ignore
 
-    def dump_config(self, services: List[str], set_registry: bool = True) -> None:
+    def dump_config(
+        self,
+        services: List[str],
+        set_registry: bool = True,
+        v1_compatibility: bool = False,
+    ) -> None:
 
         compose_config = self.get_config_json()
 
@@ -84,6 +89,11 @@ class Compose:
                 if source and volume_type == "volume":
                     volumes.add(source.split(":")[0])
                 elif source and volume_type == "bind":
+
+                    # Remove unsupported option: 'create_host_path'
+                    if v1_compatibility:
+                        k.get("bind", {}).pop("create_host_path", None)
+
                     binds.add(source.split(":")[0])
 
         # Missing folders are then automatically created by the docker engine

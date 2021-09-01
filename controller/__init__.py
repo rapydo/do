@@ -27,15 +27,13 @@ log.remove()
 
 if os.getenv("TESTING", "0") == "1":
     fmt = "{message}"
-    # colorize = False
 else:  # pragma: no cover
     fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
     fmt += "[<level>{level}</level> "
     fmt += "<fg #666>{name}:{line}</fg #666>] "
     fmt += "<fg #FFF>{message}</fg #FFF>"
-    # colorize = True
 
-log.add(sys.stderr, colorize=True, format=fmt)
+log.add(sys.stderr, format=fmt)
 
 if LOGS_FILE is not None:
     try:
