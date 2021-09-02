@@ -72,20 +72,37 @@ class Docker:
             return False
 
     @staticmethod
-    def send_registry_request(url: str, check_status: bool = True) -> Response:
-        r = requests.get(
+    def send_registry_request(
+        url: str, check_status: bool = True, method: str = "GET", version: str = "2"
+    ) -> Response:
+
+        if version == "2":
+            headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
+        else:
+            headers = {}
+        if method == "DELETE":
+            expected_status = 202
+            method_ref = requests.delete
+
+        else:
+            expected_status = 200
+            method_ref = requests.get
+
+        r = method_ref(
             url,
             verify=False,
             auth=HTTPBasicAuth(
                 Application.env["REGISTRY_USERNAME"],
                 Application.env["REGISTRY_PASSWORD"],
             ),
+            headers=headers,
         )
 
-        if check_status and r.status_code != 200:
+        if check_status and r.status_code != expected_status:
             print_and_exit(
-                "The registry responded with an unexpected status {} (GET {})",
+                "The registry responded with an unexpected status {} ({} {})",
                 str(r.status_code),
+                method,
                 url,
             )
 
