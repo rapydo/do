@@ -85,12 +85,12 @@ def images(
 
         log.info("This registry contains {} image(s):", len(images))
         print("")
-        h0 = "ID"
-        h1 = "Image"
-        h2 = "Version"
-        h3 = "Size"
-        h4 = "Creation date"
-        print(f"{h0:13}{h1:24}{h2:10}{h3:8}{h4}")
+        h0 = "REPOSITORY"
+        h1 = "TAG"
+        h2 = "IMAGE ID"
+        h3 = "CREATED"
+        h4 = "SIZE"
+        print(f"{h0:24}{h1:10}{h2:14}{h3:21}{h4}")
         images_to_be_removed: List[Tuple[str, str, str]] = []
         for img in images:
 
@@ -118,7 +118,7 @@ def images(
                 COLOR = ""
             RESET = colors.RESET
             print(
-                f"{COLOR}{_id:13}{repository:24}{tag:10}{SIZE:8}{creation_date}{RESET}"
+                f"{COLOR}{repository:24}{tag:10}{_id:14}{creation_date:21}{SIZE}{RESET}"
             )
 
         if len(remove_images) != len(images_to_be_removed):
