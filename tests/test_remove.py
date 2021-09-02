@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 from python_on_whales import docker
 
-from controller import SWARM_MODE, colors
+from controller import REGISTRY, SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -24,7 +24,7 @@ def get_containers() -> List[str]:
     for container in docker.container.list():
         name = container.name
 
-        if name == "registry":
+        if name == REGISTRY:
             continue
 
         # this is swarm mode:

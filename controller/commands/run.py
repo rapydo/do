@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import REGISTRY, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
@@ -82,7 +82,7 @@ def run(
 
     if SWARM_MODE:
         docker = Docker()
-        if service != "registry":
+        if service != REGISTRY:
             docker.ping_registry()
         elif docker.ping_registry(do_exit=False):
             registry = docker.get_registry()
@@ -105,7 +105,7 @@ def run(
 
     if pull:
         compose.command("pull", {"SERVICE": [service], "quiet": True})
-    elif service != "registry":
+    elif service != REGISTRY:
         verify_available_images(
             [service],
             Application.data.compose_config,
@@ -130,7 +130,7 @@ def run(
         return None
 
     # This is equivalent to the old registry command
-    if service == "registry":
+    if service == REGISTRY:
         # @ symbol in secrets is not working
         # https://github.com/bitnami/charts/issues/1954
         # Other symbols like # and " also lead to configuration errors

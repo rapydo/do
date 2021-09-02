@@ -9,6 +9,7 @@ from python_on_whales.utils import DockerException
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
+    REGISTRY,
     SWARM_MODE,
     colors,
     log,
@@ -58,7 +59,7 @@ class Compose:
             if key not in services:
                 continue
 
-            if SWARM_MODE and set_registry and key != "registry":
+            if SWARM_MODE and set_registry and key != REGISTRY:
                 value["image"] = f"{registry}/{value['image']}"
 
             if "healthcheck" in value and "test" in value["healthcheck"]:

@@ -5,7 +5,10 @@ from types import TracebackType
 from typing import Any, List, Optional, Type, TypeVar
 
 from faker import Faker
+from python_on_whales import docker
 from typer.testing import CliRunner
+
+from controller import REGISTRY
 
 runner = CliRunner()
 
@@ -166,9 +169,7 @@ def start_registry(capfd: Any) -> None:
     )
     time.sleep(2)
 
-    from python_on_whales import docker
-
-    print(docker.logs("registry"))
+    print(docker.logs(REGISTRY))
 
 
 def pull_images(capfd: Any) -> None:
