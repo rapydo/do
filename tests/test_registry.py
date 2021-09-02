@@ -107,3 +107,9 @@ def test_docker_registry(capfd: Capture) -> None:
         "run registry",
         "The registry is already running at 127.0.0.1:5000",
     )
+
+    exec_command(
+        capfd,
+        "images --remove invalid",
+        "Some of the images that you specified are not found in this registry",
+    )
