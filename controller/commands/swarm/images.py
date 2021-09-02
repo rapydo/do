@@ -48,8 +48,11 @@ def images(
 
         # Fetch the tags under the repository identified by <name>
         r = docker.send_registry_request(f"{host}/v2/{repository}/tags/list")
+        # tags can be None if all the tags of a repository have deleted
+        # this or ensure that every None will be converted in an empty dictionary
+        tags = r.json().get("tags") or {}
 
-        for tag in r.json().get("tags", {}):
+        for tag in tags:
 
             # Fetch the manifest identified by name and reference
             r = docker.send_registry_request(f"{host}/v2/{repository}/manifests/{tag}")
