@@ -11,6 +11,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Query the local registry")
 def images() -> None:
+
     Application.get_controller().controller_init()
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -22,12 +23,19 @@ def images() -> None:
 
     registry = docker.get_registry()
     host = f"https://{registry}"
+
+    # to delete:
+    # DELETE /v2/<name>/manifests/<reference>
+    # -> should be: "{host}/v2/{repository}/manifests/{tag}"
+    # docker.send_registry_request(f"{host}/v2/{repository}/manifests/{tag}")
+
     r = docker.send_registry_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
     images: List[Tuple[str, str, str, Optional[datetime]]] = []
     for repository in catalog.get("repositories", {}):
+
         r = docker.send_registry_request(f"{host}/v2/{repository}/tags/list")
 
         for tag in r.json().get("tags", {}):
@@ -35,6 +43,7 @@ def images() -> None:
             r = docker.send_registry_request(f"{host}/v2/{repository}/manifests/{tag}")
             manifest = r.json()
             headers = r.headers
+
             _id = cast(str, headers.get("Docker-Content-Digest", "N/A"))
 
             layers = manifest.get("history", [])

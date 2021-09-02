@@ -254,5 +254,5 @@ def test_remove(capfd: Capture) -> None:
             # "Services removed",
             # The main stack is already removed, can't remove postgres
             # But this is enough to confirm that registry and services can be mixed up
-            "Stack neo is not running, deploy it with",
+            "Stack rem is not running, deploy it with",
         )
