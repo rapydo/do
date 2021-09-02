@@ -60,7 +60,7 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "restart",
+            "restart --force",
             "Stack restarted",
         )
 
