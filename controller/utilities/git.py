@@ -352,6 +352,6 @@ def check_updates(path: str, gitobj: Repo) -> None:
 
 
 def get_last_commit(gitobj: Repo) -> str:
-    if gitobj:
+    if gitobj and gitobj.heads:
         return next(gitobj.iter_commits()).hexsha[0:8]
     return ""
