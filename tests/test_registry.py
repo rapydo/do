@@ -30,7 +30,7 @@ def test_docker_registry(capfd: Capture) -> None:
         name="swarm",
         auth=auth,
         frontend="no",
-        services=["rabbitmq"],
+        services=["rabbit"],
     )
 
     exec_command(
@@ -105,7 +105,7 @@ def test_docker_registry(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "pull rabbitmq",
+        "pull rabbit",
         "Base images pulled from docker hub and pushed into the local registry",
     )
 
