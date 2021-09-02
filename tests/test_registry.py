@@ -30,7 +30,7 @@ def test_docker_registry(capfd: Capture) -> None:
         name="swarm",
         auth=auth,
         frontend="no",
-        services=["redis"],
+        services=["rabbitmq"],
     )
 
     exec_command(
@@ -105,7 +105,7 @@ def test_docker_registry(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "pull redis",
+        "pull rabbitmq",
         "Base images pulled from docker hub and pushed into the local registry",
     )
 
@@ -114,7 +114,7 @@ def test_docker_registry(capfd: Capture) -> None:
         "images",
         "This registry contains 2 image(s):",
         "rapydo/backend",
-        "rapydo/redis",
+        "rapydo/rabbitmq",
     )
 
     exec_command(
@@ -183,7 +183,7 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         "images",
         "This registry contains 1 image(s):",
-        "rapydo/redis",
+        "rapydo/rabbitmq",
     )
 
     exec_command(
@@ -194,12 +194,12 @@ def test_docker_registry(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        f"images --remove rapydo/redis:{__version__}",
-        f"Image rapydo/redis:{__version__} deleted from ",
+        f"images --remove rapydo/rabbitmq:{__version__}",
+        f"Image rapydo/rabbitmq:{__version__} deleted from ",
     )
 
     exec_command(
         capfd,
-        f"images --remove rapydo/redis:{__version__}",
+        f"images --remove rapydo/rabbitmq:{__version__}",
         "This registry contains no images",
     )
