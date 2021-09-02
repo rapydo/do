@@ -126,6 +126,15 @@ def test_docker_registry(capfd: Capture) -> None:
     assert "repositories" in catalog
     assert "rapydo/backend" in catalog["repositories"]
 
+    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+
+    tags_list = r.json()
+
+    assert "name" in tags_list
+    assert tags_list["name"] == "rapydo/backend"
+    assert "tags" in tags_list
+    assert __version__ in tags_list["tags"]
+
     exec_command(
         capfd,
         f"images --remove rapydo/backend:{__version__}",
@@ -137,7 +146,18 @@ def test_docker_registry(capfd: Capture) -> None:
     catalog = r.json()
 
     assert "repositories" in catalog
-    assert "rapydo/backend" not in catalog["repositories"]
+    # After the delete the repository is still in the catalog but with no tag associated
+    assert "rapydo/backend" in catalog["repositories"]
+
+    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+
+    tags_list = r.json()
+
+    assert "name" in tags_list
+    assert tags_list["name"] == "rapydo/backend"
+    assert "tags" in tags_list
+    # No tags associated to this repository
+    assert tags_list["tags"] is None
 
     exec_command(
         capfd,
