@@ -4,7 +4,8 @@ This module will test the registry service
 import random
 import time
 
-from controller import SWARM_MODE, colors
+from controller import SWARM_MODE, __version__, colors
+from controller.deploy.docker import Docker
 from tests import Capture, create_project, exec_command
 
 
@@ -111,5 +112,35 @@ def test_docker_registry(capfd: Capture) -> None:
     exec_command(
         capfd,
         "images --remove invalid",
+        "Some of the images that you specified are not found in this registry",
+    )
+
+    # Copied from images.py
+    docker = Docker()
+    registry = docker.get_registry()
+    host = f"https://{registry}"
+    r = docker.send_registry_request(f"{host}/v2/_catalog")
+
+    catalog = r.json()
+
+    assert "repositories" in catalog
+    assert "rapydo/backend" in catalog["repositories"]
+
+    exec_command(
+        capfd,
+        f"images --remove rapydo/backend:{__version__}",
+        f"Image rapydo/backend:{__version__} deleted from ",
+    )
+
+    r = docker.send_registry_request(f"{host}/v2/_catalog")
+
+    catalog = r.json()
+
+    assert "repositories" in catalog
+    assert "rapydo/backend" not in catalog["repositories"]
+
+    exec_command(
+        capfd,
+        f"images --remove rapydo/backend:{__version__}",
         "Some of the images that you specified are not found in this registry",
     )
