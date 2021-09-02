@@ -785,6 +785,7 @@ You can use of one:
             Application.env["BASE_PROJECT"] = Application.env["EXTENDED_PROJECT"]
 
         Application.env["RAPYDO_VERSION"] = __version__
+        Application.env["BUILD"] = git.get_last_commit(Application.gits["main"])
         Application.env["PROJECT_VERSION"] = Configuration.version
         Application.env["CURRENT_UID"] = str(self.current_uid)
         Application.env["CURRENT_GID"] = str(self.current_gid)

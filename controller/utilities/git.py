@@ -349,3 +349,9 @@ def check_updates(path: str, gitobj: Repo) -> None:
             if len(message) > 60:  # pragma: no cover
                 message = message[0:57] + "..."
             log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
+
+
+def get_last_commit(gitobj: Repo) -> str:
+    if gitobj:
+        return next(gitobj.iter_commits()).hexsha[0:8]
+    return ""
