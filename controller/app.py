@@ -40,9 +40,6 @@ from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
 
-# From python 3.8 it could be a TypedDict
-DataFileStub = Dict[str, List[str]]
-
 ROOT_UID = 0
 BASE_UID = 1000
 
@@ -893,7 +890,7 @@ You can use of one:
         except FileNotFoundError:
             pass
 
-        data: DataFileStub = {
+        data = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
             "services": active_services,
             "allservices": services,
@@ -903,45 +900,31 @@ You can use of one:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile() -> DataFileStub:
-        output: DataFileStub = {}
+    def parse_datafile(key: str) -> List[str]:
         try:
             with open(DATAFILE) as json_file:
                 datafile = json.load(json_file)
-                # This is needed to let mypy understand the correct type
-                output["submodules"] = datafile.get("submodules")
-                output["services"] = datafile.get("services")
-                output["allservices"] = datafile.get("allservices")
-                return output
+                return cast(List[str], datafile.get(key, []))
         except FileNotFoundError:
-            return output
+            return []
 
     @staticmethod
     def autocomplete_service(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("services", [])
+        values = Application.parse_datafile("services")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
     def autocomplete_allservice(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("allservices", [])
+        values = Application.parse_datafile("allservices")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
     def autocomplete_submodule(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("submodules", [])
+        values = Application.parse_datafile("submodules")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
