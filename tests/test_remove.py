@@ -223,3 +223,36 @@ def test_remove(capfd: Capture) -> None:
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
         assert UNNAMED_VOLUMES_NUM == u
+
+    if SWARM_MODE:
+        # Remove the registry
+        exec_command(
+            capfd,
+            "remove registry",
+            "Registry service removed",
+        )
+
+        # Verify that the registry is no longer running
+        exec_command(
+            capfd,
+            "start",
+            "Registry 127.0.0.1:5000 not reachable.",
+        )
+
+        # Not errors if the registry is not running
+        exec_command(
+            capfd,
+            "remove registry",
+            "Registry service removed",
+        )
+
+        # Mix both registry and normal services
+        exec_command(
+            capfd,
+            "remove registry postgres",
+            "Registry service removed",
+            # "Services removed",
+            # The main stack is already removed, can't remove postgres
+            # But this is enough to confirm that registry and services can be mixed up
+            "Stack neo is not running, deploy it with",
+        )

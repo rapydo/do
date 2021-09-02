@@ -5,7 +5,7 @@ import typer
 from python_on_whales import Service
 from python_on_whales.exceptions import DockerException
 
-from controller import RED, log, print_and_exit
+from controller import RED, REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.swarm import Swarm
 
@@ -35,9 +35,21 @@ def remove(
         autocompletion=Application.autocomplete_service,
     ),
 ) -> None:
-    Application.get_controller().controller_init(services)
 
     swarm = Swarm()
+    if services and REGISTRY in services:
+
+        # services is a tuple, even if defined as List[str] ...
+        services = list(services)
+        services.pop(services.index(REGISTRY))
+
+        swarm.docker.container.remove(REGISTRY, force=True)
+        log.info("Registry service removed")
+
+        if not services:
+            return
+
+    Application.get_controller().controller_init(services)
 
     all_services = Application.data.services == Application.data.active_services
 
