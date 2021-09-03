@@ -17,6 +17,16 @@ from tests import (
 )
 
 
+def count_running_containers() -> int:
+    return len(
+        [
+            c
+            for c in docker.container.list()
+            if c.state.status in ("running", "starting")
+        ]
+    )
+
+
 def test_scale(capfd: Capture) -> None:
 
     create_project(
@@ -63,7 +73,7 @@ def test_scale(capfd: Capture) -> None:
     # Wait for the backend startup
     time.sleep(2)
 
-    assert len(docker.container.list()) == BASE_SERVICE_NUM
+    assert count_running_containers() == BASE_SERVICE_NUM
 
     exec_command(
         capfd,
@@ -80,7 +90,7 @@ def test_scale(capfd: Capture) -> None:
             "Service converged",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
+        assert count_running_containers() == BASE_SERVICE_NUM + 1
 
         exec_command(
             capfd,
@@ -94,7 +104,7 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 1",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM
+        assert count_running_containers() == BASE_SERVICE_NUM
 
         exec_command(
             capfd,
@@ -103,7 +113,7 @@ def test_scale(capfd: Capture) -> None:
             "Service converged",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 2
+        assert count_running_containers() == BASE_SERVICE_NUM + 2
 
         exec_command(
             capfd,
@@ -120,7 +130,7 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 4",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 3
+        assert count_running_containers() == BASE_SERVICE_NUM + 3
 
         exec_command(
             capfd,
@@ -128,7 +138,7 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 0",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM - 1
+        assert count_running_containers() == BASE_SERVICE_NUM - 1
 
         exec_command(
             capfd,
@@ -146,7 +156,7 @@ def test_scale(capfd: Capture) -> None:
             "Services scaled: redis=1",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM
+        assert count_running_containers() == BASE_SERVICE_NUM
 
         exec_command(
             capfd,
@@ -155,7 +165,7 @@ def test_scale(capfd: Capture) -> None:
             "Services scaled: redis=2",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
+        assert count_running_containers() == BASE_SERVICE_NUM + 1
 
         exec_command(
             capfd,
@@ -164,7 +174,7 @@ def test_scale(capfd: Capture) -> None:
             "Services scaled: redis=3",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 2
+        assert count_running_containers() == BASE_SERVICE_NUM + 2
 
         with open(".projectrc", "a") as f:
             f.write("\n      DEFAULT_SCALE_REDIS: 4\n")
@@ -176,7 +186,7 @@ def test_scale(capfd: Capture) -> None:
             "Services scaled: redis=4",
         )
 
-        assert len(docker.container.list()) == BASE_SERVICE_NUM + 3
+        assert count_running_containers() == BASE_SERVICE_NUM + 3
 
         # This should fail due to a go panic error
         # exec_command(
@@ -186,7 +196,7 @@ def test_scale(capfd: Capture) -> None:
         #     "Services scaled: redis=1",
         # )
 
-        # assert len(docker.container.list()) == BASE_SERVICE_NUM
+        # assert count_running_containers() == BASE_SERVICE_NUM
 
         # exec_command(
         #     capfd,
@@ -195,7 +205,7 @@ def test_scale(capfd: Capture) -> None:
         #     "Services scaled: redis=2",
         # )
 
-        # assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
+        # assert count_running_containers() == BASE_SERVICE_NUM + 1
 
         # This should restart all the replicas.
         # Actually fails due to the panic above
