@@ -3,6 +3,8 @@ This module will test the scale command
 """
 import time
 
+from python_on_whales import docker
+
 from controller import SWARM_MODE, colors
 from tests import (
     Capture,
@@ -26,6 +28,9 @@ def test_scale(capfd: Capture) -> None:
     )
     init_project(capfd)
 
+    # backend, postgres, rabbit, redis
+    BASE_SERVICE_NUM = 4
+
     if SWARM_MODE:
 
         exec_command(
@@ -35,6 +40,9 @@ def test_scale(capfd: Capture) -> None:
         )
 
         start_registry(capfd)
+
+        # Add the registry
+        BASE_SERVICE_NUM += 1
 
     exec_command(
         capfd,
@@ -55,6 +63,8 @@ def test_scale(capfd: Capture) -> None:
     # Wait for the backend startup
     time.sleep(2)
 
+    assert len(docker.container.list()) == BASE_SERVICE_NUM
+
     exec_command(
         capfd,
         "scale rabbit=x",
@@ -70,6 +80,8 @@ def test_scale(capfd: Capture) -> None:
             "Service converged",
         )
 
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
+
         exec_command(
             capfd,
             "status",
@@ -82,12 +94,16 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 1",
         )
 
+        assert len(docker.container.list()) == BASE_SERVICE_NUM
+
         exec_command(
             capfd,
             "-e DEFAULT_SCALE_BACKEND=3 scale backend --wait",
             "first_backend scaled to 3",
             "Service converged",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 2
 
         exec_command(
             capfd,
@@ -104,11 +120,15 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 4",
         )
 
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 3
+
         exec_command(
             capfd,
             "scale backend=0 --wait",
             "first_backend scaled to 0",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM - 1
 
         exec_command(
             capfd,
@@ -122,35 +142,60 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "scale rabbit",
+            "Scaling services: rabbit=1...",
+            "Services scaled: rabbit=1",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM
+
         exec_command(
             capfd,
             "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
+            "Scaling services: rabbit=2...",
+            "Services scaled: rabbit=2",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
 
         exec_command(
             capfd,
-            "scale rabbit=2",
+            "scale rabbit=3",
+            "Scaling services: rabbit=3...",
+            "Services scaled: rabbit=3",
         )
 
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 2
+
         with open(".projectrc", "a") as f:
-            f.write("\n      DEFAULT_SCALE_RABBIT: 3\n")
+            f.write("\n      DEFAULT_SCALE_RABBIT: 4\n")
 
         exec_command(
             capfd,
             "scale rabbit",
+            "Scaling services: rabbit=4...",
+            "Services scaled: rabbit=4",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 3
 
         # This should fail due to a go panic error
         exec_command(
             capfd,
             "scale rabbit=1",
+            "Scaling services: rabbit=1...",
+            "Services scaled: rabbit=1",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM
 
         exec_command(
             capfd,
             "scale rabbit=2",
+            "Scaling services: rabbit=2...",
+            "Services scaled: rabbit=2",
         )
+
+        assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
 
         # This should restart all the replicas.
         # Actually fails due to the panic above

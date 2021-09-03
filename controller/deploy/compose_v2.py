@@ -136,19 +136,31 @@ class Compose:
         if force:
             log.warning("--force not implemented yet")
 
-        if not scales:
+        if scales:
+            # Based on rapydo scale implementation services is always a 1-length list
+            service = services[0]
+            nreplicas = scales.get(service, 0)
+            services_list = f"{service}={nreplicas}"
+
+            log.info("Scaling services: {}...", services_list)
+        else:
+            services_list = ", ".join(services)
             scales = {}
 
-        services_list = ", ".join(services)
-        log.info("Starting services ({})...", services_list)
+            log.info("Starting services ({})...", services_list)
+
         self.docker.compose.up(
             services=services,
             build=False,
             detach=True,
             abort_on_container_exit=False,
+            # force_recreate=force
             scales=scales,
         )
-        log.info("Services started: {}", services_list)
+        if scales:
+            log.info("Services scaled: {}", services_list)
+        else:
+            log.info("Services started: {}", services_list)
 
     def get_running_services(self, prefix: str) -> Set[str]:
 

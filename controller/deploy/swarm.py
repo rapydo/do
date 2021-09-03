@@ -343,8 +343,8 @@ class Swarm:
                 continue
 
             if config.deploy.resources.reservations:
-                # int() are needed because python on whales 0.25 extended
-                # replicas type to Union[float, str] according to compose-cli typing
+                # int() are needed because python on whales 0.25 extended type of
+                # cpus and replicas to Union[float, str] according to compose-cli typing
 
                 cpus = int(config.deploy.resources.reservations.cpus) or 0
                 memory = config.deploy.resources.reservations.memory
