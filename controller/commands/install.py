@@ -20,9 +20,9 @@ EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 # https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh
 EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
 
-# https://github.com/docker/compose-cli/releases
-COMPOSE_VERSION = "v2.0.0-rc.2"
-EXPECTED_COMPOSE_BIN_MD5 = "8ae1c3688291a00e8498aa520225ddcd"
+# https://github.com/docker/compose/releases
+COMPOSE_VERSION = "v2.0.0-rc.3"
+EXPECTED_COMPOSE_BIN_MD5 = "0b9389fb37f2ca50fa6d431ed7fdc641"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.6.2"
@@ -99,7 +99,7 @@ def install(
         cli_plugin.mkdir(parents=True, exist_ok=True)
         compose_bin = cli_plugin.joinpath("docker-compose")
 
-        url = "https://github.com/docker/compose-cli/releases/download/"
+        url = "https://github.com/docker/compose/releases/download/"
         url += f"{COMPOSE_VERSION}/docker-compose-linux-amd64"
 
         log.info("Downloading compose binary: {}", url)
