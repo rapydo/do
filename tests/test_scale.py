@@ -104,6 +104,13 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 1",
         )
 
+        # The backend instances are still 2 because the service is not converged yet
+        # (--wait flag was not included in the previous command)
+        assert count_running_containers() == BASE_SERVICE_NUM + 1
+
+        # So just sleep for a while to let the service to converge
+        time.sleep(2)
+
         assert count_running_containers() == BASE_SERVICE_NUM
 
         exec_command(
