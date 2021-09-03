@@ -37,6 +37,12 @@ def test_all(capfd: Capture) -> None:
             "Ready+Active",
             "No service is running",
         )
+    else:
+        exec_command(
+            capfd,
+            "status",
+            "No container is running",
+        )
 
     start_project(capfd)
 

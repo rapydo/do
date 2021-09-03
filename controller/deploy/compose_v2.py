@@ -226,3 +226,5 @@ class Compose:
 
             cname = f"{COLOR}{name:23}{colors.RESET}"
             print(f"{container_id} {cname} {status:8} {ts:20} {image:24}\t{ports}")
+        else:
+            log.info("No container is running")
