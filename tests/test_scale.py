@@ -24,12 +24,12 @@ def test_scale(capfd: Capture) -> None:
         name="first",
         auth="postgres",
         frontend="no",
-        services=["rabbit", "redis"],
+        services=["redis"],
     )
     init_project(capfd)
 
-    # backend, postgres, rabbit, redis
-    BASE_SERVICE_NUM = 4
+    # backend, postgres, redis
+    BASE_SERVICE_NUM = 3
 
     if SWARM_MODE:
 
@@ -67,7 +67,7 @@ def test_scale(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "scale rabbit=x",
+        "scale redis=x",
         "Invalid number of replicas: x",
     )
 
@@ -141,39 +141,39 @@ def test_scale(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "scale rabbit",
-            "Scaling services: rabbit=1...",
-            "Services scaled: rabbit=1",
+            "scale redis",
+            "Scaling services: redis=1...",
+            "Services scaled: redis=1",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM
 
         exec_command(
             capfd,
-            "-e DEFAULT_SCALE_RABBIT=2 scale rabbit",
-            "Scaling services: rabbit=2...",
-            "Services scaled: rabbit=2",
+            "-e DEFAULT_SCALE_REDIS=2 scale redis",
+            "Scaling services: redis=2...",
+            "Services scaled: redis=2",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
 
         exec_command(
             capfd,
-            "scale rabbit=3",
-            "Scaling services: rabbit=3...",
-            "Services scaled: rabbit=3",
+            "scale redis=3",
+            "Scaling services: redis=3...",
+            "Services scaled: redis=3",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM + 2
 
         with open(".projectrc", "a") as f:
-            f.write("\n      DEFAULT_SCALE_RABBIT: 4\n")
+            f.write("\n      DEFAULT_SCALE_REDIS: 4\n")
 
         exec_command(
             capfd,
-            "scale rabbit",
-            "Scaling services: rabbit=4...",
-            "Services scaled: rabbit=4",
+            "scale redis",
+            "Scaling services: redis=4...",
+            "Services scaled: redis=4",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM + 3
@@ -181,18 +181,18 @@ def test_scale(capfd: Capture) -> None:
         # This should fail due to a go panic error
         exec_command(
             capfd,
-            "scale rabbit=1",
-            "Scaling services: rabbit=1...",
-            "Services scaled: rabbit=1",
+            "scale redis=1",
+            "Scaling services: redis=1...",
+            "Services scaled: redis=1",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM
 
         exec_command(
             capfd,
-            "scale rabbit=2",
-            "Scaling services: rabbit=2...",
-            "Services scaled: rabbit=2",
+            "scale redis=2",
+            "Scaling services: redis=2...",
+            "Services scaled: redis=2",
         )
 
         assert len(docker.container.list()) == BASE_SERVICE_NUM + 1
@@ -218,6 +218,6 @@ def test_scale(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "first_rabbit_1",
-            "first_rabbit_2",
+            "first_redis_1",
+            "first_redis_2",
         )
