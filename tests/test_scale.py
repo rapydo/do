@@ -137,6 +137,10 @@ def test_scale(capfd: Capture) -> None:
             "first_backend scaled to 4",
         )
 
+        # Just wait for a while for all task to start, necessary because the previous
+        # command did not include --wait flag
+        time.sleep(2)
+
         assert count_running_containers() == BASE_SERVICE_NUM + 3
 
         exec_command(
