@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Union, cast
 
 import yaml
 from python_on_whales import DockerClient
@@ -126,10 +126,18 @@ class Compose:
 
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
-    def start_containers(self, services: List[str], force: bool = False) -> None:
+    def start_containers(
+        self,
+        services: List[str],
+        force: bool = False,
+        scales: Optional[Dict[str, int]] = None,
+    ) -> None:
 
         if force:
             log.warning("--force not implemented yet")
+
+        if not scales:
+            scales = {}
 
         services_list = ", ".join(services)
         log.info("Starting services ({})...", services_list)
@@ -138,6 +146,7 @@ class Compose:
             build=False,
             detach=True,
             abort_on_container_exit=False,
+            scales=scales,
         )
         log.info("Services started: {}", services_list)
 

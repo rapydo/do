@@ -141,6 +141,7 @@ def test_scale(capfd: Capture) -> None:
             "scale rabbit",
         )
 
+        # This should fail due to a go panic error
         exec_command(
             capfd,
             "scale rabbit=1",
