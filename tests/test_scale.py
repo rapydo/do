@@ -146,3 +146,33 @@ def test_scale(capfd: Capture) -> None:
             capfd,
             "scale rabbit=1",
         )
+
+        exec_command(
+            capfd,
+            "scale rabbit=2",
+        )
+
+        # This should restart all the replicas.
+        # Actually fails due to the panic above
+        exec_command(
+            capfd,
+            "restart",
+        )
+
+        exec_command(
+            capfd,
+            "restart --force",
+        )
+
+        # Verify that 2 replicas are still running after the restat
+        exec_command(
+            capfd,
+            "restart --force",
+        )
+
+        exec_command(
+            capfd,
+            "status",
+            "first_rabbit_1",
+            "first_rabbit_2",
+        )
