@@ -198,8 +198,10 @@ class Compose:
     def status(self) -> None:
         print("")
 
+        number_of_containers = 0
         for container in self.docker.compose.ps():
 
+            number_of_containers += 1
             status = container.state.status
             if status == "shutdown" or status == "complete":
                 COLOR = colors.BLUE
@@ -226,5 +228,6 @@ class Compose:
 
             cname = f"{COLOR}{name:23}{colors.RESET}"
             print(f"{container_id} {cname} {status:8} {ts:20} {image:24}\t{ports}")
-        else:
+
+        if number_of_containers == 0:
             log.info("No container is running")
