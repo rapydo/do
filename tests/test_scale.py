@@ -109,7 +109,7 @@ def test_scale(capfd: Capture) -> None:
         assert count_running_containers() == BASE_SERVICE_NUM + 1
 
         # So just sleep for a while to let the service to converge
-        time.sleep(2)
+        time.sleep(3)
 
         assert count_running_containers() == BASE_SERVICE_NUM
 
