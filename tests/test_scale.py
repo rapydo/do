@@ -199,46 +199,39 @@ def test_scale(capfd: Capture) -> None:
 
         assert count_running_containers() == BASE_SERVICE_NUM + 3
 
-        # This should fail due to a go panic error
-        # exec_command(
-        #     capfd,
-        #     "scale redis=1",
-        #     "Scaling services: redis=1...",
-        #     "Services scaled: redis=1",
-        # )
+        exec_command(
+            capfd,
+            "scale redis=1",
+            "Scaling services: redis=1...",
+            "Services scaled: redis=1",
+        )
 
-        # assert count_running_containers() == BASE_SERVICE_NUM
+        assert count_running_containers() == BASE_SERVICE_NUM
 
-        # exec_command(
-        #     capfd,
-        #     "scale redis=2",
-        #     "Scaling services: redis=2...",
-        #     "Services scaled: redis=2",
-        # )
+        exec_command(
+            capfd,
+            "scale redis=2",
+            "Scaling services: redis=2...",
+            "Services scaled: redis=2",
+        )
 
-        # assert count_running_containers() == BASE_SERVICE_NUM + 1
+        assert count_running_containers() == BASE_SERVICE_NUM + 1
 
         # This should restart all the replicas.
-        # Actually fails due to the panic above
-        # exec_command(
-        #     capfd,
-        #     "restart",
-        # )
+        exec_command(
+            capfd,
+            "restart",
+        )
 
-        # exec_command(
-        #     capfd,
-        #     "restart --force",
-        # )
+        # Verify that 2 replicas are still running after the restart
+        exec_command(
+            capfd,
+            "restart --force",
+        )
 
-        # # Verify that 2 replicas are still running after the restat
-        # exec_command(
-        #     capfd,
-        #     "restart --force",
-        # )
-
-        # exec_command(
-        #     capfd,
-        #     "status",
-        #     "first_redis_1",
-        #     "first_redis_2",
-        # )
+        exec_command(
+            capfd,
+            "status",
+            "first_redis_1",
+            "first_redis_2",
+        )
