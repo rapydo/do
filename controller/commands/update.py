@@ -30,6 +30,8 @@ def update(
     base_services, config = Application.get_controller().get_compose_configuration()
     active_services = services.find_active(config)
 
-    Application.get_controller().check_placeholders(config, active_services)
+    Application.get_controller().check_placeholders_and_passwords(
+        config, active_services
+    )
 
     log.info("All updated")

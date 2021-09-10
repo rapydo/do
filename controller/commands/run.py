@@ -76,7 +76,7 @@ def run(
 
     Application.get_controller().controller_init()
 
-    Application.get_controller().check_placeholders(
+    Application.get_controller().check_placeholders_and_passwords(
         Application.data.compose_config, [service]
     )
 

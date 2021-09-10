@@ -29,6 +29,7 @@ variables:
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     FILE_LOGLEVEL: WARNING
     LOG_RETENTION: 180 # in days
+    MIN_PASSWORD_SCORE: 2 # raised to 4 in prod mode
 
     ACTIVATE_BACKEND: 1
     ACTIVATE_PROXY: 0

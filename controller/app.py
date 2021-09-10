@@ -12,6 +12,7 @@ import typer
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
+from zxcvbn import zxcvbn
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -379,7 +380,7 @@ class Application:
         # Compose services and variables
         base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders(compose_config, self.active_services)
+        self.check_placeholders_and_passwords(compose_config, self.active_services)
 
         # Final step, launch the command
 
@@ -881,6 +882,7 @@ You can use of one:
 
                 # if len(value) == 0:
                 #     value = f"'{value}'"
+
                 whandle.write(f"{key}={value}\n")
 
     @staticmethod
@@ -930,7 +932,7 @@ You can use of one:
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def check_placeholders(
+    def check_placeholders_and_passwords(
         compose_services: ComposeServices, active_services: List[str]
     ) -> None:
 
@@ -945,6 +947,8 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("Active services: {}", active_services)
 
         missing: Dict[str, Set[str]] = {}
+        passwords: Dict[str, str] = {}
+        passwords_services: Dict[str, Set[str]] = {}
         for service_name in active_services:
             service = compose_services[service_name]
 
@@ -955,16 +959,41 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         missing.setdefault(key, set())
                         missing[key].add(service_name)
 
-        placeholders = []
-        for key, raw_services in missing.items():
+                    elif key.endswith("_PASSWORD") and value:
+                        key = services.normalize_placeholder_variable(key)
+                        passwords.setdefault(key, value)
+                        passwords_services.setdefault(key, set())
+                        passwords_services[key].add(service_name)
 
-            serv = services.vars_to_services_mapping.get(key) or raw_services
+        placeholders = []
+        for variable, raw_services in missing.items():
+
+            serv = services.vars_to_services_mapping.get(variable) or raw_services
             active_serv = [s for s in serv if s in active_services]
 
             if active_serv:
                 placeholders.append(
-                    "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
+                    "{:<20}\trequired by\t{}".format(variable, ", ".join(active_serv))
                 )
+
+        MIN_PASSWORD_SCORE = int(
+            Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
+        )
+        for variable, raw_services in passwords_services.items():
+
+            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            active_serv = [s for s in serv if s in active_services]
+            if active_serv:
+                password = passwords.get(variable)
+                result = zxcvbn(password)
+                score = result["score"]
+                if score < MIN_PASSWORD_SCORE:
+                    if score == MIN_PASSWORD_SCORE - 1:
+                        log.warning("The password used in {} is weak", key)
+                    elif score == MIN_PASSWORD_SCORE - 2:
+                        log.error("The password used in {} is very weak", key)
+                    else:
+                        log.critical("The password used in {} is extremely weak", key)
 
         if placeholders:
             print_and_exit(

@@ -1,6 +1,8 @@
 variables:
   env:
     LOG_LEVEL: INFO # log level for backend and celery
+    MIN_PASSWORD_SCORE: 4
+
     ACTIVATE_PROXY: 1
     APP_MODE: production
     FLASK_ENV: production
