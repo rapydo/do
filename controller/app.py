@@ -989,11 +989,13 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 score = result["score"]
                 if score < MIN_PASSWORD_SCORE:
                     if score == MIN_PASSWORD_SCORE - 1:
-                        log.warning("The password used in {} is weak", key)
+                        log.warning("The password used in {} is weak", variable)
                     elif score == MIN_PASSWORD_SCORE - 2:
-                        log.error("The password used in {} is very weak", key)
+                        log.error("The password used in {} is very weak", variable)
                     else:
-                        log.critical("The password used in {} is extremely weak", key)
+                        log.critical(
+                            "The password used in {} is extremely weak", variable
+                        )
 
         if placeholders:
             print_and_exit(
