@@ -224,13 +224,7 @@ RUN mkdir xyz
         "The following variables are missing in your configuration",
     )
 
-    # Default ALCHEMY_PASSWORD has score 2 and should raise no warnings in dev mode
-    # But should be considered very weak in production mode
-    exec_command(
-        capfd,
-        "--prod check -i main --no-git --no-builds",
-        "The password used in ALCHEMY_PASSWORD is very weak",
-    )
+    # Default ALCHEMY_PASSWORD has as score of 2
     exec_command(
         capfd,
         "-e MIN_PASSWORD_SCORE=3 check -i main --no-git --no-builds",
