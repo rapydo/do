@@ -133,9 +133,6 @@ class Compose:
         scales: Optional[Dict[str, int]] = None,
     ) -> None:
 
-        if force:
-            log.warning("--force not implemented yet")
-
         if scales:
             # Based on rapydo scale implementation services is always a 1-length list
             service = services[0]
@@ -154,7 +151,7 @@ class Compose:
             build=False,
             detach=True,
             abort_on_container_exit=False,
-            # force_recreate=force
+            force_recreate=force,
             scales=scales,
         )
         if scales:

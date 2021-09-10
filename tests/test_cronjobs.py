@@ -52,22 +52,11 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1\n")
         f.write("\n")
 
-    # These two commands
-    exec_command(capfd, "remove", "Stack removed")
-
-    # Restart to enable cronjobs
     exec_command(
         capfd,
-        "-e CRONTAB_ENABLE=1 start",
-        "Stack started",
+        "-e CRONTAB_ENABLE=1 restart --force",
+        "Stack restarted",
     )
-
-    # have to be replaced with:
-    # exec_command(
-    #     capfd,
-    #     "-e CRONTAB_ENABLE=1 restart --force",
-    #     "Stack restarted",
-    # )
 
     exec_command(
         capfd,
