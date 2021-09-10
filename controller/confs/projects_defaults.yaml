@@ -359,7 +359,7 @@ variables:
     ACTIVATE_AUTH: 1
     AUTH_SERVICE: NO_AUTHENTICATION
     AUTH_DEFAULT_USERNAME: "user@nomail.org"
-    AUTH_DEFAULT_PASSWORD: "test"
+    AUTH_DEFAULT_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     AUTH_MIN_PASSWORD_LENGTH: 8
     AUTH_FORCE_FIRST_PASSWORD_CHANGE: 0
     AUTH_MAX_PASSWORD_VALIDITY: 0
