@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import pytz
@@ -44,8 +44,7 @@ def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
         log.error("git object is None, cannot retrieve active branch")
         return None
     try:
-        # active_branch.name is still unannotated
-        return cast(str, gitobj.active_branch.name)
+        return gitobj.active_branch.name
     except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return None
@@ -180,7 +179,7 @@ def check_file_younger_than(
 ) -> Tuple[bool, float, datetime]:
 
     try:
-        commits = gitobj.blame(rev="HEAD", file=filename)
+        commits = gitobj.blame(rev="HEAD", file=str(filename))
     except GitCommandError as e:  # pragma: no cover
         print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
 
