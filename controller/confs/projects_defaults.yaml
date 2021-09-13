@@ -53,7 +53,6 @@ variables:
 
     ACTIVATE_SWAGGERUI: 0
     ACTIVATE_ADMINER: 0
-    ACTIVATE_MONGOUI: 0
 
     RUN_SCHEMATHESIS: 1
     MAX_LOGS_LENGTH: 200
@@ -194,8 +193,6 @@ variables:
     MONGO_DATABASE: rapydo
     MONGO_USER: mongo
     MONGO_PASSWORD: "D3vMode!" # This default is invalidated in production mode
-    MONGOUI_USER: mongo
-    MONGOUI_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     ELASTIC_HOST: elastic.dockerized.io
     ELASTIC_PORT: 9200

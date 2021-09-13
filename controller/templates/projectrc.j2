@@ -32,8 +32,6 @@ project_configuration:
       {% if service == "mongodb" -%}
       MONGO_PASSWORD: {{ "RANDOM"| password }}
       MONGO_USER: mongo
-      MONGOUI_PASSWORD: {{ "RANDOM"| password }}
-      MONGOUI_USER: mongo
       {% endif -%}
       {% if service == "flower" -%}
       FLOWER_PASSWORD: {{ "RANDOM"| password }}

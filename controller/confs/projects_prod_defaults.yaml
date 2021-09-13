@@ -55,11 +55,8 @@ variables:
     FLOWER_PASSWORD: "**PLACEHOLDER**"
     REGISTRY_USERNAME: "**PLACEHOLDER**"
     REGISTRY_PASSWORD: "**PLACEHOLDER**"
-
-    # Autoreload disabled in production mode
-    CELERY_AUTORELOAD:
-
     MONGO_USER: "**PLACEHOLDER**"
     MONGO_PASSWORD: "**PLACEHOLDER**"
-    MONGOUI_USER: "**PLACEHOLDER**"
-    MONGOUI_PASSWORD: "**PLACEHOLDER**"
+
+    # Autoreload is disabled in production mode
+    CELERY_AUTORELOAD:
