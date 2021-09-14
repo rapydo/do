@@ -146,15 +146,18 @@ def password(
     # No service specified, only a summary will be reported
     if not service:
 
+        MIN_PASSWORD_SCORE = int(
+            Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
+        )
+
         last_updates = parse_projectrc()
         now = datetime.now()
 
         h1 = "SERVICE"
         h2 = "VARIABLE"
-        h3 = "SCORE"
-        h4 = "LAST CHANGE"
-        # note three blanks to center the score
-        print(f"{h1:12}{h2:22}{h3:5}  {h4}")
+        h3 = "LAST CHANGE"
+        h4 = "SCORE"
+        print(f"{h1:12}{h2:22}{h3:14}{h4}")
         for s in Services:
             # This should never happens and can't be (easily) tested
             if s.value not in Application.data.base_services:  # pragma: no cover
@@ -168,7 +171,7 @@ def password(
 
                 password = Application.env.get(v)
                 result = zxcvbn(password)
-                score = str(result["score"])
+                score = result["score"]
 
                 if v in last_updates:
                     last_change = last_updates.get(v, datetime.fromtimestamp(0))
@@ -179,12 +182,17 @@ def password(
                     expired = True
                     last_change_text = "N/A"
 
-                # note two blanks to center the score
-                line = f"{s.value:12}{v:22}  {score:5}{last_change_text}"
                 if expired:
-                    print(RED(line))
+                    last_change_text = RED(last_change_text)
                 else:
-                    print(GREEN(line))
+                    last_change_text = GREEN(last_change_text)
+
+                if score < MIN_PASSWORD_SCORE:
+                    score_text = RED(score)
+                else:
+                    score_text = GREEN(score)
+
+                print(f"{s.value:12}{v:22}{last_change_text:16}{score_text}")
 
     # In this case a service is asked to be updated
     else:

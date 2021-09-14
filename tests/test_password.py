@@ -81,11 +81,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     )
     exec_command(
         capfd,
-        "password redis",
-        "Change password for redis not implemented yet",
-    )
-    exec_command(
-        capfd,
         "password flower",
         "Change password for flower not implemented yet",
     )
