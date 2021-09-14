@@ -27,7 +27,6 @@ def logs(
         "-t",
         help="Number of lines to show",
     ),
-    nocolor: bool = typer.Option(False, "--no-color", help="Produce monochrome output"),
 ) -> None:
     Application.get_controller().controller_init(services)
 
@@ -47,7 +46,7 @@ def logs(
         "--follow": follow,
         "--tail": str(tail),
         "--timestamps": timestamps,
-        "--no-color": nocolor,
+        "--no-color": False,
         "--no-log-prefix": not log_prefix,
         "SERVICE": services,
     }

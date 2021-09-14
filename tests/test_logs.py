@@ -135,7 +135,7 @@ def test_all(capfd: Capture) -> None:
     # Frontend logs are always timestamped
     exec_command(
         capfd,
-        "logs --tail 10 --no-color frontend",
+        "logs --tail 10 frontend",
         # Logs are not prefixed because only one service is shown
         f"{timestamp}",
     )
@@ -143,7 +143,7 @@ def test_all(capfd: Capture) -> None:
     # With multiple services logs are not timestamped
     exec_command(
         capfd,
-        "logs --tail 10 --no-color frontend backend",
+        "logs --tail 10 frontend backend",
         # Logs are prefixed because more than one service is shown
         "backend_1      | Testing mode",
         # "backend_1       | Development mode",
