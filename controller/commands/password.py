@@ -283,3 +283,10 @@ def password(
             service.value,
             variables[0],
         )
+
+        # DEBUG CODE!
+        with open(PROJECTRC) as f:
+            lines = f.readlines()
+
+            for line in lines:
+                log.error(line.strip())
