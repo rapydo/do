@@ -43,11 +43,11 @@ def test_all(capfd: Capture) -> None:
         "No such service: invalid",
     )
 
+    now = datetime.now()
+
     # In swarm mode this test hangs forever, even if KeyboardInterrupt is correctly
     # catched and working if manually tested
     if not SWARM_MODE:
-        now = datetime.now()
-        timestamp = now.strftime("%Y-%m-%dT")
 
         signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
         signal.alarm(5)
@@ -131,6 +131,7 @@ def test_all(capfd: Capture) -> None:
         "Testing mode",
     )
 
+    timestamp = now.strftime("%Y-%m-%dT")
     # Frontend logs are always timestamped
     exec_command(
         capfd,
