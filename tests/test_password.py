@@ -1,0 +1,159 @@
+"""
+This module will test the password command and the passwords management
+"""
+from faker import Faker
+
+from controller import SWARM_MODE
+from tests import (
+    Capture,
+    create_project,
+    exec_command,
+    init_project,
+    random_project_name,
+    start_registry,
+)
+
+
+def test_password(capfd: Capture, faker: Faker) -> None:
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+        auth="postgres",
+        frontend="no",
+        services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
+        extra="--env RABBITMQ_PASSWORD=invalid£password",
+    )
+
+    init_project(capfd)
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    exec_command(
+        capfd,
+        "password",
+        "backend     AUTH_DEFAULT_PASSWORD",
+        "postgres    ALCHEMY_PASSWORD",
+        "mariadb     ALCHEMY_PASSWORD",
+        "mariadb     MYSQL_ROOT_PASSWORD",
+        "mongodb     MONGO_PASSWORD",
+        "neo4j       NEO4J_PASSWORD",
+        "rabbit      RABBITMQ_PASSWORD",
+        "redis       REDIS_PASSWORD",
+        "flower      FLOWER_PASSWORD",
+        # last password change is not implemented => everything is 1970-01-01
+        "1970-01-01",
+    )
+
+    exec_command(
+        capfd,
+        "password backend",
+        "Change password for backend not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password postgres",
+        "Change password for postgres not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password mariadb",
+        "Change password for mariadb not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password mongodb",
+        "Change password for mongodb not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password neo4j",
+        "Change password for neo4j not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password rabbit",
+        "Change password for rabbit not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password redis",
+        "Change password for redis not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password flower",
+        "Change password for flower not implemented yet",
+    )
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "password registry",
+            "Change password for registry not implemented yet",
+        )
+
+
+def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+        auth="postgres",
+        frontend="no",
+        services=["rabbit"],
+        extra="--env RABBITMQ_PASSWORD=invalid£password",
+    )
+
+    informative = "Some special characters, including £ § ” ’, are not allowed "
+    informative += "because make RabbitMQ crash at startup"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in RABBITMQ_PASSWORD.",
+        informative,
+    )
+
+
+def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+        auth="postgres",
+        frontend="no",
+        services=["redis"],
+        extra="--env REDIS_PASSWORD=invalid#password",
+    )
+
+    informative = "Some special characters, including #, are not allowed "
+    informative += "because make some clients to fail to connect"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in REDIS_PASSWORD.",
+        informative,
+    )
+
+
+def test_mongodb_invalid_characters(capfd: Capture, faker: Faker) -> None:
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+        auth="postgres",
+        frontend="no",
+        services=["mongo"],
+        extra="--env MONGO_PASSWORD=invalid#password",
+    )
+
+    informative = "Some special characters, including #, are not allowed "
+    informative += "because make some clients to fail to connect"
+
+    exec_command(
+        capfd,
+        "init --force",
+        "Not allowed characters found in MONGO_PASSWORD.",
+        informative,
+    )

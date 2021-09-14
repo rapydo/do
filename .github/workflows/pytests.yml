@@ -28,6 +28,7 @@ jobs:
             libs,
             list,
             logs,
+            password,
             restart,
             remove,
             scale,
