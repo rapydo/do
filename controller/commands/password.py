@@ -237,6 +237,8 @@ def password(
         else:
             print_and_exit("Change password for {} not implemented yet", service.value)
 
+        log.info("Changing password for {}...", service.value)
+
         if is_running_needed and not is_running:
             print_and_exit(
                 "Can't update {} since it is not running. Please start your stack",

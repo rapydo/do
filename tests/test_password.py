@@ -1,9 +1,15 @@
 """
 This module will test the password command and the passwords management
 """
-from faker import Faker
+from datetime import datetime
 
-from controller import SWARM_MODE, colors
+from faker import Faker
+from glom import glom
+from python_on_whales import docker
+
+from controller import PROJECTRC, SWARM_MODE, colors
+from controller.deploy.swarm import Swarm
+from controller.utilities import configuration
 from tests import (
     Capture,
     create_project,
@@ -14,6 +20,11 @@ from tests import (
     start_project,
     start_registry,
 )
+
+
+def get_password_from_projectrc(variable: str) -> str:
+    projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
+    return glom(projectrc, f"project_configuration.variables.env.{variable}", "")
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:
@@ -141,7 +152,31 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     # ###  COMMANDS NOT REQUIRING RUNNING SERVICES  ###
     # #################################################
 
-    # execute and verify the success
+    redis_pass = get_password_from_projectrc("REDIS_PASSWORD")
+    exec_command(
+        capfd,
+        "password redis --random",
+        "The password of redis has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "REDIS_PASSWORD variable",
+    )
+    assert redis_pass != get_password_from_projectrc("REDIS_PASSWORD")
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password",
+        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
+        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
+        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
+        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
+        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
+        f"redis       REDIS_PASSWORD        {colors.GREEN}{today}",
+        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
+    )
 
     pull_images(capfd)
     start_project(capfd)
@@ -150,8 +185,56 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     # ###  COMMANDS REQUIRING RUNNING SERVICES  ###
     # #############################################
 
+    if SWARM_MODE:
+        swarm = Swarm()
+        backend_name = swarm.get_container("backend", slot=1)
+        redis_name = swarm.get_container("redis", slot=1)
+    else:
+        backend_name = "first_backend_1"
+        redis_name = "first_redis_1"
+    assert backend_name is not None
+    assert redis_name is not None
+
+    backend = docker.container.inspect(backend_name)
+    backend_start_date = backend.state.started_at
+    redis = docker.container.inspect(redis_name)
+    redis_start_date = redis.state.started_at
+
     # execute and verify the success of EVERYTHING
     # (also commands already tests with no running services)
+
+    exec_command(
+        capfd,
+        "password redis --random",
+        "The password of redis has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "REDIS_PASSWORD variable",
+    )
+
+    backend = docker.container.inspect(backend_name)
+    backend_start_date2 = backend.state.started_at
+    redis = docker.container.inspect(redis_name)
+    redis_start_date2 = redis.state.started_at
+
+    # Verify that both backend and redis are restarted
+    assert backend_start_date2 != backend_start_date
+    assert redis_start_date2 != redis_start_date
+
+    exec_command(
+        capfd,
+        "password",
+        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
+        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
+        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
+        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
+        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
+        f"redis       REDIS_PASSWORD        {colors.GREEN}{today}",
+        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
+    )
+
+    # Now verify that the password change really works!
 
 
 def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
