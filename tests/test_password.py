@@ -32,7 +32,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A"
+        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
         f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
         f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
         f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
