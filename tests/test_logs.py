@@ -123,30 +123,28 @@ def test_all(capfd: Capture) -> None:
             "No such service: invalid",
         )
 
-    if not SWARM_MODE:
+    # Backend logs are never timestamped
+    exec_command(
+        capfd,
+        "logs --tail 20 backend",
+        # Logs are not prefixed because only one service is shown
+        "Testing mode",
+    )
 
-        # Backend logs are never timestamped
-        exec_command(
-            capfd,
-            "logs --tail 20 backend",
-            # Logs are not prefixed because only one service is shown
-            "Testing mode",
-        )
+    # Frontend logs are always timestamped
+    exec_command(
+        capfd,
+        "logs --tail 10 --no-color frontend",
+        # Logs are not prefixed because only one service is shown
+        f"{timestamp}",
+    )
 
-        # Frontend logs are always timestamped
-        exec_command(
-            capfd,
-            "logs --tail 10 --no-color frontend",
-            # Logs are not prefixed because only one service is shown
-            f"{timestamp}",
-        )
-
-        # With multiple services logs are not timestamped
-        exec_command(
-            capfd,
-            "logs --tail 10 --no-color frontend backend",
-            # Logs are prefixed because more than one service is shown
-            "backend_1      | Testing mode",
-            # "backend_1       | Development mode",
-            "frontend_1     | Merging files...",
-        )
+    # With multiple services logs are not timestamped
+    exec_command(
+        capfd,
+        "logs --tail 10 --no-color frontend backend",
+        # Logs are prefixed because more than one service is shown
+        "backend_1      | Testing mode",
+        # "backend_1       | Development mode",
+        "frontend_1     | Merging files...",
+    )

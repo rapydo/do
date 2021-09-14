@@ -60,6 +60,18 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "run backend --command hostname",
+        "Can't specify a command if debug mode is OFF",
+    )
+
+    exec_command(
+        capfd,
+        "run backend --command hostname --user developer",
+        "Can't specify a user if debug mode is OFF",
+    )
+
+    exec_command(
+        capfd,
         "run --debug backend --command hostname",
         "backend-server",
     )
