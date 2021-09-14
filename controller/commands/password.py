@@ -99,6 +99,7 @@ def parse_projectrc() -> Dict[str, datetime]:
 def update_projectrc(variables: Dict[str, str]) -> None:
 
     today = date.today().strftime("%Y-%m-%d")
+    annotation = f"# {UPDATE_LABEL} {today}"
     with open(PROJECTRC) as f:
         lines = f.readlines()
         append_additional_lines: List[str] = []
@@ -109,7 +110,6 @@ def update_projectrc(variables: Dict[str, str]) -> None:
                 if line.strip().startswith(variable):
                     blanks = line.index(variable)
                     pref = " " * blanks
-                    annotation = f"# {UPDATE_LABEL} {today}"
                     lines[index] = f'{pref}{variable}: "{value}"  {annotation}\n'
                     break
             # if the variable is not found in .projectrc, let's append as additional
