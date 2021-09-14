@@ -31,9 +31,10 @@ def get_password_from_projectrc(variable: str) -> str:
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:
+    project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
-        name=random_project_name(faker),
+        name=project_name,
         auth="postgres",
         frontend="no",
         services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
@@ -193,8 +194,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         backend_name = swarm.get_container("backend", slot=1)
         redis_name = swarm.get_container("redis", slot=1)
     else:
-        backend_name = "first_backend_1"
-        redis_name = "first_redis_1"
+        backend_name = f"{project_name}_backend_1"
+        redis_name = f"{project_name}_redis_1"
     assert backend_name is not None
     assert redis_name is not None
 
