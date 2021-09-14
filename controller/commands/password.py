@@ -101,19 +101,27 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     today = date.today().strftime("%Y-%m-%d")
     with open(PROJECTRC) as f:
         lines = f.readlines()
+        append_additional_lines: List[str] = []
         for index, line in enumerate(lines):
 
             for variable, value in variables.items():
+                # If the variable is found in .projectrc, let's update it
                 if line.strip().startswith(variable):
                     blanks = line.index(variable)
                     pref = " " * blanks
                     annotation = f"# {UPDATE_LABEL} {today}"
                     lines[index] = f'{pref}{variable}: "{value}"  {annotation}\n'
+                    break
+            # if the variable is not found in .projectrc, let's append as additional
+            else:
+                append_additional_lines.append(
+                    f'{pref}{variable}: "{value}"  {annotation}\n'
+                )
 
     templating = Templating()
     templating.make_backup(PROJECTRC)
     with open(PROJECTRC, "w") as f:
-        for line in lines:
+        for line in lines + append_additional_lines:
             f.write(line)
 
 
