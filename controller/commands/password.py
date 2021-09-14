@@ -134,6 +134,8 @@ def update_projectrc(variables: Dict[str, str]) -> None:
         for line in lines + append_additional_lines:
             last_line = line
             f.write(line)
+            if not line.endswith("\n"):
+                f.write("\n")
 
         # If last line is not an empty line, let's add a newline at the end of file
         if last_line.strip():
