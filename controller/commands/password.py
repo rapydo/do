@@ -289,4 +289,4 @@ def password(
             lines = f.readlines()
 
             for line in lines:
-                log.error(line.strip())
+                log.error(line)
