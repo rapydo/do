@@ -114,6 +114,9 @@ def update_projectrc(variables: Dict[str, str]) -> None:
                     break
             # if the variable is not found in .projectrc, let's append as additional
             else:
+                # Let's hope that the all .projectrc are indented the same way.
+                # Otherwise find the env and then increse the indentation by one level
+                pref = " " * 6
                 append_additional_lines.append(
                     f'{pref}{variable}: "{value}"  {annotation}\n'
                 )
