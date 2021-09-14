@@ -120,14 +120,14 @@ def update_projectrc(variables: Dict[str, str]) -> None:
 def get_random_password() -> str:
 
     password = generate_random_password(
-        length=16, param_not_used="", symbols="%*,-.=?[]^_~"
+        length=16, param_not_used="", symbols="%*,-.=^_~"
     )
 
     result = zxcvbn(password)
     score = result["score"]
     # Should never happens since 16 characters with symbols is very unlikely to be weak
     if score < 4:  # pragma: no cover
-        log.warning("Generated password is not strong enough, resampling again")
+        log.warning("Generated password is not strong enough, sampling again")
         return get_random_password()
     return password
 
@@ -135,10 +135,16 @@ def get_random_password() -> str:
 @Application.app.command(help="Manage services passwords")
 def password(
     service: Services = typer.Argument(None, help="Service name"),
+    random: bool = typer.Option(
+        False,
+        "--random",
+        help="Generate a random password",
+        show_default=False,
+    ),
     new_password: str = typer.Option(
         None,
         "--password",
-        help="Force the given password instead of create a random password",
+        help="Force the given password",
         show_default=False,
     ),
 ) -> None:
@@ -147,6 +153,12 @@ def password(
 
     # No service specified, only a summary will be reported
     if not service:
+
+        if random:
+            print_and_exit("--random flag is not supported without a service")
+
+        if new_password:
+            print_and_exit("--password option is not supported without a service")
 
         MIN_PASSWORD_SCORE = int(
             Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
@@ -197,16 +209,19 @@ def password(
     # In this case a service is asked to be updated
     else:
 
+        if random:
+            new_password = get_random_password()
+        elif not new_password:
+            print_and_exit("Please specify one between --random and --password options")
+
+        # log.critical(new_password)
+
         compose = Compose(Application.data.files)
         if SWARM_MODE:
             swarm = Swarm()
             running_services = swarm.get_running_services(Configuration.project)
         else:
             running_services = compose.get_running_services(Configuration.project)
-
-        if not new_password:
-            new_password = get_random_password()
-        # log.critical(new_password)
 
         variables = get_service_passwords(service)
         new_variables = {variable: new_password for variable in variables}

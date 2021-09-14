@@ -43,50 +43,91 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
     )
 
+    exec_command(
+        capfd,
+        "password backend",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password postgres",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password mariadb",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password mongodb",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password neo4j",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password rabbit",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password redis",
+        "Please specify one between --random and --password options",
+    )
+    exec_command(
+        capfd,
+        "password flower",
+        "Please specify one between --random and --password options",
+    )
+
     # ######################################
     # ###  COMMANDS NOT IMPLEMENTED YET  ###
     # ######################################
 
     exec_command(
         capfd,
-        "password backend",
+        "password backend --random",
         "Change password for backend not implemented yet",
     )
     exec_command(
         capfd,
-        "password postgres",
+        "password postgres --random",
         "Change password for postgres not implemented yet",
     )
     exec_command(
         capfd,
-        "password mariadb",
+        "password mariadb --random",
         "Change password for mariadb not implemented yet",
     )
     exec_command(
         capfd,
-        "password mongodb",
+        "password mongodb --random",
         "Change password for mongodb not implemented yet",
     )
     exec_command(
         capfd,
-        "password neo4j",
+        "password neo4j --random",
         "Change password for neo4j not implemented yet",
     )
     exec_command(
         capfd,
-        "password rabbit",
+        "password rabbit --random",
         "Change password for rabbit not implemented yet",
     )
     exec_command(
         capfd,
-        "password flower",
+        "password flower --random",
         "Change password for flower not implemented yet",
     )
 
     if SWARM_MODE:
         exec_command(
             capfd,
-            "password registry",
+            "password registry --random",
             "Change password for registry not implemented yet",
         )
 
