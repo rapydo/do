@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+import time
 from datetime import datetime
 
 from faker import Faker
@@ -214,6 +215,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "Please find the new password into your .projectrc file as "
         "REDIS_PASSWORD variable",
     )
+
+    time.sleep(2)
 
     backend = docker.container.inspect(backend_name)
     backend_start_date2 = backend.state.started_at
