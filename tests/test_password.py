@@ -24,7 +24,9 @@ from tests import (
 
 def get_password_from_projectrc(variable: str) -> str:
     projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
-    return glom(projectrc, f"project_configuration.variables.env.{variable}", "")
+    return glom(
+        projectrc, f"project_configuration.variables.env.{variable}", default=""
+    )
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:

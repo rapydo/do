@@ -18,7 +18,7 @@ from controller.templating import password as generate_random_password
 # make this configurable
 PASSWORD_EXPIRATION = 90
 
-UPDATE_LABEL = "updated by rapydo password on"
+UPDATE_LABEL = "updated on"
 
 
 class Services(str, Enum):
