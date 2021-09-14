@@ -9,7 +9,9 @@ from tests import (
     create_project,
     exec_command,
     init_project,
+    pull_images,
     random_project_name,
+    start_project,
     start_registry,
 )
 
@@ -21,7 +23,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
         services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
-        extra="--env RABBITMQ_PASSWORD=invalid£password",
     )
 
     init_project(capfd)
@@ -43,6 +44,10 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         # last password change is not implemented => everything is 1970-01-01
         "1970-01-01",
     )
+
+    # ######################################
+    # ###  COMMANDS NOT IMPLEMENTED YET  ###
+    # ######################################
 
     exec_command(
         capfd,
@@ -91,6 +96,28 @@ def test_password(capfd: Capture, faker: Faker) -> None:
             "password registry",
             "Change password for registry not implemented yet",
         )
+
+    # #############################################
+    # ###  COMMANDS REQUIRING RUNNING SERVICES  ###
+    # #############################################
+
+    # execute and verify the failure due to non running services
+
+    # #################################################
+    # ###  COMMANDS NOT REQUIRING RUNNING SERVICES  ###
+    # #################################################
+
+    # execute and verify the success
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    # #############################################
+    # ###  COMMANDS REQUIRING RUNNING SERVICES  ###
+    # #############################################
+
+    # execute and verify the success of EVERYTHING
+    # (also commands already tests with no running services)
 
 
 def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:

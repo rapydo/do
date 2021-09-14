@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Union
+from typing import List, Set, Union
 
 import typer
 from zxcvbn import zxcvbn
@@ -85,6 +85,51 @@ def get_random_password() -> str:
     return password
 
 
+def change_backend_password(new_password: str, running_services: Set[str]) -> None:
+    service = "backend"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_neo4j_password(new_password: str, running_services: Set[str]) -> None:
+    service = "neo4j"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_postgres_password(new_password: str, running_services: Set[str]) -> None:
+    service = "postgres"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_mariadb_password(new_password: str, running_services: Set[str]) -> None:
+    service = "mariadb"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_mongodb_password(new_password: str, running_services: Set[str]) -> None:
+    service = "mongodb"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_rabbit_password(new_password: str, running_services: Set[str]) -> None:
+    service = "rabbit"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_redis_password(new_password: str, running_services: Set[str]) -> None:
+    service = "redis"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_registry_password(new_password: str, running_services: Set[str]) -> None:
+    service = "registry"
+    log.critical("Change password for {} not implemented yet", service)
+
+
+def change_flower_password(new_password: str, running_services: Set[str]) -> None:
+    service = "flower"
+    log.critical("Change password for {} not implemented yet", service)
+
+
 @Application.app.command(help="Manage services passwords")
 def password(
     service: Services = typer.Argument(None, help="Service name"),
@@ -135,26 +180,25 @@ def password(
         running_services = engine.get_running_services(Configuration.project)
         if not new_password:
             new_password = get_random_password()
+        # log.critical(new_password)
 
         log.critical("running services: {}", running_services)
 
         if service == Services.backend:
-            log.critical("Change password for {} not implemented yet", service)
+            change_backend_password(new_password, running_services)
         elif service == Services.neo4j:
-            log.critical("Change password for {} not implemented yet", service)
+            change_neo4j_password(new_password, running_services)
         elif service == Services.postgres:
-            log.critical("Change password for {} not implemented yet", service)
+            change_postgres_password(new_password, running_services)
         elif service == Services.mariadb:
-            log.critical("Change password for {} not implemented yet", service)
+            change_mariadb_password(new_password, running_services)
         elif service == Services.mongodb:
-            log.critical("Change password for {} not implemented yet", service)
+            change_mongodb_password(new_password, running_services)
         elif service == Services.rabbit:
-            log.critical("Change password for {} not implemented yet", service)
+            change_rabbit_password(new_password, running_services)
         elif service == Services.redis:
-            log.critical("Change password for {} not implemented yet", service)
+            change_redis_password(new_password, running_services)
         elif service == Services.registry:
-            log.critical("Change password for {} not implemented yet", service)
+            change_registry_password(new_password, running_services)
         elif service == Services.flower:
-            log.critical("Change password for {} not implemented yet", service)
-
-        # log.critical(new_password)
+            change_flower_password(new_password, running_services)
