@@ -6,7 +6,9 @@ from typing import Dict, List
 import typer
 from zxcvbn import zxcvbn
 
-from controller import GREEN, PROJECTRC, RED, SWARM_MODE, log, print_and_exit
+from controller import GREEN, PROJECTRC, RED, SWARM_MODE
+from controller import colors as c
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.swarm import Swarm
@@ -157,7 +159,7 @@ def password(
         h2 = "VARIABLE"
         h3 = "LAST CHANGE"
         h4 = "SCORE"
-        print(f"{h1:12}{h2:22}{h3:14}{h4}")
+        print(f"{h1:12}{h2:22}{h3:16}{h4}")
         for s in Services:
             # This should never happens and can't be (easily) tested
             if s.value not in Application.data.base_services:  # pragma: no cover
@@ -174,25 +176,23 @@ def password(
                 score = result["score"]
 
                 if v in last_updates:
-                    last_change = last_updates.get(v, datetime.fromtimestamp(0))
-                    expiration_date = last_change + timedelta(days=PASSWORD_EXPIRATION)
+                    change_date = last_updates.get(v, datetime.fromtimestamp(0))
+                    expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
                     expired = now > expiration_date
-                    last_change_text = last_change.strftime("%Y-%m-%d")
+                    last_change = change_date.strftime("%Y-%m-%d")
                 else:
                     expired = True
-                    last_change_text = "N/A"
-
-                if expired:
-                    last_change_text = RED(last_change_text)
-                else:
-                    last_change_text = GREEN(last_change_text)
+                    last_change = "N/A"
 
                 if score < MIN_PASSWORD_SCORE:
                     score_text = RED(score)
                 else:
                     score_text = GREEN(score)
 
-                print(f"{s.value:12}{v:22}{last_change_text:16}{score_text}")
+                if expired:
+                    print(f"{s.value:12}{v:22}{c.RED}{last_change:16}{score_text}")
+                else:
+                    print(f"{s.value:12}{v:22}{c.GREEN}{last_change:16}{score_text}")
 
     # In this case a service is asked to be updated
     else:

@@ -3,7 +3,7 @@ This module will test the password command and the passwords management
 """
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -32,17 +32,15 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        "backend     AUTH_DEFAULT_PASSWORD",
-        "postgres    ALCHEMY_PASSWORD",
-        "mariadb     ALCHEMY_PASSWORD",
-        "mariadb     MYSQL_ROOT_PASSWORD",
-        "mongodb     MONGO_PASSWORD",
-        "neo4j       NEO4J_PASSWORD",
-        "rabbit      RABBITMQ_PASSWORD",
-        "redis       REDIS_PASSWORD",
-        "flower      FLOWER_PASSWORD",
-        # last password change is not implemented => everything is 1970-01-01
-        "1970-01-01",
+        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A"
+        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
+        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
+        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
+        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
+        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
+        f"redis       REDIS_PASSWORD        {colors.RED}N/A",
+        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
     )
 
     # ######################################
