@@ -103,9 +103,9 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     with open(PROJECTRC) as f:
         lines = f.readlines()
         append_additional_lines: List[str] = []
-        for index, line in enumerate(lines):
 
-            for variable, value in variables.items():
+        for variable, value in variables.items():
+            for index, line in enumerate(lines):
                 # If the variable is found in .projectrc, let's update it
                 if line.strip().startswith(variable):
                     blanks = line.index(variable)
@@ -124,8 +124,14 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     templating = Templating()
     templating.make_backup(PROJECTRC)
     with open(PROJECTRC, "w") as f:
+        last_line = ""
         for line in lines + append_additional_lines:
+            last_line = line
             f.write(line)
+
+        # If last line is not an empty line, let's add a newline at the end of file
+        if last_line:
+            f.write("\n")
 
 
 def get_random_password() -> str:
