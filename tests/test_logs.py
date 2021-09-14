@@ -131,7 +131,9 @@ def test_all(capfd: Capture) -> None:
         "Testing mode",
     )
 
-    time.sleep(3)
+    # Debug code... no logs in swarm mode for frontend, let's wait for a startup?
+    if SWARM_MODE:
+        time.sleep(20)
 
     timestamp = now.strftime("%Y-%m-%dT")
     # Frontend logs are always timestamped
