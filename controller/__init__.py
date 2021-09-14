@@ -79,3 +79,7 @@ def print_and_exit(
 
 def RED(msg: str) -> str:
     return f"{colors.RED}{msg}{colors.RESET}"
+
+
+def GREEN(msg: str) -> str:
+    return f"{colors.GREEN}{msg}{colors.RESET}"
