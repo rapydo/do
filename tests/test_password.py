@@ -201,7 +201,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_start_date = redis.state.started_at
 
     # execute and verify the success of EVERYTHING
-    # (also commands already tests with no running services)
+    # (also commands already tested with not running services)
 
     exec_command(
         capfd,
@@ -234,7 +234,18 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
     )
 
+    # Now verify the --password option
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password redis --password {mypassword}",
+        "The password of redis has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("REDIS_PASSWORD")
+
     # Now verify that the password change really works!
+    # Not implemented yet
 
 
 def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
