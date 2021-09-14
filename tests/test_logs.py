@@ -131,18 +131,21 @@ def test_all(capfd: Capture) -> None:
         "Testing mode",
     )
 
-    # Debug code... no logs in swarm mode for frontend, let's wait for a startup?
+    # Debug code... no logs in swarm mode for frontend, even after a wait 20...
     if SWARM_MODE:
-        time.sleep(20)
-
-    timestamp = now.strftime("%Y-%m-%dT")
-    # Frontend logs are always timestamped
-    exec_command(
-        capfd,
-        "logs --tail 10 frontend",
-        # Logs are not prefixed because only one service is shown
-        f"{timestamp}",
-    )
+        exec_command(
+            capfd,
+            "logs --tail 10 frontend",
+        )
+    else:
+        timestamp = now.strftime("%Y-%m-%dT")
+        # Frontend logs are always timestamped
+        exec_command(
+            capfd,
+            "logs --tail 10 frontend",
+            # Logs are not prefixed because only one service is shown
+            f"{timestamp}",
+        )
 
     # With multiple services logs are not timestamped
     if not SWARM_MODE:
