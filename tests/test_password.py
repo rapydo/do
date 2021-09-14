@@ -23,10 +23,13 @@ from tests import (
 
 
 def get_password_from_projectrc(variable: str) -> str:
-    projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
+    projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=False)
 
-    # Assert is not empty
     assert projectrc
+    assert "project_configuration" in projectrc
+    assert "variables" in projectrc["project_configuration"]
+    assert "env" in projectrc["project_configuration"]["variables"]
+    assert variable in projectrc["project_configuration"]["variables"]["env"]
 
     return glom(
         projectrc, f"project_configuration.variables.env.{variable}", default=""
