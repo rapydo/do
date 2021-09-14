@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
-from typing import List, Set, Union
+from typing import Dict, List, Set, Union
 
 import typer
 from zxcvbn import zxcvbn
@@ -9,6 +9,7 @@ from controller import PROJECTRC, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.swarm import Swarm
+from controller.templating import Templating
 from controller.templating import password as generate_random_password
 
 
@@ -70,6 +71,29 @@ def parse_projectrc() -> None:
             log.critical(line)
 
 
+# Note: can't directly use utilities in app.py because in this case we want to
+# maintain all values (not only templated variables) and we also want to keep comments
+def update_projectrc(variables: Dict[str, str]) -> None:
+
+    today = date.today().strftime("%Y-%m-%d")
+    with open(PROJECTRC) as f:
+        lines = f.readlines()
+        for index, line in enumerate(lines):
+
+            for variable, value in variables.items():
+                if line.strip().startswith(variable):
+                    blanks = line.index(variable)
+                    pref = " " * blanks
+                    annotation = f"# updated by rapydo password on {today}"
+                    lines[index] = f'{pref}{variable}: "{value}"  {annotation}\n'
+
+    templating = Templating()
+    templating.make_backup(PROJECTRC)
+    with open(PROJECTRC, "w") as f:
+        for line in lines:
+            f.write(line)
+
+
 def get_random_password() -> str:
 
     password = generate_random_password(
@@ -85,51 +109,6 @@ def get_random_password() -> str:
     return password
 
 
-def change_backend_password(new_password: str, running_services: Set[str]) -> None:
-    service = "backend"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_neo4j_password(new_password: str, running_services: Set[str]) -> None:
-    service = "neo4j"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_postgres_password(new_password: str, running_services: Set[str]) -> None:
-    service = "postgres"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_mariadb_password(new_password: str, running_services: Set[str]) -> None:
-    service = "mariadb"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_mongodb_password(new_password: str, running_services: Set[str]) -> None:
-    service = "mongodb"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_rabbit_password(new_password: str, running_services: Set[str]) -> None:
-    service = "rabbit"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_redis_password(new_password: str, running_services: Set[str]) -> None:
-    service = "redis"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_registry_password(new_password: str, running_services: Set[str]) -> None:
-    service = "registry"
-    log.critical("Change password for {} not implemented yet", service)
-
-
-def change_flower_password(new_password: str, running_services: Set[str]) -> None:
-    service = "flower"
-    log.critical("Change password for {} not implemented yet", service)
-
-
 @Application.app.command(help="Manage services passwords")
 def password(
     service: Services = typer.Argument(None, help="Service name"),
@@ -143,6 +122,7 @@ def password(
 
     Application.get_controller().controller_init()
 
+    # No service specified, only a summary will be reported
     if not service:
 
         parse_projectrc()
@@ -171,34 +151,59 @@ def password(
 
                 # note two blanks to center the score
                 print(f"{s.value:12}{v:22}  {score:6}{last_change}")
+
+    # In this case a service is asked to be updated
     else:
 
-        engine: Union[Swarm, Compose] = (
-            Swarm() if SWARM_MODE else Compose(Application.data.files)
-        )
+        compose = Compose(Application.data.files)
+        if SWARM_MODE:
+            swarm = Swarm()
+            running_services = swarm.get_running_services(Configuration.project)
+        else:
+            running_services = compose.get_running_services(Configuration.project)
 
-        running_services = engine.get_running_services(Configuration.project)
         if not new_password:
             new_password = get_random_password()
         # log.critical(new_password)
 
-        log.critical("running services: {}", running_services)
+        variables = get_service_passwords(service)
+        new_variables = {variable: new_password for variable in variables}
 
-        if service == Services.backend:
-            change_backend_password(new_password, running_services)
-        elif service == Services.neo4j:
-            change_neo4j_password(new_password, running_services)
-        elif service == Services.postgres:
-            change_postgres_password(new_password, running_services)
-        elif service == Services.mariadb:
-            change_mariadb_password(new_password, running_services)
-        elif service == Services.mongodb:
-            change_mongodb_password(new_password, running_services)
-        elif service == Services.rabbit:
-            change_rabbit_password(new_password, running_services)
-        elif service == Services.redis:
-            change_redis_password(new_password, running_services)
-        elif service == Services.registry:
-            change_registry_password(new_password, running_services)
-        elif service == Services.flower:
-            change_flower_password(new_password, running_services)
+        # Some services can only be updated if already running,
+        # others can be updated even if offline,
+        # but in every case if the stack is running it has to be restarted
+        is_running = service.value in running_services
+        is_running_needed = False
+
+        if service == Services.redis:
+            is_running_needed = False
+        else:
+            print_and_exit("Change password for {} not implemented yet", service.value)
+
+        if is_running_needed and not is_running:
+            print_and_exit(
+                "Can't update {} since it is not running. Please start your stack",
+                service.value,
+            )
+
+        update_projectrc(new_variables)
+
+        # here specific operation have to be implemented.
+        # - Nothing for Redis, projectrc update is enough
+
+        if is_running:
+
+            if SWARM_MODE:
+
+                compose.dump_config(Application.data.services)
+                swarm.deploy()
+
+            else:
+                compose.start_containers(Application.data.services)
+
+        log.info(
+            "The password of {} has been changed. "
+            "Please find the new password into your .projectrc file as {} variable",
+            service.value,
+            variables[0],
+        )
