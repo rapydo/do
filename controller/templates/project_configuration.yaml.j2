@@ -59,6 +59,9 @@ variables:
     {% if enable_pushpin -%}
     ACTIVATE_PUSHPIN: 1
     {% endif -%}
+    {% if enable_flower -%}
+    ACTIVATE_FLOWER: 1
+    {% endif -%}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1
     {% endif -%}
