@@ -104,19 +104,25 @@ def update_projectrc(variables: Dict[str, str]) -> None:
         lines = f.readlines()
         append_additional_lines: List[str] = []
 
+        pref = ""
+        for line in lines:
+            if line.strip().startswith("env:"):
+                blanks = line.index("env:")
+                # Add 1 indentation level
+                blanks = int(3 * blanks / 2)
+                pref = " " * blanks
+
+        if not pref:  # pragma: no cover
+            print_and_exit("Malformed .projectrc file, can't find an env block")
+
         for variable, value in variables.items():
             for index, line in enumerate(lines):
                 # If the variable is found in .projectrc, let's update it
                 if line.strip().startswith(variable):
-                    blanks = line.index(variable)
-                    pref = " " * blanks
                     lines[index] = f'{pref}{variable}: "{value}"  {annotation}\n'
                     break
             # if the variable is not found in .projectrc, let's append as additional
             else:
-                # Let's hope that the all .projectrc are indented the same way.
-                # Otherwise find the env and then increse the indentation by one level
-                pref = " " * 6
                 append_additional_lines.append(
                     f'{pref}{variable}: "{value}"  {annotation}\n'
                 )
@@ -130,7 +136,7 @@ def update_projectrc(variables: Dict[str, str]) -> None:
             f.write(line)
 
         # If last line is not an empty line, let's add a newline at the end of file
-        if last_line:
+        if last_line.strip():
             f.write("\n")
 
 
