@@ -131,6 +131,8 @@ def test_all(capfd: Capture) -> None:
         "Testing mode",
     )
 
+    time.sleep(3)
+
     timestamp = now.strftime("%Y-%m-%dT")
     # Frontend logs are always timestamped
     exec_command(
@@ -141,11 +143,13 @@ def test_all(capfd: Capture) -> None:
     )
 
     # With multiple services logs are not timestamped
-    exec_command(
-        capfd,
-        "logs --tail 10 frontend backend",
-        # Logs are prefixed because more than one service is shown
-        "backend_1      | Testing mode",
-        # "backend_1       | Development mode",
-        "frontend_1     | Merging files...",
-    )
+    if not SWARM_MODE:
+        # Multiple services are not supported in swarm mode
+        exec_command(
+            capfd,
+            "logs --tail 10 frontend backend",
+            # Logs are prefixed because more than one service is shown
+            "backend_1      | Testing mode",
+            # "backend_1       | Development mode",
+            "frontend_1     | Merging files...",
+        )
