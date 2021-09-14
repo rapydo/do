@@ -24,6 +24,10 @@ from tests import (
 
 def get_password_from_projectrc(variable: str) -> str:
     projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
+
+    # Assert is not empty
+    assert projectrc
+
     return glom(
         projectrc, f"project_configuration.variables.env.{variable}", default=""
     )
