@@ -17,9 +17,6 @@ from controller.utilities import git
 # https://get.docker.com
 EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 
-# https://raw.githubusercontent.com/docker/compose-cli/main/scripts/install/install_linux.sh
-# EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
-
 # https://github.com/docker/compose/releases
 COMPOSE_VERSION = "v2.0.0-rc.3"
 EXPECTED_COMPOSE_BIN_MD5 = "9174d158bc401b9e9bb367884b59f9b1"
@@ -84,17 +81,6 @@ def install(
         return None
 
     if version == "compose":
-        # url = "https://raw.githubusercontent.com/docker/compose-cli/"
-        # url += "main/scripts/install/install_linux.sh"
-        # log.info("Downloading installation script: {}", url)
-        # f = download(url, EXPECTED_COMPOSE_SCRIPT_MD5)
-
-        # with Sultan.load(sudo=True) as sultan:
-        #     result = sultan.sh(f).run()
-
-        #     for r in result.stdout + result.stderr:
-        #         print(r)
-
         cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
         cli_plugin.mkdir(parents=True, exist_ok=True)
         compose_bin = cli_plugin.joinpath("docker-compose")
@@ -114,7 +100,6 @@ def install(
         return None
 
     if version == "buildx":
-
         if docker.buildx.is_installed():
             v = docker.buildx.version()
             log.info("Docker buildx current version: {}", v)

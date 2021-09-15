@@ -40,7 +40,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
     )
 
-    init_project(capfd)
+    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
     if SWARM_MODE:
         start_registry(capfd)
 
@@ -165,9 +165,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis = docker.container.inspect(redis_name)
     redis_start_date = redis.state.started_at
 
-    # DEBUG CODE. REMOVE ME!
-    exec_command(capfd, "status")
-
     exec_command(
         capfd,
         "password redis --random",
@@ -179,9 +176,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
-
-    # DEBUG CODE. REMOVE ME!
-    exec_command(capfd, "status")
 
     backend = docker.container.inspect(backend_name)
     backend_start_date2 = backend.state.started_at

@@ -141,6 +141,11 @@ def update_projectrc(variables: Dict[str, str]) -> None:
         if last_line.strip():
             f.write("\n")
 
+    # Write again the .env file
+    Application.get_controller().load_projectrc()
+    Application.get_controller().read_specs(read_extended=True)
+    Application.get_controller().make_env()
+
 
 def get_random_password() -> str:
 
@@ -275,6 +280,11 @@ def password(
 
         # here specific operation have to be implemented.
         # - Nothing for Redis, projectrc update is enough
+
+        # DEBUG CODE!!
+        import time
+
+        time.sleep(1)
 
         if is_running:
             log.info("{} was running, restarting services...", service.value)
