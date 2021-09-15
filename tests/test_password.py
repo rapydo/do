@@ -1,7 +1,6 @@
 """
 This module will test the password command and the passwords management
 """
-import time
 from datetime import datetime
 
 from faker import Faker
@@ -165,6 +164,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis = docker.container.inspect(redis_name)
     redis_start_date = redis.state.started_at
 
+    # DEBUG CODE. REMOVE ME!
+    exec_command(capfd, "status")
+
     exec_command(
         capfd,
         "password redis --random",
@@ -174,7 +176,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "REDIS_PASSWORD variable",
     )
 
-    time.sleep(2)
+    # DEBUG CODE. REMOVE ME!
+    exec_command(capfd, "status")
 
     backend = docker.container.inspect(backend_name)
     backend_start_date2 = backend.state.started_at
