@@ -32,6 +32,15 @@ setup(
         "typer[all]==0.3.2",
         "zxcvbn",
     ],
+    extras_require={
+        "dev": [
+            "setuptools",
+            "pytest",
+            "pytest-cov",
+            "pytest-timeout",
+            "Faker",
+        ]
+    },
     keywords=["http", "api", "rest", "web", "backend", "rapydo"],
     classifiers=[
         "Programming Language :: Python",
