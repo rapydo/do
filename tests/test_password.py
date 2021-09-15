@@ -6,7 +6,7 @@ from datetime import datetime
 
 from faker import Faker
 from glom import glom
-from python_on_whales import docker
+from python_on_whales import Container, docker
 
 from controller import PROJECTRC, SWARM_MODE, colors
 from controller.deploy.swarm import Swarm
@@ -160,22 +160,19 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         swarm = Swarm()
-        backend_name = swarm.get_container("backend", slot=1)
-        redis_name = swarm.get_container("redis", slot=1)
-        flower_name = swarm.get_container("flower", slot=1)
-    else:
-        backend_name = f"{project_name}_backend_1"
-        redis_name = f"{project_name}_redis_1"
-        flower_name = f"{project_name}_flower_1"
-    assert backend_name is not None
-    assert redis_name is not None
-    assert flower_name is not None
+
+    def get_start_date(service: str) -> datetime:
+
+        if SWARM_MODE:
+            container_name = swarm.get_container(service, slot=1)
+        container_name = f"{project_name}_{service}_1"
+
+        assert container_name is not None
+        return docker.container.inspect(container_name).state.started_at
 
     #  ############## REDIS ######################
-    backend = docker.container.inspect(backend_name)
-    backend_start_date = backend.state.started_at
-    redis = docker.container.inspect(redis_name)
-    redis_start_date = redis.state.started_at
+    backend_start_date = get_start_date("backend")
+    redis_start_date = get_start_date("redis")
 
     exec_command(
         capfd,
@@ -192,10 +189,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         time.sleep(2)
 
-    backend = docker.container.inspect(backend_name)
-    backend_start_date2 = backend.state.started_at
-    redis = docker.container.inspect(redis_name)
-    redis_start_date2 = redis.state.started_at
+    backend_start_date2 = get_start_date("backend")
+    redis_start_date2 = get_start_date("redis")
 
     # Verify that both backend and redis are restarted
     assert backend_start_date2 != backend_start_date
@@ -203,8 +198,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     #  ############## FLOWER #####################
 
-    flower = docker.container.inspect(flower_name)
-    flower_start_date = flower.state.started_at
+    flower_start_date = get_start_date("flower")
 
     exec_command(
         capfd,
@@ -221,8 +215,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         time.sleep(2)
 
-    flower = docker.container.inspect(flower_name)
-    flower_start_date2 = flower.state.started_at
+    flower_start_date2 = get_start_date("flower")
 
     assert flower_start_date2 != flower_start_date
 
