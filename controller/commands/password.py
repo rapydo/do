@@ -255,7 +255,7 @@ def password(
         # others can be updated even if offline,
         # but in every case if the stack is running it has to be restarted
         is_running = service.value in running_services
-        log.critical(is_running)
+
         is_running_needed = False
 
         if service == Services.redis:

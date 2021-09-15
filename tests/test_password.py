@@ -115,7 +115,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     # ###  TEST rapydo password WITH SERVICES NOT RUNNING  ###
     # ########################################################
 
-    redis_pass = get_password_from_projectrc("REDIS_PASSWORD")
+    redis_pass1 = get_password_from_projectrc("REDIS_PASSWORD")
     exec_command(
         capfd,
         "password redis --random",
@@ -124,7 +124,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "Please find the new password into your .projectrc file as "
         "REDIS_PASSWORD variable",
     )
-    assert redis_pass != get_password_from_projectrc("REDIS_PASSWORD")
+    redis_pass2 = get_password_from_projectrc("REDIS_PASSWORD")
+    assert redis_pass1 != redis_pass2
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -175,6 +176,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "Please find the new password into your .projectrc file as "
         "REDIS_PASSWORD variable",
     )
+
+    redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
+    assert redis_pass2 != redis_pass3
 
     # DEBUG CODE. REMOVE ME!
     exec_command(capfd, "status")
