@@ -98,11 +98,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "password rabbit --random",
         "Change password for rabbit not implemented yet",
     )
-    exec_command(
-        capfd,
-        "password flower --random",
-        "Change password for flower not implemented yet",
-    )
 
     if SWARM_MODE:
         exec_command(
@@ -127,6 +122,18 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass2 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass1 != redis_pass2
 
+    flower_pass1 = get_password_from_projectrc("FLOWER_PASSWORD")
+    exec_command(
+        capfd,
+        "password flower --random",
+        "flower was not running, restart is not needed",
+        "The password of flower has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "FLOWER_PASSWORD variable",
+    )
+    flower_pass2 = get_password_from_projectrc("FLOWER_PASSWORD")
+    assert flower_pass1 != flower_pass2
+
     today = datetime.now().strftime("%Y-%m-%d")
 
     exec_command(
@@ -140,7 +147,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
         f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
         f"redis       REDIS_PASSWORD        {colors.GREEN}{today}",
-        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
+        f"flower      FLOWER_PASSWORD       {colors.GREEN}{today}",
     )
 
     pull_images(capfd)
@@ -154,12 +161,16 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         swarm = Swarm()
         backend_name = swarm.get_container("backend", slot=1)
         redis_name = swarm.get_container("redis", slot=1)
+        flower_name = swarm.get_container("flower", slot=1)
     else:
         backend_name = f"{project_name}_backend_1"
         redis_name = f"{project_name}_redis_1"
+        flower_name = f"{project_name}_flower_1"
     assert backend_name is not None
     assert redis_name is not None
+    assert flower_name is not None
 
+    #  ############## REDIS ######################
     backend = docker.container.inspect(backend_name)
     backend_start_date = backend.state.started_at
     redis = docker.container.inspect(redis_name)
@@ -186,19 +197,27 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     assert backend_start_date2 != backend_start_date
     assert redis_start_date2 != redis_start_date
 
+    #  ############## FLOWER #####################
+
+    flower = docker.container.inspect(flower_name)
+    flower_start_date = flower.state.started_at
+
     exec_command(
         capfd,
-        "password",
-        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
-        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
-        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
-        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
-        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
-        f"redis       REDIS_PASSWORD        {colors.GREEN}{today}",
-        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
+        "password flower --random",
+        "flower was running, restarting services...",
+        "The password of flower has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "FLOWER_PASSWORD variable",
     )
+
+    flower_pass3 = get_password_from_projectrc("FLOWER_PASSWORD")
+    assert flower_pass2 != flower_pass3
+
+    flower = docker.container.inspect(flower_name)
+    flower_start_date2 = flower.state.started_at
+
+    assert flower_start_date2 != flower_start_date
 
     # ########################################################
     # ###      TEST rapydo password --password OPTION      ###

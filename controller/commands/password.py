@@ -265,6 +265,8 @@ def password(
 
         if service == Services.redis:
             is_running_needed = False
+        elif service == Services.flower:
+            is_running_needed = False
         else:
             print_and_exit("Change password for {} not implemented yet", service.value)
 
@@ -279,7 +281,7 @@ def password(
         update_projectrc(new_variables)
 
         # here specific operation have to be implemented.
-        # - Nothing for Redis, projectrc update is enough
+        # - Nothing for Redis and Flower, projectrc update is enough
 
         # DEBUG CODE!!
         import time
