@@ -64,41 +64,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "password backend",
         "Please specify one between --random and --password options",
     )
-    exec_command(
-        capfd,
-        "password postgres",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password mariadb",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password mongodb",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password neo4j",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password rabbit",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password redis",
-        "Please specify one between --random and --password options",
-    )
-    exec_command(
-        capfd,
-        "password flower",
-        "Please specify one between --random and --password options",
-    )
 
     # ######################################
     # ###  COMMANDS NOT IMPLEMENTED YET  ###
@@ -147,20 +112,15 @@ def test_password(capfd: Capture, faker: Faker) -> None:
             "Change password for registry not implemented yet",
         )
 
-    # #############################################
-    # ###  COMMANDS REQUIRING RUNNING SERVICES  ###
-    # #############################################
-
-    # execute and verify the failure due to non running services
-
-    # #################################################
-    # ###  COMMANDS NOT REQUIRING RUNNING SERVICES  ###
-    # #################################################
+    # ########################################################
+    # ###  TEST rapydo password WITH SERVICES NOT RUNNING  ###
+    # ########################################################
 
     redis_pass = get_password_from_projectrc("REDIS_PASSWORD")
     exec_command(
         capfd,
         "password redis --random",
+        "redis was not running, restart is not needed",
         "The password of redis has been changed. ",
         "Please find the new password into your .projectrc file as "
         "REDIS_PASSWORD variable",
@@ -186,9 +146,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    # #############################################
-    # ###  COMMANDS REQUIRING RUNNING SERVICES  ###
-    # #############################################
+    # ########################################################
+    # ###  TEST rapydo password WITH SERVICES     RUNNING  ###
+    # ########################################################
 
     if SWARM_MODE:
         swarm = Swarm()
@@ -205,12 +165,10 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis = docker.container.inspect(redis_name)
     redis_start_date = redis.state.started_at
 
-    # execute and verify the success of EVERYTHING
-    # (also commands already tested with not running services)
-
     exec_command(
         capfd,
         "password redis --random",
+        "redis was running, restarting services...",
         "The password of redis has been changed. ",
         "Please find the new password into your .projectrc file as "
         "REDIS_PASSWORD variable",
@@ -241,7 +199,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
     )
 
-    # Now verify the --password option
+    # ########################################################
+    # ###      TEST rapydo password --password OPTION      ###
+    # ########################################################
 
     mypassword = faker.pystr()
     exec_command(
