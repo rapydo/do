@@ -128,6 +128,7 @@ def test_remove(capfd: Capture) -> None:
         # Single service remove does not remove the network
         assert NETWORK_NAME in get_networks()
         # Single service remove also remove unnamed volumes
+        time.sleep(2)
         n, u = count_volumes()
         assert NAMED_VOLUMES_NUM == n
         assert UNNAMED_VOLUMES_NUM > u
