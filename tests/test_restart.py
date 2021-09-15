@@ -1,6 +1,8 @@
 """
 This module will test the restart command
 """
+import time
+
 from python_on_whales import docker
 
 from controller import SWARM_MODE, colors
@@ -93,6 +95,8 @@ def test_all(capfd: Capture) -> None:
     if SWARM_MODE:
         swarm = Swarm()
         container_name = swarm.get_container("backend", slot=1)
+        # Just wait a bit to prevent errors on non existing containers
+        time.sleep(1)
     else:
         container_name = "first_backend_1"
     assert container_name is not None
