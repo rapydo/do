@@ -164,10 +164,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     def get_start_date(service: str) -> datetime:
 
         if SWARM_MODE:
-            # this is needed to wait for services rolling up
-            time.sleep(2)
             container_name = swarm.get_container(service, slot=1)
-        container_name = f"{project_name}_{service}_1"
+        else:
+            container_name = f"{project_name}_{service}_1"
 
         assert container_name is not None
         return docker.container.inspect(container_name).state.started_at
