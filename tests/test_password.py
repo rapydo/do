@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+import time
 from datetime import datetime
 
 from faker import Faker
@@ -188,6 +189,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
+    if SWARM_MODE:
+        time.sleep(2)
+
     backend = docker.container.inspect(backend_name)
     backend_start_date2 = backend.state.started_at
     redis = docker.container.inspect(redis_name)
@@ -213,6 +217,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     flower_pass3 = get_password_from_projectrc("FLOWER_PASSWORD")
     assert flower_pass2 != flower_pass3
+
+    if SWARM_MODE:
+        time.sleep(2)
 
     flower = docker.container.inspect(flower_name)
     flower_start_date2 = flower.state.started_at
