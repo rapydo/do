@@ -277,7 +277,7 @@ def password(
         # - Nothing for Redis, projectrc update is enough
 
         if is_running:
-            log.info("{} was running, restarting services...")
+            log.info("{} was running, restarting services...", service.value)
 
             if SWARM_MODE:
 
@@ -287,7 +287,7 @@ def password(
             else:
                 compose.start_containers(Application.data.services)
         else:
-            log.info("{} was not running, restart is not needed")
+            log.info("{} was not running, restart is not needed", service.value)
 
         log.info(
             "The password of {} has been changed. "
