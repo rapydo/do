@@ -161,12 +161,14 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         swarm = Swarm()
 
-    def get_start_date(service: str, wait: bool = False) -> datetime:
+    def get_start_date(capfd: Capture, service: str, wait: bool = False) -> datetime:
 
         if SWARM_MODE:
             if wait:
-                # This is needed to wait the service rollup to complete
-                time.sleep(5)
+                # This is needed to debug and wait the service rollup to complete
+                # Status is both for debug and to delay the get_container
+                exec_command(capfd, "status")
+                time.sleep(3)
 
             container_name = swarm.get_container(service, slot=1)
         else:
@@ -176,8 +178,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         return docker.container.inspect(container_name).state.started_at
 
     #  ############## REDIS ######################
-    backend_start_date = get_start_date("backend")
-    redis_start_date = get_start_date("redis")
+    backend_start_date = get_start_date(capfd, "backend")
+    redis_start_date = get_start_date(capfd, "redis")
 
     exec_command(
         capfd,
@@ -191,8 +193,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
-    backend_start_date2 = get_start_date("backend", wait=True)
-    redis_start_date2 = get_start_date("redis", wait=True)
+    backend_start_date2 = get_start_date(capfd, "backend", wait=True)
+    redis_start_date2 = get_start_date(capfd, "redis", wait=True)
 
     # Verify that both backend and redis are restarted
     assert backend_start_date2 != backend_start_date
@@ -200,7 +202,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     #  ############## FLOWER #####################
 
-    flower_start_date = get_start_date("flower", wait=True)
+    flower_start_date = get_start_date(capfd, "flower", wait=True)
 
     exec_command(
         capfd,
@@ -214,7 +216,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     flower_pass3 = get_password_from_projectrc("FLOWER_PASSWORD")
     assert flower_pass2 != flower_pass3
 
-    flower_start_date2 = get_start_date("flower", wait=True)
+    flower_start_date2 = get_start_date(capfd, "flower", wait=True)
 
     assert flower_start_date2 != flower_start_date
 

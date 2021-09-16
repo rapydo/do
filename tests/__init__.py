@@ -57,7 +57,7 @@ def mock_KeyboardInterrupt(signum, frame):  # type: ignore
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd: Any, command: str, *asserts: str) -> None:
+def exec_command(capfd: Capture, command: str, *asserts: str) -> None:
 
     # This is needed to reload the LOG dir
     import controller
@@ -117,7 +117,7 @@ def exec_command(capfd: Any, command: str, *asserts: str) -> None:
         assert a in out + err or any(a in x for x in out + err + cout + exc)
 
 
-def service_verify(capfd: Any, service: str) -> None:
+def service_verify(capfd: Capture, service: str) -> None:
     exec_command(
         capfd,
         f"shell backend --no-tty 'restapi verify --service {service}'",
@@ -131,7 +131,7 @@ def random_project_name(faker: Faker) -> str:
 
 
 def create_project(
-    capfd: Any,
+    capfd: Capture,
     name: Optional[str] = None,
     auth: str = "postgres",
     frontend: str = "angular",
@@ -152,7 +152,7 @@ def create_project(
     )
 
 
-def init_project(capfd: Any, pre_options: str = "", post_options: str = "") -> None:
+def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") -> None:
     exec_command(
         capfd,
         f"{pre_options} init {post_options}",
@@ -160,7 +160,7 @@ def init_project(capfd: Any, pre_options: str = "", post_options: str = "") -> N
     )
 
 
-def start_registry(capfd: Any) -> None:
+def start_registry(capfd: Capture) -> None:
     exec_command(
         capfd,
         "run registry",
@@ -172,7 +172,7 @@ def start_registry(capfd: Any) -> None:
     print(docker.logs(REGISTRY))
 
 
-def pull_images(capfd: Any) -> None:
+def pull_images(capfd: Capture) -> None:
 
     exec_command(
         capfd,
@@ -181,7 +181,7 @@ def pull_images(capfd: Any) -> None:
     )
 
 
-def start_project(capfd: Any) -> None:
+def start_project(capfd: Capture) -> None:
     exec_command(
         capfd,
         "start",
