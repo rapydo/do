@@ -761,7 +761,7 @@ services:
 
   redis:
     restart: always
-    image: redis:6.2.4
+    image: redis:6.2.5
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
       test: "redis-cli --pass $$REDIS_PASSWORD -h 127.0.0.1 ping"
