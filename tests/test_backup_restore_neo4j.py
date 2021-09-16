@@ -193,6 +193,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "start neo4j")
 
+    # Just some delay extra delay, neo4j is a slow starter
+    time.sleep(5)
+
     # Restore command
     exec_command(
         capfd, "restore neo4j", "Please specify one of the following backup:", ".dump"
