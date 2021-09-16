@@ -86,12 +86,14 @@ jobs:
 
           if [[ "${{ matrix.deploy }}" == "swarm" ]]; then
 
-            IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
-
-            sudo cat /etc/docker/daemon.json
-            sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP}:5000\"]}' >  /etc/docker/daemon.json"
-            sudo cat /etc/docker/daemon.json
-            sudo systemctl restart docker.service
+            # This would be only needed in production mode.
+            # In dev mode the registry is bound to 127.0.0.1 that is trusted by default
+            
+            # IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
+            # sudo cat /etc/docker/daemon.json
+            # sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP}:5000\"]}' >  /etc/docker/daemon.json"
+            # sudo cat /etc/docker/daemon.json
+            # sudo systemctl restart docker.service
 
             export SWARM_MODE="1"
 
