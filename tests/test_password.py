@@ -200,10 +200,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     #  ############## FLOWER #####################
 
-    # DEBUG CODE
-    exec_command(capfd, "status")
-
-    flower_start_date = get_start_date("flower")
+    flower_start_date = get_start_date("flower", wait=True)
 
     exec_command(
         capfd,
