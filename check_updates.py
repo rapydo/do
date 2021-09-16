@@ -240,6 +240,9 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
     if lib == "stilliard/pure-ftpd":
         return "stretch-latest"
 
+    if lib == "docker":
+        return "dind"
+
     time.sleep(sleep_time)
     if "/" not in lib:
         lib = f"library/{lib}"

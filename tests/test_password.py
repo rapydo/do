@@ -166,7 +166,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         if SWARM_MODE:
             if wait:
                 # This is needed to wait the service rollup to complete
-                time.sleep(4)
+                time.sleep(5)
+
             container_name = swarm.get_container(service, slot=1)
         else:
             container_name = f"{project_name}_{service}_1"
@@ -190,8 +191,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
-    # DEBUG CODE
-    exec_command(capfd, "status")
     backend_start_date2 = get_start_date("backend", wait=True)
     redis_start_date2 = get_start_date("redis", wait=True)
 
@@ -200,6 +199,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     assert redis_start_date2 != redis_start_date
 
     #  ############## FLOWER #####################
+
+    # DEBUG CODE
+    exec_command(capfd, "status")
 
     flower_start_date = get_start_date("flower")
 
