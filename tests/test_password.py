@@ -166,7 +166,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         if SWARM_MODE:
             if wait:
                 # This is needed to wait the service rollup to complete
-                time.sleep(3)
+                time.sleep(4)
             container_name = swarm.get_container(service, slot=1)
         else:
             container_name = f"{project_name}_{service}_1"
