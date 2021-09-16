@@ -127,7 +127,7 @@ def service_verify(capfd: Any, service: str) -> None:
 
 def random_project_name(faker: Faker) -> str:
 
-    return f"{faker.word()}{faker.word()}"
+    return f"{faker.word()}{faker.word()}".lower()
 
 
 def create_project(
