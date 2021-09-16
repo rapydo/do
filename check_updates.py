@@ -32,7 +32,7 @@ os.chdir(os.path.dirname(__file__))
 
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
-skip_versions = {"typescript": "4.3.2"}
+skip_versions = {"typescript": "4.4.3"}
 
 
 def load_yaml_file(filepath: Path) -> Dict[str, Any]:
