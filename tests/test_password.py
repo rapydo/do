@@ -190,6 +190,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
+    # DEBUG CODE
+    exec_command(capfd, "status")
     backend_start_date2 = get_start_date("backend", wait=True)
     redis_start_date2 = get_start_date("redis", wait=True)
 
