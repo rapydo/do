@@ -41,7 +41,21 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
     )
 
-    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
+    init_project(
+        capfd,
+        " -e HEALTHCHECK_INTERVAL=1s"
+        # Prevent no suitable node (insufficient resources on 1 node)
+        # Due to GA nodes with 2 cpus only (9 services x 0.25 default => 2.25 cpus)
+        " -e ASSIGNED_CPU_BACKEND=0.1"
+        " -e ASSIGNED_CPU_POSTGRES=0.1"
+        " -e ASSIGNED_CPU_MARIADB=0.1"
+        " -e ASSIGNED_CPU_NEO4J=0.1"
+        " -e ASSIGNED_CPU_MONGODB=0.1"
+        " -e ASSIGNED_CPU_RABBIT=0.1"
+        " -e ASSIGNED_CPU_REDIS=0.1"
+        " -e ASSIGNED_CPU_FLOWER=0.1"
+        " -e ASSIGNED_CPU_REGISTRY=0.1",
+    )
     if SWARM_MODE:
         start_registry(capfd)
 
