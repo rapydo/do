@@ -53,11 +53,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "redis")
 
-    # # This will initialize redis
-    # exec_command(capfd, "shell --no-tty backend 'restapi init'")
-
     # Just some delay extra delay, redis is a slow starter
-    time.sleep(5)
+    # time.sleep(5)
 
     key = faker.pystr()
     value1 = faker.pystr()

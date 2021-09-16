@@ -51,9 +51,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "sqlalchemy")
 
-    # Just some delay extra delay. restapi init alone not always is enough...
-    # time.sleep(5)
-
     # This will initialize mariadb
     exec_command(capfd, "shell --no-tty backend 'restapi init'")
 
