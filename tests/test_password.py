@@ -6,7 +6,7 @@ from datetime import datetime
 
 from faker import Faker
 from glom import glom
-from python_on_whales import Container, docker
+from python_on_whales import docker
 
 from controller import PROJECTRC, SWARM_MODE, colors
 from controller.deploy.swarm import Swarm

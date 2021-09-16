@@ -27,3 +27,11 @@ def create_folder() -> None:
     os.chdir(folder)
 
     print(f"FOLDER = {folder}")
+
+
+# Beware, this replaces the standard faker fixture provided by Faker it-self
+@pytest.fixture
+def faker() -> Faker:
+
+    # Call to untyped function "Faker" in typed context
+    return Faker("en_US")  # type: ignore
