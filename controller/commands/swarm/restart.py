@@ -21,8 +21,7 @@ def restart(
 
     if not swarm.stack_is_running(Configuration.project):
         print_and_exit(
-            "Stack {} is not running, deploy it with {command}",
-            Configuration.project,
+            "Your stack is not running, deploy it with {command}",
             command=RED("rapydo start"),
         )
 

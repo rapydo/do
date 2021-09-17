@@ -35,7 +35,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "restart",
-            f"Stack first is not running, deploy it with {colors.RED}rapydo start",
+            f"Your stack is not running, deploy it with {colors.RED}rapydo start",
         )
 
     start_project(capfd)
