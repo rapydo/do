@@ -82,7 +82,7 @@ def test_docker_registry(capfd: Capture) -> None:
         "_registry_run",
     )
 
-    time.sleep(1)
+    time.sleep(2)
 
     exec_command(
         capfd,
