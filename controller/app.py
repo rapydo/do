@@ -105,7 +105,7 @@ def projectrc_values(
     if ctx.resilient_parsing:  # pragma: no cover
         return None
 
-    if value != param.get_default(ctx):
+    if not param.name or value != param.get_default(ctx):
         return value
 
     from_projectrc = Configuration.projectrc.get(param.name)
