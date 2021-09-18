@@ -338,6 +338,7 @@ def password(
                 compose.docker.container.remove(REGISTRY, force=True)
                 # compose v2 does not implement volatile container yet
                 compose_v1 = ComposeV1(files=Application.data.files)
+                Configuration.FORCE_COMPOSE_ENGINE = True
                 compose_v1.create_volatile_container(
                     REGISTRY, detach=True, publish=[f"{port}:{port}"]
                 )
