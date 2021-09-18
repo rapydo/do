@@ -35,7 +35,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "list",
-        "Missing argument 'ELEMENT_TYPE:{env|services|submodules}'.  Choose from:",
+        "Missing argument 'ELEMENT_TYPE:{env|services|submodules}'. Choose from:",
     )
 
     exec_command(
