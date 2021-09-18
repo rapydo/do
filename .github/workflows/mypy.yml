@@ -28,7 +28,6 @@ jobs:
 
           for lib in \
             urllib3 \
-            docker.errors \
             compose \
             plumbum \
             sultan \

@@ -64,8 +64,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     today = datetime.now().strftime("%Y-%m-%d")
 
     if SWARM_MODE:
-        na_registry_line = f"registry   REGISTRY_PASSWORD        {colors.RED}N/A"
-        ok_registry_line = f"registry   REGISTRY_PASSWORD        {colors.GREEN}{today}"
+        na_registry_line = f"registry   REGISTRY_PASSWORD      {colors.RED}N/A"
+        ok_registry_line = f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}"
     else:
         na_registry_line = ""
         ok_registry_line = ""
