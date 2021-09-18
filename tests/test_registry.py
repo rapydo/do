@@ -131,8 +131,6 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         "run registry",
         "The registry container is already existing, removing",
-        "Creating",
-        "_registry_run",
     )
 
     exec_command(
