@@ -156,6 +156,9 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         registry_pass1 = get_password_from_projectrc("REGISTRY_PASSWORD")
+
+        docker.container.remove(REGISTRY, force=True)
+
         exec_command(
             capfd,
             "password registry --random",
@@ -166,6 +169,8 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         )
         registry_pass2 = get_password_from_projectrc("REGISTRY_PASSWORD")
         assert registry_pass1 != registry_pass2
+
+        start_registry(capfd)
 
     exec_command(
         capfd,
