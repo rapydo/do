@@ -5,7 +5,7 @@ This module will test the volatile command
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__
+from controller import SWARM_MODE, __version__, colors
 from tests import (  # signal_handler,
     Capture,
     create_project,
@@ -13,7 +13,6 @@ from tests import (  # signal_handler,
     init_project,
     pull_images,
     random_project_name,
-    start_project,
     start_registry,
 )
 
@@ -40,7 +39,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run --debug backend",
-        f"Missing rapydo/backend:{__version__} image, add --pull option",
+        f"Missing rapydo/backend:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
     )
 
     pull_images(capfd)
@@ -98,7 +97,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run --debug maintenance",
-        f"Missing rapydo/proxy:{__version__} image, add --pull option",
+        f"Missing rapydo/proxy:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
     )
 
     exec_command(

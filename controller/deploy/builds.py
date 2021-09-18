@@ -188,7 +188,9 @@ def verify_available_images(
 
             if not image_exists:
                 if is_run_command:
-                    print_and_exit("Missing {} image, add --pull option", image)
+                    print_and_exit(
+                        "Missing {} image, add {opt} option", image, opt=RED("--pull")
+                    )
                 else:
                     print_and_exit(
                         "Missing {} image, execute {command}",

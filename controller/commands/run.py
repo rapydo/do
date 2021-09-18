@@ -111,7 +111,7 @@ def run(
 
     if pull:
         compose.command("pull", {"SERVICE": [service], "quiet": True})
-    elif service != REGISTRY:
+    else:
         verify_available_images(
             [service],
             Application.data.compose_config,

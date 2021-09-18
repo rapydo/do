@@ -3,7 +3,7 @@ This module will test the interfaces command
 """
 from faker import Faker
 
-from controller import SWARM_MODE, __version__
+from controller import SWARM_MODE, __version__, colors
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -49,7 +49,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run adminer",
-        f"Missing rapydo/adminer:{__version__} image, add --pull option",
+        f"Missing rapydo/adminer:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
     )
 
     docker = Docker()
