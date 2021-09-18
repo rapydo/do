@@ -3,6 +3,7 @@ This module will test the password command and the passwords management
 """
 import time
 from datetime import datetime
+from typing import Optional
 
 from faker import Faker
 from glom import glom
@@ -12,6 +13,7 @@ from controller import PROJECTRC, SWARM_MODE, colors
 from controller.deploy.swarm import Swarm
 from controller.utilities import configuration
 from tests import (
+    REGISTRY,
     Capture,
     create_project,
     exec_command,
@@ -59,6 +61,15 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         start_registry(capfd)
 
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    if SWARM_MODE:
+        na_registry_line = f"registry   REGISTRY_PASSWORD        {colors.RED}N/A"
+        ok_registry_line = f"registry   REGISTRY_PASSWORD        {colors.GREEN}{today}"
+    else:
+        na_registry_line = ""
+        ok_registry_line = ""
+
     exec_command(
         capfd,
         "password",
@@ -71,6 +82,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
         f"redis      REDIS_PASSWORD         {colors.RED}N/A",
         f"flower     FLOWER_PASSWORD        {colors.RED}N/A",
+        na_registry_line,
     )
 
     exec_command(
@@ -114,13 +126,6 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "Change password for rabbit not implemented yet",
     )
 
-    if SWARM_MODE:
-        exec_command(
-            capfd,
-            "password registry --random",
-            "Change password for registry not implemented yet",
-        )
-
     # ########################################################
     # ###  TEST rapydo password WITH SERVICES NOT RUNNING  ###
     # ########################################################
@@ -149,7 +154,18 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     flower_pass2 = get_password_from_projectrc("FLOWER_PASSWORD")
     assert flower_pass1 != flower_pass2
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    if SWARM_MODE:
+        registry_pass1 = get_password_from_projectrc("REGISTRY_PASSWORD")
+        exec_command(
+            capfd,
+            "password registry --random",
+            "registry was not running, restart is not needed",
+            "The password of registry has been changed. ",
+            "Please find the new password into your .projectrc file as "
+            "REGISTRY_PASSWORD variable",
+        )
+        registry_pass2 = get_password_from_projectrc("REGISTRY_PASSWORD")
+        assert registry_pass1 != registry_pass2
 
     exec_command(
         capfd,
@@ -163,6 +179,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
         f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
         f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
+        ok_registry_line,
     )
 
     pull_images(capfd)
@@ -177,7 +194,12 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     def get_start_date(capfd: Capture, service: str, wait: bool = False) -> datetime:
 
-        if SWARM_MODE:
+        # Optional is needed because swarm.get_container returns Optional[str]
+        container_name: Optional[str] = None
+
+        if service == REGISTRY:
+            container_name = REGISTRY
+        elif SWARM_MODE:
             if wait:
                 # This is needed to debug and wait the service rollup to complete
                 # Status is both for debug and to delay the get_container
@@ -234,10 +256,32 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     assert flower_start_date2 != flower_start_date
 
+    #  ############## REGISTRY #####################
+
+    if SWARM_MODE:
+        registry_start_date = get_start_date(capfd, "registry", wait=True)
+
+        exec_command(
+            capfd,
+            "password registry --random",
+            "registry was running, restarting services...",
+            "The password of registry has been changed. ",
+            "Please find the new password into your .projectrc file as "
+            "REGISTRY_PASSWORD variable",
+        )
+
+        registry_pass3 = get_password_from_projectrc("REGISTRY_PASSWORD")
+        assert registry_pass2 != registry_pass3
+
+        registry_start_date2 = get_start_date(capfd, "registry", wait=True)
+
+        assert registry_start_date2 != registry_start_date
+
     # ########################################################
     # ###      TEST rapydo password --password OPTION      ###
     # ########################################################
 
+    # Just test one service... no need to test all of them
     mypassword = faker.pystr()
     exec_command(
         capfd,

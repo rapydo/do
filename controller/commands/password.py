@@ -11,13 +11,16 @@ from controller import (
     GREEN,
     PROJECTRC,
     RED,
+    REGISTRY,
     SWARM_MODE,
     TABLE_FORMAT,
     log,
     print_and_exit,
 )
 from controller.app import Application, Configuration
+from controller.deploy.compose import Compose as ComposeV1
 from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 from controller.templating import Templating
 from controller.templating import password as generate_random_password
@@ -209,7 +212,10 @@ def password(
             # This should never happens and can't be (easily) tested
             if s.value not in Application.data.base_services:  # pragma: no cover
                 print_and_exit("Command misconfiguration, unknown {} service", s.value)
-            if s.value not in Application.data.active_services:
+            if (
+                s != Services.registry
+                and s.value not in Application.data.active_services
+            ):
                 continue
 
             variables = get_service_passwords(s)
@@ -278,7 +284,12 @@ def password(
         # Some services can only be updated if already running,
         # others can be updated even if offline,
         # but in every case if the stack is running it has to be restarted
-        is_running = service.value in running_services
+
+        if service == Services.registry:
+            docker = Docker()
+            is_running = docker.ping_registry(do_exit=False)
+        else:
+            is_running = service.value in running_services
 
         is_running_needed = False
 
@@ -286,6 +297,16 @@ def password(
             is_running_needed = False
         elif service == Services.flower:
             is_running_needed = False
+        elif service == Services.registry:
+            is_running_needed = False
+
+        # backend
+        # neo4j
+        # postgres
+        # mariadb
+        # mongodb
+        # rabbit
+
         else:
             print_and_exit("Change password for {} not implemented yet", service.value)
 
@@ -310,7 +331,17 @@ def password(
         if is_running:
             log.info("{} was running, restarting services...", service.value)
 
-            if SWARM_MODE:
+            if service == Services.registry:
+                compose.docker.container.restart(REGISTRY)
+                port = Application.env["REGISTRY_PORT"]
+
+                compose.docker.container.remove(REGISTRY, force=True)
+                # compose v2 does not implement volatile container yet
+                compose_v1 = ComposeV1(files=Application.data.files)
+                compose_v1.create_volatile_container(
+                    REGISTRY, detach=True, publish=[f"{port}:{port}"]
+                )
+            elif SWARM_MODE:
 
                 compose.dump_config(Application.data.services)
                 swarm.deploy()

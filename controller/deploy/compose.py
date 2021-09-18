@@ -52,7 +52,7 @@ class Compose:
         log.debug("docker-compose command: '{}'", command)
 
         # sometimes this import stucks... importing here to avoid unnecessary waits
-        from docker.errors import APIError
+        from docker.errors import APIError  # type: ignore
 
         try:
             method(options=options)
