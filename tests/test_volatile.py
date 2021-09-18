@@ -39,7 +39,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run --debug backend",
-        f"Missing rapydo/backend:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
+        f"Missing rapydo/backend:{__version__} image, add {colors.RED}--pull{colors.RESET} option",
     )
 
     pull_images(capfd)
@@ -97,7 +97,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run --debug maintenance",
-        f"Missing rapydo/proxy:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
+        f"Missing rapydo/proxy:{__version__} image, add {colors.RED}--pull{colors.RESET} option",
     )
 
     exec_command(

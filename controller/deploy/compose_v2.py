@@ -5,12 +5,14 @@ import yaml
 from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
+from tabulate import tabulate
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
     REGISTRY,
     SWARM_MODE,
+    TABLE_FORMAT,
     colors,
     log,
     print_and_exit,
@@ -216,10 +218,9 @@ class Compose:
     def status(self) -> None:
         print("")
 
-        number_of_containers = 0
+        table: List[List[str]] = []
         for container in self.docker.compose.ps():
 
-            number_of_containers += 1
             status = container.state.status
             if status == "shutdown" or status == "complete":
                 COLOR = colors.BLUE
@@ -238,14 +239,24 @@ class Compose:
                     container_port = container_port.split("/")[0]
                     ports_list.append(f"{container_port}->{host_port[0]['HostPort']}")
 
-            container_id = container.id[0:12]
-            image = container.config.image
-            name = container.name
-            ports = ",".join(ports_list)
-            ts = container.created.strftime("%d-%m-%Y %H:%M:%S")
+            table.append(
+                [
+                    container.id[0:12],
+                    f"{COLOR}{container.name}{colors.RESET}",
+                    status,
+                    container.created.strftime("%d-%m-%Y %H:%M:%S"),
+                    container.config.image,
+                    ",".join(ports_list),
+                ],
+            )
 
-            cname = f"{COLOR}{name:23}{colors.RESET}"
-            print(f"{container_id} {cname} {status:8} {ts:20} {image:24}\t{ports}")
-
-        if number_of_containers == 0:
+        if not table:
             log.info("No container is running")
+        else:
+            print(
+                tabulate(
+                    table,
+                    tablefmt=TABLE_FORMAT,
+                    headers=["ID", "NAME", "STATUS", "CREATED", "IMAGE", "PORTS"],
+                )
+            )

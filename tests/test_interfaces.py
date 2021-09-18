@@ -49,7 +49,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run adminer",
-        f"Missing rapydo/adminer:{__version__} image, add {colors.RED}--pull{colors.DEFAULT} option",
+        f"Missing rapydo/adminer:{__version__} image, add {colors.RED}--pull{colors.RESET} option",
     )
 
     docker = Docker()

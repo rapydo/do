@@ -55,6 +55,7 @@ repos:
             "types-setuptools",
             "types-python-dateutil",
             "types-click",
+            "types-tabulate",
             "Faker",
           ]
 

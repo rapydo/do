@@ -15,6 +15,7 @@ __all__ = [colors]
 
 LOGS_FOLDER = Path("data", "logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
+TABLE_FORMAT = "simple"  # plain, simple, pretty, presto
 
 LOGS_FILE = None
 if LOGS_FOLDER.is_dir():

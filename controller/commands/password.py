@@ -4,11 +4,18 @@ from enum import Enum
 from typing import Dict, List
 
 import typer
+from tabulate import tabulate
 from zxcvbn import zxcvbn
 
-from controller import GREEN, PROJECTRC, RED, SWARM_MODE
-from controller import colors as c
-from controller import log, print_and_exit
+from controller import (
+    GREEN,
+    PROJECTRC,
+    RED,
+    SWARM_MODE,
+    TABLE_FORMAT,
+    log,
+    print_and_exit,
+)
 from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.swarm import Swarm
@@ -197,11 +204,7 @@ def password(
         last_updates = parse_projectrc()
         now = datetime.now()
 
-        h1 = "SERVICE"
-        h2 = "VARIABLE"
-        h3 = "LAST CHANGE"
-        h4 = "SCORE"
-        print(f"{h1:12}{h2:22}{h3:16}{h4}")
+        table: List[List[str]] = []
         for s in Services:
             # This should never happens and can't be (easily) tested
             if s.value not in Application.data.base_services:  # pragma: no cover
@@ -211,14 +214,14 @@ def password(
 
             variables = get_service_passwords(s)
 
-            for v in variables:
+            for variable in variables:
 
-                password = Application.env.get(v)
+                password = Application.env.get(variable)
                 result = zxcvbn(password)
                 score = result["score"]
 
-                if v in last_updates:
-                    change_date = last_updates.get(v, datetime.fromtimestamp(0))
+                if variable in last_updates:
+                    change_date = last_updates.get(variable, datetime.fromtimestamp(0))
                     expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
                     expired = now > expiration_date
                     last_change = change_date.strftime("%Y-%m-%d")
@@ -226,15 +229,31 @@ def password(
                     expired = True
                     last_change = "N/A"
 
-                if score < MIN_PASSWORD_SCORE:
-                    score_text = RED(score)
-                else:
-                    score_text = GREEN(score)
+                pass_line: List[str] = []
+
+                pass_line.append(s.value)
+                pass_line.append(variable)
 
                 if expired:
-                    print(f"{s.value:12}{v:22}{c.RED}{last_change:16}{score_text}")
+                    pass_line.append(RED(last_change))
                 else:
-                    print(f"{s.value:12}{v:22}{c.GREEN}{last_change:16}{score_text}")
+                    pass_line.append(GREEN(last_change))
+
+                if score < MIN_PASSWORD_SCORE:
+                    pass_line.append(RED(score))
+                else:
+                    pass_line.append(GREEN(score))
+
+                table.append(pass_line)
+
+        print("")
+        print(
+            tabulate(
+                table,
+                tablefmt=TABLE_FORMAT,
+                headers=["SERVICE", "VARIABLE", "LAST CHANGE", "SCORE"],
+            )
+        )
 
     # In this case a service is asked to be updated
     else:

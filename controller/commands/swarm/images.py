@@ -4,8 +4,9 @@ from typing import List, Optional, Tuple, cast
 
 import typer
 import urllib3
+from tabulate import tabulate
 
-from controller import colors, log
+from controller import RED, TABLE_FORMAT, log
 from controller.app import Application
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -87,14 +88,8 @@ def images(
     else:
 
         log.info("This registry contains {} image(s):", len(images))
-        print("")
-        h0 = "REPOSITORY"
-        h1 = "TAG"
-        h2 = "IMAGE ID"
-        h3 = "CREATED"
-        h4 = "SIZE"
-        print(f"{h0:24}{h1:10}{h2:14}{h3:21}{h4}")
         images_to_be_removed: List[Tuple[str, str, str]] = []
+        table: List[List[str]] = []
         for img in images:
 
             digest = img[0]
@@ -113,16 +108,33 @@ def images(
             )
             creation_date = d.strftime("%Y-%m-%d %H:%M:%S") if d else "N/A"
 
+            image_line: List[str] = []
+
             if to_be_removed:
-                COLOR = colors.RED
+                image_line.append(RED(repository))
+                image_line.append(RED(tag))
+                image_line.append(RED(_id))
+                image_line.append(RED(creation_date))
+                image_line.append(RED(SIZE))
                 creation_date = "DELETING ..."
                 images_to_be_removed.append((repository, digest, tag))
             else:
-                COLOR = ""
-            RESET = colors.RESET
-            print(
-                f"{COLOR}{repository:24}{tag:10}{_id:14}{creation_date:21}{SIZE}{RESET}"
+                image_line.append(repository)
+                image_line.append(tag)
+                image_line.append(_id)
+                image_line.append(creation_date)
+                image_line.append(SIZE)
+
+            table.append(image_line)
+
+        print("")
+        print(
+            tabulate(
+                table,
+                tablefmt=TABLE_FORMAT,
+                headers=["REPOSITORY", "TAG", "IMAGE ID", "CREATED", "SIZE"],
             )
+        )
 
         if len(remove_images) != len(images_to_be_removed):
             log.error(

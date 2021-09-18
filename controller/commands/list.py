@@ -1,10 +1,11 @@
 import os
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 import typer
+from tabulate import tabulate
 
-from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, log
+from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, TABLE_FORMAT, log
 from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.swarm import Swarm
@@ -25,17 +26,19 @@ def list_cmd(
 ) -> None:
     Application.get_controller().controller_init()
 
+    table: List[List[str]] = []
     if element_type == ElementTypes.env:
         log.info("List env variables:\n")
+        headers = ["Key", "Value"]
         env = read_env()
         for var in sorted(env):
-            val = env.get(var)
-            print(f"{var:<36}\t{val}")
+            val = env.get(var) or ""
+            table.append([var, val])
 
     if element_type == ElementTypes.services:
         log.info("List of active services:\n")
 
-        header = ("Name", "Image", "Status", "Path")
+        headers = ["Name", "Image", "Status", "Path"]
 
         if SWARM_MODE:
             engine: Union[Swarm, Compose] = Swarm()
@@ -43,7 +46,6 @@ def list_cmd(
             engine = Compose(Application.data.files)
 
         services_status = engine.get_services_status(Configuration.project)
-        print(f"{header[0]:<12} {header[1]:<24} {header[2]:<12} {header[3]}")
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
                 image = service.image
@@ -52,23 +54,28 @@ def list_cmd(
                 status = services_status.get(name, "N/A")
 
                 if build:
-                    build_path = build.context.relative_to(os.getcwd())
-                    print(f"{name:<12} {image:<24} {status:12} {build_path}")
+                    build_path = str(build.context.relative_to(os.getcwd()))
                 else:
-                    print(f"{name:<12} {image:<24} {status:12}")
+                    build_path = ""
+
+                table.append([name, image, status, build_path])
 
     if element_type == ElementTypes.submodules:
         log.info("List of submodules:\n")
-        print("{:<18} {:<18} {}".format("Repo", "Branch", "Path"))
+        headers = ["Repo", "Branch", "Path"]
         for name in Application.gits:
             repo = Application.gits.get(name)
             if repo and repo.working_dir:
-                branch = git.get_active_branch(repo)
+                branch = git.get_active_branch(repo) or "N/A"
                 path = str(repo.working_dir).replace(os.getcwd(), "")
                 # to be replacecd with removeprefix
                 if path.startswith("/"):
                     path = path[1:]
-                print(f"{name:<18} {branch:<18} {path}")
+
+                table.append([name, branch, path])
+
+    print("")
+    print(tabulate(table, tablefmt=TABLE_FORMAT, headers=headers))
 
 
 def read_env() -> Dict[str, str]:
