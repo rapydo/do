@@ -84,9 +84,15 @@ def run(
         docker = Docker()
         if service != REGISTRY:
             docker.ping_registry()
-        elif docker.ping_registry(do_exit=False):
-            registry = docker.get_registry()
-            print_and_exit("The registry is already running at {}", registry)
+        else:
+
+            if docker.ping_registry(do_exit=False):
+                registry = docker.get_registry()
+                print_and_exit("The registry is already running at {}", registry)
+
+            if docker.client.container.exists("registry"):
+                log.debug("The registry container is already existing, removing")
+                docker.client.container.remove("registry", force=True)
 
     if not debug:
         if user:
