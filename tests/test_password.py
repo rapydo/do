@@ -62,15 +62,15 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
-        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
-        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
-        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
-        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
-        f"redis       REDIS_PASSWORD        {colors.RED}N/A",
-        f"flower      FLOWER_PASSWORD       {colors.RED}N/A",
+        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
+        f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
+        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
+        f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
+        f"mongodb    MONGO_PASSWORD         {colors.RED}N/A",
+        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
+        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
+        f"redis      REDIS_PASSWORD         {colors.RED}N/A",
+        f"flower     FLOWER_PASSWORD        {colors.RED}N/A",
     )
 
     exec_command(
@@ -154,15 +154,15 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"backend     AUTH_DEFAULT_PASSWORD {colors.RED}N/A",
-        f"postgres    ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     ALCHEMY_PASSWORD      {colors.RED}N/A",
-        f"mariadb     MYSQL_ROOT_PASSWORD   {colors.RED}N/A",
-        f"mongodb     MONGO_PASSWORD        {colors.RED}N/A",
-        f"neo4j       NEO4J_PASSWORD        {colors.RED}N/A",
-        f"rabbit      RABBITMQ_PASSWORD     {colors.RED}N/A",
-        f"redis       REDIS_PASSWORD        {colors.GREEN}{today}",
-        f"flower      FLOWER_PASSWORD       {colors.GREEN}{today}",
+        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
+        f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
+        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
+        f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
+        f"mongodb    MONGO_PASSWORD         {colors.RED}N/A",
+        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
+        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
+        f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
+        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
     )
 
     pull_images(capfd)
