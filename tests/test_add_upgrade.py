@@ -198,8 +198,8 @@ def test_add(capfd: Capture) -> None:
     exec_command(
         capfd,
         "add abc xyz",
-        "invalid choice: abc. "  # Note no comma, it's a line continuation
-        "(choose from endpoint, task, component, service, integration_test, workflow)",
+        "Invalid value for",
+        "'abc' is not one of 'endpoint', 'task', 'component', 'service', ",
     )
 
     exec_command(capfd, "upgrade")

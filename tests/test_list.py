@@ -41,8 +41,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "list invalid",
-        "Invalid value for 'ELEMENT_TYPE:[env|services|submodules]': ",
-        "invalid choice: invalid. (choose from env, services, submodules)",
+        "Invalid value for",
+        "'invalid' is not one of 'env', 'services', 'submodules'",
     )
 
     exec_command(
