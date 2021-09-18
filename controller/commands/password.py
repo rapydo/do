@@ -328,13 +328,27 @@ def password(
 
         update_projectrc(new_variables)
 
+        # if service == Services.backend:
+        #     # restapi init --force-user
+        #     pass
+        # elif service == Services.neo4j:
+        #     # ALTER CURRENT USER SET PASSWORD FROM "<old-pass>" TO "<new-pass>";
+        #     pass
+        # elif service == Services.postgres:
+        #     # \password username
+        #     pass
+        # elif service == Services.mariadb:
+        #     # ALTER USER
+        #     pass
+        # elif service == Services.mongodb:
+        #     # db.changeUserPassword(...)
+        #     pass
+        # elif service == Services.rabbit:
+        #     # rabbitmqctl change_password <USERNAME> <NEWPASSWORD>
+        #     pass
+
         # here specific operation have to be implemented.
-        # - Nothing for Redis and Flower, projectrc update is enough
-
-        # DEBUG CODE!!
-        import time
-
-        time.sleep(1)
+        # - Nothing for Redis, Flower and Registry, projectrc update is enough
 
         if is_running:
             log.info("{} was running, restarting services...", service.value)
