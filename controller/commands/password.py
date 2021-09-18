@@ -300,15 +300,20 @@ def password(
         elif service == Services.registry:
             is_running_needed = False
 
-        # backend
-        # neo4j
-        # postgres
-        # mariadb
-        # mongodb
-        # rabbit
-
-        else:
-            print_and_exit("Change password for {} not implemented yet", service.value)
+        elif service == Services.backend:
+            is_running_needed = True
+        elif service == Services.neo4j:
+            is_running_needed = True
+        elif service == Services.postgres:
+            is_running_needed = True
+        elif service == Services.mariadb:
+            is_running_needed = True
+        elif service == Services.mongodb:
+            is_running_needed = True
+        elif service == Services.rabbit:
+            is_running_needed = True
+        else:  # pragma: no cover
+            print_and_exit("Unexpected error, unknown service {}", service.value)
 
         log.info("Changing password for {}...", service.value)
 
@@ -317,6 +322,9 @@ def password(
                 "Can't update {} since it is not running. Please start your stack",
                 service.value,
             )
+
+        if is_running_needed:
+            print_and_exit("Change password for {} not implemented yet", service.value)
 
         update_projectrc(new_variables)
 

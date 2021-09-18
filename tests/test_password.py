@@ -174,6 +174,37 @@ def test_password(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "password backend --random",
+        "Can't update backend since it is not running. Please start your stack",
+    )
+    exec_command(
+        capfd,
+        "password postgres --random",
+        "Can't update postgres since it is not running. Please start your stack",
+    )
+    exec_command(
+        capfd,
+        "password mariadb --random",
+        "Can't update mariadb since it is not running. Please start your stack",
+    )
+    exec_command(
+        capfd,
+        "password mongodb --random",
+        "Can't update mongodb since it is not running. Please start your stack",
+    )
+    exec_command(
+        capfd,
+        "password neo4j --random",
+        "Can't update neo4j since it is not running. Please start your stack",
+    )
+    exec_command(
+        capfd,
+        "password rabbit --random",
+        "Can't update rabbit since it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
         "password",
         f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
         f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
@@ -281,6 +312,37 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         registry_start_date2 = get_start_date(capfd, "registry", wait=True)
 
         assert registry_start_date2 != registry_start_date
+
+    exec_command(
+        capfd,
+        "password backend --random",
+        "Change password for backend not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password postgres --random",
+        "Change password for postgres not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password mariadb --random",
+        "Change password for mariadb not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password mongodb --random",
+        "Change password for mongodb not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password neo4j --random",
+        "Change password for neo4j not implemented yet",
+    )
+    exec_command(
+        capfd,
+        "password rabbit --random",
+        "Change password for rabbit not implemented yet",
+    )
 
     # ########################################################
     # ###      TEST rapydo password --password OPTION      ###
