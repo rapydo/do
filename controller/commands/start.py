@@ -15,7 +15,7 @@ def start(
     services: List[str] = typer.Argument(
         None,
         help="Services to be started",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     )
 ) -> None:
 

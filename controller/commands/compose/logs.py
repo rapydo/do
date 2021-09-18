@@ -12,7 +12,7 @@ def logs(
     services: List[str] = typer.Argument(
         None,
         help="Services to be inspected",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
     follow: bool = typer.Option(
         False,

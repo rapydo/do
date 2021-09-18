@@ -58,10 +58,10 @@ def backup(
         show_default=False,
     ),
     restart: List[str] = typer.Option(
-        "",
+        [],
         "--restart",
         help="Service to be restarted once completed the backup (multiple allowed)",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
 

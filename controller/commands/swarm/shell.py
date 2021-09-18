@@ -11,7 +11,7 @@ from controller.utilities import services
 @Application.app.command(help="Open a shell or execute a command onto a container")
 def shell(
     service: str = typer.Argument(
-        ..., help="Service name", autocompletion=Application.autocomplete_service
+        ..., help="Service name", shell_complete=Application.autocomplete_service
     ),
     command: str = typer.Argument(
         "bash", help="UNIX command to be executed on selected running service"

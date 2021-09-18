@@ -10,12 +10,12 @@ from controller.utilities import services
 @Application.app.command(help="Update the current project")
 def update(
     ignore_submodules: List[str] = typer.Option(
-        "",
+        [],
         "--ignore-submodule",
         "-i",
         help="Ignore a submodule",
         show_default=False,
-        autocompletion=Application.autocomplete_submodule,
+        shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
     Application.get_controller().controller_init()

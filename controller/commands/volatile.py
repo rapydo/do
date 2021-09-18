@@ -10,7 +10,7 @@ def volatile(
     service: str = typer.Argument(
         ...,
         help="Service name",
-        autocompletion=Application.autocomplete_allservice,
+        shell_complete=Application.autocomplete_allservice,
     ),
     command: str = typer.Argument(
         "bash", help="UNIX command to be executed on selected running service"

@@ -49,11 +49,11 @@ def create(
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
     services: List[ServiceTypes] = typer.Option(
-        "",
+        [],
         "--service",
         "-s",
         help="Service to be enabled (multiple is enabled)",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
     origin_url: Optional[str] = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"

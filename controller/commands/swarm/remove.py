@@ -32,7 +32,7 @@ def remove(
     services: List[str] = typer.Argument(
         None,
         help="Services to be removed",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
 

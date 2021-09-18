@@ -19,7 +19,7 @@ def build(
     services: List[str] = typer.Argument(
         None,
         help="Services to be built",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
     core: bool = typer.Option(
         False,

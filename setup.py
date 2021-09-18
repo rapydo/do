@@ -29,7 +29,8 @@ setup(
         "PyYAML==5.4.1",
         "pip>=10.0.0",
         "requests>=2.6.1",
-        "typer[all]==0.3.2",
+        "typer[all]==0.4.0",
+        "click==8.0.1",
         "zxcvbn",
     ],
     extras_require={

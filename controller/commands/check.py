@@ -35,12 +35,12 @@ def check(
         show_default=False,
     ),
     ignore_submodules: List[str] = typer.Option(
-        "",
+        [],
         "--ignore-submodule",
         "-i",
         help="Ignore submodule",
         show_default=False,
-        autocompletion=Application.autocomplete_submodule,
+        shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
 

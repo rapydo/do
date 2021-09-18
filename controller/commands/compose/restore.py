@@ -34,10 +34,10 @@ def restore(
         show_default=False,
     ),
     restart: List[str] = typer.Option(
-        "",
+        [],
         "--restart",
         help="Service to be restarted once completed the restore (multiple allowed)",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
     Application.get_controller().controller_init()

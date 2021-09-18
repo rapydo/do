@@ -37,7 +37,7 @@ def run(
     service: str = typer.Argument(
         ...,
         help="Service name",
-        autocompletion=Application.autocomplete_allservice,
+        shell_complete=Application.autocomplete_allservice,
     ),
     pull: bool = typer.Option(
         False,

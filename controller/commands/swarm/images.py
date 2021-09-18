@@ -14,12 +14,12 @@ from controller.utilities import system
 @Application.app.command(help="Query the local registry")
 def images(
     remove_images: List[str] = typer.Option(
-        "",
+        [],
         "--rm",
         "--remove",
         help="Remove the specified image(s)",
         show_default=False,
-        autocompletion=Application.autocomplete_submodule,
+        shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
 

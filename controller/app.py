@@ -7,6 +7,7 @@ from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple, cast
 
+import click
 import requests
 import typer
 from git import Repo as GitRepo
@@ -169,7 +170,7 @@ def controller_cli_options(
         show_default=False,
     ),
     environment: List[str] = typer.Option(
-        "",
+        [],
         "--env",
         "-e",
         help="Temporary change the value of an environment variable",
@@ -911,21 +912,27 @@ You can use of one:
             return []
 
     @staticmethod
-    def autocomplete_service(incomplete: str) -> List[str]:
+    def autocomplete_service(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
         values = Application.parse_datafile("services")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_allservice(incomplete: str) -> List[str]:
+    def autocomplete_allservice(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
         values = Application.parse_datafile("allservices")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_submodule(incomplete: str) -> List[str]:
+    def autocomplete_submodule(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
         values = Application.parse_datafile("submodules")
         if not incomplete:
             return values

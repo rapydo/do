@@ -12,7 +12,7 @@ def stop(
     services: List[str] = typer.Argument(
         None,
         help="Services to be stopped",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     )
 ) -> None:
     Application.get_controller().controller_init(services)

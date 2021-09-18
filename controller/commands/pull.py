@@ -13,7 +13,7 @@ def pull(
     services: List[str] = typer.Argument(
         None,
         help="Services to be pulled",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
     include_all: bool = typer.Option(
         False,
