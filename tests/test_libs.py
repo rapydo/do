@@ -37,45 +37,45 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     app = Application()
 
-    values = app.autocomplete_service("")
+    values = app.autocomplete_service(None, None, "")  # type: ignore
     assert len(values) > 0
     assert "backend" in values
-    values = app.autocomplete_service("invalid")
+    values = app.autocomplete_service(None, None, "invalid")  # type: ignore
     assert len(values) == 0
-    values = app.autocomplete_service("b")
+    values = app.autocomplete_service(None, None, "b")  # type: ignore
     assert len(values) >= 1
     assert "backend" in values
 
-    values = app.autocomplete_allservice("")
+    values = app.autocomplete_allservice(None, None, "")  # type: ignore
     assert len(values) > 0
     assert "backend" in values
-    values = app.autocomplete_allservice("invalid")
+    values = app.autocomplete_allservice(None, None, "invalid")  # type: ignore
     assert len(values) == 0
-    values = app.autocomplete_allservice("b")
+    values = app.autocomplete_allservice(None, None, "b")  # type: ignore
     assert len(values) >= 1
     assert "backend" in values
-    values = app.autocomplete_allservice("c")
+    values = app.autocomplete_allservice(None, None, "c")  # type: ignore
     assert len(values) >= 1
     assert "backend" not in values
 
-    values = app.autocomplete_submodule("")
+    values = app.autocomplete_submodule(None, None, "")  # type: ignore
     assert len(values) > 0
     assert "main" in values
-    values = app.autocomplete_submodule("invalid")
+    values = app.autocomplete_submodule(None, None, "invalid")  # type: ignore
     assert len(values) == 0
-    values = app.autocomplete_submodule("m")
+    values = app.autocomplete_submodule(None, None, "m")  # type: ignore
     assert len(values) >= 1
     assert "main" in values
-    values = app.autocomplete_submodule("d")
+    values = app.autocomplete_submodule(None, None, "d")  # type: ignore
     assert len(values) >= 1
     assert "main" not in values
 
     os.unlink(".rapydo")
-    values = app.autocomplete_service("")
+    values = app.autocomplete_service(None, None, "")  # type: ignore
     assert len(values) == 0
-    values = app.autocomplete_allservice("")
+    values = app.autocomplete_allservice(None, None, "")  # type: ignore
     assert len(values) == 0
-    values = app.autocomplete_submodule("")
+    values = app.autocomplete_submodule(None, None, "")  # type: ignore
     assert len(values) == 0
 
     assert git.get_repo("does/not/exist") is None
