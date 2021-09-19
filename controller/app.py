@@ -847,14 +847,6 @@ You can use of one:
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
 
-                if (
-                    Configuration.production
-                    and key.endswith("_PASSWORD")
-                    and value
-                    and len(str(value)) < 8
-                ):
-                    log.warning("{} is set with a short password", key)
-
                 # Deprecated since 1.0
                 # Backend and Frontend use different booleans due to Py vs Js
                 # 0/1 is a much more portable value to prevent true|True|"true"

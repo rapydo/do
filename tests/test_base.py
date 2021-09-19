@@ -50,15 +50,6 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         f"required rapydo: {colors.GREEN}{__version__}",
     )
 
-    auth_envs = "-e AUTH_DEFAULT_PASSWORD=short"
-    alchemy_envs = " -e ALCHEMY_USER=sqluser -e ALCHEMY_PASSWORD=short"
-    exec_command(
-        capfd,
-        f"--prod {auth_envs} {alchemy_envs} check -i main --no-git --no-builds",
-        "AUTH_DEFAULT_PASSWORD is set with a short password",
-        "ALCHEMY_PASSWORD is set with a short password",
-    )
-
     folder = os.getcwd()
     # Tests from a subfolder
     os.chdir("projects")
