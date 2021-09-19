@@ -1012,9 +1012,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             log.info("You can fix this error by updating your .projectrc file")
             log.info("Do you want some random passwords?")
 
+            print("")
             for v in placeholders:
                 pwd = get_strong_password()
-                print(f'      {v[0]}: "{pwd}"')
+                print(f'{v[0]}: "{pwd}"')
+            print("")
 
             sys.exit(1)
 
