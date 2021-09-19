@@ -222,6 +222,8 @@ RUN mkdir xyz
         capfd,
         "--prod check -i main --no-git --no-builds",
         "The following variables are missing in your configuration",
+        "You can fix this error by updating your .projectrc file",
+        "Do you want some random passwords?",
     )
 
     # Default ALCHEMY_PASSWORD has as score of 2

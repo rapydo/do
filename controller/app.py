@@ -13,6 +13,7 @@ import typer
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
+from tabulate import tabulate
 from zxcvbn import zxcvbn
 
 from controller import (
@@ -27,6 +28,7 @@ from controller import (
     RED,
     SUBMODULES_DIR,
     SWARM_MODE,
+    TABLE_FORMAT,
     ComposeServices,
     EnvType,
     __version__,
@@ -37,7 +39,7 @@ from controller import (
 from controller.commands import load_commands
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
-from controller.templating import Templating
+from controller.templating import Templating, get_strong_password
 from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
@@ -971,9 +973,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             active_serv = [s for s in serv if s in active_services]
 
             if active_serv:
-                placeholders.append(
-                    "{:<20}\trequired by\t{}".format(variable, ", ".join(active_serv))
-                )
+                placeholders.append([variable, ", ".join(active_serv)])
 
         MIN_PASSWORD_SCORE = int(
             Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
@@ -997,11 +997,26 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                         )
 
         if placeholders:
-            print_and_exit(
-                "The following variables are missing in your configuration:\n\n{}"
-                "\n\nYou can fix this error by updating your .projectrc file\n",
-                "\n".join(placeholders),
+            log.critical("The following variables are missing in your configuration:")
+
+            print("")
+            print(
+                tabulate(
+                    placeholders,
+                    tablefmt=TABLE_FORMAT,
+                    headers=["VARIABLE", "SERVICE(S)"],
+                )
             )
+            print("")
+
+            log.info("You can fix this error by updating your .projectrc file")
+            log.info("Do you want some random passwords?")
+
+            for v in placeholders:
+                pwd = get_strong_password()
+                print(f'      {v[0]}: "{pwd}"')
+
+            sys.exit(1)
 
         return None
 

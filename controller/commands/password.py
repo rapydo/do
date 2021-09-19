@@ -22,8 +22,7 @@ from controller.deploy.compose import Compose as ComposeV1
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
-from controller.templating import Templating
-from controller.templating import password as generate_random_password
+from controller.templating import Templating, get_strong_password
 
 # make this configurable
 PASSWORD_EXPIRATION = 90
@@ -157,21 +156,6 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     Application.get_controller().make_env()
 
 
-def get_random_password() -> str:
-
-    password = generate_random_password(
-        length=16, param_not_used="", symbols="%*,-.=^_~"
-    )
-
-    result = zxcvbn(password)
-    score = result["score"]
-    # Should never happens since 16 characters with symbols is very unlikely to be weak
-    if score < 4:  # pragma: no cover
-        log.warning("Generated password is not strong enough, sampling again")
-        return get_random_password()
-    return password
-
-
 @Application.app.command(help="Manage services passwords")
 def password(
     service: Services = typer.Argument(None, help="Service name"),
@@ -257,7 +241,7 @@ def password(
             tabulate(
                 table,
                 tablefmt=TABLE_FORMAT,
-                headers=["SERVICE", "VARIABLE", "LAST CHANGE", "SCORE"],
+                headers=["SERVICE", "VARIABLE", "LAST CHANGE", "STRENGTH"],
             )
         )
 
@@ -265,7 +249,7 @@ def password(
     else:
 
         if random:
-            new_password = get_random_password()
+            new_password = get_strong_password()
         elif not new_password:
             print_and_exit("Please specify one between --random and --password options")
 
