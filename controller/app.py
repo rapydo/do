@@ -39,7 +39,7 @@ from controller import (
 from controller.commands import load_commands
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
-from controller.templating import Templating, get_strong_password
+from controller.templating import Templating
 from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
@@ -383,7 +383,7 @@ class Application:
         # Compose services and variables
         base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders_and_passwords(compose_config, self.active_services)
+        self.check_placeholders_and_passwords(compose_config, self.enabled_services)
 
         # Final step, launch the command
 
@@ -1010,13 +1010,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             print("")
 
             log.info("You can fix this error by updating your .projectrc file")
-            log.info("Do you want some random passwords?")
-
-            print("")
-            for v in placeholders:
-                pwd = get_strong_password()
-                print(f'{v[0]}: "{pwd}"')
-            print("")
 
             sys.exit(1)
 
