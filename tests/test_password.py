@@ -322,6 +322,12 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     )
     assert mypassword == get_password_from_projectrc("REDIS_PASSWORD")
 
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
     # Now verify that the password change really works!
     # Not implemented yet
 

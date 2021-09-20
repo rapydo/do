@@ -159,6 +159,12 @@ def update_projectrc(variables: Dict[str, str]) -> None:
 @Application.app.command(help="Manage services passwords")
 def password(
     service: Services = typer.Argument(None, help="Service name"),
+    show: bool = typer.Option(
+        False,
+        "--show",
+        help="Show the current password(s)",
+        show_default=False,
+    ),
     random: bool = typer.Option(
         False,
         "--random",
@@ -234,14 +240,21 @@ def password(
                 else:
                     pass_line.append(GREEN(score))
 
+                if show:
+                    pass_line.append(str(password))
+
                 table.append(pass_line)
+
+        headers = ["SERVICE", "VARIABLE", "LAST CHANGE", "STRENGTH"]
+        if show:
+            headers.append("PASSWORD")
 
         print("")
         print(
             tabulate(
                 table,
                 tablefmt=TABLE_FORMAT,
-                headers=["SERVICE", "VARIABLE", "LAST CHANGE", "STRENGTH"],
+                headers=headers,
             )
         )
 
