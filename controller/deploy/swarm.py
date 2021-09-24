@@ -131,14 +131,14 @@ class Swarm:
 
         nodes: Dict[str, str] = {}
         nodes_table: List[List[str]] = []
+        headers = ["Role", "State", "Name", "IP", "CPUs", "RAM", "LABELS", "Version"]
         print("====== Nodes ======")
         for node in self.docker.node.list():
             nodes[node.id] = node.description.hostname
 
             state = f"{node.status.state.title()}+{node.spec.availability.title()}"
-            cpu = round(node.description.resources.nano_cpus / 1000000000)
+            cpu = str(round(node.description.resources.nano_cpus / 1000000000))
             ram = system.bytes_to_str(node.description.resources.memory_bytes)
-            resources = f"{cpu} CPU {ram} RAM"
 
             if state == "Ready+Active":
                 color_fn = GREEN
@@ -151,13 +151,14 @@ class Swarm:
                     color_fn(state),
                     color_fn(node.description.hostname),
                     color_fn(node.status.addr),
-                    color_fn(resources),
+                    color_fn(cpu),
+                    color_fn(ram),
                     color_fn(",".join(node.spec.labels)),
                     color_fn(f"v{node.description.engine.engine_version}"),
                 ]
             )
 
-        print(tabulate(nodes_table, tablefmt=TABLE_FORMAT))
+        print(tabulate(nodes_table, tablefmt=TABLE_FORMAT, headers=headers))
         services = self.docker.service.list()
 
         print("")
