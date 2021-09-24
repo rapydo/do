@@ -6,8 +6,17 @@ from typing import Dict, List, Optional, Set, Union
 from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
+from tabulate import tabulate
 
-from controller import COMPOSE_FILE, RED, colors, log, print_and_exit
+from controller import (
+    COMPOSE_FILE,
+    GREEN,
+    RED,
+    TABLE_FORMAT,
+    colors,
+    log,
+    print_and_exit,
+)
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -121,6 +130,7 @@ class Swarm:
     def status(self) -> None:
 
         nodes: Dict[str, str] = {}
+        nodes_table: List[List[str]] = []
         print("====== Nodes ======")
         for node in self.docker.node.list():
             nodes[node.id] = node.description.hostname
@@ -131,25 +141,23 @@ class Swarm:
             resources = f"{cpu} CPU {ram} RAM"
 
             if state == "Ready+Active":
-                COLOR = colors.GREEN
+                color_fn = GREEN
             else:
-                COLOR = colors.RED
+                color_fn = RED
 
-            print(
-                COLOR
-                + "\t".join(
-                    (
-                        node.spec.role.title(),
-                        state,
-                        node.description.hostname,
-                        node.status.addr,
-                        resources,
-                        ",".join(node.spec.labels),
-                        f"v{node.description.engine.engine_version}",
-                    )
-                )
+            nodes_table.append(
+                [
+                    color_fn(node.spec.role.title()),
+                    color_fn(state),
+                    color_fn(node.description.hostname),
+                    color_fn(node.status.addr),
+                    color_fn(resources),
+                    color_fn(",".join(node.spec.labels)),
+                    color_fn(f"v{node.description.engine.engine_version}"),
+                ]
             )
 
+        print(tabulate(nodes_table, tablefmt=TABLE_FORMAT))
         services = self.docker.service.list()
 
         print("")

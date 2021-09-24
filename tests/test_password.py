@@ -205,7 +205,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
                 # This is needed to debug and wait the service rollup to complete
                 # Status is both for debug and to delay the get_container
                 exec_command(capfd, "status")
-                time.sleep(3)
+                time.sleep(4)
 
             container_name = swarm.get_container(service, slot=1)
         else:

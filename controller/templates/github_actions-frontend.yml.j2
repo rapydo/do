@@ -45,6 +45,6 @@ jobs:
           rapydo start frontend proxy
           rapydo dump
           rapydo logs --follow frontend
-          docker-compose logs --tail 2 frontend 2>&1 | grep "files have been compressed."
+          docker-compose logs --tail 6 frontend 2>&1 | grep "files have been compressed."
           docker-compose logs --tail 20 proxy
           curl --insecure -X GET https://localhost
