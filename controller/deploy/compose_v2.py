@@ -121,7 +121,34 @@ class Compose:
             clean_config["networks"][net] = compose_config["networks"].get(net)
 
         for vol in volumes:
-            clean_config["volumes"][vol] = compose_config["volumes"].get(vol)
+            volume_config = compose_config["volumes"].get(vol)
+            if "driver_opts" in volume_config:
+                device_type = volume_config["driver_opts"].get("type", "local")
+                device = volume_config["driver_opts"].get("device", "")
+
+                if device_type == "nfs" and device:
+                    # starting from py39
+                    # device = device.removeprefix(":")
+                    if device.startswith(":"):
+                        device = device[1:]
+                    p = Path(device)
+                    if p.exists():
+                        continue
+                    try:
+                        p.mkdir(parents=True)
+                        log.warning(
+                            "A volume path was missing "
+                            "and was automatically created: {}",
+                            device,
+                        )
+                    except PermissionError:
+                        print_and_exit(
+                            "A volume path is missing "
+                            "and can't be automatically created: {}",
+                            device,
+                        )
+
+            clean_config["volumes"][vol] = volume_config
 
         with open(COMPOSE_FILE, "w") as fh:
             fh.write(yaml.dump(clean_config, default_flow_style=False))
