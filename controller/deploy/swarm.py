@@ -132,7 +132,6 @@ class Swarm:
         nodes: Dict[str, str] = {}
         nodes_table: List[List[str]] = []
         headers = ["Role", "State", "Name", "IP", "CPUs", "RAM", "LABELS", "Version"]
-        print("====== Nodes ======")
         for node in self.docker.node.list():
             nodes[node.id] = node.description.hostname
 
@@ -166,8 +165,6 @@ class Swarm:
         if not services:
             log.info("No service is running")
             return
-
-        print(colors.RESET + "====== Services ======")
 
         for service in services:
 

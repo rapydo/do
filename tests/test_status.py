@@ -32,7 +32,6 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "====== Nodes ======",
             "Manager",
             "Ready+Active",
             "No service is running",
@@ -52,10 +51,8 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "====== Nodes ======",
             "Manager",
             "Ready+Active",
-            "====== Services ======",
             "first_backend",
             "first_postgres",
             " [1]",

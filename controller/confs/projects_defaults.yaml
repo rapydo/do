@@ -326,7 +326,7 @@ variables:
     SMTP_ADMIN:
     SMTP_NOREPLY:
     SMTP_HOST:
-    SMTP_PORT:
+    SMTP_PORT: 25
     SMTP_USERNAME:
     SMTP_PASSWORD:
 

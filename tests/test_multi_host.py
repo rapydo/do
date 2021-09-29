@@ -65,13 +65,11 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     exec_command(
         capfd,
         "status",
-        "====== Nodes ======",
         "Manager",
         # Still unable to add workers because GA instances lack nested virtualization
         # See details in pytests.yml (VT-x is not available)
         # "Worker",
         "Ready+Active",
-        "====== Services ======",
         "swarm_backend",
         " [1]",
         # "running",
