@@ -36,6 +36,22 @@ class Compose:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
         return self.docker.compose.config(return_json=True)  # type: ignore
 
+    @staticmethod
+    def create_local_path(path: Path, label: str) -> None:
+        try:
+            path.mkdir(parents=True)
+            log.warning(
+                "A {} was missing and was automatically created: {}", label, path
+            )
+        except PermissionError:
+            hint = "\n..."
+            print_and_exit(
+                "A {} is missing and can't be automatically created: {}{}",
+                label,
+                path,
+                hint,
+            )
+
     def dump_config(
         self,
         services: List[str],
@@ -53,7 +69,7 @@ class Compose:
         }
         networks = set()
         volumes = set()
-        binds = set()
+        binds: Set[Path] = set()
 
         registry = Docker.get_registry()
         # Remove unused services, networks and volumes from compose configuration
@@ -97,25 +113,15 @@ class Compose:
                     if v1_compatibility:
                         k.get("bind", {}).pop("create_host_path", None)
 
-                    binds.add(source.split(":")[0])
+                    binds.add(Path(source.split(":")[0]))
 
         # Missing folders are then automatically created by the docker engine
         # the runs with root privileges and so create folders as root
         # and this can often lead to issues with permissions.
 
         for b in binds:
-            p = Path(b)
-            if p.exists():
-                continue
-            try:
-                p.mkdir(parents=True)
-                log.warning(
-                    "A bind folder was missing and was automatically created: {}", b
-                )
-            except PermissionError:
-                print_and_exit(
-                    "A bind folder is missing and can't be automatically created: {}", b
-                )
+            if not b.exists():
+                self.create_local_path(b, "bind folder")
 
         for net in networks:
             clean_config["networks"][net] = compose_config["networks"].get(net)
@@ -132,21 +138,8 @@ class Compose:
                     if device.startswith(":"):
                         device = device[1:]
                     p = Path(device)
-                    if p.exists():
-                        continue
-                    try:
-                        p.mkdir(parents=True)
-                        log.warning(
-                            "A volume path was missing "
-                            "and was automatically created: {}",
-                            device,
-                        )
-                    except PermissionError:
-                        print_and_exit(
-                            "A volume path is missing "
-                            "and can't be automatically created: {}",
-                            device,
-                        )
+                    if not p.exists():
+                        self.create_local_path(b, "volume path")
 
             clean_config["volumes"][vol] = volume_config
 
