@@ -10,6 +10,7 @@ from tabulate import tabulate
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
+    RED,
     REGISTRY,
     SWARM_MODE,
     TABLE_FORMAT,
@@ -18,6 +19,7 @@ from controller import (
     print_and_exit,
 )
 from controller.deploy.docker import Docker
+from controller.utilities import system
 
 
 class Compose:
@@ -44,7 +46,10 @@ class Compose:
                 "A {} was missing and was automatically created: {}", label, path
             )
         except PermissionError:
-            hint = "\n..."
+            uid = system.get_current_uid()
+            gid = system.get_current_gid()
+            command = f"sudo mkdir -p {path} && sudo chown {uid}:{gid} {path}"
+            hint = f"\nSuggested command: {RED(command)}"
             print_and_exit(
                 "A {} is missing and can't be automatically created: {}{}",
                 label,
@@ -137,9 +142,9 @@ class Compose:
                     # device = device.removeprefix(":")
                     if device.startswith(":"):
                         device = device[1:]
-                    p = Path(device)
-                    if not p.exists():
-                        self.create_local_path(b, "volume path")
+                    d = Path(device)
+                    if not d.exists():
+                        self.create_local_path(d, "volume path")
 
             clean_config["volumes"][vol] = volume_config
 
