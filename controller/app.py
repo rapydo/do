@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import sys
+import time
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
@@ -224,6 +225,7 @@ def controller_cli_options(
     # Deprecated since 2.1
     if services_list:
         warnings.warn("-s option is going to be replaced by rapydo <command> service")
+        time.sleep(1)
 
     Configuration.services_list = services_list
     Configuration.production = production
