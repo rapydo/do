@@ -56,10 +56,23 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     start_registry(capfd)
     pull_images(capfd)
 
+    exec_command(
+        capfd,
+        "start backend",
+        "A volume path is missing and can't be automatically created: ",
+        "Suggested command: sudo mkdir -p /volumes/ssl_certs",
+        "&& sudo chown ",
+    )
+
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s -e NFS_EXPORTS_SSL_CERTS=/tmp/ssl_certs init -f",
+    )
     # Deploy a sub-stack
     exec_command(
         capfd,
         "start backend",
+        "A volume path was missing and was automatically created: /tmp/ssl_certs",
         "Stack started",
     )
 

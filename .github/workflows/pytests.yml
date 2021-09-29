@@ -124,6 +124,16 @@ jobs:
 
               # NFS to be added
               export NFS_HOST="127.0.0.1"
+
+              # Create all volumes used by NFS expect for ssl_certs
+              sudo mkdir -p /volumes/secrets
+              sudo mkdir -p /volumes/rabbitdata
+              sudo mkdir -p /volumes/sqldata
+              sudo mkdir -p /volumes/mariadb
+              sudo mkdir -p /volumes/graphdata
+              sudo mkdir -p /volumes/mongodata
+              sudo mkdir -p /volumes/data_imports
+              sudo mkdir -p /volumes/redisdata
             fi
 
           fi
