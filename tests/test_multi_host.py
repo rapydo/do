@@ -5,7 +5,7 @@ import random
 
 from python_on_whales import docker
 
-from controller import SWARM_MODE
+from controller import SWARM_MODE, colors
 from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
@@ -60,7 +60,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         capfd,
         "start backend",
         "A volume path is missing and can't be automatically created: ",
-        "Suggested command: sudo mkdir -p /volumes/ssl_certs",
+        f"Suggested command: {colors.RED}sudo mkdir -p /volumes/ssl_certs",
         "&& sudo chown ",
     )
 
