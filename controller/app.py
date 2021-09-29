@@ -828,6 +828,7 @@ You can use of one:
             if not Application.env.get("SWARM_MANAGER_ADDRESS"):
                 Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip()
 
+            log.critical("SWARM_MANAGER_ADDRESS??")
             if not Application.env.get("REGISTRY_HOST"):
                 Application.env["REGISTRY_HOST"] = Application.env[
                     "SWARM_MANAGER_ADDRESS"

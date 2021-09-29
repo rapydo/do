@@ -6,13 +6,10 @@ import time
 
 from controller import SWARM_MODE, __version__, colors
 from controller.deploy.docker import Docker
-from tests import Capture, create_project, exec_command
+from tests import Capture, create_project, exec_command, init_project
 
 
 def test_docker_registry(capfd: Capture) -> None:
-
-    if not SWARM_MODE:
-        return None
 
     rand = random.SystemRandom()
 
@@ -32,6 +29,16 @@ def test_docker_registry(capfd: Capture) -> None:
         frontend="no",
         services=["rabbit"],
     )
+
+    if not SWARM_MODE:
+        init_project(capfd)
+        exec_command(
+            capfd,
+            "run registry",
+            "Can't start the registry in compose mode",
+        )
+
+        return None
 
     exec_command(
         capfd,

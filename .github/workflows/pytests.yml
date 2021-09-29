@@ -29,6 +29,7 @@ jobs:
             list,
             logs,
             password,
+            registry,
             restart,
             remove,
             scale,
@@ -39,7 +40,6 @@ jobs:
             volatile,
 
             # Swarm only
-            registry,
             join,
             multi_host,
 

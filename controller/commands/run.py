@@ -80,6 +80,9 @@ def run(
         Application.data.compose_config, [service]
     )
 
+    if service == REGISTRY and not SWARM_MODE:
+        print_and_exit("Can't start the registry in compose mode")
+
     if SWARM_MODE:
         docker = Docker()
         if service != REGISTRY:
