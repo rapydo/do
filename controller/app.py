@@ -676,6 +676,7 @@ You can use of one:
             add(CONFS_DIR, "swarm_options.yml")
 
         if Application.env.get("NFS_HOST"):
+            log.info("NFS Server is enabled")
             add(CONFS_DIR, "volumes_nfs.yml")
         else:
             add(CONFS_DIR, "volumes_local.yml")
