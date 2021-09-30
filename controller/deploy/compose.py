@@ -141,10 +141,6 @@ class Compose:
         detach: bool = False,
         user: Optional[str] = None,
     ) -> None:
-        """
-        Execute a command on a not container
-        """
-
         if publish is None:
             publish = []
 

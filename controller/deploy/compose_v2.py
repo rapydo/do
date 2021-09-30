@@ -1,5 +1,6 @@
+import shlex
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
 import yaml
 from python_on_whales import DockerClient
@@ -185,6 +186,52 @@ class Compose:
             log.info("Services scaled: {}", services_list)
         else:
             log.info("Services started: {}", services_list)
+
+    @staticmethod
+    def split_command(command: Optional[str]) -> List[str]:
+        # Needed because:
+        # Passing None for 's' to shlex.split() is deprecated
+        if command is None:
+            return []
+
+        return shlex.split(command)
+
+    def create_volatile_container(
+        self,
+        service: str,
+        command: Optional[str] = None,
+        publish: Optional[List[Tuple[int, int]]] = None,
+        # used by interfaces
+        detach: bool = False,
+        user: Optional[str] = None,
+    ) -> None:
+
+        # equivalent to command is not None and len(command) > 0
+        # or not(not command) ...
+        if command:
+            tty = True
+        else:
+            tty = False
+
+        out = self.docker.compose.run(
+            service=service,
+            name=service,
+            command=self.split_command(command),
+            user=user,
+            detach=detach,
+            # Attach a tty if a command is specified
+            # but interactive commands is not working
+            tty=tty,
+            dependencies=False,
+            remove=True,
+            # Enable services ports only if publish is empty
+            service_ports=not publish,
+            publish=publish or [],
+            use_aliases=True,
+        )
+
+        if not detach:
+            print(out)
 
     def get_running_services(self, prefix: str) -> Set[str]:
 

@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 import typer
 
@@ -10,10 +10,11 @@ from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
+# from controller.deploy.compose_v2 import Compose
 interfaces = ["swaggerui", "adminer", "flower"]
 
 
-def get_publish_port(service: str, port: Optional[int]) -> Tuple[List[str], int]:
+def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
     service_config = Application.data.compose_config.get(service, None)
     if not service_config:  # pragma: no cover
         print_and_exit("Services misconfiguration, can't find {}", service)
@@ -26,9 +27,7 @@ def get_publish_port(service: str, port: Optional[int]) -> Tuple[List[str], int]
     port = port or current_ports.published
     target = current_ports.target
 
-    publish = [f"{port}:{target}"]
-
-    return publish, port
+    return port, target
 
 
 # This command replaces volatile, interfaces and registry
@@ -111,9 +110,11 @@ def run(
         )
 
     compose = Compose(files=Application.data.files)
+    # compose = Compose(Application.data.files)
 
     if pull:
         compose.command("pull", {"SERVICE": [service], "quiet": True})
+        # compose.docker.compose.pull([service], quiet=True)
     else:
         verify_available_images(
             [service],
@@ -149,9 +150,12 @@ def run(
             # , symbols="%*,-.=?[]^_~"
         )
 
-    publish, port = get_publish_port(service, port)
+    port, target = get_publish_port(service, port)
 
-    compose.create_volatile_container(service, detach=True, publish=publish)
+    compose.create_volatile_container(
+        service, detach=True, publish=[f"{port}:{target}"]
+    )
+    # compose.create_volatile_container(service, detach=True, publish=[(port, target)])
 
     if service == "swaggerui":
         if Configuration.production:
