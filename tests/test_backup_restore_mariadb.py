@@ -49,6 +49,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
+    exec_command(capfd, "status")
     service_verify(capfd, "sqlalchemy")
 
     # This will initialize mariadb
