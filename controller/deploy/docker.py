@@ -161,7 +161,7 @@ class Docker:
     @classmethod
     def get_service(cls, service: str) -> str:
         if not SWARM_MODE:
-            return f"{Configuration.project}-{service}"
+            return f"{Configuration.project}_{service}"
         return f"{Configuration.project}_{service}"
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
