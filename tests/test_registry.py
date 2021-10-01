@@ -86,7 +86,6 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         "run registry",
         "Creating",
-        "_registry_run",
     )
 
     time.sleep(2)
