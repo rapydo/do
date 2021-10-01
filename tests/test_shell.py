@@ -34,7 +34,9 @@ def test_all(capfd: Capture) -> None:
     if SWARM_MODE:
         exec_command(capfd, "shell invalid", "Service invalid not found")
     else:
-        exec_command(capfd, "shell invalid", "No such service: invalid")
+        exec_command(
+            capfd, "shell invalid", "No running container found for invalid service"
+        )
 
     if SWARM_MODE:
 
