@@ -126,6 +126,7 @@ def run(
         if not command:
             command = "bash"
 
+        log.info("Starting {}...", service)
         compose.create_volatile_container(
             service,
             command=command,
@@ -134,6 +135,7 @@ def run(
             # How to prevent ports on volatile containers?
             # publish=None,
         )
+        log.info("Service {} removed", service)
 
         return None
 
