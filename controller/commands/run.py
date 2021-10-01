@@ -150,6 +150,7 @@ def run(
 
     port, target = get_publish_port(service, port)
 
+    log.info("Running {}...", service)
     compose.create_volatile_container(service, detach=True, publish=[(port, target)])
 
     if service == "swaggerui":
