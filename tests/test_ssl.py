@@ -53,16 +53,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "No container found for proxy_1",
     )
 
-    # Before creating SSL certificates, neo4j and rabbit should not be able to start
+    # Before creating SSL certificates rabbit and neo4j should not be able to start
     exec_command(
         capfd,
-        "run --debug neo4j",
+        "run --debug rabbit",
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
     exec_command(
         capfd,
-        "run --debug rabbit",
+        "run --debug neo4j",
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
