@@ -10,7 +10,7 @@ from python_on_whales.utils import DockerException
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
 
-from controller import RED, SWARM_MODE, print_and_exit
+from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 
 
@@ -169,7 +169,8 @@ class Docker:
         service_name = self.get_service(service)
 
         if not SWARM_MODE:
-            c = f"{service_name}-{slot}"
+            c = f"{service_name}_{slot}"
+            log.debug("Container name: {}", c)
             if self.client.container.exists(c):
                 return c
             return None
