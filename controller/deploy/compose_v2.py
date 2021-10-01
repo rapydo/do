@@ -202,13 +202,6 @@ class Compose:
         user: Optional[str] = None,
     ) -> None:
 
-        # equivalent to command is not None and len(command) > 0
-        # or not(not command) ...
-        if command:
-            tty = True
-        else:
-            tty = False
-
         try:
             out = self.docker.compose.run(
                 service=service,
@@ -216,9 +209,8 @@ class Compose:
                 command=Docker.split_command(command),
                 user=user,
                 detach=detach,
-                # Attach a tty if a command is specified
-                # but interactive commands is not working
-                tty=tty,
+                # Please note that interactive commands is not working yet
+                tty=True,
                 dependencies=False,
                 # Error in python on whales 0.27 to be restored once fixed
                 # remove=True,
