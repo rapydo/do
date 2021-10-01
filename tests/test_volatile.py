@@ -69,48 +69,28 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
         "Can't specify a user if debug mode is OFF",
     )
 
-    exec_command(
-        capfd,
-        "run --debug backend --command hostname",
-        "backend-server",
-    )
-
-    exec_command(
-        capfd,
-        "run --debug backend --command whoami",
-        "root",
-    )
-    exec_command(
-        capfd,
-        "run --debug backend -u developer --command whoami",
-        "Please remember that users in volatile containers are not mapped on current ",
-        "developer",
-    )
-    exec_command(
-        capfd,
-        "run --debug backend -u invalid --command whoami",
-        "Error response from daemon:",
-        "unable to find user invalid:",
-        "no matching entries in passwd file",
-    )
-
-    exec_command(
-        capfd,
-        "run --debug maintenance",
-        f"Missing rapydo/proxy:{__version__} image, add {colors.RED}--pull{colors.RESET} option",
-    )
-
-    exec_command(
-        capfd,
-        "-e ACTIVATE_PROXY=1 pull proxy",
-        "Base images pulled from docker hub",
-    )
-
-    # signal.signal(signal.SIGALRM, signal_handler)
-    # signal.alarm(4)
+    # TEMPORARY DISABLED 662
     # exec_command(
     #     capfd,
-    #     "run maintenance",
-    #     # "Maintenance server is up and waiting for connections",
-    #     "Time is up",
+    #     "run --debug backend --command hostname",
+    #     "backend-server",
+    # )
+
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command whoami",
+    #     "root",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u developer --command whoami",
+    #     "Please remember that users in volatile containers are not mapped on current ",
+    #     "developer",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u invalid --command whoami",
+    #     "Error response from daemon:",
+    #     "unable to find user invalid:",
+    #     "no matching entries in passwd file",
     # )
