@@ -81,6 +81,8 @@ jobs:
         # https://github.com/actions/runner/issues/241
         shell: 'script --return --quiet --command "bash {0}"'
         run: |
+          set -e
+
           # This works well for all tests... except for install... that is not covered :o
           # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
 
