@@ -19,6 +19,7 @@ from controller import (
     log,
     print_and_exit,
 )
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
 
@@ -191,15 +192,6 @@ class Compose:
         else:
             log.info("Services started: {}", services_list)
 
-    @staticmethod
-    def split_command(command: Optional[str]) -> List[str]:
-        # Needed because:
-        # Passing None for 's' to shlex.split() is deprecated
-        if command is None:
-            return []
-
-        return shlex.split(command)
-
     def create_volatile_container(
         self,
         service: str,
@@ -217,26 +209,29 @@ class Compose:
         else:
             tty = False
 
-        out = self.docker.compose.run(
-            service=service,
-            name=service,
-            command=self.split_command(command),
-            user=user,
-            detach=detach,
-            # Attach a tty if a command is specified
-            # but interactive commands is not working
-            tty=tty,
-            dependencies=False,
-            # Error in python on whales 0.27 to be restored once fixed
-            # remove=True,
-            # Enable services ports only if publish is empty
-            service_ports=not publish,
-            publish=publish or [],
-            use_aliases=True,
-        )
+        try:
+            out = self.docker.compose.run(
+                service=service,
+                name=service,
+                command=Docker.split_command(command),
+                user=user,
+                detach=detach,
+                # Attach a tty if a command is specified
+                # but interactive commands is not working
+                tty=tty,
+                dependencies=False,
+                # Error in python on whales 0.27 to be restored once fixed
+                # remove=True,
+                # Enable services ports only if publish is empty
+                service_ports=not publish,
+                publish=publish or [],
+                use_aliases=True,
+            )
 
-        if not detach:
-            print(out)
+            if not detach:
+                print(out)
+        except DockerException as e:
+            log.critical(e)
 
     def get_running_services(self, prefix: str) -> Set[str]:
 

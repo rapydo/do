@@ -1,5 +1,6 @@
+import shlex
 import socket
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 import requests
 import urllib3
@@ -146,3 +147,41 @@ class Docker:
                 )
 
             raise e
+
+    @staticmethod
+    def split_command(command: Optional[str]) -> List[str]:
+        # Needed because:
+        # Passing None for 's' to shlex.split() is deprecated
+        if command is None:
+            return []
+
+        return shlex.split(command)
+
+    @classmethod
+    def get_service(cls, service: str) -> str:
+        return f"{Configuration.project}-{service}"
+
+    @classmethod
+    def get_container(cls, service: str, slot: int) -> Optional[str]:
+
+        service_name = cls.get_service(service)
+        return f"{service_name}-{slot}"
+
+    def exec_command(
+        self,
+        container: str,
+        user: Optional[str] = None,
+        command: str = None,
+        tty: bool = True,
+    ) -> None:
+        print("")
+        print(
+            self.client.container.execute(
+                container,
+                user=user,
+                command=self.split_command(command),
+                interactive=tty,
+                tty=tty,
+                detach=False,
+            )
+        )
