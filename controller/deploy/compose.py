@@ -22,7 +22,7 @@ from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
 
-from controller import COMPOSE_ENVIRONMENT_FILE, RED, log, print_and_exit
+from controller import COMPOSE_ENVIRONMENT_FILE, RED, REGISTRY, log, print_and_exit
 
 
 class Compose:
@@ -218,6 +218,7 @@ class Compose:
                     continue
                 if row.startswith("---"):
                     continue
+
                 # row is:
                 # Name   Command   State   Ports
                 # Split on two or more spaces
@@ -229,11 +230,14 @@ class Compose:
                 status = row_tokens[2]
                 name = row_tokens[0]
 
+                if name == REGISTRY:
+                    continue
+
                 # Removed the prefix (i.e. project name)
                 # to be replaced with removeprefix
                 name = name[1 + len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("_")]
+                name = name[0 : name.index("-")]
 
                 containers[name] = status
 

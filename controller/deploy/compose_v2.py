@@ -227,7 +227,7 @@ class Compose:
 
     def get_running_services(self, prefix: str) -> Set[str]:
 
-        prefix += "_"
+        prefix += "-"
         containers = set()
         try:
             for container in self.docker.compose.ps():
@@ -242,7 +242,7 @@ class Compose:
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("_")]
+                name = name[0 : name.index("-")]
                 containers.add(name)
             return containers
         # An exception is raised when no service is running.
@@ -255,7 +255,7 @@ class Compose:
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
 
-        prefix += "_"
+        prefix += "-"
         services_status: Dict[str, str] = dict()
         try:
             for container in self.docker.compose.ps():
@@ -268,7 +268,7 @@ class Compose:
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("_")]
+                name = name[0 : name.index("-")]
                 services_status[name] = status
             return services_status
         # An exception is raised when no service is running.
