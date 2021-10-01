@@ -227,7 +227,8 @@ class Compose:
             # but interactive commands is not working
             tty=tty,
             dependencies=False,
-            remove=True,
+            # Error in python on whales 0.27 to be restored once fixed
+            # remove=True,
             # Enable services ports only if publish is empty
             service_ports=not publish,
             publish=publish or [],

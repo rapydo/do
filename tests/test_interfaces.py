@@ -58,7 +58,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run adminer --pull",
-        # "Pulling adminer",
+        "Pulling image for adminer...",
         # f"Creating {project_name}_adminer_run",
         "You can access Adminer interface on: http://localhost:7777",
     )
@@ -78,6 +78,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run swaggerui --pull",
+        "Pulling image for swaggerui...",
         "You can access SwaggerUI web page here: http://localhost:7777",
     )
     docker.client.container.remove("swaggerui", force=True, volumes=True)

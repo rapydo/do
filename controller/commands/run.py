@@ -6,12 +6,11 @@ import typer
 from controller import REGISTRY, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose import Compose
+from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
-# from controller.deploy.compose_v2 import Compose
-interfaces = ["swaggerui", "adminer", "flower"]
+# interfaces = ["swaggerui", "adminer", "flower"]
 
 
 def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
@@ -109,12 +108,11 @@ def run(
             "You should avoid to write or modify files on volumes"
         )
 
-    compose = Compose(files=Application.data.files)
-    # compose = Compose(Application.data.files)
+    compose = Compose(Application.data.files)
 
     if pull:
-        compose.command("pull", {"SERVICE": [service], "quiet": True})
-        # compose.docker.compose.pull([service], quiet=True)
+        log.info("Pulling image for {}...", service)
+        compose.docker.compose.pull([service])
     else:
         verify_available_images(
             [service],
@@ -152,12 +150,7 @@ def run(
 
     port, target = get_publish_port(service, port)
 
-    compose.create_volatile_container(
-        service, detach=True, publish=[f"{port}:{target}"]
-    )
-    # compose.create_volatile_container(
-    #     service, detach=True, publish=[(port, target)]
-    # )
+    compose.create_volatile_container(service, detach=True, publish=[(port, target)])
 
     if service == "swaggerui":
         if Configuration.production:
