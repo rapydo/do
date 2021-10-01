@@ -24,6 +24,8 @@ from compose.service import BuildError
 
 from controller import COMPOSE_ENVIRONMENT_FILE, RED, REGISTRY, log, print_and_exit
 
+COMPOSE_SEP = "_"
+
 
 class Compose:
     def __init__(self, files: List[Path]) -> None:
@@ -237,7 +239,7 @@ class Compose:
                 # to be replaced with removeprefix
                 name = name[1 + len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("-")]
+                name = name[0 : name.index(COMPOSE_SEP)]
 
                 containers[name] = status
 

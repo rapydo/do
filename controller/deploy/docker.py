@@ -13,6 +13,10 @@ from requests.models import Response
 from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 
+COMPOSE_SEP = "_"
+# starting from v2.0.0
+# COMPOSE_SEP = "-"
+
 
 class Docker:
     def __init__(self) -> None:
@@ -161,7 +165,7 @@ class Docker:
     @classmethod
     def get_service(cls, service: str) -> str:
         if not SWARM_MODE:
-            return f"{Configuration.project}-{service}"
+            return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
@@ -169,7 +173,7 @@ class Docker:
         service_name = self.get_service(service)
 
         if not SWARM_MODE:
-            c = f"{service_name}-{slot}"
+            c = f"{service_name}{COMPOSE_SEP}{slot}"
             log.debug("Container name: {}", c)
             if self.client.container.exists(c):
                 return c

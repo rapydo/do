@@ -25,6 +25,10 @@ Port = Union[str, int]
 PortMapping = Tuple[Port, Port]
 PortRangeMapping = Tuple[Port, Port, str]
 
+COMPOSE_SEP = "_"
+# starting from v2.0.0
+# COMPOSE_SEP = "-"
+
 
 class Compose:
     def __init__(self, files: List[Path]) -> None:
@@ -224,7 +228,7 @@ class Compose:
 
     def get_running_services(self, prefix: str) -> Set[str]:
 
-        prefix += "-"
+        prefix += COMPOSE_SEP
         containers = set()
         try:
             for container in self.docker.compose.ps():
@@ -239,7 +243,7 @@ class Compose:
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("-")]
+                name = name[0 : name.index(COMPOSE_SEP)]
                 containers.add(name)
             return containers
         # An exception is raised when no service is running.
@@ -252,7 +256,7 @@ class Compose:
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
 
-        prefix += "-"
+        prefix += COMPOSE_SEP
         services_status: Dict[str, str] = dict()
         try:
             for container in self.docker.compose.ps():
@@ -265,7 +269,7 @@ class Compose:
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
                 # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index("-")]
+                name = name[0 : name.index(COMPOSE_SEP)]
                 services_status[name] = status
             return services_status
         # An exception is raised when no service is running.
