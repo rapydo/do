@@ -273,7 +273,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert len(cmd) == 3
     assert cmd[0] == "a"
     assert cmd[1] == "b"
-    assert cmd[1] == "c"
+    assert cmd[2] == "c"
 
     cmd = Docker.split_command("a 'b c'")
     assert isinstance(cmd, list)
