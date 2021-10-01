@@ -25,7 +25,8 @@ from controller.utilities import system
 class Swarm:
     def __init__(self, check_initialization: bool = True):
 
-        self.docker = Docker().client
+        self.docker_wrapper = Docker()
+        self.docker = self.docker_wrapper.client
 
         if check_initialization and not self.get_token():
             print_and_exit(
@@ -51,10 +52,6 @@ class Swarm:
         except NotASwarmManager:
 
             return None
-
-    @staticmethod
-    def get_service(service: str) -> str:
-        return f"{Configuration.project}_{service}"
 
     @staticmethod
     def get_replicas(service: Service) -> int:
@@ -244,19 +241,11 @@ class Swarm:
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
 
+    def get_service(self, service: str) -> str:
+        return self.docker_wrapper.get_service(service)
+
     def get_container(self, service: str, slot: int) -> Optional[str]:
-
-        service_name = self.get_service(service)
-        try:
-            for task in self.docker.service.ps(service_name):
-                if task.slot != slot:
-                    continue
-
-                return f"{service_name}.{slot}.{task.id}"
-        except NoSuchService:
-            return None
-
-        return None
+        return self.docker_wrapper.get_container(service, slot)
 
     def exec_command(
         self,

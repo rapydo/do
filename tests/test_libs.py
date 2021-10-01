@@ -19,7 +19,7 @@ from controller.app import Application
 from controller.commands.compose.backup import get_date_pattern
 from controller.commands.install import download
 from controller.deploy.builds import get_image_creation
-from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 from controller.packages import Packages
 from controller.templating import Templating
 from controller.utilities import git, services, system
@@ -249,45 +249,37 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     with pytest.raises(SystemExit):
         templating.get_template("invalid", {})
 
-    cmd = Compose.split_command(None)
-    assert len(cmd) == 2
-    assert cmd[0] is None
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 0
+    cmd = Docker.split_command(None)
+    assert isinstance(cmd, list)
+    assert len(cmd) == 0
 
-    cmd = Compose.split_command("")
-    assert len(cmd) == 2
-    assert cmd[0] is None
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 0
+    cmd = Docker.split_command("")
+    assert isinstance(cmd, list)
+    assert len(cmd) == 0
 
-    cmd = Compose.split_command("a")
+    cmd = Docker.split_command("a")
+    assert isinstance(cmd, list)
+    assert len(cmd) == 1
+    assert cmd[0] == "a"
+
+    cmd = Docker.split_command("a b")
+    assert isinstance(cmd, list)
     assert len(cmd) == 2
     assert cmd[0] == "a"
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 0
+    assert cmd[1] == "b"
 
-    cmd = Compose.split_command("a b")
+    cmd = Docker.split_command("a b c")
+    assert isinstance(cmd, list)
+    assert len(cmd) == 3
+    assert cmd[0] == "a"
+    assert cmd[1] == "b"
+    assert cmd[1] == "c"
+
+    cmd = Docker.split_command("a 'b c'")
+    assert isinstance(cmd, list)
     assert len(cmd) == 2
     assert cmd[0] == "a"
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 1
-    assert cmd[1][0] == "b"
-
-    cmd = Compose.split_command("a b c")
-    assert len(cmd) == 2
-    assert cmd[0] == "a"
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 2
-    assert cmd[1][0] == "b"
-    assert cmd[1][1] == "c"
-
-    cmd = Compose.split_command("a 'b c'")
-    assert len(cmd) == 2
-    assert cmd[0] == "a"
-    assert isinstance(cmd[1], list)
-    assert len(cmd[1]) == 1
-    assert cmd[1][0] == "b c"
+    assert cmd[1] == "b c"
 
     assert Packages.get_bin_version("invalid") is None
 

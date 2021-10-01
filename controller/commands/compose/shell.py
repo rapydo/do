@@ -2,9 +2,9 @@ from typing import Optional
 
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
-from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 from controller.utilities import services
 
 
@@ -39,7 +39,7 @@ def shell(
 ) -> None:
     Application.get_controller().controller_init()
 
-    dc = Compose(files=Application.data.files)
+    docker = Docker()
 
     if not user:
         user = services.get_default_user(service, Configuration.frontend)
@@ -49,4 +49,9 @@ def shell(
 
     log.debug("Requested command: {} with user: {}", command, user)
 
-    dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
+    container = docker.get_container(service, slot=1)
+
+    if not container:
+        print_and_exit("No running container found for {} service", service)
+
+    docker.exec_command(container, user=user, command=command, tty=not no_tty)

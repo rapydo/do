@@ -5,11 +5,12 @@ from typing import List, Optional, cast
 import requests
 import urllib3
 from python_on_whales import DockerClient
+from python_on_whales.exceptions import NoSuchService
 from python_on_whales.utils import DockerException
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
 
-from controller import RED, print_and_exit
+from controller import RED, SWARM_MODE, print_and_exit
 from controller.app import Application, Configuration
 
 
@@ -159,13 +160,30 @@ class Docker:
 
     @classmethod
     def get_service(cls, service: str) -> str:
-        return f"{Configuration.project}-{service}"
+        if not SWARM_MODE:
+            return f"{Configuration.project}-{service}"
+        return f"{Configuration.project}_{service}"
 
-    @classmethod
-    def get_container(cls, service: str, slot: int) -> Optional[str]:
+    def get_container(self, service: str, slot: int) -> Optional[str]:
 
-        service_name = cls.get_service(service)
-        return f"{service_name}-{slot}"
+        service_name = self.get_service(service)
+
+        if not SWARM_MODE:
+            c = f"{service_name}-{slot}"
+            if self.client.container.exists(c):
+                return c
+            return None
+
+        try:
+            for task in self.client.service.ps(service_name):
+                if task.slot != slot:
+                    continue
+
+                return f"{service_name}.{slot}.{task.id}"
+        except NoSuchService:
+            return None
+
+        return None
 
     def exec_command(
         self,
