@@ -218,8 +218,8 @@ def test_remove(capfd: Capture) -> None:
 
         assert get_containers() == NONE
         n, u = count_volumes()
-        assert NAMED_VOLUMES_NUM < n
-        assert UNNAMED_VOLUMES_NUM < u
+        assert NAMED_VOLUMES_NUM > n
+        assert UNNAMED_VOLUMES_NUM > u
 
     if SWARM_MODE:
         # Remove the registry
