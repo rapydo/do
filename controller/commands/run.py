@@ -155,7 +155,9 @@ def run(
     compose.create_volatile_container(
         service, detach=True, publish=[f"{port}:{target}"]
     )
-    # compose.create_volatile_container(service, detach=True, publish=[(port, target)])
+    # compose.create_volatile_container(
+    #     service, detach=True, publish=[(port, target)]
+    # )
 
     if service == "swaggerui":
         if Configuration.production:

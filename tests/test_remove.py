@@ -214,16 +214,12 @@ def test_remove(capfd: Capture) -> None:
         # New counts, after single service --all has removed some unnamed volume
         NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
-        exec_command(
-            capfd, "remove --all", "--all option not implemented yet", "Stack removed"
-        )
+        exec_command(capfd, "remove --all", "Stack removed")
 
         assert get_containers() == NONE
-        # Removal of all services does not remove any volume because it is:
-        # NOT IMPLEMENTED YET
         n, u = count_volumes()
-        assert NAMED_VOLUMES_NUM == n
-        assert UNNAMED_VOLUMES_NUM == u
+        assert NAMED_VOLUMES_NUM < n
+        assert UNNAMED_VOLUMES_NUM < u
 
     if SWARM_MODE:
         # Remove the registry

@@ -22,6 +22,10 @@ from controller import (
 from controller.deploy.docker import Docker
 from controller.utilities import system
 
+Port = Union[str, int]
+PortMapping = Tuple[Port, Port]
+PortRangeMapping = Tuple[Port, Port, str]
+
 
 class Compose:
     def __init__(self, files: List[Path]) -> None:
@@ -200,7 +204,7 @@ class Compose:
         self,
         service: str,
         command: Optional[str] = None,
-        publish: Optional[List[Tuple[int, int]]] = None,
+        publish: Optional[List[Union[PortMapping, PortRangeMapping]]] = None,
         # used by interfaces
         detach: bool = False,
         user: Optional[str] = None,

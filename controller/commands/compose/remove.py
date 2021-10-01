@@ -28,18 +28,17 @@ def remove(
     all_services = Application.data.services == Application.data.active_services
 
     if all_services and rm_all:
-        log.warning("--all option not implemented yet")
-        # -v, --volumes volumes
-        # Remove named volumes declared in the volumes section of the
-        # Compose file and anonymous volumes attached to containers.
-
-        # "--volumes": rm_all,
-
         # Networks are not removed, but based on docker compose down --help they should
         # Also docker-compose down removes network from what I remember
         # Should be reported as bug? If corrected a specific check in test_remove.py
         # will start to fail
-        dc.docker.compose.down(remove_orphans=False, remove_images="local")
+        dc.docker.compose.down(
+            remove_orphans=False,
+            remove_images="local",
+            # Remove named volumes declared in the volumes section of the
+            # Compose file and anonymous volumes attached to containers.
+            volumes=rm_all,
+        )
     else:
         # Important note: volumes=True only destroy anonymous volumes,
         # not named volumes like down should do
