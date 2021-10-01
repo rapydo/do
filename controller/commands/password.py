@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, cast
 
 import typer
 from tabulate import tabulate
@@ -18,7 +18,6 @@ from controller import (
     print_and_exit,
 )
 from controller.app import Application, Configuration
-from controller.deploy.compose import Compose as ComposeV1
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
@@ -351,17 +350,15 @@ def password(
             log.info("{} was running, restarting services...", service.value)
 
             if service == Services.registry:
-                port = Application.env["REGISTRY_PORT"]
+                port = cast(int, Application.env["REGISTRY_PORT"])
 
                 compose.docker.container.remove(REGISTRY, force=True)
-                # compose v2 does not implement volatile container yet
-                compose_v1 = ComposeV1(files=Application.data.files)
                 Configuration.FORCE_COMPOSE_ENGINE = True
                 # init is needed to reload the configuration to force compose engine
                 Application.get_controller().controller_init()
 
-                compose_v1.create_volatile_container(
-                    REGISTRY, detach=True, publish=[f"{port}:{port}"]
+                compose.create_volatile_container(
+                    REGISTRY, detach=True, publish=[(port, port)]
                 )
             elif SWARM_MODE:
 
