@@ -120,7 +120,7 @@ def exec_command(capfd: Capture, command: str, *asserts: str) -> None:
 def service_verify(capfd: Capture, service: str) -> None:
     exec_command(
         capfd,
-        f"shell backend --no-tty 'restapi verify --service {service}'",
+        f"shell backend 'restapi verify --service {service}'",
         f"Service {service} is reachable",
     )
 
