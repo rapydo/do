@@ -47,10 +47,6 @@ def shell(
     if default_command:
         command = services.get_default_command(service)
 
-    if no_tty:
-        no_tty = False
-        log.warning("--no-tty flag is currently disabled")
-
     log.debug("Requested command: {} with user: {}", command, user)
 
     container = docker.get_container(service, slot=1)

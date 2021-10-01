@@ -77,12 +77,7 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
-        # Hack to enable a TTY
-        # https://github.com/actions/runner/issues/241
-        # also there https://giters.com/gfx/example-github-actions-with-tty?amp=1
-        shell: 'script -q -e -c "bash {0}"'
         run: |
-          set -e
 
           # This works well for all tests... except for install... that is not covered :o
           # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
