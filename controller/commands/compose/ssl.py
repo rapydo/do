@@ -90,6 +90,7 @@ def ssl(
 
     try:
         if volatile:
+            # once migrated to v2 a publish=[(443, 443)] will be needed
             dc.create_volatile_container(service, command=command)
         else:
             dc.exec_command(service, user="root", command=command, disable_tty=no_tty)

@@ -1,4 +1,3 @@
-import shlex
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
 
@@ -19,7 +18,6 @@ from controller import (
     log,
     print_and_exit,
 )
-from controller.app import Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
 
@@ -214,8 +212,7 @@ class Compose:
                 dependencies=False,
                 # Error in python on whales 0.27 to be restored once fixed
                 # remove=True,
-                # Enable services ports only if publish is empty
-                service_ports=not publish,
+                service_ports=False,
                 publish=publish or [],
                 use_aliases=True,
             )
