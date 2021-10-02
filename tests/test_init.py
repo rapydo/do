@@ -15,6 +15,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
@@ -22,6 +23,7 @@ from tests import (
 
 def test_init(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "init")
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

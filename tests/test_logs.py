@@ -10,6 +10,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     mock_KeyboardInterrupt,
     pull_images,
@@ -19,6 +20,8 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
+
+    execute_outside(capfd, "logs")
 
     create_project(
         capfd=capfd,

@@ -13,11 +13,14 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
 )
 
 
 def test_base(capfd: Capture) -> None:
+
+    execute_outside(capfd, "check")
 
     create_project(
         capfd=capfd,

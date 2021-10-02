@@ -8,6 +8,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     signal_handler,
@@ -17,6 +18,8 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
+
+    execute_outside(capfd, "shell backend ls")
 
     create_project(
         capfd=capfd,

@@ -2,7 +2,6 @@
 This module will test the backup and restore commands on Redis
 """
 import os
-import time
 from pathlib import Path
 
 from faker import Faker
@@ -13,6 +12,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     random_project_name,
@@ -25,6 +25,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         return None
+
+    execute_outside(capfd, "backup redis")
+    execute_outside(capfd, "restore redis")
 
     backup_folder = Path("data/backup/redis")
 

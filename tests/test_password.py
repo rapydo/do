@@ -17,6 +17,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     random_project_name,
@@ -34,6 +35,9 @@ def get_password_from_projectrc(variable: str) -> str:
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "password")
+
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,

@@ -6,10 +6,13 @@ import time
 
 from controller import SWARM_MODE, __version__, colors
 from controller.deploy.docker import Docker
-from tests import Capture, create_project, exec_command, init_project
+from tests import Capture, create_project, exec_command, execute_outside, init_project
 
 
 def test_docker_registry(capfd: Capture) -> None:
+
+    execute_outside(capfd, "run registry")
+    execute_outside(capfd, "images")
 
     rand = random.SystemRandom()
 

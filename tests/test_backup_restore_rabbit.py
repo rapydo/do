@@ -13,6 +13,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     random_project_name,
@@ -25,6 +26,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         return None
+
+    execute_outside(capfd, "backup rabbit")
+    execute_outside(capfd, "restore rabbit")
 
     backup_folder = Path("data/backup/rabbit")
 

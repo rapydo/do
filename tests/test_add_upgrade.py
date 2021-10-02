@@ -5,11 +5,13 @@ This module will test the add and upgrade commands
 import os
 import shutil
 
-from tests import Capture, create_project, exec_command, init_project
+from tests import Capture, create_project, exec_command, execute_outside, init_project
 
 
 def test_add(capfd: Capture) -> None:
 
+    execute_outside(capfd, "add endpoint x")
+    execute_outside(capfd, "upgrade --path x")
     create_project(
         capfd=capfd,
         name="second",

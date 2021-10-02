@@ -11,6 +11,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     start_project,
@@ -66,6 +67,8 @@ def count_volumes() -> Tuple[int, int]:
 
 
 def test_remove(capfd: Capture) -> None:
+
+    execute_outside(capfd, "remove")
 
     create_project(
         capfd=capfd,

@@ -1,3 +1,5 @@
+import os
+import tempfile
 import time
 from importlib import reload
 from pathlib import Path
@@ -183,3 +185,15 @@ def start_project(capfd: Capture) -> None:
         "Stack started",
     )
     time.sleep(5)
+
+
+def execute_outside(capfd: Capture, command: str) -> None:
+    folder = os.getcwd()
+    os.chdir(tempfile.gettempdir())
+    exec_command(
+        capfd,
+        command,
+        "You are not in a git repository",
+    )
+
+    os.chdir(folder)

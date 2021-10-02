@@ -11,6 +11,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     random_project_name,
@@ -21,6 +22,7 @@ from tests import (
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "list env")
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

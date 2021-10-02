@@ -12,12 +12,15 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "version")
 
     exec_command(
         capfd,

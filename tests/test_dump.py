@@ -9,12 +9,15 @@ from tests import (  # pull_images,
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
 
 
 def test_dump(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "dump")
 
     create_project(
         capfd=capfd,

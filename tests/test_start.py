@@ -11,6 +11,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     start_registry,
@@ -18,6 +19,9 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
+
+    execute_outside(capfd, "start")
+    execute_outside(capfd, "stop")
 
     rand = random.SystemRandom()
 

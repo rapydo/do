@@ -8,6 +8,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     random_project_name,
     service_verify,
 )
@@ -17,6 +18,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         return None
+
+    execute_outside(capfd, "ssl")
 
     project = random_project_name(faker)
     create_project(

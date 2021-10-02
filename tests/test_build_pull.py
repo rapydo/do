@@ -11,6 +11,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
     start_registry,
@@ -18,6 +19,9 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "pull")
+    execute_outside(capfd, "build")
 
     project2 = random_project_name(faker)
     create_project(

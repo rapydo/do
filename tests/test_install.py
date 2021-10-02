@@ -13,12 +13,15 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
 
 
 def test_install(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "install")
 
     project = random_project_name(faker)
     create_project(

@@ -8,6 +8,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     start_project,
@@ -16,6 +17,8 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
+
+    execute_outside(capfd, "status")
 
     create_project(
         capfd=capfd,

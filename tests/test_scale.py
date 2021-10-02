@@ -10,6 +10,7 @@ from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     pull_images,
     start_project,
@@ -28,6 +29,8 @@ def count_running_containers() -> int:
 
 
 def test_scale(capfd: Capture) -> None:
+
+    execute_outside(capfd, "scale x=1")
 
     create_project(
         capfd=capfd,
