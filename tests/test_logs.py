@@ -21,7 +21,7 @@ from tests import (
 
 def test_all(capfd: Capture) -> None:
 
-    execute_outside(capfd, "logs")
+    execute_outside(capfd, "logs backend")
 
     create_project(
         capfd=capfd,
