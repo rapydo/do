@@ -12,7 +12,8 @@ from tests import Capture, create_project, exec_command, execute_outside, init_p
 def test_docker_registry(capfd: Capture) -> None:
 
     execute_outside(capfd, "run registry")
-    execute_outside(capfd, "images")
+    if SWARM_MODE:
+        execute_outside(capfd, "images")
 
     rand = random.SystemRandom()
 
