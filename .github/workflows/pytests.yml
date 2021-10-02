@@ -141,6 +141,6 @@ jobs:
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Coverage
-        uses: rapydo/actions/install@v1
+        uses: rapydo/actions/coverage@v1
         with:
           path: coverage.xml
