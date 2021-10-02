@@ -140,7 +140,7 @@ jobs:
           fi
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
-          cp coverage.xml ..
-          cd ..
-
-          bash <(curl -s https://codecov.io/bash)
+      - name: Coverage
+        uses: rapydo/actions/install@v1
+        with:
+          path: coverage.xml
