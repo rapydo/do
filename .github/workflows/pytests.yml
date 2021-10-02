@@ -143,4 +143,5 @@ jobs:
       - name: Coverage
         uses: rapydo/actions/coverage@v1
         with:
-          path: rapydo_tests/coverage.xml
+          path: .
+          cov_file: rapydo_tests/coverage.xml
