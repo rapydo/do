@@ -17,6 +17,8 @@ def restart(
     ),
 ) -> None:
 
+    Application.get_controller().controller_init()
+
     swarm = Swarm()
 
     if not swarm.stack_is_running(Configuration.project):
@@ -24,8 +26,6 @@ def restart(
             "Your stack is not running, deploy it with {command}",
             command=RED("rapydo start"),
         )
-
-    Application.get_controller().controller_init()
 
     log.info("Restarting services:")
 
