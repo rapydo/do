@@ -21,7 +21,8 @@ from tests import (
 def test_all(capfd: Capture) -> None:
 
     execute_outside(capfd, "start")
-    execute_outside(capfd, "stop")
+    if not SWARM_MODE:
+        execute_outside(capfd, "stop")
 
     rand = random.SystemRandom()
 
