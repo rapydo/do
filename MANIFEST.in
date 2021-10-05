@@ -1,6 +1,5 @@
 include LICENSE AUTHORS README.md README.rst
 
-exclude .travis.yml
 exclude dev-requirements.txt
 
 global-exclude *.py[co]
