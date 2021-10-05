@@ -115,6 +115,7 @@ class Project:
         self.optionals_files.append(
             self.p_path("backend", "models", "emails", "update_credentials.html")
         )
+        self.optionals_files.append(Path("codecov.yml"))
 
         self.data_folders.extend(
             [

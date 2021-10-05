@@ -43,5 +43,6 @@ def upgrade(
         force_current=True,
         force=force,
         auto=auto,
+        add_optionals=True,
         path=path,
     )
