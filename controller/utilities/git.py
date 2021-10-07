@@ -10,6 +10,8 @@ from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from controller import RED, SUBMODULES_DIR, log, print_and_exit
 
+MAX_FETCHED_COMMITS = 20
+
 
 def get_repo(path: str) -> Optional[Repo]:
     try:
@@ -265,6 +267,31 @@ def update(path: str, gitobj: Repo) -> None:
             try:
                 branch = gitobj.active_branch.name
                 log.info("Updating {} {}@{}", remote, path, branch)
+
+                commits_behind = gitobj.iter_commits(
+                    f"{branch}..origin/{branch}", max_count=MAX_FETCHED_COMMITS
+                )
+                try:
+                    commits_behind_list = list(commits_behind)
+                except GitCommandError:  # pragma: no cover
+                    log.info(
+                        "Remote branch {} not found for {}. Is it a local branch?",
+                        branch,
+                        path,
+                    )
+                else:
+                    if commits_behind_list:  # pragma: no cover
+                        for c in commits_behind_list:
+                            message = str(c.message).strip().replace("\n", "")
+
+                            if message.startswith("#"):
+                                continue
+
+                            sha = c.hexsha[0:7]
+                            if len(message) > 60:
+                                message = message[0:57] + "..."
+                            log.info("... pulling commit {}: {}", sha, message)
+
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
@@ -299,11 +326,10 @@ def check_updates(path: str, gitobj: Repo) -> None:
         log.warning("Is {} repo detached? Unable to verify updates", path)
         return None
 
-    max_remote = 20
-
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = f"{branch}..origin/{branch}"
-    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+    commits_behind = gitobj.iter_commits(
+        f"{branch}..origin/{branch}", max_count=MAX_FETCHED_COMMITS
+    )
 
     try:
         commits_behind_list = list(commits_behind)
@@ -322,13 +348,17 @@ def check_updates(path: str, gitobj: Repo) -> None:
             for c in commits_behind_list:
                 message = str(c.message).strip().replace("\n", "")
 
+                if message.startswith("#"):
+                    continue
+
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
                 log.warning("Missing commit from {}: {} ({})", path, sha, message)
 
-    ahead_check = f"origin/{branch}..{branch}"
-    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
+    commits_ahead = gitobj.iter_commits(
+        f"origin/{branch}..{branch}", max_count=MAX_FETCHED_COMMITS
+    )
     try:
         commits_ahead_list = list(commits_ahead)
     except GitCommandError:  # pragma: no cover
