@@ -48,7 +48,6 @@ repos:
 
             # Extra dependencies
             "lxml",
-            "pytest-stub",
             "types-PyYAML",
             "types-pytz",
             "types-requests",

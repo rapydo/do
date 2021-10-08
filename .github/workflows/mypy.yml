@@ -18,7 +18,7 @@ jobs:
       - name: Install MyPy
         run: |
           python -m pip install --upgrade pip
-          pip install mypy lxml html5lib pytest-stub types-PyYAML types-python-dateutil types-pytz types-requests types-tabulate Faker
+          pip install mypy lxml html5lib types-PyYAML types-python-dateutil types-pytz types-requests types-tabulate Faker
           pip install --upgrade --no-cache-dir --editable .
 
       - name: Run MyPy
