@@ -570,7 +570,7 @@ You can use of one:
         """Check if connected to internet"""
 
         try:
-            requests.get("https://www.google.com")
+            requests.get("https://www.google.com", timeout=1)
             if Configuration.check:
                 log.info("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover

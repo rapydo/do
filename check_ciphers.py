@@ -19,7 +19,9 @@ with open(nginx_header) as headers:
             if cipher.startswith("!"):
                 continue
 
-            page = requests.get(f"https://ciphersuite.info/search/?q={cipher}")
+            page = requests.get(
+                f"https://ciphersuite.info/search/?q={cipher}", timeout=30
+            )
             soup = BeautifulSoup(page.content, "html5lib")
             # Results are organized on a ul class='prettylist'
             ul = soup.find("ul", attrs={"class": "prettylist"})
