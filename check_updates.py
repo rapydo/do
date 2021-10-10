@@ -170,7 +170,7 @@ def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
 
     time.sleep(sleep_time)
 
-    page = requests.get(url)
+    page = requests.get(url, timeout=30)
     soup = BeautifulSoup(page.content, "html5lib")
     span = soup.find("span", attrs={"title": lib})
 
@@ -184,7 +184,7 @@ def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
 
 def parse_pypi(url: str, lib: str) -> str:
 
-    page = requests.get(url)
+    page = requests.get(url, timeout=30)
     soup = BeautifulSoup(page.content, "html5lib")
     span = soup.find("h1", attrs={"class": "package-header__name"})
 
@@ -253,7 +253,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
 
     url = f"{AUTH_URL}/token?service=registry.docker.io&scope={AUTH_SCOPE}"
 
-    resp = requests.get(url)
+    resp = requests.get(url, timeout=30)
     token = resp.json()["token"]
 
     if not token:
@@ -262,7 +262,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
     headers = {"Authorization": f"Bearer {token}"}
 
     url = f"{REGISTRY_URL}/v2/{lib}/tags/list"
-    resp = requests.get(url, headers=headers)
+    resp = requests.get(url, headers=headers, timeout=30)
     tags = resp.json().get("tags")
 
     if lib == "library/node":
