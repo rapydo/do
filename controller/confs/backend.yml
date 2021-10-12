@@ -92,7 +92,7 @@ services:
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
-      UPLOAD_PATH: ${UPLOAD_PATH}
+      DATA_PATH: ${DATA_PATH}
       DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
 
@@ -240,8 +240,8 @@ services:
       - ${DATA_DIR}/logs:/logs
       # Crontabs (only used if enabled)
       - ${PROJECT_DIR}/backend/cron:/etc/cron.rapydo
-      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
-      # Projects can then map a different folder and change the UPLOAD_PATH accordingly
+      # Upload dir (matches the $DATA_PATH env variable in the default configuration)
+      # Projects can then map a different folder and change the DATA_PATH accordingly
       - ${DATA_DIR}/uploads:/uploads
     networks:
       default:
@@ -526,7 +526,7 @@ services:
       ACTIVATE: ${ACTIVATE_CELERY}
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
-      UPLOAD_PATH: ${UPLOAD_PATH}
+      DATA_PATH: ${DATA_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
@@ -621,7 +621,7 @@ services:
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
       # Logs
       - ${DATA_DIR}/logs:/logs
-      # Upload dir (matches the $UPLOAD_PATH env variable in the default configuration)
+      # Upload dir (matches the $DATA_PATH env variable in the default configuration)
       - ${DATA_DIR}/uploads:/uploads
     networks:
       default:

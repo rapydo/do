@@ -70,7 +70,7 @@ variables:
     PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
     BACKEND_PREFIX: ""
     APP_SECRETS: /secrets
-    UPLOAD_PATH: /uploads
+    DATA_PATH: /uploads
     DATA_IMPORT_FOLDER: /imports
     # from GUNICORN docs:
     # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
