@@ -12,3 +12,9 @@ services:
     deploy:
       restart_policy:
         condition: none
+    healthcheck:
+      test: "echo 'ok'"
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: 10s
+      retries: 3
+      start_period: 5m
