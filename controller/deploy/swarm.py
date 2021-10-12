@@ -185,9 +185,14 @@ class Swarm:
                 else:
                     COLOR = colors.RESET
 
-                slot = f" \\_ [{task.slot}]"
+                if task.slot:
+                    slot = f" \\_ [{task.slot}]"
+                    container_name = f"{service_name}.{task.slot}.{task.id}"
+                else:
+                    slot = " \\_ [H]"
+                    container_name = f"{service_name}.{task.id}"
+
                 node_name = nodes.get(task.node_id, "")
-                container_name = f"{service_name}.{task.slot}.{task.id}"
                 status = f"{COLOR}{task.status.state:8}{colors.RESET}"
                 errors = f"err={task.status.err}" if task.status.err else ""
                 labels = ",".join(task.labels)
