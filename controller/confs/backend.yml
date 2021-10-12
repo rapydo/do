@@ -277,7 +277,16 @@ services:
 
     ports:
       - ${PROXY_DEV_PORT}:80 # 80 redirect
-      - ${PROXY_PROD_PORT}:443 # 443 SSL
+      - target: 443
+        published: ${PROXY_PROD_PORT}
+        protocol: tcp
+        # Swarm default is ingress to be load balanced
+        # With host the port is directly mapped on the host
+        # and prevents nginx to be behind the swarm proxy
+        # Cons: nginx is no longer scalable
+        # Pro: nginx is able to access the real client IP address,
+        # instead of the load balancer IP
+        mode: host
     environment:
       APP_MODE: ${APP_MODE}
       DOMAIN: "${PROJECT_DOMAIN}"

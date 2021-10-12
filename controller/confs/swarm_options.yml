@@ -13,6 +13,11 @@ services:
 
   proxy:
     deploy:
+      # This prevents nginx to be behind the swarm proxy
+      # Cons: nginx is no longer scalable
+      # Pro: nginx is able to access the real client IP address,
+      # instead of the load balancer IP
+      mode: global
       replicas: ${DEFAULT_SCALE_PROXY}
       resources:
         reservations:
