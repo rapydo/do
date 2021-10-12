@@ -264,7 +264,10 @@ variables:
     DEFAULT_SCALE_BACKEND: 1
     DEFAULT_SCALE_CELERY: 1
     DEFAULT_SCALE_CELERYBEAT: 1
-    DEFAULT_SCALE_PROXY: 1
+    # To allow nginx to access the real client IP it is now deployed in global mode
+    # to be able to map the port directly on the host, instead of being load balanced
+    # In this way the proxy can no longer be scaled
+    # DEFAULT_SCALE_PROXY: 1
     DEFAULT_SCALE_SWAGGERUI: 1
 
     ASSIGNED_CPU_BACKEND: "0.25"

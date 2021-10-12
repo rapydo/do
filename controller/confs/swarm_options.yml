@@ -18,7 +18,7 @@ services:
       # Pro: nginx is able to access the real client IP address,
       # instead of the load balancer IP
       mode: global
-      replicas: ${DEFAULT_SCALE_PROXY}
+      # replicas: ${DEFAULT_SCALE_PROXY}
       resources:
         reservations:
           cpus: "${ASSIGNED_CPU_PROXY}"

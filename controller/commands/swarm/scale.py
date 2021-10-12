@@ -19,7 +19,10 @@ supported_services = [
     "celery",
     "flower",
     "ftp",
-    "proxy",
+    # To allow nginx to access the real client IP it is now deployed in global mode
+    # to be able to map the port directly on the host, instead of being load balanced
+    # In this way the proxy can no longer be scaled
+    # "proxy",
     "swaggerui",
 ]
 
