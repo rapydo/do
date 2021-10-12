@@ -13,9 +13,9 @@ services:
       restart_policy:
         condition: none
     healthcheck:
+      # Uhm... I can't change the healthcheck!?
       test: "echo 'ok'"
-      # Just to make the container quickly "running"
-      interval: 1s
+      interval: 60m
       timeout: 10s
       retries: 3
-      start_period: 1s
+      start_period: 60m
