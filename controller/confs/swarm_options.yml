@@ -22,7 +22,7 @@ services:
       resources:
         reservations:
           cpus: "${ASSIGNED_CPU_PROXY}"
-          memory: ${ASSIGNED_MEMORY_PROXY
+          memory: ${ASSIGNED_MEMORY_PROXY}
       # Needed to make the proxy accessible from the hostname because it is
       # no longer behind the nginx proxy / load balancer
       placement:
