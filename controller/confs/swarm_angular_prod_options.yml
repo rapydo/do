@@ -14,7 +14,8 @@ services:
         condition: none
     healthcheck:
       test: "echo 'ok'"
-      interval: ${HEALTHCHECK_INTERVAL}
+      # Just to make the container quickly "running"
+      interval: 1s
       timeout: 10s
       retries: 3
       start_period: 1s
