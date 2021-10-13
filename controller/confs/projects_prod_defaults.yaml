@@ -22,7 +22,6 @@ variables:
     # The depth is the maximum number of non-self-issued intermediate certificates that may follow the peer certificate in a valid certification path. So if depth is 0 the peer (e.g. client) certificate must be signed by the trusted CA directly, if 1 the path can be "peer, CA, trusted CA", if it is 2 "peer, CA, CA, trusted CA", and so on. The default depth is 1.
     # RABBITMQ_SSL_DEPTH: 1
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "false"
-    RABBITMQ_CTL_ERL_ARGS: "-proto_dist inet_tls"
     # RABBITMQ_SSL_VERIFY
     RABBITMQ_SSL_ENABLED: 1 # it is used by Celery
 

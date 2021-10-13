@@ -735,7 +735,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/rabbitmq:${RAPYDO_VERSION}
     healthcheck:
-      test: "RABBITMQ_CTL_ERL_ARGS='' rabbitmq-diagnostics status"
+      test: "rabbitmq-diagnostics status"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
@@ -755,7 +755,6 @@ services:
 
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_MANAGEMENT_PORT: ${RABBITMQ_MANAGEMENT_PORT}
-      RABBITMQ_CTL_ERL_ARGS: "${RABBITMQ_CTL_ERL_ARGS}"
       RABBITMQ_ENABLE_SHOVEL_PLUGIN: ${RABBITMQ_ENABLE_SHOVEL_PLUGIN}
 
     volumes:
