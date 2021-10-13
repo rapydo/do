@@ -349,7 +349,9 @@ class Swarm:
                 cpus = int(config.deploy.resources.reservations.cpus) or 0
                 memory = config.deploy.resources.reservations.memory
 
-                replicas = int(config.deploy.replicas)  # default=1
+                # the proxy container is now defined as global and without any replicas
+                # => replicas is None => defaulted to 1
+                replicas = int(config.deploy.replicas or 1)
 
                 total_cpus += replicas * cpus
                 total_memory += replicas * memory
