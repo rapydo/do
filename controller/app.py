@@ -522,8 +522,7 @@ class Application:
         specs = configuration.load_yaml_file(
             file=Configuration.ABS_PROJECT_PATH.joinpath(
                 configuration.PROJECT_CONF_FILENAME
-            ),
-            keep_order=True,
+            )
         )
 
         Application.verify_rapydo_version(
