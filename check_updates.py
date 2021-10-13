@@ -45,9 +45,8 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
 
     with open(filepath) as fh:
         try:
-            loader = yaml.load_all(fh, yaml.loader.Loader)
 
-            docs = list(loader)
+            docs = list(yaml.safe_load_all(fh))
 
             if not docs:
                 print_and_exit("YAML file is empty: {}", filepath)

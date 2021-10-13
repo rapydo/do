@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import yaml
 
@@ -142,16 +142,14 @@ def load_yaml_file(
 
     with open(file) as fh:
         try:
-            loader = yaml.safe_load_all(fh)
+            docs = list(yaml.safe_load_all(fh))
 
-            docs = list(loader)
-
-            if len(docs) == 0:
+            if not docs:
                 print_and_exit("YAML file is empty: {}", file)
 
             # Return value of yaml.safe_load_all is un-annotated and considered as Any
             # But we known that it is a Dict Configuration-compliant
-            return docs[0]  # type: ignore
+            return cast(Configuration, docs[0])
 
         except Exception as e:
             # # IF dealing with a strange exception string (escaped)
