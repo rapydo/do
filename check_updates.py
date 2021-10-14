@@ -28,7 +28,7 @@ Dependencies = Dict[str, Dict[str, List[str]]]
 # change current dir to the folder containing this script
 # this way the script will be allowed to access all required files
 # by providing relative links
-os.chdir(os.path.dirname(__file__))
+os.chdir(Path(__file__).parent)
 
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 

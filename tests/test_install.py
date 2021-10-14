@@ -1,7 +1,6 @@
 """
 This module will test the install command
 """
-import os
 from pathlib import Path
 
 from faker import Faker
@@ -88,14 +87,15 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     # are able to correctly resolve symlinks
     # ###########################################################
     # Copied from test_init_check_update.py from here...
-    os.rename("submodules", "submodules.bak")
-    os.mkdir("submodules")
+    submodules = Path("submodules")
+    submodules.rename("submodules.bak")
+    submodules.mkdir()
 
     # This is to re-fill the submodules folder,
     # these folder will be removed by the next init
     exec_command(capfd, "init", "Project initialized")
 
-    modules_path = os.path.abspath("submodules.bak")
+    modules_path = Path("submodules.bak").resolve()
 
     exec_command(
         capfd,

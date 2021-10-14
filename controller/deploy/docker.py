@@ -198,6 +198,10 @@ class Docker:
         tty: bool = True,
     ) -> None:
         print("")
+
+        # when tty is True the print is useless.
+        # When tty works, the terminal is directly connected to the container
+        # input and output entirely bypassing python
         print(
             self.client.container.execute(
                 container,

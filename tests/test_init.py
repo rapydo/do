@@ -90,7 +90,7 @@ def test_init(capfd: Capture, faker: Faker) -> None:
     # these folder will be removed by the next init
     exec_command(capfd, "init", "Project initialized")
 
-    modules_path = os.path.abspath("submodules.bak")
+    modules_path = Path("submodules.bak").resolve()
 
     with TemporaryRemovePath(Path("submodules.bak/do")):
         exec_command(
