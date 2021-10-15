@@ -133,13 +133,9 @@ def test_docker_registry(capfd: Capture) -> None:
         "The registry is already running at 127.0.0.1:5000",
     )
 
-    docker = Docker()
-
-    docker.client.container.stop("registry")
-
     exec_command(
         capfd,
-        "run registry",
+        "run -e REGISTRY_PORT=5001 registry",
         "The registry container is already existing, removing",
     )
 
@@ -150,6 +146,7 @@ def test_docker_registry(capfd: Capture) -> None:
     )
 
     # Copied from images.py
+    docker = Docker()
     registry = docker.get_registry()
     host = f"https://{registry}"
     r = docker.send_registry_request(f"{host}/v2/_catalog")
