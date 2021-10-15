@@ -185,12 +185,13 @@ RUN mkdir xyz
     )
 
     # Test init of data folders
-    shutil.rmtree("data/logs")
-    assert not os.path.isdir("data/logs")
+    logs_dir = Path("data", "logs")
+    shutil.rmtree(logs_dir)
+    assert not logs_dir.is_dir()
     # Let's restore .projectrc and data/logs
     init_project(capfd, "--project third")
 
-    assert os.path.isdir("data/logs")
+    assert logs_dir.is_dir()
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",

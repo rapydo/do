@@ -2,8 +2,8 @@
 This module will test the add and upgrade commands
 """
 
-import os
 import shutil
+from pathlib import Path
 
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 
@@ -20,10 +20,10 @@ def test_add(capfd: Capture) -> None:
     )
     init_project(capfd)
 
-    path = "projects/second/backend/endpoints/xyz.py"
-    test_path = "projects/second/backend/tests/test_endpoints_xyz.py"
-    assert not os.path.exists(path)
-    assert not os.path.exists(test_path)
+    path = Path("projects/second/backend/endpoints/xyz.py")
+    test_path = Path("projects/second/backend/tests/test_endpoints_xyz.py")
+    assert not path.exists()
+    assert not test_path.exists()
     exec_command(
         capfd,
         "add endpoint xyz --add-tests",
@@ -40,11 +40,11 @@ def test_add(capfd: Capture) -> None:
         "add --force endpoint xyz",
         f"Endpoint created: {path}",
     )
-    assert os.path.isfile(path)
-    assert os.path.isfile(test_path)
+    assert path.is_file()
+    assert test_path.is_file()
 
-    path = "projects/second/backend/tasks/xyz.py"
-    assert not os.path.exists(path)
+    path = Path("projects/second/backend/tasks/xyz.py")
+    assert not path.exists()
     exec_command(
         capfd,
         "add task xyz --add-tests",
@@ -61,13 +61,13 @@ def test_add(capfd: Capture) -> None:
         "add --force task xyz",
         f"Task created: {path}",
     )
-    assert os.path.isfile(path)
+    assert path.is_file()
 
-    path = "projects/second/frontend/app/components/xyz"
-    test_path = "projects/second/frontend/app/components/xyz/xyz.spec.ts"
-    assert not os.path.exists(path)
-    assert not os.path.exists(os.path.join(path, "xyz.ts"))
-    assert not os.path.exists(os.path.join(path, "xyz.html"))
+    path = Path("projects/second/frontend/app/components/xyz")
+    test_path = Path("projects/second/frontend/app/components/xyz/xyz.spec.ts")
+    assert not path.exists()
+    assert not path.joinpath("xyz.ts").exists()
+    assert not path.joinpath("xyz.html").exists()
     exec_command(
         capfd,
         "add component xyz --add-tests",
@@ -77,9 +77,9 @@ def test_add(capfd: Capture) -> None:
         f"Tests scaffold created: {test_path}",
     )
 
-    assert os.path.isdir(path)
-    assert os.path.isfile(os.path.join(path, "xyz.ts"))
-    assert os.path.isfile(os.path.join(path, "xyz.html"))
+    assert path.is_dir()
+    assert path.joinpath("xyz.ts").is_file()
+    assert path.joinpath("xyz.html").is_file()
     exec_command(
         capfd,
         "add component xyz",
@@ -106,9 +106,9 @@ def test_add(capfd: Capture) -> None:
         "Added SinkComponent to module declarations",
     )
 
-    path = "projects/second/frontend/app/services"
-    assert not os.path.exists(path)
-    assert not os.path.exists(os.path.join(path, "xyz.ts"))
+    path = Path("projects/second/frontend/app/services")
+    assert not path.exists()
+    assert not path.joinpath("xyz.ts").exists()
     exec_command(
         capfd,
         "add service xyz --add-tests",
@@ -117,8 +117,8 @@ def test_add(capfd: Capture) -> None:
         f"Service created: {path}",
         "Tests for services not implemented yet",
     )
-    assert os.path.isdir(path)
-    assert os.path.isfile(os.path.join(path, "xyz.ts"))
+    assert path.is_dir()
+    assert path.joinpath("xyz.ts").is_file()
     exec_command(
         capfd,
         "add service xyz",
@@ -129,7 +129,7 @@ def test_add(capfd: Capture) -> None:
         "add --force service xyz",
         f"Service created: {path}",
     )
-    os.remove(f"{path}/xyz.ts")
+    path.joinpath("xyz.ts").unlink()
     exec_command(
         capfd,
         "add service xyz",
@@ -138,8 +138,8 @@ def test_add(capfd: Capture) -> None:
         f"Service created: {path}",
     )
 
-    path = "projects/second/frontend/integration/app_mypath_my_id.spec.ts"
-    assert not os.path.exists(path)
+    path = Path("projects/second/frontend/integration/app_mypath_my_id.spec.ts")
+    assert not path.exists()
     exec_command(
         capfd,
         "add integration_test app/mypath/:my_id --add-tests",
@@ -162,10 +162,10 @@ def test_add(capfd: Capture) -> None:
         "add --force integration_test /app/mypath/:my_id",
         f"Integration test created: {path}",
     )
-    assert os.path.isfile(path)
+    assert path.is_file()
 
-    path = ".github/workflows/github_actions-backend.yml"
-    assert not os.path.exists(path)
+    path = Path(".github/workflows/github_actions-backend.yml")
+    assert not path.exists()
 
     exec_command(
         capfd,
@@ -195,7 +195,7 @@ def test_add(capfd: Capture) -> None:
         "add --force workflow backend",
         f"GitHub Actions workflow created: {path}",
     )
-    assert os.path.isfile(path)
+    assert path.is_file()
 
     exec_command(
         capfd,
