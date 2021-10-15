@@ -214,8 +214,7 @@ class Compose:
                 # Please note that interactive commands is not working yet
                 tty=True,
                 dependencies=False,
-                # Error in python on whales 0.27 to be restored once fixed
-                # remove=True,
+                remove=True,
                 service_ports=False,
                 publish=publish or [],
                 use_aliases=True,
