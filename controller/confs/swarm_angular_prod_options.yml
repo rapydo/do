@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 # This file may be merged with angular.yml when swarm mode will no longer be optional
 # This file is only included in production mode (AND swarm mode)

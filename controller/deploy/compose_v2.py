@@ -10,6 +10,7 @@ from tabulate import tabulate
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
+    COMPOSE_FILE_VERSION,
     RED,
     REGISTRY,
     SWARM_MODE,
@@ -75,7 +76,7 @@ class Compose:
         compose_config = self.get_config_json()
 
         clean_config: Dict[str, Any] = {
-            "version": compose_config.get("version", "3.8"),
+            "version": compose_config.get("version", COMPOSE_FILE_VERSION),
             "networks": {},
             "volumes": {},
             "services": {},

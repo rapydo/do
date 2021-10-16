@@ -63,7 +63,7 @@ DATAFILE = Path(".rapydo")
 EXTENDED_PROJECT_DISABLED = "no_extended_project"
 CONTAINERS_YAML_DIRNAME = "confs"
 COMPOSE_FILE = Path("docker-compose.yml")
-COMPOSE_FILE_VERSION = "3.8"
+COMPOSE_FILE_VERSION = "3.9"
 
 SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
 REGISTRY = "registry"
