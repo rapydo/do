@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 # This file may be merged with backend.yml when swarm mode will no longer be optional
 
@@ -233,3 +233,13 @@ services:
       placement:
         constraints:
           - "node.role==manager"
+
+    # network_mode does not work in swarm mode
+    # This external network is a workaround to let the container access the host network
+    networks:
+      - outside
+
+networks:
+  outside:
+    external:
+      name: "host"

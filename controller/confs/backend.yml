@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 # #####################
 # VOLUMES
@@ -1125,9 +1125,9 @@ services:
   fail2ban:
     restart: always
     image: crazymax/fail2ban:0.11.2
+    # This works for compose but not for swarm.
+    # In swarm mode this flag is replaced with an external network
     network_mode: "host"
-
-    # Actually not working in swarm mode... they are ignored
     cap_add:
       - NET_ADMIN
       - NET_RAW
