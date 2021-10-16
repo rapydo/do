@@ -1126,6 +1126,8 @@ services:
     restart: always
     image: crazymax/fail2ban:0.11.2
     network_mode: "host"
+
+    # Actually not working in swarm mode... they are ignored
     cap_add:
       - NET_ADMIN
       - NET_RAW
@@ -1142,4 +1144,6 @@ services:
     volumes:
       - /var/log/syslog:/var/log/syslog:ro
       - /tmp/fail2ban:/data
-      # - ______:/data  # Contains customs jails, actions and filters and Fail2ban persistent database
+      # /data/db could be attached to a data-dir
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d

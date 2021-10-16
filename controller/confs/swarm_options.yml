@@ -229,6 +229,7 @@ services:
 
   fail2ban:
     deploy:
+      mode: global
       placement:
         constraints:
           - "node.role==manager"
