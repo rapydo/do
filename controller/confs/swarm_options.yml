@@ -226,3 +226,9 @@ services:
     logging:
       options:
         syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+
+  fail2ban:
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
