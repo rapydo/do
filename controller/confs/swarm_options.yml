@@ -10,6 +10,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_BACKEND}"
           memory: ${ASSIGNED_MEMORY_BACKEND}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   proxy:
     deploy:
@@ -28,6 +31,9 @@ services:
       placement:
         constraints:
           - "node.role==manager"
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   postgres:
     deploy:
@@ -37,6 +43,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_POSTGRES}"
           memory: ${ASSIGNED_MEMORY_POSTGRES}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   mariadb:
     deploy:
@@ -46,6 +55,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_MARIADB}"
           memory: ${ASSIGNED_MEMORY_MARIADB}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   neo4j:
     deploy:
@@ -55,6 +67,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_NEO4J}"
           memory: ${ASSIGNED_MEMORY_NEO4J}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   mongodb:
     deploy:
@@ -64,6 +79,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_MONGODB}"
           memory: ${ASSIGNED_MEMORY_MONGODB}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   celery:
     deploy:
@@ -72,6 +90,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_CELERY}"
           memory: ${ASSIGNED_MEMORY_CELERY}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   celery-beat:
     deploy:
@@ -80,6 +101,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_CELERYBEAT}"
           memory: ${ASSIGNED_MEMORY_CELERYBEAT}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   rabbit:
     deploy:
@@ -89,6 +113,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_RABBIT}"
           memory: ${ASSIGNED_MEMORY_RABBIT}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   redis:
     deploy:
@@ -98,6 +125,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_REDIS}"
           memory: ${ASSIGNED_MEMORY_REDIS}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   bot:
     deploy:
@@ -107,6 +137,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_BOT}"
           memory: ${ASSIGNED_MEMORY_BOT}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   flower:
     deploy:
@@ -116,6 +149,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_FLOWER}"
           memory: ${ASSIGNED_MEMORY_FLOWER}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   swaggerui:
     deploy:
@@ -124,6 +160,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_SWAGGERUI}"
           memory: ${ASSIGNED_MEMORY_SWAGGERUI}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   adminer:
     deploy:
@@ -133,6 +172,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_ADMINER}"
           memory: ${ASSIGNED_MEMORY_ADMINER}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   ftp:
     deploy:
@@ -142,6 +184,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_FTP}"
           memory: ${ASSIGNED_MEMORY_FTP}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   smtp:
     deploy:
@@ -151,6 +196,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_SMTP}"
           memory: ${ASSIGNED_MEMORY_SMTP}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   pushpin:
     deploy:
@@ -160,6 +208,9 @@ services:
         reservations:
           cpus: "${ASSIGNED_CPU_PUSHPIN}"
           memory: ${ASSIGNED_MEMORY_PUSHPIN}
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
 
   registry:
     deploy:
@@ -172,3 +223,6 @@ services:
       placement:
         constraints:
           - "node.role==manager"
+    logging:
+      options:
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"

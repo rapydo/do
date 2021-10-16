@@ -63,8 +63,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
     hostname: backend-server
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
@@ -258,6 +259,8 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
+    logging:
+      driver: syslog
     working_dir: /etc/nginx
     # logging:
     #   driver: syslog
@@ -325,6 +328,8 @@ services:
     image: rapydo/proxy:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
+    logging:
+      driver: syslog
     volumes:
       - ssl_certs:/etc/letsencrypt
     networks:
@@ -358,6 +363,8 @@ services:
       timeout: 20s
       retries: 3
       start_period: 5m
+    logging:
+      driver: syslog
     volumes:
       - sqldata:/var/lib/postgresql
       - ${DATA_DIR}/backup:/backup
@@ -382,6 +389,8 @@ services:
       timeout: 20s
       retries: 3
       start_period: 5m
+    logging:
+      driver: syslog
     volumes:
       - mariadb:/var/lib/mysql
       - ${DATA_DIR}/backup:/backup
@@ -414,6 +423,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
+
+    logging:
+      driver: syslog
 
     volumes:
       - graphdata:/data
@@ -487,6 +499,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
+    logging:
+      driver: syslog
     volumes:
       - mongodata:/data/db
     networks:
@@ -522,7 +536,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
+    logging:
+      driver: syslog
     # user: developer
     working_dir: /code
     environment:
@@ -653,7 +668,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
+    logging:
+      driver: syslog
     # user: developer
     working_dir: /code
     environment:
@@ -740,7 +756,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
+    logging:
+      driver: syslog
     hostname: rabbit
     environment:
       ACTIVATE: ${ACTIVATE_RABBIT}
@@ -776,7 +793,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
+    logging:
+      driver: syslog
     volumes:
       - redisdata:/data
       - ${DATA_DIR}/backup:/backup
@@ -803,6 +821,8 @@ services:
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-bot
     hostname: telegram-bot
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_TELEGRAM}
       APP_MODE: ${APP_MODE}
@@ -856,6 +876,7 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
+    hostname: flower
 
     entrypoint: docker-entrypoint-celery
     # user: root
@@ -866,7 +887,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-    hostname: flower
+    logging:
+      driver: syslog
     working_dir: /code
     expose:
       - ${FLOWER_PORT}
@@ -947,6 +969,8 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/swaggerui:${RAPYDO_VERSION}
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
@@ -969,6 +993,8 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/adminer:${RAPYDO_VERSION}
+    logging:
+      driver: syslog
     # user: adminer
     networks:
       default:
@@ -995,6 +1021,8 @@ services:
     # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
     # with the server's SSL certificates for TLS support. Optional TLS is
     # automatically enabled when the container finds this file on startup.
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
@@ -1015,6 +1043,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
@@ -1029,6 +1059,8 @@ services:
   pushpin:
     restart: always
     image: fanout/pushpin:1.33.1
+    logging:
+      driver: syslog
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
@@ -1058,7 +1090,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
+    logging:
+      driver: syslog
     ports:
       - 5000:5000
     environment:
