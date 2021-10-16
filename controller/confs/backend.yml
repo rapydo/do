@@ -1117,3 +1117,27 @@ services:
 
     volumes:
       - registry:/var/lib/registry
+
+  ##################
+  ###  FAIL2BAN  ###
+  ##################
+
+  fail2ban:
+    restart: always
+    image: crazymax/fail2ban:0.11.2
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      ACTIVATE: ${ACTIVATE_FAIL2BAN}
+      # ACTIVATE: 1
+      # SSMTP_HOST: SMTP server host
+      # SSMTP_PORT: SMTP server port (default 25)
+      # SSMTP_HOSTNAME: Full hostname (default $(hostname -f))
+      # SSMTP_USER: SMTP username
+      # SSMTP_PASSWORD: SMTP password
+      # SSMTP_TLS: Use TLS to talk to the SMTP server (default NO)
+      # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
+    volumes:
+      - /var/log/syslog:/var/log/syslog:ro

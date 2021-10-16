@@ -316,6 +316,9 @@ variables:
     # Automatically set before creating the registry
     REGISTRY_HTTP_SECRET:
 
+    # Fail2ban
+    ACTIVATE_FAIL2BAN: 0
+
     # To be enabled with "manager.host"
     # defaulted to local IP of active network interface
     # Note: can only be modified as env variable, not projectrc/-e :\
