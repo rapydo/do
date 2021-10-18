@@ -1124,7 +1124,8 @@ services:
 
   fail2ban:
     restart: always
-    image: crazymax/fail2ban:0.11.2
+    build: ${SUBMODULE_DIR}/build-templates/fail2ban
+    image: rapydo/fail2ban:${RAPYDO_VERSION}
     # This works for compose but not for swarm.
     # In swarm mode this flag is replaced with an external network
     network_mode: "host"
