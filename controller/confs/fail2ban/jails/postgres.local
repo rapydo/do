@@ -1,20 +1,2 @@
 [postgres]
 enabled  = true
-bantime = 1h
-
-# increase banTime * 1, 2, 4, 8, 16, 32...
-bantime.increment = true
-
-# "bantime.rndtime" is the max number of seconds using for mixing with random time
-# to prevent "clever" botnets calculate exact time IP can be unbanned again:
-bantime.rndtime = 59
-
-# Time window to search for maxretry matches
-findtime = 1h
-maxretry = 5                     
-
-logpath  = /var/log/syslog
-
-banaction = iptables-allports
-chain = DOCKER-USER
-
