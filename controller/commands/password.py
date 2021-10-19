@@ -178,6 +178,13 @@ def password(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--show", show, IF=show),
+        Application.serialize_parameter("--random", random, IF=random),
+        Application.serialize_parameter("--password", new_password, IF=new_password),
+        Application.serialize_parameter("", service),
+    )
+
     Application.get_controller().controller_init()
 
     # No service specified, only a summary will be reported

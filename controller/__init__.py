@@ -40,10 +40,13 @@ if LOGS_FILE is not None:
     try:
         log.add(
             LOGS_FILE,
-            level="WARNING",
+            level=0,
             rotation="1 week",
             retention=f"{LOG_RETENTION} days",
+            format="{time:YYYY-MM-DD HH:mm:ss,SSS} <level>{level:8}</level> {message}",
             colorize=False,
+            filter=lambda record: record["level"].no >= log.level("WARNING").no
+            or "log_to_file" in record["extra"],
         )
     except PermissionError as e:  # pragma: no cover
         log.error(e)

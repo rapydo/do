@@ -37,6 +37,17 @@ def shell(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--user", user, IF=user),
+        Application.serialize_parameter(
+            "--default", default_command, IF=default_command
+        ),
+        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
+        Application.serialize_parameter("", service),
+        Application.serialize_parameter("", command),
+    )
+
     Application.get_controller().controller_init()
 
     swarm = Swarm()

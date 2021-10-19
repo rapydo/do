@@ -48,6 +48,13 @@ def ssl(
         show_default=False,
     ),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--volatile", volatile, IF=volatile),
+        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
+        Application.serialize_parameter("--chain-file", chain_file, IF=chain_file),
+        Application.serialize_parameter("--key-file", key_file, IF=key_file),
+    )
+
     Application.get_controller().controller_init()
 
     if chain_file is not None or key_file is not None:

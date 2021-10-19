@@ -18,6 +18,11 @@ def update(
         shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--ignore-submodule", ignore_submodules),
+    )
+
     Application.get_controller().controller_init()
 
     Application.git_update(ignore_submodules)

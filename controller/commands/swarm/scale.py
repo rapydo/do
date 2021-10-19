@@ -37,6 +37,10 @@ def scale(
         show_default=False,
     ),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--wait", wait, IF=wait),
+        Application.serialize_parameter("", scaling),
+    )
     Application.get_controller().controller_init()
 
     options = scaling.split("=")

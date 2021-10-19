@@ -89,6 +89,21 @@ def create(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--auth", auth),
+        Application.serialize_parameter("--frontend", frontend),
+        Application.serialize_parameter("--extend", extend, IF=extend),
+        Application.serialize_parameter("--service", services),
+        Application.serialize_parameter("--origin-url", origin_url, IF=origin_url),
+        Application.serialize_parameter("--env", envs),
+        Application.serialize_parameter("--current", force_current, IF=force_current),
+        Application.serialize_parameter("--force", force, IF=force),
+        Application.serialize_parameter("--auto", auto, IF=auto),
+        Application.serialize_parameter("--add-optionals", add_optionals),
+        Application.serialize_parameter("", project_name),
+    )
+
     Application.get_controller().controller_init()
 
     if extend is not None:

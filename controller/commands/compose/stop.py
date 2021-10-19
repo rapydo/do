@@ -15,6 +15,7 @@ def stop(
         shell_complete=Application.autocomplete_service,
     )
 ) -> None:
+    Application.print_command(Application.serialize_parameter("", services))
     Application.get_controller().controller_init(services)
 
     dc = Compose(Application.data.files)

@@ -22,6 +22,11 @@ def tuning(
     cpu: int = typer.Option(None, "--cpu", help="Force the amount of cpus", min=1),
     ram: int = typer.Option(None, "--ram", help="Force the amount of ram", min=1),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--cpu", cpu, IF=cpu),
+        Application.serialize_parameter("--ram", ram, IF=ram),
+        Application.serialize_parameter("", service),
+    )
     Application.get_controller().controller_init()
 
     service_name = service.value

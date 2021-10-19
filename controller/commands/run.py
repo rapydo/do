@@ -70,6 +70,15 @@ def run(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--pull", pull, IF=pull),
+        Application.serialize_parameter("--debug", debug, IF=debug),
+        Application.serialize_parameter("--command", command, IF=command),
+        Application.serialize_parameter("--user", user, IF=user),
+        Application.serialize_parameter("--port", port, IF=port),
+        Application.serialize_parameter("", service),
+    )
+
     Configuration.FORCE_COMPOSE_ENGINE = True
 
     Application.get_controller().controller_init()

@@ -44,6 +44,11 @@ def check(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--no-git", no_git, IF=no_git),
+        Application.serialize_parameter("--no-builds", no_builds, IF=no_builds),
+        Application.serialize_parameter("--ignore-submodule", ignore_submodules),
+    )
     Application.get_controller().controller_init()
 
     if SWARM_MODE:

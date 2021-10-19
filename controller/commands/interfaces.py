@@ -39,6 +39,11 @@ def interfaces(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--detach", detach, IF=detach),
+        Application.serialize_parameter("--port", port, IF=port),
+        Application.serialize_parameter("", service),
+    )
     # Deprecated since 1.2
     if service.value == "sqlalchemy":
         log.warning("Deprecated interface sqlalchemy, use adminer instead")

@@ -21,6 +21,10 @@ def remove(
         show_default=False,
     ),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--all", rm_all, IF=rm_all),
+        Application.serialize_parameter("", services),
+    )
     Application.get_controller().controller_init(services)
 
     dc = Compose(Application.data.files)

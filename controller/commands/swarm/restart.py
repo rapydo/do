@@ -17,6 +17,10 @@ def restart(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--force", force, IF=force),
+    )
+
     Application.get_controller().controller_init()
 
     swarm = Swarm()

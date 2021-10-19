@@ -24,6 +24,10 @@ def images(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--remove", remove_images, IF=remove_images),
+    )
+
     Application.get_controller().controller_init()
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

@@ -19,6 +19,8 @@ def start(
     )
 ) -> None:
 
+    Application.print_command(Application.serialize_parameter("", services))
+
     Application.get_controller().controller_init(services)
 
     if SWARM_MODE:

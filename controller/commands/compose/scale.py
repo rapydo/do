@@ -11,6 +11,9 @@ from controller.deploy.compose_v2 import Compose
 def scale(
     scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
 ) -> None:
+
+    Application.print_command(Application.serialize_parameter("", scaling))
+
     Application.get_controller().controller_init()
 
     options = scaling.split("=")

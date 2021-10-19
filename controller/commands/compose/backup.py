@@ -65,6 +65,14 @@ def backup(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--force", force, IF=force),
+        Application.serialize_parameter("--max", max_backups, IF=max_backups),
+        Application.serialize_parameter("--dry-run", dry_run, IF=dry_run),
+        Application.serialize_parameter("--restart", restart, IF=restart),
+        Application.serialize_parameter("", service),
+    )
+
     if dry_run:
         log.warning("Dry run mode is enabled")
 

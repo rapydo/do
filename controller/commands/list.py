@@ -24,6 +24,7 @@ def list_cmd(
         ..., help="Type of element to be listed"
     ),
 ) -> None:
+    Application.print_command(Application.serialize_parameter("", element_type))
     Application.get_controller().controller_init()
 
     table: List[List[str]] = []

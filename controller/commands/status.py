@@ -6,6 +6,9 @@ from controller.deploy.swarm import Swarm
 
 @Application.app.command(help="Show current services status")
 def status() -> None:
+
+    Application.print_command()
+
     Application.get_controller().controller_init()
 
     if SWARM_MODE:

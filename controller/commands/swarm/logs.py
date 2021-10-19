@@ -26,6 +26,11 @@ def logs(
         help="Number of lines to show",
     ),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--follow", follow, IF=follow),
+        Application.serialize_parameter("--tail", tail),
+        Application.serialize_parameter("", service),
+    )
     Application.get_controller().controller_init()
 
     if service == "frontend":

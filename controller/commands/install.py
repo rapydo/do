@@ -64,6 +64,11 @@ def install(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--no-editable", not editable, IF=not editable),
+        Application.serialize_parameter("", version),
+    )
+
     if version == "docker":
         log.info("Docker current version: {}", Packages.get_bin_version("docker"))
         url = "https://get.docker.com"

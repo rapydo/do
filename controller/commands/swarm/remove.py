@@ -36,6 +36,8 @@ def remove(
     ),
 ) -> None:
 
+    Application.print_command(Application.serialize_parameter("", services))
+
     remove_registry = False
     if services and REGISTRY in services:
         # services is a tuple, even if defined as List[str] ...

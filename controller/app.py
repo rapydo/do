@@ -6,7 +6,7 @@ import time
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
 import click
 import requests
@@ -49,6 +49,9 @@ ROOT_UID = 0
 BASE_UID = 1000
 
 
+CommandParameter = Union[int, str, bool, None, Path, Iterable[str]]
+
+
 class Configuration:
     projectrc: Dict[str, str] = {}
     # To be better characterized. This is a:
@@ -59,6 +62,7 @@ class Configuration:
     environment: Dict[str, str]
 
     action: Optional[str] = None
+    parameters: List[str] = []
 
     production: bool = False
     testing: bool = False
@@ -91,8 +95,7 @@ class Configuration:
     FORCE_COMPOSE_ENGINE: bool = False
 
     @staticmethod
-    def set_action(action: Optional[str]) -> None:
-        log.debug("Requested command: {}", action)
+    def set_action(action: Optional[str], params: Dict[str, Any]) -> None:
         Configuration.action = action
         Configuration.initialize = Configuration.action == "init"
         Configuration.update = Configuration.action == "update"
@@ -100,6 +103,49 @@ class Configuration:
         Configuration.install = Configuration.action == "install"
         Configuration.print_version = Configuration.action == "version"
         Configuration.create = Configuration.action == "create"
+
+        params.pop("version")
+        # This will start to fail when this parameter will be dropped
+        params.pop("services_list")
+
+        project = params.pop("project")
+        if project and project != Configuration.projectrc.get("project"):
+            Configuration.parameters.append(f"--project {project}")
+
+        hostname = params.pop("hostname")
+        if hostname != "localhost" and hostname != Configuration.projectrc.get(
+            "hostname"
+        ):
+            Configuration.parameters.append(f"--hostname {hostname}")
+
+        stack = params.pop("stack")
+        if stack and stack != Configuration.projectrc.get("stack"):
+            Configuration.parameters.append(f"--stack {stack}")
+
+        if params.pop("production"):
+            Configuration.parameters.append("--production")
+
+        if params.pop("testing"):
+            Configuration.parameters.append("--testing")
+
+        environment = params.pop("environment")
+        if environment:
+            for e in environment:
+                Configuration.parameters.append(f"--env {e}")
+
+        remote_engine = params.pop("remote_engine")
+        if remote_engine and stack:
+            Configuration.parameters.append(f"--remote {remote_engine}")
+
+        if params.pop("no_backend"):
+            Configuration.parameters.append("--no-backend")
+        if params.pop("no_frontend"):
+            Configuration.parameters.append("--no-frontend")
+        if params.pop("no_commons"):
+            Configuration.parameters.append("--no-commons")
+
+        if params:
+            log.warning("Found unknown parameters: {}", params)
 
 
 def projectrc_values(
@@ -220,7 +266,8 @@ def controller_cli_options(
     # FORCE_COMPOSE_ENGINE remains enabled
     # It would not be needed during the normal use of the controller
     Configuration.FORCE_COMPOSE_ENGINE = False
-    Configuration.set_action(ctx.invoked_subcommand)
+
+    Configuration.set_action(ctx.invoked_subcommand, ctx.params)
 
     # Deprecated since 2.1
     if services_list:
@@ -297,6 +344,49 @@ class Application:
         load_commands()
 
         Application.load_projectrc()
+
+    @staticmethod
+    def serialize_parameter(
+        param: str,
+        value: CommandParameter,
+        IF: CommandParameter = True,
+    ) -> Optional[str]:
+        if IF and value is not None:
+            if isinstance(value, bool):
+                return f"{param}"
+            if isinstance(value, tuple) or isinstance(value, list):
+                return " ".join([f"{param} {v}" for v in value])
+
+            # Options => (--param value)
+            if param:
+                return f"{param} {value}"
+
+            # Arguments ( => no param, only a value)
+            return str(value)
+
+        return None
+
+    @staticmethod
+    def print_command(*parameters: Optional[str]) -> None:
+
+        pre_params = " ".join(
+            [p for p in Configuration.parameters if p is not None]
+        ).strip()
+        post_params = " ".join([p for p in parameters if p is not None]).strip()
+
+        if pre_params:
+            pre_params = f"{pre_params} "
+
+        if post_params:
+            post_params = f" {post_params}"
+
+        log.debug(
+            "Command: rapydo {}{}{}",
+            pre_params,
+            Configuration.action,
+            post_params,
+            log_to_file=True,
+        )
 
     @staticmethod
     def get_controller() -> "Application":
@@ -946,7 +1036,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         elif Configuration.check:
-            log.info("Active services: {}", active_services)
+            log.info("Active services: {}", active_services, log_to_file=True)
 
         missing: Dict[str, Set[str]] = {}
         passwords: Dict[str, str] = {}

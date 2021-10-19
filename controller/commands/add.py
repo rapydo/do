@@ -66,6 +66,13 @@ def add(
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--add-tests", add_tests, IF=add_tests),
+        Application.serialize_parameter("--force", force, IF=force),
+        Application.serialize_parameter("", element_type),
+        Application.serialize_parameter("", name),
+    )
+
     Application.get_controller().controller_init()
 
     auth = glom(

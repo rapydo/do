@@ -35,6 +35,11 @@ def build(
         show_default=False,
     ),
 ) -> bool:
+    Application.print_command(
+        Application.serialize_parameter("--core", core, IF=core),
+        Application.serialize_parameter("--force", force, IF=force),
+        Application.serialize_parameter("", services),
+    )
     Application.get_controller().controller_init(services)
 
     docker = Docker()

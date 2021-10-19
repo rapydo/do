@@ -28,6 +28,12 @@ def logs(
         help="Number of lines to show",
     ),
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--follow", follow, IF=follow),
+        Application.serialize_parameter("--tail", tail, IF=tail),
+        Application.serialize_parameter("", services),
+    )
+
     Application.get_controller().controller_init(services)
 
     services = Application.data.services
