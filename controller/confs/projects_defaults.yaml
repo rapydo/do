@@ -367,7 +367,7 @@ variables:
     AUTH_FORCE_FIRST_PASSWORD_CHANGE: 0
     AUTH_MAX_PASSWORD_VALIDITY: 0
     AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: 0
-    AUTH_MAX_LOGIN_ATTEMPTS: 0
+    AUTH_MAX_LOGIN_ATTEMPTS: 8
     # Increased from 1 hour to 12 hours after implementing the unlock token mechanism
     # AUTH_LOGIN_BAN_TIME: 3600
     AUTH_LOGIN_BAN_TIME: 43200
