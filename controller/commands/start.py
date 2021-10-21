@@ -36,26 +36,26 @@ def start(
     compose = Compose(Application.data.files)
     if SWARM_MODE:
         swarm = Swarm()
-        if swarm.stack_is_running(Configuration.project):
-            print_and_exit(
-                "A stack is already running. "
-                "Stop it with {command1} if you want to start a new stack "
-                "or use {command2} to update it",
-                command1=RED("rapydo remove"),
-                command2=RED("rapydo restart"),
-            )
+        # if swarm.stack_is_running(Configuration.project):
+        #     print_and_exit(
+        #         "A stack is already running. "
+        #         "Stop it with {command1} if you want to start a new stack "
+        #         "or use {command2} to update it",
+        #         command1=RED("rapydo remove"),
+        #         command2=RED("rapydo restart"),
+        #     )
 
         compose.dump_config(Application.data.services)
         swarm.deploy()
     else:
-        if compose.get_running_services(Configuration.project):
-            print_and_exit(
-                "A stack is already running. "
-                "Stop it with {command1} if you want to start a new stack "
-                "or use {command2} to update it",
-                command1=RED("rapydo remove"),
-                command2=RED("rapydo restart"),
-            )
+        # if compose.get_running_services(Configuration.project):
+        #     print_and_exit(
+        #         "A stack is already running. "
+        #         "Stop it with {command1} if you want to start a new stack "
+        #         "or use {command2} to update it",
+        #         command1=RED("rapydo remove"),
+        #         command2=RED("rapydo restart"),
+        #     )
         compose.start_containers(Application.data.services)
 
     log.info("Stack started")

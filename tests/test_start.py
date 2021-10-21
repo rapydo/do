@@ -4,9 +4,13 @@ This module will test the start command
 
 import random
 import shutil
+import time
 from pathlib import Path
 
+from python_on_whales import docker
+
 from controller import SWARM_MODE, colors
+from controller.deploy.swarm import Swarm
 from tests import (
     Capture,
     create_project,
@@ -71,22 +75,55 @@ def test_all(capfd: Capture) -> None:
 
     if SWARM_MODE:
 
+        swarm = Swarm()
+
         # Deploy a sub-stack
         exec_command(
             capfd,
             "start backend",
+            "Enabled services: ['backend']",
             "Stack started",
         )
 
+        time.sleep(2)
+
+        # Only backend is expected to be running
+        backend_container = swarm.get_container("backend", slot=1)
+        assert backend_container is not None
+        assert docker.container.exists(backend_container)
+
+        neo4j_container = swarm.get_container("neo4j", slot=1)
+        assert neo4j_container is not None
+        assert not docker.container.exists(neo4j_container)
         # Once started a stack in swarm mode, it's not possible
         # to re-deploy another stack
+        # exec_command(
+        #     capfd,
+        #     "start",
+        #     "A stack is already running",
+        #     f"Stop it with {colors.RED}rapydo remove{colors.RESET} "
+        #     "if you want to start a new stack",
+        # )
+
+        # Deploy an additional sub-stack
         exec_command(
             capfd,
-            "start",
-            "A stack is already running",
-            f"Stop it with {colors.RED}rapydo remove{colors.RESET} "
-            "if you want to start a new stack",
+            "start neo4j",
+            "Enabled services: ['neo4j']",
+            "Stack started",
         )
+
+        time.sleep(2)
+
+        # In swarm mode new stack replaces the previous
+        # => Only neo4j is expected to be running
+        backend_container = swarm.get_container("backend", slot=1)
+        assert backend_container is not None
+        assert not docker.container.exists(backend_container)
+
+        neo4j_container = swarm.get_container("neo4j", slot=1)
+        assert neo4j_container is not None
+        assert docker.container.exists(neo4j_container)
 
         exec_command(
             capfd,
@@ -101,15 +138,16 @@ def test_all(capfd: Capture) -> None:
             "Stack started",
         )
 
-        # Once started a stack in swarm mode, it's not possible
-        # to re-deploy another stack
-        exec_command(
-            capfd,
-            "start backend",
-            "A stack is already running",
-            f"Stop it with {colors.RED}rapydo remove{colors.RESET} "
-            "if you want to start a new stack",
-        )
+        time.sleep(2)
+
+        # Now both backend and neo4j are expected to be running
+        backend_container = swarm.get_container("backend", slot=1)
+        assert backend_container is not None
+        assert docker.container.exists(backend_container)
+
+        neo4j_container = swarm.get_container("neo4j", slot=1)
+        assert neo4j_container is not None
+        assert docker.container.exists(neo4j_container)
 
         # ############################
         # Verify bind volumes checks #
@@ -153,14 +191,39 @@ def test_all(capfd: Capture) -> None:
         )
         assert karma_folder.exists()
     else:
+
+        # Deploy a sub-stack
+        exec_command(
+            capfd,
+            "start backend",
+            "Enabled services: ['backend']",
+            "Stack started",
+        )
+
+        # Only backend is expected to be running
+        assert docker.container.exists(f"{project_name}_backend_1")
+        assert not docker.container.exists(f"{project_name}_neo4j_1")
+
+        # Deploy an additional sub-stack
+        exec_command(
+            capfd,
+            "start neo4j",
+            "Enabled services: ['neo4j']",
+            "Stack started",
+        )
+
+        # In compose mode additional stack are aggregated
+        # => both backend and neo4j are expected to be running
+        assert docker.container.exists(f"{project_name}_backend_1")
+        assert docker.container.exists(f"{project_name}_neo4j_1")
+
+        # exec_command(
+        #     capfd,
+        #     "start",
+        #     "A stack is already running.",
+        # )
         exec_command(
             capfd,
             "start",
             "Stack started",
-        )
-
-        exec_command(
-            capfd,
-            "start",
-            "A stack is already running.",
         )
