@@ -2,8 +2,8 @@ from typing import List
 
 import typer
 
-from controller import RED, SWARM_MODE, log, print_and_exit
-from controller.app import Application, Configuration
+from controller import SWARM_MODE, log
+from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose_v2 import Compose as Compose
 from controller.deploy.docker import Docker
@@ -11,6 +11,7 @@ from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Start services for this configuration")
+# Maybe to be renamed in deploy?
 def start(
     services: List[str] = typer.Argument(
         None,
