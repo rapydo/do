@@ -64,7 +64,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user       | User",
+        "normal_user       | User",
     )
 
     exec_command(
@@ -255,7 +255,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user       | User",
+        "normal_user       | User",
     )
     # 2) Modify such data
     exec_command(
@@ -265,7 +265,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user       | normal_user",
+        "normal_user       | normal_user",
     )
     # 3) restore the dump
     exec_command(
@@ -281,5 +281,5 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',
-        " normal_user       | User",
+        "normal_user       | User",
     )
