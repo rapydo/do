@@ -4,7 +4,6 @@ import typer
 
 from controller import log, print_and_exit
 from controller.app import Application, Configuration
-from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 from controller.utilities import services
 
@@ -38,10 +37,20 @@ def shell(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--user", user, IF=user),
+        Application.serialize_parameter(
+            "--default", default_command, IF=default_command
+        ),
+        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
+        Application.serialize_parameter("", service),
+        Application.serialize_parameter("", command),
+    )
+
     Application.get_controller().controller_init()
 
     docker = Docker()
-    dc = Compose(files=Application.data.files)
 
     if not user:
         user = services.get_default_user(service, Configuration.frontend)
@@ -56,5 +65,4 @@ def shell(
     if not container:
         print_and_exit("No running container found for {} service", service)
 
-    # docker.exec_command(container, user=user, command=command, tty=not no_tty)
-    dc.exec_command(service, user=user, command=command, disable_tty=no_tty)
+    docker.exec_command(container, user=user, command=command, tty=not no_tty)

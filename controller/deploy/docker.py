@@ -197,18 +197,28 @@ class Docker:
         command: str = None,
         tty: bool = True,
     ) -> None:
-        print("")
 
-        # when tty is True the print is useless.
-        # When tty works, the terminal is directly connected to the container
-        # input and output entirely bypassing python
-        print(
-            self.client.container.execute(
-                container,
-                user=user,
-                command=self.split_command(command),
-                interactive=tty,
-                tty=tty,
-                detach=False,
-            )
+        output = self.client.container.execute(
+            container,
+            user=user,
+            command=self.split_command(command),
+            interactive=tty,
+            tty=tty,
+            stream=not tty,
+            detach=False,
         )
+        # When tty is True the output is empty because the terminal is directly
+        # connected to the container I/o entirely bypassing python
+        if output:
+            for out_line in output:
+                # 'stdout' or 'stderr'
+                # Both out and err are collapsed in stdout
+                # Maybe in the future would be useful to keep them separated?
+                # stdstream = out_line[0]
+
+                line = out_line[1]
+
+                if isinstance(line, bytes):
+                    line = line.decode("UTF-8")
+
+                print(line.strip())
