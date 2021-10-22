@@ -53,7 +53,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "ssl",
-        "No container found for proxy_1",
+        "The proxy is not running, start your stack or try with "
+        f"{colors.RED}rapydo ssl --volatile",
     )
 
     # Before creating SSL certificates rabbit and neo4j should not be able to start

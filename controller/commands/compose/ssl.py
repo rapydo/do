@@ -102,7 +102,7 @@ def ssl(
         container = docker.get_container(service, slot=1)
         if not container:
             print_and_exit(
-                "If your proxy container is not running, try with {command}",
+                "The proxy is not running, start your stack or try with {command}",
                 command=RED("rapydo ssl --volatile"),
             )
         docker.exec_command(container, user="root", command=command, tty=not no_tty)
