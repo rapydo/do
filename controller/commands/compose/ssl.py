@@ -107,24 +107,25 @@ def ssl(
             )
         docker.exec_command(container, user="root", command=command, tty=not no_tty)
 
-    running_containers = dc.get_running_containers(Configuration.project)
-    if "neo4j" in running_containers:
+    container = docker.get_container("neo4j", slot=1)
+    if container:
         # This is not true!! A full restart is needed
         # log.info("Neo4j is running, but it will reload the certificate by itself")
         # But not implemented yet...
         log.info("Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.")
 
-    if "rabbit" in running_containers:
+    container = docker.get_container("rabbit", slot=1)
+    if container:
         log.info("RabbitMQ is running, executing command to refresh the certificate")
         # Please note that Erland is able to automatically reload the certificate
         # But RabbitMQ does not. Probably in the future releases this command will
         # No longer be required. To test it after the creation of the new cert:
         #   echo -n | openssl s_client -showcerts -connect hostname:5671
         # Please note that this command can fail if RabbitMQ is still starting
-        dc.exec_command(
-            "rabbit",
+        docker.exec_command(
+            container,
             command="/usr/local/bin/reload_certificate",
-            disable_tty=no_tty,
+            tty=not no_tty,
         )
 
     log.info("New certificate successfully enabled")
