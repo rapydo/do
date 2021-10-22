@@ -108,6 +108,7 @@ class Configuration:
         # This will start to fail when this parameter will be dropped
         params.pop("services_list")
 
+        Configuration.parameters = []
         project = params.pop("project")
         if project and project != Configuration.projectrc.get("project"):
             Configuration.parameters.append(f"--project {project}")

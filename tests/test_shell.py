@@ -70,7 +70,8 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell backend hostname",
-            "the input device is not a TTY",
+            # "the input device is not a TTY",
+            "fileno",
         )
 
         exec_command(
