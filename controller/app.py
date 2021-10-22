@@ -540,9 +540,8 @@ class Application:
             )
 
         if docker.compose.is_installed():
-            # NotImplementedError
-            # v = docker.compose.version()
-            log.debug("docker compose is installed")
+            v = docker.compose.version()
+            log.debug("docker compose is installed: {}", v)
         else:  # pragma: no cover
             print_and_exit(
                 "A mandatory dependency is missing: docker compose not found"
