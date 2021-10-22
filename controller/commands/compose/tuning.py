@@ -4,9 +4,10 @@ from enum import Enum
 import typer
 
 from controller import log
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 from controller.utilities import system
 
 
@@ -51,14 +52,14 @@ def tuning(
         )
 
         dc = Compose(files=Application.data.files)
+        docker = Docker()
 
-        running_containers = dc.get_running_containers(Configuration.project)
-        container_is_running = service_name in running_containers
+        container = docker.get_container(service, slot=1)
 
         command = f"neo4j-admin memrec --memory {ram}"
 
-        if container_is_running:
-            dc.exec_command(service_name, command=command, disable_tty=True)
+        if container:
+            docker.exec_command(container, command=command, tty=False)
         else:
             dc.create_volatile_container(service_name, command=command)
 
