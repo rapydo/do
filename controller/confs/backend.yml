@@ -279,7 +279,6 @@ services:
           - ${PROXY_HOST}
 
     ports:
-      - ${PROXY_DEV_PORT}:80 # 80 redirect
       - target: 443
         published: ${PROXY_PROD_PORT}
         protocol: tcp
@@ -289,6 +288,10 @@ services:
         # Cons: nginx is no longer scalable
         # Pro: nginx is able to access the real client IP address,
         # instead of the load balancer IP
+        mode: host
+      - target: 80
+        published: ${PROXY_DEV_PORT}
+        protocol: tcp
         mode: host
     environment:
       APP_MODE: ${APP_MODE}
