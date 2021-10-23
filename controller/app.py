@@ -1,3 +1,4 @@
+import enum
 import json
 import os
 import shutil
@@ -49,7 +50,7 @@ ROOT_UID = 0
 BASE_UID = 1000
 
 
-CommandParameter = Union[int, str, bool, None, Path, Iterable[str]]
+CommandParameter = Union[int, str, bool, None, Path, Iterable[str], enum.Enum]
 
 
 class Configuration:
@@ -352,6 +353,10 @@ class Application:
         value: CommandParameter,
         IF: CommandParameter = True,
     ) -> Optional[str]:
+
+        if isinstance(value, enum.Enum):
+            value = value.value
+
         if IF and value is not None:
             if isinstance(value, bool):
                 return f"{param}"

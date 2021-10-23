@@ -72,8 +72,14 @@ def test(
         envs={"SWARM_MODE": "1" if swarm_mode else "0"},
     )
 
-    if swarm_mode:
-        pass
+    docker.container.execute(
+        container_name,
+        command="syslogd",
+        interactive=False,
+        tty=False,
+        stream=False,
+        detach=True,
+    )
 
     # Wait few seconds to let the docker daemon to start
     log.info("Waiting for docker daemon to start...")
