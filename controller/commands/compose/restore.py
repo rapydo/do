@@ -1,4 +1,3 @@
-import os
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
@@ -45,7 +44,7 @@ def restore(
     Application.print_command(
         Application.serialize_parameter("--force", force, IF=force),
         Application.serialize_parameter("--restart", restart, IF=restart),
-        Application.serialize_parameter("", service),
+        Application.serialize_parameter("", service.value),
         Application.serialize_parameter("", backup_file),
     )
     Application.get_controller().controller_init()
@@ -84,9 +83,9 @@ def restore(
         )
 
     if backup_file is None:
-        files = os.listdir(backup_dir)
+        files = backup_dir.iterdir()
 
-        filtered_files = [d for d in files if d.endswith(expected_ext)]
+        filtered_files = [d.name for d in files if d.name.endswith(expected_ext)]
         filtered_files.sort()
 
         if not len(filtered_files):
@@ -139,22 +138,25 @@ def restore(
         dump_file = backup_file.replace(".gz", "")
         dump_path = f"/tmp/{dump_file}"
 
-        command = f"cp {backup_path} /tmp/"
-        # Executed as root
-        dc.exec_command(service_name, command=command, disable_tty=True)
+        docker.exec_command(
+            container, user="root", command=f"cp {backup_path} /tmp/", tty=False
+        )
 
-        command = f"gunzip -kf /tmp/{backup_file}"
-        # Executed as root
-        dc.exec_command(service_name, command=command, disable_tty=True)
+        docker.exec_command(
+            container, user="root", command=f"gunzip -kf /tmp/{backup_file}", tty=False
+        )
 
-        command = f"chown postgres {dump_path}"
         # Executed as root
-        dc.exec_command(service_name, command=command, disable_tty=True)
+        docker.exec_command(
+            container, user="root", command=f"chown postgres {dump_path}", tty=False
+        )
 
         # By using pg_dumpall the resulting dump can be restored with psql:
-        command = f"psql -U sqluser -f {dump_path} postgres"
-        dc.exec_command(
-            service_name, command=command, user="postgres", disable_tty=True
+        docker.exec_command(
+            container,
+            user="postgres",
+            command=f"psql -U sqluser -f {dump_path} postgres",
+            tty=False,
         )
 
         log.info("Restore from data{} completed", backup_path)

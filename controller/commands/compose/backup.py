@@ -71,7 +71,7 @@ def backup(
         Application.serialize_parameter("--max", max_backups, IF=max_backups),
         Application.serialize_parameter("--dry-run", dry_run, IF=dry_run),
         Application.serialize_parameter("--restart", restart, IF=restart),
-        Application.serialize_parameter("", service),
+        Application.serialize_parameter("", service.value),
     )
 
     if dry_run:
