@@ -174,6 +174,8 @@ def test_docker_registry(capfd: Capture) -> None:
         "Registry restarted to clean the layers cache",
     )
 
+    time.sleep(1)
+
     r = docker.send_registry_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
