@@ -98,10 +98,6 @@ jobs:
 
             export SWARM_MODE="1"
 
-            # Temporary added this to prevent fileno error when starting the registry
-            # BUG probably due to compose 1.29, to be removed once migrated to compose 2
-            docker pull rapydo/registry:2.1
-
             if [[ "${TEST_NAME}" == "multi_host" ]]; then
 
               base=https://github.com/docker/machine/releases/download/v0.16.0 \

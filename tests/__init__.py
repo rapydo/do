@@ -163,7 +163,7 @@ def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") 
 
 
 def start_registry(capfd: Capture) -> None:
-    exec_command(capfd, "run registry")
+    exec_command(capfd, "run registry --pull")
     time.sleep(2)
 
     print(docker.logs(REGISTRY))
