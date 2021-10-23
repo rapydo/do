@@ -89,6 +89,12 @@ def test_docker_registry(capfd: Capture) -> None:
     exec_command(
         capfd,
         "run registry",
+        f"Missing rapydo/registry:{__version__} image, add {colors.RED}--pull{colors.RESET} option",
+    )
+
+    exec_command(
+        capfd,
+        "run registry --pull",
         "Running registry...",
     )
 
