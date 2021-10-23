@@ -10,6 +10,7 @@ from tests import (
     exec_command,
     execute_outside,
     init_project,
+    mock_KeyboardInterrupt,
     pull_images,
     signal_handler,
     start_project,
@@ -76,6 +77,20 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
+            "shell --no-tty backend invalid",
+            "The command execution was terminated by command cannot be invoked. "
+            "Exit code is 126",
+        )
+
+        exec_command(
+            capfd,
+            'shell --no-tty backend "bash invalid"',
+            "The command execution was terminated by command not found. "
+            "Exit code is 127",
+        )
+
+        exec_command(
+            capfd,
             "shell --no-tty backend hostname",
             "backend-server",
         )
@@ -85,6 +100,18 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell --no-tty backend --default-command",
+            "The command execution was terminated by SIGKILL. "
+            "Exit code is 137"
+            "Time is up",
+        )
+
+        signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
+        signal.alarm(2)
+        exec_command(
+            capfd,
+            "shell --no-tty backend --default-command",
+            "The command execution was terminated by Control-C. "
+            "Exit code is 130"
             "Time is up",
         )
 

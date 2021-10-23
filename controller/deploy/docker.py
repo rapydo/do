@@ -1,5 +1,7 @@
+import re
 import shlex
 import socket
+import sys
 from typing import List, Optional, cast
 
 import requests
@@ -207,27 +209,67 @@ class Docker:
         tty: bool = True,
     ) -> None:
 
-        output = self.client.container.execute(
-            container,
-            user=user,
-            command=self.split_command(command),
-            interactive=tty,
-            tty=tty,
-            stream=not tty,
-            detach=False,
-        )
-        # When tty is True the output is empty because the terminal is directly
-        # connected to the container I/o entirely bypassing python
-        if output:
-            for out_line in output:
-                # 'stdout' or 'stderr'
-                # Both out and err are collapsed in stdout
-                # Maybe in the future would be useful to keep them separated?
-                # stdstream = out_line[0]
+        try:
+            output = self.client.container.execute(
+                container,
+                user=user,
+                command=self.split_command(command),
+                interactive=tty,
+                tty=tty,
+                stream=not tty,
+                detach=False,
+            )
 
-                line = out_line[1]
+            # When tty is True the output is empty because the terminal is directly
+            # connected to the container I/O bypassing python
+            # Important: in case of --no-tty, execution exceptions are not raised by
+            # container.execute but by the following loop!
+            if output:
+                for out_line in output:
+                    # 'stdout' or 'stderr'
+                    # Both out and err are collapsed in stdout
+                    # Maybe in the future would be useful to keep them separated?
+                    # stdstream = out_line[0]
 
-                if isinstance(line, bytes):
-                    line = line.decode("UTF-8")
+                    line = out_line[1]
 
-                print(line.strip())
+                    if isinstance(line, bytes):
+                        line = line.decode("UTF-8")
+
+                    print(line.strip())
+
+        except DockerException as e:
+            m = re.search(r"It returned with code (\d+)\n", str(e))
+            if not m:
+                log.debug("Catched exception does not contains any valid exit code")
+                raise e
+
+            exit_code = m.group(1)
+
+            # Based on docker exit codes https://github.com/moby/moby/pull/14012
+            # which follows standard chroot exit codes
+            # https://tldp.org/LDP/abs/html/exitcodes.html
+            if exit_code == "126":
+                # rapydo shell backend "invalid"
+                motivation = "command cannot be invoked"
+            elif exit_code == "127":
+                # rapydo shell backend "bash invalid"
+                motivation = "command not found"
+            elif exit_code == "130":
+                # container ctrl+c will executing (i.e. rapydo shell backend)
+                motivation = "Control-C"
+            elif exit_code == "137":
+                # container restart will executing (i.e. rapydo shell backend)
+                motivation = "SIGKILL"
+            elif exit_code == "143":
+                motivation = "SIGTERM"
+            else:  # pragma: no cover
+                motivation = "an unknown cause"
+                exit_code = "1"
+
+            log.error(
+                "The command execution was terminated by {}. Exit code is {}",
+                motivation,
+                exit_code,
+            )
+            sys.exit(int(exit_code))
