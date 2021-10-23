@@ -6,9 +6,10 @@ from typing import List, Optional
 import typer
 
 from controller import log, print_and_exit
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 
 
 class Services(str, Enum):
@@ -59,9 +60,9 @@ def restore(
 
     options = {"SERVICE": [service_name]}
     dc = Compose(files=Application.data.files)
+    docker = Docker()
 
-    running_containers = dc.get_running_containers(Configuration.project)
-    container_is_running = service_name in running_containers
+    container = docker.get_container(service_name, slot=1)
 
     expected_ext = ""
 
@@ -102,13 +103,13 @@ def restore(
         print_and_exit("Invalid backup file, {} does not exist", backup_host_path)
 
     if service_name == Services.neo4j:
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "Neo4j is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
-        if container_is_running:
+        if container:
             dc.command("stop", options)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
@@ -121,12 +122,12 @@ def restore(
 
         log.info("Restore from data{} completed", backup_path)
 
-        if container_is_running:
+        if container:
             dc.start_containers([service_name])
 
     if service_name == Services.postgres:
 
-        if not container_is_running:
+        if not container:
             print_and_exit(
                 "The restore procedure requires {} running, please start your stack",
                 service_name,
@@ -160,7 +161,7 @@ def restore(
 
     if service_name == Services.mariadb:
 
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "MariaDB is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
@@ -168,7 +169,7 @@ def restore(
 
         log.info("Starting restore on {}...", service_name)
 
-        if container_is_running:
+        if container:
             dc.command("stop", options)
 
         # backup.tar.gz
@@ -202,19 +203,19 @@ def restore(
         command = f"rm -rf {tmp_backup_path}"
         dc.create_volatile_container(service_name, command=command)
 
-        if container_is_running:
+        if container:
             dc.start_containers([service_name])
 
         log.info("Restore from data{} completed", backup_path)
 
     if service_name == Services.rabbit:
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "RabbitMQ is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
-        if container_is_running:
+        if container:
             dc.command("stop", options)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
@@ -227,18 +228,18 @@ def restore(
 
         log.info("Restore from data{} completed", backup_path)
 
-        if container_is_running:
+        if container:
             dc.start_containers([service_name])
 
     if service_name == Services.redis:
 
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "Redis is running and the restore will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
-        if container_is_running:
+        if container:
             dc.command("stop", options)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
@@ -249,7 +250,7 @@ def restore(
 
         log.info("Restore from data{} completed", backup_path)
 
-        if container_is_running:
+        if container:
             dc.start_containers([service_name])
 
     if restart:

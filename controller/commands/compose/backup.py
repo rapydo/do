@@ -6,9 +6,10 @@ from typing import List
 import typer
 
 from controller import log, print_and_exit
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
+from controller.deploy.docker import Docker
 
 # 0 1 * * * cd /home/??? && \
 #     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo backup neo4j --force > \
@@ -87,9 +88,9 @@ def backup(
     )
 
     dc = Compose(files=Application.data.files)
+    docker = Docker()
 
-    running_containers = dc.get_running_containers(Configuration.project)
-    container_is_running = service_name in running_containers
+    container = docker.get_container(service_name, slot=1)
 
     backup_dir = Path("data", "backup", service_name)
     backup_dir.mkdir(parents=True, exist_ok=True)
@@ -110,13 +111,13 @@ def backup(
 
     now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
     if service_name == Services.neo4j:
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "Neo4j is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
-        if container_is_running and not dry_run:
+        if container and not dry_run:
             dc.command("stop", {"SERVICE": [service_name]})
 
         backup_path = f"/backup/{service_name}/{now}.dump"
@@ -129,12 +130,12 @@ def backup(
 
         log.info("Backup completed: data{}", backup_path)
 
-        if container_is_running and not dry_run:
+        if container and not dry_run:
             dc.start_containers([service_name])
 
     if service_name == Services.postgres:
 
-        if not container_is_running:
+        if not container:
             print_and_exit(
                 "The backup procedure requires {} running, please start your stack",
                 service_name,
@@ -176,7 +177,7 @@ def backup(
 
     if service_name == Services.mariadb:
 
-        if not container_is_running:
+        if not container:
             print_and_exit(
                 "The backup procedure requires {} running, please start your stack",
                 service_name,
@@ -228,13 +229,13 @@ def backup(
         log.info("Backup completed: data{}", backup_path)
 
     if service_name == Services.rabbit:
-        if container_is_running and not force:
+        if container and not force:
             print_and_exit(
                 "RabbitMQ is running and the backup will temporary stop it. "
                 "If you want to continue add --force flag"
             )
 
-        if container_is_running and not dry_run:
+        if container and not dry_run:
             dc.command("stop", {"SERVICE": [service_name]})
 
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
@@ -253,7 +254,7 @@ def backup(
 
         log.info("Backup completed: data{}", backup_path)
 
-        if container_is_running and not dry_run:
+        if container and not dry_run:
             dc.start_containers([service_name])
 
     if service_name == Services.redis:
@@ -262,13 +263,13 @@ def backup(
 
         log.info("Starting backup on {}...", service_name)
         # If running, ask redis to synchronize the database
-        if container_is_running:
+        if container:
             command = "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
             dc.exec_command(service_name, command=command, disable_tty=True)
 
         command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
         if not dry_run:
-            if container_is_running:
+            if container:
                 dc.exec_command(service_name, command=command, disable_tty=True)
             else:
                 dc.create_volatile_container(service_name, command=command)
@@ -276,7 +277,7 @@ def backup(
         # Verify the gz integrity
         command = f"gzip -t {backup_path}"
         if not dry_run:
-            if container_is_running:
+            if container:
                 dc.exec_command(service_name, command=command, disable_tty=True)
             else:
                 dc.create_volatile_container(service_name, command=command)
