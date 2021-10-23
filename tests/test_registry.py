@@ -169,6 +169,9 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         f"images --remove rapydo/backend:{__version__}",
         f"Image rapydo/backend:{__version__} deleted from ",
+        "Executing registry garbage collector...",
+        "Registry garbage collector successfully executed",
+        "Registry restarted to clean the layers cache",
     )
 
     r = docker.send_registry_request(f"{host}/v2/_catalog")
@@ -212,6 +215,9 @@ def test_docker_registry(capfd: Capture) -> None:
         capfd,
         f"images --remove rapydo/rabbitmq:{__version__}",
         f"Image rapydo/rabbitmq:{__version__} deleted from ",
+        "Executing registry garbage collector...",
+        "Registry garbage collector successfully executed",
+        "Registry restarted to clean the layers cache",
     )
 
     exec_command(

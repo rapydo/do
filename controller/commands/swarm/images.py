@@ -156,3 +156,19 @@ def images(
             )
 
             log.info("Image {}:{} deleted from {}", repository, tag, host)
+
+        if images_to_be_removed:
+            log.info("Executing registry garbage collector...")
+            command = "/bin/registry garbage-collect -m /etc/docker/registry/config.yml"
+            docker.exec_command("registry", command=command, tty=False)
+            log.info("Registry garbage collector successfully executed")
+
+            # A restart is needed to prevent clashes beetween gc and cache
+            # https://gist.github.com/jaytaylor/86d5efaddda926a25fa68c263830dac1#gistcomment-3653760
+            # The garbage collector doesn't communicate with the cache, or unlink layers
+            # from the repository so if you immediately try to repush a layer that was
+            # just deleted, the registry will find it for stat calls, but actually
+            # serving the blob will fail.
+
+            docker.client.container.restart("registry")
+            log.info("Registry restarted to clean the layers cache")
