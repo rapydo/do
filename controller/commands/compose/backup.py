@@ -146,32 +146,39 @@ def backup(
         # This double step is required because postgres user is uid 70
         # It is not fixed with host uid as the other service_names
         tmp_backup_path = f"/tmp/{now}.sql"
-        command = f"pg_dumpall --clean -U sqluser -f {tmp_backup_path}"
         # Creating backup on a tmp folder as postgres user
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="postgres", disable_tty=True
+            docker.exec_command(
+                container,
+                user="postgres",
+                command=f"pg_dumpall --clean -U sqluser -f {tmp_backup_path}",
+                tty=False,
             )
 
         # Compress the sql with best compression ratio
-        command = f"gzip -9 {tmp_backup_path}"
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="postgres", disable_tty=True
+            docker.exec_command(
+                container,
+                user="postgres",
+                command=f"gzip -9 {tmp_backup_path}",
+                tty=False,
             )
 
         # Verify the gz integrity
-        command = f"gzip -t {tmp_backup_path}.gz"
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="postgres", disable_tty=True
+            docker.exec_command(
+                container,
+                user="postgres",
+                command=f"gzip -t {tmp_backup_path}.gz",
+                tty=False,
             )
 
         # Move the backup from /tmp to /backup (as root user)
         backup_path = f"/backup/{service_name}/{now}.sql.gz"
-        command = f"mv {tmp_backup_path}.gz {backup_path}"
         if not dry_run:
-            dc.exec_command(service_name, command=command, disable_tty=True)
+            docker.exec_command(
+                container, command=f"mv {tmp_backup_path}.gz {backup_path}", tty=False
+            )
 
         log.info("Backup completed: data{}", backup_path)
 
@@ -191,40 +198,43 @@ def backup(
 
         # Creating backup on a tmp folder as mysql user
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="mysql", disable_tty=True
-            )
-
-        command = f"sh -c 'mariabackup --prepare --target-dir={tmp_backup_path}'"
+            docker.exec_command(container, user="mysql", command=command, tty=False)
 
         # Creating backup on a tmp folder as mysql user
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="mysql", disable_tty=True
+            docker.exec_command(
+                container,
+                user="mysql",
+                command=f"sh -c 'mariabackup --prepare --target-dir={tmp_backup_path}'",
+                tty=False,
             )
 
         # Compress the prepared data folder. Used -C to skip the /tmp from folders paths
-        command = f"tar -zcf {tmp_backup_path}.tar.gz -C /tmp {now}"
-
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="mysql", disable_tty=True
+            docker.exec_command(
+                container,
+                user="mysql",
+                command=f"tar -zcf {tmp_backup_path}.tar.gz -C /tmp {now}",
+                tty=False,
             )
 
         # Verify the gz integrity
-        command = f"gzip -t {tmp_backup_path}.tar.gz"
-
         if not dry_run:
-            dc.exec_command(
-                service_name, command=command, user="mysql", disable_tty=True
+            docker.exec_command(
+                container,
+                user="mysql",
+                command=f"gzip -t {tmp_backup_path}.tar.gz",
+                tty=False,
             )
 
         # Move the backup from /tmp to /backup (as root user)
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
-        command = f"mv {tmp_backup_path}.tar.gz {backup_path}"
-
         if not dry_run:
-            dc.exec_command(service_name, command=command, disable_tty=True)
+            docker.exec_command(
+                container,
+                command=f"mv {tmp_backup_path}.tar.gz {backup_path}",
+                tty=False,
+            )
 
         log.info("Backup completed: data{}", backup_path)
 
@@ -264,13 +274,16 @@ def backup(
         log.info("Starting backup on {}...", service_name)
         # If running, ask redis to synchronize the database
         if container:
-            command = "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
-            dc.exec_command(service_name, command=command, disable_tty=True)
+            docker.exec_command(
+                container,
+                command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'",
+                tty=False,
+            )
 
         command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
         if not dry_run:
             if container:
-                dc.exec_command(service_name, command=command, disable_tty=True)
+                docker.exec_command(container, command=command, tty=False)
             else:
                 dc.create_volatile_container(service_name, command=command)
 
@@ -278,7 +291,7 @@ def backup(
         command = f"gzip -t {backup_path}"
         if not dry_run:
             if container:
-                dc.exec_command(service_name, command=command, disable_tty=True)
+                docker.exec_command(container, command=command, tty=False)
             else:
                 dc.create_volatile_container(service_name, command=command)
 
