@@ -3,6 +3,7 @@ from pathlib import Path
 
 import typer
 from python_on_whales import docker
+from python_on_whales.utils import DockerException
 
 from controller import __version__, log, print_and_exit
 from controller.app import Application
@@ -80,18 +81,21 @@ def test(
 
     command = ["py.test", "-s", "-x", f"/code/{test_file}"]
     log.info("Executing command: {}", " ".join(command))
-    result = docker.container.execute(
-        container_name,
-        command=command,
-        workdir="/tmp",
-        interactive=True,
-        tty=True,
-        stream=False,
-        detach=False,
-    )
 
-    print(result)
+    try:
+        docker.container.execute(
+            container_name,
+            command=command,
+            workdir="/tmp",
+            interactive=True,
+            tty=True,
+            stream=False,
+            detach=False,
+        )
+    except DockerException as e:
+        log.error(e)
 
-    # Do not remove to let for some debugging if needed
+    # Do not remove the container to let for some debugging
     if not no_remove:
         docker.container.remove(container_name, force=True, volumes=True)
+        log.info("Test container ({}) removed", container_name)
