@@ -258,10 +258,10 @@ class Docker:
             elif exit_code == "130":
                 # container ctrl+c will executing (i.e. rapydo shell backend)
                 motivation = "Control-C"
-            elif exit_code == "137":
+            elif exit_code == "137":  # pragma: no cover
                 # container restart will executing (i.e. rapydo shell backend)
                 motivation = "SIGKILL"
-            elif exit_code == "143":
+            elif exit_code == "143":  # pragma: no cover
                 motivation = "SIGTERM"
             else:  # pragma: no cover
                 motivation = "an unknown cause"

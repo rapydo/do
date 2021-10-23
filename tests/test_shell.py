@@ -100,8 +100,6 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell --no-tty backend --default-command",
-            "The command execution was terminated by SIGKILL. "
-            "Exit code is 137"
             "Time is up",
         )
 
