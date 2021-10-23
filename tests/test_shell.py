@@ -108,9 +108,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell --no-tty backend --default-command",
-            "The command execution was terminated by Control-C. "
-            "Exit code is 130"
-            "Time is up",
+            "The command execution was terminated by Control-C. " "Exit code is 130",
         )
 
         # This can't work on GitHub Actions due to the lack of tty
