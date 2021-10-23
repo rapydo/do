@@ -5,13 +5,10 @@ Integration with Docker compose
 https://stackoverflow.com/questions/2828953/silence-the-stdout-of-a-function-in-python-without-trashing-sys-stdout-and-resto
 """
 import os
-import re
 import shlex
 import sys
-from contextlib import redirect_stdout
-from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from compose import errors as cerrors
 from compose.cli import errors as clierrors
@@ -22,7 +19,7 @@ from compose.network import NetworkConfigChangedError
 from compose.project import NoSuchService, ProjectError
 from compose.service import BuildError
 
-from controller import COMPOSE_ENVIRONMENT_FILE, RED, REGISTRY, log, print_and_exit
+from controller import COMPOSE_ENVIRONMENT_FILE, RED, log, print_and_exit
 
 COMPOSE_SEP = "_"
 
@@ -174,86 +171,3 @@ class Compose:
         }
 
         self.command("run", options)
-
-    def exec_command(
-        self,
-        service: str,
-        user: Optional[str] = None,
-        command: str = None,
-        disable_tty: bool = False,
-    ) -> None:
-        """
-        Execute a command on a running container
-        """
-        shell_command, shell_args = self.split_command(command)
-        options = {
-            "SERVICE": service,
-            "COMMAND": shell_command,
-            "ARGS": shell_args,
-            "--index": "1",
-            "--user": user,
-            "-T": disable_tty,
-            "--env": None,
-            "--workdir": None,
-            "--detach": False,
-            "--privileged": False,
-        }
-        if shell_command is not None:
-            log.debug(
-                "Command on {}: {} {}",
-                service.lower(),
-                shell_command,
-                " ".join(shell_args),
-            )
-        self.command("exec_command", options)
-
-    def get_containers_status(self, prefix: str) -> Dict[str, str]:
-        with StringIO() as buf, redirect_stdout(buf):
-            self.command("ps", {"--quiet": False, "--services": False, "--all": False})
-            output = buf.getvalue().split("\n")
-
-            containers = {}
-            for row in output:
-                if row == "":
-                    continue
-                if row.startswith(" "):
-                    continue
-                if row.startswith("---"):
-                    continue
-
-                # row is:
-                # Name   Command   State   Ports
-                # Split on two or more spaces
-                row_tokens = re.split(r"\s\s+", row)
-
-                if row_tokens[0] == "Name":
-                    continue
-
-                status = row_tokens[2]
-                name = row_tokens[0]
-
-                if name == REGISTRY:
-                    continue
-
-                # Removed the prefix (i.e. project name)
-                # to be replaced with removeprefix
-                name = name[1 + len(prefix) :]
-                # Remove the _instancenumber (i.e. _1 or _n in case of scaled services)
-                name = name[0 : name.index(COMPOSE_SEP)]
-
-                containers[name] = status
-
-            return containers
-
-    def get_running_containers(self, prefix: str) -> Set[str]:
-        containers_status = self.get_containers_status(prefix)
-        containers = set()
-        for name, status in containers_status.items():
-            if not status.startswith("Up"):
-                continue
-
-            if status == "Up (unhealthy)":  # pragma: no cover
-                log.error("Status of {} container is unhealthy", name)
-
-            containers.add(name)
-        return containers
