@@ -255,7 +255,7 @@ class Docker:
             elif exit_code == "127":
                 # rapydo shell backend "bash invalid"
                 motivation = "command not found"
-            elif exit_code == "130":
+            elif exit_code == "130":  # pragma: no cover
                 # container ctrl+c will executing (i.e. rapydo shell backend)
                 motivation = "Control-C"
             elif exit_code == "137":  # pragma: no cover

@@ -10,7 +10,6 @@ from tests import (
     exec_command,
     execute_outside,
     init_project,
-    mock_KeyboardInterrupt,
     pull_images,
     signal_handler,
     start_project,
@@ -101,14 +100,6 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "shell --no-tty backend --default-command",
             "Time is up",
-        )
-
-        signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-        signal.alarm(2)
-        exec_command(
-            capfd,
-            "shell --no-tty backend --default-command",
-            "The command execution was terminated by Control-C. " "Exit code is 130",
         )
 
         # This can't work on GitHub Actions due to the lack of tty
