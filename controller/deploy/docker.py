@@ -5,7 +5,7 @@ from typing import List, Optional, cast
 import requests
 import urllib3
 from python_on_whales import DockerClient
-from python_on_whales.exceptions import NoSuchService
+from python_on_whales.exceptions import NoSuchContainer, NoSuchService
 from python_on_whales.utils import DockerException
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
@@ -175,9 +175,18 @@ class Docker:
         if not SWARM_MODE:
             c = f"{service_name}{COMPOSE_SEP}{slot}"
             log.debug("Container name: {}", c)
-            if self.client.container.exists(c):
+            # Can't use container.exists because a check on the status is needed
+            try:
+                container = self.client.container.inspect(c)
+                status = container.state.status
+                if status != "running" and status != "starting" and status != "ready":
+                    log.warning(
+                        "Found a container for {}, but status is {}", service, status
+                    )
+                    return None
                 return c
-            return None
+            except NoSuchContainer:
+                return None
 
         try:
             for task in self.client.service.ps(service_name):

@@ -107,6 +107,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup neo4j",
+        "Found a container for neo4j, but status is exited",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
     )

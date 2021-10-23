@@ -183,6 +183,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup postgres",
+        "Found a container for postgres, but status is exited",
         "The backup procedure requires postgres running, please start your stack",
     )
 
