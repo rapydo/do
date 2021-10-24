@@ -45,7 +45,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
-        "docker buildx is installed",
         "docker compose is installed",
         "NFS Server is enabled",
         # already initialized before the test, in the workflow yml

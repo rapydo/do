@@ -42,7 +42,6 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS=127.0.0.1 init",
-            "docker buildx is installed",
             "docker compose is installed",
             "Initializing Swarm with manager IP 127.0.0.1",
             "Swarm is now initialized",
@@ -55,7 +54,6 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS= init",
-            "docker buildx is installed",
             "docker compose is installed",
             "Swarm is now initialized",
             f"Initializing Swarm with manager IP {local_ip}",

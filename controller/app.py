@@ -534,20 +534,12 @@ class Application:
             "docker", min_version="20.10.0", min_recommended_version="20.10.0"
         )
 
-        if docker.buildx.is_installed():
-            v = docker.buildx.version()
-            log.debug("docker buildx is installed: {}", v)
-        else:  # pragma: no cover
-            print_and_exit(
-                "A mandatory dependency is missing: docker buildx not found"
-                "\nInstallation guide: https://github.com/docker/buildx#binary-release"
-                "\nor try the automated installation with {command}",
-                command=RED("rapydo install buildx"),
-            )
-
         if docker.compose.is_installed():
-            v = docker.compose.version()
-            log.debug("docker compose is installed: {}", v)
+            # too slow to verify the version on every commands... near half a seconds
+            # Sometimes a couple of seconds!
+            # v = docker.compose.version()
+            # log.debug("docker compose is installed: {}", v)
+            log.debug("docker compose is installed")
         else:  # pragma: no cover
             print_and_exit(
                 "A mandatory dependency is missing: docker compose not found"

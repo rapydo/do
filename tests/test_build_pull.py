@@ -51,6 +51,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "build",
+            "docker buildx is installed",
             "Registry 127.0.0.1:5000 not reachable.",
         )
 
@@ -112,6 +113,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Build path not found",
     )
 
@@ -121,6 +123,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Build path not found: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -131,6 +134,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -141,6 +145,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -151,6 +156,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
@@ -169,6 +175,7 @@ services:
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         "Custom images built",
     )
 
@@ -188,6 +195,7 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "build rabbit",
+        "docker buildx is installed",
         f"naming to docker.io/testbuild/rabbit:{__version__}",
         "Custom images built",
     )

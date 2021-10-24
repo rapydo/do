@@ -3,7 +3,7 @@ from typing import List, Set, cast
 
 import typer
 
-from controller import COMPOSE_FILE, SWARM_MODE, log
+from controller import COMPOSE_FILE, RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
@@ -40,9 +40,21 @@ def build(
         Application.serialize_parameter("--force", force, IF=force),
         Application.serialize_parameter("", services),
     )
+
     Application.get_controller().controller_init(services)
 
     docker = Docker()
+
+    if docker.client.buildx.is_installed():
+        v = docker.client.buildx.version()
+        log.debug("docker buildx is installed: {}", v)
+    else:  # pragma: no cover
+        print_and_exit(
+            "A mandatory dependency is missing: docker buildx not found"
+            "\nInstallation guide: https://github.com/docker/buildx#binary-release"
+            "\nor try the automated installation with {command}",
+            command=RED("rapydo install buildx"),
+        )
 
     if SWARM_MODE:
         docker.ping_registry()
