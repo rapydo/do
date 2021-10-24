@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from typing import Optional
 
+import requests
 from faker import Faker
 from glom import glom
 from python_on_whales import docker
@@ -21,9 +22,35 @@ from tests import (
     init_project,
     pull_images,
     random_project_name,
+    service_verify,
     start_project,
     start_registry,
 )
+
+
+def get_start_date(
+    capfd: Capture, service: str, project_name: str, wait: bool = False
+) -> datetime:
+
+    # Optional is needed because swarm.get_container returns Optional[str]
+    container_name: Optional[str] = None
+
+    if service == REGISTRY:
+        container_name = REGISTRY
+    elif SWARM_MODE:
+        if wait:
+            # This is needed to debug and wait the service rollup to complete
+            # Status is both for debug and to delay the get_container
+            exec_command(capfd, "status")
+            time.sleep(4)
+
+        swarm = Swarm()
+        container_name = swarm.get_container(service, slot=1)
+    else:
+        container_name = f"{project_name}_{service}_1"
+
+    assert container_name is not None
+    return docker.container.inspect(container_name).state.started_at
 
 
 def get_password_from_projectrc(variable: str) -> str:
@@ -44,50 +71,11 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         name=project_name,
         auth="postgres",
         frontend="no",
-        services=["neo4j", "mysql", "mongo", "rabbit", "redis", "flower"],
     )
 
-    init_project(
-        capfd,
-        " -e HEALTHCHECK_INTERVAL=1s"
-        # Prevent no suitable node (insufficient resources on 1 node)
-        # Due to GA nodes with 2 cpus only (9 services x 0.25 default => 2.25 cpus)
-        " -e ASSIGNED_CPU_BACKEND=0.1"
-        " -e ASSIGNED_CPU_POSTGRES=0.1"
-        " -e ASSIGNED_CPU_MARIADB=0.1"
-        " -e ASSIGNED_CPU_NEO4J=0.1"
-        " -e ASSIGNED_CPU_MONGODB=0.1"
-        " -e ASSIGNED_CPU_RABBIT=0.1"
-        " -e ASSIGNED_CPU_REDIS=0.1"
-        " -e ASSIGNED_CPU_FLOWER=0.1"
-        " -e ASSIGNED_CPU_REGISTRY=0.1",
-    )
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s")
     if SWARM_MODE:
         start_registry(capfd)
-
-    today = datetime.now().strftime("%Y-%m-%d")
-
-    if SWARM_MODE:
-        na_registry_line = f"registry   REGISTRY_PASSWORD      {colors.RED}N/A"
-        ok_registry_line = f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}"
-    else:
-        na_registry_line = ""
-        ok_registry_line = ""
-
-    exec_command(
-        capfd,
-        "password",
-        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
-        f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
-        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
-        f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
-        f"mongodb    MONGO_PASSWORD         {colors.RED}N/A",
-        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
-        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
-        f"redis      REDIS_PASSWORD         {colors.RED}N/A",
-        f"flower     FLOWER_PASSWORD        {colors.RED}N/A",
-        na_registry_line,
-    )
 
     exec_command(
         capfd,
@@ -95,9 +83,107 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "Please specify one between --random and --password options",
     )
 
-    # ########################################################
-    # ###  TEST rapydo password WITH SERVICES NOT RUNNING  ###
-    # ########################################################
+
+def test_password_registry(capfd: Capture, faker: Faker) -> None:
+
+    if not SWARM_MODE:
+        return None
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s")
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password",
+        f"registry   REGISTRY_PASSWORD      {colors.RED}N/A",
+    )
+    registry_pass1 = get_password_from_projectrc("REGISTRY_PASSWORD")
+
+    docker.container.remove(REGISTRY, force=True)
+
+    exec_command(
+        capfd,
+        "password registry --random",
+        "registry was not running, restart is not needed",
+        "The password of registry has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "REGISTRY_PASSWORD variable",
+    )
+    registry_pass2 = get_password_from_projectrc("REGISTRY_PASSWORD")
+    assert registry_pass1 != registry_pass2
+
+    start_registry(capfd)
+
+    exec_command(
+        capfd,
+        "password",
+        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+    )
+
+    exec_command(capfd, "images", "This registry contains ")
+
+    registry_start_date = get_start_date(capfd, "registry", project_name, wait=True)
+
+    exec_command(
+        capfd,
+        "password registry --random",
+        "registry was running, restarting services...",
+        "The password of registry has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "REGISTRY_PASSWORD variable",
+    )
+
+    registry_pass3 = get_password_from_projectrc("REGISTRY_PASSWORD")
+    assert registry_pass2 != registry_pass3
+
+    registry_start_date2 = get_start_date(capfd, "registry", project_name, wait=True)
+
+    assert registry_start_date2 != registry_start_date
+
+    exec_command(capfd, "images", "This registry contains ")
+
+    exec_command(
+        capfd,
+        "password",
+        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+    )
+
+    # This is needed otherwise the following tests will be unable to start
+    # a new instance of the registry and will fail with registry auth errors
+    exec_command(capfd, "remove registry", "Registry service removed")
+
+
+def test_password_redis(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+        services=["redis"],
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password",
+        f"redis      REDIS_PASSWORD         {colors.RED}N/A",
+    )
 
     redis_pass1 = get_password_from_projectrc("REDIS_PASSWORD")
     exec_command(
@@ -111,116 +197,19 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass2 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass1 != redis_pass2
 
-    flower_pass1 = get_password_from_projectrc("FLOWER_PASSWORD")
-    exec_command(
-        capfd,
-        "password flower --random",
-        "flower was not running, restart is not needed",
-        "The password of flower has been changed. ",
-        "Please find the new password into your .projectrc file as "
-        "FLOWER_PASSWORD variable",
-    )
-    flower_pass2 = get_password_from_projectrc("FLOWER_PASSWORD")
-    assert flower_pass1 != flower_pass2
-
-    if SWARM_MODE:
-        registry_pass1 = get_password_from_projectrc("REGISTRY_PASSWORD")
-
-        docker.container.remove(REGISTRY, force=True)
-
-        exec_command(
-            capfd,
-            "password registry --random",
-            "registry was not running, restart is not needed",
-            "The password of registry has been changed. ",
-            "Please find the new password into your .projectrc file as "
-            "REGISTRY_PASSWORD variable",
-        )
-        registry_pass2 = get_password_from_projectrc("REGISTRY_PASSWORD")
-        assert registry_pass1 != registry_pass2
-
-        start_registry(capfd)
-
-    exec_command(
-        capfd,
-        "password backend --random",
-        "Can't update backend since it is not running. Please start your stack",
-    )
-    exec_command(
-        capfd,
-        "password postgres --random",
-        "Can't update postgres since it is not running. Please start your stack",
-    )
-    exec_command(
-        capfd,
-        "password mariadb --random",
-        "Can't update mariadb since it is not running. Please start your stack",
-    )
-    exec_command(
-        capfd,
-        "password mongodb --random",
-        "Can't update mongodb since it is not running. Please start your stack",
-    )
-    exec_command(
-        capfd,
-        "password neo4j --random",
-        "Can't update neo4j since it is not running. Please start your stack",
-    )
-    exec_command(
-        capfd,
-        "password rabbit --random",
-        "Can't update rabbit since it is not running. Please start your stack",
-    )
-
     exec_command(
         capfd,
         "password",
-        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
-        f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
-        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
-        f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
-        f"mongodb    MONGO_PASSWORD         {colors.RED}N/A",
-        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
-        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
         f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
-        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
-        ok_registry_line,
     )
 
     pull_images(capfd)
     start_project(capfd)
 
-    # ########################################################
-    # ###  TEST rapydo password WITH SERVICES     RUNNING  ###
-    # ########################################################
+    service_verify(capfd, "redis")
 
-    if SWARM_MODE:
-        swarm = Swarm()
-
-    def get_start_date(capfd: Capture, service: str, wait: bool = False) -> datetime:
-
-        # Optional is needed because swarm.get_container returns Optional[str]
-        container_name: Optional[str] = None
-
-        if service == REGISTRY:
-            container_name = REGISTRY
-        elif SWARM_MODE:
-            if wait:
-                # This is needed to debug and wait the service rollup to complete
-                # Status is both for debug and to delay the get_container
-                exec_command(capfd, "status")
-                time.sleep(4)
-
-            container_name = swarm.get_container(service, slot=1)
-        else:
-            container_name = f"{project_name}_{service}_1"
-
-        assert container_name is not None
-        return docker.container.inspect(container_name).state.started_at
-
-    #  ############## REDIS ######################
-    backend_start_date = get_start_date(capfd, "backend")
-    redis_start_date = get_start_date(capfd, "redis")
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    redis_start_date = get_start_date(capfd, "redis", project_name)
 
     exec_command(
         capfd,
@@ -234,90 +223,21 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_password_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
-    backend_start_date2 = get_start_date(capfd, "backend", wait=True)
-    redis_start_date2 = get_start_date(capfd, "redis", wait=True)
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    redis_start_date2 = get_start_date(capfd, "redis", project_name, wait=True)
 
     # Verify that both backend and redis are restarted
     assert backend_start_date2 != backend_start_date
     assert redis_start_date2 != redis_start_date
 
-    #  ############## FLOWER #####################
-
-    flower_start_date = get_start_date(capfd, "flower", wait=True)
+    service_verify(capfd, "redis")
 
     exec_command(
         capfd,
-        "password flower --random",
-        "flower was running, restarting services...",
-        "The password of flower has been changed. ",
-        "Please find the new password into your .projectrc file as "
-        "FLOWER_PASSWORD variable",
+        "password",
+        f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
     )
 
-    flower_pass3 = get_password_from_projectrc("FLOWER_PASSWORD")
-    assert flower_pass2 != flower_pass3
-
-    flower_start_date2 = get_start_date(capfd, "flower", wait=True)
-
-    assert flower_start_date2 != flower_start_date
-
-    #  ############## REGISTRY #####################
-
-    if SWARM_MODE:
-        registry_start_date = get_start_date(capfd, "registry", wait=True)
-
-        exec_command(
-            capfd,
-            "password registry --random",
-            "registry was running, restarting services...",
-            "The password of registry has been changed. ",
-            "Please find the new password into your .projectrc file as "
-            "REGISTRY_PASSWORD variable",
-        )
-
-        registry_pass3 = get_password_from_projectrc("REGISTRY_PASSWORD")
-        assert registry_pass2 != registry_pass3
-
-        registry_start_date2 = get_start_date(capfd, "registry", wait=True)
-
-        assert registry_start_date2 != registry_start_date
-
-    exec_command(
-        capfd,
-        "password backend --random",
-        "Change password for backend not implemented yet",
-    )
-    exec_command(
-        capfd,
-        "password postgres --random",
-        "Change password for postgres not implemented yet",
-    )
-    exec_command(
-        capfd,
-        "password mariadb --random",
-        "Change password for mariadb not implemented yet",
-    )
-    exec_command(
-        capfd,
-        "password mongodb --random",
-        "Change password for mongodb not implemented yet",
-    )
-    exec_command(
-        capfd,
-        "password neo4j --random",
-        "Change password for neo4j not implemented yet",
-    )
-    exec_command(
-        capfd,
-        "password rabbit --random",
-        "Change password for rabbit not implemented yet",
-    )
-
-    # ########################################################
-    # ###      TEST rapydo password --password OPTION      ###
-    # ########################################################
-
-    # Just test one service... no need to test all of them
     mypassword = faker.pystr()
     exec_command(
         capfd,
@@ -332,8 +252,632 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
-    # Now verify that the password change really works!
-    # Not implemented yet
+    service_verify(capfd, "redis")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def test_password_flower(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+        services=["flower"],
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password",
+        f"flower     FLOWER_PASSWORD        {colors.RED}N/A",
+    )
+
+    flower_pass1 = get_password_from_projectrc("FLOWER_PASSWORD")
+    exec_command(
+        capfd,
+        "password flower --random",
+        "flower was not running, restart is not needed",
+        "The password of flower has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "FLOWER_PASSWORD variable",
+    )
+    flower_pass2 = get_password_from_projectrc("FLOWER_PASSWORD")
+    assert flower_pass1 != flower_pass2
+
+    exec_command(
+        capfd,
+        "password",
+        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    flower_start_date = get_start_date(capfd, "flower", project_name, wait=True)
+
+    exec_command(
+        capfd,
+        "password flower --random",
+        "flower was running, restarting services...",
+        "The password of flower has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "FLOWER_PASSWORD variable",
+    )
+
+    flower_pass3 = get_password_from_projectrc("FLOWER_PASSWORD")
+    assert flower_pass2 != flower_pass3
+
+    flower_start_date2 = get_start_date(capfd, "flower", project_name, wait=True)
+
+    assert flower_start_date2 != flower_start_date
+
+    exec_command(
+        capfd,
+        "password",
+        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password flower --password {mypassword}",
+        "The password of flower has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("FLOWER_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+        services=["rabbit"],
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password rabbit --random",
+        "Can't update rabbit because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "rabbitmq")
+
+    #  ############## RABBIT #####################
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    rabbit_start_date = get_start_date(capfd, "rabbit", project_name)
+    rabbit_pass1 = get_password_from_projectrc("RABBITMQ_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password rabbit --random",
+        "rabbit was running, restarting services...",
+        "The password of rabbit has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "RABBITMQ_PASSWORD variable",
+    )
+
+    rabbit_pass2 = get_password_from_projectrc("RABBITMQ_PASSWORD")
+    assert rabbit_pass1 != rabbit_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    rabbit_start_date2 = get_start_date(capfd, "rabbit", project_name, wait=True)
+
+    # Verify that both backend and rabbit are restarted
+    assert backend_start_date2 != backend_start_date
+    assert rabbit_start_date2 != rabbit_start_date
+
+    service_verify(capfd, "rabbitmq")
+
+    exec_command(
+        capfd,
+        "password",
+        f"rabbit     RABBITMQ_PASSWORD      {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password rabbit --password {mypassword}",
+        "The password of rabbit has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("RABBITMQ_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    service_verify(capfd, "rabbitmq")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def test_password_postgres(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password postgres --random",
+        "Can't update postgres because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"postgres   ALCHEMY_PASSWORD       {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "sqlalchemy")
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    postgres_start_date = get_start_date(capfd, "postgres", project_name)
+    postgres_pass1 = get_password_from_projectrc("ALCHEMY_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password postgres --random",
+        "postgres was running, restarting services...",
+        "The password of postgres has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "ALCHEMY_PASSWORD variable",
+    )
+
+    postgres_pass2 = get_password_from_projectrc("ALCHEMY_PASSWORD")
+    assert postgres_pass1 != postgres_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    postgres_start_date2 = get_start_date(capfd, "postgres", project_name, wait=True)
+
+    # Verify that both backend and postgres are restarted
+    assert backend_start_date2 != backend_start_date
+    assert postgres_start_date2 != postgres_start_date
+
+    service_verify(capfd, "sqlalchemy")
+
+    exec_command(
+        capfd,
+        "password",
+        f"postgres   ALCHEMY_PASSWORD       {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password postgres --password {mypassword}",
+        "The password of postgres has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("ALCHEMY_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    service_verify(capfd, "sqlalchemy")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def SKIP_test_password_mysql(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="mysql",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password mariadb --random",
+        "Can't update mariadb because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
+        # f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "sqlalchemy")
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    mariadb_start_date = get_start_date(capfd, "mariadb", project_name)
+    mariadb_pass1 = get_password_from_projectrc("ALCHEMY_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password mariadb --random",
+        "mariadb was running, restarting services...",
+        "The password of mariadb has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "ALCHEMY_PASSWORD variable",
+    )
+
+    mariadb_pass2 = get_password_from_projectrc("ALCHEMY_PASSWORD")
+    assert mariadb_pass1 != mariadb_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    mariadb_start_date2 = get_start_date(capfd, "mariadb", project_name, wait=True)
+
+    # Verify that both backend and mariadb are restarted
+    assert backend_start_date2 != backend_start_date
+    assert mariadb_start_date2 != mariadb_start_date
+
+    service_verify(capfd, "sqlalchemy")
+
+    exec_command(
+        capfd,
+        "password",
+        f"mariadb    ALCHEMY_PASSWORD       {colors.GREEN}{today}",
+        # f"mariadb    MYSQL_ROOT_PASSWORD    {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password mariadb --password {mypassword}",
+        "The password of mariadb has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("ALCHEMY_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    service_verify(capfd, "sqlalchemy")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def SKIP_test_password_neo4j(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="neo4j",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password neo4j --random",
+        "Can't update neo4j because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "neo4j")
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    neo4j_start_date = get_start_date(capfd, "neo4j", project_name)
+    neo4j_pass1 = get_password_from_projectrc("NEO4J_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password neo4j --random",
+        "neo4j was running, restarting services...",
+        "The password of neo4j has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "NEO4J_PASSWORD variable",
+    )
+
+    neo4j_pass2 = get_password_from_projectrc("NEO4J_PASSWORD")
+    assert neo4j_pass1 != neo4j_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    neo4j_start_date2 = get_start_date(capfd, "neo4j", project_name, wait=True)
+
+    # Verify that both backend and neo4j are restarted
+    assert backend_start_date2 != backend_start_date
+    assert neo4j_start_date2 != neo4j_start_date
+
+    service_verify(capfd, "neo4j")
+
+    exec_command(
+        capfd,
+        "password",
+        f"neo4j      NEO4J_PASSWORD         {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password neo4j --password {mypassword}",
+        "The password of neo4j has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("NEO4J_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    service_verify(capfd, "neo4j")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def SKIP_test_password_mongo(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="mongo",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password mongodb --random",
+        "Can't update mongodb because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"mongodb    MONGO_PASSWORD         {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    service_verify(capfd, "mongo")
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    mongodb_start_date = get_start_date(capfd, "mongodb", project_name)
+    mongodb_pass1 = get_password_from_projectrc("MONGO_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password mongodb --random",
+        "mongodb was running, restarting services...",
+        "The password of mongodb has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "MONGO_PASSWORD variable",
+    )
+
+    mongodb_pass2 = get_password_from_projectrc("MONGO_PASSWORD")
+    assert mongodb_pass1 != mongodb_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+    mongodb_start_date2 = get_start_date(capfd, "mongodb", project_name, wait=True)
+
+    # Verify that both backend and mongodb are restarted
+    assert backend_start_date2 != backend_start_date
+    assert mongodb_start_date2 != mongodb_start_date
+
+    service_verify(capfd, "mongo")
+
+    exec_command(
+        capfd,
+        "password",
+        f"mongodb    MONGO_PASSWORD         {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password mongodb --password {mypassword}",
+        "The password of mongodb has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("MONGO_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    service_verify(capfd, "mongo")
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
+
+
+def SKIP_test_password_backend(capfd: Capture, faker: Faker) -> None:
+
+    project_name = random_project_name(faker)
+    create_project(
+        capfd=capfd,
+        name=project_name,
+        auth="postgres",
+        frontend="no",
+    )
+
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    if SWARM_MODE:
+        start_registry(capfd)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    exec_command(
+        capfd,
+        "password backend --random",
+        "Can't update backend because it is not running. Please start your stack",
+    )
+
+    exec_command(
+        capfd,
+        "password",
+        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
+    )
+
+    pull_images(capfd)
+    start_project(capfd)
+
+    exec_command(capfd, "logs backend --tail 10")
+    time.sleep(2)
+    r = requests.post(
+        "http://localhost:8080/auth/login",
+        data={
+            "username": get_password_from_projectrc("AUTH_DEFAULT_USERNAME"),
+            "password": get_password_from_projectrc("AUTH_DEFAULT_PASSWORD"),
+        },
+    )
+    exec_command(capfd, "logs backend --tail 10")
+    assert r.status_code == 200
+
+    backend_start_date = get_start_date(capfd, "backend", project_name)
+    backend_pass1 = get_password_from_projectrc("AUTH_DEFAULT_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password backend --random",
+        "backend was running, restarting services...",
+        "The password of backend has been changed. ",
+        "Please find the new password into your .projectrc file as "
+        "AUTH_DEFAULT_PASSWORD variable",
+    )
+
+    backend_pass2 = get_password_from_projectrc("AUTH_DEFAULT_PASSWORD")
+    assert backend_pass1 != backend_pass2
+
+    backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
+
+    # Verify that backend is restarted
+    assert backend_start_date2 != backend_start_date
+
+    exec_command(capfd, "logs backend --tail 10")
+    time.sleep(2)
+    r = requests.post(
+        "http://localhost:8080/auth/login",
+        data={
+            "username": get_password_from_projectrc("AUTH_DEFAULT_USERNAME"),
+            "password": get_password_from_projectrc("AUTH_DEFAULT_PASSWORD"),
+        },
+    )
+    exec_command(capfd, "logs backend --tail 10")
+    assert r.status_code == 200
+
+    exec_command(
+        capfd,
+        "password",
+        f"backend    AUTH_DEFAULT_PASSWORD  {colors.GREEN}{today}",
+    )
+
+    mypassword = faker.pystr()
+    exec_command(
+        capfd,
+        f"password backend --password {mypassword}",
+        "The password of backend has been changed. ",
+    )
+    assert mypassword == get_password_from_projectrc("AUTH_DEFAULT_PASSWORD")
+
+    exec_command(
+        capfd,
+        "password --show",
+        mypassword,
+    )
+
+    exec_command(capfd, "logs backend --tail 10")
+    time.sleep(2)
+    r = requests.post(
+        "http://localhost:8080/auth/login",
+        data={
+            "username": get_password_from_projectrc("AUTH_DEFAULT_USERNAME"),
+            "password": get_password_from_projectrc("AUTH_DEFAULT_PASSWORD"),
+        },
+    )
+    exec_command(capfd, "logs backend --tail 10")
+    assert r.status_code == 200
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")
 
 
 def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:

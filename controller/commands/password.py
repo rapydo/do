@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import Dict, List, cast
+from typing import Dict, List, Optional, cast
 
 import typer
 from tabulate import tabulate
@@ -50,7 +50,9 @@ def get_service_passwords(service: Services) -> List[str]:
     if service == Services.postgres:
         return ["ALCHEMY_PASSWORD"]
     if service == Services.mariadb:
-        return ["ALCHEMY_PASSWORD", "MYSQL_ROOT_PASSWORD"]
+        # return ["ALCHEMY_PASSWORD", "MYSQL_ROOT_PASSWORD"]
+        # MYSQL_ROOT_PASSWORD change is not supported yet
+        return ["ALCHEMY_PASSWORD"]
     if service == Services.mongodb:
         return ["MONGO_PASSWORD"]
     if service == Services.rabbit:
@@ -208,10 +210,14 @@ def password(
             # This should never happens and can't be (easily) tested
             if s.value not in Application.data.base_services:  # pragma: no cover
                 print_and_exit("Command misconfiguration, unknown {} service", s.value)
+
             if (
                 s != Services.registry
                 and s.value not in Application.data.active_services
             ):
+                continue
+
+            if s == Services.registry and not SWARM_MODE:
                 continue
 
             variables = get_service_passwords(s)
@@ -272,14 +278,7 @@ def password(
         elif not new_password:
             print_and_exit("Please specify one between --random and --password options")
 
-        # log.critical(new_password)
-
         compose = Compose(Application.data.files)
-        if SWARM_MODE:
-            swarm = Swarm()
-            running_services = swarm.get_running_services(Configuration.project)
-        else:
-            running_services = compose.get_running_services(Configuration.project)
 
         variables = get_service_passwords(service)
         new_variables = {variable: new_password for variable in variables}
@@ -288,11 +287,13 @@ def password(
         # others can be updated even if offline,
         # but in every case if the stack is running it has to be restarted
 
+        docker = Docker()
         if service == Services.registry:
-            docker = Docker()
             is_running = docker.ping_registry(do_exit=False)
+            container: Optional[str] = "registry"
         else:
-            is_running = service.value in running_services
+            container = docker.get_container(service.value, slot=1)
+            is_running = container is not None
 
         is_running_needed = False
 
@@ -320,38 +321,54 @@ def password(
 
         log.info("Changing password for {}...", service.value)
 
-        if is_running_needed and not is_running:
+        if is_running_needed and (not is_running or not container):
             print_and_exit(
-                "Can't update {} since it is not running. Please start your stack",
+                "Can't update {} because it is not running. Please start your stack",
                 service.value,
             )
 
-        if is_running_needed:
-            print_and_exit("Change password for {} not implemented yet", service.value)
-
         update_projectrc(new_variables)
 
-        # if service == Services.backend:
-        #     # restapi init --force-user
-        #     pass
-        # elif service == Services.neo4j:
-        #     # ALTER CURRENT USER SET PASSWORD FROM "<old-pass>" TO "<new-pass>";
-        #     pass
-        # elif service == Services.postgres:
-        #     # \password username
-        #     pass
-        # elif service == Services.mariadb:
-        #     # ALTER USER
-        #     pass
-        # elif service == Services.mongodb:
-        #     # db.changeUserPassword(...)
-        #     pass
-        # elif service == Services.rabbit:
-        #     # rabbitmqctl change_password <USERNAME> <NEWPASSWORD>
-        #     pass
+        if service == Services.backend and container:
+            # restapi init --force-user
+            pass
+        elif service == Services.neo4j and container:
+            # ALTER CURRENT USER SET PASSWORD FROM "<old-pass>" TO "<new-pass>";
+            pass
+        elif service == Services.postgres and container:
+            # Interactively:
+            # \password username
+            # Non interactively:
+            # https://ubiq.co/database-blog/how-to-change-user-password-in-postgresql
+            user = Application.env.get("ALCHEMY_USER")
+            db = Application.env.get("ALCHEMY_DB")
+            command = f"""
+                psql -U {user} -d {db} -c \"
+                    ALTER USER {user} WITH PASSWORD \'{new_password}\';
+                \"
+            """
+            docker.exec_command(container, user="postgres", command=command)
 
-        # here specific operation have to be implemented.
-        # - Nothing for Redis, Flower and Registry, projectrc update is enough
+            pass
+        elif service == Services.mariadb and container:
+            # https://dev.mysql.com/doc/refman/8.0/en/set-password.html
+
+            user = Application.env.get("ALCHEMY_USER")
+            pwd = Application.env.get("MYSQL_ROOT_PASSWORD")
+            db = Application.env.get("ALCHEMY_DB")
+            command = f"""
+            sh -c \'mysql -uroot -p\"{pwd}\" -D\"{db}\" -e "
+                ALTER USER {user} IDENTIFIED BY \\\"{new_password};\\\"
+            "\'"""
+            docker.exec_command(container, user="mysql", command=command)
+        elif service == Services.mongodb and container:
+            # db.changeUserPassword(...)
+            pass
+        elif service == Services.rabbit and container:
+            user = Application.env.get("RABBITMQ_USER")
+            docker.exec_command(
+                container, command=f"rabbitmqctl change_password {user} {new_password}"
+            )
 
         if is_running:
             log.info("{} was running, restarting services...", service.value)
@@ -370,6 +387,7 @@ def password(
             elif SWARM_MODE:
 
                 compose.dump_config(Application.data.services)
+                swarm = Swarm()
                 swarm.deploy()
 
             else:
