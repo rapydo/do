@@ -209,6 +209,7 @@ class Docker:
         tty: bool = True,
     ) -> None:
 
+        tty = sys.stdout.isatty()
         try:
             output = self.client.container.execute(
                 container,

@@ -124,6 +124,7 @@ def service_verify(capfd: Capture, service: str) -> None:
         capfd,
         f"shell backend --no-tty 'restapi verify --service {service}'",
         f"Service {service} is reachable",
+        f"{service} successfully authenticated on ",
     )
 
 

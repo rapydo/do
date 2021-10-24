@@ -48,6 +48,9 @@ def shell(
         Application.serialize_parameter("", command),
     )
 
+    if no_tty:
+        log.warning("--no-tty option is deprecated, you can stop using it")
+
     Application.get_controller().controller_init()
 
     swarm = Swarm()

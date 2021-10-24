@@ -77,6 +77,12 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "shell --no-tty backend invalid",
+            "--no-tty option is deprecated, you can stop using it",
+        )
+
+        exec_command(
+            capfd,
+            "shell --no-tty backend invalid",
             "The command execution was terminated by command cannot be invoked. "
             "Exit code is 126",
         )

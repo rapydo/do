@@ -92,11 +92,7 @@ def test_remove(capfd: Capture) -> None:
         )
 
     # Even if nothing is running, remove is permitted both on Compose and Swarm
-    exec_command(
-        capfd,
-        "remove",
-        "Stack removed",
-    )
+    exec_command(capfd, "remove", "Stack removed")
 
     NONE: List[str] = []
     BACKEND_ONLY = ["rem_backend"]

@@ -55,6 +55,9 @@ def ssl(
         Application.serialize_parameter("--key-file", key_file, IF=key_file),
     )
 
+    if no_tty:
+        log.warning("--no-tty option is deprecated, you can stop using it")
+
     Application.get_controller().controller_init()
 
     if chain_file is not None or key_file is not None:
