@@ -1,11 +1,12 @@
-from colorama import deinit, init
-from python_on_whales.utils import DockerException
-
-from controller import log, print_and_exit
-from controller.app import Application
-
-
 def main() -> None:
+
+    # Import here to prevent to slow down the import
+    from colorama import deinit, init
+    from python_on_whales.utils import DockerException
+
+    from controller import log, print_and_exit
+    from controller.app import Application
+
     try:
         init()
         Application.load_projectrc()
