@@ -34,7 +34,7 @@ class Services(str, Enum):
     neo4j = "neo4j"
     postgres = "postgres"
     mariadb = "mariadb"
-    mongodb = "mongodb"
+    # mongodb = "mongodb"
     rabbit = "rabbit"
     redis = "redis"
     registry = "registry"
@@ -53,8 +53,8 @@ def get_service_passwords(service: Services) -> List[str]:
         # return ["ALCHEMY_PASSWORD", "MYSQL_ROOT_PASSWORD"]
         # MYSQL_ROOT_PASSWORD change is not supported yet
         return ["ALCHEMY_PASSWORD"]
-    if service == Services.mongodb:
-        return ["MONGO_PASSWORD"]
+    # if service == Services.mongodb:
+    #     return ["MONGO_PASSWORD"]
     if service == Services.rabbit:
         return ["RABBITMQ_PASSWORD"]
     if service == Services.redis:
@@ -313,8 +313,8 @@ def password(
             is_running_needed = True
         elif service == Services.mariadb:
             is_running_needed = True
-        elif service == Services.mongodb:
-            is_running_needed = True
+        # elif service == Services.mongodb:
+        #     is_running_needed = True
         elif service == Services.rabbit:
             is_running_needed = True
         else:  # pragma: no cover
@@ -330,10 +330,7 @@ def password(
 
         update_projectrc(new_variables)
 
-        if service == Services.backend and container:
-            # restapi init --force-user
-            pass
-        elif service == Services.neo4j and container:
+        if service == Services.neo4j and container:
 
             docker.exec_command(
                 container,
@@ -369,9 +366,9 @@ def password(
                 ALTER USER {user} IDENTIFIED BY \\\"{new_password};\\\"
             "\'"""
             docker.exec_command(container, user="mysql", command=command)
-        elif service == Services.mongodb and container:
-            # db.changeUserPassword(...)
-            pass
+        # elif service == Services.mongodb and container:
+        #     # db.changeUserPassword(...)
+        #     pass
         elif service == Services.rabbit and container:
             user = Application.env.get("RABBITMQ_USER")
             docker.exec_command(
@@ -403,6 +400,11 @@ def password(
                 compose.start_containers(Application.data.services)
         else:
             log.info("{} was not running, restart is not needed", service.value)
+
+        # Special case for the backend:
+        # change password command is to be executed AFTER the restart
+        if service == Services.backend and container:
+            docker.exec_command(container, command="restapi init --force-user")
 
         log.info(
             "The password of {} has been changed. "
