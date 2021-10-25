@@ -25,7 +25,7 @@ def get_containers() -> List[str]:
     for container in docker.container.list():
         name = container.name
 
-        if name == REGISTRY:
+        if name == REGISTRY or name == "adminer" or name == "swaggerui":
             continue
 
         # this is swarm mode:
@@ -245,9 +245,44 @@ def test_remove(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove registry postgres",
-            "Service registry removed",
-            # "Services removed",
+            # Registry is already removed, can't remove it again
+            # But this is enough to confirm that registry and services can be mixed up
+            "Service registry is not running",
             # The main stack is already removed, can't remove postgres
             # But this is enough to confirm that registry and services can be mixed up
             "Stack rem is not running, deploy it with",
         )
+
+    exec_command(capfd, "run --detach adminer", "You can access Adminer interface")
+    exec_command(capfd, "run --detach swaggerui", "You can access SwaggerUI web page")
+
+    exec_command(
+        capfd,
+        "remove adminer postgres swaggerui",
+        "Service adminer removed",
+        "Service swaggerui removed",
+        # The main stack is already removed, can't remove postgres
+        # But this is enough to confirm that registry and services can be mixed up
+        "Stack rem is not running, deploy it with",
+    )
+
+    exec_command(
+        capfd,
+        "remove adminer postgres swaggerui",
+        # Adminer and SwaggerUI are already removed, can't remove them again
+        # But this is enough to confirm that interfaces and services can be mixed up
+        "Service adminer is not running",
+        "Service swaggerui is not running",
+        # The main stack is already removed, can't remove postgres
+        # But this is enough to confirm that registry and services can be mixed up
+        "Stack rem is not running, deploy it with",
+    )
+
+    assert get_containers() == NONE
+    # Verify that remove of interfaces does not stop the main stack, if not requested
+    exec_command(capfd, "start backend", "Stack started")
+    assert get_containers() == BACKEND_ONLY
+    exec_command(capfd, "remove adminer", "Service adminer removed")
+    assert get_containers() == BACKEND_ONLY
+
+    exec_command(capfd, "remove --all", "Stack removed")
