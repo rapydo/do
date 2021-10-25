@@ -11,8 +11,7 @@ from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
-# 0 1 * * * cd /home/??? && \
-#     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo backup neo4j --force > \
+# 0 1 * * * cd /home/??? && /usr/local/bin/rapydo backup neo4j --force > \
 #         /home/???/data/logs/backup.log 2>&1
 
 

@@ -252,6 +252,9 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
+    if SWARM_MODE:
+        time.sleep(5)
+
     service_verify(capfd, "redis")
 
     # Cleanup the stack for the next test
@@ -425,6 +428,9 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
+    if SWARM_MODE:
+        time.sleep(5)
+
     service_verify(capfd, "rabbitmq")
 
     # Cleanup the stack for the next test
@@ -508,6 +514,9 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
         "password --show",
         mypassword,
     )
+
+    if SWARM_MODE:
+        time.sleep(5)
 
     service_verify(capfd, "sqlalchemy")
 
@@ -595,6 +604,9 @@ def SKIP_test_password_mysql(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
+    if SWARM_MODE:
+        time.sleep(5)
+
     service_verify(capfd, "sqlalchemy")
 
     # Cleanup the stack for the next test
@@ -679,6 +691,9 @@ def SKIP_test_password_neo4j(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
+    if SWARM_MODE:
+        time.sleep(5)
+
     service_verify(capfd, "neo4j")
 
     # Cleanup the stack for the next test
@@ -762,6 +777,9 @@ def SKIP_test_password_mongo(capfd: Capture, faker: Faker) -> None:
         "password --show",
         mypassword,
     )
+
+    if SWARM_MODE:
+        time.sleep(5)
 
     service_verify(capfd, "mongo")
 

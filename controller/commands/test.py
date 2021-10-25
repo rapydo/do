@@ -30,9 +30,9 @@ def test(
 ) -> None:  # pragma: no cover
 
     Application.print_command(
-        Application.serialize_parameter("", test),
         Application.serialize_parameter("--swarm", swarm_mode, IF=swarm_mode),
         Application.serialize_parameter("--no-rm", no_remove, IF=no_remove),
+        Application.serialize_parameter("", test),
     )
 
     controller_path = Packages.get_installation_path("rapydo")
