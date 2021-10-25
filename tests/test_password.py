@@ -156,6 +156,10 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
     )
 
+    # This is needed otherwise the following tests will be unable to start
+    # a new instance of the registry and will fail with registry auth errors
+    exec_command(capfd, "remove registry", "Service registry removed")
+
 
 def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
@@ -169,6 +173,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -266,6 +271,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -350,6 +356,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -437,6 +444,7 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -522,6 +530,7 @@ def SKIP_test_password_mysql(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -609,6 +618,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -683,7 +693,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "remove", "Stack removed")
 
 
-def SKIP_test_password_backend(capfd: Capture, faker: Faker) -> None:
+def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     project_name = random_project_name(faker)
     create_project(
@@ -694,6 +704,7 @@ def SKIP_test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
