@@ -84,10 +84,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access SwaggerUI web page here: http://localhost:124",
     )
 
-    assert [f"{c.name}: {c.state.status}" for c in docker.ps(all=True)] == [
-        "admin: running",
-        "swaggerui: running",
-    ]
+    assert docker.logs("swaggerui", tail=5) == "debug"
 
     # This fails if the interfaces are non running, i.e. in case of a post-start crash
     # Introduced after a BUG due to the tty setting in volatile container

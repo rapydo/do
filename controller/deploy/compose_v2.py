@@ -217,7 +217,7 @@ class Compose:
                 # Please note that interactive commands is not working yet
                 tty=tty,
                 dependencies=False,
-                remove=True,
+                # remove=True,
                 service_ports=False,
                 publish=publish or [],
                 use_aliases=True,
