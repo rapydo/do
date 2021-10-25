@@ -78,8 +78,7 @@ def test_remove(capfd: Capture) -> None:
     )
     init_project(capfd)
 
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     pull_images(capfd)
 

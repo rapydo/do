@@ -74,8 +74,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     exec_command(
         capfd,
@@ -174,8 +173,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -273,8 +271,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -359,8 +356,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -448,8 +444,7 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -535,8 +530,7 @@ def SKIP_test_password_mysql(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -624,8 +618,7 @@ def SKIP_test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -711,8 +704,7 @@ def SKIP_test_password_mongo(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 
@@ -798,8 +790,7 @@ def SKIP_test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 

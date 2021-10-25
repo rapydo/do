@@ -10,7 +10,7 @@ from faker import Faker
 from python_on_whales import docker
 from typer.testing import CliRunner
 
-from controller import REGISTRY
+from controller import REGISTRY, SWARM_MODE
 
 runner = CliRunner()
 
@@ -164,10 +164,11 @@ def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") 
 
 
 def start_registry(capfd: Capture) -> None:
-    exec_command(capfd, "run registry --pull")
-    time.sleep(2)
+    if SWARM_MODE:
+        exec_command(capfd, "run registry --pull")
+        time.sleep(2)
 
-    print(docker.logs(REGISTRY))
+        print(docker.logs(REGISTRY))
 
 
 def pull_images(capfd: Capture) -> None:

@@ -10,6 +10,7 @@ from tests import (
     random_project_name,
     service_verify,
     start_project,
+    start_registry,
 )
 
 
@@ -27,8 +28,7 @@ def test_tuning(capfd: Capture, faker: Faker) -> None:
     )
     init_project(capfd)
 
-    # if SWARM_MODE:
-    #     start_registry(capfd)
+    start_registry(capfd)
 
     exec_command(
         capfd,

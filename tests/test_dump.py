@@ -27,11 +27,6 @@ def test_dump(capfd: Capture, faker: Faker) -> None:
     )
     init_project(capfd)
 
-    # if SWARM_MODE:
-    #     start_registry(capfd)
-
-    # pull_images(capfd)
-
     exec_command(
         capfd,
         "dump",

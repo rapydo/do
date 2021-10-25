@@ -27,8 +27,7 @@ def test_all(capfd: Capture) -> None:
         frontend="no",
     )
     init_project(capfd)
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
     pull_images(capfd)
 
     if SWARM_MODE:

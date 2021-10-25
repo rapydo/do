@@ -3,7 +3,6 @@ This module will test the shell command
 """
 import signal
 
-from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -29,17 +28,15 @@ def test_all(capfd: Capture) -> None:
         services=["rabbit", "neo4j"],
     )
     init_project(capfd)
-    if SWARM_MODE:
-        start_registry(capfd)
+
+    start_registry(capfd)
+
     pull_images(capfd)
     start_project(capfd)
 
-    if SWARM_MODE:
-        exec_command(capfd, "shell invalid", "Service invalid not found")
-    else:
-        exec_command(
-            capfd, "shell invalid", "No running container found for invalid service"
-        )
+    exec_command(
+        capfd, "shell invalid", "No running container found for invalid service"
+    )
 
     exec_command(
         capfd,

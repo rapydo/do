@@ -6,7 +6,6 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -74,8 +73,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "N/A",
     )
 
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     pull_images(capfd)
 

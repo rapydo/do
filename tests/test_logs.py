@@ -31,8 +31,7 @@ def test_all(capfd: Capture) -> None:
     )
     init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
 
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     pull_images(capfd)
     start_project(capfd)

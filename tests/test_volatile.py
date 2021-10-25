@@ -5,7 +5,7 @@ This module will test the volatile command
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
 from tests import (  # signal_handler,
     Capture,
     create_project,
@@ -27,8 +27,7 @@ def test_volatile(capfd: Capture, faker: Faker) -> None:
     )
     init_project(capfd)
 
-    if SWARM_MODE:
-        start_registry(capfd)
+    start_registry(capfd)
 
     exec_command(
         capfd,
