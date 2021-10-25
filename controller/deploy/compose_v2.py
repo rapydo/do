@@ -203,7 +203,7 @@ class Compose:
         # used by interfaces
         detach: bool = False,
         user: Optional[str] = None,
-    ) -> None:
+    ) -> bool:
 
         try:
             out = self.docker.compose.run(
@@ -223,8 +223,11 @@ class Compose:
 
             if not detach:
                 print(out)
+
+            return True
         except DockerException as e:
             log.critical(e)
+            return False
 
     def get_running_services(self, prefix: str) -> Set[str]:
 

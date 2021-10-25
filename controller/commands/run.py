@@ -68,6 +68,12 @@ def run(
         "-p",
         help="port to be associated to the current service interface",
     ),
+    detach: Optional[bool] = typer.Option(
+        None,
+        "--detach",
+        help="Start the container in detach mode (default for non-interfaces)",
+        show_default=False,
+    ),
 ) -> None:
 
     Application.print_command(
@@ -161,27 +167,38 @@ def run(
 
     port, target = get_publish_port(service, port)
 
+    if detach is None:
+        if service == "swaggerui" or service == "adminer":
+            # to be set False after fixed the interactive volatile
+            # detach = False
+            detach = True
+        else:
+            detach = True
+
     log.info("Running {}...", service)
-    compose.create_volatile_container(service, detach=True, publish=[(port, target)])
+    created = compose.create_volatile_container(
+        service, detach=detach, publish=[(port, target)]
+    )
 
-    if service == "swaggerui":
-        if Configuration.production:
-            prot = "https"
-        else:
-            prot = "http"
+    if created:
+        if service == "swaggerui":
+            if Configuration.production:
+                prot = "https"
+            else:
+                prot = "http"
 
-        log.info(
-            "You can access SwaggerUI web page here: {}\n",
-            f"{prot}://{Configuration.hostname}:{port}",
-        )
+            log.info(
+                "You can access SwaggerUI web page here: {}\n",
+                f"{prot}://{Configuration.hostname}:{port}",
+            )
 
-    if service == "adminer":
-        if Configuration.production:
-            prot = "https"
-        else:
-            prot = "http"
+        if service == "adminer":
+            if Configuration.production:
+                prot = "https"
+            else:
+                prot = "http"
 
-        log.info(
-            "You can access Adminer interface on: {}\n",
-            f"{prot}://{Configuration.hostname}:{port}",
-        )
+            log.info(
+                "You can access Adminer interface on: {}\n",
+                f"{prot}://{Configuration.hostname}:{port}",
+            )
