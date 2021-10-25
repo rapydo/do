@@ -348,12 +348,15 @@ def password(
             # https://ubiq.co/database-blog/how-to-change-user-password-in-postgresql
             user = Application.env.get("ALCHEMY_USER")
             db = Application.env.get("ALCHEMY_DB")
-            command = f"""
-                psql -U {user} -d {db} -c \"
-                    ALTER USER {user} WITH PASSWORD \'{new_password}\';
-                \"
-            """
-            docker.exec_command(container, user="postgres", command=command)
+            docker.exec_command(
+                container,
+                user="postgres",
+                command=f"""
+                    psql -U {user} -d {db} -c \"
+                        ALTER USER {user} WITH PASSWORD \'{new_password}\';
+                    \"
+                """,
+            )
 
         elif service == Services.mariadb and container:
             # https://dev.mysql.com/doc/refman/8.0/en/set-password.html
@@ -361,11 +364,15 @@ def password(
             user = Application.env.get("ALCHEMY_USER")
             pwd = Application.env.get("MYSQL_ROOT_PASSWORD")
             db = Application.env.get("ALCHEMY_DB")
-            command = f"""
-            sh -c \'mysql -uroot -p\"{pwd}\" -D\"{db}\" -e "
-                ALTER USER {user} IDENTIFIED BY \\\"{new_password};\\\"
-            "\'"""
-            docker.exec_command(container, user="mysql", command=command)
+
+            docker.exec_command(
+                container,
+                user="mysql",
+                command=f"""
+                    mysql -uroot -p\"{pwd}\" -D\"{db}\" -e
+                        "ALTER USER '{user}'@'%' IDENTIFIED BY '{new_password}';"
+                    """,
+            )
         # elif service == Services.mongodb and container:
         #     # db.changeUserPassword(...)
         #     pass

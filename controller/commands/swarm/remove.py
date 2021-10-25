@@ -55,10 +55,10 @@ def remove(
     swarm = Swarm()
     if remove_extras:
         for extra_service in remove_extras:
-            swarm.docker.container.remove(extra_service, force=True)
             if not swarm.docker.container.exists(extra_service):
                 log.error("Service {} is not running", extra_service)
                 continue
+            swarm.docker.container.remove(extra_service, force=True)
             log.info("Service {} removed", extra_service)
 
         # Nothing more to do
