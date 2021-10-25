@@ -254,10 +254,14 @@ def test_remove(capfd: Capture) -> None:
         )
 
     exec_command(
-        capfd, "run --detach --pull adminer", "You can access Adminer interface"
+        capfd,
+        "run --detach --pull --port 7777 adminer",
+        "You can access Adminer interface",
     )
     exec_command(
-        capfd, "run --detach --pull swaggerui", "You can access SwaggerUI web page"
+        capfd,
+        "run --detach --pull --port 8888 swaggerui",
+        "You can access SwaggerUI web page",
     )
 
     exec_command(
@@ -265,21 +269,13 @@ def test_remove(capfd: Capture) -> None:
         "remove adminer postgres swaggerui",
         "Service adminer removed",
         "Service swaggerui removed",
-        # The main stack is already removed, can't remove postgres
-        # But this is enough to confirm that registry and services can be mixed up
-        "Stack rem is not running, deploy it with",
     )
 
     exec_command(
         capfd,
         "remove adminer postgres swaggerui",
-        # Adminer and SwaggerUI are already removed, can't remove them again
-        # But this is enough to confirm that interfaces and services can be mixed up
         "Service adminer is not running",
         "Service swaggerui is not running",
-        # The main stack is already removed, can't remove postgres
-        # But this is enough to confirm that registry and services can be mixed up
-        "Stack rem is not running, deploy it with",
     )
 
     assert get_containers() == NONE

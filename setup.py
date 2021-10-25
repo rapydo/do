@@ -40,6 +40,7 @@ setup(
             "pytest",
             "pytest-cov",
             "pytest-timeout",
+            "pytest-sugar",
             "Faker",
         ]
     },
