@@ -104,6 +104,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access Adminer interface on: https://localhost:126",
     )
 
+    assert docker.logs("adminer", tail=5) == ["debug"]
     assert [f"{c.name}: {c.state.status}" for c in docker.ps(all=True)] == [
         "admin: running",
         "swaggerui: running",
