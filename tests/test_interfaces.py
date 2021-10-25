@@ -2,7 +2,6 @@
 This module will test the interfaces command
 """
 from faker import Faker
-from python_on_whales import docker
 
 from controller import __version__, colors
 from tests import (
@@ -84,6 +83,16 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access SwaggerUI web page here: http://localhost:124",
     )
 
+    # This fails if the interfaces are non running, i.e. in case of a post-start crash
+    # Introduced after a BUG due to the tty setting in volatile container
+    # that made run interfaces fail on GA
+    exec_command(
+        capfd,
+        "remove adminer swaggerui",
+        "Service adminer removed",
+        "Service swaggerui removed",
+    )
+
     # Test Swagger UI and Admin in production mode
     exec_command(
         capfd,
@@ -102,19 +111,4 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         capfd,
         "--prod run adminer --port 126",
         "You can access Adminer interface on: https://localhost:126",
-    )
-
-    assert docker.logs("adminer", tail=5) == ["debug"]
-    assert [f"{c.name}: {c.state.status}" for c in docker.ps(all=True)] == [
-        "admin: running",
-        "swaggerui: running",
-    ]
-    # This fails if the interfaces are non running, i.e. in case of a post-start crash
-    # Introduced after a BUG due to the tty setting in volatile container
-    # that made run interfaces fail on GA
-    exec_command(
-        capfd,
-        "remove adminer swaggerui",
-        "Service adminer removed",
-        "Service swaggerui removed",
     )
