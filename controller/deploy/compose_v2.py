@@ -207,6 +207,7 @@ class Compose:
     ) -> bool:
 
         tty = sys.stdout.isatty()
+        log.critical("tty = {}", tty)
         try:
             out = self.docker.compose.run(
                 service=service,

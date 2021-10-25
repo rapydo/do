@@ -264,10 +264,6 @@ def test_remove(capfd: Capture) -> None:
         "You can access SwaggerUI web page",
     )
 
-    assert [f"{c.name}: {c.state.status}" for c in docker.ps(all=True)] == [
-        "admin: running",
-        "swaggerui: running",
-    ]
     exec_command(
         capfd,
         "remove adminer postgres swaggerui",

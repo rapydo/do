@@ -2,7 +2,6 @@
 This module will test the interfaces command
 """
 from faker import Faker
-from python_on_whales import docker
 
 from controller import __version__, colors
 from tests import (
@@ -63,10 +62,10 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Adminer UI with custom port
     exec_command(
         capfd,
-        "run adminer --port 123",
+        "run adminer --port 3333",
         # "Pulling adminer",
         # f"Creating {project_name}_adminer_run",
-        "You can access Adminer interface on: http://localhost:123",
+        "You can access Adminer interface on: http://localhost:3333",
     )
 
     # Launch Swagger UI with default port
@@ -80,11 +79,9 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Swagger UI with custom port
     exec_command(
         capfd,
-        "run swaggerui --port 124",
-        "You can access SwaggerUI web page here: http://localhost:124",
+        "run swaggerui --port 4444",
+        "You can access SwaggerUI web page here: http://localhost:4444",
     )
-
-    assert docker.logs("swaggerui", tail=5) == "debug"
 
     # This fails if the interfaces are non running, i.e. in case of a post-start crash
     # Introduced after a BUG due to the tty setting in volatile container
@@ -106,12 +103,12 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod run swaggerui --port 125",
-        "You can access SwaggerUI web page here: https://localhost:125",
+        "--prod run swaggerui --port 5555",
+        "You can access SwaggerUI web page here: https://localhost:5555",
     )
 
     exec_command(
         capfd,
-        "--prod run adminer --port 126",
-        "You can access Adminer interface on: https://localhost:126",
+        "--prod run adminer --port 6666",
+        "You can access Adminer interface on: https://localhost:6666",
     )
