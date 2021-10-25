@@ -59,6 +59,9 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access Adminer interface on: http://localhost:7777",
     )
 
+    from python_on_whales import docker
+    assert docker.logs("adminer", tail=10) == "debug"
+
     # Launch Adminer UI with custom port
     exec_command(
         capfd,
