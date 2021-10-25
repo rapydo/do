@@ -253,8 +253,12 @@ def test_remove(capfd: Capture) -> None:
             "Stack rem is not running, deploy it with",
         )
 
-    exec_command(capfd, "run --detach adminer", "You can access Adminer interface")
-    exec_command(capfd, "run --detach swaggerui", "You can access SwaggerUI web page")
+    exec_command(
+        capfd, "run --detach --pull adminer", "You can access Adminer interface"
+    )
+    exec_command(
+        capfd, "run --detach --pull swaggerui", "You can access SwaggerUI web page"
+    )
 
     exec_command(
         capfd,
