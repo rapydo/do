@@ -158,7 +158,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
     # This is needed otherwise the following tests will be unable to start
     # a new instance of the registry and will fail with registry auth errors
-    exec_command(capfd, "remove registry", "Registry service removed")
+    exec_command(capfd, "remove registry", "Service registry removed")
 
 
 def test_password_redis(capfd: Capture, faker: Faker) -> None:
