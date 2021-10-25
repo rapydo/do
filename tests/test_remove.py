@@ -224,7 +224,7 @@ def test_remove(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove registry",
-            "Registry service removed",
+            "Service registry removed",
         )
 
         # Verify that the registry is no longer running
@@ -238,14 +238,14 @@ def test_remove(capfd: Capture) -> None:
         exec_command(
             capfd,
             "remove registry",
-            "Registry service removed",
+            "Service registry removed",
         )
 
         # Mix both registry and normal services
         exec_command(
             capfd,
             "remove registry postgres",
-            "Registry service removed",
+            "Service registry removed",
             # "Services removed",
             # The main stack is already removed, can't remove postgres
             # But this is enough to confirm that registry and services can be mixed up

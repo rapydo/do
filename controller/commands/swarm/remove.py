@@ -38,19 +38,21 @@ def remove(
 
     Application.print_command(Application.serialize_parameter("", services))
 
-    remove_registry = False
+    remove_extras: List[str] = []
     if services and REGISTRY in services:
         # services is a tuple, even if defined as List[str] ...
         services = list(services)
         services.pop(services.index(REGISTRY))
-        remove_registry = True
+        remove_extras.append(REGISTRY)
 
     Application.get_controller().controller_init(services)
 
     swarm = Swarm()
-    if remove_registry:
-        swarm.docker.container.remove(REGISTRY, force=True)
-        log.info("Registry service removed")
+    if remove_extras:
+        for extra_service in remove_extras:
+            swarm.docker.container.remove(extra_service, force=True)
+            log.info("Registry service removed")
+            log.info("Service {} removed", extra_service)
 
         # Nothing more to do
         if not services:
