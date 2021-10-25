@@ -281,6 +281,7 @@ def password(
         compose = Compose(Application.data.files)
 
         variables = get_service_passwords(service)
+        old_password = Application.env.get(variables[0])
         new_variables = {variable: new_password for variable in variables}
 
         # Some services can only be updated if already running,
@@ -333,8 +334,16 @@ def password(
             # restapi init --force-user
             pass
         elif service == Services.neo4j and container:
-            # ALTER CURRENT USER SET PASSWORD FROM "<old-pass>" TO "<new-pass>";
-            pass
+
+            docker.exec_command(
+                container,
+                command=f"""bin/cypher-shell \"
+                    ALTER CURRENT USER
+                    SET PASSWORD
+                    FROM '{old_password}'
+                    TO '{new_password}';
+                \"""",
+            )
         elif service == Services.postgres and container:
             # Interactively:
             # \password username
@@ -349,7 +358,6 @@ def password(
             """
             docker.exec_command(container, user="postgres", command=command)
 
-            pass
         elif service == Services.mariadb and container:
             # https://dev.mysql.com/doc/refman/8.0/en/set-password.html
 

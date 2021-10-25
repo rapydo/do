@@ -208,6 +208,8 @@ class Docker:
         command: str = None,
     ) -> None:
 
+        # Important security note: never log the command command because it can
+        # contain sensitive data, for example when used from change password command
         tty = sys.stdout.isatty()
         try:
             output = self.client.container.execute(
