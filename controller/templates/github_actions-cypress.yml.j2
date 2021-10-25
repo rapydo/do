@@ -37,14 +37,14 @@ jobs:
           sleep 20
           rapydo logs
 
-          rapydo shell --no-tty frontend "yarn install"
-          rapydo shell --no-tty frontend "reload-types"
+          rapydo shell frontend "yarn install"
+          rapydo shell frontend "reload-types"
 
-          rapydo shell --no-tty frontend "yarn run cypress:start:norecord"
+          rapydo shell frontend "yarn run cypress:start:norecord"
           # Cypress with record mode enabled
-          # rapydo shell --no-tty frontend "yarn run cypress:start:full"
+          # rapydo shell frontend "yarn run cypress:start:full"
 
-          rapydo shell --no-tty frontend "npx nyc --all report --reporter=lcov --report-dir /coverage"
+          rapydo shell frontend "npx nyc --all report --reporter=lcov --report-dir /coverage"
 
       - name: Coverage
         uses: rapydo/actions/coverage@v1

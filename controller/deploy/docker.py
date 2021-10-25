@@ -206,7 +206,6 @@ class Docker:
         container: str,
         user: Optional[str] = None,
         command: str = None,
-        tty: bool = True,
     ) -> None:
 
         tty = sys.stdout.isatty()
@@ -221,10 +220,10 @@ class Docker:
                 detach=False,
             )
 
-            # When tty is True the output is empty because the terminal is directly
+            # When tty is enabled the output is empty because the terminal is directly
             # connected to the container I/O bypassing python
-            # Important: in case of --no-tty, execution exceptions are not raised by
-            # container.execute but by the following loop!
+            # Important: when the tty is disabled exceptions are not raised by
+            # container.execute but by the following loop so keep both in the try/except
             if output:
                 for out_line in output:
                     # 'stdout' or 'stderr'

@@ -138,17 +138,15 @@ def restore(
         dump_file = backup_file.replace(".gz", "")
         dump_path = f"/tmp/{dump_file}"
 
-        docker.exec_command(
-            container, user="root", command=f"cp {backup_path} /tmp/", tty=False
-        )
+        docker.exec_command(container, user="root", command=f"cp {backup_path} /tmp/")
 
         docker.exec_command(
-            container, user="root", command=f"gunzip -kf /tmp/{backup_file}", tty=False
+            container, user="root", command=f"gunzip -kf /tmp/{backup_file}"
         )
 
         # Executed as root
         docker.exec_command(
-            container, user="root", command=f"chown postgres {dump_path}", tty=False
+            container, user="root", command=f"chown postgres {dump_path}"
         )
 
         # By using pg_dumpall the resulting dump can be restored with psql:
@@ -156,7 +154,6 @@ def restore(
             container,
             user="postgres",
             command=f"psql -U sqluser -f {dump_path} postgres",
-            tty=False,
         )
 
         log.info("Restore from data{} completed", backup_path)

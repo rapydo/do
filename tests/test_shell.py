@@ -66,14 +66,6 @@ def test_all(capfd: Capture) -> None:
         exec_command(capfd, "shell backend -u aRandomUser", "--user aRandomUser")
 
     else:
-        # Added for GitHub Actions
-        exec_command(
-            capfd,
-            "shell backend hostname",
-            # "the input device is not a TTY",
-            "fileno",
-        )
-
         exec_command(
             capfd,
             "shell --no-tty backend invalid",
@@ -82,21 +74,21 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "shell --no-tty backend invalid",
+            "shell backend invalid",
             "The command execution was terminated by command cannot be invoked. "
             "Exit code is 126",
         )
 
         exec_command(
             capfd,
-            'shell --no-tty backend "bash invalid"',
+            'shell backend "bash invalid"',
             "The command execution was terminated by command not found. "
             "Exit code is 127",
         )
 
         exec_command(
             capfd,
-            "shell --no-tty backend hostname",
+            "shell backend hostname",
             "backend-server",
         )
 
@@ -104,7 +96,7 @@ def test_all(capfd: Capture) -> None:
         signal.alarm(2)
         exec_command(
             capfd,
-            "shell --no-tty backend --default-command",
+            "shell backend --default-command",
             "Time is up",
         )
 
@@ -113,7 +105,7 @@ def test_all(capfd: Capture) -> None:
         # signal.alarm(2)
         # exec_command(
         #     capfd,
-        #     "shell --no-tty backend",
+        #     "shell backend",
         #     # "developer@backend-server:[/code]",
         #     "Time is up",
         # )
@@ -121,27 +113,27 @@ def test_all(capfd: Capture) -> None:
         # Testing default users
         exec_command(
             capfd,
-            "shell --no-tty backend whoami",
+            "shell backend whoami",
             "developer",
         )
         exec_command(
             capfd,
-            "shell --no-tty frontend whoami",
+            "shell frontend whoami",
             "node",
         )
         exec_command(
             capfd,
-            "shell --no-tty rabbit whoami",
+            "shell rabbit whoami",
             "rabbitmq",
         )
         exec_command(
             capfd,
-            "shell --no-tty postgres whoami",
+            "shell postgres whoami",
             "postgres",
         )
         exec_command(
             capfd,
-            "shell --no-tty neo4j whoami",
+            "shell neo4j whoami",
             "neo4j",
         )
 
@@ -153,14 +145,14 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "shell --no-tty backend hostname",
+            "shell backend hostname",
             "Requested command: hostname with user: developer",
             "No running container found for backend service",
         )
 
         exec_command(
             capfd,
-            "shell --no-tty backend --default",
+            "shell backend --default",
             "Requested command: restapi launch with user: developer",
             "No running container found for backend service",
         )

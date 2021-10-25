@@ -9,10 +9,7 @@ from controller.deploy.builds import verify_available_images
 from controller.deploy.compose import Compose
 from controller.deploy.docker import Docker
 
-# 0 0 * * 3 cd /home/??? && \
-#     COMPOSE_INTERACTIVE_NO_CLI=1 /usr/local/bin/rapydo ssl --no-tty > \
-#         /home/???/data/logs/ssl.log 2>&1
-
+# 0 0 * * 3 cd /home/??? && /usr/local/bin/rapydo ssl > /home/???/data/logs/ssl.log 2>&1
 
 # dhparam is automatically generated with a default length of 2048
 # You can generate stronger dhparams with the following command in the proxy container:
@@ -50,7 +47,6 @@ def ssl(
 ) -> None:
     Application.print_command(
         Application.serialize_parameter("--volatile", volatile, IF=volatile),
-        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
         Application.serialize_parameter("--chain-file", chain_file, IF=chain_file),
         Application.serialize_parameter("--key-file", key_file, IF=key_file),
     )
@@ -108,7 +104,7 @@ def ssl(
                 "The proxy is not running, start your stack or try with {command}",
                 command=RED("rapydo ssl --volatile"),
             )
-        docker.exec_command(container, user="root", command=command, tty=not no_tty)
+        docker.exec_command(container, user="root", command=command)
 
     container = docker.get_container("neo4j", slot=1)
     if container:
@@ -125,10 +121,6 @@ def ssl(
         # No longer be required. To test it after the creation of the new cert:
         #   echo -n | openssl s_client -showcerts -connect hostname:5671
         # Please note that this command can fail if RabbitMQ is still starting
-        docker.exec_command(
-            container,
-            command="/usr/local/bin/reload_certificate",
-            tty=not no_tty,
-        )
+        docker.exec_command(container, command="/usr/local/bin/reload_certificate")
 
     log.info("New certificate successfully enabled")

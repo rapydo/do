@@ -57,10 +57,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     service_verify(capfd, "sqlalchemy")
 
     # This will initialize postgres
-    exec_command(capfd, "shell --no-tty backend 'restapi init'")
+    exec_command(capfd, "shell backend 'restapi init'")
 
     # Verify the initialization
-    psql = "shell --no-tty postgres 'psql -U sqluser -d SQL_API -c"
+    psql = "shell postgres 'psql -U sqluser -d SQL_API -c"
     exec_command(
         capfd,
         f'{psql} "select name, description from role"\'',

@@ -43,7 +43,6 @@ def shell(
         Application.serialize_parameter(
             "--default", default_command, IF=default_command
         ),
-        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
         Application.serialize_parameter("", service),
         Application.serialize_parameter("", command),
     )
@@ -68,4 +67,4 @@ def shell(
     if not container:
         print_and_exit("No running container found for {} service", service)
 
-    docker.exec_command(container, user=user, command=command, tty=not no_tty)
+    docker.exec_command(container, user=user, command=command)

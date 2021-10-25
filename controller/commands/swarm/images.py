@@ -160,7 +160,7 @@ def images(
         if images_to_be_removed:
             log.info("Executing registry garbage collector...")
             command = "/bin/registry garbage-collect -m /etc/docker/registry/config.yml"
-            docker.exec_command("registry", command=command, tty=False)
+            docker.exec_command("registry", command=command)
             log.info("Registry garbage collector successfully executed")
 
             # A restart is needed to prevent clashes beetween gc and cache

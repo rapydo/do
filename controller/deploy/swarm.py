@@ -1,6 +1,7 @@
 """
 Integration with Docker swarm
 """
+import sys
 from typing import Dict, List, Optional, Set, Union
 
 from glom import glom
@@ -257,7 +258,6 @@ class Swarm:
         service: str,
         user: Optional[str] = None,
         command: str = None,
-        disable_tty: bool = False,
         slot: int = 1,
     ) -> None:
         """
@@ -272,7 +272,7 @@ class Swarm:
             return None
 
         exec_command = "docker exec --interactive "
-        if not disable_tty:
+        if sys.stdout.isatty():
             exec_command += "--tty "
         if user:
             exec_command += f"--user {user} "

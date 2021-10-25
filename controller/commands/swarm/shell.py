@@ -43,7 +43,6 @@ def shell(
         Application.serialize_parameter(
             "--default", default_command, IF=default_command
         ),
-        Application.serialize_parameter("--no-tty", no_tty, IF=no_tty),
         Application.serialize_parameter("", service),
         Application.serialize_parameter("", command),
     )
@@ -63,4 +62,4 @@ def shell(
 
     log.debug("Requested command: {} with user: {}", command, user)
 
-    swarm.exec_command(service, user=user, command=command, disable_tty=no_tty)
+    swarm.exec_command(service, user=user, command=command)

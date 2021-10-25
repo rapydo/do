@@ -29,9 +29,9 @@ jobs:
           rapydo start frontend
           sleep 5
           rapydo logs frontend
-          rapydo shell --no-tty frontend "yarn install"
-          rapydo shell --no-tty frontend "reload-types"
-          rapydo shell --no-tty frontend "yarn run test:single"
+          rapydo shell frontend "yarn install"
+          rapydo shell frontend "reload-types"
+          rapydo shell frontend "yarn run test:single"
 
       - name: Coverage
         uses: rapydo/actions/coverage@v1

@@ -57,13 +57,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     service_verify(capfd, "neo4j")
 
     # This will initialize neo4j
-    exec_command(capfd, "shell --no-tty backend 'restapi init'")
+    exec_command(capfd, "shell backend 'restapi init'")
 
     # Just some delay extra delay. restapi init alone not always is enough...
     time.sleep(5)
 
     # Verify the initialization
-    cypher = "shell --no-tty neo4j 'bin/cypher-shell"
+    cypher = "shell neo4j 'bin/cypher-shell"
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',

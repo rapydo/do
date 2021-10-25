@@ -94,8 +94,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        # --no-tty is needed on GitHub Actions
-        # to be able to execute commands on the running containers
         "ssl --no-tty",
         "--no-tty option is deprecated, you can stop using it",
         "Creating a self signed SSL certificate",

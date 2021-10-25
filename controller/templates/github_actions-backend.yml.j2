@@ -34,9 +34,9 @@ jobs:
           # rapydo add task test_task
 
           rapydo start
-          rapydo shell --no-tty backend 'restapi wait'
+          rapydo shell backend 'restapi wait'
 
-          rapydo shell --no-tty backend 'restapi tests --wait --destroy'
+          rapydo shell backend 'restapi tests --wait --destroy'
 
           LOGURU_LEVEL=WARNING rapydo list services
           # This should fail if at least one container is in Exit status

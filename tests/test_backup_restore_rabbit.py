@@ -63,9 +63,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     # NOTE: q = rabbitmq.__name__ is just to have a fixed name to be used to test the
     # queue without the need to introdure further nested " or '
-    query_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance();print(q, r.queue_exists(q));'\""
-    create_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.create_queue(q);'\""
-    delete_queue = "shell --no-tty backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.delete_queue(q);'\""
+    query_queue = "shell backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance();print(q, r.queue_exists(q));'\""
+    create_queue = "shell backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.create_queue(q);'\""
+    delete_queue = "shell backend \"/usr/bin/python3 -c 'from restapi.connectors import rabbitmq; q = rabbitmq.__name__; r = rabbitmq.get_instance(); r.delete_queue(q);'\""
 
     exec_command(capfd, query_queue, "restapi.connectors.rabbitmq False")
 

@@ -28,7 +28,6 @@ jobs:
             libs,
             list,
             logs,
-            password,
             registry,
             restart,
             remove,
@@ -50,6 +49,7 @@ jobs:
             backup_restore_rabbit,
             backup_restore_redis,
             cronjobs,
+            password,
             ssl,
             tuning,
           ]

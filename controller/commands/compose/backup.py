@@ -152,32 +152,25 @@ def backup(
                 container,
                 user="postgres",
                 command=f"pg_dumpall --clean -U sqluser -f {tmp_backup_path}",
-                tty=False,
             )
 
         # Compress the sql with best compression ratio
         if not dry_run:
             docker.exec_command(
-                container,
-                user="postgres",
-                command=f"gzip -9 {tmp_backup_path}",
-                tty=False,
+                container, user="postgres", command=f"gzip -9 {tmp_backup_path}"
             )
 
         # Verify the gz integrity
         if not dry_run:
             docker.exec_command(
-                container,
-                user="postgres",
-                command=f"gzip -t {tmp_backup_path}.gz",
-                tty=False,
+                container, user="postgres", command=f"gzip -t {tmp_backup_path}.gz"
             )
 
         # Move the backup from /tmp to /backup (as root user)
         backup_path = f"/backup/{service_name}/{now}.sql.gz"
         if not dry_run:
             docker.exec_command(
-                container, command=f"mv {tmp_backup_path}.gz {backup_path}", tty=False
+                container, command=f"mv {tmp_backup_path}.gz {backup_path}"
             )
 
         log.info("Backup completed: data{}", backup_path)
@@ -198,7 +191,7 @@ def backup(
 
         # Creating backup on a tmp folder as mysql user
         if not dry_run:
-            docker.exec_command(container, user="mysql", command=command, tty=False)
+            docker.exec_command(container, user="mysql", command=command)
 
         # Creating backup on a tmp folder as mysql user
         if not dry_run:
@@ -206,7 +199,6 @@ def backup(
                 container,
                 user="mysql",
                 command=f"sh -c 'mariabackup --prepare --target-dir={tmp_backup_path}'",
-                tty=False,
             )
 
         # Compress the prepared data folder. Used -C to skip the /tmp from folders paths
@@ -215,25 +207,19 @@ def backup(
                 container,
                 user="mysql",
                 command=f"tar -zcf {tmp_backup_path}.tar.gz -C /tmp {now}",
-                tty=False,
             )
 
         # Verify the gz integrity
         if not dry_run:
             docker.exec_command(
-                container,
-                user="mysql",
-                command=f"gzip -t {tmp_backup_path}.tar.gz",
-                tty=False,
+                container, user="mysql", command=f"gzip -t {tmp_backup_path}.tar.gz"
             )
 
         # Move the backup from /tmp to /backup (as root user)
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
         if not dry_run:
             docker.exec_command(
-                container,
-                command=f"mv {tmp_backup_path}.tar.gz {backup_path}",
-                tty=False,
+                container, command=f"mv {tmp_backup_path}.tar.gz {backup_path}"
             )
 
         log.info("Backup completed: data{}", backup_path)
@@ -275,15 +261,13 @@ def backup(
         # If running, ask redis to synchronize the database
         if container:
             docker.exec_command(
-                container,
-                command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'",
-                tty=False,
+                container, command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
             )
 
         command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
         if not dry_run:
             if container:
-                docker.exec_command(container, command=command, tty=False)
+                docker.exec_command(container, command=command)
             else:
                 dc.create_volatile_container(service_name, command=command)
 
@@ -291,7 +275,7 @@ def backup(
         command = f"gzip -t {backup_path}"
         if not dry_run:
             if container:
-                docker.exec_command(container, command=command, tty=False)
+                docker.exec_command(container, command=command)
             else:
                 dc.create_volatile_container(service_name, command=command)
 
