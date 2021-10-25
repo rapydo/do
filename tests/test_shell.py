@@ -41,118 +41,97 @@ def test_all(capfd: Capture) -> None:
             capfd, "shell invalid", "No running container found for invalid service"
         )
 
-    if SWARM_MODE:
+    exec_command(
+        capfd,
+        "shell --no-tty backend invalid",
+        "--no-tty option is deprecated, you can stop using it",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend",
-            "Due to limitations of the underlying packages, "
-            "the shell command is not implemented yet",
-            "You can execute by yourself the following command",
-            "docker exec --interactive --tty --user developer first_backend.1.",
-            "bash",
-        )
+    exec_command(
+        capfd,
+        "shell backend invalid",
+        "The command execution was terminated by command cannot be invoked. "
+        "Exit code is 126",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend --default",
-            "Due to limitations of the underlying packages, "
-            "the shell command is not implemented yet",
-            "You can execute by yourself the following command",
-            "docker exec --interactive --tty --user developer first_backend.1.",
-            "restapi launch",
-        )
+    exec_command(
+        capfd,
+        'shell backend "bash invalid"',
+        "The command execution was terminated by command not found. "
+        "Exit code is 127",
+    )
 
-        exec_command(capfd, "shell backend -u aRandomUser", "--user aRandomUser")
+    exec_command(
+        capfd,
+        "shell backend hostname",
+        "backend-server",
+    )
 
-    else:
-        exec_command(
-            capfd,
-            "shell --no-tty backend invalid",
-            "--no-tty option is deprecated, you can stop using it",
-        )
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(2)
+    exec_command(
+        capfd,
+        "shell backend --default-command",
+        "Time is up",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend invalid",
-            "The command execution was terminated by command cannot be invoked. "
-            "Exit code is 126",
-        )
+    # This can't work on GitHub Actions due to the lack of tty
+    # signal.signal(signal.SIGALRM, handler)
+    # signal.alarm(2)
+    # exec_command(
+    #     capfd,
+    #     "shell backend",
+    #     # "developer@backend-server:[/code]",
+    #     "Time is up",
+    # )
 
-        exec_command(
-            capfd,
-            'shell backend "bash invalid"',
-            "The command execution was terminated by command not found. "
-            "Exit code is 127",
-        )
+    # Testing default users
+    exec_command(
+        capfd,
+        "shell backend whoami",
+        "developer",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend hostname",
-            "backend-server",
-        )
+    exec_command(
+        capfd,
+        "shell frontend whoami",
+        "node",
+    )
 
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(2)
-        exec_command(
-            capfd,
-            "shell backend --default-command",
-            "Time is up",
-        )
+    exec_command(
+        capfd,
+        "shell rabbit whoami",
+        "rabbitmq",
+    )
 
-        # This can't work on GitHub Actions due to the lack of tty
-        # signal.signal(signal.SIGALRM, handler)
-        # signal.alarm(2)
-        # exec_command(
-        #     capfd,
-        #     "shell backend",
-        #     # "developer@backend-server:[/code]",
-        #     "Time is up",
-        # )
+    exec_command(
+        capfd,
+        "shell postgres whoami",
+        "postgres",
+    )
 
-        # Testing default users
-        exec_command(
-            capfd,
-            "shell backend whoami",
-            "developer",
-        )
-        exec_command(
-            capfd,
-            "shell frontend whoami",
-            "node",
-        )
-        exec_command(
-            capfd,
-            "shell rabbit whoami",
-            "rabbitmq",
-        )
-        exec_command(
-            capfd,
-            "shell postgres whoami",
-            "postgres",
-        )
-        exec_command(
-            capfd,
-            "shell neo4j whoami",
-            "neo4j",
-        )
+    exec_command(
+        capfd,
+        "shell neo4j whoami",
+        "neo4j",
+    )
 
-        exec_command(
-            capfd,
-            "remove",
-            "Stack removed",
-        )
+    exec_command(
+        capfd,
+        "remove",
+        "Stack removed",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend hostname",
-            "Requested command: hostname with user: developer",
-            "No running container found for backend service",
-        )
+    exec_command(
+        capfd,
+        "shell backend hostname",
+        "Requested command: hostname with user: developer",
+        "No running container found for backend service",
+    )
 
-        exec_command(
-            capfd,
-            "shell backend --default",
-            "Requested command: restapi launch with user: developer",
-            "No running container found for backend service",
-        )
+    exec_command(
+        capfd,
+        "shell backend --default",
+        "Requested command: restapi launch with user: developer",
+        "No running container found for backend service",
+    )
