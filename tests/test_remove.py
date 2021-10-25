@@ -279,10 +279,10 @@ def test_remove(capfd: Capture) -> None:
     )
 
     assert get_containers() == NONE
-    # Verify that remove of interfaces does not stop the main stack, if not requested
+    # Verify that removal of interfaces does not stop the main stack, if not requested
     exec_command(capfd, "start backend", "Stack started")
     assert get_containers() == BACKEND_ONLY
-    exec_command(capfd, "remove adminer", "Service adminer removed")
+    exec_command(capfd, "remove adminer", "Service adminer is not running")
     assert get_containers() == BACKEND_ONLY
 
     exec_command(capfd, "remove --all", "Stack removed")
