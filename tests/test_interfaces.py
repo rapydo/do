@@ -102,3 +102,13 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "--prod run adminer --port 126",
         "You can access Adminer interface on: https://localhost:126",
     )
+
+    # This fails if the interfaces are non running, i.e. in case of a post-start crash
+    # Introduced after a BUG due to the tty setting in volatile container
+    # that made run interfaces fail on GA
+    exec_command(
+        capfd,
+        "remove adminer swaggerui",
+        "Service adminer removed",
+        "Service swaggerui removed",
+    )
