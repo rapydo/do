@@ -234,11 +234,10 @@ def test_remove(capfd: Capture) -> None:
             "Registry 127.0.0.1:5000 not reachable.",
         )
 
-        # Not errors if the registry is not running
         exec_command(
             capfd,
             "remove registry",
-            "Service registry removed",
+            "Service registry is not running",
         )
 
         # Mix both registry and normal services
