@@ -59,8 +59,15 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access Adminer interface on: http://localhost:7777",
     )
 
-    from python_on_whales import docker
-    assert docker.logs("adminer", tail=10) == "debug"
+    # Admin or SwaggerUI does not start? You can debug with:
+    # from python_on_whales import docker
+    # assert docker.logs("adminer", tail=10) == "debug"
+
+    exec_command(
+        capfd,
+        "remove adminer",
+        "Service adminer removed",
+    )
 
     # Launch Adminer UI with custom port
     exec_command(
@@ -77,6 +84,12 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "run swaggerui --pull",
         "Pulling image for swaggerui...",
         "You can access SwaggerUI web page here: http://localhost:7777",
+    )
+
+    exec_command(
+        capfd,
+        "remove swaggerui",
+        "Service swaggerui removed",
     )
 
     # Launch Swagger UI with custom port

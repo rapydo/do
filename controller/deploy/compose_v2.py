@@ -207,7 +207,6 @@ class Compose:
     ) -> bool:
 
         tty = sys.stdout.isatty()
-        log.critical("tty = {}", tty)
         try:
             out = self.docker.compose.run(
                 service=service,
@@ -218,7 +217,7 @@ class Compose:
                 # Please note that interactive commands is not working yet
                 tty=tty,
                 dependencies=False,
-                remove=False,
+                remove=True,
                 service_ports=False,
                 publish=publish or [],
                 use_aliases=True,
