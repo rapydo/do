@@ -206,7 +206,7 @@ class Compose:
         user: Optional[str] = None,
     ) -> bool:
 
-        # tty = sys.stdout.isatty()
+        tty = sys.stdout.isatty()
         try:
             out = self.docker.compose.run(
                 service=service,
@@ -215,7 +215,7 @@ class Compose:
                 user=user,
                 detach=detach,
                 # Please note that interactive commands is not working yet
-                tty=False,
+                tty=tty,
                 dependencies=False,
                 remove=True,
                 service_ports=False,
