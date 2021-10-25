@@ -367,7 +367,8 @@ def password(
         elif service == Services.rabbit and container:
             user = Application.env.get("RABBITMQ_USER")
             docker.exec_command(
-                container, command=f"rabbitmqctl change_password {user} {new_password}"
+                container,
+                command=f'rabbitmqctl change_password "{user}" "{new_password}"',
             )
 
         if is_running:
