@@ -262,6 +262,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     neo4j_dump_file = files[-1]
 
+    time.sleep(5)
+
     # Here we test the restore procedure:
     # 1) verify some data in the database
     exec_command(
