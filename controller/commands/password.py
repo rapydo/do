@@ -144,7 +144,6 @@ def update_projectrc(variables: Dict[str, str]) -> None:
         last_line = ""
         for line in lines + append_additional_lines:
             last_line = line
-            log.critical(line.strip())
             f.write(line)
             if not line.endswith("\n"):
                 f.write("\n")

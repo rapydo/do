@@ -13,7 +13,11 @@ project_configuration:
       LOG_LEVEL: INFO
       # SMTP_ADMIN: your@email.org
       AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
+      {% if testing -%}
+      AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}+Aa1-nowit'sstrong!
+      {% else -%}
       AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
 
       {% if production -%}
       {% if services -%}{% for service in services -%}
@@ -55,8 +59,6 @@ project_configuration:
       SMTP_PASSWORD: {{ "RANDOM"| password }}
       ALLOW_PASSWORD_RESET: 1
       ALLOW_REGISTRATION: 1
-      AUTH_DEFAULT_USERNAME: {{ "RANDOM"| username }}@nomail.org
-      AUTH_DEFAULT_PASSWORD: {{ "RANDOM"| password }}+Aa1-nowit'sstrong!
       MAX_LOGS_LENGTH: 40
       AUTH_TOKEN_SAVE_FREQUENCY: 1
       FRONTEND_BUILD_MODE: angular-test
