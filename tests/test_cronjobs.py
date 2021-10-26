@@ -33,6 +33,8 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
+    time.sleep(5)
+
     exec_command(
         capfd,
         "logs --tail 50 backend",
