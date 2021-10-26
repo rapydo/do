@@ -38,6 +38,8 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     else:
         time.sleep(5)
 
+    exec_command(capfd, "status")
+
     exec_command(
         capfd,
         "logs --tail 50 backend",
