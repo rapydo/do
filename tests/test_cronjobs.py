@@ -5,6 +5,8 @@ import time
 
 from faker import Faker
 
+from controller import SWARM_MODE
+
 from tests import (
     Capture,
     create_project,
@@ -12,6 +14,7 @@ from tests import (
     init_project,
     pull_images,
     random_project_name,
+    start_registry,
 )
 
 
@@ -25,6 +28,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
+    start_registry(capfd)
     pull_images(capfd)
     exec_command(
         capfd,
@@ -53,6 +57,9 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         "-e CRONTAB_ENABLE=1 restart --force",
         "Stack restarted",
     )
+
+    if SWARM_MODE:
+        time.sleep(5)
 
     exec_command(
         capfd,

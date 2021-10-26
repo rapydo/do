@@ -222,7 +222,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     assert redis_pass2 != redis_pass3
 
     backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
-    redis_start_date2 = get_start_date(capfd, "redis", project_name, wait=True)
+    redis_start_date2 = get_start_date(capfd, "redis", project_name, wait=False)
 
     # Verify that both backend and redis are restarted
     assert backend_start_date2 != backend_start_date
@@ -396,7 +396,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     assert rabbit_pass1 != rabbit_pass2
 
     backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
-    rabbit_start_date2 = get_start_date(capfd, "rabbit", project_name, wait=True)
+    rabbit_start_date2 = get_start_date(capfd, "rabbit", project_name, wait=False)
 
     # Verify that both backend and rabbit are restarted
     assert backend_start_date2 != backend_start_date
@@ -482,7 +482,7 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
     assert postgres_pass1 != postgres_pass2
 
     backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
-    postgres_start_date2 = get_start_date(capfd, "postgres", project_name, wait=True)
+    postgres_start_date2 = get_start_date(capfd, "postgres", project_name, wait=False)
 
     # Verify that both backend and postgres are restarted
     assert backend_start_date2 != backend_start_date
@@ -569,7 +569,7 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
     assert mariadb_pass1 != mariadb_pass2
 
     backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
-    mariadb_start_date2 = get_start_date(capfd, "mariadb", project_name, wait=True)
+    mariadb_start_date2 = get_start_date(capfd, "mariadb", project_name, wait=False)
 
     # Verify that both backend and mariadb are restarted
     assert backend_start_date2 != backend_start_date
@@ -656,7 +656,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     assert neo4j_pass1 != neo4j_pass2
 
     backend_start_date2 = get_start_date(capfd, "backend", project_name, wait=True)
-    neo4j_start_date2 = get_start_date(capfd, "neo4j", project_name, wait=True)
+    neo4j_start_date2 = get_start_date(capfd, "neo4j", project_name, wait=False)
 
     # Verify that both backend and neo4j are restarted
     assert backend_start_date2 != backend_start_date
