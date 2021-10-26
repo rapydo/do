@@ -26,7 +26,7 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd)
     start_registry(capfd)
 
     exec_command(

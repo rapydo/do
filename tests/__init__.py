@@ -161,8 +161,8 @@ def create_project(
 
 def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") -> None:
 
-    # if "HEALTHCHECK_INTERVAL" not in pre_options:
-    #     pre_options += "-e HEALTHCHECK_INTERVAL=1s"
+    if "HEALTHCHECK_INTERVAL" not in pre_options:
+        pre_options += " -e HEALTHCHECK_INTERVAL=1s "
 
     exec_command(
         capfd,

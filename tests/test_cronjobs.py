@@ -27,7 +27,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
     )
-    init_project(capfd, "-e CRONTAB_ENABLE=1 -e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd, "-e CRONTAB_ENABLE=1")
     start_registry(capfd)
     pull_images(capfd)
     start_project(capfd)
@@ -53,7 +53,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     )
 
     if SWARM_MODE:
-        time.sleep(5)
+        time.sleep(10)
 
     exec_command(
         capfd,

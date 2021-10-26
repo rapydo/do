@@ -30,7 +30,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["rabbit", "redis"],
         extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
     )
-    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd)
 
     # Some tests with list
     exec_command(

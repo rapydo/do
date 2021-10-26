@@ -33,7 +33,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
 

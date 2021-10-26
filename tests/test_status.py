@@ -61,7 +61,7 @@ def test_all(capfd: Capture) -> None:
             "starting",
         )
 
-        init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s", "--force")
+        init_project(capfd, "", "--force")
 
         exec_command(
             capfd,

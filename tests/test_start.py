@@ -46,7 +46,7 @@ def test_all(capfd: Capture) -> None:
         services=["neo4j"],
     )
 
-    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd)
 
     if SWARM_MODE:
         exec_command(

@@ -29,7 +29,7 @@ def test_all(capfd: Capture) -> None:
         auth="postgres",
         frontend="angular",
     )
-    init_project(capfd, "-e HEALTHCHECK_INTERVAL=1s")
+    init_project(capfd)
 
     start_registry(capfd)
 

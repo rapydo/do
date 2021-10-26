@@ -33,7 +33,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
         services=["redis"],
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
+    init_project(capfd, "-e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
