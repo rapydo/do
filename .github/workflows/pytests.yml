@@ -29,6 +29,7 @@ jobs:
             list,
             logs,
             registry,
+            reload,
             restart,
             remove,
             scale,
