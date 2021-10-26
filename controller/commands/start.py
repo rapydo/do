@@ -37,7 +37,7 @@ def start(
     compose = Compose(Application.data.files)
     if SWARM_MODE:
         swarm = Swarm()
-        # if swarm.stack_is_running(Configuration.project):
+        # if swarm.stack_is_running():
         #     print_and_exit(
         #         "A stack is already running. "
         #         "Stop it with {command1} if you want to start a new stack "
@@ -49,7 +49,7 @@ def start(
         compose.dump_config(Application.data.services)
         swarm.deploy()
     else:
-        # if compose.get_running_services(Configuration.project):
+        # if compose.get_running_services():
         #     print_and_exit(
         #         "A stack is already running. "
         #         "Stop it with {command1} if you want to start a new stack "

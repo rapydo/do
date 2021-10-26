@@ -77,7 +77,7 @@ def remove(
         log.info("Stack removed")
     else:
 
-        if not swarm.stack_is_running(Configuration.project):
+        if not swarm.stack_is_running():
             print_and_exit(
                 "Stack {} is not running, deploy it with {command}",
                 Configuration.project,

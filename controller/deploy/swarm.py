@@ -61,15 +61,16 @@ class Swarm:
 
         return glom(service.spec.mode, "Replicated.Replicas", default=0)
 
-    def stack_is_running(self, stack: str) -> bool:
+    def stack_is_running(self) -> bool:
+        stack = Configuration.project
         for s in self.docker.stack.list():
             if s.name == stack:
                 return True
         return False
 
-    def get_running_services(self, prefix: str) -> Set[str]:
+    def get_running_services(self) -> Set[str]:
 
-        prefix += "_"
+        prefix = f"{Configuration.project}_"
         containers = set()
         for service in self.docker.service.list():
             name = service.spec.name

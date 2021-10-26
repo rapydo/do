@@ -747,6 +747,12 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         "AUTH_DEFAULT_PASSWORD variable",
     )
 
+    # ######## DEBUG CODE
+    exec_command(
+        capfd,
+        "password --show",
+    )
+    # ###################
     backend_pass2 = get_password_from_projectrc("AUTH_DEFAULT_PASSWORD")
     assert backend_pass1 != backend_pass2
 

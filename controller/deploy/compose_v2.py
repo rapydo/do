@@ -8,6 +8,7 @@ from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
 
+from controller.app import Configuration
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
@@ -231,9 +232,9 @@ class Compose:
             log.critical(e)
             return False
 
-    def get_running_services(self, prefix: str) -> Set[str]:
+    def get_running_services(self) -> Set[str]:
 
-        prefix += COMPOSE_SEP
+        prefix = f"{Configuration.project}{COMPOSE_SEP}"
         containers = set()
         try:
             for container in self.docker.compose.ps():
