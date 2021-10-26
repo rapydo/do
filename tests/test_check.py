@@ -36,7 +36,7 @@ def test_base(capfd: Capture) -> None:
         capfd,
         "check -i main",
         f"http-api: wrong branch 0.7.6, expected {__version__}",
-        f"You can use {colors.RED}rapydo init{colors.RESET} to fix it",
+        f"You can fix it with {colors.RED}rapydo init{colors.RESET}",
     )
     init_project(capfd)
 

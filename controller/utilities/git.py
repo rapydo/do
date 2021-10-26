@@ -160,7 +160,7 @@ Suggestion: remove {} and execute the init command
 
     if active_branch and active_branch != branch and gitobj.working_dir:
         print_and_exit(
-            "{}: wrong branch {}, expected {}. You can use {command} to fix it",
+            "{}: wrong branch {}, expected {}. You can fix it with {command}",
             Path(gitobj.working_dir).stem,
             active_branch,
             branch,
