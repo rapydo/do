@@ -185,7 +185,8 @@ def check_file_younger_than(
     except GitCommandError as e:  # pragma: no cover
         print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
 
-    dates = []
+    # added a default date to prevent errors in case of new files with no blame commits
+    dates = [datetime.fromtimestamp(0).replace(tzinfo=pytz.utc)]
     if commits:
         for commit in commits:
             current_blame = gitobj.commit(rev=str(commit[0]))
