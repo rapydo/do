@@ -14,6 +14,7 @@ from tests import (
     init_project,
     pull_images,
     random_project_name,
+    start_project,
     start_registry,
 )
 
@@ -27,20 +28,10 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
     )
-    init_project(capfd)
+    init_project(capfd, "-e CRONTAB_ENABLE=1")
     start_registry(capfd)
     pull_images(capfd)
-    exec_command(
-        capfd,
-        "-e CRONTAB_ENABLE=1 start",
-        "Stack started",
-    )
-
-    # Add some delay to wait the container to start
-    if SWARM_MODE:
-        time.sleep(10)
-    else:
-        time.sleep(5)
+    start_project(capfd)
 
     exec_command(
         capfd,
