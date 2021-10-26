@@ -13,7 +13,6 @@ jobs:
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
         test: [
             # Both Compose and Swarm
             add_upgrade,
@@ -37,7 +36,6 @@ jobs:
             password_postgres,
             password_rabbit,
             password_redis,
-            password_registry,
             registry,
             reload,
             restart,
@@ -51,6 +49,7 @@ jobs:
 
             # Swarm only
             join,
+            password_registry,
             multi_host,
 
             # Compose only
@@ -66,10 +65,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Select a Python version
+        run: |
+          versions=(3.7 3.8 3.9)
+          PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
+          echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
+        shell: bash
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install
         run: |
           python -m pip install --upgrade pip
