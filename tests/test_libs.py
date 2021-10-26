@@ -15,7 +15,7 @@ import pytest
 from faker import Faker
 
 from controller import __version__
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.commands.compose.backup import get_date_pattern
 from controller.commands.install import download
 from controller.deploy.builds import get_image_creation
@@ -224,17 +224,21 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     env["CELERY_BACKEND"] = "INVALID"
     assert short2(env) == "Unknown"
 
-    assert services.get_default_user("invalid", "angular") is None
-    assert services.get_default_user("backend", "") == "developer"
-    assert services.get_default_user("celery", "") == "developer"
-    assert services.get_default_user("flower", "") == "developer"
-    assert services.get_default_user("celery-beat", "") == "developer"
-    assert services.get_default_user("frontend", "invalid") is None
-    assert services.get_default_user("frontend", "no") is None
-    assert services.get_default_user("frontend", "angular") == "node"
-    assert services.get_default_user("frontend", "angularjs") is None
-    assert services.get_default_user("postgres", "") == "postgres"
-    assert services.get_default_user("neo4j", "") == "neo4j"
+    assert services.get_default_user("invalid") is None
+    assert services.get_default_user("backend") == "developer"
+    assert services.get_default_user("celery") == "developer"
+    assert services.get_default_user("flower") == "developer"
+    assert services.get_default_user("celery-beat") == "developer"
+    Configuration.frontend = "invalid"
+    assert services.get_default_user("frontend") is None
+    Configuration.frontend = "no"
+    assert services.get_default_user("frontend") is None
+    Configuration.frontend = "angular"
+    assert services.get_default_user("frontend") == "node"
+    Configuration.frontend = "angularjs"
+    assert services.get_default_user("frontend") is None
+    assert services.get_default_user("postgres") == "postgres"
+    assert services.get_default_user("neo4j") == "neo4j"
 
     assert services.get_default_command("invalid") == "bash"
     assert services.get_default_command("backend") == "restapi launch"

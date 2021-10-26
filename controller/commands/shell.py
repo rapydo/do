@@ -3,7 +3,7 @@ from typing import Optional
 import typer
 
 from controller import log, print_and_exit
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.docker import Docker
 from controller.utilities import services
 
@@ -55,7 +55,7 @@ def shell(
     docker = Docker()
 
     if not user:
-        user = services.get_default_user(service, Configuration.frontend)
+        user = services.get_default_user(service)
 
     if default_command:
         command = services.get_default_command(service)

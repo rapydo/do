@@ -169,7 +169,7 @@ def backup(
         backup_path = f"/backup/{service_name}/{now}.sql.gz"
         if not dry_run:
             docker.exec_command(
-                container, command=f"mv {tmp_backup_path}.gz {backup_path}"
+                container, user="root", command=f"mv {tmp_backup_path}.gz {backup_path}"
             )
 
         log.info("Backup completed: data{}", backup_path)
@@ -218,7 +218,9 @@ def backup(
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
         if not dry_run:
             docker.exec_command(
-                container, command=f"mv {tmp_backup_path}.tar.gz {backup_path}"
+                container,
+                user="root",
+                command=f"mv {tmp_backup_path}.tar.gz {backup_path}",
             )
 
         log.info("Backup completed: data{}", backup_path)
@@ -260,13 +262,15 @@ def backup(
         # If running, ask redis to synchronize the database
         if container:
             docker.exec_command(
-                container, command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'"
+                container,
+                user="root",
+                command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'",
             )
 
         command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
         if not dry_run:
             if container:
-                docker.exec_command(container, command=command)
+                docker.exec_command(container, user="root", command=command)
             else:
                 dc.create_volatile_container(service_name, command=command)
 
@@ -274,7 +278,7 @@ def backup(
         command = f"gzip -t {backup_path}"
         if not dry_run:
             if container:
-                docker.exec_command(container, command=command)
+                docker.exec_command(container, user="root", command=command)
             else:
                 dc.create_volatile_container(service_name, command=command)
 

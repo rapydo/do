@@ -8,7 +8,6 @@ from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
 
-from controller.app import Configuration
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
@@ -21,6 +20,7 @@ from controller import (
     log,
     print_and_exit,
 )
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
 

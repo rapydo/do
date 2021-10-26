@@ -172,7 +172,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
         services=["redis"],
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -270,7 +270,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
         services=["flower"],
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -355,7 +355,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         services=["rabbit"],
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -443,7 +443,7 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -529,7 +529,7 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -617,7 +617,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -703,7 +703,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
 
-    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s" " -e API_AUTOSTART=1")
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=1s -e API_AUTOSTART=1")
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
@@ -762,7 +762,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     assert backend_start_date2 != backend_start_date
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(2)
+    time.sleep(5)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
@@ -794,7 +794,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(2)
+    time.sleep(5)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={

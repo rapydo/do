@@ -22,6 +22,7 @@ from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 from controller.templating import Templating, get_strong_password
+from controller.utilities import services
 
 # make this configurable
 PASSWORD_EXPIRATION = 90
@@ -330,10 +331,26 @@ def password(
 
         update_projectrc(new_variables)
 
-        if service == Services.neo4j and container:
+        if service == Services.backend and container:
+            # restapi init need the env variable to be updated but can't be done after
+            # the restart because it often fails because unable to re-connect to
+            # services in a short time and some long sleep would be needed
+            # => applied a workaround to be able to execute it before the restart
+            docker.exec_command(
+                container,
+                user=services.get_default_user(service),
+                command=f"""/bin/bash -c '
+                    AUTH_DEFAULT_PASSWORD=\"{new_password}\"
+                        restapi init --force-user
+                    '
+                    """,
+            )
+
+        elif service == Services.neo4j and container:
 
             docker.exec_command(
                 container,
+                user=services.get_default_user(service),
                 command=f"""bin/cypher-shell \"
                     ALTER CURRENT USER
                     SET PASSWORD
@@ -350,7 +367,7 @@ def password(
             db = Application.env.get("ALCHEMY_DB")
             docker.exec_command(
                 container,
-                user="postgres",
+                user=services.get_default_user(service),
                 command=f"""
                     psql -U {user} -d {db} -c \"
                         ALTER USER {user} WITH PASSWORD \'{new_password}\';
@@ -367,7 +384,7 @@ def password(
 
             docker.exec_command(
                 container,
-                user="mysql",
+                user=services.get_default_user(service),
                 command=f"""
                     mysql -uroot -p\"{pwd}\" -D\"{db}\" -e
                         "ALTER USER '{user}'@'%' IDENTIFIED BY '{new_password}';"
@@ -380,6 +397,7 @@ def password(
             user = Application.env.get("RABBITMQ_USER")
             docker.exec_command(
                 container,
+                user=services.get_default_user(service),
                 command=f'rabbitmqctl change_password "{user}" "{new_password}"',
             )
 
@@ -407,11 +425,6 @@ def password(
                 compose.start_containers(Application.data.services)
         else:
             log.info("{} was not running, restart is not needed", service.value)
-
-        # Special case for the backend:
-        # change password command is to be executed AFTER the restart
-        if service == Services.backend and container:
-            docker.exec_command(container, command="restapi init --force-user")
 
         log.info(
             "The password of {} has been changed. "

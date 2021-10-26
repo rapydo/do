@@ -204,7 +204,7 @@ class Docker:
     def exec_command(
         self,
         container: str,
-        user: Optional[str] = None,
+        user: Optional[str],
         command: str = None,
     ) -> None:
 

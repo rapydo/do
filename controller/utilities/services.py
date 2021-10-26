@@ -199,13 +199,15 @@ def check_mongodb_password(pwd: Optional[EnvType]) -> None:
             )
 
 
-def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
+def get_default_user(service: str) -> Optional[str]:
 
     if service in ["backend", "celery", "flower", "celery-beat"]:
         return "developer"
 
     if service in ["frontend"]:
-        if frontend == ANGULAR:
+        from controller.app import Configuration
+
+        if Configuration.frontend == ANGULAR:
             return "node"
 
     if service == "postgres":
