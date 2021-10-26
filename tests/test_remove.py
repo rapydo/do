@@ -287,4 +287,4 @@ def test_remove(capfd: Capture) -> None:
     exec_command(capfd, "remove adminer", "Service adminer is not running")
     assert get_containers() == BACKEND_ONLY
 
-    exec_command(capfd, "remove --all", "Stack removed")
+    exec_command(capfd, "remove", "Stack removed")
