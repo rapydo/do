@@ -156,7 +156,6 @@ def test_all(capfd: Capture) -> None:
             capfd,
             "logs --tail 10 frontend backend",
             # Logs are prefixed because more than one service is shown
-            "backend_1      | Testing mode",
-            # "backend_1       | Development mode",
-            "frontend_1     | Merging files...",
+            "backend_1 ",
+            "frontend_1 ",
         )
