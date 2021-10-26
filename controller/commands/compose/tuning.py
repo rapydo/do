@@ -59,7 +59,7 @@ def tuning(
         command = f"neo4j-admin memrec --memory {ram}"
 
         if container:
-            docker.exec_command(container, command=command)
+            docker.exec_command(container, user="neo4j", command=command)
         else:
             dc.create_volatile_container(service_name, command=command)
 

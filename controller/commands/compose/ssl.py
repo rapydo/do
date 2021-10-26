@@ -121,6 +121,6 @@ def ssl(
         # No longer be required. To test it after the creation of the new cert:
         #   echo -n | openssl s_client -showcerts -connect hostname:5671
         # Please note that this command can fail if RabbitMQ is still starting
-        docker.exec_command(container, command="/usr/local/bin/reload_certificate")
+        docker.exec_command(container, user="root", command="/usr/local/bin/reload_certificate")
 
     log.info("New certificate successfully enabled")
