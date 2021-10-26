@@ -252,6 +252,8 @@ def test_remove(capfd: Capture) -> None:
             "Stack rem is not running, deploy it with",
         )
 
+        start_registry(capfd)
+
     exec_command(
         capfd,
         "run --detach --pull --port 7777 adminer",
