@@ -254,44 +254,6 @@ class Swarm:
     def get_container(self, service: str, slot: int) -> Optional[str]:
         return self.docker_wrapper.get_container(service, slot)
 
-    def exec_command(
-        self,
-        service: str,
-        user: Optional[str] = None,
-        command: str = None,
-        slot: int = 1,
-    ) -> None:
-        """
-        Execute a command on a running container
-        """
-        log.debug("Command on {}: {}", service.lower(), command)
-
-        container = self.get_container(service, slot)
-
-        if not container:
-            log.error("Service {} not found", service)
-            return None
-
-        exec_command = "docker exec --interactive "
-        if sys.stdout.isatty():
-            exec_command += "--tty "
-        if user:
-            exec_command += f"--user {user} "
-
-        exec_command += f"{container} {command}"
-
-        log.warning(
-            "Due to limitations of the underlying packages, "
-            "the shell command is not implemented yet"
-        )
-
-        print("")
-        print("You can execute by yourself the following command:")
-        print(exec_command)
-        print("")
-
-        return None
-
     def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
 
         if service not in Application.data.active_services:
