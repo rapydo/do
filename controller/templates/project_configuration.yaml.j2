@@ -56,11 +56,14 @@ variables:
     ACTIVATE_CELERYBEAT: 1
     {% endif -%}
     {% endif -%}
-    {% if enable_pushpin -%}
-    ACTIVATE_PUSHPIN: 1
+    {% if enable_fail2ban -%}
+    ACTIVATE_FAIL2BAN: 1
     {% endif -%}
     {% if enable_flower -%}
     ACTIVATE_FLOWER: 1
+    {% endif -%}
+    {% if enable_pushpin -%}
+    ACTIVATE_PUSHPIN: 1
     {% endif -%}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1

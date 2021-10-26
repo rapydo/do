@@ -29,8 +29,9 @@ class ServiceTypes(str, Enum):
     rabbit = "rabbit"
     redis = "redis"
     celery = "celery"
-    pushpin = "pushpin"
     flower = "flower"
+    fail2ban = "fail2ban"
+    pushpin = "pushpin"
     ftp = "ftp"
     bot = "bot"
 
@@ -169,8 +170,9 @@ def create_project(
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
     enable_celery = "celery" in services
-    enable_pushpin = "pushpin" in services
     enable_flower = "flower" in services
+    enable_fail2ban = "fail2ban" in services
+    enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
     enable_bot = "bot" in services
 
@@ -271,8 +273,9 @@ def create_project(
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,
                 "enable_celery": enable_celery,
-                "enable_pushpin": enable_pushpin,
                 "enable_flower": enable_flower,
+                "enable_fail2ban": enable_fail2ban,
+                "enable_pushpin": enable_pushpin,
                 "enable_ftp": enable_ftp,
                 "enable_bot": enable_bot,
                 "celery_broker": celery_broker,
