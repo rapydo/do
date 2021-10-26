@@ -37,7 +37,10 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
     )
 
     # Add some delay to wait the container to start
-    time.sleep(5)
+    if SWARM_MODE:
+        time.sleep(10)
+    else:
+        time.sleep(5)
 
     exec_command(
         capfd,
