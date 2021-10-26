@@ -6,7 +6,6 @@ import time
 from faker import Faker
 
 from controller import SWARM_MODE
-
 from tests import (
     Capture,
     create_project,
@@ -28,15 +27,10 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
     )
-    init_project(capfd, "-e CRONTAB_ENABLE=1")
+    init_project(capfd, "-e CRONTAB_ENABLE=1 -e HEALTHCHECK_INTERVAL=1s")
     start_registry(capfd)
     pull_images(capfd)
     start_project(capfd)
-
-    if SWARM_MODE:
-        time.sleep(15)
-    else:
-        time.sleep(5)
 
     exec_command(capfd, "status")
 

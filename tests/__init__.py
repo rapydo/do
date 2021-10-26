@@ -1,16 +1,20 @@
 import os
 import tempfile
 import time
+from datetime import datetime
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
 from typing import Any, List, Optional, Type, TypeVar
 
 from faker import Faker
+from glom import glom
 from python_on_whales import docker
 from typer.testing import CliRunner
 
-from controller import REGISTRY, SWARM_MODE
+from controller import PROJECTRC, REGISTRY, SWARM_MODE
+from controller.deploy.swarm import Swarm
+from controller.utilities import configuration
 
 runner = CliRunner()
 
@@ -156,6 +160,10 @@ def create_project(
 
 
 def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") -> None:
+
+    # if "HEALTHCHECK_INTERVAL" not in pre_options:
+    #     pre_options += "-e HEALTHCHECK_INTERVAL=1s"
+
     exec_command(
         capfd,
         f"{pre_options} init {post_options}",
@@ -199,3 +207,36 @@ def execute_outside(capfd: Capture, command: str) -> None:
     )
 
     os.chdir(folder)
+
+
+def get_container_start_date(
+    capfd: Capture, service: str, project_name: str, wait: bool = False
+) -> datetime:
+
+    # Optional is needed because swarm.get_container returns Optional[str]
+    container_name: Optional[str] = None
+
+    if service == REGISTRY:
+        container_name = REGISTRY
+    elif SWARM_MODE:
+        if wait:
+            # This is needed to debug and wait the service rollup to complete
+            # Status is both for debug and to delay the get_container
+            exec_command(capfd, "status")
+            time.sleep(4)
+
+        swarm = Swarm()
+        container_name = swarm.get_container(service, slot=1)
+    else:
+        container_name = f"{project_name}_{service}_1"
+
+    assert container_name is not None
+    return docker.container.inspect(container_name).state.started_at
+
+
+def get_variable_from_projectrc(variable: str) -> str:
+    projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=False)
+
+    return glom(
+        projectrc, f"project_configuration.variables.env.{variable}", default=""
+    )
