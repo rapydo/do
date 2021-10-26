@@ -53,7 +53,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(2)
+    time.sleep(3)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
@@ -87,7 +87,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     assert backend_start_date2 != backend_start_date
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(5)
+    time.sleep(6)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
@@ -119,7 +119,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(5)
+    time.sleep(6)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
