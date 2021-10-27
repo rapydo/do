@@ -1098,7 +1098,6 @@ services:
     ports:
       - 5000:5000
     environment:
-      ACTIVATE: ${ACTIVATE_REGISTRY}
       # Used to issue the certificate
       REGISTRY_HOST: ${REGISTRY_HOST}
       REGISTRY_USERNAME: "${REGISTRY_USERNAME}"

@@ -28,6 +28,7 @@ from controller import (
     PROJECT_DIR,
     PROJECTRC,
     RED,
+    REGISTRY,
     SUBMODULES_DIR,
     SWARM_MODE,
     TABLE_FORMAT,
@@ -919,8 +920,6 @@ You can use of one:
                     "SWARM_MANAGER_ADDRESS"
                 ]
 
-            # Application.env["ACTIVATE_REGISTRY"] = "1"
-
         if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
             Application.env["DEPLOY_ENGINE"] = "compose"
         else:
@@ -1035,10 +1034,16 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         elif Configuration.check:
             log.info("Active services: {}", active_services, log_to_file=True)
 
+        extra_services: List[str] = []
+        if SWARM_MODE and REGISTRY not in active_services:
+            extra_services.append(REGISTRY)
+
+        all_services = active_services + extra_services
+
         missing: Dict[str, Set[str]] = {}
         passwords: Dict[str, str] = {}
         passwords_services: Dict[str, Set[str]] = {}
-        for service_name in active_services:
+        for service_name in all_services:
             service = compose_services[service_name]
 
             if service:
@@ -1058,7 +1063,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         for variable, raw_services in missing.items():
 
             serv = services.vars_to_services_mapping.get(variable) or raw_services
-            active_serv = [s for s in serv if s in active_services]
+            active_serv = [s for s in serv if s in all_services]
 
             if active_serv:
                 placeholders.append([variable, ", ".join(active_serv)])
@@ -1069,7 +1074,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         for variable, raw_services in passwords_services.items():
 
             serv = services.vars_to_services_mapping.get(variable) or raw_services
-            active_serv = [s for s in serv if s in active_services]
+            active_serv = [s for s in serv if s in all_services]
             if active_serv:
                 password = passwords.get(variable)
                 result = zxcvbn(password)

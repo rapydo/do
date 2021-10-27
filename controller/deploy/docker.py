@@ -126,6 +126,9 @@ class Docker:
             f"{host}/v2/{repository}/manifests/{tag}", check_status=False
         )
 
+        if r.status_code == 401:  # pragma: no cover
+            print_and_exit("Access denied to {} registry", host)
+
         return r.status_code == 200
 
     def login(self) -> None:

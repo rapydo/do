@@ -307,8 +307,6 @@ variables:
     ASSIGNED_MEMORY_REGISTRY: "20M"
 
     # Local docker registry
-    ACTIVATE_REGISTRY: 0
-    # To be enabled with "manager.host"
     REGISTRY_HOST:
     REGISTRY_PORT: 5000
     REGISTRY_USERNAME: docker
