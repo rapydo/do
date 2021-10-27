@@ -26,11 +26,6 @@ from tests import (
 
 def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
-    # Let's simplify this task by removing task history
-    # Otherwise the wait_until very usual fails due to the logs or previous tasks
-    if SWARM_MODE:
-        docker.swarm.update(task_history_limit=0)
-
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
@@ -40,6 +35,12 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     init_project(capfd, "-e API_AUTOSTART=1")
+
+    # Let's simplify this task by removing task history
+    # Otherwise the wait_until very usual fails due to the logs or previous tasks
+    if SWARM_MODE:
+        docker.swarm.update(task_history_limit=0)
+
     start_registry(capfd)
 
     today = datetime.now().strftime("%Y-%m-%d")
