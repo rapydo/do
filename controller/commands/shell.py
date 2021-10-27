@@ -60,7 +60,7 @@ def shell(
     if default_command:
         command = services.get_default_command(service)
 
-    log.debug("Requested command: {} with user: {}", command, user)
+    log.debug("Requested command: {} with user: {}", command, user or "default")
 
     container = docker.get_container(service, slot=1)
 

@@ -55,8 +55,8 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "sqlalchemy")
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
-    mariadb_start_date = get_container_start_date(capfd, "mariadb", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
+    mariadb_start_date = get_container_start_date(capfd, "mariadb")
     mariadb_pass1 = get_variable_from_projectrc("ALCHEMY_PASSWORD")
 
     exec_command(
@@ -71,12 +71,8 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
     mariadb_pass2 = get_variable_from_projectrc("ALCHEMY_PASSWORD")
     assert mariadb_pass1 != mariadb_pass2
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
-    mariadb_start_date2 = get_container_start_date(
-        capfd, "mariadb", project_name, wait=False
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
+    mariadb_start_date2 = get_container_start_date(capfd, "mariadb", wait=False)
 
     # Verify that both backend and mariadb are restarted
     assert backend_start_date2 != backend_start_date

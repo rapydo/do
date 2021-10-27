@@ -63,9 +63,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    flower_start_date = get_container_start_date(
-        capfd, "flower", project_name, wait=True
-    )
+    flower_start_date = get_container_start_date(capfd, "flower", wait=True)
 
     exec_command(
         capfd,
@@ -79,9 +77,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     flower_pass3 = get_variable_from_projectrc("FLOWER_PASSWORD")
     assert flower_pass2 != flower_pass3
 
-    flower_start_date2 = get_container_start_date(
-        capfd, "flower", project_name, wait=True
-    )
+    flower_start_date2 = get_container_start_date(capfd, "flower", wait=True)
 
     assert flower_start_date2 != flower_start_date
 

@@ -14,7 +14,7 @@ from python_on_whales import docker
 from typer.testing import CliRunner
 
 from controller import PROJECTRC, REGISTRY, SWARM_MODE
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from controller.utilities import configuration
 
 runner = CliRunner()
@@ -216,25 +216,24 @@ def execute_outside(capfd: Capture, command: str) -> None:
 
 
 def get_container_start_date(
-    capfd: Capture, service: str, project_name: str, wait: bool = False
+    capfd: Capture, service: str, wait: bool = False
 ) -> datetime:
 
-    # Optional is needed because swarm.get_container returns Optional[str]
+    # Optional is needed because docker.get_container returns Optional[str]
     container_name: Optional[str] = None
 
     if service == REGISTRY:
         container_name = REGISTRY
-    elif SWARM_MODE:
-        if wait:
+    else:
+
+        if SWARM_MODE and wait:
             # This is needed to debug and wait the service rollup to complete
             # Status is both for debug and to delay the get_container
             exec_command(capfd, "status")
             time.sleep(4)
 
-        swarm = Swarm()
-        container_name = swarm.get_container(service, slot=1)
-    else:
-        container_name = f"{project_name}_{service}_1"
+        docker = Docker()
+        container_name = docker.get_container(service, slot=1)
 
     assert container_name is not None
     return docker.container.inspect(container_name).state.started_at

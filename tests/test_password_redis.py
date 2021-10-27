@@ -67,8 +67,8 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "redis")
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
-    redis_start_date = get_container_start_date(capfd, "redis", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
+    redis_start_date = get_container_start_date(capfd, "redis")
 
     exec_command(
         capfd,
@@ -82,12 +82,8 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     redis_pass3 = get_variable_from_projectrc("REDIS_PASSWORD")
     assert redis_pass2 != redis_pass3
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
-    redis_start_date2 = get_container_start_date(
-        capfd, "redis", project_name, wait=False
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
+    redis_start_date2 = get_container_start_date(capfd, "redis", wait=False)
 
     # Verify that both backend and redis are restarted
     assert backend_start_date2 != backend_start_date

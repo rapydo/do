@@ -67,7 +67,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "logs backend --tail 10")
     assert r.status_code == 200
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
     backend_pass1 = get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD")
 
     exec_command(
@@ -82,9 +82,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     backend_pass2 = get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD")
     assert backend_pass1 != backend_pass2
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
 
     # Verify that backend is restarted
     assert backend_start_date2 != backend_start_date

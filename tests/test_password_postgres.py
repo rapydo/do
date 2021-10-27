@@ -54,8 +54,8 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "sqlalchemy")
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
-    postgres_start_date = get_container_start_date(capfd, "postgres", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
+    postgres_start_date = get_container_start_date(capfd, "postgres")
     postgres_pass1 = get_variable_from_projectrc("ALCHEMY_PASSWORD")
 
     exec_command(
@@ -70,12 +70,8 @@ def test_password_postgres(capfd: Capture, faker: Faker) -> None:
     postgres_pass2 = get_variable_from_projectrc("ALCHEMY_PASSWORD")
     assert postgres_pass1 != postgres_pass2
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
-    postgres_start_date2 = get_container_start_date(
-        capfd, "postgres", project_name, wait=False
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
+    postgres_start_date2 = get_container_start_date(capfd, "postgres", wait=False)
 
     # Verify that both backend and postgres are restarted
     assert backend_start_date2 != backend_start_date

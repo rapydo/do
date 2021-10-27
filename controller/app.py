@@ -826,6 +826,7 @@ You can use of one:
             {
                 "project": Configuration.project,
                 "hostname": Configuration.hostname,
+                "swarm": SWARM_MODE,
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,

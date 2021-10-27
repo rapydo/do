@@ -54,8 +54,8 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "neo4j")
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
-    neo4j_start_date = get_container_start_date(capfd, "neo4j", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
+    neo4j_start_date = get_container_start_date(capfd, "neo4j")
     neo4j_pass1 = get_variable_from_projectrc("NEO4J_PASSWORD")
 
     exec_command(
@@ -70,12 +70,8 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     neo4j_pass2 = get_variable_from_projectrc("NEO4J_PASSWORD")
     assert neo4j_pass1 != neo4j_pass2
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
-    neo4j_start_date2 = get_container_start_date(
-        capfd, "neo4j", project_name, wait=False
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
+    neo4j_start_date2 = get_container_start_date(capfd, "neo4j", wait=False)
 
     # Verify that both backend and neo4j are restarted
     assert backend_start_date2 != backend_start_date

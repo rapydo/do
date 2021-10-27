@@ -57,8 +57,8 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
 
     #  ############## RABBIT #####################
 
-    backend_start_date = get_container_start_date(capfd, "backend", project_name)
-    rabbit_start_date = get_container_start_date(capfd, "rabbit", project_name)
+    backend_start_date = get_container_start_date(capfd, "backend")
+    rabbit_start_date = get_container_start_date(capfd, "rabbit")
     rabbit_pass1 = get_variable_from_projectrc("RABBITMQ_PASSWORD")
 
     exec_command(
@@ -73,12 +73,8 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     rabbit_pass2 = get_variable_from_projectrc("RABBITMQ_PASSWORD")
     assert rabbit_pass1 != rabbit_pass2
 
-    backend_start_date2 = get_container_start_date(
-        capfd, "backend", project_name, wait=True
-    )
-    rabbit_start_date2 = get_container_start_date(
-        capfd, "rabbit", project_name, wait=False
-    )
+    backend_start_date2 = get_container_start_date(capfd, "backend", wait=True)
+    rabbit_start_date2 = get_container_start_date(capfd, "rabbit", wait=False)
 
     # Verify that both backend and rabbit are restarted
     assert backend_start_date2 != backend_start_date

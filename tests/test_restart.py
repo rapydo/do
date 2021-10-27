@@ -3,10 +3,8 @@ This module will test the restart command
 """
 import time
 
-from python_on_whales import docker
-
 from controller import SWARM_MODE, colors
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from tests import (
     Capture,
     create_project,
@@ -42,14 +40,11 @@ def test_all(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    if SWARM_MODE:
-        swarm = Swarm()
-        container_name = swarm.get_container("backend", slot=1)
-    else:
-        container_name = "first_backend_1"
+    docker = Docker()
+    container_name = docker.get_container("backend", slot=1)
     assert container_name is not None
 
-    container = docker.container.inspect(container_name)
+    container = docker.client.container.inspect(container_name)
     start_date1 = container.state.started_at
 
     exec_command(
@@ -58,14 +53,10 @@ def test_all(capfd: Capture) -> None:
         "Stack restarted",
     )
 
-    if SWARM_MODE:
-        swarm = Swarm()
-        container_name = swarm.get_container("backend", slot=1)
-    else:
-        container_name = "first_backend_1"
+    container_name = docker.get_container("backend", slot=1)
     assert container_name is not None
 
-    container = docker.container.inspect(container_name)
+    container = docker.client.container.inspect(container_name)
     start_date2 = container.state.started_at
 
     # The service is not restarted because its definition is unchanged
@@ -94,16 +85,14 @@ def test_all(capfd: Capture) -> None:
         "Stack restarted",
     )
 
+    container_name = docker.get_container("backend", slot=1)
+    # Just wait a bit to prevent errors on non existing containers
     if SWARM_MODE:
-        swarm = Swarm()
-        container_name = swarm.get_container("backend", slot=1)
-        # Just wait a bit to prevent errors on non existing containers
         time.sleep(1)
-    else:
-        container_name = "first_backend_1"
+
     assert container_name is not None
 
-    container = docker.container.inspect(container_name)
+    container = docker.client.container.inspect(container_name)
     start_date3 = container.state.started_at
 
     assert start_date2 != start_date3

@@ -67,9 +67,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "images", "This registry contains ")
 
-    registry_start_date = get_container_start_date(
-        capfd, "registry", project_name, wait=True
-    )
+    registry_start_date = get_container_start_date(capfd, "registry", wait=True)
 
     exec_command(
         capfd,
@@ -83,9 +81,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     registry_pass3 = get_variable_from_projectrc("REGISTRY_PASSWORD")
     assert registry_pass2 != registry_pass3
 
-    registry_start_date2 = get_container_start_date(
-        capfd, "registry", project_name, wait=True
-    )
+    registry_start_date2 = get_container_start_date(capfd, "registry", wait=True)
 
     assert registry_start_date2 != registry_start_date
 
