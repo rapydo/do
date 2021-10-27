@@ -87,7 +87,9 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd, "reload mariadb", "Service mariadb does not support the reload command"
     )
-    exec_command(capfd, "reload redis", "Not implemented yet")
+    exec_command(
+        capfd, "reload redis", "Service redis does not support the reload command"
+    )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
     exec_command(capfd, "reload celery", "Not implemented yet")
     exec_command(capfd, "reload flower", "Not implemented yet")
@@ -134,7 +136,9 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd, "reload mariadb", "Service mariadb does not support the reload command"
     )
-    exec_command(capfd, "reload redis", "Not implemented yet")
+    exec_command(
+        capfd, "reload redis", "Service redis does not support the reload command"
+    )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
     exec_command(capfd, "reload celery", "Not implemented yet")
     exec_command(capfd, "reload flower", "Not implemented yet")
