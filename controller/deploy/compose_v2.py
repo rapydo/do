@@ -209,7 +209,6 @@ class Compose:
 
         tty = sys.stdout.isatty()
 
-        log.info("Tty = {}", tty)
         try:
             out = self.docker.compose.run(
                 service=service,

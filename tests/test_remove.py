@@ -76,7 +76,7 @@ def test_remove(capfd: Capture) -> None:
         auth="postgres",
         frontend="no",
     )
-    init_project(capfd)
+    init_project(capfd, " -e HEALTHCHECK_INTERVAL=20s ")
 
     start_registry(capfd)
 

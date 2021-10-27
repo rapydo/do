@@ -94,7 +94,10 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "--remote invalid@invalid check -i main --no-git",
-        "Could not resolve hostname invalid: Temporary failure in name resolution",
+        # Temporary failure in name resolution depends by the OS
+        # on alpine che message is: Name does not resolve
+        # "Could not resolve hostname invalid: Temporary failure in name resolution",
+        "Could not resolve hostname invalid: ",
     )
 
     exec_command(

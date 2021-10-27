@@ -15,6 +15,7 @@ __all__ = [colors]
 
 LOGS_FOLDER = Path("data", "logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
+LOG_FORMAT = os.getenv("RAPYDO_LOG_FORMAT", "simple")
 TABLE_FORMAT = "simple"  # plain, simple, pretty, presto
 
 LOGS_FILE = None
@@ -26,13 +27,17 @@ log.level("INFO", color="<green>")
 
 log.remove()
 
-if os.getenv("TESTING", "0") == "1":
-    fmt = "{message}"
-else:  # pragma: no cover
-    fmt = "<fg #FFF>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #FFF> "
+TESTING = os.getenv("TESTING", "0") == "1"
+
+fmt = "<fg #666>{time:YYYY-MM-DD HH:mm:ss,SSS}</fg #666> "
+
+if LOG_FORMAT == "full":  # pragma: no cover
     fmt += "[<level>{level}</level> "
     fmt += "<fg #666>{name}:{line}</fg #666>] "
-    fmt += "<fg #FFF>{message}</fg #FFF>"
+else:
+    fmt += "<level>{level:8}</level> "
+
+fmt += "<fg #FFF>{message}</fg #FFF>"
 
 log.add(sys.stderr, format=fmt)
 
