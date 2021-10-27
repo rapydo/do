@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -53,6 +53,10 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
+    # This is needed to wait for the service rolling update
+    if SWARM_MODE:
+        time.sleep(5)
+
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
 
     exec_command(capfd, "logs backend --tail 10")
@@ -87,6 +91,9 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     # Verify that backend is restarted
     assert backend_start_date2 != backend_start_date
 
+    # This is needed to wait for the service rolling update
+    if SWARM_MODE:
+        time.sleep(5)
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
 
     r = requests.post(
