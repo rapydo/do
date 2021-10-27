@@ -64,7 +64,8 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
             "mysql",
             "redis",
             "rabbit",
-            "celery",
+            # temporary disabled celery
+            # "celery",
             "flower",
             "mongo",
             "ftp",
@@ -98,7 +99,8 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
         capfd, "reload redis", "Service redis does not support the reload command"
     )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
-    exec_command(capfd, "reload celery", "Not implemented yet")
+    # temporary disabled celery
+    # exec_command(capfd, "reload celery", "Not implemented yet")
     exec_command(capfd, "reload flower", "Not implemented yet")
     exec_command(capfd, "reload mongodb", "Not implemented yet")
     exec_command(capfd, "reload ftp", "Not implemented yet")
@@ -118,7 +120,8 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
             "mysql",
             "redis",
             "rabbit",
-            "celery",
+            # temporary disabled celery
+            # "celery",
             "flower",
             "mongo",
             "ftp",
@@ -152,7 +155,8 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         capfd, "reload redis", "Service redis does not support the reload command"
     )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
-    exec_command(capfd, "reload celery", "Not implemented yet")
+    # temporary disabled celery
+    # exec_command(capfd, "reload celery", "Not implemented yet")
     exec_command(capfd, "reload flower", "Not implemented yet")
     exec_command(capfd, "reload mongodb", "Not implemented yet")
     exec_command(capfd, "reload ftp", "Not implemented yet")
