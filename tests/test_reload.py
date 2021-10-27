@@ -1,6 +1,7 @@
 """
 This module will test the reload command
 """
+import time
 from faker import Faker
 
 from tests import (
@@ -13,7 +14,6 @@ from tests import (
     random_project_name,
     start_project,
     start_registry,
-    wait_until,
 )
 
 
@@ -77,7 +77,8 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    wait_until(capfd, "logs --tail 10 backend", "Testing mode")
+    # To be improved, of course!!
+    time.sleep(30)
 
     # For each support service verify:
     #   1) a start line in the logs
@@ -136,7 +137,8 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    wait_until(capfd, "logs --tail 10 backend", "Testing mode")
+    # To be improved, of course!!
+    time.sleep(30)
 
     exec_command(capfd, "reload backend", "Not implemented yet")
     exec_command(capfd, "reload frontend", "Not implemented yet")
@@ -147,7 +149,6 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd, "reload redis", "Service redis does not support the reload command"
     )
-    # temporary disabled rabbit
     # exec_command(capfd, "reload rabbit", "Not implemented yet")
     exec_command(capfd, "reload celery", "Not implemented yet")
     exec_command(capfd, "reload flower", "Not implemented yet")
