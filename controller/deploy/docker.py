@@ -195,6 +195,10 @@ class Docker:
 
         try:
             for task in self.client.service.ps(service_name):
+                # this is the case of services set with `mode: global`
+                if task.slot is None:
+                    return f"{service_name}.{task.node_id}.{task.id}"
+
                 if task.slot != slot:
                     continue
 
