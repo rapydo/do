@@ -1,10 +1,8 @@
 """
 This module will test the reload command
 """
-import time
 from faker import Faker
 
-from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -15,6 +13,7 @@ from tests import (
     random_project_name,
     start_project,
     start_registry,
+    wait_until,
 )
 
 
@@ -77,8 +76,7 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    if SWARM_MODE:
-        time.sleep(5)
+    wait_until(capfd, "logs --tail 10 backend", "Testing mode")
 
     # For each support service verify:
     #   1) a start line in the logs
@@ -135,8 +133,7 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    if SWARM_MODE:
-        time.sleep(5)
+    wait_until(capfd, "logs --tail 10 backend", "Testing mode")
 
     exec_command(capfd, "reload backend", "Not implemented yet")
     exec_command(capfd, "reload frontend", "Not implemented yet")

@@ -1147,7 +1147,6 @@ services:
       # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
     volumes:
       - /var/log/syslog:/var/log/syslog:ro
-      - /tmp/fail2ban:/data
       # /data/db could be attached to a data-dir
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d
