@@ -6,6 +6,7 @@ from datetime import datetime
 
 import requests
 from faker import Faker
+from python_on_whales import docker
 
 from controller import SWARM_MODE, colors
 from tests import (
@@ -24,6 +25,10 @@ from tests import (
 
 
 def test_password_backend(capfd: Capture, faker: Faker) -> None:
+
+    # Let's simplify this task by removing task history
+    # Otherwise the wait_until very usual fails due to the logs or previous tasks
+    docker.swarm.update(task_history_limit=0)
 
     project_name = random_project_name(faker)
     create_project(
