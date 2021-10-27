@@ -115,7 +115,7 @@ class Swarm:
         )
 
     def restart(self, service: str) -> None:
-        service_name = self.get_service(service)
+        service_name = self.docker_wrapper.get_service(service)
         service_instance = self.docker.service.inspect(service_name)
 
         replicas = self.get_replicas(service_instance)
@@ -248,18 +248,12 @@ class Swarm:
     def remove(self) -> None:
         self.docker.stack.remove(Configuration.project)
 
-    def get_service(self, service: str) -> str:
-        return self.docker_wrapper.get_service(service)
-
-    def get_container(self, service: str, slot: int) -> Optional[str]:
-        return self.docker_wrapper.get_container(service, slot)
-
     def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
 
         if service not in Application.data.active_services:
             print_and_exit("No such service: {}", service)
 
-        service_name = self.get_service(service)
+        service_name = self.docker_wrapper.get_service(service)
 
         try:
             # lines: Iterable[Tuple[str, bytes]] due to stream=True

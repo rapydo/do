@@ -51,9 +51,9 @@ def scale(
         nreplicas = glom(Configuration.specs, f"variables.env.{scale_var}", default="1")
         service = scaling
 
-    swarm = Swarm()
+    docker = Docker()
 
-    service_name = swarm.get_service(service)
+    service_name = docker.get_service(service)
     scales: Dict[Union[str, Service], int] = {}
     try:
         scales[service_name] = int(nreplicas)
@@ -70,7 +70,6 @@ def scale(
                 service,
             )
 
-    docker = Docker()
     docker.ping_registry()
 
     verify_available_images(
@@ -79,6 +78,7 @@ def scale(
         Application.data.base_services,
     )
 
+    swarm = Swarm()
     try:
         swarm.docker.service.scale(scales, detach=not wait)
     # Can happens in case of scale before start

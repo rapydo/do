@@ -7,6 +7,7 @@ from python_on_whales.exceptions import DockerException
 
 from controller import RED, REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
 
@@ -86,7 +87,7 @@ def remove(
 
         scales: Dict[Union[str, Service], int] = {}
         for service in Application.data.services:
-            service_name = swarm.get_service(service)
+            service_name = Docker.get_service(service)
             scales[service_name] = 0
 
         swarm.docker.service.scale(scales, detach=False)
