@@ -49,7 +49,7 @@ project_configuration:
       REDIS_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% if swarm -%}
-      REGISTRY_USER: {{ "RANDOM"| username }}
+      REGISTRY_USERNAME: {{ "RANDOM"| username }}
       REGISTRY_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% endfor %}{% endif -%}
