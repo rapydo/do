@@ -87,8 +87,8 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     # Verify that backend is restarted
     assert backend_start_date2 != backend_start_date
 
-    exec_command(capfd, "logs backend --tail 10")
-    time.sleep(6)
+    wait_until(capfd, "logs backend --tail 10", "Boot completed")
+
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
         data={
@@ -119,8 +119,8 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
-    exec_command(capfd, "logs backend --tail 10")
-    time.sleep(6)
+    wait_until(capfd, "logs backend --tail 10", "Boot completed")
+
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
         data={
