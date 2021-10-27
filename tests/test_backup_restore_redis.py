@@ -57,9 +57,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "status")
     service_verify(capfd, "redis")
 
-    # Just some delay extra delay, redis is a slow starter
-    # time.sleep(5)
-
     key = faker.pystr()
     value1 = faker.pystr()
     value2 = faker.pystr()

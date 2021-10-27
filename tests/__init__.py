@@ -195,9 +195,9 @@ def start_project(capfd: Capture) -> None:
         "Stack started",
     )
     if SWARM_MODE:
-        time.sleep(8)
+        time.sleep(10)
     else:
-        time.sleep(3)
+        time.sleep(5)
 
 
 def execute_outside(capfd: Capture, command: str) -> None:

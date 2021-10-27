@@ -79,8 +79,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    time.sleep(2)
-
     exec_command(
         capfd,
         "list services",
