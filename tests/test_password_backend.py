@@ -53,7 +53,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(3)
+    time.sleep(5)
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
