@@ -79,7 +79,8 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
     # DEBUG CODE
     import time
     time.sleep(20)
-    exec_command(capfd, "logs --tail 5")
+    exec_command(capfd, "logs --tail 5 rabbit")
+    exec_command(capfd, "logs --tail 5 celery")
     # ################
     wait_until(capfd, "logs --tail 10 backend", "Testing mode")
 

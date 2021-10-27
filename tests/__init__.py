@@ -247,7 +247,7 @@ def get_variable_from_projectrc(variable: str) -> str:
 
 
 def wait_until(
-    capfd: Capture, command: str, expected: str, max_retries: int = 30
+    capfd: Capture, command: str, expected: str, max_retries: int = 15, sleep: int = 2
 ) -> bool:
 
     counter = 1
@@ -259,7 +259,7 @@ def wait_until(
                 return True
 
         counter += 1
-        time.sleep(1)
+        time.sleep(sleep)
 
     pytest.fail(
         f"Never found {expected} in {command} after {max_retries} retries"
