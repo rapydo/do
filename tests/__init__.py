@@ -261,6 +261,8 @@ def wait_until(
         counter += 1
         time.sleep(1)
 
-    pytest.fail("Never found {} in {} after {} retries", expected, command, max_retries)
+    pytest.fail(
+        f"Never found {expected} in {command} after {max_retries} retries"
+    )
 
     return False

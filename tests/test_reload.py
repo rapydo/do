@@ -76,6 +76,11 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
+    # DEBUG CODE
+    import time
+    time.sleep(20)
+    exec_command(capfd, "logs --tail 5")
+    # ################
     wait_until(capfd, "logs --tail 10 backend", "Testing mode")
 
     # For each support service verify:
