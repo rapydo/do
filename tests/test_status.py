@@ -58,7 +58,10 @@ def test_all(capfd: Capture) -> None:
             "first_backend",
             "first_postgres",
             " [1]",
-            "starting",
+            # No longer found starting because
+            # HEALTHCHECK_INTERVAL is defaulted to 1s during tests
+            # "starting",
+            "running",
         )
 
         init_project(capfd, "", "--force")
