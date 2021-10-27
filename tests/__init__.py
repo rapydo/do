@@ -236,7 +236,7 @@ def get_container_start_date(
         container_name = docker.get_container(service, slot=1)
 
     assert container_name is not None
-    return docker.container.inspect(container_name).state.started_at
+    return docker.client.container.inspect(container_name).state.started_at
 
 
 def get_variable_from_projectrc(variable: str) -> str:
