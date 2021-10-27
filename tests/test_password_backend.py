@@ -55,6 +55,8 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         time.sleep(5)
 
+    exec_command(capfd, "logs backend --tail 10")
+
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
