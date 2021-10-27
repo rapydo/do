@@ -247,7 +247,7 @@ def get_variable_from_projectrc(variable: str) -> str:
 
 
 def wait_until(
-    capfd: Capture, command: str, expected: str, max_retries: int = 15, sleep: int = 2
+    capfd: Capture, command: str, expected: str, max_retries: int = 30, sleep: int = 2
 ) -> bool:
 
     counter = 1
