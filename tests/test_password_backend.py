@@ -53,10 +53,6 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    # This is needed to wait for the service rolling update
-    if SWARM_MODE:
-        time.sleep(5)
-
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
 
     exec_command(capfd, "logs backend --tail 10")
@@ -94,6 +90,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     # This is needed to wait for the service rolling update
     if SWARM_MODE:
         time.sleep(5)
+
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
 
     r = requests.post(
@@ -125,6 +122,10 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         "password --show",
         mypassword,
     )
+
+    # This is needed to wait for the service rolling update
+    if SWARM_MODE:
+        time.sleep(5)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
 
