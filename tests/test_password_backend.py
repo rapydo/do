@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -53,7 +53,11 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     exec_command(capfd, "logs backend --tail 10")
-    time.sleep(5)
+    if SWARM_MODE:
+        time.sleep(8)
+    else:
+        time.sleep(3)
+
     r = requests.post(
         "http://localhost:8080/auth/login",
         data={
