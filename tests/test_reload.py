@@ -64,9 +64,9 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
             "mysql",
             "redis",
             "rabbit",
-            # temporary disabled celery
+            # temporary disabled celery and flower
             # "celery",
-            "flower",
+            # "flower",
             "mongo",
             "ftp",
             "fail2ban",
@@ -99,9 +99,9 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
         capfd, "reload redis", "Service redis does not support the reload command"
     )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
-    # temporary disabled celery
+    # temporary disabled celery and flower
     # exec_command(capfd, "reload celery", "Not implemented yet")
-    exec_command(capfd, "reload flower", "Not implemented yet")
+    # exec_command(capfd, "reload flower", "Not implemented yet")
     exec_command(capfd, "reload mongodb", "Not implemented yet")
     exec_command(capfd, "reload ftp", "Not implemented yet")
     exec_command(capfd, "reload fail2ban", "Not implemented yet")
@@ -120,9 +120,9 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
             "mysql",
             "redis",
             "rabbit",
-            # temporary disabled celery
+            # temporary disabled celery and flower
             # "celery",
-            "flower",
+            # "flower",
             "mongo",
             "ftp",
             "fail2ban",
@@ -155,9 +155,9 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         capfd, "reload redis", "Service redis does not support the reload command"
     )
     exec_command(capfd, "reload rabbit", "Not implemented yet")
-    # temporary disabled celery
+    # temporary disabled celery and flower
     # exec_command(capfd, "reload celery", "Not implemented yet")
-    exec_command(capfd, "reload flower", "Not implemented yet")
+    # exec_command(capfd, "reload flower", "Not implemented yet")
     exec_command(capfd, "reload mongodb", "Not implemented yet")
     exec_command(capfd, "reload ftp", "Not implemented yet")
     exec_command(capfd, "reload fail2ban", "Not implemented yet")

@@ -13,8 +13,24 @@ jobs:
 
     strategy:
       matrix:
+        # partially sorted by slowness
         test: [
             # Both Compose and Swarm
+            # ~ 8 minutes
+            reload,
+            # ~ 6 minutes
+            shell,
+            # ~ 4 minutes
+            list,
+            # ~ 4 minutes
+            logs,
+            # ~ 4 minutes
+            password_neo4j,
+            # ~ 3 minutes
+            install,
+            # ~ 3 minutes
+            remove,
+
             add_upgrade,
             base,
             build_pull,
@@ -23,25 +39,19 @@ jobs:
             cronjobs,
             dump,
             init,
-            install,
             interfaces,
             libs,
-            list,
-            logs,
+
             password,
             password_backend,
             password_flower,
             password_mysql,
-            password_neo4j,
             password_postgres,
             password_rabbit,
             password_redis,
             registry,
-            reload,
             restart,
-            remove,
             scale,
-            shell,
             start,
             status,
             update,
@@ -54,6 +64,7 @@ jobs:
 
             # Compose only
             backup_restore_mariadb,
+            # ~ 4 minutes
             backup_restore_neo4j,
             backup_restore_postgres,
             backup_restore_rabbit,
