@@ -92,6 +92,13 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         f"rabbit     RABBITMQ_PASSWORD      {colors.GREEN}{today}",
     )
 
+    # Needed to prevent random:
+    # failed to update service xyz_rabbit:
+    # Error response from daemon:
+    # rpc error: code = Unknown desc = update out of sequence
+    if SWARM_MODE:
+        time.sleep(3)
+
     mypassword = faker.pystr()
     exec_command(
         capfd,
