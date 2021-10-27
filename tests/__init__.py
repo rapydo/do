@@ -219,20 +219,19 @@ def get_container_start_date(
     capfd: Capture, service: str, wait: bool = False
 ) -> datetime:
 
+    if SWARM_MODE and wait:
+        # This is needed to debug and wait the service rollup to complete
+        # Status is both for debug and to delay the get_container
+        exec_command(capfd, "status")
+        time.sleep(4)
+
     # Optional is needed because docker.get_container returns Optional[str]
     container_name: Optional[str] = None
 
+    docker = Docker()
     if service == REGISTRY:
         container_name = REGISTRY
     else:
-
-        if SWARM_MODE and wait:
-            # This is needed to debug and wait the service rollup to complete
-            # Status is both for debug and to delay the get_container
-            exec_command(capfd, "status")
-            time.sleep(4)
-
-        docker = Docker()
         container_name = docker.get_container(service, slot=1)
 
     assert container_name is not None
