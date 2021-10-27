@@ -7,6 +7,7 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, List, Optional, Type, TypeVar
 
+import pytest
 from faker import Faker
 from glom import glom
 from python_on_whales import docker
@@ -63,7 +64,7 @@ def mock_KeyboardInterrupt(signum, frame):  # type: ignore
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd: Capture, command: str, *asserts: str) -> None:
+def exec_command(capfd: Capture, command: str, *asserts: str) -> List[str]:
 
     # This is needed to reload the LOG dir
     import controller
@@ -121,6 +122,8 @@ def exec_command(capfd: Capture, command: str, *asserts: str) -> None:
     for a in asserts:
         # Check if the assert is in any line (also as substring) from out or err
         assert a in out + err or any(a in x for x in out + err + cout + exc)
+
+    return out + err + cout + exc
 
 
 def service_verify(capfd: Capture, service: str) -> None:
@@ -243,3 +246,23 @@ def get_variable_from_projectrc(variable: str) -> str:
     return glom(
         projectrc, f"project_configuration.variables.env.{variable}", default=""
     )
+
+
+def wait_until(
+    capfd: Capture, command: str, expected: str, max_retries: int = 30
+) -> bool:
+
+    counter = 1
+
+    while counter <= max_retries:
+        result = exec_command(capfd, command)
+        for r in result:
+            if expected in r:
+                return True
+
+        counter += 1
+        time.sleep(1)
+
+    pytest.fail("Never found {} in {} after {} retries", expected, command, max_retries)
+
+    return False
