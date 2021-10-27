@@ -84,7 +84,9 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "reload backend", "Not implemented yet")
     exec_command(capfd, "reload frontend", "Not implemented yet")
     exec_command(capfd, "reload postgres", "Not implemented yet")
-    exec_command(capfd, "reload mariadb", "Not implemented yet")
+    exec_command(
+        capfd, "reload mariadb", "Service mariadb does not support the reload command"
+    )
     exec_command(capfd, "reload redis", "Not implemented yet")
     exec_command(capfd, "reload rabbit", "Not implemented yet")
     exec_command(capfd, "reload celery", "Not implemented yet")
@@ -129,7 +131,9 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "reload backend", "Not implemented yet")
     exec_command(capfd, "reload frontend", "Not implemented yet")
     exec_command(capfd, "reload postgres", "Not implemented yet")
-    exec_command(capfd, "reload mariadb", "Not implemented yet")
+    exec_command(
+        capfd, "reload mariadb", "Service mariadb does not support the reload command"
+    )
     exec_command(capfd, "reload redis", "Not implemented yet")
     exec_command(capfd, "reload rabbit", "Not implemented yet")
     exec_command(capfd, "reload celery", "Not implemented yet")
