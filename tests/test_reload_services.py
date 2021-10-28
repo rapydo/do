@@ -23,7 +23,7 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
-        frontend="angular",
+        frontend="no",
         services=[
             "neo4j",
             "mysql",
@@ -55,8 +55,6 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
     #   3) the start line in the logs is printed again
     #   4) some more deep check based on the service?
     #      For example API is loading a change in the code?
-    exec_command(capfd, "reload backend", "Not implemented yet")
-    exec_command(capfd, "reload frontend", "Not implemented yet")
     exec_command(capfd, "reload postgres", "Not implemented yet")
     exec_command(
         capfd, "reload mariadb", "Service mariadb does not support the reload command"
@@ -74,13 +72,16 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "remove", "Stack removed")
 
+    if SWARM_MODE:
+        exec_command(capfd, "remove registry", "Service registry removed")
+
 
 def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
-        frontend="angular",
+        frontend="no",
         services=[
             "neo4j",
             "mysql",
@@ -95,18 +96,10 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         ],
     )
 
-    exec_command(
-        capfd,
-        "--prod init -f",
-        "Created default .projectrc file",
-        "Project initialized",
-    )
+    init_project(capfd, " --prod ", "--force")
 
-    if SWARM_MODE:
-        exec_command(capfd, "remove registry", "Service registry removed")
-        start_registry(capfd)
-    pull_images(capfd)
     start_registry(capfd)
+    pull_images(capfd)
 
     start_project(capfd)
 
@@ -115,8 +108,6 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     if SWARM_MODE:
         time.sleep(20)
 
-    exec_command(capfd, "reload backend", "Not implemented yet")
-    exec_command(capfd, "reload frontend", "Not implemented yet")
     exec_command(capfd, "reload postgres", "Not implemented yet")
     exec_command(
         capfd, "reload mariadb", "Service mariadb does not support the reload command"

@@ -15,25 +15,23 @@ jobs:
       matrix:
         # +/- sorted by slowness
         test: [
-            reload_services,
-
             # > 8 minutes
-            start,
+            reload_services,
+            reload_backend,
+            reload_frontend,
             shell,
 
-            # 7-8 minutes
+            # 6-8 minutes
             password_neo4j,
-
-            # 6-7 minutes
-            list,
             logs,
+            list,
+            install,
+            start,
             password_rabbit,
 
             # ~ 5-6 minutes
             build_pull,
-            install,
             password_backend,
-            password_flower,
             password_mysql,
             password_postgres,
             password_redis,
@@ -43,17 +41,16 @@ jobs:
 
             # ~ 3-4 minutes
             cronjobs,
+            password_flower,
             registry,
             reload,
             restart,
             status,
 
-            # ~ 2-3 minutes
+            # ~ 1-3 minutes
             add_upgrade,
             check,
             interfaces,
-
-            # ~ 1-2 minutes
             base,
             create,
             dump,
