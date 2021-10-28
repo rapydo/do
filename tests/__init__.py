@@ -85,10 +85,16 @@ def exec_command(capfd: Capture, command: str, *asserts: str) -> List[str]:
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = {}
+
+    start = datetime.now()
     result = runner.invoke(ctrl.app, command)
+    end = datetime.now()
+
+    elapsed_time = (end - start).seconds
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
+        print(f"Execution time: {elapsed_time} second(s)")
         print(result.stdout)
         print("_____________________________________________")
 
@@ -261,8 +267,6 @@ def wait_until(
         counter += 1
         time.sleep(sleep)
 
-    pytest.fail(
-        f"Never found '{expected}' in '{command}' after {max_retries} retries"
-    )
+    pytest.fail(f"Never found '{expected}' in '{command}' after {max_retries} retries")
 
     return False

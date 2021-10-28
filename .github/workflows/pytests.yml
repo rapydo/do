@@ -13,26 +13,25 @@ jobs:
 
     strategy:
       matrix:
-        # partially sorted by slowness
+        # +/- sorted by slowness
         test: [
-            # Both Compose and Swarm
-            install,
-            logs,
             reload_services,
+
+            # > 8 minutes
+            start,
             shell,
 
-            start,
-            volatile,
-
-            # > 7 minutes
+            # 7-8 minutes
             password_neo4j,
 
-            # > 6 minutes
+            # 6-7 minutes
+            list,
+            logs,
             password_rabbit,
 
             # ~ 5-6 minutes
             build_pull,
-            list,
+            install,
             password_backend,
             password_flower,
             password_mysql,
@@ -40,6 +39,7 @@ jobs:
             password_redis,
             remove,
             scale,
+            volatile,
 
             # ~ 3-4 minutes
             cronjobs,
@@ -50,11 +50,11 @@ jobs:
 
             # ~ 2-3 minutes
             add_upgrade,
+            check,
             interfaces,
 
             # ~ 1-2 minutes
             base,
-            check,
             create,
             dump,
             init,
