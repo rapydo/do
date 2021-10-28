@@ -32,14 +32,8 @@ jobs:
             remove,
 
             build_pull,
-
             cronjobs,
-            dump,
-            init,
             interfaces,
-            libs,
-
-            password,
             password_backend,
             password_flower,
             password_mysql,
@@ -55,13 +49,15 @@ jobs:
             update,
             volatile,
 
-            # ~ 2 minutes
+            # < 2 minutes
+            add_upgrade,
             base,
             check,
-
-            # ~ 1 minute
-            add_upgrade,
             create,
+            dump,
+            init,
+            libs,
+            password,
 
             # Swarm only
             join,
@@ -120,6 +116,24 @@ jobs:
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
+      - name: Send Compose Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: .
+          cov_file: rapydo_tests/coverage.xml
+
+      - name: Restore the controller
+        # After the compose install test the controller won't no longer work
+        # Let's reinstall it
+        if: ${{ matrix.test == 'install' }}
+        run: pip install --upgrade --no-cache-dir --editable .[dev]
+
+      - name: Clean the environment
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+          TEST_NAME: ${{ matrix.test }}
+        run: |
           # Remove containers, networks, volumes and images
           docker rm -f $(docker ps -a -q) || true
           docker volume rm $(docker volume ls -q) || true
@@ -127,11 +141,7 @@ jobs:
           docker rmi $(docker images -q) || true
           docker system prune -f
 
-      - name: Send Compose Coverage
-        uses: rapydo/actions/coverage@v1
-        with:
-          repository: .
-          cov_file: rapydo_tests/coverage.xml
+          sudo rm -rf rapydo_tests
 
       - name: Run Swarm Tests
         env:
@@ -140,8 +150,6 @@ jobs:
           TEST_NAME: ${{ matrix.test }}
           SWARM_MODE: 1
         run: |
-
-          sudo rm -rf rapydo_tests
           mkdir rapydo_tests
           cd rapydo_tests
 
