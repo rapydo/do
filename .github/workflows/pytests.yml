@@ -143,7 +143,14 @@ jobs:
         # After the compose install test the controller won't no longer work
         # Let's reinstall it
         if: ${{ matrix.test == 'install' }}
-        run: pip install --upgrade --no-cache-dir --editable .[dev]
+        run: |
+          # This will remove the old rapydo version installed by rapydo install test
+          pip uninstall controller
+          # And not install again 
+          pip install --upgrade --no-cache-dir --editable .[dev]
+
+          # Just to verify the installed version to debug in case of errors in the next steps
+          rapydo --version
 
       - name: Run Swarm Tests
         env:
