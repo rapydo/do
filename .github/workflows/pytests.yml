@@ -16,43 +16,41 @@ jobs:
         # partially sorted by slowness
         test: [
             # Both Compose and Swarm
-            # ~ 8 minutes
-            reload_services,
-            # ~ 6 minutes
-            shell,
-            # ~ 4 minutes
-            list,
-            # ~ 4 minutes
-            logs,
-            # ~ 4 minutes
-            password_neo4j,
-            # ~ 3 minutes
             install,
-            # ~ 3 minutes
-            remove,
+            logs,
+            reload_services,
+            shell,
 
+            start,
+            volatile,
+
+            # > 7 minutes
+            password_neo4j,
+
+            # > 6 minutes
+            password_rabbit,
+
+            # ~ 5-6 minutes
             build_pull,
-            cronjobs,
+            list,
             password_backend,
             password_flower,
             password_mysql,
             password_postgres,
-            password_rabbit,
             password_redis,
+            remove,
+            scale,
+
+            # ~ 3-4 minutes
+            add_upgrade,
+            cronjobs,
+            interfaces,
             registry,
             reload,
             restart,
-            scale,
-            start,
             status,
-            update,
-            volatile,
-
-            # ~ 3-4 minutes
-            interfaces,
 
             # ~ 1-2 minutes
-            add_upgrade,
             base,
             check,
             create,
@@ -60,6 +58,7 @@ jobs:
             init,
             libs,
             password,
+            update,
 
             # Swarm only
             join,
@@ -145,8 +144,9 @@ jobs:
         if: ${{ matrix.test == 'install' }}
         run: |
           # This will remove the old rapydo version installed by rapydo install test
+          sudo pip uninstall controller
           pip uninstall controller
-          # And not install again 
+          # And now install again 
           pip install --upgrade --no-cache-dir --editable .[dev]
 
           # Just to verify the installed version to debug in case of errors in the next steps
