@@ -113,9 +113,10 @@ jobs:
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
-          # Remove all containers and all volumes. Do not delete the images
-          docker rm -f $(docker ps -a -q)
-          docker volume rm $(docker volume ls -q)
+          # Remove containers, networks and volumes. Do not delete the images
+          docker rm -f $(docker ps -a -q) || true
+          docker volume rm $(docker volume ls -q) || true
+          docker network rm $(docker network ls -q) || true
 
       - name: Send Compose Coverage
         uses: rapydo/actions/coverage@v1
