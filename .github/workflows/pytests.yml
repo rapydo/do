@@ -141,7 +141,7 @@ jobs:
           SWARM_MODE: 1
         run: |
 
-          rm -rf rapydo_tests
+          sudo rm -rf rapydo_tests
           mkdir rapydo_tests
           cd rapydo_tests
 
