@@ -50,7 +50,7 @@ def test_init(capfd: Capture, faker: Faker) -> None:
 
         swarm = Swarm()
         swarm.leave()
-        local_ip = system.get_local_ip()
+        local_ip = system.get_local_ip(production=False)
         exec_command(
             capfd,
             "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS= init",

@@ -17,7 +17,7 @@ jobs:
         test: [
             # Both Compose and Swarm
             # ~ 8 minutes
-            reload,
+            reload_services,
             # ~ 6 minutes
             shell,
             # ~ 4 minutes
@@ -50,6 +50,7 @@ jobs:
             password_rabbit,
             password_redis,
             registry,
+            reload,
             restart,
             scale,
             start,
@@ -72,7 +73,6 @@ jobs:
             ssl,
             tuning,
           ]
-        deploy: [compose, swarm]
 
     steps:
       - uses: actions/checkout@v2
@@ -101,71 +101,84 @@ jobs:
           rapydo install buildx
           rapydo install compose
 
-      - name: Run Tests
+      - name: Run Compose Tests
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
         run: |
 
-          # This works well for all tests... except for install... that is not covered :o
-          # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
-
           mkdir rapydo_tests
           cd rapydo_tests
 
-          if [[ "${{ matrix.deploy }}" == "swarm" ]]; then
+          py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
-            # This would be only needed in production mode.
-            # In dev mode the registry is bound to 127.0.0.1 that is trusted by default
-            
-            # IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
-            # sudo cat /etc/docker/daemon.json
-            # sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP}:5000\"]}' >  /etc/docker/daemon.json"
-            # sudo cat /etc/docker/daemon.json
-            # sudo systemctl restart docker.service
+          # Remove all containers and all volumes. Do not delete the images
+          docker rm -f $(docker ps -a -q)
+          docker volume rm $(docker volume ls -q)
 
-            export SWARM_MODE="1"
+      - name: Send Compose Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: .
+          cov_file: rapydo_tests/coverage.xml
 
-            if [[ "${TEST_NAME}" == "multi_host" ]]; then
+      - name: Run Swarm Tests
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+          TEST_NAME: ${{ matrix.test }}
+          SWARM_MODE: 1
+        run: |
 
-              base=https://github.com/docker/machine/releases/download/v0.16.0 \
-                && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
-                && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
-                && chmod +x /usr/local/bin/docker-machine
+          rm -rf rapydo_tests
+          mkdir rapydo_tests
+          cd rapydo_tests
 
-              docker-machine --version
+          IP_DEV=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=False))")
+          IP_PROD=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=True))")
+          sudo cat /etc/docker/daemon.json
+          sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
+          sudo cat /etc/docker/daemon.json
+          sudo systemctl restart docker.service
 
-              sudo apt-get update
-              sudo apt-get install --yes virtualbox
-              docker swarm init
-              JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
-              echo "Join command = ${JOIN_COMMAND}"
+          if [[ "${TEST_NAME}" == "multi_host" ]]; then
 
-              # Currently not working due to lack of nested virtualization:
-              # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
-              # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
-              # docker-machine ssh test $JOIN_COMMAND
-              # docker node ls
+            base=https://github.com/docker/machine/releases/download/v0.16.0 \
+              && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
+              && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
+              && chmod +x /usr/local/bin/docker-machine
 
-              # NFS to be added
-              export NFS_HOST="127.0.0.1"
+            docker-machine --version
 
-              # Create all volumes used by NFS expect for ssl_certs
-              sudo mkdir -p /volumes/secrets
-              sudo mkdir -p /volumes/rabbitdata
-              sudo mkdir -p /volumes/sqldata
-              sudo mkdir -p /volumes/mariadb
-              sudo mkdir -p /volumes/graphdata
-              sudo mkdir -p /volumes/mongodata
-              sudo mkdir -p /volumes/data_imports
-              sudo mkdir -p /volumes/redisdata
-            fi
+            sudo apt-get update
+            sudo apt-get install --yes virtualbox
+            docker swarm init
+            JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
+            echo "Join command = ${JOIN_COMMAND}"
 
+            # Currently not working due to lack of nested virtualization:
+            # VBoxManage: error: VT-x is not available (VERR_VMX_NO_VMX)
+            # docker-machine create --driver virtualbox --virtualbox-no-vtx-check --swarm test
+            # docker-machine ssh test $JOIN_COMMAND
+            # docker node ls
+
+            # NFS to be added
+            export NFS_HOST="127.0.0.1"
+
+            # Create all volumes used by NFS expect for ssl_certs
+            sudo mkdir -p /volumes/secrets
+            sudo mkdir -p /volumes/rabbitdata
+            sudo mkdir -p /volumes/sqldata
+            sudo mkdir -p /volumes/mariadb
+            sudo mkdir -p /volumes/graphdata
+            sudo mkdir -p /volumes/mongodata
+            sudo mkdir -p /volumes/data_imports
+            sudo mkdir -p /volumes/redisdata
           fi
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
-      - name: Coverage
+      - name: Send Swarm Coverage
         uses: rapydo/actions/coverage@v1
         with:
           repository: .

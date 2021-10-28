@@ -38,7 +38,8 @@ class Swarm:
     def init(self) -> None:
 
         manager_address = str(
-            Application.env.get("SWARM_MANAGER_ADDRESS") or system.get_local_ip()
+            Application.env.get("SWARM_MANAGER_ADDRESS")
+            or system.get_local_ip(Configuration.production)
         )
 
         log.info("Initializing Swarm with manager IP {}", manager_address)
