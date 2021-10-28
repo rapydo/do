@@ -33,7 +33,6 @@ jobs:
 
             build_pull,
             cronjobs,
-            interfaces,
             password_backend,
             password_flower,
             password_mysql,
@@ -49,7 +48,10 @@ jobs:
             update,
             volatile,
 
-            # < 2 minutes
+            # ~ 3-4 minutes
+            interfaces,
+
+            # ~ 1-2 minutes
             add_upgrade,
             base,
             check,
@@ -122,12 +124,6 @@ jobs:
           repository: .
           cov_file: rapydo_tests/coverage.xml
 
-      - name: Restore the controller
-        # After the compose install test the controller won't no longer work
-        # Let's reinstall it
-        if: ${{ matrix.test == 'install' }}
-        run: pip install --upgrade --no-cache-dir --editable .[dev]
-
       - name: Clean the environment
         env:
           LOGURU_LEVEL: DEBUG
@@ -142,6 +138,12 @@ jobs:
           docker system prune -f
 
           sudo rm -rf rapydo_tests
+
+      - name: Restore the controller
+        # After the compose install test the controller won't no longer work
+        # Let's reinstall it
+        if: ${{ matrix.test == 'install' }}
+        run: pip install --upgrade --no-cache-dir --editable .[dev]
 
       - name: Run Swarm Tests
         env:
