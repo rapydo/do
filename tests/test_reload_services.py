@@ -102,8 +102,9 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         "Project initialized",
     )
 
-    exec_command(capfd, "remove registry", "Service registry removed")
-    start_registry(capfd)
+    if SWARM_MODE:
+        exec_command(capfd, "remove registry", "Service registry removed")
+        start_registry(capfd)
     pull_images(capfd)
     start_registry(capfd)
 
