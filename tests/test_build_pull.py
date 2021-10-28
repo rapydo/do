@@ -90,7 +90,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # --all is useless here... added just to include the parameter in some tests.
-    # A true test on such parameter would be quite complicated...
+    # A true test on such parameter would be quite complex...
     exec_command(
         capfd,
         "pull --all --quiet backend",
@@ -210,10 +210,17 @@ RUN mkdir xyz
     # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild
     # This simulate a pull updating a core image making the custom image obsolete
+
+    if SWARM_MODE:
+        swarm_push_warn = "Local registry push is not implemented yet for core images"
+    else:
+        swarm_push_warn = ""
+
     exec_command(
         capfd,
         f"-p {project2} build --core rabbit",
         "Core images built",
+        swarm_push_warn,
         "No custom images to build",
     )
     exec_command(

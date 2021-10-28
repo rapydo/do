@@ -31,11 +31,8 @@ jobs:
             # ~ 3 minutes
             remove,
 
-            add_upgrade,
-            base,
             build_pull,
-            check,
-            create,
+
             cronjobs,
             dump,
             init,
@@ -58,17 +55,27 @@ jobs:
             update,
             volatile,
 
+            # ~ 2 minutes
+            base,
+            check,
+
+            # ~ 1 minute
+            add_upgrade,
+            create,
+
             # Swarm only
             join,
             password_registry,
             multi_host,
 
             # Compose only
+            # ~ 3 minutes
             backup_restore_mariadb,
-            # ~ 4 minutes
             backup_restore_neo4j,
             backup_restore_postgres,
+            # ~ 4 minutes
             backup_restore_rabbit,
+            # ~ 3 minutes
             backup_restore_redis,
             ssl,
             tuning,
@@ -118,6 +125,7 @@ jobs:
           docker volume rm $(docker volume ls -q) || true
           docker network rm $(docker network ls -q) || true
           docker rmi $(docker images -q) || true
+          docker system prune -f
 
       - name: Send Compose Coverage
         uses: rapydo/actions/coverage@v1
