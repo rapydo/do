@@ -34,7 +34,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["redis"],
     )

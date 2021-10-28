@@ -26,7 +26,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project_name,
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["flower"],
     )

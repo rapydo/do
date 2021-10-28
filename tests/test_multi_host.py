@@ -30,7 +30,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         name="swarm",
         auth=auth,
         frontend="no",
-        services=["rabbit", "redis"],
     )
 
     for node in docker.node.list():

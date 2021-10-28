@@ -2,7 +2,6 @@
 This module will test the start command
 """
 
-import random
 import shutil
 import time
 from pathlib import Path
@@ -26,24 +25,12 @@ def test_all(capfd: Capture) -> None:
     if not SWARM_MODE:
         execute_outside(capfd, "stop")
 
-    rand = random.SystemRandom()
-
-    auth = rand.choice(
-        (
-            "postgres",
-            "mysql",
-            "neo4j",
-            "mongo",
-        )
-    )
-
     project_name = "first"
     create_project(
         capfd=capfd,
         name=project_name,
-        auth=auth,
+        auth="neo4j",
         frontend="angular",
-        services=["neo4j"],
     )
 
     init_project(capfd)

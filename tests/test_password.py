@@ -43,9 +43,8 @@ def test_mongodb_invalid_characters(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        auth="postgres",
+        auth="mongo",
         frontend="no",
-        services=["mongo"],
         extra="--env MONGO_PASSWORD=invalid#password",
     )
 

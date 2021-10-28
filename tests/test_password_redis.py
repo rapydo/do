@@ -28,7 +28,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project_name,
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["redis"],
     )
@@ -125,7 +125,7 @@ def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["redis"],
         extra="--env REDIS_PASSWORD=invalid#password",

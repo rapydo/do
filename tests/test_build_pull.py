@@ -27,7 +27,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name="testbuild",
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )
@@ -35,7 +35,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project2,
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )

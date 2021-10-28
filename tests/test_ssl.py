@@ -25,9 +25,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project,
-        auth="postgres",
+        auth="neo4j",
         frontend="no",
-        services=["rabbit", "neo4j"],
+        services=["rabbit"],
     )
     pconf = f"projects/{project}/project_configuration.yaml"
 

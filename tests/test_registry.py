@@ -1,7 +1,6 @@
 """
 This module will test the registry service
 """
-import random
 import time
 
 from controller import SWARM_MODE, __version__, colors
@@ -15,21 +14,10 @@ def test_docker_registry(capfd: Capture) -> None:
     if SWARM_MODE:
         execute_outside(capfd, "images")
 
-    rand = random.SystemRandom()
-
-    auth = rand.choice(
-        (
-            "postgres",
-            "mysql",
-            "neo4j",
-            "mongo",
-        )
-    )
-
     create_project(
         capfd=capfd,
         name="swarm",
-        auth=auth,
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )

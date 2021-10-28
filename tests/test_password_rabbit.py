@@ -28,7 +28,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project_name,
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )
@@ -123,7 +123,7 @@ def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
         extra="--env RABBITMQ_PASSWORD=invalid£password",
