@@ -61,6 +61,11 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
+    # in dev mode Flask loads the app two times... A "boot completed" only states that
+    # the app is loaded at least once, and the second time will success for sure
+    # But can't say if now flask is really ready or still loading the second time
+    # Added a sleep to wait for the eventual second load
+    time.sleep(2)
 
     exec_command(capfd, "logs backend --tail 10")
 
@@ -99,6 +104,11 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         time.sleep(5)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
+    # in dev mode Flask loads the app two times... A "boot completed" only states that
+    # the app is loaded at least once, and the second time will success for sure
+    # But can't say if now flask is really ready or still loading the second time
+    # Added a sleep to wait for the eventual second load
+    time.sleep(2)
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
@@ -135,6 +145,11 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         time.sleep(5)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
+    # in dev mode Flask loads the app two times... A "boot completed" only states that
+    # the app is loaded at least once, and the second time will success for sure
+    # But can't say if now flask is really ready or still loading the second time
+    # Added a sleep to wait for the eventual second load
+    time.sleep(2)
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",

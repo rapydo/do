@@ -42,13 +42,15 @@ jobs:
             scale,
 
             # ~ 3-4 minutes
-            add_upgrade,
             cronjobs,
-            interfaces,
             registry,
             reload,
             restart,
             status,
+
+            # ~ 2-3 minutes
+            add_upgrade,
+            interfaces,
 
             # ~ 1-2 minutes
             base,

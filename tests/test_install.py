@@ -119,6 +119,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "install --no-editable")
 
     # This is the very last command... installing an old version!
+    # Can't go easily back now! :-p
     exec_command(capfd, "install --no-editable 0.7.2")
 
     # This test will change the required version
