@@ -114,14 +114,6 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         "All updated",
     )
 
-    exec_command(capfd, "install")
-
-    exec_command(capfd, "install --no-editable")
-
-    # This is the very last command... installing an old version!
-    # Can't go easily back now! :-p
-    exec_command(capfd, "install --no-editable 0.7.2")
-
     # This test will change the required version
     pconf = f"projects/{project}/project_configuration.yaml"
 
@@ -158,3 +150,9 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         f"This project is not compatible with rapydo version {__version__}",
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
+
+    exec_command(capfd, "install --no-editable 0.8")
+
+    exec_command(capfd, "install --no-editable")
+
+    exec_command(capfd, "install")
