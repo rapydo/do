@@ -52,6 +52,13 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "--prod init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
+
+    exec_command(
+        capfd,
         "--prod start rabbit celery flower",
         "Stack started",
     )

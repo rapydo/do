@@ -52,6 +52,13 @@ def test_reload_neo4j(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "--prod init -f",
+        "Created default .projectrc file",
+        "Project initialized",
+    )
+
+    exec_command(
+        capfd,
         "--prod start neo4j",
         "Stack started",
     )
