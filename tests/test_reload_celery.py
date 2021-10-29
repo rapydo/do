@@ -27,7 +27,7 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
         services=[
             "rabbit",
             "celery",
-            "flower",
+            # "flower",
         ],
     )
     init_project(capfd)
@@ -36,9 +36,9 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     if SWARM_MODE:
-        time.sleep(10)
+        time.sleep(12)
     else:
-        time.sleep(5)
+        time.sleep(7)
 
     # For each support service verify:
     #   1) a start line in the logs
@@ -48,7 +48,8 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
     #      For example API is loading a change in the code?
 
     exec_command(capfd, "reload celery", "Not implemented yet")
-    exec_command(capfd, "reload flower", "Not implemented yet")
+
+    # exec_command(capfd, "reload flower", "Not implemented yet")
 
     exec_command(
         capfd,
@@ -59,7 +60,8 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod start rabbit celery flower",
+        # "--prod start rabbit celery flower",
+        "--prod start rabbit celery",
         "Stack started",
     )
 
@@ -69,4 +71,4 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
         time.sleep(5)
 
     exec_command(capfd, "reload celery", "Not implemented yet")
-    exec_command(capfd, "reload flower", "Not implemented yet")
+    # exec_command(capfd, "reload flower", "Not implemented yet")
