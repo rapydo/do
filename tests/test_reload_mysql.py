@@ -48,7 +48,9 @@ def test_reload_mysql(capfd: Capture, faker: Faker) -> None:
     #   3) the start line in the logs is printed again
     #   4) some more deep check based on the service?
     #      For example API is loading a change in the code?
-    exec_command(capfd, "reload mariadb", "Not implemented yet")
+    exec_command(
+        capfd, "reload mariadb", "Service mariadb does not support the reload command"
+    )
 
     exec_command(
         capfd,
@@ -68,4 +70,6 @@ def test_reload_mysql(capfd: Capture, faker: Faker) -> None:
     else:
         time.sleep(5)
 
-    exec_command(capfd, "reload mariadb", "Not implemented yet")
+    exec_command(
+        capfd, "reload mariadb", "Service mariadb does not support the reload command"
+    )
