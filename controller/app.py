@@ -278,12 +278,6 @@ def controller_cli_options(
         time.sleep(1)
 
     Configuration.services_list = services_list
-    if production and testing:
-        log.debug(
-            "Can't enable both production and testing mode, disabled testing mode"
-        )
-        testing = False
-
     Configuration.production = production
     Configuration.testing = testing
     Configuration.project = project
@@ -894,7 +888,7 @@ You can use of one:
         )
         Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords or ""
 
-        if Configuration.testing:
+        if Configuration.testing and not Configuration.production:
             Application.env["APP_MODE"] = "test"
 
         Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
