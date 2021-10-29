@@ -52,7 +52,7 @@ def test_reload_mongo(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod mongo",
+        "--prod start mongo",
         "Stack started",
     )
 

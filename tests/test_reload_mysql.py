@@ -52,7 +52,7 @@ def test_reload_mysql(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod mariadb",
+        "--prod start mariadb",
         "Stack started",
     )
 

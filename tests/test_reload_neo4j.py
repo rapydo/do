@@ -52,7 +52,7 @@ def test_reload_neo4j(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod neo4j",
+        "--prod start neo4j",
         "Stack started",
     )
 

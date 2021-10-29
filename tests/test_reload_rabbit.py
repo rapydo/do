@@ -55,7 +55,7 @@ def test_reload_rabbit(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod rabbit",
+        "--prod start rabbit",
         "Stack started",
     )
 

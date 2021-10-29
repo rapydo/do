@@ -55,7 +55,7 @@ def test_reload_fail2ban(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod fail2ban",
+        "--prod start fail2ban",
         "Stack started",
     )
 

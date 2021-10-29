@@ -52,7 +52,7 @@ def test_reload_postgres(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod postgres",
+        "--prod start postgres",
         "Stack started",
     )
 

@@ -52,7 +52,7 @@ def test_reload_celery(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod rabbit celery flower",
+        "--prod start rabbit celery flower",
         "Stack started",
     )
 

@@ -57,7 +57,7 @@ def test_reload_redis(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod redis",
+        "--prod start redis",
         "Stack started",
     )
 

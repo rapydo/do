@@ -55,7 +55,7 @@ def test_reload_(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "start --prod ",
+        "--prod start ",
         "Stack started",
     )
 
