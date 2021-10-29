@@ -71,6 +71,7 @@ def reload(
             raise
 
         docker.exec_command(container, user="root", command="/usr/local/bin/reload")
+        reloaded += 1
 
     if reloaded == 0:
         log.info("No service reloaded")

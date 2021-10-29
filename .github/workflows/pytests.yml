@@ -15,31 +15,38 @@ jobs:
       matrix:
         # +/- sorted by slowness
         test: [
-            # > 8 minutes
-            reload_services,
-            reload_backend,
-            reload_frontend,
-            shell,
+            reload_fail2ban,
+            reload_ftp,
+            reload_mongo,
+            reload_mysql,
+            reload_neo4j,
+            reload_postgres,
+            reload_rabbit,
+            reload_redis,
+            reload_celery,
 
-            # 6-8 minutes
+            # > 6 minutes
+            shell,
             password_neo4j,
+            reload_frontend,
             logs,
-            list,
             install,
             start,
             password_rabbit,
 
             # ~ 5-6 minutes
-            build_pull,
             password_backend,
             password_mysql,
             password_postgres,
             password_redis,
+            reload_backend,
             remove,
             scale,
             volatile,
 
             # ~ 3-4 minutes
+            build_pull,
+            list,
             cronjobs,
             password_flower,
             registry,
