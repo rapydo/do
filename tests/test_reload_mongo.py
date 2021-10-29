@@ -28,13 +28,13 @@ def test_reload_mongo(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "pull --quiet mongo",
+        "pull --quiet mongodb",
         "Base images pulled from docker hub",
     )
 
     exec_command(
         capfd,
-        "start mongo",
+        "start mongodb",
         "Stack started",
     )
     if SWARM_MODE:
@@ -48,7 +48,7 @@ def test_reload_mongo(capfd: Capture, faker: Faker) -> None:
     #   3) the start line in the logs is printed again
     #   4) some more deep check based on the service?
     #      For example API is loading a change in the code?
-    exec_command(capfd, "reload mongo", "Not implemented yet")
+    exec_command(capfd, "reload mongodb", "Not implemented yet")
 
     exec_command(
         capfd,
@@ -59,7 +59,7 @@ def test_reload_mongo(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod start mongo",
+        "--prod start mongodb",
         "Stack started",
     )
 
@@ -68,4 +68,4 @@ def test_reload_mongo(capfd: Capture, faker: Faker) -> None:
     else:
         time.sleep(5)
 
-    exec_command(capfd, "reload mongo", "Not implemented yet")
+    exec_command(capfd, "reload mongodb", "Not implemented yet")
