@@ -15,20 +15,9 @@ jobs:
       matrix:
         # +/- sorted by slowness
         test: [
-            reload_fail2ban,
-            reload_ftp,
-            reload_mongo,
-            reload_mysql,
-            reload_neo4j,
-            reload_postgres,
-            reload_rabbit,
-            reload_redis,
-            # reload_celery,
-
             # > 6 minutes
             shell,
             password_neo4j,
-            reload_frontend,
             logs,
             install,
             start,
@@ -39,7 +28,7 @@ jobs:
             password_mysql,
             password_postgres,
             password_redis,
-            reload_backend,
+            reload,
             remove,
             scale,
             volatile,
@@ -50,7 +39,6 @@ jobs:
             cronjobs,
             password_flower,
             registry,
-            reload,
             restart,
             status,
 
