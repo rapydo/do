@@ -130,3 +130,9 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "start backend postgres _invalid",
         "No such service: invalid",
     )
+
+    exec_command(
+        capfd,
+        "--prod --testing start invalid",
+        "Can't enable both production and testing mode, disabled testing mode",
+    )

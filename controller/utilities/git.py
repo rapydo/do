@@ -100,7 +100,11 @@ def clone(
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
-        gitobj = Repo.clone_from(url=url, to_path=local_path)
+        gitobj = Repo.clone_from(
+            url=url,
+            to_path=local_path,
+            multi_options=["--single-branch", f"-b {branch}"],
+        )
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
         print_and_exit(

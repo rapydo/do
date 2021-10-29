@@ -278,6 +278,12 @@ def controller_cli_options(
         time.sleep(1)
 
     Configuration.services_list = services_list
+    if production and testing:
+        log.debug(
+            "Can't enable both production and testing mode, disabled testing mode"
+        )
+        testing = False
+
     Configuration.production = production
     Configuration.testing = testing
     Configuration.project = project
