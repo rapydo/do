@@ -23,7 +23,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
-        auth="postgres",
+        auth="no",
         frontend="no",
     )
     init_project(capfd)
@@ -38,9 +38,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     start_project(capfd)
 
-    exec_command(capfd, "reload backend", "Not implemented yet")
-
-    exec_command(capfd, "reload postgres", "Not implemented yet")
+    exec_command(capfd, "reload backend", "Reloading Flask...")
 
     exec_command(capfd, "shell backend -u root 'rm /usr/local/bin/reload'")
 

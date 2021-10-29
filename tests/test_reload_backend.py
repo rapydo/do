@@ -40,7 +40,7 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
     #   3) the start line in the logs is printed again
     #   4) some more deep check based on the service?
     #      For example API is loading a change in the code?
-    exec_command(capfd, "reload backend", "Not implemented yet")
+    exec_command(capfd, "reload backend", "Reloading Flask...")
 
     exec_command(capfd, "remove", "Stack removed")
 
@@ -65,6 +65,6 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
 
     time.sleep(5)
 
-    exec_command(capfd, "reload backend", "Not implemented yet")
+    exec_command(capfd, "reload backend", "Reloading gunicorn (PID #")
 
     exec_command(capfd, "remove", "Stack removed")
