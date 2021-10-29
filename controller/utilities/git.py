@@ -101,9 +101,7 @@ def clone(
         gitobj = Repo(local_path)
     elif do:
         gitobj = Repo.clone_from(
-            url=url,
-            to_path=local_path,
-            multi_options=["--single-branch", f"-b {branch}"],
+            url=url, to_path=local_path
         )
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
