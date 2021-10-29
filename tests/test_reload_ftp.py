@@ -22,7 +22,7 @@ def test_reload_(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="no",
         frontend="no",
-        services=[""],
+        services=["ftp"],
     )
     init_project(capfd)
     start_registry(capfd)
