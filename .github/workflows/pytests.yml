@@ -23,7 +23,7 @@ jobs:
             reload_postgres,
             reload_rabbit,
             reload_redis,
-            reload_celery,
+            # reload_celery,
 
             # > 6 minutes
             shell,
