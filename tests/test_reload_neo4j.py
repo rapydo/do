@@ -64,8 +64,8 @@ def test_reload_neo4j(capfd: Capture, faker: Faker) -> None:
     )
 
     if SWARM_MODE:
-        time.sleep(10)
+        time.sleep(15)
     else:
-        time.sleep(5)
+        time.sleep(10)
 
     exec_command(capfd, "reload neo4j", "Not implemented yet")
