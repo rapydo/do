@@ -153,6 +153,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     if SWARM_MODE:
         service = "backend"
+
+        exec_command(
+            capfd,
+            "start backend",
+            "Stack started",
+        )
+
         exec_command(
             capfd,
             "scale backend=2 --wait",
