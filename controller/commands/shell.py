@@ -36,6 +36,18 @@ def shell(
         help="Disable pseudo-tty allocation (useful for non-interactive script)",
         show_default=False,
     ),
+    replica: int = typer.Option(
+        1,
+        "--replica",
+        help="Execute the command on the specified replica",
+        show_default=False,
+    ),
+    broadcast: bool = typer.Option(
+        False,
+        "--broadcast",
+        help="Execute the command on all the replicas",
+        show_default=False,
+    ),
 ) -> None:
 
     Application.print_command(
@@ -60,11 +72,18 @@ def shell(
     if default_command:
         command = services.get_default_command(service)
 
+    if broadcast:
+        print_and_exit("Broadcast mode not implemented yet")
+
     log.debug("Requested command: {} with user: {}", command, user or "default")
 
-    container = docker.get_container(service, slot=1)
+    container = docker.get_container(service, slot=replica)
 
     if not container:
+        if replica != 1:
+            print_and_exit(
+                "Replica number {} not found for {} service", replica, service
+            )
         print_and_exit("No running container found for {} service", service)
 
     docker.exec_command(container, user=user, command=command)

@@ -3,6 +3,10 @@ This module will test the shell command
 """
 import signal
 
+from faker import Faker
+
+from controller import SWARM_MODE
+from controller.deploy.docker import Docker
 from tests import (
     Capture,
     create_project,
@@ -16,7 +20,7 @@ from tests import (
 )
 
 
-def test_all(capfd: Capture) -> None:
+def test_all(capfd: Capture, faker: Faker) -> None:
 
     execute_outside(capfd, "shell backend ls")
 
@@ -25,7 +29,7 @@ def test_all(capfd: Capture) -> None:
         name="first",
         auth="postgres",
         frontend="angular",
-        services=["rabbit", "neo4j"],
+        services=["rabbit", "neo4j", "redis"],
     )
     init_project(capfd)
 
@@ -132,3 +136,76 @@ def test_all(capfd: Capture) -> None:
         "Requested command: restapi launch with user: developer",
         "No running container found for backend service",
     )
+
+    exec_command(
+        capfd,
+        "shell backend --replica 1 --default",
+        "Requested command: restapi launch with user: developer",
+        "No running container found for backend service",
+    )
+
+    exec_command(
+        capfd,
+        "shell backend --replica 2 --default",
+        "Requested command: restapi launch with user: developer",
+        "Replica number 2 not found for backend service",
+    )
+
+    if SWARM_MODE:
+        service = "backend"
+        exec_command(
+            capfd,
+            "scale backend=2 --wait",
+            "first_backend scaled to 2",
+            "Service converged",
+        )
+    else:
+
+        service = "redis"
+        exec_command(
+            capfd,
+            "scale redis=2",
+            "Scaling services: redis=2...",
+            "Services scaled: redis=2",
+        )
+
+    docker = Docker()
+    container1 = docker.get_container(service, slot=1)
+    container2 = docker.get_container(service, slot=2)
+    assert container1 is not None
+    assert container2 is not None
+    assert container1 != container2
+
+    string1 = faker.pystr(min_chars=30, max_chars=30)
+    string2 = faker.pystr(min_chars=30, max_chars=30)
+
+    docker.client.container.execute(
+        container1,
+        command=["touch", f"/tmp/{string1}"],
+        tty=False,
+        detach=False,
+    )
+
+    docker.client.container.execute(
+        container2,
+        command=["touch", f"/tmp/{string2}"],
+        tty=False,
+        detach=False,
+    )
+
+    exec_command(capfd, f"shell {service} --replica 1 'ls /tmp/'", string1)
+
+    exec_command(capfd, f"shell {service} --replica 2 'ls /tmp/'", string2)
+
+    exec_command(
+        capfd,
+        "shell backend mycommand --broadcast",
+        "Broadcast mode not implemented yet",
+    )
+
+    # exec_command(
+    #     capfd,
+    #     f"shell {service} --broadcast 'ls /tmp/'",
+    #     string1,
+    #     string2,
+    # )
