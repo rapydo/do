@@ -100,9 +100,7 @@ def clone(
         log.debug("Path {} already exists", local_path)
         gitobj = Repo(local_path)
     elif do:
-        gitobj = Repo.clone_from(
-            url=url, to_path=local_path
-        )
+        gitobj = Repo.clone_from(url=url, to_path=local_path)
         log.info("Cloned {}@{} as {}", url, branch, path)
     else:
         print_and_exit(
@@ -271,6 +269,7 @@ def update(path: str, gitobj: Repo) -> None:
                 branch = gitobj.active_branch.name
                 log.info("Updating {} {}@{}", remote, path, branch)
 
+                fetch(path, gitobj)
                 commits_behind = gitobj.iter_commits(
                     f"{branch}..origin/{branch}", max_count=MAX_FETCHED_COMMITS
                 )
