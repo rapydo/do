@@ -53,7 +53,7 @@ jobs:
       - name: Production mode
         run: |
           rapydo remove --all
-          rapydo --prod init --force
+          rapydo --testing --prod init --force
           rapydo pull --quiet
           rapydo ssl --volatile
           rapydo start
