@@ -15,6 +15,7 @@ import typer
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
+from python_on_whales.utils import DockerException
 from tabulate import tabulate
 from zxcvbn import zxcvbn
 
@@ -924,9 +925,22 @@ You can use of one:
                 ]
 
         if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
-            Application.env["DEPLOY_ENGINE"] = "compose"
+            DEPLOY_ENGINE = "compose"
         else:
-            Application.env["DEPLOY_ENGINE"] = "swarm"
+            DEPLOY_ENGINE = "swarm"
+
+        Application.env["DEPLOY_ENGINE"] = DEPLOY_ENGINE
+
+        if Application.env.get("ACTIVATE_FAIL2BAN"):
+            # Unfortunately this will work only after the cretion of the network
+            try:
+                DOCKER_SUBNET = docker.network.inspect(
+                    f"{Configuration.project}_{DEPLOY_ENGINE}_default"
+                ).ipam.config[0]["Subnet"]
+            # The first execution will fail and fallen back to localhost
+            except DockerException:
+                DOCKER_SUBNET = "127.0.0.1"
+            Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false

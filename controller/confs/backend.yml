@@ -1128,11 +1128,15 @@ services:
     # This works for compose but not for swarm.
     # In swarm mode this flag is replaced with an external network
     network_mode: "host"
+    hostname: fail2ban
     cap_add:
       - NET_ADMIN
       - NET_RAW
     environment:
       ACTIVATE: ${ACTIVATE_FAIL2BAN}
+      # Beware: before the creation of the network this variable will contain 127.0.0.1
+      # The correct subnet will only be available starting from the second command... :\
+      DOCKER_SUBNET: ${DOCKER_SUBNET}
       # ACTIVATE: 1
       # SSMTP_HOST: SMTP server host
       # SSMTP_PORT: SMTP server port (default 25)

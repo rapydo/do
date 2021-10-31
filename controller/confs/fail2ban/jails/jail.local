@@ -1,7 +1,4 @@
 [DEFAULT]
-# ignoreip = IP1/yy IP2 IP3/xx
-ignoreip = 127.0.0.1/24
-
 bantime = 1h
 
 # increase banTime * 1, 2, 4, 8, 16, 32...
