@@ -2,6 +2,7 @@ import re
 import shlex
 import socket
 import sys
+from functools import lru_cache
 from typing import Dict, List, Optional, Tuple, Union, cast
 
 import requests
@@ -14,6 +15,7 @@ from requests.models import Response
 
 from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
+from controller.utilities import system
 
 COMPOSE_SEP = "_"
 MAIN_NODE = "manager"
@@ -24,20 +26,36 @@ MAIN_NODE = "manager"
 class Docker:
     def __init__(self) -> None:
 
-        self.client = DockerClient(host=self.get_engine())
+        self.client = DockerClient(host=self.get_engine(Configuration.remote_engine))
+
+    @lru_cache
+    def connect_engine(self, node_id: str) -> DockerClient:
+        """Convert a node_id to a docker client connected to the engine hostname"""
+        node = self.client.node.inspect(node_id)
+
+        manager_address = str(
+            Application.env.get("SWARM_MANAGER_ADDRESS")
+            or system.get_local_ip(Configuration.production)
+        )
+
+        if node.status.addr == manager_address:
+            return self.client
+        return DockerClient(host=self.get_engine(node.status.addr))
 
     @classmethod
-    def get_engine(cls) -> Optional[str]:
-        if not Configuration.remote_engine:
+    def get_engine(cls, engine: Optional[str]) -> Optional[str]:
+
+        if not engine:
             return None
 
-        if not cls.validate_remote_engine(Configuration.remote_engine):
-            print_and_exit(
-                "Invalid remote host {}, expected user@ip-or-hostname",
-                Configuration.remote_engine,
-            )
+        if engine == MAIN_NODE:
+            return None
 
-        return f"ssh://{Configuration.remote_engine}"
+        if "@" not in engine:
+            user = system.get_username(system.get_current_uid())
+            engine = f"{user}@{engine}"
+
+        return f"ssh://{engine}"
 
     @staticmethod
     def validate_remote_engine(host: str) -> bool:
@@ -265,10 +283,12 @@ class Docker:
             if broadcast:
                 log.info("Executing on {}", container[0])
             try:
-                log.info(
-                    "Container {} is running on node {}", container[0], container[1]
-                )
-                output = self.client.container.execute(
+                node_id = container[1]
+                if node_id != "" and node_id != MAIN_NODE:
+                    pass
+
+                client = self.connect_engine(container[1])
+                output = client.container.execute(
                     container[0],
                     user=user,
                     command=self.split_command(command),

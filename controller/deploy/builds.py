@@ -24,8 +24,6 @@ name_priorities = [
     "bot",
 ]
 
-docker = Docker()
-
 # From python 3.8 could be converted in a TypedDict
 # service -> str
 # services -> List[str]
@@ -45,6 +43,7 @@ def name_priority(name1: str, name2: str) -> str:
 
 
 def get_image_creation(image_name: str) -> datetime:
+    docker = Docker()
     try:
         return docker.client.image.inspect(image_name).created
     except NoSuchImage:
@@ -170,6 +169,7 @@ def verify_available_images(
     is_run_command: bool = False,
 ) -> None:
 
+    docker = Docker()
     # All template builds (core only)
     templates = find_templates_build(base_services, include_image=True)
     clean_core_services = get_non_redundant_services(templates, services)
