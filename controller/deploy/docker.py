@@ -37,6 +37,11 @@ class Docker:
 
         node = self.client.node.inspect(node_id)
 
+        # Always use the default client if executing on localhost
+        if node.status.addr == system.get_local_ip(production=False):
+            return self.client
+
+        # manager address should be localhost in dev mode, something else in prod mode
         manager_address = str(
             Application.env.get("SWARM_MANAGER_ADDRESS")
             or system.get_local_ip(Configuration.production)
@@ -44,6 +49,7 @@ class Docker:
 
         if node.status.addr == manager_address:
             return self.client
+
         return DockerClient(host=self.get_engine(node.status.addr))
 
     @classmethod
