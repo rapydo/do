@@ -187,14 +187,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     string2 = faker.pystr(min_chars=30, max_chars=30)
 
     docker.client.container.execute(
-        container1,
+        container1[0],
         command=["touch", f"/tmp/{string1}"],
         tty=False,
         detach=False,
     )
 
     docker.client.container.execute(
-        container2,
+        container2[0],
         command=["touch", f"/tmp/{string2}"],
         tty=False,
         detach=False,

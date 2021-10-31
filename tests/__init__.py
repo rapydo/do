@@ -232,16 +232,17 @@ def get_container_start_date(
         time.sleep(4)
 
     # Optional is needed because docker.get_container returns Optional[str]
-    container_name: Optional[str] = None
+    container: Optional[str, str] = None
 
     docker = Docker()
     if service == REGISTRY:
-        container_name = REGISTRY
+        # a tuple to have the same type of get_container
+        container = (REGISTRY, "")
     else:
-        container_name = docker.get_container(service, slot=1)
+        container = docker.get_container(service, slot=1)
 
-    assert container_name is not None
-    return docker.client.container.inspect(container_name).state.started_at
+    assert container is not None
+    return docker.client.container.inspect(container[0]).state.started_at
 
 
 def get_variable_from_projectrc(variable: str) -> str:

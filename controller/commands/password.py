@@ -1,7 +1,7 @@
 import re
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import typer
 from tabulate import tabulate
@@ -292,7 +292,7 @@ def password(
         docker = Docker()
         if service == Services.registry:
             is_running = docker.ping_registry(do_exit=False)
-            container: Optional[str] = "registry"
+            container: Optional[Tuple[str, str]] = ("registry", "")
         else:
             container = docker.get_container(service.value)
             is_running = container is not None

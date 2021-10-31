@@ -332,3 +332,45 @@ class Compose:
                     headers=["ID", "NAME", "STATUS", "CREATED", "IMAGE", "PORTS"],
                 )
             )
+
+    def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
+
+        if len(services) > 1:
+            timestamps = False
+            log_prefix = True
+        elif services[0] in "frontend":
+            timestamps = True
+            log_prefix = False
+        else:
+            timestamps = False
+            log_prefix = False
+
+        # Options:
+        #   -f, --follow          Follow log output.
+        #       --no-color        Produce monochrome output.
+        #       --no-log-prefix   Don't print prefix in logs.
+        #       --since string    Show logs since timestamp
+        #       --tail string     Number of lines to show from the end of the logs
+        #   -t, --timestamps      Show timestamps.
+        #       --until string    Show logs before a timestamp
+
+        lines = self.docker.compose.logs(
+            services,
+            follow=follow,
+            tail=tail,
+            timestamps=timestamps,
+            no_log_prefix=not log_prefix,
+            stream=True,
+        )
+        for log_line in lines:
+            # 'stdout' or 'stderr'
+            # Both out and err are collapsed in stdout
+            # Maybe in the future would be useful to keep them separated?
+            # stdstream = log_line[0]
+
+            line = log_line[1]
+
+            if isinstance(line, bytes):
+                line = line.decode("UTF-8")
+
+            print(line.strip())

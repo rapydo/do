@@ -45,7 +45,7 @@ def reload(
 
         try:
             output = docker.client.container.execute(
-                container,
+                container[0],
                 user="root",
                 command=["ls", "/usr/local/bin/reload"],
                 interactive=False,
@@ -70,6 +70,7 @@ def reload(
                 continue
             raise
 
+        # this should be a broadcast
         docker.exec_command(container, user="root", command="/usr/local/bin/reload")
         reloaded += 1
 

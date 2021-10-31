@@ -4,12 +4,12 @@ This module will test the restart command
 import time
 
 from controller import SWARM_MODE, colors
-from controller.deploy.docker import Docker
 from tests import (
     Capture,
     create_project,
     exec_command,
     execute_outside,
+    get_container_start_date,
     init_project,
     pull_images,
     start_project,
@@ -40,24 +40,14 @@ def test_all(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    docker = Docker()
-    container_name = docker.get_container("backend")
-    assert container_name is not None
-
-    container = docker.client.container.inspect(container_name)
-    start_date1 = container.state.started_at
-
+    start_date1 = get_container_start_date(capfd, "backend")
     exec_command(
         capfd,
         "restart",
         "Stack restarted",
     )
 
-    container_name = docker.get_container("backend")
-    assert container_name is not None
-
-    container = docker.client.container.inspect(container_name)
-    start_date2 = container.state.started_at
+    start_date2 = get_container_start_date(capfd, "backend")
 
     # The service is not restarted because its definition is unchanged
     assert start_date1 == start_date2
@@ -85,14 +75,6 @@ def test_all(capfd: Capture) -> None:
         "Stack restarted",
     )
 
-    container_name = docker.get_container("backend")
-    # Just wait a bit to prevent errors on non existing containers
-    if SWARM_MODE:
-        time.sleep(1)
-
-    assert container_name is not None
-
-    container = docker.client.container.inspect(container_name)
-    start_date3 = container.state.started_at
+    start_date3 = get_container_start_date(capfd, "backend")
 
     assert start_date2 != start_date3

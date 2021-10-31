@@ -2,7 +2,7 @@ import re
 import shlex
 import socket
 import sys
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Tuple, Union, cast
 
 import requests
 import urllib3
@@ -16,6 +16,7 @@ from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 
 COMPOSE_SEP = "_"
+MAIN_NODE = "manager"
 # starting from v2.0.0
 # COMPOSE_SEP = "-"
 
@@ -173,20 +174,34 @@ class Docker:
             return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
 
-    def get_containers(self, service: str) -> Dict[int, str]:
+    def get_containers(self, service: str) -> Dict[int, Tuple[str, str]]:
 
-        containers: Dict[int, str] = {}
+        containers: Dict[int, Tuple[str, str]] = {}
         service_name = self.get_service(service)
 
         if SWARM_MODE:
             try:
                 for task in self.client.service.ps(service_name):
+                    if task.status.state not in ("running", "starting", "ready"):
+                        continue
                     # this is the case of services set with `mode: global`
                     if task.slot is None:
-                        containers[0] = f"{service_name}.{task.node_id}.{task.id}"
+                        containers.setdefault(
+                            0,
+                            (
+                                f"{service_name}.{task.node_id}.{task.id}",
+                                task.node_id,
+                            ),
+                        )
                         break
 
-                    containers[task.slot] = f"{service_name}.{task.slot}.{task.id}"
+                    containers.setdefault(
+                        task.slot,
+                        (
+                            f"{service_name}.{task.slot}.{task.id}",
+                            task.node_id,
+                        ),
+                    )
             except (NoSuchService, NoSuchContainer):
                 return containers
         else:
@@ -197,10 +212,10 @@ class Docker:
                 # from py39 use removeprefix
                 # slot = c.name.removeprefix(prefix)
                 slot = int(c.name[len(prefix) :])
-                containers[slot] = c.name
+                containers.setdefault(slot, (c.name, MAIN_NODE))
         return containers
 
-    def get_container(self, service: str, slot: int = 1) -> Optional[str]:
+    def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
 
         if SWARM_MODE:
             return self.get_containers(service).get(slot)
@@ -212,25 +227,31 @@ class Docker:
         try:
             container = self.client.container.inspect(c)
             status = container.state.status
-            if status != "running" and status != "starting" and status != "ready":
+            if status not in ("running", "starting", "ready"):
                 log.warning(
                     "Found a container for {}, but status is {}", service, status
                 )
                 return None
-            return c
+            return (c, MAIN_NODE)
         except NoSuchContainer:
             return None
 
     def exec_command(
         self,
-        # str == return of get_container
-        # Dict[int, str] == return of get_containers
-        containers: Union[str, Dict[int, str]],
+        # Tuple[str, str] == return of get_container
+        # Dict[int, Tuple[str, str]] == return of get_containers
+        containers: Union[str, Tuple[str, str], Dict[int, Tuple[str, str]]],
         user: Optional[str],
         command: str = None,
     ) -> None:
 
         if isinstance(containers, str):
+            containers = (
+                containers,
+                MAIN_NODE,
+            )
+
+        if isinstance(containers, tuple):
             containers_list = [containers]
         else:
             containers_list = list(sorted(containers.values()))
@@ -242,10 +263,13 @@ class Docker:
         tty = sys.stdout.isatty()
         for container in containers_list:
             if broadcast:
-                log.info("Executing on {}", container)
+                log.info("Executing on {}", container[0])
             try:
+                log.info(
+                    "Container {} is running on node {}", container[0], container[1]
+                )
                 output = self.client.container.execute(
-                    container,
+                    container[0],
                     user=user,
                     command=self.split_command(command),
                     interactive=tty,
