@@ -31,6 +31,10 @@ class Docker:
     @lru_cache()
     def connect_engine(self, node_id: str) -> DockerClient:
         """Convert a node_id to a docker client connected to the engine hostname"""
+
+        if not node_id or node_id == MAIN_NODE or not SWARM_MODE:
+            return self.client
+
         node = self.client.node.inspect(node_id)
 
         manager_address = str(
@@ -346,6 +350,7 @@ class Docker:
                 else:  # pragma: no cover
                     motivation = "an unknown cause"
                     exit_code = "1"
+                    log.debug(str(e))
 
                 log.error(
                     "The command execution was terminated by {}. Exit code is {}",

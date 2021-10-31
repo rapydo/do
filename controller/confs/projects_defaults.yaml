@@ -61,7 +61,7 @@ variables:
     FLASK_HOST: apiserver.dockerized.io
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
     FLASK_ENV: development
-    API_AUTOSTART: 0 # used in cypress testing mode to auto start the backend
+    API_AUTOSTART: 0 # used in some tests to auto-start the backend
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URI: ""
