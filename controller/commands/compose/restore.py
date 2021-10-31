@@ -61,7 +61,7 @@ def restore(
     dc = Compose(files=Application.data.files)
     docker = Docker()
 
-    container = docker.get_container(service_name, slot=1)
+    container = docker.get_container(service_name)
 
     expected_ext = ""
 

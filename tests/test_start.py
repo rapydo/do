@@ -73,8 +73,8 @@ def test_all(capfd: Capture) -> None:
         time.sleep(2)
 
         # Only backend is expected to be running
-        assert docker.get_container("backend", slot=1) is not None
-        assert docker.get_container("neo4j", slot=1) is None
+        assert docker.get_container("backend") is not None
+        assert docker.get_container("neo4j") is None
 
         # Once started a stack in swarm mode, it's not possible
         # to re-deploy another stack
@@ -98,8 +98,8 @@ def test_all(capfd: Capture) -> None:
 
         # In swarm mode new stack replaces the previous
         # => Only neo4j is expected to be running
-        assert docker.get_container("backend", slot=1) is None
-        assert docker.get_container("neo4j", slot=1) is not None
+        assert docker.get_container("backend") is None
+        assert docker.get_container("neo4j") is not None
 
         exec_command(
             capfd,
@@ -117,8 +117,8 @@ def test_all(capfd: Capture) -> None:
         time.sleep(2)
 
         # Now both backend and neo4j are expected to be running
-        assert docker.get_container("backend", slot=1) is not None
-        assert docker.get_container("neo4j", slot=1) is not None
+        assert docker.get_container("backend") is not None
+        assert docker.get_container("neo4j") is not None
 
         # ############################
         # Verify bind volumes checks #
@@ -172,8 +172,8 @@ def test_all(capfd: Capture) -> None:
         )
 
         # Only backend is expected to be running
-        assert docker.get_container("backend", slot=1) is not None
-        assert docker.get_container("neo4j", slot=1) is None
+        assert docker.get_container("backend") is not None
+        assert docker.get_container("neo4j") is None
 
         # Deploy an additional sub-stack
         exec_command(
@@ -185,8 +185,8 @@ def test_all(capfd: Capture) -> None:
 
         # In compose mode additional stack are aggregated
         # => both backend and neo4j are expected to be running
-        assert docker.get_container("backend", slot=1) is not None
-        assert docker.get_container("neo4j", slot=1) is not None
+        assert docker.get_container("backend") is not None
+        assert docker.get_container("neo4j") is not None
 
         # exec_command(
         #     capfd,

@@ -54,7 +54,7 @@ def tuning(
         dc = Compose(files=Application.data.files)
         docker = Docker()
 
-        container = docker.get_container(service, slot=1)
+        container = docker.get_container(service)
 
         command = f"neo4j-admin memrec --memory {ram}"
 

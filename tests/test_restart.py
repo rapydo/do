@@ -41,7 +41,7 @@ def test_all(capfd: Capture) -> None:
     start_project(capfd)
 
     docker = Docker()
-    container_name = docker.get_container("backend", slot=1)
+    container_name = docker.get_container("backend")
     assert container_name is not None
 
     container = docker.client.container.inspect(container_name)
@@ -53,7 +53,7 @@ def test_all(capfd: Capture) -> None:
         "Stack restarted",
     )
 
-    container_name = docker.get_container("backend", slot=1)
+    container_name = docker.get_container("backend")
     assert container_name is not None
 
     container = docker.client.container.inspect(container_name)
@@ -85,7 +85,7 @@ def test_all(capfd: Capture) -> None:
         "Stack restarted",
     )
 
-    container_name = docker.get_container("backend", slot=1)
+    container_name = docker.get_container("backend")
     # Just wait a bit to prevent errors on non existing containers
     if SWARM_MODE:
         time.sleep(1)

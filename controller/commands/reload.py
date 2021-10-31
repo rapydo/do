@@ -38,7 +38,7 @@ def reload(
         if service not in running_services:
             continue
 
-        container = docker.get_container(service, slot=1)
+        container = docker.get_container(service)
         if not container:
             log.warning("Can't find any container for {}", service)
             continue

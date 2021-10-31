@@ -294,7 +294,7 @@ def password(
             is_running = docker.ping_registry(do_exit=False)
             container: Optional[str] = "registry"
         else:
-            container = docker.get_container(service.value, slot=1)
+            container = docker.get_container(service.value)
             is_running = container is not None
 
         is_running_needed = False

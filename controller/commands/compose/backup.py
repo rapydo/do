@@ -89,7 +89,7 @@ def backup(
     dc = Compose(files=Application.data.files)
     docker = Docker()
 
-    container = docker.get_container(service_name, slot=1)
+    container = docker.get_container(service_name)
 
     backup_dir = Path("data", "backup", service_name)
     backup_dir.mkdir(parents=True, exist_ok=True)

@@ -200,7 +200,7 @@ class Docker:
                 containers[slot] = c.name
         return containers
 
-    def get_container(self, service: str, slot: int) -> Optional[str]:
+    def get_container(self, service: str, slot: int = 1) -> Optional[str]:
 
         if SWARM_MODE:
             return self.get_containers(service).get(slot)

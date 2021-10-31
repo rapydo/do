@@ -98,7 +98,7 @@ def ssl(
         # once migrated to v2 a publish=[(443, 443)] will be needed
         dc.create_volatile_container(service, command=command)
     else:
-        container = docker.get_container(service, slot=1)
+        container = docker.get_container(service)
         if not container:
             print_and_exit(
                 "The proxy is not running, start your stack or try with {command}",
@@ -106,14 +106,14 @@ def ssl(
             )
         docker.exec_command(container, user="root", command=command)
 
-    container = docker.get_container("neo4j", slot=1)
+    container = docker.get_container("neo4j")
     if container:
         # This is not true!! A full restart is needed
         # log.info("Neo4j is running, but it will reload the certificate by itself")
         # But not implemented yet...
         log.info("Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.")
 
-    container = docker.get_container("rabbit", slot=1)
+    container = docker.get_container("rabbit")
     if container:
         log.info("RabbitMQ is running, executing command to refresh the certificate")
         # Please note that Erland is able to automatically reload the certificate
@@ -122,9 +122,7 @@ def ssl(
         #   echo -n | openssl s_client -showcerts -connect hostname:5671
         # Please note that this command can fail if RabbitMQ is still starting
         docker.exec_command(
-            container,
-            user="root",
-            command="/usr/local/bin/reload_certificate"
+            container, user="root", command="/usr/local/bin/reload_certificate"
         )
 
     log.info("New certificate successfully enabled")
