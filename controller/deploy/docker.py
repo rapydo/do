@@ -2,7 +2,7 @@ import re
 import shlex
 import socket
 import sys
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, Union, cast
 
 import requests
 import urllib3
@@ -202,110 +202,108 @@ class Docker:
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
 
+        if SWARM_MODE:
+            return self.get_containers(service).get(slot)
+
         service_name = self.get_service(service)
-
-        if not SWARM_MODE:
-            c = f"{service_name}{COMPOSE_SEP}{slot}"
-            log.debug("Container name: {}", c)
-            # Can't use container.exists because a check on the status is needed
-            try:
-                container = self.client.container.inspect(c)
-                status = container.state.status
-                if status != "running" and status != "starting" and status != "ready":
-                    log.warning(
-                        "Found a container for {}, but status is {}", service, status
-                    )
-                    return None
-                return c
-            except NoSuchContainer:
-                return None
-
+        c = f"{service_name}{COMPOSE_SEP}{slot}"
+        log.debug("Container name: {}", c)
+        # Can't use container.exists because a check on the status is needed
         try:
-            for task in self.client.service.ps(service_name):
-                # this is the case of services set with `mode: global`
-                if task.slot is None:
-                    return f"{service_name}.{task.node_id}.{task.id}"
-
-                if task.slot != slot:
-                    continue
-
-                return f"{service_name}.{slot}.{task.id}"
-        except NoSuchService:
+            container = self.client.container.inspect(c)
+            status = container.state.status
+            if status != "running" and status != "starting" and status != "ready":
+                log.warning(
+                    "Found a container for {}, but status is {}", service, status
+                )
+                return None
+            return c
+        except NoSuchContainer:
             return None
-
-        return None
 
     def exec_command(
         self,
-        container: str,
+        # str == return of get_container
+        # Dict[int, str] == return of get_containers
+        containers: Union[str, Dict[int, str]],
         user: Optional[str],
         command: str = None,
     ) -> None:
 
+        if isinstance(containers, str):
+            containers_list = [containers]
+        else:
+            containers_list = list(sorted(containers.values()))
+
+        broadcast = len(containers) > 1
+
         # Important security note: never log the command command because it can
         # contain sensitive data, for example when used from change password command
         tty = sys.stdout.isatty()
-        try:
-            output = self.client.container.execute(
-                container,
-                user=user,
-                command=self.split_command(command),
-                interactive=tty,
-                tty=tty,
-                stream=not tty,
-                detach=False,
-            )
+        for container in containers_list:
+            if broadcast:
+                log.info("Executing on {}", container)
+            try:
+                output = self.client.container.execute(
+                    container,
+                    user=user,
+                    command=self.split_command(command),
+                    interactive=tty,
+                    tty=tty,
+                    stream=not tty,
+                    detach=False,
+                )
 
-            # When tty is enabled the output is empty because the terminal is directly
-            # connected to the container I/O bypassing python
-            # Important: when the tty is disabled exceptions are not raised by
-            # container.execute but by the following loop so keep both in the try/except
-            if output:
-                for out_line in output:
-                    # 'stdout' or 'stderr'
-                    # Both out and err are collapsed in stdout
-                    # Maybe in the future would be useful to keep them separated?
-                    # stdstream = out_line[0]
+                # When tty is enabled the output is empty because the terminal is
+                # directly connected to the container I/O bypassing python
+                # Important: when the tty is disabled exceptions are not raised by
+                # container.execute but by the loop => keep both in the try/except
+                if output:
+                    for out_line in output:
+                        # 'stdout' or 'stderr'
+                        # Both out and err are collapsed in stdout
+                        # Maybe in the future would be useful to keep them separated?
+                        # stdstream = out_line[0]
 
-                    line = out_line[1]
+                        line = out_line[1]
 
-                    if isinstance(line, bytes):
-                        line = line.decode("UTF-8")
+                        if isinstance(line, bytes):
+                            line = line.decode("UTF-8")
 
-                    print(line.strip())
+                        print(line.strip())
 
-        except DockerException as e:
-            m = re.search(r"It returned with code (\d+)\n", str(e))
-            if not m:
-                log.debug("Catched exception does not contains any valid exit code")
-                raise e
+            except DockerException as e:
+                m = re.search(r"It returned with code (\d+)\n", str(e))
+                if not m:
+                    log.debug("Catched exception does not contains any valid exit code")
+                    raise e
 
-            exit_code = m.group(1)
+                exit_code = m.group(1)
 
-            # Based on docker exit codes https://github.com/moby/moby/pull/14012
-            # which follows standard chroot exit codes
-            # https://tldp.org/LDP/abs/html/exitcodes.html
-            if exit_code == "126":
-                # rapydo shell backend "invalid"
-                motivation = "command cannot be invoked"
-            elif exit_code == "127":
-                # rapydo shell backend "bash invalid"
-                motivation = "command not found"
-            elif exit_code == "130":  # pragma: no cover
-                # container ctrl+c will executing (i.e. rapydo shell backend)
-                motivation = "Control-C"
-            elif exit_code == "137":  # pragma: no cover
-                # container restart will executing (i.e. rapydo shell backend)
-                motivation = "SIGKILL"
-            elif exit_code == "143":  # pragma: no cover
-                motivation = "SIGTERM"
-            else:  # pragma: no cover
-                motivation = "an unknown cause"
-                exit_code = "1"
+                # Based on docker exit codes https://github.com/moby/moby/pull/14012
+                # which follows standard chroot exit codes
+                # https://tldp.org/LDP/abs/html/exitcodes.html
+                if exit_code == "126":
+                    # rapydo shell backend "invalid"
+                    motivation = "command cannot be invoked"
+                elif exit_code == "127":
+                    # rapydo shell backend "bash invalid"
+                    motivation = "command not found"
+                elif exit_code == "130":  # pragma: no cover
+                    # container ctrl+c will executing (i.e. rapydo shell backend)
+                    motivation = "Control-C"
+                elif exit_code == "137":  # pragma: no cover
+                    # container restart will executing (i.e. rapydo shell backend)
+                    motivation = "SIGKILL"
+                elif exit_code == "143":  # pragma: no cover
+                    motivation = "SIGTERM"
+                else:  # pragma: no cover
+                    motivation = "an unknown cause"
+                    exit_code = "1"
 
-            log.error(
-                "The command execution was terminated by {}. Exit code is {}",
-                motivation,
-                exit_code,
-            )
-            sys.exit(int(exit_code))
+                log.error(
+                    "The command execution was terminated by {}. Exit code is {}",
+                    motivation,
+                    exit_code,
+                )
+                sys.exit(int(exit_code))

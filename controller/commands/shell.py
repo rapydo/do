@@ -39,6 +39,7 @@ def shell(
     replica: int = typer.Option(
         1,
         "--replica",
+        "--slot",
         help="Execute the command on the specified replica",
         show_default=False,
     ),
@@ -62,6 +63,8 @@ def shell(
     if no_tty:
         log.warning("--no-tty option is deprecated, you can stop using it")
 
+    if replica > 1 and broadcast:
+        print_and_exit("--replica and --broadcast options are not compatible")
     Application.get_controller().controller_init()
 
     docker = Docker()
@@ -72,20 +75,21 @@ def shell(
     if default_command:
         command = services.get_default_command(service)
 
+    log.debug("Requested command: {} with user: {}", command, user or "default")
     if broadcast:
         containers = docker.get_containers(service)
-        log.critical(containers)
-        print_and_exit("Broadcast mode not implemented yet")
+        if not containers:
+            print_and_exit("No running container found for {} service", service)
 
-    log.debug("Requested command: {} with user: {}", command, user or "default")
+        docker.exec_command(containers, user=user, command=command)
+    else:
+        container = docker.get_container(service, slot=replica)
 
-    container = docker.get_container(service, slot=replica)
+        if not container:
+            if replica != 1:
+                print_and_exit(
+                    "Replica number {} not found for {} service", str(replica), service
+                )
+            print_and_exit("No running container found for {} service", service)
 
-    if not container:
-        if replica != 1:
-            print_and_exit(
-                "Replica number {} not found for {} service", str(replica), service
-            )
-        print_and_exit("No running container found for {} service", service)
-
-    docker.exec_command(container, user=user, command=command)
+        docker.exec_command(container, user=user, command=command)

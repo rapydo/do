@@ -206,13 +206,25 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "shell backend mycommand --broadcast",
-        "Broadcast mode not implemented yet",
+        f"shell {service} mycommand --replica 2 --broadcast",
+        "--replica and --broadcast options are not compatible",
     )
 
-    # exec_command(
-    #     capfd,
-    #     f"shell {service} --broadcast 'ls /tmp/'",
-    #     string1,
-    #     string2,
-    # )
+    exec_command(
+        capfd,
+        f"shell {service} --broadcast 'ls /tmp/'",
+        string1,
+        string2,
+    )
+
+    exec_command(
+        capfd,
+        "remove",
+        "Stack removed",
+    )
+
+    exec_command(
+        capfd,
+        f"shell {service} mycommand --broadcast",
+        f"No running container found for {service} service",
+    )
