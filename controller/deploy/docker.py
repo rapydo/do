@@ -28,7 +28,7 @@ class Docker:
 
         self.client = DockerClient(host=self.get_engine(Configuration.remote_engine))
 
-    @lru_cache
+    @lru_cache()
     def connect_engine(self, node_id: str) -> DockerClient:
         """Convert a node_id to a docker client connected to the engine hostname"""
         node = self.client.node.inspect(node_id)
@@ -285,7 +285,7 @@ class Docker:
                 client = self.connect_engine(container[1])
                 if client.client_config.host:
                     log.info(
-                        "Executing on {}@{}", client.client_config.host, container[0]
+                        "Executing on {}:{}", client.client_config.host, container[0]
                     )
                 elif broadcast:
                     log.info("Executing on {}", container[0])

@@ -113,8 +113,8 @@ def ssl(
         # But not implemented yet...
         log.info("Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.")
 
-    container = docker.get_container("rabbit")
-    if container:
+    containers = docker.get_containers("rabbit")
+    if containers:
         log.info("RabbitMQ is running, executing command to refresh the certificate")
         # Please note that Erland is able to automatically reload the certificate
         # But RabbitMQ does not. Probably in the future releases this command will
@@ -122,7 +122,7 @@ def ssl(
         #   echo -n | openssl s_client -showcerts -connect hostname:5671
         # Please note that this command can fail if RabbitMQ is still starting
         docker.exec_command(
-            container, user="root", command="/usr/local/bin/reload_certificate"
+            containers, user="root", command="/usr/local/bin/reload_certificate"
         )
 
     log.info("New certificate successfully enabled")
