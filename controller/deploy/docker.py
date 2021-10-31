@@ -274,20 +274,22 @@ class Docker:
         else:
             containers_list = list(sorted(containers.values()))
 
-        broadcast = len(containers) > 1
+        broadcast = len(containers_list) > 1
 
         # Important security note: never log the command command because it can
         # contain sensitive data, for example when used from change password command
         tty = sys.stdout.isatty()
         for container in containers_list:
-            if broadcast:
-                log.info("Executing on {}", container[0])
-            try:
-                node_id = container[1]
-                if node_id != "" and node_id != MAIN_NODE:
-                    pass
 
+            try:
                 client = self.connect_engine(container[1])
+                if client.client_config.host:
+                    log.info(
+                        "Executing on {}@{}", client.client_config.host, container[0]
+                    )
+                elif broadcast:
+                    log.info("Executing on {}", container[0])
+
                 output = client.container.execute(
                     container[0],
                     user=user,
