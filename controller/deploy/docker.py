@@ -2,7 +2,7 @@ import re
 import shlex
 import socket
 import sys
-from typing import List, Optional, cast
+from typing import Dict, List, Optional, cast
 
 import requests
 import urllib3
@@ -172,6 +172,33 @@ class Docker:
         if not SWARM_MODE:
             return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
+
+    def get_containers(self, service: str) -> Dict[int, str]:
+
+        containers: Dict[int, str] = {}
+        service_name = self.get_service(service)
+
+        if SWARM_MODE:
+            try:
+                for task in self.client.service.ps(service_name):
+                    # this is the case of services set with `mode: global`
+                    if task.slot is None:
+                        containers[0] = f"{service_name}.{task.node_id}.{task.id}"
+                        break
+
+                    containers[task.slot] = f"{service_name}.{task.slot}.{task.id}"
+            except (NoSuchService, NoSuchContainer):
+                return containers
+        else:
+            prefix = f"{service_name}{COMPOSE_SEP}"
+            for c in self.client.container.list():
+                if not c.name.startswith(prefix):
+                    continue
+                # from py39 use removeprefix
+                # slot = c.name.removeprefix(prefix)
+                slot = int(c.name[len(prefix) :])
+                containers[slot] = c.name
+        return containers
 
     def get_container(self, service: str, slot: int) -> Optional[str]:
 

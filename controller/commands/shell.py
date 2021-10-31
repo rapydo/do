@@ -73,6 +73,8 @@ def shell(
         command = services.get_default_command(service)
 
     if broadcast:
+        containers = docker.get_containers(service)
+        log.critical(containers)
         print_and_exit("Broadcast mode not implemented yet")
 
     log.debug("Requested command: {} with user: {}", command, user or "default")
@@ -82,7 +84,7 @@ def shell(
     if not container:
         if replica != 1:
             print_and_exit(
-                "Replica number {} not found for {} service", replica, service
+                "Replica number {} not found for {} service", str(replica), service
             )
         print_and_exit("No running container found for {} service", service)
 
