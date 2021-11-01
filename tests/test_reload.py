@@ -59,7 +59,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "scale backend=2 --wait",
-            "{project_name}_backend scaled to 2",
+            f"{project_name}_backend scaled to 2",
             "Service converged",
         )
     else:
