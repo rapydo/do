@@ -147,15 +147,24 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "reload backend", "Reloading gunicorn (PID #")
 
     exec_command(
-        capfd, "reload", "Can't reload the frontend if not explicitly requested"
+        capfd,
+        "reload",
+        "Can't reload the frontend if not explicitly requested",
+        "Services reloaded",
     )
 
     exec_command(
-        capfd, "reload frontend", "Can't reload the frontend while it is still building"
+        capfd,
+        "reload frontend",
+        "Can't reload the frontend while it is still building",
+        "No service reloaded",
     )
 
-    exec_command(capfd, "remove", "Stack removed")
+    docker = Docker()
+    container = docker.get_container("frontend")
+    assert container is not None
 
+    docker.client.container.stop(container[0])
     # 'if' to be removed after completed in compose mode
     if SWARM_MODE:
         exec_command(capfd, "reload frontend", "Reloading frontend...")
@@ -165,3 +174,5 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
             "reload frontend",
             "Can't reload the frontend while it is still building",
         )
+
+    exec_command(capfd, "remove", "Stack removed")
