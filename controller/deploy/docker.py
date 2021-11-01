@@ -246,7 +246,9 @@ class Docker:
     def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
 
         if SWARM_MODE:
-            return self.get_containers(service).get(slot)
+            tasks = self.get_containers(service)
+            # the 0 index is found in case of containers in global mode, like the proxy
+            return tasks.get(slot) or tasks.get(0)
 
         service_name = self.get_service(service)
         c = f"{service_name}{COMPOSE_SEP}{slot}"

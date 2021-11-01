@@ -41,6 +41,7 @@ repos:
             "click==8.0.1",
 
             # Extra dependencies
+            "pytest",
             "lxml",
             "types-PyYAML",
             "types-pytz",

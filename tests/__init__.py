@@ -5,7 +5,7 @@ from datetime import datetime
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
-from typing import Any, List, Optional, Type, TypeVar
+from typing import Any, List, Optional, Tuple, Type, TypeVar
 
 import pytest
 from faker import Faker
@@ -232,7 +232,7 @@ def get_container_start_date(
         time.sleep(4)
 
     # Optional is needed because docker.get_container returns Optional[str]
-    container: Optional[str, str] = None
+    container: Optional[Tuple[str, str]] = None
 
     docker = Docker()
     if service == REGISTRY:
@@ -268,6 +268,6 @@ def wait_until(
         counter += 1
         time.sleep(sleep)
 
-    pytest.fail(f"Never found '{expected}' in '{command}' after {max_retries} retries")
-
-    return False
+    pytest.fail(
+        f"Never found '{expected}' in '{command}' after {max_retries} retries"
+    )  # pragma: no cover

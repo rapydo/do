@@ -27,9 +27,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name="first",
-        auth="postgres",
+        auth="no",
         frontend="angular",
-        services=["rabbit", "neo4j", "redis"],
+        services=["redis", "fail2ban"],
     )
     init_project(capfd)
 
@@ -86,7 +86,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     #     "Time is up",
     # )
 
-    # Testing default users
+    # Testing default users. I did't include all the containers because:
+    #   1. this will greatly slow down this test for a very small benefit
+    #   2. check the presence of 'postgres' in the output of shell postgres whoami
+    #      is trivial because it is always in the output, due to the echo of the command
     exec_command(
         capfd,
         "shell backend whoami",
@@ -99,22 +102,13 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "node",
     )
 
+    # Added because fail2ban is deployed in global mode, so that the container name is
+    # different and this can make the command to fail
+    # (as happened before the introduction of this test)
     exec_command(
         capfd,
-        "shell rabbit whoami",
-        "rabbitmq",
-    )
-
-    exec_command(
-        capfd,
-        "shell postgres whoami",
-        "postgres",
-    )
-
-    exec_command(
-        capfd,
-        "shell neo4j whoami",
-        "neo4j",
+        "shell fail2ban whoami",
+        "root",
     )
 
     exec_command(
