@@ -70,12 +70,14 @@ def test_base(capfd: Capture, faker: Faker) -> None:
             "Services scaled: fail2ban=2",
         )
 
-    docker = Docker()
+    time.sleep(4)
 
+    docker = Docker()
     container1 = docker.get_container(service, slot=1)
     container2 = docker.get_container(service, slot=2)
-
-    time.sleep(4)
+    assert container1 is not None
+    assert container2 is not None
+    assert container1 != container2
 
     exec_command(
         capfd,
