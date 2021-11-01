@@ -4,7 +4,7 @@ import typer
 from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, log
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
@@ -34,6 +34,24 @@ def reload(
 
     reloaded = 0
     for service in Application.data.services:
+
+        # Special case: frontend in production mode
+        if Configuration.production and service == "frontend":
+            # Only consider it if explicitly requested in input
+            if "frontend" not in services:
+                log.debug("Can't reload the frontend if not explicitly requested")
+            elif service in running_services:
+                log.warning("Can't reload the frontend while it is still building")
+            else:
+                log.info("Reloading frontend...")
+                if SWARM_MODE:
+                    service_name = docker.get_service(service)
+                    docker.client.service.update(service_name, force=True, detach=True)
+                # to be enabled once completed compose restart
+                # else:
+                #     compose.docker.compose.restart(service)
+                reloaded += 1
+            continue
 
         if service not in running_services:
             continue

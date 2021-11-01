@@ -132,7 +132,7 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         capfd=capfd,
         name=random_project_name(faker),
         auth="no",
-        frontend="no",
+        frontend="angular",
     )
 
     init_project(capfd, " --prod ", "--force")
@@ -146,4 +146,22 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "reload backend", "Reloading gunicorn (PID #")
 
+    exec_command(
+        capfd, "reload", "Can't reload the frontend if not explicitly requested"
+    )
+
+    exec_command(
+        capfd, "reload frontend", "Can't reload the frontend while it is still building"
+    )
+
     exec_command(capfd, "remove", "Stack removed")
+
+    # 'if' to be removed after completed in compose mode
+    if SWARM_MODE:
+        exec_command(capfd, "reload frontend", "Reloading frontend...")
+
+        exec_command(
+            capfd,
+            "reload frontend",
+            "Can't reload the frontend while it is still building",
+        )
