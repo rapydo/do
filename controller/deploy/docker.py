@@ -3,7 +3,7 @@ import shlex
 import socket
 import sys
 from functools import lru_cache
-from typing import Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, Iterable, List, Optional, Tuple, Union, cast
 
 import requests
 import urllib3
@@ -273,7 +273,9 @@ class Docker:
         containers: Union[str, Tuple[str, str], Dict[int, Tuple[str, str]]],
         user: Optional[str],
         command: str = None,
-    ) -> None:
+        # this basically force tty=False
+        force_output_return: bool = False,
+    ) -> Optional[Union[str, Iterable[Tuple[str, bytes]]]]:
 
         if isinstance(containers, str):
             containers = (
@@ -290,7 +292,7 @@ class Docker:
 
         # Important security note: never log the command command because it can
         # contain sensitive data, for example when used from change password command
-        tty = sys.stdout.isatty()
+        tty = not force_output_return and sys.stdout.isatty()
         for container in containers_list:
 
             try:
@@ -312,6 +314,8 @@ class Docker:
                     detach=False,
                 )
 
+                if force_output_return:
+                    return output
                 # When tty is enabled the output is empty because the terminal is
                 # directly connected to the container I/O bypassing python
                 # Important: when the tty is disabled exceptions are not raised by
@@ -331,6 +335,7 @@ class Docker:
                         print(line.strip())
 
             except DockerException as e:
+
                 m = re.search(r"It returned with code (\d+)\n", str(e))
                 if not m:
                     log.debug("Catched exception does not contains any valid exit code")
@@ -366,3 +371,5 @@ class Docker:
                     exit_code,
                 )
                 sys.exit(int(exit_code))
+
+        return None

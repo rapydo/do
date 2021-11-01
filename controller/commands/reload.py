@@ -52,14 +52,11 @@ def reload(
                 log.warning("Can't find any container for {}", service)
                 continue
 
-            output = docker.client.container.execute(
-                container[0],
+            output = docker.exec_command(
+                container,
                 user="root",
-                command=["ls", "/usr/local/bin/reload"],
-                interactive=False,
-                tty=False,
-                stream=True,
-                detach=False,
+                command="ls /usr/local/bin/reload",
+                force_output_return=True,
             )
 
             # this is to consume the iterator and raise the exception with exit code
