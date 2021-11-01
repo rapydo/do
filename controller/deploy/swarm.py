@@ -193,7 +193,7 @@ class Swarm:
                     container_name = f"{service_name}.{task.slot}.{task.id}"
                 else:
                     slot = " \\_ [H]"
-                    container_name = f"{service_name}.{task.id}"
+                    container_name = f"{service_name}.{task.node_id}.{task.id}"
 
                 node_name = nodes.get(task.node_id, "")
                 status = f"{COLOR}{task.status.state:8}{colors.RESET}"
