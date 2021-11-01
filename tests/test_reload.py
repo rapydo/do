@@ -24,9 +24,11 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     execute_outside(capfd, "reload")
 
+    project_name = random_project_name(faker)
+
     create_project(
         capfd=capfd,
-        name=random_project_name(faker),
+        name=project_name,
         auth="no",
         frontend="no",
         services=["fail2ban"],
@@ -57,7 +59,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "scale backend=2 --wait",
-            "first_backend scaled to 2",
+            "{project_name}_backend scaled to 2",
             "Service converged",
         )
     else:
