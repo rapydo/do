@@ -74,6 +74,9 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     container1 = docker.get_container(service, slot=1)
     container2 = docker.get_container(service, slot=2)
+
+    time.sleep(4)
+
     exec_command(
         capfd,
         f"reload {service}",
