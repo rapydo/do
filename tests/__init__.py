@@ -226,10 +226,10 @@ def get_container_start_date(
 ) -> datetime:
 
     if SWARM_MODE and wait:
+        time.sleep(5)
         # This is needed to debug and wait the service rollup to complete
         # Status is both for debug and to delay the get_container
         exec_command(capfd, "status")
-        time.sleep(4)
 
     # Optional is needed because docker.get_container returns Optional[str]
     container: Optional[Tuple[str, str]] = None
