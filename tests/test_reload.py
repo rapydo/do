@@ -6,6 +6,7 @@ import time
 from faker import Faker
 
 from controller import SWARM_MODE
+from controller.deploy.docker import Docker
 from tests import (
     Capture,
     create_project,
@@ -28,6 +29,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="no",
         frontend="no",
+        services=["fail2ban"],
     )
     init_project(capfd)
 
@@ -42,6 +44,42 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     start_project(capfd)
 
     exec_command(capfd, "reload backend", "Reloading Flask...")
+
+    if SWARM_MODE:
+        service = "backend"
+
+        exec_command(
+            capfd,
+            "start backend",
+            "Stack started",
+        )
+
+        exec_command(
+            capfd,
+            "scale backend=2 --wait",
+            "first_backend scaled to 2",
+            "Service converged",
+        )
+    else:
+
+        service = "fail2ban"
+        exec_command(
+            capfd,
+            "scale fail2ban=2",
+            "Scaling services: fail2ban=2...",
+            "Services scaled: fail2ban=2",
+        )
+
+    docker = Docker()
+
+    container1 = docker.get_container(service, slot=1)
+    container2 = docker.get_container(service, slot=2)
+    exec_command(
+        capfd,
+        f"reload {service}",
+        f"Executing on {container1}",
+        f"Executing on {container2}",
+    )
 
     exec_command(capfd, "shell backend -u root 'rm /usr/local/bin/reload'")
 

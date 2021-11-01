@@ -38,12 +38,20 @@ def reload(
         if service not in running_services:
             continue
 
-        container = docker.get_container(service)
-        if not container:
+        containers = docker.get_containers(service)
+        if not containers:
             log.warning("Can't find any container for {}", service)
             continue
 
         try:
+            # get the first container from the containers dict
+            container = containers.get(list(containers.keys())[0])
+
+            # Just added for typing purpose
+            if not container:  # pragma: no conver
+                log.warning("Can't find any container for {}", service)
+                continue
+
             output = docker.client.container.execute(
                 container[0],
                 user="root",
@@ -70,8 +78,7 @@ def reload(
                 continue
             raise
 
-        # this should be a broadcast
-        docker.exec_command(container, user="root", command="/usr/local/bin/reload")
+        docker.exec_command(containers, user="root", command="/usr/local/bin/reload")
         reloaded += 1
 
     if reloaded == 0:
