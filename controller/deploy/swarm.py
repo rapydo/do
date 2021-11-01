@@ -57,8 +57,8 @@ class Swarm:
 
     @staticmethod
     def get_replicas(service: Service) -> int:
-        if not service.spec.mode:  # pragma: no cover
-            return 0
+        if not service.spec.mode or "Global" in service.spec.mode:
+            return 1
 
         return glom(service.spec.mode, "Replicated.Replicas", default=0)
 
