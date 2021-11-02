@@ -356,7 +356,7 @@ def check_updates(path: str, gitobj: Repo) -> None:
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
-                log.warning("Missing commit from {}: {} ({})", path, sha, message)
+                log.warning("... missing commit from {}: {} ({})", path, sha, message)
 
     commits_ahead = gitobj.iter_commits(
         f"origin/{branch}..{branch}", max_count=MAX_FETCHED_COMMITS
