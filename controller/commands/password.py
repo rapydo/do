@@ -105,6 +105,37 @@ def parse_projectrc() -> Dict[str, datetime]:
     return updates
 
 
+def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
+    env_indentation = 0
+    for line in projectrc:
+
+        # save the indentation level of the env block
+        # it will be used to determine the variables indentation
+        # if no further lines will be found
+        if line.strip().startswith("env:"):
+            env_indentation = line.index("env:")
+            continue
+
+        # Skip every line before the env block
+        if env_indentation == 0:
+            continue
+
+        m = re.search(r"^(\s+).*", line)
+        if m:
+            blanks = len(m.group(1))
+            # Skip any lines after env with an indentation lower than env itself
+            # (for example a blank line or any other wrong-indented line)
+            if blanks < env_indentation:
+                continue
+
+        return blanks
+
+    # if reached this point it means that after the env block no further non-empty lines
+    # have been found, so return the env level by adding 1 indentation level
+    # Add 1 indentation level
+    return int(3 * env_indentation / 2)
+
+
 # Note: can't directly use utilities in app.py because in this case we want to
 # maintain all values (not only templated variables) and we also want to keep comments
 def update_projectrc(variables: Dict[str, str]) -> None:
@@ -115,16 +146,11 @@ def update_projectrc(variables: Dict[str, str]) -> None:
         lines = f.readlines()
         append_additional_lines: List[str] = []
 
-        pref = ""
-        for line in lines:
-            if line.strip().startswith("env:"):
-                blanks = line.index("env:")
-                # Add 1 indentation level
-                blanks = int(3 * blanks / 2)
-                pref = " " * blanks
-
-        if not pref:  # pragma: no cover
+        blanks = get_projectrc_variables_indentation(lines)
+        if blanks == 0:  # pragma: no cover
             print_and_exit("Malformed .projectrc file, can't find an env block")
+
+        pref = " " * blanks
 
         for variable, value in variables.items():
             for index, line in enumerate(lines):
