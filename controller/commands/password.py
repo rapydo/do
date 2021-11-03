@@ -128,7 +128,7 @@ def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
             if blanks < env_indentation:
                 continue
 
-        return blanks
+            return blanks
 
     # if reached this point it means that after the env block no further non-empty lines
     # have been found, so return the env level by adding 1 indentation level

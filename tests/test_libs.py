@@ -18,6 +18,7 @@ from controller import __version__
 from controller.app import Application, Configuration
 from controller.commands.compose.backup import get_date_pattern
 from controller.commands.install import download
+from controller.commands.password import get_projectrc_variables_indentation
 from controller.deploy.builds import get_image_creation
 from controller.deploy.docker import Docker
 from controller.packages import Packages
@@ -27,7 +28,7 @@ from controller.utilities.configuration import load_yaml_file, mix_configuration
 from tests import Capture, create_project, init_project, random_project_name
 
 
-def test_all(capfd: Capture, faker: Faker) -> None:
+def test_autocomplete(capfd: Capture, faker: Faker) -> None:
 
     create_project(
         capfd=capfd,
@@ -78,6 +79,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     values = app.autocomplete_submodule(None, None, "")  # type: ignore
     assert len(values) == 0
 
+
+def test_git(capfd: Capture, faker: Faker) -> None:
+
+    create_project(
+        capfd=capfd,
+        name=random_project_name(faker),
+    )
+    init_project(capfd)
+
     assert git.get_repo("does/not/exist") is None
     do_repo = git.get_repo("submodules/do")
     assert do_repo is not None
@@ -102,6 +112,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     r = git.init("../justatest")
     assert git.get_origin(r) is None
 
+
+def test_execute_command() -> None:
     out = system.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
@@ -111,6 +123,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     with pytest.raises(system.ExecutionException):
         assert system.execute_command("ls", ["doesnotexistforsure"])
 
+
+def test_bytes_to_str() -> None:
     assert system.bytes_to_str(0) == "0"
     assert system.bytes_to_str(1) == "1"
     assert system.bytes_to_str(1023) == "1023"
@@ -128,6 +142,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024) == "1024GB"
     assert system.bytes_to_str(1024 * 1024 * 1024 * 1024 * 1024) == "1048576GB"
 
+
+def test_str_to_bytes() -> None:
     assert system.str_to_bytes("0") == 0
     assert system.str_to_bytes("1") == 1
     assert system.str_to_bytes("42") == 42
@@ -156,6 +172,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     with pytest.raises(AttributeError):
         system.str_to_bytes("1TB")
 
+
+def test_load_yaml_file() -> None:
     # Invalid file / path
     with pytest.raises(SystemExit):
         load_yaml_file(file=Path("path", "invalid"))
@@ -178,11 +196,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         load_yaml_file(file=Path(f.name))
     f.close()
 
+
+def test_mix_configuration() -> None:
     y = mix_configuration(None, None)
     assert y is not None
     assert isinstance(y, dict)
     assert len(y) == 0
 
+
+def test_normalize_placeholder_variable() -> None:
     short1 = services.normalize_placeholder_variable
     assert short1("NEO4J_AUTH") == "NEO4J_PASSWORD"
     assert short1("POSTGRES_USER") == "ALCHEMY_USER"
@@ -202,6 +224,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     key = "anyother"
     assert short1(key) == key
 
+
+def test_get_celerybeat_scheduler() -> None:
     short2 = services.get_celerybeat_scheduler
     env: Dict[str, Union[None, str, int, float]] = {}
     assert short2(env) == "Unknown"
@@ -224,6 +248,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     env["CELERY_BACKEND"] = "INVALID"
     assert short2(env) == "Unknown"
 
+
+def test_get_default_user() -> None:
     assert services.get_default_user("invalid") is None
     assert services.get_default_user("backend") == "developer"
     assert services.get_default_user("celery") == "developer"
@@ -240,6 +266,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert services.get_default_user("postgres") == "postgres"
     assert services.get_default_user("neo4j") == "neo4j"
 
+
+def test_get_default_command() -> None:
     assert services.get_default_command("invalid") == "bash"
     assert services.get_default_command("backend") == "restapi launch"
     assert services.get_default_command("bot") == "restapi bot"
@@ -248,11 +276,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
 
+
+def test_get_templating() -> None:
     templating = Templating()
 
     with pytest.raises(SystemExit):
         templating.get_template("invalid", {})
 
+
+def test_split_command() -> None:
     cmd = Docker.split_command(None)
     assert isinstance(cmd, list)
     assert len(cmd) == 0
@@ -285,6 +317,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert cmd[0] == "a"
     assert cmd[1] == "b c"
 
+
+def test_packages(faker: Faker) -> None:
     assert Packages.get_bin_version("invalid") is None
 
     v = Packages.get_bin_version("git")
@@ -358,14 +392,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     assert Packages.convert_bin_to_win32(rand_str) == rand_str
     assert Packages.convert_bin_to_win32("docker") == "docker.exe"
 
-    date_pattern = get_date_pattern()
-    # just a trick to transform a glob-like expression into a valid regular expression
-    date_pattern.replace(".*", "\\.+")
-    # Same pattern used in backup.py to create backup filenames
-    d = faker.date("%Y_%m_%d-%H_%M_%S")
-    for _ in range(20):
-        assert re.match(date_pattern, f"{d}.bak")
 
+def test_download() -> None:
     with pytest.raises(SystemExit):
         download("https://www.google.com/test", "")
 
@@ -381,5 +409,141 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
     assert downloaded is not None
 
+
+def test_get_date_pattern(faker: Faker) -> None:
+    date_pattern = get_date_pattern()
+    # just a trick to transform a glob-like expression into a valid regular expression
+    date_pattern.replace(".*", "\\.+")
+    # Same pattern used in backup.py to create backup filenames
+    d = faker.date("%Y_%m_%d-%H_%M_%S")
+    for _ in range(20):
+        assert re.match(date_pattern, f"{d}.bak")
+
+
+def test_get_image_creation() -> None:
     _1970 = datetime.fromtimestamp(0)
     assert get_image_creation("invalid") == _1970
+
+
+def test_get_projectrc_variables_indentation() -> None:
+    assert get_projectrc_variables_indentation([]) == 0
+
+    projectrc = """
+project: xyz
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 0
+
+    projectrc = """
+project: xyz
+project_configuration:
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 0
+
+    projectrc = """
+project: xyz
+project_configuration:
+  variables:
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 0
+
+    projectrc = """
+project: xyz
+project_configuration:
+  variables:
+    env:
+      X: 10
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 6
+
+    projectrc = """
+project: xyz
+project_configuration:
+ variables:
+    env:
+      X: 10
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 6
+
+    projectrc = """
+project: xyz
+project_configuration:
+ variables:
+  env:
+   X: 10
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 3
+
+    projectrc = """
+project: xyz
+project_configuration:
+ variables:
+  env:
+    X: 10
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 4
+
+    projectrc = """
+project: xyz
+project_configuration:
+ variables:
+  env:
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 3
+
+    projectrc = """
+project: xyz
+project_configuration:
+ variables:
+   env:
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 4
+
+    projectrc = """
+project: xyz
+project_configuration:
+  variables:
+    env:
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 6
+
+    projectrc = """
+project: xyz
+project_configuration:
+    variables:
+        env:
+            X: 10
+""".split(
+        "\n"
+    )
+
+    assert get_projectrc_variables_indentation(projectrc) == 12
