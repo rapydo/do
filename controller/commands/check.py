@@ -116,10 +116,16 @@ def check(
                 image_creation, cast(Optional[Path], build.get("path"))
             )
             if d1 and d2:
-                from_img = overriding_builds.get(image_tag, "")
+                tmp_from_image = overriding_builds.get(image_tag)
+                # This is the case of a build not overriding a core image,
+                # e.g nifi or geoserver. In that case from_image is faked to image_tag
+                # just to make print_obsolete to print 'build' instead of 'pull'
+                if not tmp_from_image and image_tag not in core_builds:
+                    tmp_from_image = image_tag
+
                 # from py38 a typed dict will replace this cast
                 print_obsolete(
-                    image_tag, d1, d2, cast(str, build.get("service")), from_img
+                    image_tag, d1, d2, cast(str, build.get("service")), tmp_from_image
                 )
 
             # if FROM image is newer, this build should be re-built
