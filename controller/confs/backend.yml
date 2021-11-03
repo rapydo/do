@@ -532,7 +532,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
-    command: ${CELERY_AUTORELOAD} celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
     healthcheck:
       test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -d celery@$$PROJECT_NAME-$$HOSTNAME"
       interval: ${HEALTHCHECK_INTERVAL}

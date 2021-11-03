@@ -172,7 +172,7 @@ jobs:
 
             docker-machine --version
 
-            sudo apt-get update
+            sudo apt-get update -qq
             sudo apt-get install --yes virtualbox
             docker swarm init
             JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)

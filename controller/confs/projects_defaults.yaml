@@ -239,9 +239,6 @@ variables:
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    # Disabled in prod mode
-    # Note: unable to set $PYTHON_PATH to add restapi package to the watched folders
-    CELERY_AUTORELOAD: "watchmedo auto-restart --directory /code/ --recursive --pattern \\'*.py\\' --"
 
     # Flower
     FLOWER_USER: "flower" # This default is invalidated in production mode
