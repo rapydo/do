@@ -73,7 +73,12 @@ def check(
         log.info("Checking builds (skip with --no-builds)")
 
         docker = Docker()
-        dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
+        dimages: List[str] = []
+
+        for img in docker.client.images():
+            if img.repo_tags:
+                for i in img.repo_tags:
+                    dimages.append(i)
 
         all_builds = find_templates_build(Application.data.compose_config)
         core_builds = find_templates_build(Application.data.base_services)
@@ -111,17 +116,16 @@ def check(
                 image_creation, cast(Optional[Path], build.get("path"))
             )
             if d1 and d2:
+                from_img = overriding_builds.get(image_tag, "")
                 # from py38 a typed dict will replace this cast
-                print_obsolete(image_tag, d1, d2, cast(str, build.get("service")))
+                print_obsolete(
+                    image_tag, d1, d2, cast(str, build.get("service")), from_img
+                )
 
             # if FROM image is newer, this build should be re-built
             elif image_tag in overriding_builds:
                 from_img = overriding_builds.get(image_tag, "")
                 from_build = core_builds.get(from_img, {})
-
-                # # This check should not be needed, added to prevent errors from mypy
-                # if not from_build:  # pragma: no cover
-                #     continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
