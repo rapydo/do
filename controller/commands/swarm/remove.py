@@ -12,15 +12,16 @@ from controller.deploy.swarm import Swarm
 
 
 def wait_network_removal(swarm: Swarm, network: str) -> None:
-    for _ in range(0, 60):
+    MAX = 30
+    for i in range(0, MAX):
         try:
             for n in swarm.docker.network.list():
                 if n.driver == "overlay" and n.name == network:
                     break
             else:
                 break
-            log.debug("{} is still removing, waiting...", network)
-            time.sleep(1)
+            log.info("Stack is still removing, waiting... [{}/{}]", i + 1, MAX)
+            time.sleep(2)
         # Can happens when the network is near to be removed and
         # returned by list but no longer available for inspect
         # It is assumed to be removed

@@ -1,6 +1,8 @@
+import time
 from typing import List
 
 import typer
+from python_on_whales.exceptions import DockerException
 
 from controller import SWARM_MODE, log
 from controller.app import Application
@@ -8,6 +10,20 @@ from controller.deploy.builds import verify_available_images
 from controller.deploy.compose_v2 import Compose as Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
+
+
+def wait_stack_deploy(swarm: Swarm) -> None:
+    MAX = 60
+    for i in range(0, MAX):
+        try:
+            if swarm.get_running_services():
+                break
+
+            log.info("Stack is still starting, waiting... [{}/{}]", i + 1, MAX)
+            time.sleep(1)
+        # Can happens when the stack is near to be deployed
+        except DockerException:  # pragma: no cover
+            pass
 
 
 @Application.app.command(help="Start services for this configuration")
@@ -48,6 +64,8 @@ def start(
 
         compose.dump_config(Application.data.services)
         swarm.deploy()
+        wait_stack_deploy(swarm)
+
     else:
         # if compose.get_running_services():
         #     print_and_exit(
