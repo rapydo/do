@@ -27,7 +27,7 @@ EXPECTED_BUILDX_BIN_MD5 = "1b3bcb477b47d2251389402d57221f6f"
 
 
 def download(url: str, expected_checksum: str) -> Path:
-    r = requests.get(url, timeout=5)
+    r = requests.get(url, timeout=10)
     if r.status_code != 200:
         print_and_exit(
             "Can't download {}, invalid status code {}", url, str(r.status_code)
