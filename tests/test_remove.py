@@ -101,8 +101,6 @@ def test_remove(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    time.sleep(2)
-
     if SWARM_MODE:
         NETWORK_NAME = "rem_swarm_default"
     else:

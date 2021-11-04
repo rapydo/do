@@ -1,9 +1,11 @@
 """
 This module will test the cronjobs installed on the backend container
 """
+import time
 
 from faker import Faker
 
+from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -46,9 +48,12 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-e CRONTAB_ENABLE=1 start",
-        "Stack started",
+        "-e CRONTAB_ENABLE=1 restart --force",
+        "Stack restarted",
     )
+
+    if SWARM_MODE:
+        time.sleep(10)
 
     exec_command(
         capfd,

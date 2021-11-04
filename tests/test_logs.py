@@ -2,7 +2,6 @@
 This module will test the logs command
 """
 import signal
-import time
 from datetime import datetime
 
 from controller import SWARM_MODE
@@ -35,8 +34,6 @@ def test_all(capfd: Capture) -> None:
 
     pull_images(capfd)
     start_project(capfd)
-
-    time.sleep(3)
 
     # Invalid services are refused
     exec_command(
