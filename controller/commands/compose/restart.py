@@ -2,6 +2,7 @@ import typer
 
 from controller import log
 from controller.app import Application
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose_v2 import Compose
 
 
@@ -19,6 +20,12 @@ def restart(
         Application.serialize_parameter("--force", force, IF=force),
     )
     Application.get_controller().controller_init()
+
+    verify_available_images(
+        Application.data.services,
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     dc = Compose(Application.data.files)
     dc.start_containers(Application.data.services, force=force)

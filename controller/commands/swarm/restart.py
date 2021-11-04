@@ -2,6 +2,7 @@ import typer
 
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
+from controller.deploy.builds import verify_available_images
 from controller.deploy.compose_v2 import Compose as ComposeV2
 from controller.deploy.swarm import Swarm
 
@@ -22,6 +23,12 @@ def restart(
     )
 
     Application.get_controller().controller_init()
+
+    verify_available_images(
+        Application.data.services,
+        Application.data.compose_config,
+        Application.data.base_services,
+    )
 
     swarm = Swarm()
 
