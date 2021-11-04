@@ -22,6 +22,7 @@ jobs:
       - uses: rapydo/actions/install@v1
         with:
           project: ${PROJECT}
+          # swarm: 1
 
       - name: Run Karma
         run: |
@@ -43,7 +44,7 @@ jobs:
 
       - name: Production Mode
         run: |
-          rapydo remove --all
+          rapydo remove
           rapydo --testing --prod init --force
           rapydo pull --quiet frontend proxy
 
