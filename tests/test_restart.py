@@ -1,9 +1,7 @@
 """
 This module will test the restart command
 """
-from python_on_whales import docker
-
-from controller import SWARM_MODE, __version__, colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -78,12 +76,3 @@ def test_all(capfd: Capture) -> None:
     start_date3 = get_container_start_date(capfd, "backend")
 
     assert start_date2 != start_date3
-
-    backend_image = f"rapydo/backend:{__version__}"
-    docker.image.remove(backend_image)
-
-    exec_command(
-        capfd,
-        "restart --force",
-        f"Missing {backend_image} image, add {colors.RED}--pull{colors.RESET} option",
-    )
