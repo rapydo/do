@@ -48,7 +48,6 @@ def test_all(capfd: Capture) -> None:
     start_project(capfd)
 
     if SWARM_MODE:
-        time.sleep(1)
 
         exec_command(
             capfd,

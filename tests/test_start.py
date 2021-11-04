@@ -3,7 +3,6 @@ This module will test the start command
 """
 
 import shutil
-import time
 from pathlib import Path
 
 from controller import SWARM_MODE, colors
@@ -70,8 +69,6 @@ def test_all(capfd: Capture) -> None:
             "Stack started",
         )
 
-        time.sleep(2)
-
         # Only backend is expected to be running
         assert docker.get_container("backend") is not None
         assert docker.get_container("neo4j") is None
@@ -94,8 +91,6 @@ def test_all(capfd: Capture) -> None:
             "Stack started",
         )
 
-        time.sleep(2)
-
         # In swarm mode new stack replaces the previous
         # => Only neo4j is expected to be running
         assert docker.get_container("backend") is None
@@ -113,8 +108,6 @@ def test_all(capfd: Capture) -> None:
             "start",
             "Stack started",
         )
-
-        time.sleep(2)
 
         # Now both backend and neo4j are expected to be running
         assert docker.get_container("backend") is not None

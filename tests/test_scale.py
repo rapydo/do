@@ -73,8 +73,6 @@ def test_scale(capfd: Capture) -> None:
         )
 
     start_project(capfd)
-    # Wait for the backend startup
-    time.sleep(2)
 
     assert count_running_containers() == BASE_SERVICE_NUM
 
