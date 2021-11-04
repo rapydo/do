@@ -27,30 +27,33 @@ EXPECTED_BUILDX_BIN_MD5 = "1b3bcb477b47d2251389402d57221f6f"
 
 
 def download(url: str, expected_checksum: str) -> Path:
-    r = requests.get(url, timeout=10)
-    if r.status_code != 200:
-        print_and_exit(
-            "Can't download {}, invalid status code {}", url, str(r.status_code)
-        )
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code != 200:
+            print_and_exit(
+                "Can't download {}, invalid status code {}", url, str(r.status_code)
+            )
 
-    file: Path = Path(tempfile.NamedTemporaryFile().name)
+        file: Path = Path(tempfile.NamedTemporaryFile().name)
 
-    with open(file, "wb") as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+        with open(file, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
 
-    md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
-    if md5 == expected_checksum:
-        log.info("Checksum verified: {}", md5)
-    else:
-        print_and_exit(
-            "Checksum of download file ({}) does not match the expected value ({})" "",
-            md5,
-            expected_checksum,
-        )
+        md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
+        if md5 == expected_checksum:
+            log.info("Checksum verified: {}", md5)
+        else:
+            print_and_exit(
+                "Checksum of download file ({}) does not match the expected value ({})",
+                md5,
+                expected_checksum,
+            )
 
-    return file
+        return file
+    except requests.exceptions.ReadTimeout as e:  # pragma: no cover
+        print_and_exit("The request timed out, please retry in a while ({})", str(e))
 
 
 @Application.app.command(help="Install the specified version of rapydo")

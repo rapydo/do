@@ -66,61 +66,43 @@ def test_all(capfd: Capture) -> None:
         "REST API backend server is ready to be launched",
     )
 
-    # In swarm mode service is mandatory
-    if SWARM_MODE:
-        exec_command(
-            capfd,
-            "logs --tail 1",
-            "Error: Missing argument 'SERVICE'",
-        )
-    else:
-        exec_command(
-            capfd,
-            "logs --tail 1",
-            "Enabled services: ['backend', 'frontend', 'postgres']",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1",
+        "Enabled services: ['backend', 'frontend', 'postgres']",
+    )
 
-    if SWARM_MODE:
-        exec_command(capfd, "logs --tail 1 backend", "first_backend", "Testing mode")
+    exec_command(capfd, "logs --tail 2 backend", "first_backend", "Testing mode")
 
-    else:
-        exec_command(
-            capfd,
-            "logs --tail 1 backend",
-            "Enabled services: ['backend']",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1 backend",
+        "Enabled services: ['backend']",
+    )
 
-        exec_command(
-            capfd,
-            "logs --tail 1 frontend",
-            "Enabled services: ['frontend']",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1 frontend",
+        "Enabled services: ['frontend']",
+    )
 
-    # In swarm mode multiple services are not allowed
-    if SWARM_MODE:
-        exec_command(
-            capfd,
-            "logs --tail 1 backend frontend",
-            "Error: Got unexpected extra argument (frontend)",
-        )
-    else:
-        exec_command(
-            capfd,
-            "logs --tail 1 backend frontend",
-            "Enabled services: ['backend', 'frontend']",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1 backend frontend",
+        "Enabled services: ['backend', 'frontend']",
+    )
 
-        exec_command(
-            capfd,
-            "logs --tail 1 frontend backend",
-            "Enabled services: ['backend', 'frontend']",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1 frontend backend",
+        "Enabled services: ['backend', 'frontend']",
+    )
 
-        exec_command(
-            capfd,
-            "logs --tail 1 backend invalid",
-            "No such service: invalid",
-        )
+    exec_command(
+        capfd,
+        "logs --tail 1 backend invalid",
+        "No such service: invalid",
+    )
 
     # Backend logs are never timestamped
     exec_command(
@@ -146,13 +128,17 @@ def test_all(capfd: Capture) -> None:
             f"{timestamp}",
         )
 
-    # With multiple services logs are not timestamped
-    if not SWARM_MODE:
+    # Follow flag is not supported in swarm mode with multiple services
+    if SWARM_MODE:
         # Multiple services are not supported in swarm mode
         exec_command(
             capfd,
-            "logs --tail 10 frontend backend",
-            # Logs are prefixed because more than one service is shown
-            "backend_1 ",
-            "frontend_1 ",
+            "logs --follow",
+            "Follow flag is not supported on multiple services",
+        )
+
+        exec_command(
+            capfd,
+            "logs --follow backend frontend",
+            "Follow flag is not supported on multiple services",
         )
