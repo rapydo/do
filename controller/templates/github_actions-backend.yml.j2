@@ -54,8 +54,10 @@ jobs:
       - name: Production mode
         run: |
           rapydo remove
+          # rapydo remove registry
           docker volume rm $(docker volume ls -q)
           rapydo --testing --prod init --force
+          # rapydo run registry
           rapydo pull --quiet
           rapydo ssl --volatile
           rapydo start
