@@ -47,9 +47,8 @@ def reload(
                 if SWARM_MODE:
                     service_name = docker.get_service(service)
                     docker.client.service.update(service_name, force=True, detach=True)
-                # to be enabled once completed compose restart
-                # else:
-                #     compose.docker.compose.restart(service)
+                else:
+                    compose.docker.compose.restart(service)
                 reloaded += 1
             continue
 

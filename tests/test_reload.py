@@ -165,14 +165,12 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     assert container is not None
 
     docker.client.container.stop(container[0])
-    # 'if' to be removed after completed in compose mode
-    if SWARM_MODE:
-        exec_command(capfd, "reload frontend", "Reloading frontend...")
+    exec_command(capfd, "reload frontend", "Reloading frontend...")
 
-        exec_command(
-            capfd,
-            "reload frontend",
-            "Can't reload the frontend while it is still building",
-        )
+    exec_command(
+        capfd,
+        "reload frontend",
+        "Can't reload the frontend while it is still building",
+    )
 
     exec_command(capfd, "remove", "Stack removed")
