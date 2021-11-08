@@ -931,16 +931,16 @@ You can use of one:
 
         Application.env["DEPLOY_ENGINE"] = DEPLOY_ENGINE
 
-        if Application.env.get("ACTIVATE_FAIL2BAN"):
-            # Unfortunately this will work only after the cretion of the network
-            try:
-                DOCKER_SUBNET = docker.network.inspect(
-                    f"{Configuration.project}_{DEPLOY_ENGINE}_default"
-                ).ipam.config[0]["Subnet"]
-            # The first execution will fail and fallen back to localhost
-            except DockerException:
-                DOCKER_SUBNET = "127.0.0.1"
-            Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
+        # Unfortunately this will only work after the creation of the network
+        # i.e. will be fallen back to 127.0.0.1 the first time
+        try:
+            DOCKER_SUBNET = docker.network.inspect(
+                f"{Configuration.project}_{DEPLOY_ENGINE}_default"
+            ).ipam.config[0]["Subnet"]
+        # The first execution will fail and fallen back to localhost
+        except DockerException:
+            DOCKER_SUBNET = "127.0.0.1"
+        Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false
