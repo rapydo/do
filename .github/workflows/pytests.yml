@@ -30,6 +30,7 @@ jobs:
             password_postgres,
             password_redis,
             reload,
+            registry,
             remove,
             scale,
 
