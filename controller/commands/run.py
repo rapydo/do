@@ -10,8 +10,6 @@ from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
-# interfaces = ["swaggerui", "adminer", "flower"]
-
 
 def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
     service_config = Application.data.compose_config.get(service, None)
@@ -169,36 +167,32 @@ def run(
 
     if detach is None:
         if service == "swaggerui" or service == "adminer":
-            # to be set False after fixed the interactive volatile
-            # detach = False
-            detach = True
+            detach = False
         else:
             detach = True
 
     log.info("Running {}...", service)
-    created = compose.create_volatile_container(
-        service, detach=detach, publish=[(port, target)]
-    )
 
-    if created:
-        if service == "swaggerui":
-            if Configuration.production:
-                prot = "https"
-            else:
-                prot = "http"
+    if service == "swaggerui":
+        if Configuration.production:
+            prot = "https"
+        else:
+            prot = "http"
 
-            log.info(
-                "You can access SwaggerUI web page here: {}\n",
-                f"{prot}://{Configuration.hostname}:{port}",
-            )
+        log.info(
+            "You can access SwaggerUI web page here: {}\n",
+            f"{prot}://{Configuration.hostname}:{port}",
+        )
 
-        if service == "adminer":
-            if Configuration.production:
-                prot = "https"
-            else:
-                prot = "http"
+    if service == "adminer":
+        if Configuration.production:
+            prot = "https"
+        else:
+            prot = "http"
 
-            log.info(
-                "You can access Adminer interface on: {}\n",
-                f"{prot}://{Configuration.hostname}:{port}",
-            )
+        log.info(
+            "You can access Adminer interface on: {}\n",
+            f"{prot}://{Configuration.hostname}:{port}",
+        )
+
+    compose.create_volatile_container(service, detach=detach, publish=[(port, target)])

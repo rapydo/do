@@ -216,7 +216,6 @@ class Compose:
                 command=Docker.split_command(command),
                 user=user,
                 detach=detach,
-                # Please note that interactive commands is not working yet
                 tty=tty and not detach,
                 stream=not tty and not detach,
                 dependencies=False,

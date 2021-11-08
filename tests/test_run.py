@@ -71,30 +71,30 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
         "Can't specify a user if debug mode is OFF",
     )
 
-    exec_command(
-        capfd,
-        "run --debug backend --command hostname",
-        "backend-server",
-    )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command hostname",
+    #     "backend-server",
+    # )
 
-    exec_command(
-        capfd,
-        "run --debug backend --command whoami",
-        "root",
-    )
-    exec_command(
-        capfd,
-        "run --debug backend -u developer --command whoami",
-        "Please remember that users in volatile containers are not mapped on current ",
-        "developer",
-    )
-    exec_command(
-        capfd,
-        "run --debug backend -u invalid --command whoami",
-        "Error response from daemon:",
-        "unable to find user invalid:",
-        "no matching entries in passwd file",
-    )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command whoami",
+    #     "root",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u developer --command whoami",
+    #     "Please remember that users in volatile containers are not mapped on current ",
+    #     "developer",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u invalid --command whoami",
+    #     "Error response from daemon:",
+    #     "unable to find user invalid:",
+    #     "no matching entries in passwd file",
+    # )
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
@@ -137,7 +137,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Adminer UI with default port
     exec_command(
         capfd,
-        "run adminer --pull",
+        "run adminer --pull --detach",
         "Pulling image for adminer...",
         # f"Creating {project_name}_adminer_run",
         "You can access Adminer interface on: http://localhost:7777",
@@ -156,7 +156,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Adminer UI with custom port
     exec_command(
         capfd,
-        "run adminer --port 3333",
+        "run adminer --port 3333 --detach",
         # "Pulling adminer",
         # f"Creating {project_name}_adminer_run",
         "You can access Adminer interface on: http://localhost:3333",
@@ -165,7 +165,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Swagger UI with default port
     exec_command(
         capfd,
-        "run swaggerui --pull",
+        "run swaggerui --pull --detach",
         "Pulling image for swaggerui...",
         "You can access SwaggerUI web page here: http://localhost:7777",
     )
@@ -179,7 +179,7 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # Launch Swagger UI with custom port
     exec_command(
         capfd,
-        "run swaggerui --port 4444",
+        "run swaggerui --port 4444 --detach",
         "You can access SwaggerUI web page here: http://localhost:4444",
     )
 
@@ -203,13 +203,13 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "--prod run swaggerui --port 5555",
+        "--prod run swaggerui --port 5555 --detach",
         "You can access SwaggerUI web page here: https://localhost:5555",
     )
 
     exec_command(
         capfd,
-        "--prod run adminer --port 6666",
+        "--prod run adminer --port 6666 --detach",
         "You can access Adminer interface on: https://localhost:6666",
     )
 
