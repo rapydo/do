@@ -207,7 +207,7 @@ class Compose:
         user: Optional[str] = None,
     ) -> bool:
 
-        tty = sys.stdout.isatty()
+        tty = not detach and sys.stdout.isatty()
 
         try:
             output = self.docker.compose.run(
