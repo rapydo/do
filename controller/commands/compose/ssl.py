@@ -6,7 +6,7 @@ import typer
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose import Compose
+from controller.deploy.compose_legacy import Compose
 from controller.deploy.docker import Docker
 
 # 0 0 * * 3 cd /home/??? && /usr/local/bin/rapydo ssl > /home/???/data/logs/ssl.log 2>&1

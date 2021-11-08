@@ -8,7 +8,7 @@ import typer
 from controller import log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose import Compose
+from controller.deploy.compose_legacy import Compose
 from controller.deploy.docker import Docker
 
 # 0 1 * * * cd /home/??? && /usr/local/bin/rapydo backup neo4j --force > \
