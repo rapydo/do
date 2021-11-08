@@ -210,7 +210,7 @@ class Compose:
         tty = sys.stdout.isatty()
 
         try:
-            out = self.docker.compose.run(
+            output = self.docker.compose.run(
                 service=service,
                 name=service,
                 command=Docker.split_command(command),
@@ -218,6 +218,7 @@ class Compose:
                 detach=detach,
                 # Please note that interactive commands is not working yet
                 tty=tty,
+                stream=not tty,
                 dependencies=False,
                 remove=True,
                 service_ports=False,
@@ -226,7 +227,18 @@ class Compose:
             )
 
             if not detach:
-                print(out)
+                for out_line in output:  # type: ignore
+                    # 'stdout' or 'stderr'
+                    # Both out and err are collapsed in stdout
+                    # Maybe in the future would be useful to keep them separated?
+                    # stdstream = out_line[0]
+
+                    line = out_line[1]
+
+                    if isinstance(line, bytes):
+                        line = line.decode("UTF-8")
+
+                    print(line.strip())
 
             return True
         except DockerException as e:

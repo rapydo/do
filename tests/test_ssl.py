@@ -58,11 +58,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
 
     # Before creating SSL certificates rabbit and neo4j should not be able to start
-    # exec_command(
-    #     capfd,
-    #     "run --debug rabbit",
-    #     "SSL mandatory file not found: /ssl/real/fullchain1.pem",
-    # )
+    exec_command(
+        capfd,
+        "run --debug rabbit",
+        "SSL mandatory file not found: /ssl/real/fullchain1.pem",
+    )
 
     exec_command(
         capfd,
