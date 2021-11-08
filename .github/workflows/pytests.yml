@@ -16,22 +16,22 @@ jobs:
         # +/- sorted by slowness
         test: [
             # > 6 minutes
+            reload,
             shell,
             password_neo4j,
             logs,
-            install,
             start,
             password_rabbit,
-            run,
 
             # ~ 5-6 minutes
+            install,
             password_backend,
             password_mysql,
             password_postgres,
             password_redis,
-            reload,
             registry,
             remove,
+            run,
             scale,
 
             # ~ 3-4 minutes
