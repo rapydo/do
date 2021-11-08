@@ -78,17 +78,22 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
     #     "backend-server",
     # )
 
+    # TEMPORARY DISABLED REF736
     # exec_command(
     #     capfd,
     #     "run --debug backend --command whoami",
     #     "root",
     # )
+
+    # TEMPORARY DISABLED REF736
     # exec_command(
     #     capfd,
     #     "run --debug backend -u developer --command whoami",
     #     "Please remember that users in volatile containers are not mapped on current ",
     #     "developer",
     # )
+
+    # TEMPORARY DISABLED REF736
     # exec_command(
     #     capfd,
     #     "run --debug backend -u invalid --command whoami",
