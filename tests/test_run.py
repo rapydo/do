@@ -4,7 +4,7 @@ This module will test the run command
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
 from tests import (
     Capture,
     create_project,
@@ -72,31 +72,30 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
     )
 
     # TEMPORARY DISABLED REF736
-    if not SWARM_MODE:
-        exec_command(
-            capfd,
-            "run --debug backend --command hostname",
-            "backend-server",
-        )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command hostname",
+    #     "backend-server",
+    # )
 
-        exec_command(
-            capfd,
-            "run --debug backend --command whoami",
-            "root",
-        )
-        exec_command(
-            capfd,
-            "run --debug backend -u developer --command whoami",
-            "Please remember that users in volatile containers are not mapped on current ",
-            "developer",
-        )
-        exec_command(
-            capfd,
-            "run --debug backend -u invalid --command whoami",
-            "Error response from daemon:",
-            "unable to find user invalid:",
-            "no matching entries in passwd file",
-        )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend --command whoami",
+    #     "root",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u developer --command whoami",
+    #     "Please remember that users in volatile containers are not mapped on current ",
+    #     "developer",
+    # )
+    # exec_command(
+    #     capfd,
+    #     "run --debug backend -u invalid --command whoami",
+    #     "Error response from daemon:",
+    #     "unable to find user invalid:",
+    #     "no matching entries in passwd file",
+    # )
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
