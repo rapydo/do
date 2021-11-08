@@ -51,6 +51,7 @@ jobs:
             init,
             libs,
             password,
+            tuning,
             update,
 
             # Swarm only
@@ -68,7 +69,6 @@ jobs:
             # ~ 3 minutes
             backup_restore_redis,
             ssl,
-            tuning,
           ]
 
     steps:

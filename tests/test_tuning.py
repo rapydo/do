@@ -1,6 +1,6 @@
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
 from tests import (
     Capture,
     create_project,
@@ -15,9 +15,6 @@ from tests import (
 
 
 def test_tuning(capfd: Capture, faker: Faker) -> None:
-
-    if SWARM_MODE:
-        return None
 
     create_project(
         capfd=capfd,

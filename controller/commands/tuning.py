@@ -6,7 +6,7 @@ import typer
 from controller import log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_legacy import Compose
+from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.utilities import system
 
@@ -51,7 +51,6 @@ def tuning(
             Application.data.base_services,
         )
 
-        dc = Compose(files=Application.data.files)
         docker = Docker()
 
         container = docker.get_container(service)
@@ -61,7 +60,8 @@ def tuning(
         if container:
             docker.exec_command(container, user="neo4j", command=command)
         else:
-            dc.create_volatile_container(service_name, command=command)
+            compose = Compose(Application.data.files)
+            compose.create_volatile_container(service_name, command=command)
 
         # output = temporary_stream.getvalue().split("\\")
         # print(output)
