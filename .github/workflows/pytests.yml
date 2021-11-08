@@ -79,8 +79,6 @@ jobs:
           versions=(3.7 3.8 3.9)
           PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
           echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
-
-          rm -rf /opt/hostedtoolcache/Python/*/x64/lib/python3.?/site-packages
         shell: bash
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2
