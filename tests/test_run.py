@@ -21,6 +21,8 @@ from tests import (
 
 def test_debug_run(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "run backend")
+
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
@@ -98,6 +100,9 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "run adminer")
+
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
@@ -213,6 +218,20 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access Adminer interface on: https://localhost:6666",
     )
 
+    exec_command(
+        capfd,
+        "remove adminer swaggerui",
+        "Service adminer removed",
+        "Service swaggerui removed",
+    )
+
+    if SWARM_MODE:
+        exec_command(
+            capfd,
+            "remove registry",
+            "Service registry removed",
+        )
+
 
 def test_docker_registry(capfd: Capture) -> None:
 
@@ -227,9 +246,9 @@ def test_docker_registry(capfd: Capture) -> None:
         frontend="no",
         services=["rabbit"],
     )
+    init_project(capfd)
 
     if not SWARM_MODE:
-        init_project(capfd)
         exec_command(
             capfd,
             "run registry",
@@ -237,14 +256,6 @@ def test_docker_registry(capfd: Capture) -> None:
         )
 
         return None
-
-    exec_command(
-        capfd,
-        "-e HEALTHCHECK_INTERVAL=1s -e SWARM_MANAGER_ADDRESS=127.0.0.1 init",
-        "Initializing Swarm with manager IP 127.0.0.1",
-        "Swarm is now initialized",
-        "Project initialized",
-    )
 
     exec_command(
         capfd,
