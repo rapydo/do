@@ -218,7 +218,7 @@ class Compose:
                 detach=detach,
                 # Please note that interactive commands is not working yet
                 tty=tty,
-                stream=not tty,
+                stream=not tty and not detach,
                 dependencies=False,
                 remove=True,
                 service_ports=False,
