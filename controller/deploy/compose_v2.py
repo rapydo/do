@@ -28,8 +28,7 @@ Port = Union[str, int]
 PortMapping = Tuple[Port, Port]
 PortRangeMapping = Tuple[Port, Port, str]
 
-# COMPOSE_SEP = "_"
-# starting from v2.0.0
+# Starting from v2.0.0 _ is replaced by -
 COMPOSE_SEP = "-"
 
 

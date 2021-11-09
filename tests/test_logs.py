@@ -72,7 +72,7 @@ def test_all(capfd: Capture) -> None:
         "Enabled services: ['backend', 'frontend', 'postgres']",
     )
 
-    exec_command(capfd, "logs --tail 2 backend", "first_backend", "Testing mode")
+    exec_command(capfd, "logs --tail 2 backend", "first-backend", "Testing mode")
 
     exec_command(
         capfd,

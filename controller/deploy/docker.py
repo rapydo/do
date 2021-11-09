@@ -17,9 +17,8 @@ from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.utilities import system
 
-# COMPOSE_SEP = "_"
 MAIN_NODE = "manager"
-# starting from v2.0.0
+# Starting from v2.0.0 _ is replaced by -
 COMPOSE_SEP = "-"
 
 
