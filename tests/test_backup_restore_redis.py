@@ -288,4 +288,5 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Wait redis to completely startup
     service_verify(capfd, "redis")
 
+    exec_command(capfd, "status")
     exec_command(capfd, get_key, value1)
