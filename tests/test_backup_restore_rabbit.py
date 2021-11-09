@@ -108,7 +108,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup rabbit",
-        "Found a container for rabbit, but status is exited",
         "Starting backup on rabbit...",
         "Backup completed: data/backup/rabbit/",
     )

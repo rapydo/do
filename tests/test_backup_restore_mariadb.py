@@ -190,7 +190,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup mariadb",
-        "Found a container for mariadb, but status is exited",
         "The backup procedure requires mariadb running, please start your stack",
     )
 

@@ -97,7 +97,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "backup redis",
-        "Found a container for redis, but status is exited",
         "Starting backup on redis...",
         "Backup completed: data/backup/redis/",
     )
