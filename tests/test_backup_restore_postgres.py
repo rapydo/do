@@ -241,8 +241,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "restart",
-        "Stack restarted",
+        "start",
+        "Stack started",
     )
 
     # Here we test the restore procedure:
