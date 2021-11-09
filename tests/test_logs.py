@@ -72,7 +72,12 @@ def test_all(capfd: Capture) -> None:
         "Enabled services: ['backend', 'frontend', 'postgres']",
     )
 
-    exec_command(capfd, "logs --tail 2 backend", "first-backend", "Testing mode")
+    if SWARM_MODE:
+        container_prefix = "first_backend"
+    else:
+        container_prefix = "first-backend"
+
+    exec_command(capfd, "logs --tail 2 backend", container_prefix, "Testing mode")
 
     exec_command(
         capfd,
