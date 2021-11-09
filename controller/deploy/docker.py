@@ -17,10 +17,10 @@ from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.utilities import system
 
-COMPOSE_SEP = "_"
+# COMPOSE_SEP = "_"
 MAIN_NODE = "manager"
 # starting from v2.0.0
-# COMPOSE_SEP = "-"
+COMPOSE_SEP = "-"
 
 
 class Docker:

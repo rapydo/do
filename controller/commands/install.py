@@ -18,8 +18,8 @@ from controller.utilities import git
 EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.0.0-rc.3"
-EXPECTED_COMPOSE_BIN_MD5 = "9174d158bc401b9e9bb367884b59f9b1"
+COMPOSE_VERSION = "v2.1.0"
+EXPECTED_COMPOSE_BIN_MD5 = "36360ac1955f1e7be79a8b63532f4ffd"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.6.3"
@@ -94,7 +94,7 @@ def install(
         compose_bin = cli_plugin.joinpath("docker-compose")
 
         url = "https://github.com/docker/compose/releases/download/"
-        url += f"{COMPOSE_VERSION}/docker-compose-linux-amd64"
+        url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
 
         log.info("Downloading compose binary: {}", url)
         f = download(url, EXPECTED_COMPOSE_BIN_MD5)
