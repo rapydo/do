@@ -5,11 +5,12 @@ from typing import List
 
 import typer
 
-from controller import log, print_and_exit
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_legacy import Compose
+from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
+from controller.deploy.swarm import Swarm
 
 # 0 1 * * * cd /home/??? && /usr/local/bin/rapydo backup neo4j --force > \
 #         /home/???/data/logs/backup.log 2>&1
@@ -34,6 +35,30 @@ def get_date_pattern() -> str:
         "[0-5][0-9]"  # second
         ".*"  # extension
     )
+
+
+# Also duplicated in restore.py. A wrapper is needed
+def remove(compose: Compose, service: str) -> None:
+    if SWARM_MODE:
+        compose.docker.service.scale({"service": 0}, detach=False)
+    else:
+        compose.docker.compose.rm([service], stop=True, volumes=False)
+
+
+# Also duplicated in restore.py. A wrapper is needed
+def start(compose: Compose, service: str) -> None:
+    if SWARM_MODE:
+        swarm = Swarm()
+        swarm.deploy()
+    else:
+        compose.start_containers([service])
+
+
+# Also duplicated in restore.py. A wrapper is needed (to be also used in reload.py)
+def reload(docker: Docker, services: List[str]) -> None:
+    for service in services:
+        containers = docker.get_containers(service)
+        docker.exec_command(containers, user="root", command="/usr/local/bin/reload")
 
 
 @Application.app.command(help="Execute a backup of one service")
@@ -86,7 +111,7 @@ def backup(
         Application.data.base_services,
     )
 
-    dc = Compose(files=Application.data.files)
+    compose = Compose(Application.data.files)
     docker = Docker()
 
     container = docker.get_container(service_name)
@@ -117,7 +142,7 @@ def backup(
             )
 
         if container and not dry_run:
-            dc.command("stop", {"SERVICE": [service_name]})
+            remove(compose, service_name)
 
         backup_path = f"/backup/{service_name}/{now}.dump"
 
@@ -125,12 +150,12 @@ def backup(
 
         log.info("Starting backup on {}...", service_name)
         if not dry_run:
-            dc.create_volatile_container(service_name, command=command)
+            compose.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 
         if container and not dry_run:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
     if service_name == Services.postgres:
 
@@ -233,7 +258,7 @@ def backup(
             )
 
         if container and not dry_run:
-            dc.command("stop", {"SERVICE": [service_name]})
+            remove(compose, service_name)
 
         backup_path = f"/backup/{service_name}/{now}.tar.gz"
 
@@ -241,18 +266,18 @@ def backup(
 
         log.info("Starting backup on {}...", service_name)
         if not dry_run:
-            dc.create_volatile_container(service_name, command=command)
+            compose.create_volatile_container(service_name, command=command)
 
         # Verify the gz integrity
         command = f"gzip -t {backup_path}"
 
         if not dry_run:
-            dc.create_volatile_container(service_name, command=command)
+            compose.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 
         if container and not dry_run:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
     if service_name == Services.redis:
 
@@ -272,7 +297,7 @@ def backup(
             if container:
                 docker.exec_command(container, user="root", command=command)
             else:
-                dc.create_volatile_container(service_name, command=command)
+                compose.create_volatile_container(service_name, command=command)
 
         # Verify the gz integrity
         command = f"gzip -t {backup_path}"
@@ -280,9 +305,9 @@ def backup(
             if container:
                 docker.exec_command(container, user="root", command=command)
             else:
-                dc.create_volatile_container(service_name, command=command)
+                compose.create_volatile_container(service_name, command=command)
 
         log.info("Backup completed: data{}", backup_path)
 
     if restart and not dry_run:
-        dc.command("restart", {"SERVICE": restart})
+        reload(docker, restart)

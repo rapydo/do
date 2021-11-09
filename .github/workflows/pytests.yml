@@ -16,20 +16,20 @@ jobs:
         # +/- sorted by slowness
         test: [
             # > 6 minutes
+            backup_restore_mariadb,
+            backup_restore_neo4j,
+            backup_restore_postgres,
+            backup_restore_rabbit,
+            backup_restore_redis,
+            logs,
+            password_neo4j,
+            password_rabbit,
             reload,
             shell,
-            password_neo4j,
-            logs,
             start,
-            password_rabbit,
 
             # ~ 5-6 minutes
             install,
-            # backup_restore_mariadb,
-            # backup_restore_neo4j,
-            # backup_restore_postgres,
-            # backup_restore_rabbit,
-            # backup_restore_redis,
             multi_host,
             password_backend,
             password_mysql,

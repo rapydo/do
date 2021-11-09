@@ -4,11 +4,12 @@ from typing import List, Optional
 
 import typer
 
-from controller import log, print_and_exit
+from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_legacy import Compose
+from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
+from controller.deploy.swarm import Swarm
 
 
 class Services(str, Enum):
@@ -17,6 +18,30 @@ class Services(str, Enum):
     mariadb = "mariadb"
     rabbit = "rabbit"
     redis = "redis"
+
+
+# Also duplicated in backup.py. A wrapper is needed
+def remove(compose: Compose, service: str) -> None:
+    if SWARM_MODE:
+        compose.docker.service.scale({"service": 0}, detach=False)
+    else:
+        compose.docker.compose.rm([service], stop=True, volumes=False)
+
+
+# Also duplicated in backup.py. A wrapper is needed
+def start(compose: Compose, service: str) -> None:
+    if SWARM_MODE:
+        swarm = Swarm()
+        swarm.deploy()
+    else:
+        compose.start_containers([service])
+
+
+# Also duplicated in backup.py. A wrapper is needed (to be also used in reload.py)
+def reload(docker: Docker, services: List[str]) -> None:
+    for service in services:
+        containers = docker.get_containers(service)
+        docker.exec_command(containers, user="root", command="/usr/local/bin/reload")
 
 
 @Application.app.command(help="Restore a backup of one service")
@@ -57,8 +82,7 @@ def restore(
         Application.data.base_services,
     )
 
-    options = {"SERVICE": [service_name]}
-    dc = Compose(files=Application.data.files)
+    compose = Compose(Application.data.files)
     docker = Docker()
 
     container = docker.get_container(service_name)
@@ -109,7 +133,7 @@ def restore(
             )
 
         if container:
-            dc.command("stop", options)
+            remove(compose, service_name)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
 
@@ -117,12 +141,12 @@ def restore(
 
         log.info("Starting restore on {}...", service_name)
 
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Restore from data{} completed", backup_path)
 
         if container:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
     if service_name == Services.postgres:
 
@@ -169,7 +193,7 @@ def restore(
         log.info("Starting restore on {}...", service_name)
 
         if container:
-            dc.command("stop", options)
+            remove(compose, service_name)
 
         # backup.tar.gz
         backup_path = f"/backup/{service_name}/{backup_file}"
@@ -180,14 +204,14 @@ def restore(
         log.info("Opening backup file")
         # Uncompress /backup/{service_name}/{backup_file} into /backup/{service_name}
         command = f"tar -xf {backup_path} -C /backup/{service_name}"
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Removing current datadir")
         # mariabackup required the datadir to be empty...
         command = "rm -rf /var/lib/mysql/*"
         # without bash -c   the * does not work...
         command = "bash -c 'rm -rf /var/lib/mysql/*'"
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Restoring the backup")
         # Note: --move-back moves instead of copying
@@ -195,15 +219,15 @@ def restore(
         # manually deleted, it is preferred to use the more conservative copy-back
         # and then delete the whole temporary folder manually
         command = f"sh -c 'mariabackup --copy-back --target-dir={tmp_backup_path}'"
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Removing the temporary uncompressed folder")
         # Removed the temporary uncompressed folder in /backup/{service_name}
         command = f"rm -rf {tmp_backup_path}"
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         if container:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
         log.info("Restore from data{} completed", backup_path)
 
@@ -215,7 +239,7 @@ def restore(
             )
 
         if container:
-            dc.command("stop", options)
+            remove(compose, service_name)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
 
@@ -223,12 +247,12 @@ def restore(
 
         log.info("Starting restore on {}...", service_name)
 
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Restore from data{} completed", backup_path)
 
         if container:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
     if service_name == Services.redis:
 
@@ -239,18 +263,18 @@ def restore(
             )
 
         if container:
-            dc.command("stop", options)
+            remove(compose, service_name)
 
         backup_path = f"/backup/{service_name}/{backup_file}"
         log.info("Starting restore on {}...", service_name)
 
         command = f"tar -xf {backup_path} -C /data/"
-        dc.create_volatile_container(service_name, command=command)
+        compose.create_volatile_container(service_name, command=command)
 
         log.info("Restore from data{} completed", backup_path)
 
         if container:
-            dc.start_containers([service_name])
+            start(compose, service_name)
 
     if restart:
-        dc.command("restart", {"SERVICE": restart})
+        reload(docker, restart)
