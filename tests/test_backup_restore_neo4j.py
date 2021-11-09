@@ -288,6 +288,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
+    # DEBUG CODE
+    exec_command(capfd, "logs neo4j")
+    # ##########
     exec_command(capfd, "start neo4j")
     # 4) verify data match again point 1 (restore completed)
     # postponed because neo4j needs time to start...
