@@ -244,11 +244,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     mariadb_dump_file = files[-1]
 
-    exec_command(
-        capfd,
-        "restart",
-        "Stack restarted",
-    )
+    exec_command(capfd, "start", "Stack started")
 
     # Postgres restore not allowed if container is not running
     exec_command(

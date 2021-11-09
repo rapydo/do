@@ -239,11 +239,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "The restore procedure requires postgres running, please start your stack",
     )
 
-    exec_command(
-        capfd,
-        "start",
-        "Stack started",
-    )
+    exec_command(capfd, "start", "Stack started")
 
     # Here we test the restore procedure:
     # 1) verify some data in the database
