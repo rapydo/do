@@ -196,7 +196,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Backup completed: data/backup/neo4j/",
     )
 
-    exec_command(capfd, "start neo4j")
+    exec_command(capfd, "start", "Stack started")
 
     # Just some delay extra delay, neo4j is a slow starter
     time.sleep(5)
@@ -288,7 +288,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
 
-    exec_command(capfd, "start neo4j")
+    exec_command(capfd, "start", "Stack started")
 
     exec_command(
         capfd,
