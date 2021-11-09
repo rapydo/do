@@ -35,8 +35,8 @@ def get_containers() -> List[str]:
         # this is compose mode:
         # project_service_slot
         else:
-            index_of_second_underscore = name.index("_", name.index("_") + 1)
-            name = name[0:index_of_second_underscore]
+            index_of_second_hyphen = name.index("-", name.index("-") + 1)
+            name = name[0:index_of_second_hyphen]
 
         # in both cases now name is:
         # project_service
