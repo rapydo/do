@@ -19,6 +19,7 @@ from tests import (
     random_project_name,
     service_verify,
     start_project,
+    start_registry,
 )
 
 
@@ -36,6 +37,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         frontend="no",
     )
     init_project(capfd)
+    start_registry(capfd)
 
     exec_command(
         capfd,
