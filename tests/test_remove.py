@@ -94,8 +94,8 @@ def test_remove(capfd: Capture) -> None:
     exec_command(capfd, "remove", "Stack removed")
 
     NONE: List[str] = []
-    BACKEND_ONLY = ["rem_backend"]
-    ALL = ["rem_backend", "rem_postgres"]
+    BACKEND_ONLY = ["rem-backend"]
+    ALL = ["rem-backend", "rem-postgres"]
 
     assert get_containers() == NONE
 
