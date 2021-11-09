@@ -83,5 +83,5 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "first_backend_1",
+            "first-backend-1",
         )

@@ -30,6 +30,7 @@ jobs:
             # backup_restore_postgres,
             # backup_restore_rabbit,
             # backup_restore_redis,
+            multi_host,
             password_backend,
             password_mysql,
             password_postgres,
@@ -58,12 +59,9 @@ jobs:
             join,
             libs,
             password,
+            password_registry,
             tuning,
             update,
-
-            # Swarm only
-            password_registry,
-            multi_host,
           ]
 
     steps:
