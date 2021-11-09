@@ -40,7 +40,8 @@ def get_date_pattern() -> str:
 # Also duplicated in restore.py. A wrapper is needed
 def remove(compose: Compose, service: str) -> None:
     if SWARM_MODE:
-        compose.docker.service.scale({service: 0}, detach=False)
+        service_name = Docker.get_service(service)
+        compose.docker.service.scale({service_name: 0}, detach=False)
     else:
         compose.docker.compose.rm([service], stop=True, volumes=False)
 
