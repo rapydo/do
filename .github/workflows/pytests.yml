@@ -50,18 +50,18 @@ jobs:
 
             # ~ 1-3 minutes
             add_upgrade,
-            check,
             base,
+            check,
             create,
             dump,
             init,
+            join,
             libs,
             password,
             tuning,
             update,
 
             # Swarm only
-            join,
             password_registry,
             multi_host,
           ]

@@ -35,24 +35,23 @@ def test_tuning(capfd: Capture, faker: Faker) -> None:
 
     pull_images(capfd)
 
-    # TEMPORARY DISABLED REF736
     # Tuning command with neo4j container OFF
-    # exec_command(
-    #     capfd,
-    #     "tuning neo4j",
-    #     "Number of CPU(s): ",
-    #     "Amount of RAM: ",
-    #     "Suggested settings:",
-    #     "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
-    #     "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
-    #     "Memory settings recommendation from neo4j-admin memrec:",
-    #     "Based on the above, the following memory settings are recommended:",
-    #     "dbms.memory.heap.initial_size=",
-    #     "dbms.memory.heap.max_size=",
-    #     "dbms.memory.pagecache.size=",
-    #     "Total size of lucene indexes in all databases:",
-    #     "Total size of data and native indexes in all databases:",
-    # )
+    exec_command(
+        capfd,
+        "tuning neo4j",
+        "Number of CPU(s): ",
+        "Amount of RAM: ",
+        "Suggested settings:",
+        "Use 'dbms.memory.heap.max_size' as NEO4J_HEAP_SIZE",
+        "Use 'dbms.memory.pagecache.size' as NEO4J_PAGECACHE_SIZE",
+        "Memory settings recommendation from neo4j-admin memrec:",
+        "Based on the above, the following memory settings are recommended:",
+        "dbms.memory.heap.initial_size=",
+        "dbms.memory.heap.max_size=",
+        "dbms.memory.pagecache.size=",
+        "Total size of lucene indexes in all databases:",
+        "Total size of data and native indexes in all databases:",
+    )
 
     start_project(capfd)
 

@@ -71,36 +71,32 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
         "Can't specify a user if debug mode is OFF",
     )
 
-    # TEMPORARY DISABLED REF736
-    # exec_command(
-    #     capfd,
-    #     "run --debug backend --command hostname",
-    #     "backend-server",
-    # )
+    exec_command(
+        capfd,
+        "run --debug backend --command hostname",
+        "backend-server",
+    )
 
-    # TEMPORARY DISABLED REF736
-    # exec_command(
-    #     capfd,
-    #     "run --debug backend --command whoami",
-    #     "root",
-    # )
+    exec_command(
+        capfd,
+        "run --debug backend --command whoami",
+        "root",
+    )
 
-    # TEMPORARY DISABLED REF736
-    # exec_command(
-    #     capfd,
-    #     "run --debug backend -u developer --command whoami",
-    #     "Please remember that users in volatile containers are not mapped on current ",
-    #     "developer",
-    # )
+    exec_command(
+        capfd,
+        "run --debug backend -u developer --command whoami",
+        "Please remember that users in volatile containers are not mapped on current ",
+        "developer",
+    )
 
-    # TEMPORARY DISABLED REF736
-    # exec_command(
-    #     capfd,
-    #     "run --debug backend -u invalid --command whoami",
-    #     "Error response from daemon:",
-    #     "unable to find user invalid:",
-    #     "no matching entries in passwd file",
-    # )
+    exec_command(
+        capfd,
+        "run --debug backend -u invalid --command whoami",
+        "Error response from daemon:",
+        "unable to find user invalid:",
+        "no matching entries in passwd file",
+    )
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:

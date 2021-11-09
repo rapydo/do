@@ -70,15 +70,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
-    # TEMPORARY DISABLED REF736
-    # exec_command(
-    #     capfd,
-    #     "ssl --volatile",
-    #     "Creating a self signed SSL certificate",
-    #     "Self signed SSL certificate successfully created",
-    #     # Just to verify that the default does not change
-    #     "Generating DH parameters, 1024 bit long safe prime, generator 2",
-    # )
+    exec_command(
+        capfd,
+        "ssl --volatile",
+        "Creating a self signed SSL certificate",
+        "Self signed SSL certificate successfully created",
+        # Just to verify that the default does not change
+        "Generating DH parameters, 1024 bit long safe prime, generator 2",
+    )
 
     # Start to verify certificate creation while services are running
     exec_command(
