@@ -97,11 +97,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "'invalid' is not one of 'neo4j', 'postgres', 'mariadb', 'rabbit', 'redis'",
     )
 
-    exec_command(
-        capfd,
-        "stop",
-        "Stack stopped",
-    )
+    exec_command(capfd, "remove", "Stack removed")
 
     exec_command(
         capfd,
@@ -304,12 +300,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
     )
-
-    # DEBUG CODE
-    exec_command(capfd, "logs neo4j")
-    exec_command(capfd, "logs backend")
-    exec_command(capfd, "status")
-    # ##########
 
     # Wait neo4j to completely startup
     service_verify(capfd, "neo4j")

@@ -91,11 +91,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "'invalid' is not one of 'neo4j', 'postgres', 'mariadb', 'rabbit', 'redis'",
     )
 
-    exec_command(
-        capfd,
-        "stop",
-        "Stack stopped",
-    )
+    exec_command(capfd, "remove", "Stack removed")
 
     # Backup command on a stopped Redis
     exec_command(
