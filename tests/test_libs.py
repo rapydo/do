@@ -16,7 +16,7 @@ from faker import Faker
 
 from controller import __version__
 from controller.app import Application, Configuration
-from controller.commands.compose.backup import get_date_pattern
+from controller.commands.backup import get_date_pattern
 from controller.commands.install import download
 from controller.commands.password import get_projectrc_variables_indentation
 from controller.deploy.builds import get_image_creation

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -23,9 +23,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
-    if SWARM_MODE:
-        return None
 
     execute_outside(capfd, "backup neo4j")
     execute_outside(capfd, "restore neo4j")
