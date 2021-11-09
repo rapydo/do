@@ -308,6 +308,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # DEBUG CODE
     exec_command(capfd, "logs neo4j")
     exec_command(capfd, "logs backend")
+    exec_command(capfd, "status")
     # ##########
 
     # Wait neo4j to completely startup
