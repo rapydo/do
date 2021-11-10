@@ -7,7 +7,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -275,6 +275,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     )
     exec_command(capfd, "remove neo4j")
     # 3) restore the dump
+
+    # Found one time that the following restore failed because neo4j was still running..
+    if SWARM_MODE:
+        time.sleep(2)
+
     exec_command(
         capfd,
         f"restore neo4j {neo4j_dump_file}",
