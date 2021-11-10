@@ -7,7 +7,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -266,20 +266,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         '"normal_user", "User"',
     )
 
-    # 2) Modify such data
+    # 2) Modify the data
     exec_command(capfd, f'{cypher} "match (r: Role) SET r.description = r.name"\'')
     exec_command(
         capfd,
         f'{cypher} "match (r: Role) return r.name, r.description"\'',
         '"normal_user", "normal_user"',
     )
-    exec_command(capfd, "remove neo4j")
+    exec_command(capfd, "remove")
+
     # 3) restore the dump
-
-    # Found one time that the following restore failed because neo4j was still running..
-    if SWARM_MODE:
-        time.sleep(2)
-
     exec_command(
         capfd,
         f"restore neo4j {neo4j_dump_file}",

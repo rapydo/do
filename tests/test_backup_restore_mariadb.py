@@ -261,7 +261,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         exec_query("select name, description from role"),
         "normal_user\tUser",
     )
-    # 2) Modify such data
+
+    # 2) Modify the data
     exec_command(
         capfd,
         exec_query("update role SET description=name"),

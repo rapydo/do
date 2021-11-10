@@ -248,7 +248,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f'{psql} "select name, description from role"\'',
         "normal_user       | User",
     )
-    # 2) Modify such data
+
+    # 2) Modify the data
     exec_command(
         capfd,
         f'{psql} "update role SET description=name"\'',
