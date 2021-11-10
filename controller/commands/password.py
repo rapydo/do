@@ -17,7 +17,7 @@ from controller import (
     log,
     print_and_exit,
 )
-from controller.app import Application, Configuration
+from controller.app import Application
 from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
@@ -434,9 +434,6 @@ def password(
                 port = cast(int, Application.env["REGISTRY_PORT"])
 
                 compose.docker.container.remove(REGISTRY, force=True)
-                Configuration.FORCE_COMPOSE_ENGINE = True
-                # init is needed to reload the configuration to force compose engine
-                Application.get_controller().controller_init()
 
                 compose.create_volatile_container(
                     REGISTRY, detach=True, publish=[(port, port)]

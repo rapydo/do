@@ -206,6 +206,17 @@ class Compose:
         user: Optional[str] = None,
     ) -> bool:
 
+        compose_engine_forced = False
+        if SWARM_MODE:
+            # import here to prevent circular imports
+            from controller.app import Application
+
+            if not Configuration.FORCE_COMPOSE_ENGINE:
+                compose_engine_forced = True
+                Configuration.FORCE_COMPOSE_ENGINE = True
+                # init is needed to reload the configuration to force compose engine
+                Application.get_controller().controller_init()
+
         tty = sys.stdout.isatty()
 
         try:
@@ -237,6 +248,11 @@ class Compose:
                         line = line.decode("UTF-8")
 
                     print(line.strip())
+
+            if compose_engine_forced:
+                Configuration.FORCE_COMPOSE_ENGINE = False
+                # init is needed to reload the configuration to undo compose engine
+                Application.get_controller().controller_init()
 
             return True
         except DockerException as e:
