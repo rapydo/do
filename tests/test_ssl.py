@@ -11,6 +11,7 @@ from tests import (
     execute_outside,
     random_project_name,
     service_verify,
+    start_registry,
 )
 
 
@@ -34,6 +35,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Created default .projectrc file",
         "Project initialized",
     )
+
+    start_registry(capfd)
 
     exec_command(
         capfd,
