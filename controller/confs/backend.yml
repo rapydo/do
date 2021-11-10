@@ -22,26 +22,6 @@ networks:
     driver_opts:
       com.docker.network.driver.mtu: ${NETWORK_MTU}
 
-  # app_net:
-  #   driver_opts:
-  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
-
-  # proxy_net:
-  #   driver_opts:
-  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
-
-  # worker_net:
-  #   driver_opts:
-  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
-
-  # ftp_net:
-  #   driver_opts:
-  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
-
-  # db_net:
-  #   driver_opts:
-  #     com.docker.network.driver.mtu: ${NETWORK_MTU}
-
 # #####################
 # SERVICES
 # #####################

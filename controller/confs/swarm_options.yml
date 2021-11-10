@@ -241,5 +241,5 @@ services:
 
 networks:
   outside:
-    external:
-      name: "host"
+    name: "host"
+    external: true

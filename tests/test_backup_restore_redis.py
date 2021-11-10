@@ -56,11 +56,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     service_verify(capfd, "redis")
 
     key = faker.pystr()
-    value1 = faker.pystr()
-    value2 = faker.pystr()
+    value1 = f"old-{faker.pystr()}"
+    value2 = f"new-{faker.pystr()}"
 
-    value1 = "debugABC"
-    value2 = "debug123"
     # NOTE: q = redis.__name__ is just to have a fixed name to be used to test the
     # queue without the need to introdure further nested " or '
     get_key = f'shell redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" get {key}\'"'
