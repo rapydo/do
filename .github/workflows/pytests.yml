@@ -15,8 +15,7 @@ jobs:
       matrix:
         test: [
             # > 6 minutes
-            # temporary disabled REF739
-            # backup_restore_mariadb,
+            backup_restore_mariadb,
             backup_restore_neo4j,
             backup_restore_postgres,
             backup_restore_rabbit,

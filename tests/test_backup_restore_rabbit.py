@@ -200,7 +200,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "start backend rabbit")
 
     # Just some delay extra delay, rabbit is a slow starter
-    time.sleep(10)
+    time.sleep(12)
 
     exec_command(
         capfd,
