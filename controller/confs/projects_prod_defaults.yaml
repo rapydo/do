@@ -11,6 +11,7 @@ variables:
     # used to reach the backend from outer network
     # in production it match the with proxy ssl port (${PROXY_PROD_PORT})
     BACKEND_API_PORT: 443
+    ACTIVATE_FAIL2BAN: 1
 
     HEALTHCHECK_BACKEND_CMD: "curl --fail http://localhost:8080/api/status"
 

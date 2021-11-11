@@ -310,7 +310,7 @@ variables:
     REGISTRY_HTTP_SECRET:
 
     # Fail2ban
-    ACTIVATE_FAIL2BAN: 0
+    ACTIVATE_FAIL2BAN: 0 # enabled by default in production mode
 
     # To be enabled with "manager.host"
     # defaulted to local IP of active network interface
