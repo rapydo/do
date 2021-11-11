@@ -120,8 +120,6 @@ variables:
     SET_MAX_REQUESTS_BURST_AUTH: 2
     SET_MAX_REQUESTS_PER_SECOND_API: 3
     SET_MAX_REQUESTS_BURST_API: 10
-    SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
-    SET_MAX_REQUESTS_BURST_ASSETS: 30
     # if empty will be automatically replaced with DOMAIN in proxy entrypoint
     CORS_ALLOWED_ORIGIN:
     # if enabled, make sure to copy client certificates in /etc/letsencrypt/client_certs
