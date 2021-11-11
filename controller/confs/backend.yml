@@ -46,6 +46,7 @@ services:
     hostname: backend-server
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
       APP_MODE: ${APP_MODE}
@@ -241,9 +242,8 @@ services:
     hostname: proxy
     logging:
       driver: syslog
+      options: {}
     working_dir: /etc/nginx
-    # logging:
-    #   driver: syslog
     healthcheck:
       test: "wget -t 1 --quiet --no-check-certificate --certificate=/etc/letsencrypt/local_client.crt --private-key=/etc/letsencrypt/local_client.key http://localhost -O - > /dev/null"
       interval: ${HEALTHCHECK_INTERVAL}
@@ -311,6 +311,7 @@ services:
     hostname: proxy
     logging:
       driver: syslog
+      options: {}
     volumes:
       - ssl_certs:/etc/letsencrypt
     networks:
@@ -346,6 +347,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     volumes:
       - sqldata:/var/lib/postgresql
       - ${DATA_DIR}/backup:/backup
@@ -372,6 +374,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     volumes:
       - mariadb:/var/lib/mysql
       - ${DATA_DIR}/backup:/backup
@@ -396,7 +399,6 @@ services:
         CURRENT_UID: ${CURRENT_UID}
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/neo4j:${RAPYDO_VERSION}
-
     healthcheck:
       # test: ["CMD", "cypher-shell", "'match (n) WITH n LIMIT 1 return count(n)'"]
       test: "cypher-shell 'match (n) WITH n LIMIT 1 return count(n)'"
@@ -404,10 +406,9 @@ services:
       timeout: 10s
       retries: 3
       start_period: 5m
-
     logging:
       driver: syslog
-
+      options: {}
     volumes:
       - graphdata:/data
       # it is used to enable SSL in production mode
@@ -482,6 +483,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     volumes:
       - mongodata:/data/db
     networks:
@@ -519,6 +521,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     # user: developer
     working_dir: /code
     environment:
@@ -650,6 +653,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     # user: developer
     working_dir: /code
     environment:
@@ -737,6 +741,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     hostname: rabbit
     environment:
       ACTIVATE: ${ACTIVATE_RABBIT}
@@ -774,6 +779,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     volumes:
       - redisdata:/data
       - ${DATA_DIR}/backup:/backup
@@ -802,6 +808,7 @@ services:
     hostname: telegram-bot
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_TELEGRAM}
       APP_MODE: ${APP_MODE}
@@ -868,6 +875,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     working_dir: /code
     expose:
       - ${FLOWER_PORT}
@@ -949,6 +957,7 @@ services:
     image: rapydo/swaggerui:${RAPYDO_VERSION}
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
       APP_MODE: ${APP_MODE}
@@ -973,6 +982,7 @@ services:
     image: rapydo/adminer:${RAPYDO_VERSION}
     logging:
       driver: syslog
+      options: {}
     # user: adminer
     networks:
       default:
@@ -1001,6 +1011,7 @@ services:
     # automatically enabled when the container finds this file on startup.
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
@@ -1023,6 +1034,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
     networks:
@@ -1039,6 +1051,7 @@ services:
     image: fanout/pushpin:1.33.1
     logging:
       driver: syslog
+      options: {}
     environment:
       ACTIVATE: ${ACTIVATE_PUSHPIN}
     networks:
@@ -1070,6 +1083,7 @@ services:
       start_period: 5m
     logging:
       driver: syslog
+      options: {}
     ports:
       - 5000:5000
     environment:

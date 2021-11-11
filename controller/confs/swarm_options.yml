@@ -12,7 +12,7 @@ services:
           memory: ${ASSIGNED_MEMORY_BACKEND}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   proxy:
     deploy:
@@ -33,7 +33,7 @@ services:
           - "node.role==manager"
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   postgres:
     deploy:
@@ -45,7 +45,7 @@ services:
           memory: ${ASSIGNED_MEMORY_POSTGRES}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   mariadb:
     deploy:
@@ -57,7 +57,7 @@ services:
           memory: ${ASSIGNED_MEMORY_MARIADB}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   neo4j:
     deploy:
@@ -69,7 +69,7 @@ services:
           memory: ${ASSIGNED_MEMORY_NEO4J}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   mongodb:
     deploy:
@@ -81,7 +81,7 @@ services:
           memory: ${ASSIGNED_MEMORY_MONGODB}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   celery:
     deploy:
@@ -92,7 +92,7 @@ services:
           memory: ${ASSIGNED_MEMORY_CELERY}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   celery-beat:
     deploy:
@@ -103,7 +103,7 @@ services:
           memory: ${ASSIGNED_MEMORY_CELERYBEAT}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   rabbit:
     deploy:
@@ -115,7 +115,7 @@ services:
           memory: ${ASSIGNED_MEMORY_RABBIT}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   redis:
     deploy:
@@ -127,7 +127,7 @@ services:
           memory: ${ASSIGNED_MEMORY_REDIS}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   bot:
     deploy:
@@ -139,7 +139,7 @@ services:
           memory: ${ASSIGNED_MEMORY_BOT}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   flower:
     deploy:
@@ -151,7 +151,7 @@ services:
           memory: ${ASSIGNED_MEMORY_FLOWER}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   swaggerui:
     deploy:
@@ -162,7 +162,7 @@ services:
           memory: ${ASSIGNED_MEMORY_SWAGGERUI}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   adminer:
     deploy:
@@ -174,7 +174,7 @@ services:
           memory: ${ASSIGNED_MEMORY_ADMINER}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   ftp:
     deploy:
@@ -186,7 +186,7 @@ services:
           memory: ${ASSIGNED_MEMORY_FTP}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   smtp:
     deploy:
@@ -198,7 +198,7 @@ services:
           memory: ${ASSIGNED_MEMORY_SMTP}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   pushpin:
     deploy:
@@ -210,7 +210,7 @@ services:
           memory: ${ASSIGNED_MEMORY_PUSHPIN}
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   registry:
     deploy:
@@ -225,7 +225,7 @@ services:
           - "node.role==manager"
     logging:
       options:
-        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:123"
+        syslog-address: "tcp://${SWARM_MANAGER_ADDRESS}:514"
 
   fail2ban:
     deploy:
