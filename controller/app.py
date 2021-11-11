@@ -924,6 +924,10 @@ You can use of one:
                     "SWARM_MANAGER_ADDRESS"
                 ]
 
+            if not Application.env.get("SYSLOG_ADDRESS"):
+                manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
+                Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
+
         if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
             DEPLOY_ENGINE = "compose"
         else:

@@ -69,7 +69,11 @@ def test(
         remove=True,
         volumes=[(controller_path, "/code")],
         name=container_name,
-        envs={"TESTING": "1", "SWARM_MODE": "1" if swarm_mode else "0"},
+        envs={
+            "TESTING": "1",
+            "SWARM_MODE": "1" if swarm_mode else "0",
+            "SYSLOG_ADDRESS": "",
+        },
     )
 
     docker.container.execute(

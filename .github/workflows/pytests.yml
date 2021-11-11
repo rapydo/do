@@ -89,6 +89,8 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
+          # Disable remote sys-logging
+          SYSLOG_ADDRESS: ""
         run: |
 
           mkdir rapydo_tests
@@ -107,6 +109,8 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
+          # Disable remote sys-logging
+          SYSLOG_ADDRESS: ""
         run: |
           # Remove containers, networks, volumes and images
           docker rm -f $(docker ps -a -q) || true
