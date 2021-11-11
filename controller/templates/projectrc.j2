@@ -68,6 +68,7 @@ project_configuration:
       FRONTEND_BUILD_MODE: angular-test
       NEO4J_PASSWORD: {{ "RANDOM"| password }}
       FILE_LOGLEVEL: INFO
+      SYSLOG_ADDRESS: ""
       {% if production -%}
       DEFAULT_DHLEN: 1024
       GUNICORN_WORKERS: 1
