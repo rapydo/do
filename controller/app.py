@@ -924,7 +924,8 @@ You can use of one:
                     "SWARM_MANAGER_ADDRESS"
                 ]
 
-            if not Application.env.get("SYSLOG_ADDRESS"):
+            # is None ensure empty string as a valid address
+            if Application.env.get("SYSLOG_ADDRESS") is None:
                 manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
                 Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
 

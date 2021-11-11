@@ -72,7 +72,6 @@ def test(
         envs={
             "TESTING": "1",
             "SWARM_MODE": "1" if swarm_mode else "0",
-            "SYSLOG_ADDRESS": "",
         },
     )
 
