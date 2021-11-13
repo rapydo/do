@@ -551,7 +551,9 @@ class Application:
                 command=RED("rapydo install compose"),
             )
 
-        Packages.check_program("git")
+        # no need to check the git executable, because alredy verified by GitPython
+        # in case of missing git GitPython will fail and this check will never executed
+        # Packages.check_program("git")
 
     def read_specs(self, read_extended: bool = True) -> None:
         """Read project configuration"""
