@@ -26,10 +26,10 @@ def username(param_not_used: str, length: int = 8) -> str:
 
 def password(param_not_used: str, length: int = 12, symbols: str = "") -> str:
     rand = random.SystemRandom()
-    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits + symbols
+    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
     random_string = rand.choice(charset)
-    charset += string.digits
+    charset += symbols
     for _ in range(length - 1):
         random_string += rand.choice(charset)
 
