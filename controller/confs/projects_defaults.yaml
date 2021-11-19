@@ -125,6 +125,7 @@ variables:
     CORS_ALLOWED_ORIGIN:
     # if enabled, make sure to copy client certificates in /etc/letsencrypt/client_certs
     SSL_VERIFY_CLIENT: 0
+    SSL_FORCE_SELF_SIGNED: 0
 
     ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
