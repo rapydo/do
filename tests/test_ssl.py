@@ -5,7 +5,7 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
 from tests import (
     Capture,
     create_project,
@@ -87,14 +87,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "--prod start",
     )
 
-    if SWARM_MODE:
-        time.sleep(5)
-
     # Needed because the next command requires rabbit already started
     # Otherwise will fail with:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
-
+    time.sleep(5)
     service_verify(capfd, "rabbitmq")
 
     exec_command(
