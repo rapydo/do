@@ -1021,7 +1021,7 @@ services:
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
-      ADDED_FLAGS: -d -d
+      ADDED_FLAGS: -H -d -d
     networks:
       default:
 
