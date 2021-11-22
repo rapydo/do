@@ -4,7 +4,7 @@ import typer
 
 from controller import log
 from controller.app import Application
-from controller.deploy.compose_legacy import Compose
+from controller.deploy.compose_v2 import Compose
 
 
 @Application.app.command(help="Watch log tails of all or specified containers")
@@ -38,36 +38,8 @@ def logs(
 
     services = Application.data.services
 
-    # V2
-    # compose = Compose(Application.data.files)
-    # try:
-    #     compose.logs(services, follow=follow, tail=tail)
-    # except KeyboardInterrupt:
-    #     log.info("Stopped by keyboard")
-
-    # V1
-    if len(services) > 1:
-        timestamps = False
-        log_prefix = True
-    elif services[0] in "frontend":
-        timestamps = True
-        log_prefix = False
-    else:
-        timestamps = False
-        log_prefix = False
-
-    options = {
-        "--follow": follow,
-        "--tail": str(tail),
-        "--timestamps": timestamps,
-        "--no-color": False,
-        "--no-log-prefix": not log_prefix,
-        "SERVICE": services,
-    }
-
-    dc = Compose(files=Application.data.files)
-
+    compose = Compose(Application.data.files)
     try:
-        dc.command("logs", options)
+        compose.logs(services, follow=follow, tail=tail)
     except KeyboardInterrupt:
         log.info("Stopped by keyboard")

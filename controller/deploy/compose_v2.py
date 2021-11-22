@@ -359,35 +359,35 @@ class Compose:
                 )
             )
 
-    # def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
+    def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
 
-    #     if len(services) > 1:
-    #         timestamps = False
-    #         log_prefix = True
-    #     elif services[0] in "frontend":
-    #         timestamps = True
-    #         log_prefix = False
-    #     else:
-    #         timestamps = False
-    #         log_prefix = False
+        if len(services) > 1:
+            timestamps = False
+            log_prefix = True
+        elif services[0] in "frontend":
+            timestamps = True
+            log_prefix = False
+        else:
+            timestamps = False
+            log_prefix = False
 
-    #     lines = self.docker.compose.logs(
-    #         services,
-    #         follow=follow,
-    #         tail=tail,
-    #         timestamps=timestamps,
-    #         no_log_prefix=not log_prefix,
-    #         stream=True,
-    #     )
-    #     for log_line in lines:
-    #         # 'stdout' or 'stderr'
-    #         # Both out and err are collapsed in stdout
-    #         # Maybe in the future would be useful to keep them separated?
-    #         # stdstream = log_line[0]
+        lines = self.docker.compose.logs(
+            services,
+            follow=follow,
+            tail=str(tail),
+            timestamps=timestamps,
+            no_log_prefix=not log_prefix,
+            stream=True,
+        )
+        for log_line in lines:
+            # 'stdout' or 'stderr'
+            # Both out and err are collapsed in stdout
+            # Maybe in the future would be useful to keep them separated?
+            # stdstream = log_line[0]
 
-    #         line = log_line[1]
+            line = log_line[1]
 
-    #         if isinstance(line, bytes):
-    #             line = line.decode("UTF-8")
+            if isinstance(line, bytes):
+                line = line.decode("UTF-8")
 
-    #         print(line.strip())
+            print(line.strip())
