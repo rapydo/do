@@ -126,4 +126,9 @@ def ssl(
             containers, user="root", command="/usr/local/bin/reload_certificate"
         )
 
+    containers = docker.get_containers("swaggerui")
+    if containers:  # pragma: no cover
+        log.info("SwaggerUI is running, executing command to refresh the certificate")
+        docker.exec_command(containers, user="root", command="nginx -s reload")
+
     log.info("New certificate successfully enabled")
