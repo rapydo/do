@@ -84,8 +84,8 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f"reload {service}",
-        f"Executing on {container1[0]}",
-        f"Executing on {container2[0]}",
+        f"Executing command on {container1[0]}",
+        f"Executing command on {container2[0]}",
     )
 
     exec_command(capfd, "shell backend -u root 'rm /usr/local/bin/reload'")

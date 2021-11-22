@@ -298,10 +298,12 @@ class Docker:
                 client = self.connect_engine(container[1])
                 if client.client_config.host:
                     log.info(
-                        "Executing on {}:{}", client.client_config.host, container[0]
+                        "Executing command on {}:{}",
+                        client.client_config.host,
+                        container[0],
                     )
                 elif broadcast:
-                    log.info("Executing on {}", container[0])
+                    log.info("Executing command on {}", container[0])
 
                 output = client.container.execute(
                     container[0],
