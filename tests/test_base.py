@@ -130,3 +130,9 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         "start backend postgres _invalid",
         "No such service: invalid",
     )
+
+    exec_command(
+        capfd,
+        "-e ACTIVATE_FAIL2BAN start fail2ban",
+        "Invalid enviroment, missing value in ACTIVATE_FAIL2BAN",
+    )

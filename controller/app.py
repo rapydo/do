@@ -286,6 +286,10 @@ def controller_cli_options(
     Configuration.remote_engine = remote_engine
     Configuration.environment = {}
     for e in environment:
+
+        if "=" not in e:
+            print_and_exit("Invalid enviroment, missing value in {}", e)
+
         key, value = e.split("=")
         Configuration.environment[key] = value
 
