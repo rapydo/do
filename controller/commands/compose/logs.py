@@ -2,7 +2,7 @@ from typing import List
 
 import typer
 
-from controller import log
+from controller import TESTING, log
 from controller.app import Application
 from controller.deploy.compose_v2 import Compose
 
@@ -41,5 +41,5 @@ def logs(
     compose = Compose(Application.data.files)
     try:
         compose.logs(services, follow=follow, tail=tail)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:  # pragma: no cover
         log.info("Stopped by keyboard")
