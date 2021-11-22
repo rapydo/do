@@ -16,7 +16,6 @@ setup(
     },
     # Remember to update mypy.additional_dependencies
     install_requires=[
-        "docker-compose==1.29.2",
         "python-on-whales==0.32.0",
         "python-dateutil",
         "pytz",
