@@ -1144,7 +1144,7 @@ services:
       # SSMTP_TLS: Use TLS to talk to the SMTP server (default NO)
       # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
     volumes:
-      - /var/log/syslog:/var/log/syslog:ro
+      - /var/log:/var/log/host_logs:ro
       # /data/db could be attached to a data-dir
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d
