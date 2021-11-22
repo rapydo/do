@@ -5,7 +5,7 @@ import time
 
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -91,7 +91,11 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Otherwise will fail with:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
-    time.sleep(5)
+    if SWARM_MODE:
+        time.sleep(10)
+    else:
+        time.sleep(5)
+
     service_verify(capfd, "rabbitmq")
 
     exec_command(

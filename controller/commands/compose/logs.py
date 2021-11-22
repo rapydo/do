@@ -2,7 +2,7 @@ from typing import List
 
 import typer
 
-from controller import TESTING, log
+from controller import log
 from controller.app import Application
 from controller.deploy.compose_v2 import Compose
 
