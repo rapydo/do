@@ -1,0 +1,6 @@
+[pureftpd]
+enabled  = true
+
+bantime = 48h
+findtime = 24h
+maxretry = 3
