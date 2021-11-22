@@ -1,9 +1,11 @@
 """
 This module will test the ssl command
 """
+import time
+
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
@@ -84,6 +86,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "--prod start",
     )
+
+    if SWARM_MODE:
+        time.sleep(5)
 
     # Needed because the next command requires rabbit already started
     # Otherwise will fail with:
