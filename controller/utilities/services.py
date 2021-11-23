@@ -201,7 +201,7 @@ def check_mongodb_password(pwd: Optional[EnvType]) -> None:
 
 def get_default_user(service: str) -> Optional[str]:
 
-    if service in ["backend", "celery", "flower", "celery-beat"]:
+    if service in ["backend", "celery", "flower", "celerybeat"]:
         return "developer"
 
     if service in ["frontend"]:

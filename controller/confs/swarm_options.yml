@@ -94,7 +94,7 @@ services:
       options:
         syslog-address: ${SYSLOG_ADDRESS}
 
-  celery-beat:
+  celerybeat:
     deploy:
       replicas: ${DEFAULT_SCALE_CELERYBEAT}
       resources:

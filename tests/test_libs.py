@@ -254,7 +254,7 @@ def test_get_default_user() -> None:
     assert services.get_default_user("backend") == "developer"
     assert services.get_default_user("celery") == "developer"
     assert services.get_default_user("flower") == "developer"
-    assert services.get_default_user("celery-beat") == "developer"
+    assert services.get_default_user("celerybeat") == "developer"
     Configuration.frontend = "invalid"
     assert services.get_default_user("frontend") is None
     Configuration.frontend = "no"

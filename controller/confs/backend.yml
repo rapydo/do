@@ -637,7 +637,7 @@ services:
     networks:
       default:
 
-  celery-beat:
+  celerybeat:
     restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}

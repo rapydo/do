@@ -19,7 +19,7 @@ name_priorities = [
     "proxy",
     "celery",
     "flower",
-    "celery-beat",
+    "celerybeat",
     "maintenance",
     "bot",
 ]
