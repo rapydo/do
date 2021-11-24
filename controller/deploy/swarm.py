@@ -127,7 +127,7 @@ class Swarm:
         else:
             self.docker.service.update(service_name, force=True, detach=True)
 
-    def status(self) -> None:
+    def status(self, services: List[str]) -> None:
 
         nodes: Dict[str, str] = {}
         nodes_table: List[List[str]] = []
@@ -158,17 +158,26 @@ class Swarm:
             )
 
         print(tabulate(nodes_table, tablefmt=TABLE_FORMAT, headers=headers))
-        services = self.docker.service.list()
+        stack_services = self.docker.service.list()
 
         print("")
 
-        if not services:
+        if not stack_services:
             log.info("No service is running")
             return
 
-        for service in services:
+        prefix = f"{Configuration.project}_"
+        for service in stack_services:
 
             service_name = service.spec.name
+
+            tmp_service_name = service_name
+            if tmp_service_name.startswith(prefix):
+                # to be replaced with removeprefix
+                tmp_service_name = tmp_service_name[len(prefix) :]
+            if tmp_service_name not in services:
+                continue
+
             print(f"{colors.RESET}Inspecting {service_name}...", end="\r")
 
             tasks_lines: List[str] = []

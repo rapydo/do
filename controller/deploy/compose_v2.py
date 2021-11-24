@@ -313,11 +313,23 @@ class Compose:
         except DockerException:
             return services_status
 
-    def status(self) -> None:
+    def status(self, services: List[str]) -> None:
         print("")
 
+        prefix = f"{Configuration.project}{COMPOSE_SEP}"
         table: List[List[str]] = []
         for container in self.docker.compose.ps():
+
+            name = container.name
+            if not name.startswith(prefix):
+                continue
+            # to be replaced with removeprefix
+            name = name[len(prefix) :]
+            if COMPOSE_SEP in name:
+                name = name[0 : name.index(COMPOSE_SEP)]
+
+            if name not in services:
+                continue
 
             status = container.state.status
             if status == "shutdown" or status == "complete":

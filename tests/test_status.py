@@ -79,9 +79,33 @@ def test_all(capfd: Capture) -> None:
             "running",
         )
 
+        exec_command(
+            capfd,
+            "status backend",
+            "running",
+        )
+
+        exec_command(
+            capfd,
+            "status backend postgres",
+            "running",
+        )
+
     else:
         exec_command(
             capfd,
             "status",
+            "first-backend-1",
+        )
+
+        exec_command(
+            capfd,
+            "status backend",
+            "first-backend-1",
+        )
+
+        exec_command(
+            capfd,
+            "status backend postgres",
             "first-backend-1",
         )
