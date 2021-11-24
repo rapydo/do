@@ -14,6 +14,7 @@ variables:
     ACTIVATE_FAIL2BAN: 1
 
     HEALTHCHECK_BACKEND_CMD: "curl --fail http://localhost:8080/api/status"
+    SYSLOG_ADDRESS:
 
     RABBITMQ_PORT: 5671
     RABBITMQ_MANAGEMENT_PORT: 15671
