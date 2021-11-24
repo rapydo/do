@@ -90,5 +90,9 @@ def RED(msg: str) -> str:
     return f"{colors.RED}{msg}{colors.RESET}"
 
 
+def YELLOW(msg: str) -> str:
+    return f"{colors.YELLOW}{msg}{colors.RESET}"
+
+
 def GREEN(msg: str) -> str:
     return f"{colors.GREEN}{msg}{colors.RESET}"

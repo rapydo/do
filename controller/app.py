@@ -33,10 +33,10 @@ from controller import (
     SUBMODULES_DIR,
     SWARM_MODE,
     TABLE_FORMAT,
+    YELLOW,
     ComposeServices,
     EnvType,
     __version__,
-    colors,
     log,
     print_and_exit,
 )
@@ -525,8 +525,10 @@ class Application:
         # Deprecated since 2.1
         if sys.version_info.major == 3 and sys.version_info.minor == 7:
             warnings.warn(
-                colors.YELLOW + "Support for Python 3.7 is deprecated "
-                "and will be dropped in a future release. Please upgrade to python 3.8+"
+                YELLOW(
+                    "Support for Python 3.7 is deprecated and will be dropped "
+                    "in a future release. Please upgrade to python 3.8+"
+                )
             )
             import time
 
