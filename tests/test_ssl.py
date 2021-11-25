@@ -92,7 +92,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
     if SWARM_MODE:
-        time.sleep(20)
+        time.sleep(15)
+        # DEBUG CODE
+        exec_command(capfd, "logs rabbit")
     else:
         time.sleep(5)
 
