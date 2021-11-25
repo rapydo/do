@@ -207,7 +207,8 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "check -i main --no-git" "Failed 'blame' operation on",
+        "check -i main --no-git",
+        "Can't retrieve a commit history for ",
         "Checks completed",
     )
 
