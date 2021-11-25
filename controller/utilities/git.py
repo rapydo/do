@@ -182,8 +182,9 @@ def check_file_younger_than(
 
     try:
         commits = gitobj.blame(rev="HEAD", file=str(filename))
-    except GitCommandError as e:  # pragma: no cover
-        print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
+    except GitCommandError:
+        log.debug("Can't retrieve a commit history for {}", filename)
+        return False, 0, datetime.fromtimestamp(0)
 
     # added a default date to prevent errors in case of new files with no blame commits
     dates = [datetime.fromtimestamp(0).replace(tzinfo=pytz.utc)]

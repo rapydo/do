@@ -207,18 +207,11 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "build rabbit",
-        "Failed 'blame' operation on",
+        "check -i main --no-git" "Failed 'blame' operation on",
+        "Checks completed",
     )
 
     test_file.unlink()
-    exec_command(
-        capfd,
-        "build rabbit",
-        "docker buildx is installed",
-        f"naming to docker.io/testbuild/rabbit:{__version__}",
-        "Custom images built",
-    )
 
     exec_command(
         capfd,
