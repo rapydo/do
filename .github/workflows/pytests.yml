@@ -150,6 +150,26 @@ jobs:
 
           if [[ "${TEST_NAME}" == "multi_host" ]]; then
 
+            docker swarm init
+            JOIN_COMMAND=$(docker swarm join-token  worker | tail -2 | head)
+            echo "Join command = ${JOIN_COMMAND}"
+
+            # NFS to be added
+            export NFS_HOST="127.0.0.1"
+
+            # Create all volumes used by NFS expect for ssl_certs
+            sudo mkdir -p /volumes/secrets
+            sudo mkdir -p /volumes/rabbitdata
+            sudo mkdir -p /volumes/sqldata
+            sudo mkdir -p /volumes/mariadb
+            sudo mkdir -p /volumes/graphdata
+            sudo mkdir -p /volumes/mongodata
+            sudo mkdir -p /volumes/data_imports
+            sudo mkdir -p /volumes/redisdata
+          fi
+
+          if [[ "${TEST_NAME}" == "multi_host-based-on-docker-machine-NOT-USED" ]]; then
+
             base=https://github.com/docker/machine/releases/download/v0.16.0 \
               && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
               && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
