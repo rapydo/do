@@ -2,6 +2,7 @@
 This module will test the build and pull commands
 """
 import os
+from pathlib import Path
 
 from faker import Faker
 from git import Repo
@@ -192,6 +193,25 @@ RUN mkdir xyz
     r.git.add("-A")
     r.git.commit("-a", "-m", "'fake'")
 
+    exec_command(
+        capfd,
+        "build rabbit",
+        "docker buildx is installed",
+        f"naming to docker.io/testbuild/rabbit:{__version__}",
+        "Custom images built",
+    )
+
+    test_file = Path("projects/testbuild/builds/rabbit/test")
+    with open(test_file, "w+") as f:
+        f.write("test")
+
+    exec_command(
+        capfd,
+        "build rabbit",
+        "Failed 'blame' operation on",
+    )
+
+    test_file.unlink()
     exec_command(
         capfd,
         "build rabbit",
