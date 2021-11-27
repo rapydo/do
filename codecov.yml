@@ -4,5 +4,6 @@ ignore:
   - "setup.py"
   - "check_ciphers.py"
   - "check_updates.py"
+  - "rapydo_tests" # created during tests
 # fixes:
 #   - "before/::after/"  # move path   e.g., "before/path" => "after/path"

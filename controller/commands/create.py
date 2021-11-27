@@ -29,6 +29,8 @@ class ServiceTypes(str, Enum):
     rabbit = "rabbit"
     redis = "redis"
     celery = "celery"
+    flower = "flower"
+    fail2ban = "fail2ban"
     pushpin = "pushpin"
     ftp = "ftp"
     bot = "bot"
@@ -48,11 +50,11 @@ def create(
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
     services: List[ServiceTypes] = typer.Option(
-        "",
+        [],
         "--service",
         "-s",
         help="Service to be enabled (multiple is enabled)",
-        autocompletion=Application.autocomplete_service,
+        shell_complete=Application.autocomplete_service,
     ),
     origin_url: Optional[str] = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"
@@ -88,6 +90,21 @@ def create(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--auth", auth),
+        Application.serialize_parameter("--frontend", frontend),
+        Application.serialize_parameter("--extend", extend, IF=extend),
+        Application.serialize_parameter("--service", services),
+        Application.serialize_parameter("--origin-url", origin_url, IF=origin_url),
+        Application.serialize_parameter("--env", envs),
+        Application.serialize_parameter("--current", force_current, IF=force_current),
+        Application.serialize_parameter("--force", force, IF=force),
+        Application.serialize_parameter("--auto", auto, IF=auto),
+        Application.serialize_parameter("--add-optionals", add_optionals),
+        Application.serialize_parameter("", project_name),
+    )
+
     Application.get_controller().controller_init()
 
     if extend is not None:
@@ -153,6 +170,8 @@ def create_project(
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
     enable_celery = "celery" in services
+    enable_flower = "flower" in services
+    enable_fail2ban = "fail2ban" in services
     enable_pushpin = "pushpin" in services
     enable_ftp = "ftp" in services
     enable_bot = "bot" in services
@@ -254,6 +273,8 @@ def create_project(
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,
                 "enable_celery": enable_celery,
+                "enable_flower": enable_flower,
+                "enable_fail2ban": enable_fail2ban,
                 "enable_pushpin": enable_pushpin,
                 "enable_ftp": enable_ftp,
                 "enable_bot": enable_bot,

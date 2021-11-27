@@ -1,13 +1,21 @@
+import os
+import tempfile
 import time
+from datetime import datetime
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
-from typing import Any, List, Optional, Type, TypeVar
+from typing import Any, List, Optional, Tuple, Type, TypeVar
 
+import pytest
 from faker import Faker
+from glom import glom
+from python_on_whales import docker
 from typer.testing import CliRunner
 
-from controller import SWARM_MODE
+from controller import PROJECTRC, REGISTRY, SWARM_MODE
+from controller.deploy.docker import Docker
+from controller.utilities import configuration
 
 runner = CliRunner()
 
@@ -56,7 +64,7 @@ def mock_KeyboardInterrupt(signum, frame):  # type: ignore
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd: Any, command: str, *asserts: str) -> None:
+def exec_command(capfd: Capture, command: str, *asserts: str) -> List[str]:
 
     # This is needed to reload the LOG dir
     import controller
@@ -77,10 +85,16 @@ def exec_command(capfd: Any, command: str, *asserts: str) -> None:
     Application.load_projectrc()
     Application.project_scaffold = Project()
     Application.gits = {}
+
+    start = datetime.now()
     result = runner.invoke(ctrl.app, command)
+    end = datetime.now()
+
+    elapsed_time = (end - start).seconds
 
     with capfd.disabled():
         print(f"Exit code: {result.exit_code}")
+        print(f"Execution time: {elapsed_time} second(s)")
         print(result.stdout)
         print("_____________________________________________")
 
@@ -115,22 +129,25 @@ def exec_command(capfd: Any, command: str, *asserts: str) -> None:
         # Check if the assert is in any line (also as substring) from out or err
         assert a in out + err or any(a in x for x in out + err + cout + exc)
 
+    return out + err + cout + exc
 
-def service_verify(capfd: Any, service: str) -> None:
+
+def service_verify(capfd: Capture, service: str) -> None:
     exec_command(
         capfd,
-        f"shell backend --no-tty 'restapi verify --service {service}'",
+        f"shell backend 'restapi verify --service {service}'",
         f"Service {service} is reachable",
+        f"{service} successfully authenticated on ",
     )
 
 
 def random_project_name(faker: Faker) -> str:
 
-    return f"{faker.word()}{faker.word()}"
+    return f"{faker.word()}{faker.word()}".lower()
 
 
 def create_project(
-    capfd: Any,
+    capfd: Capture,
     name: Optional[str] = None,
     auth: str = "postgres",
     frontend: str = "angular",
@@ -151,28 +168,27 @@ def create_project(
     )
 
 
-def init_project(capfd: Any) -> None:
+def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") -> None:
+
+    if "HEALTHCHECK_INTERVAL" not in pre_options:
+        pre_options += " -e HEALTHCHECK_INTERVAL=1s "
+
     exec_command(
         capfd,
-        "init",
+        f"{pre_options} init {post_options}",
         "Project initialized",
     )
 
 
-def start_registry(capfd: Any) -> None:
-    exec_command(
-        capfd,
-        "registry",
-        "Creating registry",
-    )
-    time.sleep(2)
+def start_registry(capfd: Capture) -> None:
+    if SWARM_MODE:
+        exec_command(capfd, "run registry --pull")
+        time.sleep(2)
 
-    from python_on_whales import docker
-
-    print(docker.logs("registry"))
+        print(docker.logs(REGISTRY))
 
 
-def pull_images(capfd: Any) -> None:
+def pull_images(capfd: Capture) -> None:
 
     exec_command(
         capfd,
@@ -181,11 +197,77 @@ def pull_images(capfd: Any) -> None:
     )
 
 
-def start_project(capfd: Any) -> None:
+def start_project(capfd: Capture) -> None:
     exec_command(
         capfd,
         "start",
-        "docker-compose command: 'up'",
         "Stack started",
     )
-    time.sleep(5)
+    if SWARM_MODE:
+        time.sleep(10)
+    else:
+        time.sleep(5)
+
+
+def execute_outside(capfd: Capture, command: str) -> None:
+    folder = os.getcwd()
+    os.chdir(tempfile.gettempdir())
+    exec_command(
+        capfd,
+        command,
+        "You are not in a git repository",
+    )
+
+    os.chdir(folder)
+
+
+def get_container_start_date(
+    capfd: Capture, service: str, wait: bool = False
+) -> datetime:
+
+    if SWARM_MODE and wait:
+        time.sleep(5)
+        # This is needed to debug and wait the service rollup to complete
+        # Status is both for debug and to delay the get_container
+        exec_command(capfd, "status")
+
+    # Optional is needed because docker.get_container returns Optional[str]
+    container: Optional[Tuple[str, str]] = None
+
+    docker = Docker()
+    if service == REGISTRY:
+        # a tuple to have the same type of get_container
+        container = (REGISTRY, "")
+    else:
+        container = docker.get_container(service, slot=1)
+
+    assert container is not None
+    return docker.client.container.inspect(container[0]).state.started_at
+
+
+def get_variable_from_projectrc(variable: str) -> str:
+    projectrc = configuration.load_yaml_file(file=PROJECTRC, is_optional=False)
+
+    return glom(
+        projectrc, f"project_configuration.variables.env.{variable}", default=""
+    )
+
+
+def wait_until(
+    capfd: Capture, command: str, expected: str, max_retries: int = 30, sleep: int = 2
+) -> bool:
+
+    counter = 1
+
+    while counter <= max_retries:
+        result = exec_command(capfd, command)
+        for r in result:
+            if expected in r:
+                return True
+
+        counter += 1
+        time.sleep(sleep)
+
+    pytest.fail(
+        f"Never found '{expected}' in '{command}' after {max_retries} retries"
+    )  # pragma: no cover

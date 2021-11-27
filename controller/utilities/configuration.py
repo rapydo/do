@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import yaml
 
@@ -25,7 +25,7 @@ def read_configuration(
     """
 
     custom_configuration = load_yaml_file(
-        file=base_project_path.joinpath(PROJECT_CONF_FILENAME), keep_order=True
+        file=base_project_path.joinpath(PROJECT_CONF_FILENAME)
     )
 
     # Verify custom project configuration
@@ -48,13 +48,12 @@ def read_configuration(
             )
 
     base_configuration = load_yaml_file(
-        file=default_file_path.joinpath(PROJECTS_DEFAULTS_FILE), keep_order=True
+        file=default_file_path.joinpath(PROJECTS_DEFAULTS_FILE)
     )
 
     if production:
         base_prod_conf = load_yaml_file(
-            file=default_file_path.joinpath(PROJECTS_PROD_DEFAULTS_FILE),
-            keep_order=True,
+            file=default_file_path.joinpath(PROJECTS_PROD_DEFAULTS_FILE)
         )
         base_configuration = mix_configuration(base_configuration, base_prod_conf)
 
@@ -86,7 +85,7 @@ def read_configuration(
         print_and_exit("From project not found: {}", extend_path)
 
     extended_configuration = load_yaml_file(
-        file=extend_path.joinpath(PROJECT_CONF_FILENAME), keep_order=True
+        file=extend_path.joinpath(PROJECT_CONF_FILENAME)
     )
 
     m1 = mix_configuration(base_configuration, extended_configuration)
@@ -129,25 +128,6 @@ def mix_configuration(
     return base
 
 
-# ################################
-# ######## FROM myyaml.py ########
-# ################################
-
-
-class OrderedLoader(yaml.SafeLoader):
-    """
-    A workaround good enough to load ordered dictionaries
-    https://stackoverflow.com/a/21912744
-    """
-
-    pass
-
-
-def construct_mapping(loader, node):  # type: ignore
-    loader.flatten_mapping(node)
-    return dict(loader.construct_pairs(node))
-
-
 def load_yaml_file(
     file: Path, keep_order: bool = False, is_optional: bool = False
 ) -> Configuration:
@@ -162,23 +142,14 @@ def load_yaml_file(
 
     with open(file) as fh:
         try:
-            if keep_order:
+            docs = list(yaml.safe_load_all(fh))
 
-                OrderedLoader.add_constructor(  # type: ignore
-                    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct_mapping
-                )
-                loader = yaml.load_all(fh, OrderedLoader)
-            else:
-                loader = yaml.load_all(fh, yaml.loader.Loader)
-
-            docs = list(loader)
-
-            if len(docs) == 0:
+            if not docs:
                 print_and_exit("YAML file is empty: {}", file)
 
-            # Return value of yaml.load_all is un-annotated and considered as Any
+            # Return value of yaml.safe_load_all is un-annotated and considered as Any
             # But we known that it is a Dict Configuration-compliant
-            return docs[0]  # type: ignore
+            return cast(Configuration, docs[0])
 
         except Exception as e:
             # # IF dealing with a strange exception string (escaped)

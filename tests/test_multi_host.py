@@ -5,10 +5,14 @@ import random
 
 from python_on_whales import docker
 
-from tests import Capture, create_project, exec_command, start_registry
+from controller import SWARM_MODE, colors
+from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
 def test_swarm_multi_host(capfd: Capture) -> None:
+
+    if not SWARM_MODE:
+        return None
 
     rand = random.SystemRandom()
 
@@ -26,7 +30,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
         name="swarm",
         auth=auth,
         frontend="no",
-        services=["rabbit", "redis"],
     )
 
     for node in docker.node.list():
@@ -41,38 +44,44 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     exec_command(
         capfd,
         "-e HEALTHCHECK_INTERVAL=1s init",
-        "docker buildx is installed",
         "docker compose is installed",
+        "NFS Server is enabled",
         # already initialized before the test, in the workflow yml
         "Swarm is already initialized",
         "Project initialized",
     )
 
     start_registry(capfd)
+    pull_images(capfd)
 
     exec_command(
         capfd,
-        "pull --quiet",
-        "Base images pulled from docker hub",
+        "start backend",
+        "A volume path is missing and can't be automatically created: ",
+        f"Suggested command: {colors.RED}sudo mkdir -p /volumes/ssl_certs",
+        "&& sudo chown ",
     )
 
+    exec_command(
+        capfd,
+        "-e HEALTHCHECK_INTERVAL=1s -e NFS_EXPORTS_SSL_CERTS=/tmp/ssl_certs init -f",
+    )
     # Deploy a sub-stack
     exec_command(
         capfd,
-        "-s backend start",
+        "start backend",
+        "A volume path was missing and was automatically created: /tmp/ssl_certs",
         "Stack started",
     )
 
     exec_command(
         capfd,
         "status",
-        "====== Nodes ======",
         "Manager",
         # Still unable to add workers because GA instances lack nested virtualization
         # See details in pytests.yml (VT-x is not available)
         # "Worker",
         "Ready+Active",
-        "====== Services ======",
         "swarm_backend",
         " [1]",
         # "running",

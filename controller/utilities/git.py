@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urlparse
 
 import pytz
@@ -8,12 +8,12 @@ from git import Repo
 from git.diff import Diff
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from controller import SUBMODULES_DIR, log, print_and_exit
+from controller import RED, SUBMODULES_DIR, log, print_and_exit
 
-# Replace all Any with Repo when GitPython typed version will be released
+MAX_FETCHED_COMMITS = 20
 
 
-def get_repo(path: str) -> Optional[Any]:
+def get_repo(path: str) -> Optional[Repo]:
     try:
         return Repo(path)
     except NoSuchPathError:
@@ -22,11 +22,11 @@ def get_repo(path: str) -> Optional[Any]:
         return None
 
 
-def init(path: str) -> Any:
+def init(path: str) -> Repo:
     return Repo.init(path)
 
 
-def get_origin(gitobj: Optional[Any]) -> Optional[str]:
+def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
     try:
         if not gitobj:
             return None
@@ -40,20 +40,19 @@ def get_origin(gitobj: Optional[Any]) -> Optional[str]:
         return None
 
 
-def get_active_branch(gitobj: Optional[Any]) -> Optional[str]:
+def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
 
     if not gitobj:
         log.error("git object is None, cannot retrieve active branch")
         return None
     try:
-        # active_branch.name is still unannotated
-        return cast(str, gitobj.active_branch.name)
+        return gitobj.active_branch.name
     except AttributeError as e:  # pragma: no cover
         log.warning(e)
         return None
 
 
-def switch_branch(gitobj: Optional[Any], branch_name: str) -> bool:
+def switch_branch(gitobj: Optional[Repo], branch_name: str) -> bool:
 
     if not gitobj:
         log.error("git object is None, cannot switch the active branch")
@@ -93,7 +92,7 @@ def switch_branch(gitobj: Optional[Any], branch_name: str) -> bool:
 
 def clone(
     url: str, path: Path, branch: str, do: bool = False, check: bool = True
-) -> Any:
+) -> Repo:
 
     local_path = SUBMODULES_DIR.joinpath(path)
 
@@ -121,7 +120,7 @@ def clone(
     return gitobj
 
 
-def compare_repository(gitobj: Any, branch: str, online_url: str) -> bool:
+def compare_repository(gitobj: Repo, branch: str, online_url: str) -> bool:
 
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
@@ -161,10 +160,11 @@ Suggestion: remove {} and execute the init command
 
     if active_branch and active_branch != branch and gitobj.working_dir:
         print_and_exit(
-            "{}: wrong branch {}, expected {}. You can use rapydo init to fix it",
+            "{}: wrong branch {}, expected {}. You can fix it with {command}",
             Path(gitobj.working_dir).stem,
             active_branch,
             branch,
+            command=RED("rapydo init"),
         )
     return True
 
@@ -177,15 +177,17 @@ def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
 
 
 def check_file_younger_than(
-    gitobj: Any, filename: Path, timestamp: Union[str, float]
+    gitobj: Repo, filename: Path, timestamp: Union[str, float]
 ) -> Tuple[bool, float, datetime]:
 
     try:
-        commits = gitobj.blame(rev="HEAD", file=filename)
-    except GitCommandError as e:  # pragma: no cover
-        print_and_exit("Failed 'blame' operation on {}.\n{}", filename, str(e))
+        commits = gitobj.blame(rev="HEAD", file=str(filename))
+    except GitCommandError:
+        log.debug("Can't retrieve a commit history for {}", filename)
+        return False, 0, datetime.fromtimestamp(0)
 
-    dates = []
+    # added a default date to prevent errors in case of new files with no blame commits
+    dates = [datetime.fromtimestamp(0).replace(tzinfo=pytz.utc)]
     if commits:
         for commit in commits:
             current_blame = gitobj.commit(rev=str(commit[0]))
@@ -199,14 +201,13 @@ def check_file_younger_than(
     )
 
 
-def get_unstaged_files(gitobj: Any) -> Dict[str, List[str]]:
+def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
     """
     ref:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
     """
 
-    # type ignore to be removed once the new gitpython version will be released
-    diff: List[Diff] = []  # type: ignore
+    diff: List[Diff] = []
     diff.extend(gitobj.index.diff(gitobj.head.commit))
     diff.extend(gitobj.index.diff(None))
 
@@ -216,7 +217,7 @@ def get_unstaged_files(gitobj: Any) -> Dict[str, List[str]]:
     }
 
 
-def print_diff(gitobj: Any, unstaged: Dict[str, List[str]]) -> bool:
+def print_diff(gitobj: Repo, unstaged: Dict[str, List[str]]) -> bool:
 
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
@@ -246,7 +247,7 @@ def print_diff(gitobj: Any, unstaged: Dict[str, List[str]]) -> bool:
     return True
 
 
-def can_be_updated(path: str, gitobj: Any, do_print: bool = True) -> bool:
+def can_be_updated(path: str, gitobj: Repo, do_print: bool = True) -> bool:
     unstaged = get_unstaged_files(gitobj)
     updatable = len(unstaged["changed"]) == 0 and len(unstaged["untracked"]) == 0
 
@@ -257,7 +258,7 @@ def can_be_updated(path: str, gitobj: Any, do_print: bool = True) -> bool:
     return updatable
 
 
-def update(path: str, gitobj: Any) -> None:
+def update(path: str, gitobj: Repo) -> None:
 
     if not gitobj.active_branch:  # pragma: no cover
         log.error("Can't update {}, no active branch found", path)
@@ -268,6 +269,32 @@ def update(path: str, gitobj: Any) -> None:
             try:
                 branch = gitobj.active_branch.name
                 log.info("Updating {} {}@{}", remote, path, branch)
+
+                fetch(path, gitobj)
+                commits_behind = gitobj.iter_commits(
+                    f"{branch}..origin/{branch}", max_count=MAX_FETCHED_COMMITS
+                )
+                try:
+                    commits_behind_list = list(commits_behind)
+                except GitCommandError:  # pragma: no cover
+                    log.info(
+                        "Remote branch {} not found for {}. Is it a local branch?",
+                        branch,
+                        path,
+                    )
+                else:
+                    if commits_behind_list:  # pragma: no cover
+                        for c in commits_behind_list:
+                            message = str(c.message).strip().replace("\n", "")
+
+                            if message.startswith("#"):
+                                continue
+
+                            sha = c.hexsha[0:7]
+                            if len(message) > 60:
+                                message = message[0:57] + "..."
+                            log.info("... pulling commit {}: {}", sha, message)
+
                 remote.pull(branch)
             except GitCommandError as e:  # pragma: no cover
                 log.error("Unable to update {} repo\n{}", path, e)
@@ -275,7 +302,7 @@ def update(path: str, gitobj: Any) -> None:
                 print_and_exit("Unable to update {} repo, {}", path, str(e))
 
 
-def check_unstaged(path: str, gitobj: Any) -> None:
+def check_unstaged(path: str, gitobj: Repo) -> None:
 
     unstaged = get_unstaged_files(gitobj)
     if len(unstaged["changed"]) > 0 or len(unstaged["untracked"]) > 0:
@@ -283,7 +310,7 @@ def check_unstaged(path: str, gitobj: Any) -> None:
     print_diff(gitobj, unstaged)
 
 
-def fetch(path: str, gitobj: Any) -> None:
+def fetch(path: str, gitobj: Repo) -> None:
 
     for remote in gitobj.remotes:
         if remote.name == "origin":
@@ -293,7 +320,7 @@ def fetch(path: str, gitobj: Any) -> None:
                 print_and_exit(str(e))
 
 
-def check_updates(path: str, gitobj: Any) -> None:
+def check_updates(path: str, gitobj: Repo) -> None:
 
     fetch(path, gitobj)
 
@@ -302,11 +329,10 @@ def check_updates(path: str, gitobj: Any) -> None:
         log.warning("Is {} repo detached? Unable to verify updates", path)
         return None
 
-    max_remote = 20
-
     # CHECKING COMMITS BEHIND (TO BE PULLED) #
-    behind_check = f"{branch}..origin/{branch}"
-    commits_behind = gitobj.iter_commits(behind_check, max_count=max_remote)
+    commits_behind = gitobj.iter_commits(
+        f"{branch}..origin/{branch}", max_count=MAX_FETCHED_COMMITS
+    )
 
     try:
         commits_behind_list = list(commits_behind)
@@ -325,13 +351,17 @@ def check_updates(path: str, gitobj: Any) -> None:
             for c in commits_behind_list:
                 message = str(c.message).strip().replace("\n", "")
 
+                if message.startswith("#"):
+                    continue
+
                 sha = c.hexsha[0:7]
                 if len(message) > 60:
                     message = message[0:57] + "..."
-                log.warning("Missing commit from {}: {} ({})", path, sha, message)
+                log.warning("... missing commit from {}: {} ({})", path, sha, message)
 
-    ahead_check = f"origin/{branch}..{branch}"
-    commits_ahead = gitobj.iter_commits(ahead_check, max_count=max_remote)
+    commits_ahead = gitobj.iter_commits(
+        f"origin/{branch}..{branch}", max_count=MAX_FETCHED_COMMITS
+    )
     try:
         commits_ahead_list = list(commits_ahead)
     except GitCommandError:  # pragma: no cover
@@ -351,3 +381,9 @@ def check_updates(path: str, gitobj: Any) -> None:
             if len(message) > 60:  # pragma: no cover
                 message = message[0:57] + "..."
             log.warning("Unpushed commit in {}: {} ({})", path, sha, message)
+
+
+def get_last_commit(gitobj: Repo) -> str:
+    if gitobj and gitobj.heads:
+        return next(gitobj.iter_commits()).hexsha[0:8]
+    return ""

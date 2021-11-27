@@ -4,27 +4,28 @@ This module will test the dump command
 
 from faker import Faker
 
-from tests import (
+# from controller import SWARM_MODE
+from tests import (  # pull_images,
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
-    pull_images,
     random_project_name,
 )
 
 
 def test_dump(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "dump")
+
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
-        frontend="angular",
-        services=["rabbit", "neo4j"],
+        frontend="no",
     )
     init_project(capfd)
-    pull_images(capfd)
 
     exec_command(
         capfd,

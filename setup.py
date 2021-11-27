@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "2.0"
+version = "2.1"
 
 setup(
     name="rapydo",
@@ -16,8 +16,7 @@ setup(
     },
     # Remember to update mypy.additional_dependencies
     install_requires=[
-        "docker-compose==1.29.2",
-        "python-on-whales==0.23.0",
+        "python-on-whales==0.32.0",
         "python-dateutil",
         "pytz",
         "loguru",
@@ -25,12 +24,25 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.18",
+        "GitPython==3.1.24",
         "PyYAML==5.4.1",
         "pip>=10.0.0",
         "requests>=2.6.1",
-        "typer[all]==0.3.2",
+        "typer[all]==0.4.0",
+        "click==8.0.1",
+        "zxcvbn",
+        "tabulate",
     ],
+    extras_require={
+        "dev": [
+            "setuptools",
+            "pytest",
+            "pytest-cov",
+            "pytest-timeout",
+            "pytest-sugar",
+            "Faker",
+        ]
+    },
     keywords=["http", "api", "rest", "web", "backend", "rapydo"],
     classifiers=[
         "Programming Language :: Python",

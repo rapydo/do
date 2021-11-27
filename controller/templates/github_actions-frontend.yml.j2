@@ -22,29 +22,36 @@ jobs:
       - uses: rapydo/actions/install@v1
         with:
           project: ${PROJECT}
-          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+          # swarm: 1
 
       - name: Run Karma
         run: |
-          rapydo -s frontend pull --quiet
-          rapydo -s frontend start
+          rapydo pull --quiet frontend
+          rapydo start frontend
           sleep 5
-          rapydo -s frontend logs
-          rapydo shell --no-tty frontend "yarn install"
-          rapydo shell --no-tty frontend "reload-types"
-          rapydo shell --no-tty frontend "yarn run test:single"
-          cp data/${PROJECT}/karma/lcov.info .
-          bash <(curl -s https://codecov.io/bash)
+          rapydo logs frontend
+          rapydo shell frontend "yarn install"
+          rapydo shell frontend "reload-types"
+          rapydo shell frontend "yarn run test:single"
 
-      - name: Production mode
+      - name: Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: projects/${PROJECT}
+          project: ${PROJECT}
+          step: frontend
+          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+
+      - name: Production Mode
         run: |
-          rapydo remove --all
-          rapydo --prod init --force
-          rapydo -s frontend,proxy pull --quiet
+          rapydo remove
+          # rapydo remove registry
+          rapydo --testing --prod init --force
+          # rapydo run registry
+          rapydo pull --quiet frontend proxy
 
-          rapydo -s frontend,proxy start
-          rapydo dump
-          rapydo -s frontend logs --follow
-          docker-compose logs --tail 2 frontend 2>&1 | grep "files have been compressed."
-          docker-compose logs --tail 20 proxy
+          rapydo start frontend proxy
+          rapydo logs --follow frontend
+          rapydo logs --tail 6 frontend | grep "files have been compressed."
+          rapydo logs --tail 20 proxy
           curl --insecure -X GET https://localhost

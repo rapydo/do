@@ -14,43 +14,46 @@ from controller.app import Application, Configuration
 from controller.packages import Packages
 from controller.utilities import git
 
-# https://github.com/docker/compose-cli/releases
-COMPOSE_VERSION = "v2.0.0-beta.6"
+# https://get.docker.com
+EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
+
+# https://github.com/docker/compose/releases
+COMPOSE_VERSION = "v2.1.0"
+EXPECTED_COMPOSE_BIN_MD5 = "36360ac1955f1e7be79a8b63532f4ffd"
+
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.6.1"
-
-
-EXPECTED_DOCKER_SCRIPT_MD5 = "2e7644d0fdc23b8df90d7d136a793248"
-EXPECTED_COMPOSE_SCRIPT_MD5 = "a7ff7d686995a7387918a5b06dfdbe93"
-EXPECTED_COMPOSE_BIN_MD5 = "72c895b551d12e5093ef3285b9d4309f"
-EXPECTED_BUILDX_BIN_MD5 = "caae05fcabd62f4e0708ea95c7c6b85f"
+BUILDX_VERSION = "v0.6.3"
+EXPECTED_BUILDX_BIN_MD5 = "1b3bcb477b47d2251389402d57221f6f"
 
 
 def download(url: str, expected_checksum: str) -> Path:
-    r = requests.get(url)
-    if r.status_code != 200:
-        print_and_exit(
-            "Can't download {}, invalid status code {}", url, str(r.status_code)
-        )
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code != 200:
+            print_and_exit(
+                "Can't download {}, invalid status code {}", url, str(r.status_code)
+            )
 
-    file: Path = Path(tempfile.NamedTemporaryFile().name)
+        file: Path = Path(tempfile.NamedTemporaryFile().name)
 
-    with open(file, "wb") as f:
-        for chunk in r.iter_content(chunk_size=1024):
-            if chunk:  # filter out keep-alive new chunks
-                f.write(chunk)
+        with open(file, "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
 
-    md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
-    if md5 == expected_checksum:
-        log.info("Checksum verified: {}", md5)
-    else:
-        print_and_exit(
-            "Checksum of download file ({}) does not match the expected value ({})" "",
-            md5,
-            expected_checksum,
-        )
+        md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
+        if md5 == expected_checksum:
+            log.info("Checksum verified: {}", md5)
+        else:
+            print_and_exit(
+                "Checksum of download file ({}) does not match the expected value ({})",
+                md5,
+                expected_checksum,
+            )
 
-    return file
+        return file
+    except requests.exceptions.ReadTimeout as e:  # pragma: no cover
+        print_and_exit("The request timed out, please retry in a while ({})", str(e))
 
 
 @Application.app.command(help="Install the specified version of rapydo")
@@ -63,6 +66,11 @@ def install(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--no-editable", not editable, IF=not editable),
+        Application.serialize_parameter("", version),
+    )
 
     if version == "docker":
         log.info("Docker current version: {}", Packages.get_bin_version("docker"))
@@ -81,23 +89,12 @@ def install(
         return None
 
     if version == "compose":
-        url = "https://raw.githubusercontent.com/docker/compose-cli/"
-        url += "main/scripts/install/install_linux.sh"
-        log.info("Downloading installation script: {}", url)
-        f = download(url, EXPECTED_COMPOSE_SCRIPT_MD5)
-
-        with Sultan.load(sudo=True) as sultan:
-            result = sultan.sh(f).run()
-
-            for r in result.stdout + result.stderr:
-                print(r)
-
         cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
         cli_plugin.mkdir(parents=True, exist_ok=True)
         compose_bin = cli_plugin.joinpath("docker-compose")
 
-        url = "https://github.com/docker/compose-cli/releases/download/"
-        url += f"{COMPOSE_VERSION}/docker-compose-linux-amd64"
+        url = "https://github.com/docker/compose/releases/download/"
+        url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
 
         log.info("Downloading compose binary: {}", url)
         f = download(url, EXPECTED_COMPOSE_BIN_MD5)
@@ -111,7 +108,6 @@ def install(
         return None
 
     if version == "buildx":
-
         if docker.buildx.is_installed():
             v = docker.buildx.version()
             log.info("Docker buildx current version: {}", v)

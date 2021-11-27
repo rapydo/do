@@ -2,15 +2,17 @@
 This module will test the build and pull commands
 """
 import os
+from pathlib import Path
 
 from faker import Faker
 from git import Repo
 
-from controller import SWARM_MODE, __version__
+from controller import SWARM_MODE, __version__, colors
 from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
     start_registry,
@@ -19,11 +21,14 @@ from tests import (
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "pull")
+    execute_outside(capfd, "build")
+
     project2 = random_project_name(faker)
     create_project(
         capfd=capfd,
         name="testbuild",
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )
@@ -31,30 +36,44 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     create_project(
         capfd=capfd,
         name=project2,
-        auth="postgres",
+        auth="no",
         frontend="no",
         services=["rabbit"],
     )
 
     if SWARM_MODE:
+
+        exec_command(
+            capfd,
+            "pull",
+            "Registry 127.0.0.1:5000 not reachable.",
+        )
+
+        exec_command(
+            capfd,
+            "build",
+            "docker buildx is installed",
+            "Registry 127.0.0.1:5000 not reachable.",
+        )
+
         start_registry(capfd)
 
     image = f"rapydo/backend:{__version__}"
     exec_command(
         capfd,
         "start",
-        f"Missing {image} image for backend service, execute rapydo pull",
+        f"Missing {image} image, execute {colors.RED}rapydo pull backend",
     )
 
     exec_command(
         capfd,
-        "-e ACTIVATE_RABBIT=0 -s rabbit pull --quiet",
+        "-e ACTIVATE_RABBIT=0 pull --quiet rabbit",
         "No such service: rabbit",
     )
 
     exec_command(
         capfd,
-        "-s proxy pull --quiet",
+        "pull --quiet proxy",
         "No such service: proxy",
     )
 
@@ -67,15 +86,15 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Basic pull
     exec_command(
         capfd,
-        "-s xxx pull",
+        "pull xxx",
         "No such service: xxx",
     )
 
     # --all is useless here... added just to include the parameter in some tests.
-    # A true test on such parameter would be quite complicated...
+    # A true test on such parameter would be quite complex...
     exec_command(
         capfd,
-        "-s backend pull --all --quiet",
+        "pull --all --quiet backend",
         "Images pulled from docker hub",
     )
 
@@ -94,9 +113,9 @@ services:
     # Missing folder
     exec_command(
         capfd,
-        "-s rabbit build",
-        # Errors from docker compose
-        " either does not exist, is not accessible, or is not a valid URL.",
+        "build rabbit",
+        "docker buildx is installed",
+        "Build path not found",
     )
 
     os.makedirs("projects/testbuild/builds/rabbit")
@@ -104,7 +123,8 @@ services:
     # Missing Dockerfile
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         "Build path not found: ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -114,7 +134,8 @@ services:
         pass
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -124,7 +145,8 @@ services:
         f.write("RUN ls")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
         "projects/testbuild/builds/rabbit/Dockerfile",
     )
@@ -134,7 +156,8 @@ services:
         f.write("FROM rapydo/invalid")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
         "projects/testbuild/builds/rabbit/Dockerfile",
@@ -144,8 +167,7 @@ services:
     exec_command(
         capfd,
         "start",
-        # f"Missing {image} image for rabbit service, execute rapydo build",
-        " image for rabbit service, execute rapydo build",
+        f" image, execute {colors.RED}rapydo build rabbit",
     )
 
     # Not a RAPyDo child but build is possibile
@@ -153,7 +175,8 @@ services:
         f.write("FROM ubuntu")
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         "Custom images built",
     )
 
@@ -172,14 +195,28 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "-s rabbit build",
+        "build rabbit",
+        "docker buildx is installed",
         f"naming to docker.io/testbuild/rabbit:{__version__}",
         "Custom images built",
     )
 
+    test_file = Path("projects/testbuild/builds/rabbit/test")
+    with open(test_file, "w+") as f:
+        f.write("test")
+
     exec_command(
         capfd,
-        f"-e ACTIVATE_RABBIT=0 -p {project2} -s rabbit build --core",
+        "check -i main --no-git",
+        "Can't retrieve a commit history for ",
+        "Checks completed",
+    )
+
+    test_file.unlink()
+
+    exec_command(
+        capfd,
+        f"-e ACTIVATE_RABBIT=0 -p {project2} build --core rabbit",
         "No such service: rabbit",
     )
 
@@ -187,10 +224,17 @@ RUN mkdir xyz
     # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild
     # This simulate a pull updating a core image making the custom image obsolete
+
+    if SWARM_MODE:
+        swarm_push_warn = "Local registry push is not implemented yet for core images"
+    else:
+        swarm_push_warn = ""
+
     exec_command(
         capfd,
-        f"-p {project2} -s rabbit build --core",
+        f"-p {project2} build --core rabbit",
         "Core images built",
+        swarm_push_warn,
         "No custom images to build",
     )
     exec_command(
@@ -199,7 +243,7 @@ RUN mkdir xyz
         f"Obsolete image testbuild/rabbit:{__version__}",
         "built on ",
         " that changed on ",
-        "Update it with: rapydo --services rabbit build",
+        f"Update it with: {colors.RED}rapydo build rabbit",
     )
 
     # Add a second service with the same image to test redundant builds
@@ -224,7 +268,7 @@ RUN mkdir xyz
         f"Obsolete image rapydo/backend:{__version__}",
         "built on ",
         " but changed on ",
-        "Update it with: rapydo --services backend pull",
+        f"Update it with: {colors.RED}rapydo pull backend",
     )
 
     exec_command(capfd, "remove", "Stack removed")
@@ -243,15 +287,13 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "-s rabbit3 pull --quiet",
+        "pull --quiet rabbit3",
         "Base images pulled from docker hub",
     )
 
     # Now this should fail because pull does not include custom services
     exec_command(
         capfd,
-        "-s rabbit3 start",
+        "start rabbit3",
         "Stack started",
     )
-
-    exec_command(capfd, "remove", "Stack removed")

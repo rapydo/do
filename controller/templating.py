@@ -7,6 +7,7 @@ from typing import Dict, List, Union
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
+from zxcvbn import zxcvbn
 
 from controller import TEMPLATE_DIR, log, print_and_exit
 
@@ -25,14 +26,25 @@ def username(param_not_used: str, length: int = 8) -> str:
 
 def password(param_not_used: str, length: int = 12, symbols: str = "") -> str:
     rand = random.SystemRandom()
-    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits + symbols
+    charset = string.ascii_lowercase + string.ascii_uppercase + string.digits
 
     random_string = rand.choice(charset)
-    charset += string.digits
+    charset += symbols
     for _ in range(length - 1):
         random_string += rand.choice(charset)
 
     return random_string
+
+
+def get_strong_password() -> str:
+    p = password(length=16, param_not_used="", symbols="%*,-.=^_~")
+    result = zxcvbn(p)
+    score = result["score"]
+    # Should never happens since 16 characters with symbols is very unlikely to be weak
+    if score < 4:  # pragma: no cover
+        log.warning("Generated password is not strong enough, sampling again")
+        return get_strong_password()
+    return p
 
 
 class Templating:

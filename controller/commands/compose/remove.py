@@ -1,60 +1,77 @@
+from typing import List
+
 import typer
 
-from controller import log, print_and_exit
-from controller.app import Application, Configuration
-from controller.deploy.compose import Compose
+from controller import REGISTRY, log
+from controller.app import Application
+from controller.deploy.compose_v2 import Compose
 
 
 @Application.app.command(help="Stop and remove containers")
 def remove(
-    rm_networks: bool = typer.Option(
-        False,
-        "--networks",
-        "--net",
-        help="Also remove containers networks",
-        show_default=False,
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be removed",
+        shell_complete=Application.autocomplete_service,
     ),
     rm_all: bool = typer.Option(
         False,
         "--all",
-        help="Also remove networks and persistent data stored in docker volumes",
+        help="Also remove persistent data stored in docker volumes",
         show_default=False,
     ),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.print_command(
+        Application.serialize_parameter("--all", rm_all, IF=rm_all),
+        Application.serialize_parameter("", services),
+    )
 
-    dc = Compose(files=Application.data.files)
+    remove_extras: List[str] = []
+    for extra in (
+        REGISTRY,
+        "adminer",
+        "swaggerui",
+    ):
+        if services and extra in services:
+            # services is a tuple, even if defined as List[str] ...
+            services = list(services)
+            services.pop(services.index(extra))
+            remove_extras.append(extra)
 
-    if rm_networks or rm_all:
+    Application.get_controller().controller_init(services)
 
-        if Configuration.services_list is not None:
+    compose = Compose(Application.data.files)
 
-            opt = "--networks" if rm_networks else "--all"
+    if remove_extras:
+        for extra_service in remove_extras:
+            if not compose.docker.container.exists(extra_service):
+                log.error("Service {} is not running", extra_service)
+                continue
 
-            print_and_exit(
-                "Incompatibile options {opt} and --service\n"
-                + "rapydo remove {opt} is ALWAYS applied to EVERY container of the "
-                + "stack due to the underlying docker-compose implementation. "
-                + "If you want to continue remove --service option",
-                opt=opt,
-            )
-        else:
+            compose.docker.container.remove(extra_service, force=True)
+            log.info("Service {} removed", extra_service)
 
-            options = {
-                "--volumes": rm_all,
-                "--remove-orphans": False,
-                "--rmi": "local",  # 'all'
-            }
-            dc.command("down", options)
+        # Nothing more to do
+        if not services:
+            return
+
+    all_services = Application.data.services == Application.data.active_services
+
+    if all_services and rm_all:
+        # Networks are not removed, but based on docker compose down --help they should
+        # Also docker-compose down removes network from what I remember
+        # Should be reported as bug? If corrected a specific check in test_remove.py
+        # will start to fail
+        compose.docker.compose.down(
+            remove_orphans=False,
+            remove_images="local",
+            # Remove named volumes declared in the volumes section of the
+            # Compose file and anonymous volumes attached to containers.
+            volumes=rm_all,
+        )
     else:
-
-        options = {
-            "SERVICE": Application.data.services,
-            # '--stop': True,  # BUG? not working
-            "--force": True,
-            "-v": False,  # dangerous?
-        }
-        dc.command("stop", options)
-        dc.command("rm", options)
+        # Important note: volumes=True only destroy anonymous volumes,
+        # not named volumes like down should do
+        compose.docker.compose.rm(Application.data.services, stop=True, volumes=rm_all)
 
     log.info("Stack removed")

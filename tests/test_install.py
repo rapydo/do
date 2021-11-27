@@ -1,7 +1,6 @@
 """
 This module will test the install command
 """
-import os
 from pathlib import Path
 
 from faker import Faker
@@ -13,6 +12,7 @@ from tests import (
     TemporaryRemovePath,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
@@ -20,12 +20,14 @@ from tests import (
 
 def test_install(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "install")
+
     project = random_project_name(faker)
     create_project(
         capfd=capfd,
         name=project,
         auth="postgres",
-        frontend="angular",
+        frontend="no",
     )
     init_project(capfd)
 
@@ -85,14 +87,15 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     # are able to correctly resolve symlinks
     # ###########################################################
     # Copied from test_init_check_update.py from here...
-    os.rename("submodules", "submodules.bak")
-    os.mkdir("submodules")
+    submodules = Path("submodules")
+    submodules.rename("submodules.bak")
+    submodules.mkdir()
 
     # This is to re-fill the submodules folder,
     # these folder will be removed by the next init
     exec_command(capfd, "init", "Project initialized")
 
-    modules_path = os.path.abspath("submodules.bak")
+    modules_path = Path("submodules.bak").resolve()
 
     exec_command(
         capfd,
@@ -110,13 +113,6 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         " and updated",
         "All updated",
     )
-
-    exec_command(capfd, "install")
-
-    exec_command(capfd, "install --no-editable")
-
-    # This is the very last command... installing an old version!
-    exec_command(capfd, "install --no-editable 0.7.2")
 
     # This test will change the required version
     pconf = f"projects/{project}/project_configuration.yaml"
@@ -154,3 +150,9 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         f"This project is not compatible with rapydo version {__version__}",
         "Please upgrade rapydo to version 99.99.99 or modify this project",
     )
+
+    exec_command(capfd, "install --no-editable 0.8")
+
+    exec_command(capfd, "install --no-editable")
+
+    exec_command(capfd, "install")

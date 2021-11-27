@@ -1,12 +1,19 @@
+from typing import List
+
 import typer
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application
 from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Watch log tails of services")
 def logs(
+    services: List[str] = typer.Argument(
+        None,
+        help="Services to be inspected",
+        shell_complete=Application.autocomplete_service,
+    ),
     follow: bool = typer.Option(
         False,
         "--follow",
@@ -21,19 +28,25 @@ def logs(
         help="Number of lines to show",
     ),
 ) -> None:
-    Application.get_controller().controller_init()
+    Application.print_command(
+        Application.serialize_parameter("--follow", follow, IF=follow),
+        Application.serialize_parameter("--tail", tail),
+        Application.serialize_parameter("", services),
+    )
+    Application.get_controller().controller_init(services)
 
-    services = Application.data.services
+    if follow and len(Application.data.services) > 1:
+        print_and_exit("Follow flag is not supported on multiple services")
 
-    if len(services) > 1:
-        timestamps = False
-    elif services[0] in "frontend":
-        timestamps = True
-    else:
-        timestamps = False
+    for service in Application.data.services:
+        if service == "frontend":
+            timestamps = True
+        else:
+            timestamps = False
 
-    swarm = Swarm()
-    try:
-        swarm.logs(services, follow, tail, timestamps)
-    except KeyboardInterrupt:  # pragma: no cover
-        log.info("Stopped by keyboard")
+        swarm = Swarm()
+        try:
+            swarm.logs(service, follow, tail, timestamps)
+        except KeyboardInterrupt:  # pragma: no cover
+            log.info("Stopped by keyboard")
+        print("")

@@ -29,6 +29,7 @@ variables:
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     FILE_LOGLEVEL: WARNING
     LOG_RETENTION: 180 # in days
+    MIN_PASSWORD_SCORE: 2 # raised to 4 in prod mode
 
     ACTIVATE_BACKEND: 1
     ACTIVATE_PROXY: 0
@@ -52,7 +53,6 @@ variables:
 
     ACTIVATE_SWAGGERUI: 0
     ACTIVATE_ADMINER: 0
-    ACTIVATE_MONGOUI: 0
 
     RUN_SCHEMATHESIS: 1
     MAX_LOGS_LENGTH: 200
@@ -61,7 +61,7 @@ variables:
     FLASK_HOST: apiserver.dockerized.io
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
     FLASK_ENV: development
-    API_AUTOSTART: 0 # used in cypress testing mode to auto start the backend
+    API_AUTOSTART: 0 # used in some tests to auto-start the backend
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URI: ""
@@ -70,7 +70,7 @@ variables:
     PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
     BACKEND_PREFIX: ""
     APP_SECRETS: /secrets
-    UPLOAD_PATH: /uploads
+    DATA_PATH: /uploads
     DATA_IMPORT_FOLDER: /imports
     # from GUNICORN docs:
     # we recommend (2 x $num_cores) + 1 as the number of workers to start off with.
@@ -116,16 +116,16 @@ variables:
     SET_CSP_IMG_SRC:
     SET_CSP_FONT_SRC:
     SET_CSP_CONNECT_SRC:
+    SET_CSP_FRAME_SRC:
     SET_MAX_REQUESTS_PER_SECOND_AUTH: 2
     SET_MAX_REQUESTS_BURST_AUTH: 2
     SET_MAX_REQUESTS_PER_SECOND_API: 3
     SET_MAX_REQUESTS_BURST_API: 10
-    SET_MAX_REQUESTS_PER_SECOND_ASSETS: 10
-    SET_MAX_REQUESTS_BURST_ASSETS: 30
     # if empty will be automatically replaced with DOMAIN in proxy entrypoint
     CORS_ALLOWED_ORIGIN:
     # if enabled, make sure to copy client certificates in /etc/letsencrypt/client_certs
     SSL_VERIFY_CLIENT: 0
+    SSL_FORCE_SELF_SIGNED: 0
 
     ALCHEMY_ENABLE_CONNECTOR: 1
     ALCHEMY_EXPIRATION_TIME: 7200
@@ -193,8 +193,6 @@ variables:
     MONGO_DATABASE: rapydo
     MONGO_USER: mongo
     MONGO_PASSWORD: "D3vMode!" # This default is invalidated in production mode
-    MONGOUI_USER: mongo
-    MONGOUI_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     ELASTIC_HOST: elastic.dockerized.io
     ELASTIC_PORT: 9200
@@ -213,7 +211,6 @@ variables:
     RABBITMQ_SSL_KEYFILE:
     RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT:
     RABBITMQ_SSL_ENABLED: 0 # it is used by Celery
-    RABBITMQ_CTL_ERL_ARGS: "" # modified in production mode
 
     REDIS_ENABLE_CONNECTOR: 1
     REDIS_EXPIRATION_TIME: 86400
@@ -242,9 +239,6 @@ variables:
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
-    # Disabled in prod mode
-    # Note: unable to set $PYTHON_PATH to add restapi package to the watched folders
-    CELERY_AUTORELOAD: "watchmedo auto-restart --directory /code/ --recursive --pattern \\'*.py\\' --"
 
     # Flower
     FLOWER_USER: "flower" # This default is invalidated in production mode
@@ -266,49 +260,50 @@ variables:
     DEFAULT_SCALE_BACKEND: 1
     DEFAULT_SCALE_CELERY: 1
     DEFAULT_SCALE_CELERYBEAT: 1
-    DEFAULT_SCALE_PROXY: 1
+    # To allow nginx to access the real client IP it is now deployed in global mode
+    # to be able to map the port directly on the host, instead of being load balanced
+    # In this way the proxy can no longer be scaled
+    # DEFAULT_SCALE_PROXY: 1
     DEFAULT_SCALE_SWAGGERUI: 1
 
-    ASSIGNED_CPU_BACKEND: 0.25
-    ASSIGNED_MEMORY_BACKEND: 20M
-    ASSIGNED_CPU_PROXY: 0.25
-    ASSIGNED_MEMORY_PROXY: 20M
-    ASSIGNED_CPU_POSTGRES: 0.25
-    ASSIGNED_MEMORY_POSTGRES: 20M
-    ASSIGNED_CPU_MARIADB: 0.25
-    ASSIGNED_MEMORY_MARIADB: 20M
-    ASSIGNED_CPU_NEO4J: 0.25
-    ASSIGNED_MEMORY_NEO4J: 20M
-    ASSIGNED_CPU_MONGODB: 0.25
-    ASSIGNED_MEMORY_MONGODB: 20M
-    ASSIGNED_CPU_CELERY: 0.25
-    ASSIGNED_MEMORY_CELERY: 20M
-    ASSIGNED_CPU_CELERYBEAT: 0.25
-    ASSIGNED_MEMORY_CELERYBEAT: 20M
-    ASSIGNED_CPU_RABBIT: 0.25
-    ASSIGNED_MEMORY_RABBIT: 20M
-    ASSIGNED_CPU_REDIS: 0.25
-    ASSIGNED_MEMORY_REDIS: 20M
-    ASSIGNED_CPU_BOT: 0.25
-    ASSIGNED_MEMORY_BOT: 20M
-    ASSIGNED_CPU_FLOWER: 0.25
-    ASSIGNED_MEMORY_FLOWER: 20M
-    ASSIGNED_CPU_SWAGGERUI: 0.25
-    ASSIGNED_MEMORY_SWAGGERUI: 20M
-    ASSIGNED_CPU_ADMINER: 0.25
-    ASSIGNED_MEMORY_ADMINER: 20M
-    ASSIGNED_CPU_FTP: 0.25
-    ASSIGNED_MEMORY_FTP: 20M
-    ASSIGNED_CPU_SMTP: 0.25
-    ASSIGNED_MEMORY_SMTP: 20M
-    ASSIGNED_CPU_PUSHPIN: 0.25
-    ASSIGNED_MEMORY_PUSHPIN: 20M
-    ASSIGNED_CPU_REGISTRY: 0.25
-    ASSIGNED_MEMORY_REGISTRY: 20M
+    ASSIGNED_CPU_BACKEND: "0.25"
+    ASSIGNED_MEMORY_BACKEND: "20M"
+    ASSIGNED_CPU_PROXY: "0.25"
+    ASSIGNED_MEMORY_PROXY: "20M"
+    ASSIGNED_CPU_POSTGRES: "0.25"
+    ASSIGNED_MEMORY_POSTGRES: "20M"
+    ASSIGNED_CPU_MARIADB: "0.25"
+    ASSIGNED_MEMORY_MARIADB: "20M"
+    ASSIGNED_CPU_NEO4J: "0.25"
+    ASSIGNED_MEMORY_NEO4J: "20M"
+    ASSIGNED_CPU_MONGODB: "0.25"
+    ASSIGNED_MEMORY_MONGODB: "20M"
+    ASSIGNED_CPU_CELERY: "0.25"
+    ASSIGNED_MEMORY_CELERY: "20M"
+    ASSIGNED_CPU_CELERYBEAT: "0.25"
+    ASSIGNED_MEMORY_CELERYBEAT: "20M"
+    ASSIGNED_CPU_RABBIT: "0.25"
+    ASSIGNED_MEMORY_RABBIT: "20M"
+    ASSIGNED_CPU_REDIS: "0.25"
+    ASSIGNED_MEMORY_REDIS: "20M"
+    ASSIGNED_CPU_BOT: "0.25"
+    ASSIGNED_MEMORY_BOT: "20M"
+    ASSIGNED_CPU_FLOWER: "0.25"
+    ASSIGNED_MEMORY_FLOWER: "20M"
+    ASSIGNED_CPU_SWAGGERUI: "0.25"
+    ASSIGNED_MEMORY_SWAGGERUI: "20M"
+    ASSIGNED_CPU_ADMINER: "0.25"
+    ASSIGNED_MEMORY_ADMINER: "20M"
+    ASSIGNED_CPU_FTP: "0.25"
+    ASSIGNED_MEMORY_FTP: "20M"
+    ASSIGNED_CPU_SMTP: "0.25"
+    ASSIGNED_MEMORY_SMTP: "20M"
+    ASSIGNED_CPU_PUSHPIN: "0.25"
+    ASSIGNED_MEMORY_PUSHPIN: "20M"
+    ASSIGNED_CPU_REGISTRY: "0.25"
+    ASSIGNED_MEMORY_REGISTRY: "20M"
 
     # Local docker registry
-    ACTIVATE_REGISTRY: 0
-    # To be enabled with "manager.host"
     REGISTRY_HOST:
     REGISTRY_PORT: 5000
     REGISTRY_USERNAME: docker
@@ -316,10 +311,14 @@ variables:
     # Automatically set before creating the registry
     REGISTRY_HTTP_SECRET:
 
+    # Fail2ban
+    ACTIVATE_FAIL2BAN: 0 # enabled by default in production mode
+
     # To be enabled with "manager.host"
     # defaulted to local IP of active network interface
     # Note: can only be modified as env variable, not projectrc/-e :\
     SWARM_MANAGER_ADDRESS:
+    SYSLOG_ADDRESS: ""
 
     # Smtp
     SMTP_ENABLE_CONNECTOR: 1
@@ -328,7 +327,7 @@ variables:
     SMTP_ADMIN:
     SMTP_NOREPLY:
     SMTP_HOST:
-    SMTP_PORT:
+    SMTP_PORT: 25
     SMTP_USERNAME:
     SMTP_PASSWORD:
 
@@ -359,12 +358,12 @@ variables:
     ACTIVATE_AUTH: 1
     AUTH_SERVICE: NO_AUTHENTICATION
     AUTH_DEFAULT_USERNAME: "user@nomail.org"
-    AUTH_DEFAULT_PASSWORD: "test"
+    AUTH_DEFAULT_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     AUTH_MIN_PASSWORD_LENGTH: 8
     AUTH_FORCE_FIRST_PASSWORD_CHANGE: 0
     AUTH_MAX_PASSWORD_VALIDITY: 0
     AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: 0
-    AUTH_MAX_LOGIN_ATTEMPTS: 0
+    AUTH_MAX_LOGIN_ATTEMPTS: 8
     # Increased from 1 hour to 12 hours after implementing the unlock token mechanism
     # AUTH_LOGIN_BAN_TIME: 3600
     AUTH_LOGIN_BAN_TIME: 43200
@@ -391,7 +390,7 @@ project:
   title: "REST HTTP-API server with Python, Flask and Docker"
   description: "No description yet"
   keywords: ""
-  rapydo: 2.0
+  rapydo: 2.1
   version: v0.1
 
 tags:

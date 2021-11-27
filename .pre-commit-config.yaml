@@ -25,9 +25,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [
-            "docker-compose==1.29.2",
-            "python-on-whales==0.23.0",
-            "dockerfile-parse==1.2.0",
+            "python-on-whales==0.32.0",
             "python-dateutil",
             "pytz",
             "loguru",
@@ -35,20 +33,22 @@ repos:
             "sultan==0.9.1",
             "plumbum",
             "glom",
-            "GitPython==3.1.18",
+            "GitPython==3.1.24",
             "PyYAML==5.4.1",
             "pip>=10.0.0",
-            "typer[all]==0.3.2",
+            "typer[all]==0.4.0",
+            "click==8.0.1",
 
             # Extra dependencies
+            "pytest",
             "lxml",
-            "pytest-stub",
             "types-PyYAML",
             "types-pytz",
             "types-requests",
             "types-setuptools",
             "types-python-dateutil",
             "types-click",
+            "types-tabulate",
             "Faker",
           ]
 
@@ -90,3 +90,10 @@ repos:
             "--txt-report",
             ".",
           ]
+
+  - repo: https://github.com/gitguardian/gg-shield
+    rev: v1.7.3
+    hooks:
+      - id: ggshield
+        language_version: python3
+        stages: [commit]

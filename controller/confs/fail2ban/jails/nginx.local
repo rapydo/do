@@ -1,0 +1,6 @@
+[nginx]
+enabled  = true
+
+bantime = 24h
+findtime = 24h
+maxretry = 2

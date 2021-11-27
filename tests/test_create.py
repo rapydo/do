@@ -11,7 +11,7 @@ from typing import List
 import pytest
 
 from controller.templating import Templating
-from tests import Capture, TemporaryRemovePath, exec_command
+from tests import Capture, TemporaryRemovePath, exec_command, init_project
 
 
 def test_create(capfd: Capture) -> None:
@@ -260,11 +260,7 @@ def test_create(capfd: Capture) -> None:
         "Project ext successfully created",
     )
 
-    exec_command(
-        capfd,
-        "-p ext init --force",
-        "Project initialized",
-    )
+    init_project(capfd, "-p ext", "--force")
     exec_command(
         capfd,
         "-p ext check -i main --no-git --no-builds",

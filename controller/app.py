@@ -1,17 +1,23 @@
+import enum
 import json
 import os
 import shutil
 import sys
+import time
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
+import click
 import requests
 import typer
 from git import Repo as GitRepo
 from glom import glom
 from python_on_whales import docker
+from python_on_whales.utils import DockerException
+from tabulate import tabulate
+from zxcvbn import zxcvbn
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -22,16 +28,19 @@ from controller import (
     PLACEHOLDER,
     PROJECT_DIR,
     PROJECTRC,
+    RED,
+    REGISTRY,
     SUBMODULES_DIR,
     SWARM_MODE,
-    ComposeConfig,
+    TABLE_FORMAT,
+    YELLOW,
+    ComposeServices,
     EnvType,
     __version__,
     log,
     print_and_exit,
 )
 from controller.commands import load_commands
-from controller.deploy.compose import Compose
 from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
@@ -39,11 +48,11 @@ from controller.utilities import configuration, git, services, system
 
 warnings.simplefilter("always", DeprecationWarning)
 
-# From python 3.8 it could be a TypedDict
-DataFileStub = Dict[str, List[str]]
-
 ROOT_UID = 0
 BASE_UID = 1000
+
+
+CommandParameter = Union[int, str, bool, None, Path, Iterable[str], enum.Enum]
 
 
 class Configuration:
@@ -53,10 +62,10 @@ class Configuration:
     host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
     specs: Dict[str, str] = {}
     services_list: Optional[str]
-    excluded_services_list: Optional[str]
     environment: Dict[str, str]
 
     action: Optional[str] = None
+    parameters: List[str] = []
 
     production: bool = False
     testing: bool = False
@@ -85,12 +94,11 @@ class Configuration:
     # It will be replaced with PROJECT_DIR/project
     ABS_PROJECT_PATH: Path = PROJECT_DIR
 
-    # used by single-container commands (interfaces, ssl, volatile, ...) in swarm mode
+    # used by single-container commands (i.e. run) in swarm mode
     FORCE_COMPOSE_ENGINE: bool = False
 
     @staticmethod
-    def set_action(action: Optional[str]) -> None:
-        log.debug("Requested command: {}", action)
+    def set_action(action: Optional[str], params: Dict[str, Any]) -> None:
         Configuration.action = action
         Configuration.initialize = Configuration.action == "init"
         Configuration.update = Configuration.action == "update"
@@ -99,6 +107,50 @@ class Configuration:
         Configuration.print_version = Configuration.action == "version"
         Configuration.create = Configuration.action == "create"
 
+        params.pop("version")
+        # This will start to fail when this parameter will be dropped
+        params.pop("services_list")
+
+        Configuration.parameters = []
+        project = params.pop("project")
+        if project and project != Configuration.projectrc.get("project"):
+            Configuration.parameters.append(f"--project {project}")
+
+        hostname = params.pop("hostname")
+        if hostname != "localhost" and hostname != Configuration.projectrc.get(
+            "hostname"
+        ):
+            Configuration.parameters.append(f"--hostname {hostname}")
+
+        stack = params.pop("stack")
+        if stack and stack != Configuration.projectrc.get("stack"):
+            Configuration.parameters.append(f"--stack {stack}")
+
+        if params.pop("production"):
+            Configuration.parameters.append("--production")
+
+        if params.pop("testing"):
+            Configuration.parameters.append("--testing")
+
+        environment = params.pop("environment")
+        if environment:
+            for e in environment:
+                Configuration.parameters.append(f"--env {e}")
+
+        remote_engine = params.pop("remote_engine")
+        if remote_engine and stack:
+            Configuration.parameters.append(f"--remote {remote_engine}")
+
+        if params.pop("no_backend"):
+            Configuration.parameters.append("--no-backend")
+        if params.pop("no_frontend"):
+            Configuration.parameters.append("--no-frontend")
+        if params.pop("no_commons"):
+            Configuration.parameters.append("--no-commons")
+
+        if params:
+            log.warning("Found unknown parameters: {}", params)
+
 
 def projectrc_values(
     ctx: typer.Context, param: typer.CallbackParam, value: str
@@ -106,7 +158,7 @@ def projectrc_values(
     if ctx.resilient_parsing:  # pragma: no cover
         return None
 
-    if value != param.get_default(ctx):
+    if not param.name or value != param.get_default(ctx):
         return value
 
     from_projectrc = Configuration.projectrc.get(param.name)
@@ -132,18 +184,11 @@ def controller_cli_options(
         help="Name of the project",
         callback=projectrc_values,
     ),
+    # Deprecated since 2.1
     services_list: Optional[str] = typer.Option(
         None,
-        "--services",
         "-s",
         help="Comma separated list of services to be included",
-        callback=projectrc_values,
-    ),
-    excluded_services_list: Optional[str] = typer.Option(
-        None,
-        "--skip-services",
-        "-S",
-        help="Comma separated list of services to be exluded",
         callback=projectrc_values,
     ),
     hostname: str = typer.Option(
@@ -178,7 +223,7 @@ def controller_cli_options(
         show_default=False,
     ),
     environment: List[str] = typer.Option(
-        "",
+        [],
         "--env",
         "-e",
         help="Temporary change the value of an environment variable",
@@ -220,15 +265,20 @@ def controller_cli_options(
     ),
 ) -> None:
 
-    Configuration.set_action(ctx.invoked_subcommand)
+    # This is needed because during tests both Application and Configuration
+    # are persistent and after a run (i.e. after starting the registry)
+    # FORCE_COMPOSE_ENGINE remains enabled
+    # It would not be needed during the normal use of the controller
+    Configuration.FORCE_COMPOSE_ENGINE = False
 
-    if services_list and excluded_services_list:
-        print_and_exit(
-            "Incompatibile use of both --services/-s and --skip-services/-S options"
-        )
+    Configuration.set_action(ctx.invoked_subcommand, ctx.params)
+
+    # Deprecated since 2.1
+    if services_list:
+        warnings.warn("-s option is going to be replaced by rapydo <command> service")
+        time.sleep(1)
 
     Configuration.services_list = services_list
-    Configuration.excluded_services_list = excluded_services_list
     Configuration.production = production
     Configuration.testing = testing
     Configuration.project = project
@@ -236,6 +286,10 @@ def controller_cli_options(
     Configuration.remote_engine = remote_engine
     Configuration.environment = {}
     for e in environment:
+
+        if "=" not in e:
+            print_and_exit("Invalid enviroment, missing value in {}", e)
+
         key, value = e.split("=")
         Configuration.environment[key] = value
 
@@ -253,12 +307,12 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files: List[Path] = [],
-        base_files: List[Path] = [],
-        services: List[str] = [],
-        active_services: List[str] = [],
-        base_services: ComposeConfig = {},
-        compose_config: ComposeConfig = {},
+        files: List[Path],
+        base_files: List[Path],
+        services: List[str],
+        active_services: List[str],
+        base_services: ComposeServices,
+        compose_config: ComposeServices,
     ):
         self.files = files
         self.base_files = base_files
@@ -279,10 +333,12 @@ class Application:
     # controller app
     controller: Optional["Application"] = None
     project_scaffold = Project()
-    data = CommandsData()
-    # type ignore to be removed once the new gitpython version will be released
-    gits: Dict[str, GitRepo] = {}  # type: ignore
+    data: CommandsData
+    gits: Dict[str, GitRepo] = {}
     env: Dict[str, EnvType] = {}
+
+    base_services: ComposeServices
+    compose_config: ComposeServices
 
     def __init__(self) -> None:
 
@@ -293,12 +349,56 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        self.base_services: ComposeConfig = {}
-        self.compose_config: ComposeConfig = {}
-
         load_commands()
 
         Application.load_projectrc()
+
+    @staticmethod
+    def serialize_parameter(
+        param: str,
+        value: CommandParameter,
+        IF: CommandParameter = True,
+    ) -> Optional[str]:
+
+        if isinstance(value, enum.Enum):
+            value = value.value
+
+        if IF and value is not None:
+            if isinstance(value, bool):
+                return f"{param}"
+            if isinstance(value, tuple) or isinstance(value, list):
+                return " ".join([f"{param} {v}" for v in value])
+
+            # Options => (--param value)
+            if param:
+                return f"{param} {value}"
+
+            # Arguments ( => no param, only a value)
+            return str(value)
+
+        return None
+
+    @staticmethod
+    def print_command(*parameters: Optional[str]) -> None:
+
+        pre_params = " ".join(
+            [p for p in Configuration.parameters if p is not None]
+        ).strip()
+        post_params = " ".join([p for p in parameters if p is not None]).strip()
+
+        if pre_params:
+            pre_params = f"{pre_params} "
+
+        if post_params:
+            post_params = f" {post_params}"
+
+        log.debug(
+            "Command: rapydo {}{}{}",
+            pre_params,
+            Configuration.action,
+            post_params,
+            log_to_file=True,
+        )
 
     @staticmethod
     def get_controller() -> "Application":
@@ -306,7 +406,7 @@ class Application:
             raise AttributeError("Application.controller not initialized")
         return Application.controller
 
-    def controller_init(self, read_extended: bool = True) -> None:
+    def controller_init(self, services: Optional[Iterable[str]] = None) -> None:
         if Configuration.create:
             Application.check_installed_software()
             return None
@@ -335,7 +435,6 @@ class Application:
         else:
             log.debug("Selected project: {}", Configuration.project)
 
-        # TODO: give an option to skip things when you are not connected
         if (
             Configuration.initialize
             or Configuration.update
@@ -348,22 +447,23 @@ class Application:
             self.read_specs(read_extended=False)
             return None
 
-        # Auth is not yet available, will be read by read_specs
+        # Auth is not available yet, will be read by read_specs
         Application.project_scaffold.load_project_scaffold(
             Configuration.project, auth=None
         )
         Application.preliminary_version_check()
 
-        self.read_specs(read_extended=read_extended)  # read project configuration
+        # read project configuration
+        self.read_specs(read_extended=True)
 
         # from read_specs
         Application.project_scaffold.load_frontend_scaffold(Configuration.frontend)
         Application.verify_rapydo_version()
         Application.project_scaffold.inspect_project_folder()
 
-        # get user launching rapydo commands
         self.current_uid = system.get_current_uid()
         self.current_gid = system.get_current_gid()
+
         # Cannot be tested
         if self.current_uid == ROOT_UID:  # pragma: no cover
             self.current_uid = BASE_UID
@@ -384,9 +484,9 @@ class Application:
         self.make_env()
 
         # Compose services and variables
-        self.get_compose_configuration()
+        base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders()
+        self.check_placeholders_and_passwords(compose_config, self.enabled_services)
 
         # Final step, launch the command
 
@@ -395,8 +495,8 @@ class Application:
             base_files=self.base_files,
             services=self.enabled_services,
             active_services=self.active_services,
-            base_services=self.base_services,
-            compose_config=self.compose_config,
+            base_services=base_services,
+            compose_config=compose_config,
         )
 
         return None
@@ -422,6 +522,18 @@ class Application:
             sys.version_info.micro,
         )
 
+        # Deprecated since 2.1
+        if sys.version_info.major == 3 and sys.version_info.minor == 7:
+            warnings.warn(
+                YELLOW(
+                    "Support for Python 3.7 is deprecated and will be dropped "
+                    "in a future release. Please upgrade to python 3.8+"
+                )
+            )
+            import time
+
+            time.sleep(1)
+
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
         # 18.09.2 fixed the CVE-2019-5736 vulnerability
@@ -430,38 +542,24 @@ class Application:
             "docker", min_version="20.10.0", min_recommended_version="20.10.0"
         )
 
-        if docker.buildx.is_installed():
-            v = docker.buildx.version()
-            log.debug("docker buildx is installed: {}", v)
-        else:  # pragma: no cover
-            print_and_exit(
-                "A mandatory dependency is missing: docker buildx not found"
-                "\nInstallation guide: https://github.com/docker/buildx#binary-release"
-                "\nor try the automated installation with rapydo install buildx"
-            )
-
         if docker.compose.is_installed():
-            # NotImplementedError
+            # too slow to verify the version on every commands... near half a seconds
+            # Sometimes a couple of seconds!
             # v = docker.compose.version()
+            # log.debug("docker compose is installed: {}", v)
             log.debug("docker compose is installed")
         else:  # pragma: no cover
+            print_and_exit(
+                "A mandatory dependency is missing: docker compose not found"
+                "\nInstallation guide: "
+                "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
+                "\nor try the automated installation with {command}",
+                command=RED("rapydo install compose"),
+            )
 
-            if SWARM_MODE:
-                print_and_exit(
-                    "A mandatory dependency is missing: docker compose not found"
-                    "\nInstallation guide: "
-                    "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                    "\nor try the automated installation with rapydo install compose"
-                )
-            else:
-                log.warning(
-                    "Docker Compose V2 will be soon mandatory and it is not installed"
-                    "\nInstallation guide: "
-                    "https://docs.docker.com/compose/cli-command/#installing-compose-v2"
-                    "\nor try the automated installation with rapydo install compose"
-                )
-
-        Packages.check_program("git")
+        # no need to check the git executable, because alredy verified by GitPython
+        # in case of missing git GitPython will fail and this check will never executed
+        # Packages.check_program("git")
 
     def read_specs(self, read_extended: bool = True) -> None:
         """Read project configuration"""
@@ -521,8 +619,7 @@ class Application:
         specs = configuration.load_yaml_file(
             file=Configuration.ABS_PROJECT_PATH.joinpath(
                 configuration.PROJECT_CONF_FILENAME
-            ),
-            keep_order=True,
+            )
         )
 
         Application.verify_rapydo_version(
@@ -532,7 +629,7 @@ class Application:
     @staticmethod
     def verify_rapydo_version(rapydo_version: str = "") -> bool:
         """
-        Verify if the installed rapydo version matches the current project requirement
+        Verify if the installed controller matches the current project requirement
         """
 
         if not rapydo_version:
@@ -568,15 +665,14 @@ You can use of one:
         """Check if connected to internet"""
 
         try:
-            requests.get("https://www.google.com")
+            requests.get("https://www.google.com", timeout=2)
             if Configuration.check:
                 log.info("Internet connection is available")
         except requests.ConnectionError:  # pragma: no cover
             print_and_exit("Internet connection is unavailable")
 
-    # type ignore to be removed once the new gitpython version will be released
     @staticmethod
-    def working_clone(  # type: ignore
+    def working_clone(
         name: str, repo: Dict[str, str], from_path: Optional[Path] = None
     ) -> Optional[GitRepo]:
 
@@ -648,7 +744,9 @@ You can use of one:
             if repo:
                 Application.gits[name] = repo
 
-    def get_compose_configuration(self) -> None:
+    def get_compose_configuration(
+        self, enabled_services: Optional[Iterable[str]] = None
+    ) -> Tuple[ComposeServices, ComposeServices]:
 
         compose_files: List[Path] = []
 
@@ -666,11 +764,14 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
+                if SWARM_MODE and Configuration.production:
+                    add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
-        if SWARM_MODE:
+        if SWARM_MODE and not Configuration.FORCE_COMPOSE_ENGINE:
             add(CONFS_DIR, "swarm_options.yml")
 
         if Application.env.get("NFS_HOST"):
+            log.info("NFS Server is enabled")
             add(CONFS_DIR, "volumes_nfs.yml")
         else:
             add(CONFS_DIR, "volumes_local.yml")
@@ -701,20 +802,19 @@ You can use of one:
         # Read necessary files
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
         # to build the config with files and variables
-        dc = Compose(files=self.base_files)
-        self.base_services = cast(ComposeConfig, dc.config().get("services", {}))
 
-        dc = Compose(files=self.files)
-        self.compose_config = cast(ComposeConfig, dc.config().get("services", {}))
+        from controller.deploy.compose_v2 import Compose
 
-        self.set_active_services()
+        compose = Compose(files=self.base_files)
+        base_services = compose.get_config().services
 
-    def set_active_services(self) -> None:
-        self.active_services = services.find_active(self.compose_config)
+        compose = Compose(files=self.files)
+        compose_config = compose.get_config().services
+
+        self.active_services = services.find_active(compose_config)
 
         self.enabled_services = services.get_services(
-            Configuration.services_list,
-            Configuration.excluded_services_list,
+            Configuration.services_list or enabled_services,
             default=self.active_services,
         )
 
@@ -724,7 +824,9 @@ You can use of one:
 
         log.debug("Enabled services: {}", self.enabled_services)
 
-        self.create_datafile()
+        self.create_datafile(list(compose_config.keys()), self.active_services)
+
+        return base_services, compose_config
 
     def create_projectrc(self) -> None:
         templating = Templating()
@@ -733,6 +835,7 @@ You can use of one:
             {
                 "project": Configuration.project,
                 "hostname": Configuration.hostname,
+                "swarm": SWARM_MODE,
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,
@@ -782,6 +885,7 @@ You can use of one:
             Application.env["BASE_PROJECT"] = Application.env["EXTENDED_PROJECT"]
 
         Application.env["RAPYDO_VERSION"] = __version__
+        Application.env["BUILD"] = git.get_last_commit(Application.gits["main"])
         Application.env["PROJECT_VERSION"] = Configuration.version
         Application.env["CURRENT_UID"] = str(self.current_uid)
         Application.env["CURRENT_GID"] = str(self.current_gid)
@@ -793,7 +897,7 @@ You can use of one:
         )
         Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords or ""
 
-        if Configuration.testing:
+        if Configuration.testing and not Configuration.production:
             Application.env["APP_MODE"] = "test"
 
         Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
@@ -819,19 +923,37 @@ You can use of one:
         if SWARM_MODE:
 
             if not Application.env.get("SWARM_MANAGER_ADDRESS"):
-                Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip()
+                Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip(
+                    Configuration.production
+                )
 
             if not Application.env.get("REGISTRY_HOST"):
                 Application.env["REGISTRY_HOST"] = Application.env[
                     "SWARM_MANAGER_ADDRESS"
                 ]
 
-            # Application.env["ACTIVATE_REGISTRY"] = "1"
+            # is None ensure empty string as a valid address
+            if Application.env.get("SYSLOG_ADDRESS") is None:
+                manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
+                Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
 
         if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
-            Application.env["DEPLOY_ENGINE"] = "compose"
+            DEPLOY_ENGINE = "compose"
         else:
-            Application.env["DEPLOY_ENGINE"] = "swarm"
+            DEPLOY_ENGINE = "swarm"
+
+        Application.env["DEPLOY_ENGINE"] = DEPLOY_ENGINE
+
+        # Unfortunately this will only work after the creation of the network
+        # i.e. will be fallen back to 127.0.0.1 the first time
+        try:
+            DOCKER_SUBNET = docker.network.inspect(
+                f"{Configuration.project}_{DEPLOY_ENGINE}_default"
+            ).ipam.config[0]["Subnet"]
+        # The first execution will fail and fallen back to localhost
+        except DockerException:
+            DOCKER_SUBNET = "127.0.0.1"
+        Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
         bool_envs = [
             # This variable is for RabbitManagement and is expected to be true|false
@@ -843,14 +965,6 @@ You can use of one:
         ]
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
-
-                if (
-                    Configuration.production
-                    and key.endswith("_PASSWORD")
-                    and value
-                    and len(str(value)) < 8
-                ):
-                    log.warning("{} is set with a short password", key)
 
                 # Deprecated since 1.0
                 # Backend and Frontend use different booleans due to Py vs Js
@@ -877,72 +991,70 @@ You can use of one:
                     value = str(value)
                 if " " in value:
                     value = f"'{value}'"
+
                 # if len(value) == 0:
                 #     value = f"'{value}'"
+
                 whandle.write(f"{key}={value}\n")
 
-    def create_datafile(self) -> None:
+    @staticmethod
+    def create_datafile(services: List[str], active_services: List[str]) -> None:
         try:
             DATAFILE.unlink()
         except FileNotFoundError:
             pass
 
-        data: DataFileStub = {
+        data = {
             "submodules": [k for k, v in Application.gits.items() if v is not None],
-            "services": self.active_services,
-            "allservices": list(self.compose_config.keys()),
+            "services": active_services,
+            "allservices": services,
         }
 
         with open(DATAFILE, "w+") as outfile:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile() -> DataFileStub:
-        output: DataFileStub = {}
+    def parse_datafile(key: str) -> List[str]:
         try:
             with open(DATAFILE) as json_file:
                 datafile = json.load(json_file)
-                # This is needed to let mypy understand the correct type
-                output["submodules"] = datafile.get("submodules")
-                output["services"] = datafile.get("services")
-                output["allservices"] = datafile.get("allservices")
-                return output
+                return cast(List[str], datafile.get(key, []))
         except FileNotFoundError:
-            return output
+            return []
 
     @staticmethod
-    def autocomplete_service(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("services", [])
+    def autocomplete_service(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
+        values = Application.parse_datafile("services")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_allservice(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("allservices", [])
+    def autocomplete_allservice(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
+        values = Application.parse_datafile("allservices")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
     @staticmethod
-    def autocomplete_submodule(incomplete: str) -> List[str]:
-        d = Application.parse_datafile()
-        if not d:
-            return []
-        values = d.get("submodules", [])
+    def autocomplete_submodule(
+        ctx: click.core.Context, param: click.Parameter, incomplete: str
+    ) -> List[str]:
+        values = Application.parse_datafile("submodules")
         if not incomplete:
             return values
         return [x for x in values if x.startswith(incomplete)]
 
-    def check_placeholders(self) -> Set[str]:
+    @staticmethod
+    def check_placeholders_and_passwords(
+        compose_services: ComposeServices, active_services: List[str]
+    ) -> None:
 
-        if len(self.active_services) == 0:  # pragma: no cover
+        if not active_services:  # pragma: no cover
             print_and_exit(
                 """You have no active service
 \nSuggestion: to activate a top-level service edit your project_configuration
@@ -950,54 +1062,89 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         elif Configuration.check:
-            log.info("Active services: {}", self.active_services)
+            log.info("Active services: {}", active_services, log_to_file=True)
 
-        missing = set()
-        for service_name in self.active_services:
-            service = self.compose_config.get(service_name)
+        extra_services: List[str] = []
+        if SWARM_MODE and REGISTRY not in active_services:
+            extra_services.append(REGISTRY)
+
+        all_services = active_services + extra_services
+
+        missing: Dict[str, Set[str]] = {}
+        passwords: Dict[str, str] = {}
+        passwords_services: Dict[str, Set[str]] = {}
+        for service_name in all_services:
+            # This can happens with `rapydo run swagger` because in case of run
+            # the controller_init method is executed without passing the service
+            # This is because interfaces are not enabled on the base stack and the
+            # controller_init([service]) would fail
+            # As side effect, non-existing services are not blocked
+            if service_name not in compose_services:
+                continue
+
+            service = compose_services[service_name]
 
             if service:
-                for key, value in (
-                    cast(Dict[str, Any], service).get("environment", {}).items()
-                ):
-                    if PLACEHOLDER in str(value):
+                for key, value in service.environment.items():
+                    if str(value) == PLACEHOLDER:
                         key = services.normalize_placeholder_variable(key)
-                        missing.add(key)
+                        missing.setdefault(key, set())
+                        missing[key].add(service_name)
+
+                    elif key.endswith("_PASSWORD") and value:
+                        key = services.normalize_placeholder_variable(key)
+                        passwords.setdefault(key, value)
+                        passwords_services.setdefault(key, set())
+                        passwords_services[key].add(service_name)
 
         placeholders = []
-        for key in missing:
+        for variable, raw_services in missing.items():
 
-            serv = services.vars_to_services_mapping.get(key)
+            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            active_serv = [s for s in serv if s in all_services]
 
-            if serv:
-                active_serv = []
-                for i in serv:
-                    if i in self.active_services:
-                        active_serv.append(i)
+            if active_serv:
+                placeholders.append([variable, ", ".join(active_serv)])
 
-                if active_serv:
-                    placeholders.append(
-                        "{:<20}\trequired by\t{}".format(key, ", ".join(active_serv))
-                    )
-            # Should never happens since all services are configured, cannot be tested
-            else:  # pragma: no cover
-                # with py39 it would be key.removeprefix('INJECT_')
-                if key.startswith("INJECT_"):
-                    key = key[len("INJECT_") :]
+        MIN_PASSWORD_SCORE = int(
+            Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
+        )
+        for variable, raw_services in passwords_services.items():
 
-                print_and_exit(
-                    "Missing variable: {}: cannot find a service mapping this variable",
-                    key,
+            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            active_serv = [s for s in serv if s in all_services]
+            if active_serv:
+                password = passwords.get(variable)
+                result = zxcvbn(password)
+                score = result["score"]
+                if score < MIN_PASSWORD_SCORE:
+                    if score == MIN_PASSWORD_SCORE - 1:
+                        log.warning("The password used in {} is weak", variable)
+                    elif score == MIN_PASSWORD_SCORE - 2:
+                        log.error("The password used in {} is very weak", variable)
+                    else:
+                        log.critical(
+                            "The password used in {} is extremely weak", variable
+                        )
+
+        if placeholders:
+            log.critical("The following variables are missing in your configuration:")
+
+            print("")
+            print(
+                tabulate(
+                    placeholders,
+                    tablefmt=TABLE_FORMAT,
+                    headers=["VARIABLE", "SERVICE(S)"],
                 )
-
-        if len(placeholders) > 0:
-            print_and_exit(
-                "The following variables are missing in your configuration:\n\n{}"
-                "\n\nYou can fix this error by updating your .projectrc file\n",
-                "\n".join(placeholders),
             )
+            print("")
 
-        return missing
+            log.info("You can fix this error by updating your .projectrc file")
+
+            sys.exit(1)
+
+        return None
 
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:

@@ -18,6 +18,11 @@ def upgrade(
         show_default=False,
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter("--path", path, IF=path),
+    )
+
     Application.get_controller().controller_init()
 
     frontend = glom(
@@ -43,5 +48,6 @@ def upgrade(
         force_current=True,
         force=force,
         auto=auto,
+        add_optionals=True,
         path=path,
     )

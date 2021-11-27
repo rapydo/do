@@ -1,26 +1,33 @@
 """
 This module will test the ssl command
 """
+import time
+
 from faker import Faker
 
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     random_project_name,
     service_verify,
+    start_registry,
 )
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "ssl")
+
     project = random_project_name(faker)
     create_project(
         capfd=capfd,
         name=project,
-        auth="postgres",
+        auth="neo4j",
         frontend="no",
-        services=["rabbit", "neo4j"],
+        services=["rabbit"],
     )
     pconf = f"projects/{project}/project_configuration.yaml"
 
@@ -31,10 +38,12 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Project initialized",
     )
 
+    start_registry(capfd)
+
     exec_command(
         capfd,
         "ssl",
-        "image for proxy service, execute rapydo pull",
+        f"image, execute {colors.RED}rapydo pull proxy",
     )
 
     exec_command(
@@ -46,19 +55,20 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "ssl",
-        "No container found for proxy_1",
+        "The proxy is not running, start your stack or try with "
+        f"{colors.RED}rapydo ssl --volatile",
     )
 
-    # Before creating SSL certificates, neo4j and rabbit should not be able to start
+    # Before creating SSL certificates rabbit and neo4j should not be able to start
     exec_command(
         capfd,
-        "volatile neo4j",
+        "run --debug rabbit",
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
     exec_command(
         capfd,
-        "volatile rabbit",
+        "run --debug neo4j",
         "SSL mandatory file not found: /ssl/real/fullchain1.pem",
     )
 
@@ -81,14 +91,20 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Otherwise will fail with:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
+    if SWARM_MODE:
+        # 60!? :| It still fails by raising to 30... Let's double it!!
+        time.sleep(60)
+        # DEBUG CODE
+        exec_command(capfd, "logs rabbit")
+    else:
+        time.sleep(5)
 
     service_verify(capfd, "rabbitmq")
 
     exec_command(
         capfd,
-        # --no-tty is needed on GitHub Actions
-        # to be able to execute commands on the running containers
         "ssl --no-tty",
+        "--no-tty option is deprecated, you can stop using it",
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
         "Neo4j is running, a full restart is needed. NOT IMPLEMENTED YET.",
@@ -123,5 +139,3 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Unable to automatically perform the requested operation",
         "You can execute the following commands by your-self:",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

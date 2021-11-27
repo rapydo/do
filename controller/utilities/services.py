@@ -1,28 +1,40 @@
-from typing import Dict, List, Optional
+import warnings
+from typing import Dict, Iterable, List, Optional, Union
 
-from glom import glom
-
-from controller import ComposeConfig, EnvType, log, print_and_exit
+from controller import ComposeServices, EnvType, log, print_and_exit
 from controller.project import ANGULAR
 
 
 def get_services(
-    services: Optional[str], excluded_services_list: Optional[str], default: List[str]
+    services: Optional[Union[str, Iterable[str]]],
+    default: List[str],
 ) -> List[str]:
 
-    if services:
-        return sorted(services.split(","))
+    return_list: List[str] = []
+    if not services:
+        return_list = sorted(default)
+    elif isinstance(services, str):
+        warnings.warn("Deprecated use of -s option")
+        return_list = sorted(services.split(","))
+    else:
+        return_list = sorted(services)
+
+    excluded_services_list: List[str] = [
+        s[1:] for s in return_list if s.startswith("_")
+    ]
 
     if excluded_services_list:
 
-        splitted = excluded_services_list.split(",")
-        for service in splitted:
-            if service not in default:
+        # Filter out _ services from return_list
+        return_list = [s for s in return_list if not s.startswith("_")]
+
+        for service in excluded_services_list:
+            if service not in return_list:
                 print_and_exit("No such service: {}", service)
 
-        return sorted(s for s in default if s not in splitted)
+        return sorted(s for s in return_list if s not in excluded_services_list)
 
-    return sorted(default)
+    return return_list
 
 
 def walk_services(
@@ -44,7 +56,7 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: ComposeConfig) -> List[str]:
+def find_active(services: ComposeServices) -> List[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
@@ -55,15 +67,13 @@ def find_active(services: ComposeConfig) -> List[str]:
 
     for name, service in services.items():
 
-        dependencies[name] = list(service.get("depends_on", {}).keys())
+        dependencies[name] = list(service.depends_on.keys())
 
-        ACTIVATE = glom(service, "environment.ACTIVATE", default=0)
-        is_active = str(ACTIVATE) == "1"
-        if is_active:
+        if service.environment and service.environment.get("ACTIVATE", "0") == "1":
             base_actives.append(name)
 
     log.debug("Base active services = {}", base_actives)
-    log.debug("Services dependencies = {}", dependencies)
+    # log.debug("Services dependencies = {}", dependencies)
     active_services = walk_services(base_actives, dependencies)
     return active_services
 
@@ -108,9 +118,9 @@ def normalize_placeholder_variable(key: str) -> str:
     if key == "MYSQL_PASSWORD":
         return "ALCHEMY_PASSWORD"
 
-    if key == "RABBITMQ_DEFAULT_USER":
+    if key == "DEFAULT_USER":
         return "RABBITMQ_USER"
-    if key == "RABBITMQ_DEFAULT_PASS":
+    if key == "DEFAULT_PASS":
         return "RABBITMQ_PASSWORD"
 
     if key == "NEO4J_dbms_memory_heap_max__size":
@@ -189,13 +199,15 @@ def check_mongodb_password(pwd: Optional[EnvType]) -> None:
             )
 
 
-def get_default_user(service: str, frontend: Optional[str]) -> Optional[str]:
+def get_default_user(service: str) -> Optional[str]:
 
-    if service in ["backend", "celery", "flower", "celery-beat"]:
+    if service in ["backend", "celery", "flower", "celerybeat"]:
         return "developer"
 
     if service in ["frontend"]:
-        if frontend == ANGULAR:
+        from controller.app import Configuration
+
+        if Configuration.frontend == ANGULAR:
             return "node"
 
     if service == "postgres":

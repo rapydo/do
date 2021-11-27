@@ -2,72 +2,81 @@ name: Test
 
 on:
   push:
-  # schedule:
-  #   - cron: "0 1 * * *"
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-20.04
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
         test: [
-            # Both Compose and Swarm
-            compose/add_upgrade,
-            swarm/add_upgrade,
-            compose/base,
-            swarm/base,
-            compose/build_pull,
-            swarm/build_pull,
-            compose/create,
-            swarm/create,
-            compose/install,
-            swarm/install,
-            compose/libs,
-            swarm/libs,
-            compose/passwords_invalid_characters,
-            swarm/passwords_invalid_characters,
+            # > 6 minutes
+            backup_restore_mariadb,
+            backup_restore_neo4j,
+            backup_restore_postgres,
+            backup_restore_rabbit,
+            backup_restore_redis,
+            logs,
+            password_neo4j,
+            password_rabbit,
+            reload,
+            shell,
+            start,
 
-            # Swarm only
-            swarm/swarm,
-            swarm/registry,
-            swarm/multi_host,
-
-            # Compose only
-            compose/backup_restore_tuning_mariadb,
-            compose/backup_restore_tuning_neo4j,
-            compose/backup_restore_tuning_postgres,
-            compose/backup_restore_tuning_rabbit,
-            compose/backup_restore_tuning_redis,
-            compose/cronjobs,
-            compose/dump,
-            compose/interfaces,
-            compose/ssl,
-            compose/volatile,
-            compose/list,
-
-            # Currently Compose only, to be generalized
-            init_check_update,
+            # ~ 5-6 minutes
+            install,
+            multi_host,
+            password_backend,
+            password_mysql,
+            password_postgres,
+            password_redis,
+            registry,
+            remove,
+            run,
             scale,
-            start_shell_status_logs_restart_remove,
+
+            # ~ 3-4 minutes
+            build_pull,
+            list,
+            cronjobs,
+            password_flower,
+            restart,
+            ssl,
+            status,
+
+            # ~ 1-3 minutes
+            add_upgrade,
+            base,
+            check,
+            create,
+            dump,
+            init,
+            join,
+            libs,
+            password,
+            password_registry,
+            tuning,
+            update,
           ]
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Select a Python version
+        run: |
+          versions=(3.7 3.8 3.9)
+          PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
+          echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
+        shell: bash
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.PYTHON_VERSION }}
       - name: Install
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools pytest pytest-cov pytest-timeout Faker
-          pip install --upgrade --no-cache-dir --editable .
-          # Install latest (unrelased) version of python-on-whales
-          # pip install git+https://github.com/gabrieldemarmiesse/python-on-whales.git
+          pip install --upgrade --no-cache-dir --editable .[dev]
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
@@ -75,39 +84,92 @@ jobs:
           rapydo install buildx
           rapydo install compose
 
-      - name: Run Tests
+      - name: Run Compose Tests
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
         run: |
-          # This works well for all tests... except for install... that is not covered :o
-          # py.test --timeout=300 -s -x --cov-report=xml --cov=. tests/test_${{ matrix.test }}.py
 
           mkdir rapydo_tests
           cd rapydo_tests
 
-          if [[ "${TEST_NAME}" == swarm/* ]]; then
+          py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
-            IP=$(python3 -c "from controller.utilities import system; print(system.get_local_ip())")
+      - name: Send Compose Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: .
+          cov_file: rapydo_tests/coverage.xml
 
-            sudo cat /etc/docker/daemon.json
-            sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP}:5000\"]}' >  /etc/docker/daemon.json"
-            sudo cat /etc/docker/daemon.json
-            sudo systemctl restart docker.service
+      - name: Clean the environment
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+          TEST_NAME: ${{ matrix.test }}
+        run: |
+          # Remove containers, networks, volumes and images
+          docker rm -f $(docker ps -a -q) || true
+          docker volume rm $(docker volume ls -q) || true
+          docker network rm $(docker network ls -q) || true
+          docker rmi $(docker images -q) || true
+          docker system prune -f
 
-            export SWARM_MODE="1"
+          sudo rm -rf rapydo_tests
 
-            # Temporary added this to prevent fileno error when starting the registry
-            # BUG probably due to compose 1.29, to be removed once migrated to compose 2
-            docker pull rapydo/registry:2.0
+      - name: Restore the controller
+        # After the compose install test the controller won't no longer work
+        # Let's reinstall it
+        if: ${{ matrix.test == 'install' }}
+        run: |
+          # This will remove the old rapydo version installed by rapydo install test
+          sudo pip uninstall rapydo
+          pip uninstall rapydo
+          # And now install again 
+          pip install --upgrade --no-cache-dir --editable .[dev]
 
-            TEST_NAME=${TEST_NAME/swarm\//}
-          elif [[ "${TEST_NAME}" == compose/* ]]; then
-            TEST_NAME=${TEST_NAME/compose\//}
-          fi
+          # Just to verify the installed version to debug in case of errors in the next steps
+          rapydo --version
+
+      - name: Run Swarm Tests
+        env:
+          LOGURU_LEVEL: DEBUG
+          TESTING: 1
+          TEST_NAME: ${{ matrix.test }}
+          SWARM_MODE: 1
+        run: |
+          mkdir rapydo_tests
+          cd rapydo_tests
+
+          IP_DEV=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=False))")
+          IP_PROD=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=True))")
+          sudo cat /etc/docker/daemon.json
+          sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
+          sudo cat /etc/docker/daemon.json
+          sudo systemctl restart docker.service
 
           if [[ "${TEST_NAME}" == "multi_host" ]]; then
+
+            docker swarm init
+            JOIN_COMMAND=$(docker swarm join-token  worker | tail -2 | head)
+            echo "Join command = ${JOIN_COMMAND}"
+
+            # NFS to be added
+            export NFS_HOST="127.0.0.1"
+
+            # Create all volumes used by NFS expect for ssl_certs
+            sudo mkdir -p /volumes/secrets
+            sudo mkdir -p /volumes/rabbitdata
+            sudo mkdir -p /volumes/sqldata
+            sudo mkdir -p /volumes/mariadb
+            sudo mkdir -p /volumes/graphdata
+            sudo mkdir -p /volumes/mongodata
+            sudo mkdir -p /volumes/data_imports
+            sudo mkdir -p /volumes/redisdata
+          fi
+
+          if [[ "${TEST_NAME}" == "multi_host-based-on-docker-machine-NOT-USED" ]]; then
+
             base=https://github.com/docker/machine/releases/download/v0.16.0 \
               && curl --silent -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine \
               && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine \
@@ -115,6 +177,7 @@ jobs:
 
             docker-machine --version
 
+            sudo apt-get update -qq
             sudo apt-get install --yes virtualbox
             docker swarm init
             JOIN_COMMAND=$(docker swarm  join-token  worker | tail -2 | head)
@@ -128,11 +191,21 @@ jobs:
 
             # NFS to be added
             export NFS_HOST="127.0.0.1"
+
+            # Create all volumes used by NFS expect for ssl_certs
+            sudo mkdir -p /volumes/secrets
+            sudo mkdir -p /volumes/rabbitdata
+            sudo mkdir -p /volumes/sqldata
+            sudo mkdir -p /volumes/mariadb
+            sudo mkdir -p /volumes/graphdata
+            sudo mkdir -p /volumes/mongodata
+            sudo mkdir -p /volumes/data_imports
+            sudo mkdir -p /volumes/redisdata
           fi
 
-
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
-          cp coverage.xml ..
-          cd ..
-
-          bash <(curl -s https://codecov.io/bash)
+      - name: Send Swarm Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: .
+          cov_file: rapydo_tests/coverage.xml

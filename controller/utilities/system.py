@@ -82,6 +82,7 @@ def bytes_to_str(value: float) -> str:
     return f"{int(round(value, 0))}{unit}"
 
 
+# This is no longer needed
 def str_to_bytes(text: str) -> float:
 
     text = text.upper()
@@ -119,7 +120,10 @@ def str_to_bytes(text: str) -> float:
     return float(value) * unit
 
 
-def get_local_ip() -> str:
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    return str(s.getsockname()[0])
+def get_local_ip(production: bool = False) -> str:
+    if production:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        return str(s.getsockname()[0])
+
+    return "127.0.0.1"

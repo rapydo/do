@@ -4,13 +4,16 @@ from glom import glom
 from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose import Compose
+from controller.deploy.compose_v2 import Compose
 
 
 @Application.app.command(help="Scale the number of containers for a service")
 def scale(
     scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
 ) -> None:
+
+    Application.print_command(Application.serialize_parameter("", scaling))
+
     Application.get_controller().controller_init()
 
     options = scaling.split("=")
@@ -18,7 +21,6 @@ def scale(
         scale_var = f"DEFAULT_SCALE_{scaling.upper()}"
         nreplicas = glom(Configuration.specs, f"variables.env.{scale_var}", default="1")
         service = scaling
-        scaling = f"{service}={nreplicas}"
     else:
         service, nreplicas = options
 
@@ -31,5 +33,5 @@ def scale(
         Application.data.base_services,
     )
 
-    dc = Compose(files=Application.data.files)
-    dc.start_containers([service], scale=[scaling], skip_dependencies=True)
+    compose = Compose(Application.data.files)
+    compose.start_containers([service], scales={service: int(nreplicas)})

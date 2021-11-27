@@ -1,23 +1,25 @@
 from distutils.version import LooseVersion
 
-from controller import __version__
+from controller import RED, __version__, colors
 from controller.app import Application, Configuration
 
 
 @Application.app.command(help="Retrieve version details")
 def version() -> None:
+
+    Application.print_command()
+
     Application.get_controller().controller_init()
 
     # Check if rapydo version is compatible with version required by the project
     if __version__ == Configuration.rapydo_version:
-        c = "\033[1;32m"  # Light Green
+        c = colors.GREEN  # Light Green
     else:
-        c = "\033[1;31m"  # Light Red
-    d = "\033[0m"
+        c = colors.RED
 
-    cv = f"{c}{__version__}{d}"
-    pv = f"{c}{Configuration.version}{d}"
-    rv = f"{c}{Configuration.rapydo_version}{d}"
+    cv = f"{c}{__version__}{colors.RESET}"
+    pv = f"{c}{Configuration.version}{colors.RESET}"
+    rv = f"{c}{Configuration.rapydo_version}{colors.RESET}"
     print(f"\nrapydo: {cv}\t{Configuration.project}: {pv}\trequired rapydo: {rv}")
 
     if __version__ != Configuration.rapydo_version:
@@ -25,6 +27,12 @@ def version() -> None:
         rver = LooseVersion(Configuration.rapydo_version)
         updown = "upgrade" if cver < rver else "downgrade"
         rv = Configuration.rapydo_version
-        print(f"\nThis project is not compatible with rapydo version {__version__}")
-        print(f"Please {updown} rapydo to version {rv} or modify this project")
-        print(f"\n\033[1;31mrapydo install {Configuration.rapydo_version}\033[0m")
+        command = RED(f"rapydo install {Configuration.rapydo_version}")
+
+        print(
+            f"""
+This project is not compatible with rapydo version {__version__}
+Please {updown} rapydo to version {rv} or modify this project
+
+{command}"""
+        )

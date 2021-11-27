@@ -22,7 +22,7 @@ jobs:
       - uses: rapydo/actions/install@v1
         with:
           project: ${PROJECT}
-          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+          # swarm: 1
 
       - name: Run Pytest
         run: |
@@ -35,28 +35,36 @@ jobs:
           # rapydo add task test_task
 
           rapydo start
-          rapydo shell --no-tty backend 'restapi wait'
+          rapydo shell backend 'restapi wait'
 
-          rapydo shell --no-tty backend 'restapi tests --wait --destroy'
+          rapydo shell backend 'restapi tests --wait --destroy'
 
           LOGURU_LEVEL=WARNING rapydo list services
           # This should fail if at least one container is in Exit status
           [[ ! $(LOGURU_LEVEL=WARNING rapydo list services | grep -E "Exit|Restarting|Created") ]]
 
-          docker cp ${PROJECT}_backend_1:/code/coverage.xml coverage.xml
-          bash <(curl -s https://codecov.io/bash)
+      - name: Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: projects/${PROJECT}
+          project: ${PROJECT}
+          step: backend
+          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
 
       - name: Production mode
         run: |
-          rapydo remove --all
-          rapydo --prod init --force
+          rapydo remove
+          # rapydo remove registry
+          docker volume rm $(docker volume ls -q)
+          rapydo --testing --prod init --force
+          # rapydo run registry
           rapydo pull --quiet
           rapydo ssl --volatile
           rapydo start
           sleep 45
           rapydo logs
           curl --insecure -X GET --max-time 5 https://localhost/api/status | grep "Server is alive"
-          rapydo -s proxy,backend logs --tail 20
+          rapydo logs --tail 20 proxy backend
 
           LOGURU_LEVEL=WARNING rapydo list services
           # This should fail if at least one container is in Exit status

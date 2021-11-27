@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.9"
 
 services:
   proxy:
@@ -30,6 +30,7 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       APP_MODE: ${APP_MODE}
       VERSION: ${PROJECT_VERSION}
+      BUILD: ${BUILD}
       RAPYDO_VERSION: ${RAPYDO_VERSION}
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       PROJECT_TITLE: "${PROJECT_TITLE}"
@@ -90,7 +91,7 @@ services:
 
       # Force xterm to prevent:
       # `tput: No value for $TERM and no -T specified`
-      # Raised when running Cypress on --no-tty shells
+      # Raised when running Cypress on non-tty shells
       TERM: xterm
 
       # DISPLAY: ":0"

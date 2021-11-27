@@ -7,17 +7,20 @@ import tempfile
 
 from faker import Faker
 
-from controller import __version__
+from controller import __version__, colors
 from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
     random_project_name,
 )
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
+
+    execute_outside(capfd, "version")
 
     exec_command(
         capfd,
@@ -30,7 +33,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f"--invalid-option create {project}",
-        "Error: no such option: --invalid-option",
+        "Error: No such option: --invalid-option",
     )
 
     exec_command(capfd, "rapydo", "Usage")
@@ -46,17 +49,8 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "version",
-        f"rapydo: \033[1;32m{__version__}",
-        f"required rapydo: \033[1;32m{__version__}",
-    )
-
-    auth_envs = "-e AUTH_DEFAULT_PASSWORD=short"
-    alchemy_envs = " -e ALCHEMY_USER=sqluser -e ALCHEMY_PASSWORD=short"
-    exec_command(
-        capfd,
-        f"--prod {auth_envs} {alchemy_envs} check -i main --no-git --no-builds",
-        "AUTH_DEFAULT_PASSWORD is set with a short password",
-        "ALCHEMY_PASSWORD is set with a short password",
+        f"rapydo: {colors.GREEN}{__version__}",
+        f"required rapydo: {colors.GREEN}{__version__}",
     )
 
     folder = os.getcwd()
@@ -93,18 +87,52 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-s invalid check -i main --no-git --no-builds",
-        "No such service: invalid",
-    )
-
-    exec_command(
-        capfd,
         "--remote invalid check -i main --no-git",
-        "Invalid remote host invalid, expected user@ip-or-hostname",
+        "Could not resolve hostname invalid: ",
     )
 
     exec_command(
         capfd,
         "--remote invalid@invalid check -i main --no-git",
-        "Could not resolve hostname invalid: Temporary failure in name resolution",
+        # Temporary failure in name resolution depends by the OS
+        # on alpine che message is: Name does not resolve
+        # "Could not resolve hostname invalid: Temporary failure in name resolution",
+        "Could not resolve hostname invalid: ",
+    )
+
+    exec_command(
+        capfd,
+        "-s backend check -i main --no-git --no-builds",
+        # warnings are not catched !?
+        # "-s option is going to be replaced by rapydo <command> service",
+    )
+
+    exec_command(
+        capfd,
+        "start backend",
+        "Enabled services: ['backend']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend postgres",
+        "Enabled services: ['backend', 'postgres']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend postgres _backend",
+        "Enabled services: ['postgres']",
+    )
+
+    exec_command(
+        capfd,
+        "start backend postgres _invalid",
+        "No such service: invalid",
+    )
+
+    exec_command(
+        capfd,
+        "-e ACTIVATE_FAIL2BAN start fail2ban",
+        "Invalid enviroment, missing value in ACTIVATE_FAIL2BAN",
     )

@@ -22,7 +22,7 @@ jobs:
       - uses: rapydo/actions/install@v1
         with:
           project: ${PROJECT}
-          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
+          # swarm: 1
 
       - uses: rapydo/actions/setup-cypress@v1
         with:
@@ -38,16 +38,22 @@ jobs:
           sleep 20
           rapydo logs
 
-          rapydo shell --no-tty frontend "yarn install"
-          rapydo shell --no-tty frontend "reload-types"
+          rapydo shell frontend "yarn install"
+          rapydo shell frontend "reload-types"
 
-          rapydo shell --no-tty frontend "yarn run cypress:start:norecord"
+          rapydo shell frontend "yarn run cypress:start:norecord"
           # Cypress with record mode enabled
-          # rapydo shell --no-tty frontend "yarn run cypress:start:full"
+          # rapydo shell frontend "yarn run cypress:start:full"
 
-          rapydo shell --no-tty frontend "npx nyc --all report --reporter=lcov --report-dir /coverage"
-          cp data/${PROJECT}/karma/lcov.info .
-          bash <(curl -s https://codecov.io/bash)
+          rapydo shell frontend "npx nyc --all report --reporter=lcov --report-dir /coverage"
+
+      - name: Coverage
+        uses: rapydo/actions/coverage@v1
+        with:
+          repository: projects/${PROJECT}
+          project: ${PROJECT}
+          step: frontend
+          codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
 
       - name: Print docker logs on failure
         if: failure()

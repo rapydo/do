@@ -5,6 +5,7 @@ import time
 
 from faker import Faker
 
+from controller import SWARM_MODE
 from tests import (
     Capture,
     create_project,
@@ -12,6 +13,8 @@ from tests import (
     init_project,
     pull_images,
     random_project_name,
+    start_project,
+    start_registry,
 )
 
 
@@ -24,22 +27,16 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         auth="postgres",
         frontend="no",
     )
-    init_project(capfd)
+    init_project(capfd, "-e CRONTAB_ENABLE=1")
+    start_registry(capfd)
     pull_images(capfd)
-    exec_command(
-        capfd,
-        "-e CRONTAB_ENABLE=1 start",
-        "docker-compose command: 'up'",
-        "Stack started",
-    )
+    start_project(capfd)
 
-    # Add some delay to wait the container to start
-    time.sleep(5)
+    exec_command(capfd, "status")
 
     exec_command(
         capfd,
-        "-s backend logs --tail 50 --no-color",
-        "docker-compose command: 'logs'",
+        "logs --tail 50 backend",
         # Logs are not prefixed because only one service is shown
         "Found no cronjob to be enabled, skipping crontab setup",
         "Testing mode",
@@ -49,17 +46,18 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         f.write("* * * * * echo 'Hello world' >> /var/log/cron.log 2>&1\n")
         f.write("\n")
 
-    # Restart to enable to cronjobs
     exec_command(
         capfd,
-        "-e CRONTAB_ENABLE=1 -s backend restart",
+        "-e CRONTAB_ENABLE=1 restart --force",
         "Stack restarted",
     )
 
+    if SWARM_MODE:
+        time.sleep(10)
+
     exec_command(
         capfd,
-        "-s backend logs --tail 50 --no-color",
-        "docker-compose command: 'logs'",
+        "logs --tail 50 backend",
         # Logs are not prefixed because only one service is shown
         # "Testing mode",
         "Enabling cron...",
@@ -67,5 +65,3 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         # this is the output of crontab -l that verifies the cronjob installation
         "* * * * * echo 'Hello world'",
     )
-
-    exec_command(capfd, "remove --all", "Stack removed")

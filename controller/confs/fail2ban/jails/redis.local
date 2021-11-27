@@ -1,0 +1,4 @@
+[redis]
+# Can't be enabled because
+# Redis does not provide facilities for logging login attempts
+enabled  = false

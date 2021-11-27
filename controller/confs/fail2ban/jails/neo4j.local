@@ -1,0 +1,5 @@
+[neo4j]
+# Can't be enabled because security logs is only available in Enterprise edition
+# https://neo4j.com/docs/operations-manual/current/monitoring/logging/#security-events-logging
+
+enabled  = false

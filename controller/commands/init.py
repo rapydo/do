@@ -22,6 +22,15 @@ def init(
         help="Link all submodules in an existing folder instead of download them",
     ),
 ) -> None:
+
+    Application.print_command(
+        Application.serialize_parameter(
+            "--force", create_projectrc, IF=create_projectrc
+        ),
+        Application.serialize_parameter(
+            "--submodules-path", submodules_path, IF=submodules_path
+        ),
+    )
     Application.get_controller().controller_init()
 
     for p in Application.project_scaffold.data_folders:
@@ -69,5 +78,4 @@ def init(
         else:
             log.debug("Swarm is already initialized")
 
-    # Application.get_controller().check_placeholders()
     log.info("Project initialized")

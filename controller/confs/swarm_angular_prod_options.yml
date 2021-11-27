@@ -1,0 +1,21 @@
+version: "3.9"
+
+# This file may be merged with angular.yml when swarm mode will no longer be optional
+# This file is only included in production mode (AND swarm mode)
+# once merged with angular.yml could be based on a env variable to modify restart_policy
+# variable, i.e.
+# restart_policy = any if DEV
+# restart_policy = None if PROD
+
+services:
+  frontend:
+    deploy:
+      restart_policy:
+        condition: none
+    healthcheck:
+      # Uhm... I can't change the healthcheck!?
+      test: "echo 'ok'"
+      interval: 60m
+      timeout: 10s
+      retries: 3
+      start_period: 60m

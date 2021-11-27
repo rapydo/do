@@ -2,25 +2,32 @@
 This module will test the list command
 """
 
+import time
+
 from faker import Faker
 
 from tests import (
     Capture,
     create_project,
     exec_command,
+    execute_outside,
     init_project,
+    pull_images,
     random_project_name,
+    start_project,
+    start_registry,
 )
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
 
+    execute_outside(capfd, "list env")
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
         auth="postgres",
-        frontend="angular",
-        services=["rabbit", "redis"],
+        frontend="no",
+        services=["redis"],
         extra="--env CUSTOMVAR1=mycustomvalue --env CUSTOMVAR2=mycustomvalue",
     )
     init_project(capfd)
@@ -29,8 +36,16 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "list",
-        "Missing argument 'ELEMENT_TYPE:[env|services|submodules]'.  Choose from:",
+        "Missing argument 'ELEMENT_TYPE:{env|services|submodules}'. Choose from:",
     )
+
+    exec_command(
+        capfd,
+        "list invalid",
+        "Invalid value for",
+        "'invalid' is not one of 'env', 'services', 'submodules'",
+    )
+
     exec_command(
         capfd,
         "list env",
@@ -51,15 +66,23 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "list services",
         "List of active services:",
         "backend",
-        "frontend",
         "postgres",
-        "rabbit",
         "redis",
+        "N/A",
     )
+
+    start_registry(capfd)
+
+    pull_images(capfd)
+
+    start_project(capfd)
 
     exec_command(
         capfd,
-        "list invalid",
-        "Invalid value for 'ELEMENT_TYPE:[env|services|submodules]': ",
-        "invalid choice: invalid. (choose from env, services, submodules)",
+        "list services",
+        "List of active services:",
+        "backend",
+        "postgres",
+        "redis",
+        "running",
     )

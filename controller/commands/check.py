@@ -1,10 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple, cast
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import (
     find_templates_build,
@@ -35,15 +35,20 @@ def check(
         show_default=False,
     ),
     ignore_submodules: List[str] = typer.Option(
-        "",
+        [],
         "--ignore-submodule",
         "-i",
         help="Ignore submodule",
         show_default=False,
-        autocompletion=Application.autocomplete_submodule,
+        shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
 
+    Application.print_command(
+        Application.serialize_parameter("--no-git", no_git, IF=no_git),
+        Application.serialize_parameter("--no-builds", no_builds, IF=no_builds),
+        Application.serialize_parameter("--ignore-submodule", ignore_submodules),
+    )
     Application.get_controller().controller_init()
 
     if SWARM_MODE:
@@ -68,7 +73,12 @@ def check(
         log.info("Checking builds (skip with --no-builds)")
 
         docker = Docker()
-        dimages = [img.repo_tags[0] for img in docker.client.images() if img.repo_tags]
+        dimages: List[str] = []
+
+        for img in docker.client.images():
+            if img.repo_tags:
+                for i in img.repo_tags:
+                    dimages.append(i)
 
         all_builds = find_templates_build(Application.data.compose_config)
         core_builds = find_templates_build(Application.data.base_services)
@@ -78,32 +88,50 @@ def check(
 
         for image_tag, build in all_builds.items():
 
-            if not any(
-                x in Application.data.active_services for x in build["services"]
-            ):
+            # from py38 a typed dict will replace this cast
+            services = cast(List[str], build["services"])
+            if not any(x in Application.data.active_services for x in services):
                 continue
 
             if image_tag not in dimages:
                 if image_tag in core_builds:
-                    log.warning("Missing {} image, execute rapydo pull", image_tag)
+                    log.warning(
+                        "Missing {} image, execute {command}",
+                        image_tag,
+                        command=RED("rapydo pull"),
+                    )
                 else:
-                    log.warning("Missing {} image, execute rapydo build", image_tag)
+                    log.warning(
+                        "Missing {} image, execute {command}",
+                        image_tag,
+                        command=RED("rapydo build"),
+                    )
                 continue
 
             image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
-            d1, d2 = build_is_obsolete(image_creation, build)
+
+            # from py38 a typed dict will replace this cast
+            d1, d2 = build_is_obsolete(
+                image_creation, cast(Optional[Path], build.get("path"))
+            )
             if d1 and d2:
-                print_obsolete(image_tag, d1, d2, build.get("service"))
+                tmp_from_image = overriding_builds.get(image_tag)
+                # This is the case of a build not overriding a core image,
+                # e.g nifi or geoserver. In that case from_image is faked to image_tag
+                # just to make print_obsolete to print 'build' instead of 'pull'
+                if not tmp_from_image and image_tag not in core_builds:
+                    tmp_from_image = image_tag
+
+                # from py38 a typed dict will replace this cast
+                print_obsolete(
+                    image_tag, d1, d2, cast(str, build.get("service")), tmp_from_image
+                )
 
             # if FROM image is newer, this build should be re-built
             elif image_tag in overriding_builds:
                 from_img = overriding_builds.get(image_tag, "")
                 from_build = core_builds.get(from_img, {})
-
-                # # This check should not be needed, added to prevent errors from mypy
-                # if not from_build:  # pragma: no cover
-                #     continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
@@ -115,9 +143,16 @@ def check(
 
                 from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
-                d1, d2 = build_is_obsolete(from_timestamp, from_build)
+
+                # from py38 a typed dict will replace this cast
+                d1, d2 = build_is_obsolete(
+                    from_timestamp, cast(Optional[Path], from_build.get("path"))
+                )
                 if d1 and d2:  # pragma: no cover
-                    print_obsolete(from_img, d1, d2, from_build.get("service"))
+                    # from py38 a typed dict will replace this cast
+                    print_obsolete(
+                        from_img, d1, d2, cast(str, from_build.get("service"))
+                    )
 
                 # from_timestamp = from_build["creation"]
                 # build_timestamp = build["creation"]
@@ -125,12 +160,19 @@ def check(
                 if from_timestamp > image_creation:
                     b = image_creation.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
-                    print_obsolete(image_tag, b, c, build.get("service"), from_img)
+                    # from py38 a typed dict will replace this cast
+                    print_obsolete(
+                        image_tag, b, c, cast(str, build.get("service")), from_img
+                    )
 
     templating = Templating()
-    for f in Application.project_scaffold.fixed_files:
-        if templating.file_changed(str(f)):
-            log.warning("{f} changed, please execute rapydo upgrade --path {f}", f=f)
+    for filename in Application.project_scaffold.fixed_files:
+        if templating.file_changed(str(filename)):
+            log.warning(
+                "{} changed, please execute {command}",
+                filename,
+                command=RED(f"rapydo upgrade --path {filename}"),
+            )
 
     log.info("Checks completed")
 
@@ -142,41 +184,59 @@ def print_obsolete(
         log.warning(
             """Obsolete image {}
 built on {} FROM {} that changed on {}
-Update it with: rapydo --services {} build""",
+Update it with: {command}""",
             image,
             date1,
             from_img,
             date2,
-            service,
+            command=RED(f"rapydo build {service}"),
         )
     else:
         log.warning(
             """Obsolete image {}
 built on {} but changed on {}
-Update it with: rapydo --services {} pull""",
+Update it with: {command}""",
             image,
             date1,
             date2,
-            service,
+            command=RED(f"rapydo pull {service}"),
         )
 
 
+def is_relative_to(path: Path, rel: str) -> bool:
+    # This works from py39
+    try:
+        return path.is_relative_to(rel)
+    # py37 and py38 compatibility fix
+    except Exception:
+        try:
+            path.relative_to(rel)
+            return True
+        except ValueError:
+            return False
+
+
 def build_is_obsolete(
-    image_creation: datetime, build: Any
+    image_creation: datetime, path: Optional[Path]
 ) -> Tuple[Optional[str], Optional[str]]:
+
+    if not path:  # pragma: no cover
+        return None, None
+
     # compare dates between git and docker
-    path = build.get("path")
     btempl = Application.gits.get("build-templates")
     vanilla = Application.gits.get("main")
 
-    if btempl and btempl.working_dir and path.startswith(btempl.working_dir):
+    if btempl and btempl.working_dir and is_relative_to(path, str(btempl.working_dir)):
         git_repo = btempl
-    elif vanilla and vanilla.working_dir and path.startswith(vanilla.working_dir):
+    elif (
+        vanilla
+        and vanilla.working_dir
+        and is_relative_to(path, str(vanilla.working_dir))
+    ):
         git_repo = vanilla
     else:  # pragma: no cover
         print_and_exit("Unable to find git repo {}", path)
-
-    # build_timestamp = build["creation"].timestamp() if build["creation"] else 0.0
 
     build_timestamp = image_creation.timestamp() if image_creation else 0.0
 

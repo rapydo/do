@@ -12,6 +12,9 @@ def join(
         False, "--manager", show_default=False, help="join new node with manager role"
     )
 ) -> None:
+    Application.print_command(
+        Application.serialize_parameter("--manager", manager, IF=manager),
+    )
     Application.get_controller().controller_init()
 
     swarm = Swarm()
