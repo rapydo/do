@@ -13,7 +13,7 @@ from controller.templating import password
 
 def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
     service_config = Application.data.compose_config.get(service, None)
-    if not service_config:  # pragma: no cover
+    if not service_config:
         print_and_exit("Services misconfiguration, can't find {}", service)
 
     try:

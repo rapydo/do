@@ -1074,6 +1074,14 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         passwords: Dict[str, str] = {}
         passwords_services: Dict[str, Set[str]] = {}
         for service_name in all_services:
+            # This can happens with `rapydo run swagger` because in case of run
+            # the controller_init method is executed without passing the service
+            # This is because interfaces are not enabled on the base stack and the
+            # controller_init([service]) would fail
+            # As side effect, non-existing services are not blocked
+            if service_name not in compose_services:
+                continue
+
             service = compose_services[service_name]
 
             if service:

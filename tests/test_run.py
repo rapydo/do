@@ -128,6 +128,12 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
+        "run invalid",
+        "Services misconfiguration, can't find invalid",
+    )
+
+    exec_command(
+        capfd,
         "run adminer --port XYZ",
         "Invalid value for '--port' / '-p': 'XYZ' is not a valid integer",
     )
