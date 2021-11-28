@@ -522,18 +522,6 @@ class Application:
             sys.version_info.micro,
         )
 
-        # Deprecated since 2.1
-        if sys.version_info.major == 3 and sys.version_info.minor == 7:
-            warnings.warn(
-                YELLOW(
-                    "Support for Python 3.7 is deprecated and will be dropped "
-                    "in a future release. Please upgrade to python 3.8+"
-                )
-            )
-            import time
-
-            time.sleep(1)
-
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
         # 18.09.2 fixed the CVE-2019-5736 vulnerability
