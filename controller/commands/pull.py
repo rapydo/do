@@ -43,7 +43,6 @@ def pull(
         docker.ping_registry()
         docker.login()
 
-    base_image: str = ""
     image: str = ""
     images: Set[str] = set()
 
@@ -51,12 +50,9 @@ def pull(
         if Application.data.services and service not in Application.data.services:
             continue
 
-        base_image = glom(
+        if base_image := glom(
             Application.data.base_services, f"{service}.image", default=""
-        )
-
-        # from py38 use walrus here
-        if base_image:
+        ):
             images.add(base_image)
 
         image = glom(Application.data.compose_config, f"{service}.image", default="")
