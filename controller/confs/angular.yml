@@ -112,7 +112,6 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.server.json:/app/tsconfig.server.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
-      - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${PROJECT_DIR}/frontend:/app/app/custom

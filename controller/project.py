@@ -214,7 +214,6 @@ class Project:
                 [
                     frontend_data_dir,
                     frontend_data_dir.joinpath("app"),
-                    frontend_data_dir.joinpath("courtesy"),
                     frontend_data_dir.joinpath("node_modules"),
                     DATA.joinpath(self.project, "karma"),
                     DATA.joinpath(self.project, "cypress"),
