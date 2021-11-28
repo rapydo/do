@@ -27,7 +27,7 @@ class Docker:
 
         self.client = DockerClient(host=self.get_engine(Configuration.remote_engine))
 
-    @lru_cache()
+    @lru_cache
     def connect_engine(self, node_id: str) -> DockerClient:
         """Convert a node_id to a docker client connected to the engine hostname"""
 

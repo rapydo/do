@@ -207,7 +207,7 @@ def is_relative_to(path: Path, rel: str) -> bool:
     # This works from py39
     try:
         return path.is_relative_to(rel)
-    # py37 and py38 compatibility fix
+    # py38 compatibility fix
     except Exception:
         try:
             path.relative_to(rel)

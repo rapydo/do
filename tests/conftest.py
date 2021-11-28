@@ -21,7 +21,7 @@ def create_folder() -> None:
 
     # Create a new folder with a random name
     # Call to untyped function "Faker" in typed context
-    f = Faker("en_US")  # type: ignore
+    f = Faker("en_US")
     folder = f"{prefix}{f.pystr(min_chars=12, max_chars=12)}{suffix}"
     os.makedirs(f"{folder}/data/logs")
     os.chdir(folder)
@@ -34,4 +34,4 @@ def create_folder() -> None:
 def faker() -> Faker:
 
     # Call to untyped function "Faker" in typed context
-    return Faker("en_US")  # type: ignore
+    return Faker("en_US")
