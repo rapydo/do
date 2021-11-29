@@ -1,12 +1,13 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Tuple
 
 import typer
 
 from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application
 from controller.deploy.builds import (
+    TemplateInfo,
     find_templates_build,
     find_templates_override,
     get_image_creation,
@@ -88,8 +89,7 @@ def check(
 
         for image_tag, build in all_builds.items():
 
-            # from py38 a typed dict will replace this cast
-            services = cast(List[str], build["services"])
+            services = build["services"]
             if not any(x in Application.data.active_services for x in services):
                 continue
 
@@ -111,10 +111,7 @@ def check(
             image_creation = get_image_creation(image_tag)
             # Check if some recent commit modified the Dockerfile
 
-            # from py38 a typed dict will replace this cast
-            d1, d2 = build_is_obsolete(
-                image_creation, cast(Optional[Path], build.get("path"))
-            )
+            d1, d2 = build_is_obsolete(image_creation, build.get("path"))
             if d1 and d2:
                 tmp_from_image = overriding_builds.get(image_tag)
                 # This is the case of a build not overriding a core image,
@@ -123,15 +120,16 @@ def check(
                 if not tmp_from_image and image_tag not in core_builds:
                     tmp_from_image = image_tag
 
-                # from py38 a typed dict will replace this cast
-                print_obsolete(
-                    image_tag, d1, d2, cast(str, build.get("service")), tmp_from_image
-                )
+                print_obsolete(image_tag, d1, d2, build.get("service"), tmp_from_image)
 
             # if FROM image is newer, this build should be re-built
             elif image_tag in overriding_builds:
                 from_img = overriding_builds.get(image_tag, "")
-                from_build = core_builds.get(from_img, {})
+                from_build: Optional[TemplateInfo] = core_builds.get(from_img)
+
+                if not from_build:  # pragma: no cover
+                    log.critical("Malformed {} image, from build is missing", image_tag)
+                    continue
 
                 # Verify if template build exists
                 if from_img not in dimages:  # pragma: no cover
@@ -144,26 +142,14 @@ def check(
                 from_timestamp = get_image_creation(from_img)
                 # Verify if template build is obsolete or not
 
-                # from py38 a typed dict will replace this cast
-                d1, d2 = build_is_obsolete(
-                    from_timestamp, cast(Optional[Path], from_build.get("path"))
-                )
+                d1, d2 = build_is_obsolete(from_timestamp, from_build.get("path"))
                 if d1 and d2:  # pragma: no cover
-                    # from py38 a typed dict will replace this cast
-                    print_obsolete(
-                        from_img, d1, d2, cast(str, from_build.get("service"))
-                    )
-
-                # from_timestamp = from_build["creation"]
-                # build_timestamp = build["creation"]
+                    print_obsolete(from_img, d1, d2, from_build.get("service"))
 
                 if from_timestamp > image_creation:
                     b = image_creation.strftime(DATE_FORMAT)
                     c = from_timestamp.strftime(DATE_FORMAT)
-                    # from py38 a typed dict will replace this cast
-                    print_obsolete(
-                        image_tag, b, c, cast(str, build.get("service")), from_img
-                    )
+                    print_obsolete(image_tag, b, c, build.get("service"), from_img)
 
     templating = Templating()
     for filename in Application.project_scaffold.fixed_files:
@@ -178,29 +164,35 @@ def check(
 
 
 def print_obsolete(
-    image: str, date1: str, date2: str, service: str, from_img: Optional[str] = None
+    image: str,
+    date1: str,
+    date2: str,
+    service: Optional[str],
+    from_img: Optional[str] = None,
 ) -> None:
-    if from_img:
-        log.warning(
-            """Obsolete image {}
-built on {} FROM {} that changed on {}
-Update it with: {command}""",
-            image,
-            date1,
-            from_img,
-            date2,
-            command=RED(f"rapydo build {service}"),
-        )
-    else:
-        log.warning(
-            """Obsolete image {}
-built on {} but changed on {}
-Update it with: {command}""",
-            image,
-            date1,
-            date2,
-            command=RED(f"rapydo pull {service}"),
-        )
+
+    if service:
+        if from_img:
+            log.warning(
+                """Obsolete image {}
+    built on {} FROM {} that changed on {}
+    Update it with: {command}""",
+                image,
+                date1,
+                from_img,
+                date2,
+                command=RED(f"rapydo build {service}"),
+            )
+        else:
+            log.warning(
+                """Obsolete image {}
+    built on {} but changed on {}
+    Update it with: {command}""",
+                image,
+                date1,
+                date2,
+                command=RED(f"rapydo pull {service}"),
+            )
 
 
 def is_relative_to(path: Path, rel: str) -> bool:
