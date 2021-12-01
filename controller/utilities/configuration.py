@@ -131,7 +131,7 @@ class AssignedCPU(ConstrainedStr):
 
 
 class AssignedMemory(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+M$")
+    regex = re.compile(r"^[0-9]+(M|G)$")
 
 
 class PostgresMem(ConstrainedStr):
