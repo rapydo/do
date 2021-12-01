@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
@@ -496,6 +497,8 @@ def read_configuration(
     base_configuration = load_yaml_file(
         file=default_file_path.joinpath(PROJECTS_DEFAULTS_FILE)
     )
+    # Prevent any change due to the mix_configuration
+    base_configuration_copy = deepcopy(base_configuration)
 
     if production:
         base_prod_conf = load_yaml_file(
@@ -513,7 +516,7 @@ def read_configuration(
             mix_configuration(base_configuration, custom_configuration),
             None,
             None,
-            base_configuration,
+            base_configuration_copy,
         )
 
     extends_from = project.get("extends-from", "projects")
@@ -544,13 +547,15 @@ def read_configuration(
         mix_configuration(m1, custom_configuration),
         extended_project,
         Path(extend_path),
-        base_configuration,
+        base_configuration_copy,
     )
 
 
 def mix_configuration(
     base: Optional[Configuration], custom: Optional[Configuration]
 ) -> Configuration:
+    # WARNING: This function has the side effect of changing ght base dict!
+
     if base is None:
         base = {}
 
