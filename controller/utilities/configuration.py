@@ -102,6 +102,11 @@ class Port(ConstrainedInt):
     le = 65535
 
 
+class NullablePort(ConstrainedInt):
+    ge = 0
+    le = 65535
+
+
 class PasswordScore(ConstrainedInt):
     ge = 0
     le = 4
@@ -377,7 +382,7 @@ class BaseEnvModel(BaseModel):
     SMTP_ADMIN: Optional[str]
     SMTP_NOREPLY: Optional[str]
     SMTP_HOST: Optional[str]
-    SMTP_PORT: Port
+    SMTP_PORT: NullablePort
     SMTP_USERNAME: Optional[str]
     SMTP_PASSWORD: Optional[str]
     SMTP_SERVER_HOST: str
