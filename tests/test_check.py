@@ -243,7 +243,7 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "-e MIN_PASSWORD_SCORE=4 -e AUTH_DEFAULT_PASSWORD=x check -i main --no-git --no-builds",
-        "The password used in ALCHEMY_PASSWORD is extremely weak",
+        "The password used in AUTH_DEFAULT_PASSWORD is extremely weak",
     )
 
     exec_command(
