@@ -15,7 +15,7 @@ from pydantic import (
     ValidationError,
 )
 
-from controller import COMPOSE_FILE_VERSION, CONFS_DIR, log, print_and_exit
+from controller import COMPOSE_FILE_VERSION, CONFS_DIR, PLACEHOLDER, log, print_and_exit
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
@@ -94,6 +94,10 @@ class NEO4J_BOLT_TLS_LEVEL_VALUES(Enum):
 class true_or_false(Enum):
     true = "true"
     false = "false"
+
+
+class PLACEHOLDER_VALUE(Enum):
+    PLACEHOLDER_VALUE = PLACEHOLDER
 
 
 # Conflicts between pydantic and mypy
@@ -266,8 +270,9 @@ class BaseEnvModel(BaseModel):
     NEO4J_WEB_INTERFACE_PORT: Port
     NEO4J_SSL_ENABLED: true_or_false
     NEO4J_BOLT_TLS_LEVEL: NEO4J_BOLT_TLS_LEVEL_VALUES
-    NEO4J_HEAP_SIZE: Neo4jMem
-    NEO4J_PAGECACHE_SIZE: Neo4jMem
+    # They are equal to placeholder in production mode when neo4j is not enabled
+    NEO4J_HEAP_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
+    NEO4J_PAGECACHE_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
     NEO4J_ALLOW_UPGRADE: true_or_false
     NEO4J_RECOVERY_MODE: true_or_false
     MONGO_ENABLE_CONNECTOR: zero_or_one
