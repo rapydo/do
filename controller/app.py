@@ -33,7 +33,6 @@ from controller import (
     SUBMODULES_DIR,
     SWARM_MODE,
     TABLE_FORMAT,
-    YELLOW,
     ComposeServices,
     EnvType,
     __version__,
@@ -562,9 +561,17 @@ class Application:
                 read_extended=read_extended,
                 production=Configuration.production,
             )
+
+            # confs 3 is the core config, extra fields are allowd
+            configuration.validate_configuration(confs[3], core=True)
+            # confs 0 is the merged conf core + custom, extra fields are allowd
+            configuration.validate_configuration(confs[0], core=False)
+            log.info("Project configuration is valid")
             Configuration.specs = configuration.mix_configuration(
                 confs[0], Configuration.host_configuration
             )
+            configuration.validate_configuration(Configuration.specs, core=False)
+            log.info("Host configuration is valid")
             self.extended_project = confs[1]
             self.extended_project_path = confs[2]
 
@@ -951,6 +958,10 @@ You can use of one:
             "NEO4J_ALLOW_UPGRADE",
             "NEO4J_RECOVERY_MODE",
         ]
+
+        configuration.validate_env(Application.env)
+        log.info("Environment configuration is valid")
+
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
 

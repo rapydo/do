@@ -1,7 +1,9 @@
+from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import yaml
+from pydantic import BaseModel, Extra, ValidationError, conint, constr
 
 from controller import COMPOSE_FILE_VERSION, CONFS_DIR, log, print_and_exit
 
@@ -12,6 +14,406 @@ PROJECT_CONF_FILENAME = Path("project_configuration.yaml")
 Configuration = Dict[str, Any]
 
 
+class BACKEND_BUILD_MODE_VALUES(Enum):
+    backend = "backend"
+
+
+class FRONTEND_FRAMEWORK_VALUES(Enum):
+    nofrontend = "nofrontend"
+    angular = "angular"
+
+
+class FRONTEND_BUILD_MODE_VALUES(Enum):
+    angular = "angular"
+    angular_test = "angular-test"
+
+
+class LOG_LEVEL_VALUES(Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
+class APP_MODE_VALUES(Enum):
+    development = "development"
+    production = "production"
+    test = "test"
+
+
+class FLASK_ENV_VALUES(Enum):
+    development = "development"
+    production = "production"
+
+
+class AUTH_SERVICE_VALUES(Enum):
+    no = "no"
+    postgres = "postgres"
+    neo4j = "neo4j"
+    mysql = "mysql"
+    mongo = "mongo"
+
+
+class ALCHEMY_DBTYPE_VALUES(Enum):
+    postgresql = "postgresql"
+    mysql = "mysql+pymysql"
+
+
+class CELERY_BROKER_VALUES(Enum):
+    RABBIT = "RABBIT"
+    REDIS = "REDIS"
+
+
+class CELERY_BACKEND_VALUES(Enum):
+    RABBIT = "RABBIT"
+    REDIS = "REDIS"
+    MONGODB = "MONGODB"
+
+
+class FLOWER_PROTOCOL_VALUES(Enum):
+    http = "http"
+    https = "https"
+
+
+class NEO4J_BOLT_TLS_LEVEL_VALUES(Enum):
+    REQUIRED = "REQUIRED"
+    OPTIONAL = "OPTIONAL"
+    DISABLED = "DISABLED"
+
+
+class true_or_false(Enum):
+    true = "true"
+    false = "false"
+
+
+Port = conint(gt=0, le=65535)
+
+AssignedCPU = constr(regex=r"^[0-9]+\.[0-9]+$")
+AssignedMemory = constr(regex=r"^[0-9]+M$")
+PostgresMem = constr(regex=r"^[0-9]+(KB|MB|GB)$")
+Neo4jMem = constr(regex=r"^[0-9]+(K|M|G)$")
+HealthcheckInterval = constr(regex=r"^[0-9]+(s|m|h)$")
+
+
+class zero_or_one(IntEnum):
+    ZERO = 0
+    ONE = 1
+
+
+class ProjectModel(BaseModel):
+    title: str
+    description: str
+    keywords: str
+    rapydo: float
+    version: str
+
+
+class SubmoduleModel(BaseModel):
+    online_url: str
+    # if: str
+
+
+class BaseEnvModel(BaseModel):
+    BACKEND_BUILD_MODE: BACKEND_BUILD_MODE_VALUES
+    FRONTEND_FRAMEWORK: FRONTEND_FRAMEWORK_VALUES
+    FRONTEND_BUILD_MODE: FRONTEND_BUILD_MODE_VALUES
+    NETWORK_MTU = conint(gt=0)
+    HEALTHCHECK_INTERVAL = HealthcheckInterval
+    HEALTHCHECK_BACKEND_CMD: str
+    LOG_LEVEL: LOG_LEVEL_VALUES
+    FILE_LOGLEVEL: LOG_LEVEL_VALUES
+    LOG_RETENTION = conint(gt=0)
+    MIN_PASSWORD_SCORE = conint(ge=0, le=4)
+    ACTIVATE_BACKEND: zero_or_one
+    ACTIVATE_PROXY: zero_or_one
+    ACTIVATE_ALCHEMY: zero_or_one
+    ACTIVATE_POSTGRES: zero_or_one
+    ACTIVATE_MYSQL: zero_or_one
+    ACTIVATE_NEO4J: zero_or_one
+    ACTIVATE_MONGODB: zero_or_one
+    ACTIVATE_RABBIT: zero_or_one
+    ACTIVATE_REDIS: zero_or_one
+    ACTIVATE_CELERY: zero_or_one
+    ACTIVATE_CELERYBEAT: zero_or_one
+    ACTIVATE_FLOWER: zero_or_one
+    ACTIVATE_FTP: zero_or_one
+    ACTIVATE_PUSHPIN: zero_or_one
+    ACTIVATE_SMTP: zero_or_one
+    ACTIVATE_SMTP_SERVER: zero_or_one
+    ACTIVATE_TELEGRAM: zero_or_one
+    ACTIVATE_SWAGGERUI: zero_or_one
+    ACTIVATE_ADMINER: zero_or_one
+    RUN_SCHEMATHESIS: zero_or_one
+    MAX_LOGS_LENGTH = conint(gt=0)
+    APP_MODE: APP_MODE_VALUES
+    FLASK_HOST: str
+    FLASK_DEFAULT_PORT = Port
+    FLASK_ENV: FLASK_ENV_VALUES
+    API_AUTOSTART: zero_or_one
+    BACKEND_PORT = Port
+    BACKEND_API_PORT = Port
+    BACKEND_URI: str
+    PYTHON_MAIN_FILE: str
+    PYTHON_PATH: Path
+    BACKEND_PREFIX: str
+    APP_SECRETS: Path
+    DATA_PATH: Path
+    DATA_IMPORT_FOLDER: Path
+    GUNICORN_WORKERS = conint(gt=0)
+    GUNICORN_WORKERS_PER_CORE = conint(gt=0)
+    GUNICORN_MAX_NUM_WORKERS = conint(gt=0)
+    CRONTAB_ENABLE: zero_or_one
+    GZIP_COMPRESSION_ENABLE: zero_or_one
+    GZIP_COMPRESSION_THRESHOLD = conint(gt=0)
+    GZIP_COMPRESSION_LEVEL = conint(ge=1, le=9)
+    ALEMBIC_AUTO_MIGRATE: zero_or_one
+    PROXY_HOST: str
+    PROXY_DEV_PORT = Port
+    PROXY_PROD_PORT = Port
+    PROXIED_CONNECTION: zero_or_one
+    DOMAIN_ALIASES: Optional[str]
+    SET_UNSAFE_EVAL: Optional[str]
+    SET_UNSAFE_INLINE: Optional[str]
+    SET_STYLE_UNSAFE_INLINE: Optional[str]
+    SET_CSP_SCRIPT_SRC: Optional[str]
+    SET_CSP_IMG_SRC: Optional[str]
+    SET_CSP_FONT_SRC: Optional[str]
+    SET_CSP_CONNECT_SRC: Optional[str]
+    SET_CSP_FRAME_SRC: Optional[str]
+    SET_MAX_REQUESTS_PER_SECOND_AUTH = conint(gt=0)
+    SET_MAX_REQUESTS_BURST_AUTH = conint(gt=0)
+    SET_MAX_REQUESTS_PER_SECOND_API = conint(gt=0)
+    SET_MAX_REQUESTS_BURST_API = conint(gt=0)
+    CORS_ALLOWED_ORIGIN: Optional[str]
+    SSL_VERIFY_CLIENT: zero_or_one
+    SSL_FORCE_SELF_SIGNED: zero_or_one
+
+    ALCHEMY_ENABLE_CONNECTOR: zero_or_one
+    ALCHEMY_EXPIRATION_TIME = conint(gt=0)
+    ALCHEMY_VERIFICATION_TIME = conint(gt=0)
+    ALCHEMY_HOST: str
+    ALCHEMY_PORT = Port
+    ALCHEMY_DBTYPE: ALCHEMY_DBTYPE_VALUES
+    ALCHEMY_USER: str
+    ALCHEMY_PASSWORD: str
+    ALCHEMY_DB: str
+    ALCHEMY_DBS: str
+    ALCHEMY_POOLSIZE = conint(gt=0)
+    MYSQL_ROOT_PASSWORD: str
+    POSTGRES_MAX_CONNECTIONS = conint(gt=0)
+    POSTGRES_SHARED_BUFFERS = PostgresMem
+    POSTGRES_WAL_BUFFERS = PostgresMem
+    POSTGRES_EFFECTIVE_CACHE_SIZE = PostgresMem
+    POSTGRES_WORK_MEM = PostgresMem
+    POSTGRES_MAINTENANCE_WORK_MEM = PostgresMem
+    POSTGRES_EFFECTIVE_IO_CONCURRENCY = conint(gt=0)
+    POSTGRES_MAX_WORKER_PROCESSES = conint(gt=0)
+    NEO4J_ENABLE_CONNECTOR: zero_or_one
+    NEO4J_EXPIRATION_TIME = conint(gt=0)
+    NEO4J_VERIFICATION_TIME = conint(gt=0)
+    NEO4J_HOST: str
+    NEO4J_BOLT_PORT = Port
+    NEO4J_USER: str
+    NEO4J_PASSWORD: str
+    NEO4J_EXPOSED_WEB_INTERFACE_PORT = Port
+    NEO4J_WEB_INTERFACE_PORT = Port
+    NEO4J_SSL_ENABLED: true_or_false
+    NEO4J_BOLT_TLS_LEVEL: NEO4J_BOLT_TLS_LEVEL_VALUES
+    NEO4J_HEAP_SIZE = Neo4jMem
+    NEO4J_PAGECACHE_SIZE = Neo4jMem
+    NEO4J_ALLOW_UPGRADE: true_or_false
+    NEO4J_RECOVERY_MODE: true_or_false
+    MONGO_ENABLE_CONNECTOR: zero_or_one
+    MONGO_EXPIRATION_TIME = conint(gt=0)
+    MONGO_VERIFICATION_TIME = conint(gt=0)
+    MONGO_HOST: str
+    MONGO_PORT = Port
+    MONGO_DATABASE: str
+    MONGO_USER: str
+    MONGO_PASSWORD: str
+    ELASTIC_HOST: str
+    ELASTIC_PORT = Port
+    RABBITMQ_ENABLE_CONNECTOR: zero_or_one
+    RABBITMQ_EXPIRATION_TIME = conint(gt=0)
+    RABBITMQ_VERIFICATION_TIME = conint(gt=0)
+    RABBITMQ_HOST: str
+    RABBITMQ_PORT = Port
+    RABBITMQ_VHOST: str
+    RABBITMQ_USER: str
+    RABBITMQ_PASSWORD: str
+    RABBITMQ_MANAGEMENT_PORT = Port
+    RABBITMQ_ENABLE_SHOVEL_PLUGIN: zero_or_one
+    RABBITMQ_SSL_CERTFILE: Optional[Path]
+    RABBITMQ_SSL_KEYFILE: Optional[Path]
+    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: Optional[str]
+    RABBITMQ_SSL_ENABLED: zero_or_one
+    REDIS_ENABLE_CONNECTOR: zero_or_one
+    REDIS_EXPIRATION_TIME = conint(gt=0)
+    REDIS_VERIFICATION_TIME = conint(gt=0)
+    REDIS_HOST: str
+    REDIS_PORT = Port
+    REDIS_PASSWORD: str
+    NFS_HOST: Optional[str]
+    NFS_EXPORTS_SECRETS: Path
+    NFS_EXPORTS_RABBITDATA: Path
+    NFS_EXPORTS_SQLDATA: Path
+    NFS_EXPORTS_MARIADB: Path
+    NFS_EXPORTS_GRAPHDATA: Path
+    NFS_EXPORTS_MONGODATA: Path
+    NFS_EXPORTS_DATA_IMPORTS: Path
+    NFS_EXPORTS_PUREFTPD: Path
+    NFS_EXPORTS_SSL_CERTS: Path
+    NFS_EXPORTS_FLOWER_DB: Path
+    NFS_EXPORTS_REDISDATA: Path
+    CELERY_ENABLE_CONNECTOR: zero_or_one
+    CELERY_EXPIRATION_TIME = conint(gt=0)
+    CELERY_VERIFICATION_TIME = conint(gt=0)
+    CELERY_BROKER: CELERY_BROKER_VALUES
+    CELERY_BACKEND: CELERY_BACKEND_VALUES
+    FLOWER_USER: str
+    FLOWER_PASSWORD: str
+    FLOWER_DBDIR: Path
+    FLOWER_PORT = Port
+    FLOWER_SSL_OPTIONS: Optional[str]
+    FLOWER_PROTOCOL: FLOWER_PROTOCOL_VALUES
+    PUSHPIN_ENABLE_CONNECTOR: zero_or_one
+    PUSHPIN_EXPIRATION_TIME = conint(gt=0)
+    PUSHPIN_VERIFICATION_TIME = conint(gt=0)
+    PUSHPIN_HOST: str
+    PUSHPIN_PORT = Port
+    PUSHPIN_CONTROL_PORT = Port
+    DEFAULT_SCALE_BACKEND = conint(gt=0)
+    DEFAULT_SCALE_CELERY = conint(gt=0)
+    DEFAULT_SCALE_CELERYBEAT = conint(gt=0)
+    DEFAULT_SCALE_SWAGGERUI = conint(gt=0)
+    ASSIGNED_CPU_BACKEND = AssignedCPU
+    ASSIGNED_MEMORY_BACKEND = AssignedMemory
+    ASSIGNED_CPU_PROXY = AssignedCPU
+    ASSIGNED_MEMORY_PROXY = AssignedMemory
+    ASSIGNED_CPU_POSTGRES = AssignedCPU
+    ASSIGNED_MEMORY_POSTGRES = AssignedMemory
+    ASSIGNED_CPU_MARIADB = AssignedCPU
+    ASSIGNED_MEMORY_MARIADB = AssignedMemory
+    ASSIGNED_CPU_NEO4J = AssignedCPU
+    ASSIGNED_MEMORY_NEO4J = AssignedMemory
+    ASSIGNED_CPU_MONGODB = AssignedCPU
+    ASSIGNED_MEMORY_MONGODB = AssignedMemory
+    ASSIGNED_CPU_CELERY = AssignedCPU
+    ASSIGNED_MEMORY_CELERY = AssignedMemory
+    ASSIGNED_CPU_CELERYBEAT = AssignedCPU
+    ASSIGNED_MEMORY_CELERYBEAT = AssignedMemory
+    ASSIGNED_CPU_RABBIT = AssignedCPU
+    ASSIGNED_MEMORY_RABBIT = AssignedMemory
+    ASSIGNED_CPU_REDIS = AssignedCPU
+    ASSIGNED_MEMORY_REDIS = AssignedMemory
+    ASSIGNED_CPU_BOT = AssignedCPU
+    ASSIGNED_MEMORY_BOT = AssignedMemory
+    ASSIGNED_CPU_FLOWER = AssignedCPU
+    ASSIGNED_MEMORY_FLOWER = AssignedMemory
+    ASSIGNED_CPU_SWAGGERUI = AssignedCPU
+    ASSIGNED_MEMORY_SWAGGERUI = AssignedMemory
+    ASSIGNED_CPU_ADMINER = AssignedCPU
+    ASSIGNED_MEMORY_ADMINER = AssignedMemory
+    ASSIGNED_CPU_FTP = AssignedCPU
+    ASSIGNED_MEMORY_FTP = AssignedMemory
+    ASSIGNED_CPU_SMTP = AssignedCPU
+    ASSIGNED_MEMORY_SMTP = AssignedMemory
+    ASSIGNED_CPU_PUSHPIN = AssignedCPU
+    ASSIGNED_MEMORY_PUSHPIN = AssignedMemory
+    ASSIGNED_CPU_REGISTRY = AssignedCPU
+    ASSIGNED_MEMORY_REGISTRY = AssignedMemory
+    REGISTRY_HOST: Optional[str]
+    REGISTRY_PORT = Port
+    REGISTRY_USERNAME: str
+    REGISTRY_PASSWORD: str
+    REGISTRY_HTTP_SECRET: Optional[str]
+    ACTIVATE_FAIL2BAN: zero_or_one
+    SWARM_MANAGER_ADDRESS: Optional[str]
+    SYSLOG_ADDRESS: str
+    SMTP_ENABLE_CONNECTOR: zero_or_one
+    SMTP_EXPIRATION_TIME = conint(gt=0)
+    SMTP_VERIFICATION_TIME = conint(gt=0)
+    SMTP_ADMIN: Optional[str]
+    SMTP_NOREPLY: Optional[str]
+    SMTP_HOST: Optional[str]
+    SMTP_PORT = Port
+    SMTP_USERNAME: Optional[str]
+    SMTP_PASSWORD: Optional[str]
+    SMTP_SERVER_HOST: str
+    SMTP_SERVER_PORT = Port
+    TELEGRAM_API_KEY: str
+    TELEGRAM_ADMINS: str
+    TELEGRAM_USERS: Optional[str]
+    TELEGRAM_WORKERS = conint(gt=0)
+    TELEGRAM_APP_HASH: Optional[str]
+    TELEGRAM_APP_ID: Optional[str]
+    TELEGRAM_BOTNAME: Optional[str]
+    TELETHON_SESSION: Optional[str]
+    FRONTEND_PREFIX: str
+    ALLOW_PASSWORD_RESET: zero_or_one
+    ALLOW_REGISTRATION: zero_or_one
+    ALLOW_TERMS_OF_USE: zero_or_one
+    REGISTRATION_NOTIFICATIONS: zero_or_one
+    SENTRY_URL: Optional[str]
+    GA_TRACKING_CODE: Optional[str]
+    SHOW_LOGIN: zero_or_one
+    ENABLE_FOOTER: zero_or_one
+    ENABLE_ANGULAR_SSR: zero_or_one
+    FORCE_SSR_SERVER_MODE: zero_or_one
+    ACTIVATE_AUTH: zero_or_one
+    AUTH_SERVICE: AUTH_SERVICE_VALUES
+    AUTH_DEFAULT_USERNAME: str
+    AUTH_DEFAULT_PASSWORD: str
+    AUTH_MIN_PASSWORD_LENGTH = conint(ge=0)
+    AUTH_FORCE_FIRST_PASSWORD_CHANGE: zero_or_one
+    AUTH_MAX_PASSWORD_VALIDITY = conint(ge=0)
+    AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER = conint(ge=0)
+    AUTH_MAX_LOGIN_ATTEMPTS = conint(ge=0)
+    AUTH_LOGIN_BAN_TIME = conint(gt=0)
+    AUTH_SECOND_FACTOR_AUTHENTICATION: zero_or_one
+    AUTH_TOTP_VALIDITY_WINDOW = conint(ge=0)
+    AUTH_JWT_TOKEN_TTL = conint(gt=0)
+    AUTH_TOKEN_SAVE_FREQUENCY = conint(ge=0)
+    AUTH_TOKEN_IP_GRACE_PERIOD = conint(ge=0)
+    ALLOW_ACCESS_TOKEN_PARAMETER: zero_or_one
+    DEFAULT_DHLEN = conint(gt=0)
+
+    FORCE_PRODUCTION_TESTS: zero_or_one
+
+
+class CoreEnvModel(BaseEnvModel, extra=Extra.forbid):
+    pass
+
+
+class CustomEnvModel(BaseEnvModel, extra=Extra.ignore):
+    pass
+
+
+class CoreVariablesModel(BaseModel):
+    submodules: Dict[str, SubmoduleModel]
+    roles: Dict[str, str]
+    env: CoreEnvModel
+
+
+class CustomVariablesModel(BaseModel):
+    submodules: Dict[str, SubmoduleModel]
+    roles: Dict[str, str]
+    env: CustomEnvModel
+
+
+class CoreConfigurationModel(BaseModel):
+    project: ProjectModel
+    tags: Dict[str, str]
+    variables: CoreVariablesModel
+
+
+class CustomConfigurationModel(BaseModel):
+    project: ProjectModel
+    tags: Dict[str, str]
+    variables: CustomVariablesModel
+
+
 def read_configuration(
     default_file_path: Path,
     base_project_path: Path,
@@ -19,7 +421,7 @@ def read_configuration(
     submodules_path: Path,
     read_extended: bool = True,
     production: bool = False,
-) -> Tuple[Configuration, Optional[Path], Optional[Path]]:
+) -> Tuple[Configuration, Optional[Path], Optional[Path], Configuration]:
     """
     Read default configuration
     """
@@ -63,7 +465,12 @@ def read_configuration(
         extended_project = None
     if extended_project is None:
         # Mix default and custom configuration
-        return mix_configuration(base_configuration, custom_configuration), None, None
+        return (
+            mix_configuration(base_configuration, custom_configuration),
+            None,
+            None,
+            base_configuration,
+        )
 
     extends_from = project.get("extends-from", "projects")
 
@@ -93,6 +500,7 @@ def read_configuration(
         mix_configuration(m1, custom_configuration),
         extended_project,
         Path(extend_path),
+        base_configuration,
     )
 
 
@@ -192,3 +600,22 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
             print_and_exit("Error reading {}: {}", path, str(e))
 
     return all_files, base_files
+
+
+def validate_configuration(conf: Optional[Configuration], core: bool) -> None:
+    if conf:
+
+        try:
+            if core:
+                CoreConfigurationModel(**conf)
+            else:
+                CustomConfigurationModel(**conf)
+        except ValidationError as e:
+            print_and_exit(str(e))
+
+
+def validate_env(env: Dict[str, Union[None, str, int, float]]) -> None:
+    try:
+        BaseEnvModel(**env)
+    except ValidationError as e:
+        print_and_exit(str(e))

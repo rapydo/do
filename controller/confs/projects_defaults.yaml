@@ -176,14 +176,14 @@ variables:
     NEO4J_PASSWORD: "D3vMode!" # Setting invalidated in production mode
     NEO4J_EXPOSED_WEB_INTERFACE_PORT: 9090
     NEO4J_WEB_INTERFACE_PORT: 7474 # Changed to 7173 in production mode
-    NEO4J_SSL_ENABLED: false # Changed to true in production mode
+    NEO4J_SSL_ENABLED: "false" # Changed to true in production mode
     # Allowed values: REQUIRED, OPTIONAL, DISABLED. Default value: DISABLED
     NEO4J_BOLT_TLS_LEVEL: "DISABLED" # Changed to OPTIONAL in production mode
     NEO4J_HEAP_SIZE: 512M # Setting invalidated in production mode
     NEO4J_PAGECACHE_SIZE: 512M # Setting invalidated in production mode
-    NEO4J_ALLOW_UPGRADE: false
+    NEO4J_ALLOW_UPGRADE: "false"
     # Enable this in case of corrupted or missing transaction logs
-    NEO4J_RECOVERY_MODE: false
+    NEO4J_RECOVERY_MODE: "false"
 
     MONGO_ENABLE_CONNECTOR: 1
     MONGO_EXPIRATION_TIME: 7200
