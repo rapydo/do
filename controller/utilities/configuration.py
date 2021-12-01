@@ -146,6 +146,10 @@ class HealthcheckInterval(ConstrainedStr):
     regex = re.compile(r"^[0-9]+(s|m|h)$")
 
 
+class Version(ConstrainedStr):
+    regex = re.compile(r"^[0-9]+(\.[0-9]+)+$")
+
+
 class zero_or_one(IntEnum):
     ZERO = 0
     ONE = 1
@@ -155,7 +159,7 @@ class ProjectModel(BaseModel):
     title: str
     description: str
     keywords: str
-    rapydo: float
+    rapydo: Version
     version: str
 
 
