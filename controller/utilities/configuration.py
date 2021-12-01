@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import yaml
+from glom import glom
 from pydantic import (
     BaseModel,
     ConstrainedInt,
@@ -375,7 +376,7 @@ class BaseEnvModel(BaseModel):
     REGISTRY_HTTP_SECRET: Optional[str]
     ACTIVATE_FAIL2BAN: zero_or_one
     SWARM_MANAGER_ADDRESS: Optional[str]
-    SYSLOG_ADDRESS: str
+    SYSLOG_ADDRESS: Optional[str]
     SMTP_ENABLE_CONNECTOR: zero_or_one
     SMTP_EXPIRATION_TIME: PositiveInt
     SMTP_VERIFICATION_TIME: PositiveInt
@@ -651,6 +652,14 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
     return all_files, base_files
 
 
+def get_offending_value(conf: Configuration, field: str) -> Optional[Any]:
+    # field is like:
+    # "variables -> env -> XYZ"
+    # this way it is converted in key = variables.env.XYZ
+    key = ".".join(field.split(" -> "))
+    return glom(conf, key, default=None)
+
+
 def validate_configuration(conf: Optional[Configuration], core: bool) -> None:
     if conf:
 
@@ -660,6 +669,10 @@ def validate_configuration(conf: Optional[Configuration], core: bool) -> None:
             else:
                 CustomConfigurationModel(**conf)
         except ValidationError as e:
+            for field in str(e).split("\n")[1::2]:
+                log.error(
+                    "Invalid value for {}: {}", field, get_offending_value(conf, field)
+                )
             print_and_exit(str(e))
 
 
