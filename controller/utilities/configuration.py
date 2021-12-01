@@ -57,9 +57,8 @@ class FLASK_ENV_VALUES(Enum):
 
 class AUTH_SERVICE_VALUES(Enum):
     no = "NO_AUTHENTICATION"
-    postgres = "postgres"
+    postgres = "sqlalchemy"
     neo4j = "neo4j"
-    mysql = "mysql"
     mongo = "mongo"
 
 
