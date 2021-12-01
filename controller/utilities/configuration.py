@@ -685,4 +685,8 @@ def validate_env(env: Dict[str, Union[None, str, int, float]]) -> None:
     try:
         BaseEnvModel(**env)
     except ValidationError as e:
+        for field in str(e).split("\n")[1::2]:
+            log.error(
+                "Invalid value for {}: {}", field, get_offending_value(env, field)
+            )
         print_and_exit(str(e))
