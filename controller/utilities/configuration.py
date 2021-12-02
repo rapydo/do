@@ -272,13 +272,13 @@ class BaseEnvModel(BaseModel):
     NEO4J_PASSWORD: str
     NEO4J_EXPOSED_WEB_INTERFACE_PORT: Port
     NEO4J_WEB_INTERFACE_PORT: Port
-    NEO4J_SSL_ENABLED: true_or_false
+    NEO4J_SSL_ENABLED: bool
     NEO4J_BOLT_TLS_LEVEL: NEO4J_BOLT_TLS_LEVEL_VALUES
     # They are equal to placeholder in production mode when neo4j is not enabled
     NEO4J_HEAP_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
     NEO4J_PAGECACHE_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
-    NEO4J_ALLOW_UPGRADE: true_or_false
-    NEO4J_RECOVERY_MODE: true_or_false
+    NEO4J_ALLOW_UPGRADE: bool
+    NEO4J_RECOVERY_MODE: bool
     MONGO_ENABLE_CONNECTOR: zero_or_one
     MONGO_EXPIRATION_TIME: PositiveInt
     MONGO_VERIFICATION_TIME: PositiveInt
