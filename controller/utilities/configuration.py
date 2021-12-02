@@ -2,7 +2,7 @@ import re
 from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import yaml
 from glom import glom
@@ -12,6 +12,7 @@ from pydantic import (
     ConstrainedStr,
     Extra,
     PositiveInt,
+    PydanticValueError,
     ValidationError,
 )
 
@@ -155,6 +156,32 @@ class zero_or_one(IntEnum):
     ONE = 1
 
 
+class InvalidNeo4jFlag(PydanticValueError):
+    msg_template = "Invalid Neo4j flag, expected values are: true or false"
+
+
+class Neo4jFlag:
+    @classmethod
+    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
+        field_schema.update(type="boolean")
+
+    @classmethod
+    def __get_validators__(cls) -> Iterator[Callable[["Neo4jFlag", Any], bool]]:
+        yield cls.validate
+
+    def validate(cls, value: Any) -> bool:
+        if isinstance(value, bool):
+            return value
+
+        if value == "true":
+            return True
+
+        if value == "false":
+            return False
+
+        raise InvalidNeo4jFlag()
+
+
 class ProjectModel(BaseModel):
     title: str
     description: str
@@ -272,13 +299,13 @@ class BaseEnvModel(BaseModel):
     NEO4J_PASSWORD: str
     NEO4J_EXPOSED_WEB_INTERFACE_PORT: Port
     NEO4J_WEB_INTERFACE_PORT: Port
-    NEO4J_SSL_ENABLED: bool
+    NEO4J_SSL_ENABLED: Neo4jFlag
     NEO4J_BOLT_TLS_LEVEL: NEO4J_BOLT_TLS_LEVEL_VALUES
     # They are equal to placeholder in production mode when neo4j is not enabled
     NEO4J_HEAP_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
     NEO4J_PAGECACHE_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
-    NEO4J_ALLOW_UPGRADE: bool
-    NEO4J_RECOVERY_MODE: bool
+    NEO4J_ALLOW_UPGRADE: Neo4jFlag
+    NEO4J_RECOVERY_MODE: Neo4jFlag
     MONGO_ENABLE_CONNECTOR: zero_or_one
     MONGO_EXPIRATION_TIME: PositiveInt
     MONGO_VERIFICATION_TIME: PositiveInt
