@@ -2,11 +2,12 @@
 This module test the backup and restore commands mariadb
 """
 import os
+import time
 from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import SWARM_MODE, colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -286,6 +287,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Removing the temporary uncompressed folder",
         f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
     )
+
+    if SWARM_MODE:
+        time.sleep(5)
 
     # 4) verify data match again point 1 (restore completed)
     exec_command(

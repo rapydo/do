@@ -22,8 +22,8 @@ COMPOSE_VERSION = "v2.1.0"
 EXPECTED_COMPOSE_BIN_MD5 = "36360ac1955f1e7be79a8b63532f4ffd"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.6.3"
-EXPECTED_BUILDX_BIN_MD5 = "1b3bcb477b47d2251389402d57221f6f"
+BUILDX_VERSION = "v0.7.1"
+EXPECTED_BUILDX_BIN_MD5 = "94f186350daf6841239a599e65ba38f1"
 
 
 def download(url: str, expected_checksum: str) -> Path:
