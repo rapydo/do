@@ -174,9 +174,8 @@ def print_obsolete(
     if service:
         if from_img:
             log.warning(
-                """Obsolete image {}
-    built on {} FROM {} that changed on {}
-    Update it with: {command}""",
+                """Obsolete image {}: built on {} FROM {} that changed on {}
+Update it with: {command}""",
                 image,
                 date1,
                 from_img,
@@ -185,9 +184,8 @@ def print_obsolete(
             )
         else:
             log.warning(
-                """Obsolete image {}
-    built on {} but changed on {}
-    Update it with: {command}""",
+                """Obsolete image {}: built on {} but changed on {}
+Update it with: {command}""",
                 image,
                 date1,
                 date2,
