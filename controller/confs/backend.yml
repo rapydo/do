@@ -368,7 +368,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.6.4
+    image: mariadb:10.7.1
     healthcheck:
       test: "mysqladmin ping -h localhost"
       interval: ${HEALTHCHECK_INTERVAL}
