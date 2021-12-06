@@ -41,7 +41,7 @@ PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
 PROJECT_CONF_FILENAME = Path("project_configuration.yaml")
 
 
-class Project(TypedDict, total=False):
+class Project(TypedDict):
     title: str
     description: str
     keywords: str
@@ -51,13 +51,14 @@ class Project(TypedDict, total=False):
     extends_from: Optional[str]
 
 
-class Submodules(TypedDict, total=False):
+class Submodule(TypedDict):
     online_url: str
-    # if: str
+    branch: Optional[str]
+    _if: str
 
 
-class Variables:
-    submodules: Dict[str, Submodules]
+class Variables(TypedDict):
+    submodules: Dict[str, Submodule]
     roles: Dict[str, str]
     env: Dict[str, EnvType]
 
@@ -237,7 +238,8 @@ class ProjectModel(BaseModel):
 
 class SubmoduleModel(BaseModel):
     online_url: str
-    # if: str
+    branch: Optional[str]
+    _if: str
 
 
 class BaseEnvModel(BaseModel):

@@ -6,7 +6,7 @@ variables:
       online_url: https://github.com/rapydo/build-templates.git
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
-      if: $$angular
+      _if: $$angular
     do:
       online_url: https://github.com/rapydo/do.git
 

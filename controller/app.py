@@ -24,7 +24,6 @@ import click
 import requests
 import typer
 from git import Repo as GitRepo
-from glom import glom
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
@@ -600,28 +599,27 @@ class Application:
         except AttributeError as e:  # pragma: no cover
             print_and_exit(str(e))
 
-        Configuration.frontend = glom(
-            Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
+        Configuration.frontend = cast(
+            str,
+            (
+                Configuration.specs.get("variables", {})
+                .get("env", {})
+                .get("FRONTEND_FRAMEWORK", default=NO_FRONTEND)
+            ),
         )
 
         if Configuration.frontend == NO_FRONTEND:
             Configuration.frontend = None
 
-        Configuration.project_title = glom(
-            Configuration.specs, "project.title", default="Unknown title"
-        )
-        Configuration.version = glom(Configuration.specs, "project.version", default="")
-        Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=""
-        )
+        project = Configuration.specs.get("project", {})
 
-        Configuration.project_description = glom(
-            Configuration.specs, "project.description", default="Unknown description"
+        Configuration.project_title = project.get("title", default="Unknown title")
+        Configuration.version = project.get("version", default="")
+        Configuration.rapydo_version = project.get("rapydo", default="")
+        Configuration.project_description = project.get(
+            "description", default="Unknown description"
         )
-
-        Configuration.project_keywords = glom(
-            Configuration.specs, "project.keywords", default=""
-        )
+        Configuration.project_keywords = project.get("keywords", default="")
 
         if not Configuration.rapydo_version:  # pragma: no cover
             print_and_exit(
@@ -640,7 +638,7 @@ class Application:
         )
 
         Application.verify_rapydo_version(
-            rapydo_version=glom(specs, "project.rapydo", default="")
+            rapydo_version=specs.get("project", {}).get("rapydo", "")
         )
 
     @staticmethod
@@ -690,7 +688,7 @@ You can use of one:
 
     @staticmethod
     def working_clone(
-        name: str, repo: Dict[str, str], from_path: Optional[Path] = None
+        name: str, repo: configuration.Submodule, from_path: Optional[Path] = None
     ) -> Optional[GitRepo]:
 
         # substitute values starting with '$$'
@@ -698,17 +696,16 @@ You can use of one:
             ANGULAR: Configuration.frontend == ANGULAR,
         }
 
-        condition = repo.get("if", "")
+        condition = repo.get("_if", "")
         if condition.startswith("$$"):
             # Is this repo enabled?
             if not myvars.get(condition.lstrip("$"), None):
                 return None
 
-        repo.setdefault(
-            "branch",
+        default_version = (
             Configuration.rapydo_version
             if Configuration.rapydo_version
-            else __version__,
+            else __version__
         )
 
         if from_path is not None:
@@ -728,12 +725,14 @@ You can use of one:
 
             os.symlink(local_path, submodule_path)
 
-        url = cast(str, repo.get("online_url"))
-        branch = cast(str, repo.get("branch"))
+        url = repo.get("online_url")
+        if not url:  # pragma: no cover
+            print_and_exit("Submodule misconfiguration, online url not found: {}", name)
+
         return git.clone(
             url=url,
             path=Path(name),
-            branch=branch,
+            branch=repo.get("branch") or default_version,
             do=Configuration.initialize,
             check=not Configuration.install,
         )
@@ -742,11 +741,9 @@ You can use of one:
     def git_submodules(from_path: Optional[Path] = None) -> None:
         """Check and/or clone git projects"""
 
-        submodules: Dict[str, Dict[str, str]] = glom(
-            Configuration.specs,
-            "variables.submodules",
-            default=cast(Dict[str, Dict[str, str]], {}),
-        ).copy()
+        submodules = (
+            Configuration.specs.get("variables", {}).get("submodules", {}).copy()
+        )
 
         main_repo = git.get_repo(".")
         # This is to reassure mypy, but this is check is already done
@@ -876,7 +873,7 @@ You can use of one:
         except FileNotFoundError:
             pass
 
-        Application.env = glom(Configuration.specs, "variables.env", default={})
+        Application.env = Configuration.specs.get("variables", {}).get("env", {})
 
         Application.env["PROJECT_DOMAIN"] = Configuration.hostname
         Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
