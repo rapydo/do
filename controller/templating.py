@@ -19,8 +19,6 @@ class TemplateDataType(TypedDict, total=False):
     version: str
     project: str
     extend: Optional[str]
-    # Duplicates should be resolved
-    auth: str
     auth_service: str
     frontend: str
     hostname: str
