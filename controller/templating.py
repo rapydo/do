@@ -26,8 +26,6 @@ class TemplateDataType(TypedDict, total=False):
     production: bool
     testing: bool
     services: List[str]
-    # Duplicates should be resolved
-    envs: Dict[str, str]
     env_variables: Dict[str, str]
     enable_postgres: bool
     enable_mysql: bool

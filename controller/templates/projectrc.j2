@@ -78,6 +78,6 @@ project_configuration:
       {% endif -%}
       {% endif -%}
 
-      {% for env_key in envs -%}
-      {{ env_key }}: {{ envs[env_key] }}
+      {% for env_key in env_variables -%}
+      {{ env_key }}: {{ env_variables[env_key] }}
       {% endfor %}
