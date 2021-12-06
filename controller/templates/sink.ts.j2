@@ -118,7 +118,7 @@ export class SinkComponent implements OnInit {
         description: "date",
         key: "date",
         required: false,
-        type: SchemaType.DATE,
+        type: SchemaType.DATETIME,
         min: new Date().setFullYear(now.getFullYear() - 1),
         max: new Date().setFullYear(now.getFullYear() + 2),
       },
