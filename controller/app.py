@@ -604,7 +604,7 @@ class Application:
             (
                 Configuration.specs.get("variables", {})
                 .get("env", {})
-                .get("FRONTEND_FRAMEWORK", default=NO_FRONTEND)
+                .get("FRONTEND_FRAMEWORK", NO_FRONTEND)
             ),
         )
 
@@ -613,13 +613,13 @@ class Application:
 
         project = Configuration.specs.get("project", {})
 
-        Configuration.project_title = project.get("title", default="Unknown title")
-        Configuration.version = project.get("version", default="")
-        Configuration.rapydo_version = project.get("rapydo", default="")
+        Configuration.project_title = project.get("title", "Unknown title")
+        Configuration.version = project.get("version", "")
+        Configuration.rapydo_version = project.get("rapydo", "")
         Configuration.project_description = project.get(
-            "description", default="Unknown description"
+            "description", "Unknown description"
         )
-        Configuration.project_keywords = project.get("keywords", default="")
+        Configuration.project_keywords = project.get("keywords", "")
 
         if not Configuration.rapydo_version:  # pragma: no cover
             print_and_exit(
