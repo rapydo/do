@@ -3,7 +3,7 @@ import random
 import string
 from filecmp import cmp
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, TypedDict
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
@@ -11,7 +11,40 @@ from zxcvbn import zxcvbn
 
 from controller import TEMPLATE_DIR, log, print_and_exit
 
-TemplateDataType = Dict[str, Union[bool, float, str, List[str], Dict[str, str], None]]
+# TemplateDataType = Dict[str, Union[bool, float, str, List[str], Dict[str, str], None]]
+
+
+class TemplateDataType(TypedDict, total=False):
+    name: str
+    version: str
+    project: str
+    extend: Optional[str]
+    # Duplicates should be resolved
+    auth: str
+    auth_service: str
+    frontend: str
+    hostname: str
+    swarm: bool
+    production: bool
+    testing: bool
+    services: List[str]
+    # Duplicates should be resolved
+    envs: Dict[str, str]
+    env_variables: Dict[str, str]
+    enable_postgres: bool
+    enable_mysql: bool
+    enable_neo4j: bool
+    enable_mongo: bool
+    enable_rabbit: bool
+    enable_redis: bool
+    enable_celery: bool
+    enable_flower: bool
+    enable_fail2ban: bool
+    enable_pushpin: bool
+    enable_ftp: bool
+    enable_bot: bool
+    celery_broker: Optional[str]
+    celery_backend: Optional[str]
 
 
 def username(param_not_used: str, length: int = 8) -> str:
