@@ -2,7 +2,18 @@ import re
 from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import yaml
 from glom import glom
@@ -16,13 +27,47 @@ from pydantic import (
     ValidationError,
 )
 
-from controller import COMPOSE_FILE_VERSION, CONFS_DIR, PLACEHOLDER, log, print_and_exit
+from controller import (
+    COMPOSE_FILE_VERSION,
+    CONFS_DIR,
+    PLACEHOLDER,
+    EnvType,
+    log,
+    print_and_exit,
+)
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
 PROJECT_CONF_FILENAME = Path("project_configuration.yaml")
 
-Configuration = Dict[str, Any]
+
+class Project(TypedDict, total=False):
+    title: str
+    description: str
+    keywords: str
+    rapydo: str
+    version: str
+    extends: Optional[str]
+    extends_from: Optional[str]
+
+
+class Submodules(TypedDict, total=False):
+    online_url: str
+    # if: str
+
+
+class Variables:
+    submodules: Dict[str, Submodules]
+    roles: Dict[str, str]
+    env: Dict[str, EnvType]
+
+
+# total is False because of .projectrc and project_configuration
+# But should be total=True in case of projects_defaults
+class Configuration(TypedDict, total=False):
+    project: Project
+    tags: Dict[str, str]
+    variables: Variables
 
 
 class BACKEND_BUILD_MODE_VALUES(Enum):
@@ -503,7 +548,7 @@ def read_configuration(
     submodules_path: Path,
     read_extended: bool = True,
     production: bool = False,
-) -> Tuple[Configuration, Optional[Path], Optional[Path], Configuration]:
+) -> Tuple[Configuration, Optional[str], Optional[Path], Configuration]:
     """
     Read default configuration
     """
@@ -556,21 +601,21 @@ def read_configuration(
             base_configuration_copy,
         )
 
-    extends_from = project.get("extends-from", "projects")
+    extends_from = project.get("extends_from") or "projects"
 
     if extends_from == "projects":
         extend_path = projects_path.joinpath(extended_project)
     elif extends_from.startswith("submodules/"):  # pragma: no cover
         repository_name = (extends_from.split("/")[1]).strip()
         if repository_name == "":
-            print_and_exit("Invalid repository name in extends-from, name is empty")
+            print_and_exit("Invalid repository name in extends_from, name is empty")
 
         extend_path = submodules_path.joinpath(
             repository_name, projects_path, extended_project
         )
     else:  # pragma: no cover
         suggest = "Expected values: 'projects' or 'submodules/${REPOSITORY_NAME}'"
-        print_and_exit("Invalid extends-from parameter: {}.\n{}", extends_from, suggest)
+        print_and_exit("Invalid extends_from parameter: {}.\n{}", extends_from, suggest)
 
     if not extend_path.exists():  # pragma: no cover
         print_and_exit("From project not found: {}", extend_path)
@@ -588,10 +633,14 @@ def read_configuration(
     )
 
 
+# This function is not mypy-friend after the introduction of TypedDict
+# TypedDict key must be a string literal;
+# This use case is not supported by mypy
+# https://github.com/python/mypy/issues/7178
 def mix_configuration(
     base: Optional[Configuration], custom: Optional[Configuration]
 ) -> Configuration:
-    # WARNING: This function has the side effect of changing ght base dict!
+    # WARNING: This function has the side effect of changing the input base dict!
 
     if base is None:
         base = {}
@@ -602,22 +651,27 @@ def mix_configuration(
     for key, elements in custom.items():
 
         if key not in base:
-            base[key] = custom[key]
+            # TypedDict key must be a string literal;
+            base[key] = custom[key]  # type: ignore
             continue
 
-        if elements is None:
-            if isinstance(base[key], dict):  # pragma: no cover
+        if elements is None:  # pragma: no cover
+            # TypedDict key must be a string literal;
+            if isinstance(base[key], dict):  # type: ignore
                 log.warning("Cannot replace {} with empty list", key)
                 continue
 
         if isinstance(elements, dict):
-            mix_configuration(base[key], custom[key])
+            # TypedDict key must be a string literal;
+            base[key] = mix_configuration(base[key], custom[key])  # type: ignore
 
         elif isinstance(elements, list):
             for e in elements:  # pragma: no cover
-                base[key].append(e)
+                # TypedDict key must be a string literal;
+                base[key].append(e)  # type: ignore
         else:
-            base[key] = elements
+            # TypedDict key must be a string literal;
+            base[key] = elements  # type: ignore
 
     return base
 
@@ -688,15 +742,7 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
     return all_files, base_files
 
 
-def get_offending_value(conf: Configuration, field: str) -> Optional[Any]:
-    # field is like:
-    # "variables -> env -> XYZ"
-    # this way it is converted in key = variables.env.XYZ
-    key = ".".join(field.split(" -> "))
-    return glom(conf, key, default=None)
-
-
-def validate_configuration(conf: Optional[Configuration], core: bool) -> None:
+def validate_configuration(conf: Configuration, core: bool) -> None:
     if conf:
 
         try:
@@ -706,18 +752,20 @@ def validate_configuration(conf: Optional[Configuration], core: bool) -> None:
                 CustomConfigurationModel(**conf)
         except ValidationError as e:
             for field in str(e).split("\n")[1::2]:
+                # field is like:
+                # "variables -> env -> XYZ"
+                # this way it is converted in key = variables.env.XYZ
+                key = ".".join(field.split(" -> "))
                 log.error(
-                    "Invalid value for {}: {}", field, get_offending_value(conf, field)
+                    "Invalid value for {}: {}", field, glom(conf, key, default=None)
                 )
             print_and_exit(str(e))
 
 
-def validate_env(env: Dict[str, Union[None, str, int, float]]) -> None:
+def validate_env(env: Dict[str, EnvType]) -> None:
     try:
         BaseEnvModel(**env)
     except ValidationError as e:
         for field in str(e).split("\n")[1::2]:
-            log.error(
-                "Invalid value for {}: {}", field, get_offending_value(env, field)
-            )
+            log.error("Invalid value for {}: {}", field, env.get(field, "N/A"))
         print_and_exit(str(e))

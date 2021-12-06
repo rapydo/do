@@ -7,7 +7,18 @@ import time
 import warnings
 from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import click
 import requests
@@ -54,12 +65,19 @@ BASE_UID = 1000
 CommandParameter = Union[int, str, bool, None, Path, Iterable[str], enum.Enum]
 
 
+class ProjectRCType(TypedDict, total=False):
+    project: str
+    stack: str
+    hostname: str
+    production: bool
+    project_configuration: configuration.Configuration
+
+
 class Configuration:
-    projectrc: Dict[str, str] = {}
-    # To be better characterized. This is a:
-    # {'variables': 'env': Dict[str, str]}
-    host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
-    specs: Dict[str, str] = {}
+    projectrc: ProjectRCType = {}
+    host_configuration: configuration.Configuration = {}
+    # This is the final configuration (defaults + project + projectrc)
+    specs: configuration.Configuration = {}
     services_list: Optional[str]
     environment: Dict[str, str]
 
@@ -160,7 +178,8 @@ def projectrc_values(
     if not param.name or value != param.get_default(ctx):
         return value
 
-    from_projectrc = Configuration.projectrc.get(param.name)
+    # This cast is not correct... but enough for this callback..
+    from_projectrc = cast(Optional[str], Configuration.projectrc.get(param.name))
 
     if from_projectrc is not None:
         return from_projectrc
@@ -503,7 +522,10 @@ class Application:
     @staticmethod
     def load_projectrc() -> None:
 
-        projectrc_yaml = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
+        projectrc_yaml = cast(
+            ProjectRCType,
+            configuration.load_yaml_file(file=PROJECTRC, is_optional=True),
+        )
 
         Configuration.host_configuration = projectrc_yaml.pop(
             "project_configuration", {}
