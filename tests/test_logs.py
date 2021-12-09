@@ -1,6 +1,7 @@
 """
 This module will test the logs command
 """
+import signal
 from datetime import datetime
 
 from controller import SWARM_MODE
@@ -10,6 +11,7 @@ from tests import (
     exec_command,
     execute_outside,
     init_project,
+    mock_KeyboardInterrupt,
     pull_images,
     start_project,
     start_registry,
@@ -42,21 +44,18 @@ def test_all(capfd: Capture) -> None:
 
     now = datetime.now()
 
-    # With python on whales this test hangs forever,
-    # even if KeyboardInterrupt is correctly catched and working if manually tested
+    signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
+    signal.alarm(5)
+    # Here using main services option
+    exec_command(
+        capfd,
+        "logs --tail 10 --follow backend",
+        "REST API backend server is ready to be launched",
+    )
+    end = datetime.now()
 
-    # signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    # signal.alarm(5)
-    # # Here using main services option
-    # exec_command(
-    #     capfd,
-    #     "logs --tail 10 --follow backend",
-    #     "REST API backend server is ready to be launched",
-    # )
-    # end = datetime.now()
-
-    # assert (end - now).seconds >= 4
-    # signal.alarm(0)
+    assert (end - now).seconds >= 4
+    signal.alarm(0)
 
     exec_command(
         capfd,
