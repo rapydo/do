@@ -6,6 +6,7 @@ import shutil
 from pathlib import Path
 
 from controller import SWARM_MODE, __version__, colors
+from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.swarm import Swarm
 from controller.utilities import git
 from tests import (
@@ -90,6 +91,8 @@ RUN mkdir xyz
         "check -i main",
         f" image, execute {colors.RED}rapydo pull",
         f" image, execute {colors.RED}rapydo build",
+        f"Compose is installed with version {COMPOSE_VERSION}",
+        f"Buildx is installed with version {BUILDX_VERSION}",
         "Checks completed",
     )
 

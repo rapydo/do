@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
@@ -6,6 +7,7 @@ import typer
 
 from controller import RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application
+from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.builds import (
     TemplateInfo,
     find_templates_build,
@@ -68,12 +70,12 @@ def check(
         log.info("Checking git (skip with --no-git)")
         Application.git_checks(ignore_submodules)
 
+    docker = Docker()
     if no_builds:
         log.info("Skipping builds checks")
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        docker = Docker()
         dimages: List[str] = []
 
         for img in docker.client.images():
@@ -159,6 +161,46 @@ def check(
                 filename,
                 command=RED(f"rapydo upgrade --path {filename}"),
             )
+
+    compose_version = "Unknown"
+    buildx_version = "Unknown"
+    m = re.search(
+        r"^Docker Compose version (v[0-9]+\.[0-9]+\.[0-9]+)$",
+        docker.client.compose.version(),
+    )
+    if m:
+        compose_version = m.group(1)
+
+    m = re.search(
+        r"^github.com/docker/buildx (v[0-9]+\.[0-9]+\.[0-9]+) .*$",
+        docker.client.buildx.version(),
+    )
+    if m:
+        buildx_version = m.group(1)
+
+    if compose_version == COMPOSE_VERSION:
+        log.info("Compose is installed with version {}", COMPOSE_VERSION)
+    else:  # pragma: no cover
+        cmd = RED("rapydo install compose")
+        fix_hint = f"You can update it with {cmd}"
+        log.warning(
+            "Compose is installed with version {}, expected version is {}.\n{}",
+            compose_version,
+            COMPOSE_VERSION,
+            fix_hint,
+        )
+
+    if buildx_version == BUILDX_VERSION:
+        log.info("Buildx is installed with version {}", BUILDX_VERSION)
+    else:  # pragma: no cover
+        cmd = RED("rapydo install buildx")
+        fix_hint = f"You can update it with {cmd}"
+        log.warning(
+            "Buildx is installed with version {}, expected version is {}.\n{}",
+            buildx_version,
+            BUILDX_VERSION,
+            fix_hint,
+        )
 
     log.info("Checks completed")
 
