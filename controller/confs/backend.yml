@@ -356,6 +356,8 @@ services:
       - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
       POSTGRES_USER: "${ALCHEMY_USER}"
       POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
       POSTGRES_DEFAULT_DB: ${ALCHEMY_DB}
