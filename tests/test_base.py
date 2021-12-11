@@ -4,10 +4,11 @@ and the checks of the current folder (git repo and rapydo structure required)
 """
 import os
 import tempfile
+from pathlib import Path
 
 from faker import Faker
 
-from controller import __version__, colors
+from controller import PROJECT_DIR, __version__, colors
 from tests import (
     Capture,
     create_project,
@@ -135,4 +136,24 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         capfd,
         "-e ACTIVATE_FAIL2BAN start fail2ban",
         "Invalid enviroment, missing value in ACTIVATE_FAIL2BAN",
+    )
+
+    Path(PROJECT_DIR, project, "commands").mkdir(exist_ok=True)
+    with open(f"projects/{project}/commands/custom.py", "w+") as f:
+        f.write(
+            """
+from controller.app import Application
+from controller import log
+
+@Application.app.command(help="This is a custom command")
+def custom() -> None:
+    Application.print_command()
+    log.info("Hello from custom command!")
+"""
+        )
+
+    exec_command(
+        capfd,
+        "custom",
+        "Hello from custom command!",
     )

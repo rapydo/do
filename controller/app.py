@@ -366,7 +366,15 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        load_commands()
+
+        if not PROJECT_DIR.is_dir():
+            project_dir = None
+        else:
+            project_dir = Application.project_scaffold.get_project(
+                Configuration.projectrc.get("project")
+            )
+
+        load_commands(project_dir)
 
         Application.load_projectrc()
 
