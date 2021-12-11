@@ -265,7 +265,7 @@ class Project:
         if project is None:
 
             if len(projects) == 0:
-                print_and_exit("No project found ({} folder is empty?)", PROJECT_DIR)
+                print_and_exit("No project found (is {} folder empty?)", PROJECT_DIR)
 
             if len(projects) > 1:
 
