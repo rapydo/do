@@ -5,6 +5,8 @@ import os
 import shutil
 from pathlib import Path
 
+import pytest
+
 from controller import SWARM_MODE, __version__, colors
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.swarm import Swarm
@@ -130,11 +132,13 @@ RUN mkdir xyz
     # Test with zero projects
     with TemporaryRemovePath(Path("projects")):
         os.mkdir("projects")
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            "No project found (projects folder is empty?)",
-        )
+        # in this case SystemExit is raised in the command init...
+        with pytest.raises(SystemExit):
+            exec_command(
+                capfd,
+                "check -i main --no-git --no-builds",
+                "No project found (is projects folder empty?)",
+            )
         shutil.rmtree("projects")
 
     exec_command(
