@@ -371,7 +371,7 @@ class Application:
             project_dir = None
         else:
             project_dir = Application.project_scaffold.get_project(
-                Configuration.projectrc.get("project")
+                Configuration.projectrc.get("project"), ignore_multiples=True
             )
 
         load_commands(project_dir)

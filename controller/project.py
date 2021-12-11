@@ -258,7 +258,7 @@ class Project:
         return True
 
     @staticmethod
-    def get_project(project: Optional[str]) -> str:
+    def get_project(project: Optional[str], ignore_multiples: bool = False) -> str:
 
         projects = os.listdir(PROJECT_DIR)
 
@@ -268,6 +268,13 @@ class Project:
                 print_and_exit("No project found ({} folder is empty?)", PROJECT_DIR)
 
             if len(projects) > 1:
+
+                # It is used by the preliminary get used to load the commands
+                # In case of multiple projects without a proper definition in
+                # projectrc, the custom commands will not be loaded
+                if ignore_multiples:
+                    return ""
+
                 print_and_exit(
                     "Multiple projects found, "
                     "please use --project to specify one of the following: {}",
