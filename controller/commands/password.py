@@ -295,7 +295,7 @@ def password(
         # but in every case if the stack is running it has to be restarted
 
         docker = Docker()
-        if service == REGISTRY:
+        if service.value == REGISTRY:
             is_running = docker.ping_registry(do_exit=False)
             container: Optional[Tuple[str, str]] = ("registry", "")
         else:
@@ -322,7 +322,7 @@ def password(
         if is_running:
             log.info("{} was running, restarting services...", service.value)
 
-            if service == REGISTRY:
+            if service.value == REGISTRY:
                 port = cast(int, Application.env["REGISTRY_PORT"])
 
                 compose.docker.container.remove(REGISTRY, force=True)
