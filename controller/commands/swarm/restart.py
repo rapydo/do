@@ -4,7 +4,6 @@ from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Update deployed services")
@@ -30,9 +29,8 @@ def restart(
         Application.data.base_services,
     )
 
-    swarm = Swarm()
-
-    if not swarm.stack_is_running():
+    docker = Docker()
+    if not docker.swarm.stack_is_running():
         print_and_exit(
             "Your stack is not running, deploy it with {command}",
             command=RED("rapydo start"),
@@ -40,9 +38,8 @@ def restart(
 
     log.info("Restarting services:")
 
-    docker = Docker()
     docker.compose.dump_config(Application.data.services)
-    swarm.deploy()
+    docker.swarm.deploy()
 
     if force:
         for service in Application.data.services:

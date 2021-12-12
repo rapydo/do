@@ -9,7 +9,7 @@ import pytest
 
 from controller import SWARM_MODE, __version__, colors
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from controller.utilities import git
 from tests import (
     Capture,
@@ -275,8 +275,8 @@ RUN mkdir xyz
             "Checks completed",
         )
 
-        swarm = Swarm()
-        swarm.leave()
+        docker = Docker()
+        docker.swarm.leave()
 
         exec_command(
             capfd,

@@ -4,7 +4,7 @@ import typer
 
 from controller import SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from controller.project import ANGULAR, DATA
 
 
@@ -72,9 +72,9 @@ def init(
         Application.get_controller().make_env()
 
     if SWARM_MODE:
-        swarm = Swarm(check_initialization=False)
-        if not swarm.get_token():
-            swarm.init()
+        docker = Docker(verify_swarm=False)
+        if not docker.swarm.get_token():
+            docker.swarm.init()
             log.info("Swarm is now initialized")
         else:
             log.debug("Swarm is already initialized")

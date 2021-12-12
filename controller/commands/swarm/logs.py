@@ -4,7 +4,7 @@ import typer
 
 from controller import log, print_and_exit
 from controller.app import Application
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Watch log tails of services")
@@ -44,9 +44,9 @@ def logs(
         else:
             timestamps = False
 
-        swarm = Swarm()
+        docker = Docker()
         try:
-            swarm.logs(service, follow, tail, timestamps)
+            docker.swarm.logs(service, follow, tail, timestamps)
         except KeyboardInterrupt:  # pragma: no cover
             log.info("Stopped by keyboard")
         print("")

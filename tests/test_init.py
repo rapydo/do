@@ -8,7 +8,7 @@ from pathlib import Path
 from faker import Faker
 
 from controller import SWARM_MODE, __version__
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from controller.utilities import git, system
 from tests import (
     Capture,
@@ -48,8 +48,8 @@ def test_init(capfd: Capture, faker: Faker) -> None:
             "Project initialized",
         )
 
-        swarm = Swarm()
-        swarm.leave()
+        docker = Docker()
+        docker.swarm.leave()
         local_ip = system.get_local_ip(production=False)
         exec_command(
             capfd,

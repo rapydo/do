@@ -23,9 +23,9 @@ from controller.utilities import system
 
 
 class Swarm:
-    def __init__(self, check_initialization: bool = True):
+    def __init__(self, docker: Docker, check_initialization: bool = True):
 
-        self.docker_wrapper = Docker()
+        self.docker_wrapper = docker
         self.docker = self.docker_wrapper.client
 
         if check_initialization and not self.get_token():

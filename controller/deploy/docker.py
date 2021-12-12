@@ -4,7 +4,7 @@ import socket
 import sys
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
 import requests
 import urllib3
@@ -24,21 +24,37 @@ COMPOSE_SEP = "-"
 
 
 class Docker:
-    def __init__(self, compose_files: Optional[List[Path]] = None) -> None:
+    def __init__(
+        self, compose_files: Optional[List[Path]] = None, verify_swarm: bool = True
+    ) -> None:
 
         if not compose_files:
-            compose_files = Application.data.files
+            # Not all commands initialize Application.data
+            # e.g. init does not
+            if hasattr(Application, "data"):
+                compose_files = Application.data.files
 
-        self.client = DockerClient(
-            compose_files=cast(List[Union[str, Path]], compose_files),
-            compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
-            host=self.get_engine(Configuration.remote_engine),
-        )
+        if compose_files:
+            self.client = DockerClient(
+                compose_files=cast(List[Union[str, Path]], compose_files),
+                compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
+                host=self.get_engine(Configuration.remote_engine),
+            )
+            # temporary add here to prevent circular imports, to be moved upside
+            from controller.deploy.compose_v2 import Compose
+
+            self.compose = Compose(docker=self)
+        else:
+            self.client = DockerClient(
+                host=self.get_engine(Configuration.remote_engine),
+            )
 
         # temporary add here to prevent circular imports, to be moved upside
-        from controller.deploy.compose_v2 import Compose
+        from controller.deploy.swarm import Swarm
 
-        self.compose = Compose(docker=self)
+        self.swarm = Swarm(
+            docker=self, check_initialization=verify_swarm and SWARM_MODE
+        )
 
     @lru_cache
     def connect_engine(self, node_id: str) -> DockerClient:
@@ -214,6 +230,18 @@ class Docker:
             return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
 
+    def get_services_status(self, prefix: str) -> Dict[str, str]:
+        if SWARM_MODE:
+            return self.swarm.get_services_status(prefix)
+        else:
+            return self.compose.get_services_status(prefix)
+
+    def get_running_services(self) -> Set[str]:
+        if SWARM_MODE:
+            return self.swarm.get_running_services()
+        else:
+            return self.compose.get_running_services()
+
     def get_containers(self, service: str) -> Dict[int, Tuple[str, str]]:
 
         containers: Dict[int, Tuple[str, str]] = {}
@@ -387,3 +415,9 @@ class Docker:
                 sys.exit(int(exit_code))
 
         return None
+
+    def status(self, services: List[str]) -> None:
+        if SWARM_MODE:
+            return self.swarm.status(services)
+        else:
+            return self.compose.status(services)

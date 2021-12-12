@@ -3,7 +3,6 @@ from typing import Optional, Tuple
 
 from controller import SWARM_MODE, log, print_and_exit
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 SERVICE_NAME = __name__
 
@@ -20,8 +19,7 @@ def remove(docker: Docker, service: str) -> None:
 # Duplicated in backup and restore modules (neo4j, rabbit, redis ...)
 def start(docker: Docker, service: str) -> None:
     if SWARM_MODE:
-        swarm = Swarm()
-        swarm.deploy()
+        docker.swarm.deploy()
     else:
         docker.compose.start_containers([service])
 

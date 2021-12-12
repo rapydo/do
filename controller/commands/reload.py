@@ -6,7 +6,6 @@ from python_on_whales.utils import DockerException
 from controller import SWARM_MODE, log
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Reload services")
@@ -23,11 +22,7 @@ def reload(
     Application.get_controller().controller_init(services)
 
     docker = Docker()
-    if SWARM_MODE:
-        swarm = Swarm()
-        running_services = swarm.get_running_services()
-    else:
-        running_services = docker.compose.get_running_services()
+    running_services = docker.get_running_services()
 
     reloaded = 0
     for service in Application.data.services:

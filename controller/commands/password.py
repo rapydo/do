@@ -20,7 +20,6 @@ from controller import (
 from controller.app import Application
 from controller.commands import PASSWORD_MODULES
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 from controller.templating import Templating, get_strong_password
 
 # make this configurable
@@ -331,8 +330,7 @@ def password(
             elif SWARM_MODE:
 
                 docker.compose.dump_config(Application.data.services)
-                swarm = Swarm()
-                swarm.deploy()
+                docker.swarm.deploy()
 
             else:
                 docker.compose.start_containers(Application.data.services)

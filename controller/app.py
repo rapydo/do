@@ -827,10 +827,14 @@ You can use of one:
 
         from controller.deploy.docker import Docker
 
-        docker = Docker(compose_files=self.base_files)
+        docker = Docker(
+            compose_files=self.base_files, verify_swarm=not Configuration.initialize
+        )
         base_services = docker.compose.get_config().services
 
-        docker = Docker(compose_files=self.files)
+        docker = Docker(
+            compose_files=self.files, verify_swarm=not Configuration.initialize
+        )
         compose_config = docker.compose.get_config().services
 
         self.active_services = services.find_active(compose_config)

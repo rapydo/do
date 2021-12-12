@@ -15,7 +15,6 @@ from controller.deploy.builds import (
     get_image_creation,
 )
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 from controller.templating import Templating
 from controller.utilities import git
 
@@ -54,15 +53,11 @@ def check(
     )
     Application.get_controller().controller_init()
 
+    docker = Docker()
     if SWARM_MODE:
-        # This is to verify if swarm is working. It will verify in the constructor
-        # if the node has joined a swarm cluster by requesting for a swarm token
-        # If not, the execution will halt
-        swarm = Swarm()
-        # this is true, otherwise during the Swarm initialization the app will be halt
         log.debug("Swarm is correctly initialized")
 
-        swarm.check_resources()
+        docker.swarm.check_resources()
 
     if no_git:
         log.info("Skipping git checks")
@@ -70,7 +65,6 @@ def check(
         log.info("Checking git (skip with --no-git)")
         Application.git_checks(ignore_submodules)
 
-    docker = Docker()
     if no_builds:
         log.info("Skipping builds checks")
     else:
