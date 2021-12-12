@@ -9,7 +9,6 @@ from controller.deploy.builds import (
     get_dockerfile_base_image,
     get_non_redundant_services,
 )
-from controller.deploy.compose_v2 import Compose as ComposeV2
 from controller.deploy.docker import Docker
 
 
@@ -63,8 +62,8 @@ def build(
     if core:
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with core files only
-        compose = ComposeV2(Application.data.base_files)
-        compose.dump_config(Application.data.services, set_registry=False)
+        docker = Docker(compose_files=Application.data.base_files)
+        docker.compose.dump_config(Application.data.services, set_registry=False)
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
         docker.client.buildx.bake(
@@ -78,8 +77,8 @@ def build(
         if SWARM_MODE:
             log.warning("Local registry push is not implemented yet for core images")
 
-    compose = ComposeV2(Application.data.files)
-    compose.dump_config(Application.data.services, set_registry=False)
+    docker = Docker()
+    docker.compose.dump_config(Application.data.services, set_registry=False)
     log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     core_builds = find_templates_build(Application.data.base_services)

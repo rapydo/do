@@ -7,7 +7,6 @@ from python_on_whales.exceptions import DockerException
 from controller import SWARM_MODE, log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose as Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
@@ -40,8 +39,8 @@ def start(
 
     Application.get_controller().controller_init(services)
 
+    docker = Docker()
     if SWARM_MODE:
-        docker = Docker()
         docker.ping_registry()
 
     verify_available_images(
@@ -50,7 +49,6 @@ def start(
         Application.data.base_services,
     )
 
-    compose = Compose(Application.data.files)
     if SWARM_MODE:
         swarm = Swarm()
         # if swarm.stack_is_running():
@@ -62,7 +60,7 @@ def start(
         #         command2=RED("rapydo restart"),
         #     )
 
-        compose.dump_config(Application.data.services)
+        docker.compose.dump_config(Application.data.services)
         swarm.deploy()
         wait_stack_deploy(swarm)
 
@@ -75,6 +73,6 @@ def start(
         #         command1=RED("rapydo remove"),
         #         command2=RED("rapydo restart"),
         #     )
-        compose.start_containers(Application.data.services)
+        docker.compose.start_containers(Application.data.services)
 
     log.info("Stack started")

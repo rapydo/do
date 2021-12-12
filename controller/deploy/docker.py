@@ -3,6 +3,7 @@ import shlex
 import socket
 import sys
 from functools import lru_cache
+from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple, Union, cast
 
 import requests
@@ -13,7 +14,7 @@ from python_on_whales.utils import DockerException
 from requests.auth import HTTPBasicAuth
 from requests.models import Response
 
-from controller import RED, SWARM_MODE, log, print_and_exit
+from controller import COMPOSE_ENVIRONMENT_FILE, RED, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.utilities import system
 
@@ -23,9 +24,21 @@ COMPOSE_SEP = "-"
 
 
 class Docker:
-    def __init__(self) -> None:
+    def __init__(self, compose_files: Optional[List[Path]] = None) -> None:
 
-        self.client = DockerClient(host=self.get_engine(Configuration.remote_engine))
+        if not compose_files:
+            compose_files = Application.data.files
+
+        self.client = DockerClient(
+            compose_files=cast(List[Union[str, Path]], compose_files),
+            compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
+            host=self.get_engine(Configuration.remote_engine),
+        )
+
+        # temporary add here to prevent circular imports, to be moved upside
+        from controller.deploy.compose_v2 import Compose
+
+        self.compose = Compose(docker=self)
 
     @lru_cache
     def connect_engine(self, node_id: str) -> DockerClient:

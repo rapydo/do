@@ -3,7 +3,7 @@ import typer
 from controller import log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Restart modified running containers")
@@ -27,7 +27,7 @@ def restart(
         Application.data.base_services,
     )
 
-    dc = Compose(Application.data.files)
-    dc.start_containers(Application.data.services, force=force)
+    docker = Docker()
+    docker.compose.start_containers(Application.data.services, force=force)
 
     log.info("Stack restarted")

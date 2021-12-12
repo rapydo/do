@@ -1,7 +1,6 @@
 from controller import log
 from controller.app import Application
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 
 SERVICE_NAME = __name__
@@ -24,8 +23,7 @@ def tuning(ram: int, cpu: int) -> None:
     if container:
         docker.exec_command(container, user="neo4j", command=command)
     else:
-        compose = Compose(Application.data.files)
-        compose.create_volatile_container(SERVICE_NAME, command=command)
+        docker.compose.create_volatile_container(SERVICE_NAME, command=command)
 
     # output = temporary_stream.getvalue().split("\\")
     # print(output)

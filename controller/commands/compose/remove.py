@@ -4,7 +4,7 @@ import typer
 
 from controller import REGISTRY, log
 from controller.app import Application
-from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Stop and remove containers")
@@ -40,15 +40,15 @@ def remove(
 
     Application.get_controller().controller_init(services)
 
-    compose = Compose(Application.data.files)
+    docker = Docker()
 
     if remove_extras:
         for extra_service in remove_extras:
-            if not compose.docker.container.exists(extra_service):
+            if not docker.client.container.exists(extra_service):
                 log.error("Service {} is not running", extra_service)
                 continue
 
-            compose.docker.container.remove(extra_service, force=True)
+            docker.client.container.remove(extra_service, force=True)
             log.info("Service {} removed", extra_service)
 
         # Nothing more to do
@@ -62,7 +62,7 @@ def remove(
         # Also docker-compose down removes network from what I remember
         # Should be reported as bug? If corrected a specific check in test_remove.py
         # will start to fail
-        compose.docker.compose.down(
+        docker.client.compose.down(
             remove_orphans=False,
             remove_images="local",
             # Remove named volumes declared in the volumes section of the
@@ -72,6 +72,6 @@ def remove(
     else:
         # Important note: volumes=True only destroy anonymous volumes,
         # not named volumes like down should do
-        compose.docker.compose.rm(Application.data.services, stop=True, volumes=rm_all)
+        docker.client.compose.rm(Application.data.services, stop=True, volumes=rm_all)
 
     log.info("Stack removed")

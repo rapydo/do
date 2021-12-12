@@ -4,7 +4,7 @@ from glom import glom
 from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Scale the number of containers for a service")
@@ -33,5 +33,5 @@ def scale(
         Application.data.base_services,
     )
 
-    compose = Compose(Application.data.files)
-    compose.start_containers([service], scales={service: int(nreplicas)})
+    docker = Docker()
+    docker.compose.start_containers([service], scales={service: int(nreplicas)})

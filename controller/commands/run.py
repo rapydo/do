@@ -6,7 +6,6 @@ import typer
 from controller import REGISTRY, SWARM_MODE, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
@@ -94,8 +93,8 @@ def run(
     if service == REGISTRY and not SWARM_MODE:
         print_and_exit("Can't start the registry in compose mode")
 
+    docker = Docker()
     if SWARM_MODE:
-        docker = Docker()
         if service != REGISTRY:
             docker.ping_registry()
         else:
@@ -121,11 +120,9 @@ def run(
             "You should avoid to write or modify files on volumes"
         )
 
-    compose = Compose(Application.data.files)
-
     if pull:
         log.info("Pulling image for {}...", service)
-        compose.docker.compose.pull([service])
+        docker.client.compose.pull([service])
     else:
         verify_available_images(
             [service],
@@ -140,7 +137,7 @@ def run(
             command = "bash"
 
         log.info("Starting {}...", service)
-        compose.create_volatile_container(
+        docker.compose.create_volatile_container(
             service,
             command=command,
             user=user,
@@ -195,4 +192,6 @@ def run(
             f"{prot}://{Configuration.hostname}:{port}",
         )
 
-    compose.create_volatile_container(service, detach=detach, publish=[(port, target)])
+    docker.compose.create_volatile_container(
+        service, detach=detach, publish=[(port, target)]
+    )

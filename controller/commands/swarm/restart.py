@@ -3,7 +3,7 @@ import typer
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose as ComposeV2
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
 
@@ -40,13 +40,13 @@ def restart(
 
     log.info("Restarting services:")
 
-    compose = ComposeV2(Application.data.files)
-    compose.dump_config(Application.data.services)
+    docker = Docker()
+    docker.compose.dump_config(Application.data.services)
     swarm.deploy()
 
     if force:
         for service in Application.data.services:
-            compose.docker.service.update(
+            docker.client.service.update(
                 f"{Configuration.project}_{service}", detach=True, force=True
             )
 

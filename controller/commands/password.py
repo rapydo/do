@@ -19,7 +19,6 @@ from controller import (
 )
 from controller.app import Application
 from controller.commands import PASSWORD_MODULES
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 from controller.templating import Templating, get_strong_password
@@ -283,7 +282,7 @@ def password(
         elif not new_password:
             print_and_exit("Please specify one between --random and --password options")
 
-        compose = Compose(Application.data.files)
+        docker = Docker()
 
         # mypy can't recognize dynamically imported modules
         variables = module.PASSWORD_VARIABLES  # type: ignore
@@ -294,7 +293,6 @@ def password(
         # others can be updated even if offline,
         # but in every case if the stack is running it has to be restarted
 
-        docker = Docker()
         if service.value == REGISTRY:
             is_running = docker.ping_registry(do_exit=False)
             container: Optional[Tuple[str, str]] = ("registry", "")
@@ -325,19 +323,19 @@ def password(
             if service.value == REGISTRY:
                 port = cast(int, Application.env["REGISTRY_PORT"])
 
-                compose.docker.container.remove(REGISTRY, force=True)
+                docker.client.container.remove(REGISTRY, force=True)
 
-                compose.create_volatile_container(
+                docker.compose.create_volatile_container(
                     REGISTRY, detach=True, publish=[(port, port)]
                 )
             elif SWARM_MODE:
 
-                compose.dump_config(Application.data.services)
+                docker.compose.dump_config(Application.data.services)
                 swarm = Swarm()
                 swarm.deploy()
 
             else:
-                compose.start_containers(Application.data.services)
+                docker.compose.start_containers(Application.data.services)
         else:
             log.info("{} was not running, restart is not needed", service.value)
 

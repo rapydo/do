@@ -33,12 +33,8 @@ COMPOSE_SEP = "-"
 
 
 class Compose:
-    def __init__(self, files: List[Path]) -> None:
-        self.files = files
-        self.docker = DockerClient(
-            compose_files=cast(List[Union[str, Path]], files),
-            compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
-        )
+    def __init__(self, docker: Docker) -> None:
+        self.docker = docker.client
 
     def get_config(self) -> ComposeConfig:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json

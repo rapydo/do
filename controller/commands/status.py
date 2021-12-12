@@ -4,7 +4,7 @@ import typer
 
 from controller import SWARM_MODE
 from controller.app import Application
-from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
 
@@ -21,9 +21,9 @@ def status(
 
     Application.get_controller().controller_init(services)
 
+    docker = Docker()
     if SWARM_MODE:
         swarm = Swarm()
         swarm.status(Application.data.services)
     else:
-        compose = Compose(Application.data.files)
-        compose.status(Application.data.services)
+        docker.compose.status(Application.data.services)

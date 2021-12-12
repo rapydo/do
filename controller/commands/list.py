@@ -7,7 +7,7 @@ from tabulate import tabulate
 
 from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, TABLE_FORMAT, log
 from controller.app import Application, Configuration
-from controller.deploy.compose_v2 import Compose
+from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 from controller.utilities import git
 
@@ -42,9 +42,13 @@ def list_cmd(
         headers = ["Name", "Image", "Status", "Path"]
 
         if SWARM_MODE:
-            engine: Union[Swarm, Compose] = Swarm()
+            # it was Compose,
+            # temporary switched to Any while completing the engines merge
+            from typing import Any
+
+            engine: Union[Swarm, Any] = Swarm()
         else:
-            engine = Compose(Application.data.files)
+            engine = Docker().compose
 
         services_status = engine.get_services_status(Configuration.project)
         for name, service in Application.data.compose_config.items():

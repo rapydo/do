@@ -825,13 +825,13 @@ You can use of one:
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
         # to build the config with files and variables
 
-        from controller.deploy.compose_v2 import Compose
+        from controller.deploy.docker import Docker
 
-        compose = Compose(files=self.base_files)
-        base_services = compose.get_config().services
+        docker = Docker(compose_files=self.base_files)
+        base_services = docker.compose.get_config().services
 
-        compose = Compose(files=self.files)
-        compose_config = compose.get_config().services
+        docker = Docker(compose_files=self.files)
+        compose_config = docker.compose.get_config().services
 
         self.active_services = services.find_active(compose_config)
 

@@ -5,7 +5,6 @@ from python_on_whales.utils import DockerException
 
 from controller import SWARM_MODE, log
 from controller.app import Application, Configuration
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.deploy.swarm import Swarm
 
@@ -24,13 +23,11 @@ def reload(
     Application.get_controller().controller_init(services)
 
     docker = Docker()
-
     if SWARM_MODE:
         swarm = Swarm()
         running_services = swarm.get_running_services()
     else:
-        compose = Compose(Application.data.files)
-        running_services = compose.get_running_services()
+        running_services = docker.compose.get_running_services()
 
     reloaded = 0
     for service in Application.data.services:
@@ -48,7 +45,7 @@ def reload(
                     service_name = docker.get_service(service)
                     docker.client.service.update(service_name, force=True, detach=True)
                 else:
-                    compose.docker.compose.restart(service)
+                    docker.client.compose.restart(service)
                 reloaded += 1
             continue
 
