@@ -44,9 +44,6 @@ class Swarm:
         log.info("Initializing Swarm with manager IP {}", manager_address)
         self.docker.swarm.init(advertise_address=manager_address)
 
-    def leave(self) -> None:
-        self.docker.swarm.leave(force=True)
-
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:
             return str(self.docker.swarm.join_token(node_type))

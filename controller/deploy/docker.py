@@ -421,3 +421,16 @@ class Docker:
             return self.swarm.status(services)
         else:
             return self.compose.status(services)
+
+    def remove(self, service: str) -> None:
+        if SWARM_MODE:
+            service_name = Docker.get_service(service)
+            self.client.service.scale({service_name: 0}, detach=False)
+        else:
+            self.client.compose.rm([service], stop=True, volumes=False)
+
+    def start(self, service: str) -> None:
+        if SWARM_MODE:
+            self.swarm.deploy()
+        else:
+            self.compose.start_containers([service])

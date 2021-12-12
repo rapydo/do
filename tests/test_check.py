@@ -276,7 +276,7 @@ RUN mkdir xyz
         )
 
         docker = Docker()
-        docker.swarm.leave()
+        docker.client.swarm.leave(force=True)
 
         exec_command(
             capfd,

@@ -49,7 +49,7 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         )
 
         docker = Docker()
-        docker.swarm.leave()
+        docker.client.swarm.leave(force=True)
         local_ip = system.get_local_ip(production=False)
         exec_command(
             capfd,
