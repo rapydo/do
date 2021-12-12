@@ -69,7 +69,7 @@ def scale(
                 service,
             )
 
-    docker.ping_registry()
+    docker.registry.ping()
 
     verify_available_images(
         [service],

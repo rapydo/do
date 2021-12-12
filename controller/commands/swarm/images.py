@@ -35,16 +35,16 @@ def images(
 
     docker = Docker()
 
-    docker.ping_registry()
+    docker.registry.ping()
 
-    registry = docker.get_registry()
+    registry = docker.registry.get_host()
     host = f"https://{registry}"
 
     # Docker Registry API Reference
     # https://docs.docker.com/registry/spec/api/
 
     # Retrieve a sorted, json list of repositories available in the registry
-    r = docker.send_registry_request(f"{host}/v2/_catalog")
+    r = docker.registry.send_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
@@ -52,7 +52,7 @@ def images(
     for repository in catalog.get("repositories", {}):
 
         # Fetch the tags under the repository identified by <name>
-        r = docker.send_registry_request(f"{host}/v2/{repository}/tags/list")
+        r = docker.registry.send_request(f"{host}/v2/{repository}/tags/list")
         # tags can be None if all the tags of a repository have deleted
         # this or ensure that every None will be converted in an empty dictionary
         tags = r.json().get("tags") or {}
@@ -60,7 +60,7 @@ def images(
         for tag in tags:
 
             # Fetch the manifest identified by name and reference
-            r = docker.send_registry_request(f"{host}/v2/{repository}/manifests/{tag}")
+            r = docker.registry.send_request(f"{host}/v2/{repository}/manifests/{tag}")
             manifest = r.json()
             size = 0
             for layer in manifest.get("layers", []):
@@ -71,7 +71,7 @@ def images(
             _id = cast(str, headers.get("Docker-Content-Digest", "N/A"))
 
             # Creation date is only available on schema version 1 :\
-            r = docker.send_registry_request(
+            r = docker.registry.send_request(
                 f"{host}/v2/{repository}/manifests/{tag}", version="1"
             )
             manifest = r.json()
@@ -151,7 +151,7 @@ def images(
             reference = image[1]  # digest without sha256:
             tag = image[2]
             # For deletes reference must be a digest or the delete will fail
-            r = docker.send_registry_request(
+            r = docker.registry.send_request(
                 f"{host}/v2/{repository}/manifests/sha256:{reference}", method="DELETE"
             )
 

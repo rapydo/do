@@ -82,7 +82,7 @@ class Compose:
         volumes = set()
         binds: Set[Path] = set()
 
-        registry = Docker.get_registry()
+        registry = Docker.registry.get_host()
         # Remove unused services, networks and volumes from compose configuration
         for key, value in compose_config.get("services", {}).items():
             if key not in services:

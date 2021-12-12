@@ -40,7 +40,7 @@ def start(
 
     docker = Docker()
     if SWARM_MODE:
-        docker.ping_registry()
+        docker.registry.ping()
 
     verify_available_images(
         Application.data.services,

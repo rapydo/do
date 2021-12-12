@@ -96,11 +96,11 @@ def run(
     docker = Docker()
     if SWARM_MODE:
         if service != REGISTRY:
-            docker.ping_registry()
+            docker.registry.ping()
         else:
 
-            if docker.ping_registry(do_exit=False):
-                registry = docker.get_registry()
+            if docker.registry.ping(do_exit=False):
+                registry = docker.registry.get_host()
                 print_and_exit("The registry is already running at {}", registry)
 
             if docker.client.container.exists("registry"):

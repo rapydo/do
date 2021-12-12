@@ -178,7 +178,7 @@ def verify_available_images(
                 continue
 
             if SWARM_MODE and not is_run_command:
-                image_exists = docker.verify_registry_image(image)
+                image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
 
@@ -205,7 +205,7 @@ def verify_available_images(
                 continue
 
             if SWARM_MODE and not is_run_command:
-                image_exists = docker.verify_registry_image(image)
+                image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
             if not image_exists:

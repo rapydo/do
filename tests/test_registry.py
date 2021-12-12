@@ -143,16 +143,16 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     # Copied from images.py
     docker = Docker()
-    registry = docker.get_registry()
+    registry = docker.registry.get_host()
     host = f"https://{registry}"
-    r = docker.send_registry_request(f"{host}/v2/_catalog")
+    r = docker.registry.send_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
     assert "repositories" in catalog
     assert "rapydo/backend" in catalog["repositories"]
 
-    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
 
     tags_list = r.json()
 
@@ -172,7 +172,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     time.sleep(1)
 
-    r = docker.send_registry_request(f"{host}/v2/_catalog")
+    r = docker.registry.send_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
@@ -180,7 +180,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     # After the delete the repository is still in the catalog but with no tag associated
     assert "rapydo/backend" in catalog["repositories"]
 
-    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
 
     tags_list = r.json()
 

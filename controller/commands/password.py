@@ -293,7 +293,7 @@ def password(
         # but in every case if the stack is running it has to be restarted
 
         if service.value == REGISTRY:
-            is_running = docker.ping_registry(do_exit=False)
+            is_running = docker.registry.ping(do_exit=False)
             container: Optional[Tuple[str, str]] = ("registry", "")
         else:
             container = docker.get_container(service.value)
