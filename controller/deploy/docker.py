@@ -35,14 +35,16 @@ class Docker:
                 compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
                 host=self.get_engine(Configuration.remote_engine),
             )
-            # temporary added here to prevent circular imports, to be moved upside
-            from controller.deploy.compose_v2 import Compose
 
-            self.compose = Compose(docker=self)
         else:
             self.client = DockerClient(
                 host=self.get_engine(Configuration.remote_engine),
             )
+
+        # temporary added here to prevent circular imports, to be moved upside
+        from controller.deploy.registry import Registry
+
+        self.registry = Registry(docker=self)
 
         # temporary added here to prevent circular imports, to be moved upside
         from controller.deploy.swarm import Swarm
@@ -51,10 +53,11 @@ class Docker:
             docker=self, check_initialization=verify_swarm and SWARM_MODE
         )
 
-        # temporary added here to prevent circular imports, to be moved upside
-        from controller.deploy.registry import Registry
+        if compose_files:
+            # temporary added here to prevent circular imports, to be moved upside
+            from controller.deploy.compose_v2 import Compose
 
-        self.registry = Registry(docker=self)
+            self.compose = Compose(docker=self)
 
     @lru_cache
     def connect_engine(self, node_id: str) -> DockerClient:

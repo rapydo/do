@@ -32,7 +32,8 @@ COMPOSE_SEP = "-"
 
 class Compose:
     def __init__(self, docker: Docker) -> None:
-        self.docker = docker.client
+        self.docker_wrapper = docker
+        self.docker = self.docker_wrapper.client
 
     def get_config(self) -> ComposeConfig:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
@@ -80,7 +81,7 @@ class Compose:
         volumes = set()
         binds: Set[Path] = set()
 
-        registry = Docker.registry.get_host()
+        registry = self.docker_wrapper.registry.get_host()
         # Remove unused services, networks and volumes from compose configuration
         for key, value in compose_config.get("services", {}).items():
             if key not in services:
