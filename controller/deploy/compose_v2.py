@@ -1,15 +1,13 @@
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import yaml
-from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
 
 from controller import (
-    COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
     COMPOSE_FILE_VERSION,
     RED,
