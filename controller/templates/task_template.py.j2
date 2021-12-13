@@ -1,6 +1,6 @@
 from celery.app.task import Task
 
-from restapi.connectors.celery import CeleryExt, Ignore
+from restapi.connectors.celery import CeleryExt, CeleryRetryTask, Ignore
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth_service}}
 
