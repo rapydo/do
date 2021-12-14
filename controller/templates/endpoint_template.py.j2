@@ -106,7 +106,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def delete(self, uuid: str, **kwargs: Any) -> Response:
+    def delete(self, uuid: str, user: User, **kwargs: Any) -> Response:
 
         db = {{auth_service}}.get_instance()
         log.info("Deleted")
