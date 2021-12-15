@@ -1092,7 +1092,9 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         elif Configuration.check:
-            log.info("Active services: {}", active_services, log_to_file=True)
+            log.info(
+                "Active services: {}", ", ".join(active_services), log_to_file=True
+            )
 
         extra_services: List[str] = []
         if SWARM_MODE and REGISTRY not in active_services:

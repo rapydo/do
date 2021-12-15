@@ -328,10 +328,11 @@ def test_create(capfd: Capture) -> None:
         else:  # pragma: no cover
             pytest.fail(f"Unrecognized service {service}")
 
+        services_list = ", ".join(sorted(active_services))
         exec_command(
             capfd,
             "-p testservices check -i main --no-git --no-builds",
-            f"Enabled services: {sorted(active_services)}",
+            f"Enabled services: {services_list}",
         )
 
     # Test Celery Activation
