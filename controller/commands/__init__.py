@@ -3,7 +3,7 @@ from pathlib import Path
 from types import ModuleType
 from typing import Dict, Optional
 
-from controller import PROJECT_DIR, SWARM_MODE
+from controller import PROJECT_DIR
 
 BACKUP_MODULES: Dict[str, ModuleType] = {}
 RESTORE_MODULES: Dict[str, ModuleType] = {}
@@ -59,7 +59,11 @@ def load_commands(project: Optional[str]) -> None:
 
     load_module(commands_folder)
 
-    if SWARM_MODE:
+    # Do not import outside, otherwise it will lead to a circular import:
+    # cannot import name 'Configuration' from partially initialized module
+    from controller.app import Configuration
+
+    if Configuration.swarm_mode:
         load_module(commands_folder.joinpath("swarm"))
     else:
         load_module(commands_folder.joinpath("compose"))

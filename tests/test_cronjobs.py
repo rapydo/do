@@ -5,7 +5,7 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -52,7 +52,7 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
         "Stack restarted",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(10)
 
     exec_command(

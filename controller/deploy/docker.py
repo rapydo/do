@@ -9,7 +9,7 @@ from python_on_whales import DockerClient
 from python_on_whales.exceptions import NoSuchContainer, NoSuchService
 from python_on_whales.utils import DockerException
 
-from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, log
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 from controller.app import Application, Configuration
 from controller.utilities import system
 
@@ -50,7 +50,7 @@ class Docker:
         from controller.deploy.swarm import Swarm
 
         self.swarm = Swarm(
-            docker=self, check_initialization=verify_swarm and SWARM_MODE
+            docker=self, check_initialization=verify_swarm and Configuration.swarm_mode
         )
 
         if compose_files:
@@ -63,7 +63,7 @@ class Docker:
     def connect_engine(self, node_id: str) -> DockerClient:
         """Convert a node_id to a docker client connected to the engine hostname"""
 
-        if not node_id or node_id == MAIN_NODE or not SWARM_MODE:
+        if not node_id or node_id == MAIN_NODE or not Configuration.swarm_mode:
             return self.client
 
         node = self.client.node.inspect(node_id)
@@ -100,18 +100,18 @@ class Docker:
 
     @classmethod
     def get_service(cls, service: str) -> str:
-        if not SWARM_MODE:
+        if not Configuration.swarm_mode:
             return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             return self.swarm.get_services_status(prefix)
         else:
             return self.compose.get_services_status(prefix)
 
     def get_running_services(self) -> Set[str]:
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             return self.swarm.get_running_services()
         else:
             return self.compose.get_running_services()
@@ -121,7 +121,7 @@ class Docker:
         containers: Dict[int, Tuple[str, str]] = {}
         service_name = self.get_service(service)
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             try:
                 for task in self.client.service.ps(service_name):
                     if task.status.state not in ("running", "starting", "ready"):
@@ -159,7 +159,7 @@ class Docker:
 
     def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             tasks = self.get_containers(service)
             # the 0 index is found in case of containers in global mode, like the proxy
             return tasks.get(slot) or tasks.get(0)
@@ -300,20 +300,20 @@ class Docker:
         return None
 
     def status(self, services: List[str]) -> None:
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             return self.swarm.status(services)
         else:
             return self.compose.status(services)
 
     def remove(self, service: str) -> None:
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             service_name = Docker.get_service(service)
             self.client.service.scale({service_name: 0}, detach=False)
         else:
             self.client.compose.rm([service], stop=True, volumes=False)
 
     def start(self, service: str) -> None:
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             self.swarm.deploy()
         else:
             self.compose.start_containers([service])

@@ -7,7 +7,8 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -200,7 +201,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "start backend rabbit")
 
     # Just some delay extra delay, rabbit is a slow starter
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(20)
     else:
         time.sleep(10)

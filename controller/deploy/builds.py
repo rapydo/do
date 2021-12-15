@@ -11,7 +11,8 @@ from typing import Dict, List, Optional, Set, TypedDict
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import RED, SWARM_MODE, ComposeServices, log, print_and_exit
+from controller import RED, ComposeServices, log, print_and_exit
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -177,7 +178,7 @@ def verify_available_images(
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE and not is_run_command:
+            if Configuration.swarm_mode and not is_run_command:
                 image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
@@ -204,7 +205,7 @@ def verify_available_images(
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE and not is_run_command:
+            if Configuration.swarm_mode and not is_run_command:
                 image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)

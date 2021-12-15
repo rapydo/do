@@ -7,7 +7,8 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -59,7 +60,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "shell backend 'restapi init'")
 
     # Just some delay extra delay. restapi init alone not always is enough...
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(10)
     else:
         time.sleep(5)

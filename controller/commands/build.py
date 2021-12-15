@@ -2,8 +2,8 @@ from typing import List, Set
 
 import typer
 
-from controller import COMPOSE_FILE, RED, SWARM_MODE, log, print_and_exit
-from controller.app import Application
+from controller import COMPOSE_FILE, RED, log, print_and_exit
+from controller.app import Application, Configuration
 from controller.deploy.builds import (
     find_templates_build,
     get_dockerfile_base_image,
@@ -54,7 +54,7 @@ def build(
             command=RED("rapydo install buildx"),
         )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         docker.registry.ping()
         docker.registry.login()
 
@@ -74,7 +74,7 @@ def build(
             cache=not force,
         )
         log.info("Core images built")
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             log.warning("Local registry push is not implemented yet for core images")
 
     docker = Docker()
@@ -116,7 +116,7 @@ def build(
         cache=not force,
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         registry = docker.registry.get_host()
 
         local_images: List[str] = []

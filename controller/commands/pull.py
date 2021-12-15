@@ -3,8 +3,8 @@ from typing import List, Set
 import typer
 from glom import glom
 
-from controller import SWARM_MODE, log
-from controller.app import Application
+from controller import log
+from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
 
@@ -39,7 +39,7 @@ def pull(
 
     docker = Docker()
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         docker.registry.ping()
         docker.registry.login()
 
@@ -65,7 +65,7 @@ def pull(
 
     docker.client.image.pull(list(images), quiet=quiet)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         registry = docker.registry.get_host()
 
         local_images: List[str] = []
@@ -83,7 +83,7 @@ def pull(
     else:
         target = "Base images"
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         extra = " and pushed into the local registry"
     else:
         extra = ""

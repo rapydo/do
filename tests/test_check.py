@@ -7,7 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
+from controller.app import Configuration
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.docker import Docker
 from controller.utilities import git
@@ -266,7 +267,7 @@ RUN mkdir xyz
         "Checks completed",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # Skipping main because we are on a fake git repository
         exec_command(
             capfd,

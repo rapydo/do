@@ -6,7 +6,8 @@ from datetime import datetime
 from faker import Faker
 from python_on_whales import docker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     REGISTRY,
     Capture,
@@ -22,7 +23,7 @@ from tests import (
 
 def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
-    if not SWARM_MODE:
+    if not Configuration.swarm_mode:
         return None
 
     project_name = random_project_name(faker)

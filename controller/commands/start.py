@@ -4,8 +4,8 @@ from typing import List
 import typer
 from python_on_whales.exceptions import DockerException
 
-from controller import SWARM_MODE, log
-from controller.app import Application
+from controller import log
+from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.docker import Docker
 
@@ -39,7 +39,7 @@ def start(
     Application.get_controller().controller_init(services)
 
     docker = Docker()
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         docker.registry.ping()
 
     verify_available_images(
@@ -48,7 +48,7 @@ def start(
         Application.data.base_services,
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # if swarm.stack_is_running():
         #     print_and_exit(
         #         "A stack is already running. "

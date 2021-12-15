@@ -12,7 +12,6 @@ from controller import (
     COMPOSE_FILE_VERSION,
     RED,
     REGISTRY,
-    SWARM_MODE,
     TABLE_FORMAT,
     colors,
     log,
@@ -87,7 +86,7 @@ class Compose:
             if key not in services:
                 continue
 
-            if SWARM_MODE and set_registry and key != REGISTRY:
+            if Configuration.swarm_mode and set_registry and key != REGISTRY:
                 value["image"] = f"{registry}/{value['image']}"
 
             if "healthcheck" in value and "test" in value["healthcheck"]:
@@ -202,7 +201,7 @@ class Compose:
     ) -> bool:
 
         compose_engine_forced = False
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             # import here to prevent circular imports
             from controller.app import Application
 

@@ -5,7 +5,8 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -91,7 +92,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # Otherwise will fail with:
     # Error: unable to perform an operation on node 'rabbit@rabbit'.
     # Please see diagnostics information and suggestions below.
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # 60!? :| It still fails after raising to 30... Let's double it!!
         # 90!? :| It still fails after raising to 60!!
         time.sleep(90)

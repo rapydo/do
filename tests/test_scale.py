@@ -5,7 +5,8 @@ import time
 
 from python_on_whales import docker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -44,7 +45,7 @@ def test_scale(capfd: Capture) -> None:
     # backend, postgres, redis
     BASE_SERVICE_NUM = 3
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
 
         exec_command(
             capfd,
@@ -65,7 +66,7 @@ def test_scale(capfd: Capture) -> None:
 
     pull_images(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "scale backend=2",
@@ -82,7 +83,7 @@ def test_scale(capfd: Capture) -> None:
         "Invalid number of replicas: x",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
 
         exec_command(
             capfd,

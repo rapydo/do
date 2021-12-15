@@ -1,7 +1,8 @@
 """
 This module will test the restart command
 """
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -29,7 +30,7 @@ def test_all(capfd: Capture) -> None:
     start_registry(capfd)
     pull_images(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "restart",
@@ -50,7 +51,7 @@ def test_all(capfd: Capture) -> None:
     # The service is not restarted because its definition is unchanged
     assert start_date1 == start_date2
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "remove backend",

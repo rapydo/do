@@ -3,7 +3,7 @@ from typing import List
 import typer
 from python_on_whales.utils import DockerException
 
-from controller import SWARM_MODE, log
+from controller import log
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
@@ -36,7 +36,7 @@ def reload(
                 log.warning("Can't reload the frontend while it is still building")
             else:
                 log.info("Reloading frontend...")
-                if SWARM_MODE:
+                if Configuration.swarm_mode:
                     service_name = docker.get_service(service)
                     docker.client.service.update(service_name, force=True, detach=True)
                 else:

@@ -41,7 +41,6 @@ from controller import (
     RED,
     REGISTRY,
     SUBMODULES_DIR,
-    SWARM_MODE,
     TABLE_FORMAT,
     ComposeServices,
     EnvType,
@@ -69,12 +68,14 @@ class ProjectRCType(TypedDict, total=False):
     stack: str
     hostname: str
     production: bool
+    swarm: bool
     project_configuration: configuration.Configuration
 
 
 class Configuration:
     projectrc: ProjectRCType = {}
     host_configuration: configuration.Configuration = {}
+    swarm_mode: bool = False
     # This is the final configuration (defaults + project + projectrc)
     specs: configuration.Configuration = {}
     services_list: Optional[str]
@@ -539,6 +540,10 @@ class Application:
         )
 
         Configuration.projectrc = projectrc_yaml
+        Configuration.swarm_mode = (
+            Configuration.projectrc.get("swarm", False)
+            or os.environ.get("SWARM_MODE", "0") == "1"
+        )
 
     @staticmethod
     def check_installed_software() -> None:
@@ -786,10 +791,10 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
-                if SWARM_MODE and Configuration.production:
+                if Configuration.swarm_mode and Configuration.production:
                     add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
-        if SWARM_MODE and not Configuration.FORCE_COMPOSE_ENGINE:
+        if Configuration.swarm_mode and not Configuration.FORCE_COMPOSE_ENGINE:
             add(CONFS_DIR, "swarm_options.yml")
 
         if Application.env.get("NFS_HOST"):
@@ -861,7 +866,7 @@ You can use of one:
             {
                 "project": Configuration.project,
                 "hostname": Configuration.hostname,
-                "swarm": SWARM_MODE,
+                "swarm": Configuration.swarm_mode,
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,
@@ -946,7 +951,7 @@ You can use of one:
 
         Application.env.update(Configuration.environment)
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
 
             if not Application.env.get("SWARM_MANAGER_ADDRESS"):
                 Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip(
@@ -963,7 +968,7 @@ You can use of one:
                 manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
                 Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
 
-        if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
+        if Configuration.FORCE_COMPOSE_ENGINE or not Configuration.swarm_mode:
             DEPLOY_ENGINE = "compose"
         else:
             DEPLOY_ENGINE = "swarm"
@@ -1097,7 +1102,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             )
 
         extra_services: List[str] = []
-        if SWARM_MODE and REGISTRY not in active_services:
+        if Configuration.swarm_mode and REGISTRY not in active_services:
             extra_services.append(REGISTRY)
 
         all_services = active_services + extra_services

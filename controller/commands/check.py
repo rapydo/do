@@ -5,8 +5,8 @@ from typing import List, Optional, Tuple
 
 import typer
 
-from controller import RED, SWARM_MODE, log, print_and_exit
-from controller.app import Application
+from controller import RED, log, print_and_exit
+from controller.app import Application, Configuration
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.builds import (
     TemplateInfo,
@@ -54,7 +54,7 @@ def check(
     Application.get_controller().controller_init()
 
     docker = Docker()
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         log.debug("Swarm is correctly initialized")
 
         docker.swarm.check_resources()

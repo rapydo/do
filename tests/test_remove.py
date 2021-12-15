@@ -6,7 +6,8 @@ from typing import List, Tuple
 
 from python_on_whales import docker
 
-from controller import REGISTRY, SWARM_MODE, colors
+from controller import REGISTRY, colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -82,7 +83,7 @@ def test_remove(capfd: Capture) -> None:
 
     pull_images(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # In swarm mode single service remove is not permitted if nothing is running
         exec_command(
             capfd,
@@ -94,7 +95,7 @@ def test_remove(capfd: Capture) -> None:
     exec_command(capfd, "remove", "Stack removed")
 
     NONE: List[str] = []
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         BACKEND_ONLY = ["rem_backend"]
         ALL = ["rem_backend", "rem_postgres"]
     else:
@@ -105,7 +106,7 @@ def test_remove(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         NETWORK_NAME = "rem_swarm_default"
     else:
         NETWORK_NAME = "rem_compose_default"
@@ -114,7 +115,7 @@ def test_remove(capfd: Capture) -> None:
 
     NAMED_VOLUMES_NUM, UNNAMED_VOLUMES_NUM = count_volumes()
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # In swarm mode remove single service is equivalent to scale 0
         exec_command(
             capfd,
@@ -221,7 +222,7 @@ def test_remove(capfd: Capture) -> None:
         assert NAMED_VOLUMES_NUM > n
         assert UNNAMED_VOLUMES_NUM > u
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # Remove the registry
         exec_command(
             capfd,

@@ -5,7 +5,8 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -20,7 +21,7 @@ from tests import (
 def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     execute_outside(capfd, "run registry")
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         execute_outside(capfd, "images")
 
     create_project(
@@ -32,7 +33,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     )
     init_project(capfd)
 
-    if not SWARM_MODE:
+    if not Configuration.swarm_mode:
         exec_command(
             capfd,
             "run registry",

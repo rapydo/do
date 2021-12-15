@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 import typer
 
-from controller import REGISTRY, SWARM_MODE, log, print_and_exit
+from controller import REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.docker import Docker
@@ -90,11 +90,11 @@ def run(
         Application.data.compose_config, [service]
     )
 
-    if service == REGISTRY and not SWARM_MODE:
+    if service == REGISTRY and not Configuration.swarm_mode:
         print_and_exit("Can't start the registry in compose mode")
 
     docker = Docker()
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         if service != REGISTRY:
             docker.registry.ping()
         else:

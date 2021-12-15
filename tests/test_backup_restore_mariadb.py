@@ -7,7 +7,8 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -288,7 +289,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(5)
 
     # 4) verify data match again point 1 (restore completed)

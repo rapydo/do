@@ -4,7 +4,7 @@ This module will test the logs command
 import signal
 from datetime import datetime
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -108,7 +108,7 @@ def test_all(capfd: Capture) -> None:
     )
 
     # Debug code... no logs in swarm mode for frontend, even after a wait 20...
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "logs --tail 10 frontend",
@@ -124,7 +124,7 @@ def test_all(capfd: Capture) -> None:
         )
 
     # Follow flag is not supported in swarm mode with multiple services
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # Multiple services are not supported in swarm mode
         exec_command(
             capfd,

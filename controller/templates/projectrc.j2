@@ -6,6 +6,9 @@ production: True
 {% else -%}
 # production: True
 {% endif -%}
+{% if swarm -%}
+swarm: True
+{% endif -%}
 
 project_configuration:
   variables:

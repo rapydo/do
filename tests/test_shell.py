@@ -5,7 +5,7 @@ import signal
 
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -145,7 +145,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Replica number 2 not found for backend service",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         service = "backend"
 
         exec_command(

@@ -12,12 +12,11 @@ from controller import (
     PROJECTRC,
     RED,
     REGISTRY,
-    SWARM_MODE,
     TABLE_FORMAT,
     log,
     print_and_exit,
 )
-from controller.app import Application
+from controller.app import Application, Configuration
 from controller.commands import PASSWORD_MODULES
 from controller.deploy.docker import Docker
 from controller.templating import Templating, get_strong_password
@@ -209,7 +208,7 @@ def password(
             if s != REGISTRY and s not in Application.data.active_services:
                 continue
 
-            if s == REGISTRY and not SWARM_MODE:
+            if s == REGISTRY and not Configuration.swarm_mode:
                 continue
 
             module = PASSWORD_MODULES.get(s)
@@ -327,7 +326,7 @@ def password(
                 docker.compose.create_volatile_container(
                     REGISTRY, detach=True, publish=[(port, port)]
                 )
-            elif SWARM_MODE:
+            elif Configuration.swarm_mode:
 
                 docker.compose.dump_config(Application.data.services)
                 docker.swarm.deploy()

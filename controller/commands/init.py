@@ -2,7 +2,7 @@ from pathlib import Path
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.project import ANGULAR, DATA
@@ -71,7 +71,7 @@ def init(
         Application.get_controller().read_specs(read_extended=True)
         Application.get_controller().make_env()
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         docker = Docker(verify_swarm=False)
         if not docker.swarm.get_token():
             docker.swarm.init()
