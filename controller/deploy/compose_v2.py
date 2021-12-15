@@ -176,7 +176,7 @@ class Compose:
             services_list = ", ".join(services)
             scales = {}
 
-            log.info("Starting services ({})...", services_list)
+            log.info("Starting services: {}...", services_list)
 
         self.docker.compose.up(
             services=services,
