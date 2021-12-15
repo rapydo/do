@@ -848,7 +848,7 @@ You can use of one:
             if service not in self.active_services:
                 print_and_exit("No such service: {}", service)
 
-        log.debug("Enabled services: {}", self.enabled_services)
+        log.debug("Enabled services: {}", ", ".join(self.enabled_services))
 
         self.create_datafile(list(compose_config.keys()), self.active_services)
 

@@ -72,8 +72,8 @@ def find_active(services: ComposeServices) -> List[str]:
         if service.environment and service.environment.get("ACTIVATE", "0") == "1":
             base_actives.append(name)
 
-    log.debug("Base active services = {}", ", ".join(base_actives))
-    # log.debug("Services dependencies = {}", dependencies)
+    log.debug("Base active services: {}", ", ".join(base_actives))
+    # log.debug("Services dependencies: {}", ", ".join(dependencies))
     active_services = walk_services(base_actives, dependencies)
     return active_services
 

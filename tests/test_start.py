@@ -65,7 +65,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start backend",
-            "Enabled services: ['backend']",
+            "Enabled services: backend",
             "Stack started",
         )
 
@@ -87,7 +87,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start neo4j",
-            "Enabled services: ['neo4j']",
+            "Enabled services: neo4j",
             "Stack started",
         )
 
@@ -160,7 +160,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start backend",
-            "Enabled services: ['backend']",
+            "Enabled services: backend",
             "Stack started",
         )
 
@@ -172,7 +172,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start neo4j",
-            "Enabled services: ['neo4j']",
+            "Enabled services: neo4j",
             "Stack started",
         )
 

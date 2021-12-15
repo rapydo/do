@@ -111,19 +111,19 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "start backend",
-        "Enabled services: ['backend']",
+        "Enabled services: backend",
     )
 
     exec_command(
         capfd,
         "start backend postgres",
-        "Enabled services: ['backend', 'postgres']",
+        "Enabled services: backend, postgres",
     )
 
     exec_command(
         capfd,
         "start backend postgres _backend",
-        "Enabled services: ['postgres']",
+        "Enabled services: postgres",
     )
 
     exec_command(
