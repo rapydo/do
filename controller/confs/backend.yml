@@ -520,7 +520,7 @@ services:
     entrypoint: docker-entrypoint-celery
     command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
     healthcheck:
-      test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -d celery@$$PROJECT_NAME-$$HOSTNAME"
+      test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -t 5 -d celery@$$PROJECT_NAME-$$HOSTNAME"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
