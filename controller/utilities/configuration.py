@@ -479,6 +479,7 @@ class BaseEnvModel(BaseModel):
     TELEGRAM_APP_ID: Optional[str]
     TELEGRAM_BOTNAME: Optional[str]
     TELETHON_SESSION: Optional[str]
+    FRONTEND_URL: str
     FRONTEND_PREFIX: str
     ALLOW_PASSWORD_RESET: zero_or_one
     ALLOW_REGISTRATION: zero_or_one

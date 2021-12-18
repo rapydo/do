@@ -343,6 +343,7 @@ variables:
     # SMTP_HOST and SMTP_PORT are needed because not automatically merged with
     # SMTP_SERVER_HOST and SMTP_SERVER_PORT when ACTIVATE_SMTP_SERVER is enabled
 
+    FRONTEND_URL: ""
     FRONTEND_PREFIX: /
     ALLOW_PASSWORD_RESET: 0
     ALLOW_REGISTRATION: 0
