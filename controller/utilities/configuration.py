@@ -281,7 +281,7 @@ class BaseEnvModel(BaseModel):
     API_AUTOSTART: zero_or_one
     BACKEND_PORT: Port
     BACKEND_API_PORT: Port
-    BACKEND_URI: str
+    BACKEND_URL: str
     PYTHON_MAIN_FILE: str
     PYTHON_PATH: Path
     BACKEND_PREFIX: str
