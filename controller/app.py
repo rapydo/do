@@ -678,10 +678,10 @@ class Application:
 
             msg = f"""RAPyDo version is not compatible.
 
-This project requires rapydo {r}, you are using {c}. {ac}
+This project requires RAPyDo {r} but you are using version {c}. {ac}
 
 You can use of one:
-  -  rapydo install               (install in editable from submodules/do, if available)
+  -  rapydo install               (install in editable from submodules/do)
   -  rapydo install --no-editable (install from pypi)
 
 """
