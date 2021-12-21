@@ -339,6 +339,12 @@ class CommandsData:
         self.base_services = base_services
         self.compose_config = compose_config
 
+        core_services = list(base_services.keys())
+        all_services = list(compose_config.keys())
+        self.custom_services: List[str] = [
+            s for s in all_services if s not in core_services
+        ]
+
 
 class Application:
 

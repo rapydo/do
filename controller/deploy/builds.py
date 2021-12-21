@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Set, TypedDict
 from python_on_whales.exceptions import NoSuchImage
 
 from controller import RED, ComposeServices, log, print_and_exit
-from controller.app import Configuration
+from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -36,6 +36,14 @@ BuildInfo = Dict[str, TemplateInfo]
 
 
 def name_priority(name1: str, name2: str) -> str:
+
+    # Prevents warning: Cannot determine build priority with custom services
+    if name1 in Application.data.custom_services:
+        return name2
+
+    if name2 in Application.data.custom_services:
+        return name1
+
     if name1 not in name_priorities or name2 not in name_priorities:
         log.warning("Cannot determine build priority between {} and {}", name1, name2)
         return name2
