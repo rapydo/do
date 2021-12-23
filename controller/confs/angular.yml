@@ -56,7 +56,7 @@ services:
       FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       # Prevent: error YN0028: The lockfile would have been created by this install,
       #                        which is explicitly forbidden.
-      YARN_ENABLE_IMMUTABLE_INSTALLS: false
+      YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
       PUSHPIN_HOST: ${PROJECT_DOMAIN}
       PUSHPIN_PORT: ${PUSHPIN_PORT}
       SENTRY_URL: ${SENTRY_URL}
