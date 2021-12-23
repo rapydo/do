@@ -118,10 +118,7 @@ def backup(
         print_and_exit(f"{service.value} misconfiguration, module not found")
 
     now = datetime.now().strftime("%Y_%m_%d-%H_%M_%S")
-    # mypy can't recognize dynamically imported modules
-    module.backup(  # type: ignore
-        container=container, now=now, force=force, dry_run=dry_run
-    )
+    module.backup(container=container, now=now, force=force, dry_run=dry_run)
 
     if restart and not dry_run:
         reload(docker, restart)

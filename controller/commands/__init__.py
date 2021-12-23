@@ -25,7 +25,7 @@ def load_module(path: Path) -> Dict[str, ModuleType]:
                 command = module_from_spec(spec)
                 # "_LoaderProtocol" has no attribute "exec_module"
                 # https://issueexplorer.com/issue/python/typeshed/6163
-                spec.loader.exec_module(command)  # type: ignore
+                spec.loader.exec_module(command)
                 loaded_modules[c.stem] = command
 
     return loaded_modules

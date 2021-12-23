@@ -216,10 +216,7 @@ def password(
             if not module:  # pragma: no cover
                 print_and_exit(f"{s} misconfiguration, module not found")
 
-            # mypy can't recognize dynamically imported modules
-            variables = module.PASSWORD_VARIABLES  # type: ignore
-
-            for variable in variables:
+            for variable in module.PASSWORD_VARIABLES:
 
                 password = Application.env.get(variable)
                 result = zxcvbn(password)
@@ -282,8 +279,7 @@ def password(
 
         docker = Docker()
 
-        # mypy can't recognize dynamically imported modules
-        variables = module.PASSWORD_VARIABLES  # type: ignore
+        variables = module.PASSWORD_VARIABLES
         old_password = Application.env.get(variables[0])
         new_variables = {variable: new_password for variable in variables}
 
@@ -298,8 +294,7 @@ def password(
             container = docker.get_container(service.value)
             is_running = container is not None
 
-        # mypy can't recognize dynamically imported modules
-        is_running_needed = module.IS_RUNNING_NEEDED  # type: ignore
+        is_running_needed = module.IS_RUNNING_NEEDED
 
         log.info("Changing password for {}...", service.value)
 
@@ -312,8 +307,7 @@ def password(
         update_projectrc(new_variables)
 
         if container:
-            # mypy can't recognize dynamically imported modules
-            module.password(container, old_password, new_password)  # type: ignore
+            module.password(container, old_password, new_password)
 
         if is_running:
             log.info("{} was running, restarting services...", service.value)

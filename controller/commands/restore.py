@@ -77,8 +77,7 @@ def restore(
     if not module:  # pragma: no cover
         print_and_exit(f"{service.value} misconfiguration, module not found")
 
-    # mypy can't recognize dynamically imported modules
-    expected_ext = module.EXPECTED_EXT  # type: ignore
+    expected_ext = module.EXPECTED_EXT
 
     if backup_file is None:
         files = backup_dir.iterdir()
@@ -99,10 +98,7 @@ def restore(
     if not backup_host_path.exists():
         print_and_exit("Invalid backup file, {} does not exist", backup_host_path)
 
-    # mypy can't recognize dynamically imported modules
-    module.restore(  # type: ignore
-        container=container, backup_file=backup_file, force=force
-    )
+    module.restore(container=container, backup_file=backup_file, force=force)
 
     if restart:
         reload(docker, restart)

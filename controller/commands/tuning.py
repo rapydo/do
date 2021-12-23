@@ -44,5 +44,4 @@ def tuning(
     if not module:  # pragma: no cover
         print_and_exit(f"{service.value} misconfiguration, module not found")
 
-    # mypy can't recognize dynamically imported modules
-    module.tuning(ram, cpu)  # type: ignore
+    module.tuning(ram, cpu)
