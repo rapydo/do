@@ -313,11 +313,7 @@ def parseDockerfile(
                     DOCKERFILE_ENVS.setdefault(service, {})
                     DOCKERFILE_ENVS[service][env[1]] = env[2]
 
-            elif not skip_angular and (
-                "RUN npm install" in line
-                or "RUN yarn add" in line
-                or "RUN yarn global add" in line
-            ):
+            elif not skip_angular and "RUN npm install" in line:
 
                 tokens = line.split(" ")
                 for t in tokens:
