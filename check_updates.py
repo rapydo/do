@@ -32,7 +32,12 @@ os.chdir(Path(__file__).parent)
 
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
-skip_versions = {"typescript": "4.5.4"}
+skip_versions = {
+    "typescript": "4.5.4",
+    "node": "17.3.0-buster",
+    "ubuntu": "22.04",
+    "bootstrap": "5.1.3",
+}
 
 
 def load_yaml_file(filepath: Path) -> Dict[str, Any]:
@@ -271,9 +276,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
         return get_latest_version(tags, suffix="-management")
 
     if lib == "library/ubuntu":
-        return get_latest_version(
-            tags, regexp=SEMVER2, ignores=["20.10", "21.04", "21.10"]
-        )
+        return get_latest_version(tags, regexp=SEMVER2, ignores=["21.10"])
 
     if lib == "library/postgres":
         return get_latest_version(tags, regexp=SEMVER2, suffix="-alpine")
