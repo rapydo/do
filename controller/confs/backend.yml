@@ -1078,7 +1078,7 @@ services:
 
   pushpin:
     restart: always
-    image: fanout/pushpin:1.33.1
+    image: fanout/pushpin:1.34.0
     logging:
       driver: syslog
       options: {}
