@@ -37,6 +37,7 @@ skip_versions = {
     "node": "17.3.0-buster",
     "ubuntu": "22.04",
     "bootstrap": "5.1.3",
+    "ajv": "8.8.2",
 }
 
 
@@ -85,8 +86,7 @@ def check_updates(
         latest = parse_pypi(url, tokens[0])
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:
@@ -108,8 +108,7 @@ def check_updates(
         latest = parse_dockerhub(tokens[0], dockerhub_timeout)
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:
@@ -140,8 +139,7 @@ def check_updates(
         latest = parse_npm(url, tokens[0], npm_timeout, tokens[1])
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:

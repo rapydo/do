@@ -186,7 +186,7 @@ class PostgresMem(ConstrainedStr):
 
 
 class Neo4jMem(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(K|M|G)$")
+    regex = re.compile(r"^[0-9]+(K|M|G|k|m|g)$")
 
 
 class HealthcheckInterval(ConstrainedStr):
