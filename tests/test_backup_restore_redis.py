@@ -58,7 +58,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # DEBUG CODE
     if Configuration.swarm_mode:
         # Added after the upgrade from redis 6.2.5 to 6.2.6
-        time.sleep(20)
+        # 2 minutes !?
+        time.sleep(120)
         exec_command(capfd, "logs redis")
 
     service_verify(capfd, "redis")
