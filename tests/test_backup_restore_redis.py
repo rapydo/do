@@ -2,13 +2,11 @@
 This module will test the backup and restore commands on Redis
 """
 import os
-import time
 from pathlib import Path
 
 from faker import Faker
 
 from controller import colors
-from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -54,13 +52,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     pull_images(capfd)
     start_project(capfd)
-
-    # DEBUG CODE
-    if Configuration.swarm_mode:
-        # Added after the upgrade from redis 6.2.5 to 6.2.6
-        # 2 minutes !?
-        time.sleep(120)
-        exec_command(capfd, "logs redis")
 
     service_verify(capfd, "redis")
 

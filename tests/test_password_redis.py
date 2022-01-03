@@ -66,13 +66,6 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    # DEBUG CODE
-    if Configuration.swarm_mode:
-        # Added after the upgrade from redis 6.2.5 to 6.2.6
-        # 2 minutes !?
-        time.sleep(120)
-        exec_command(capfd, "logs redis")
-
     service_verify(capfd, "redis")
 
     backend_start_date = get_container_start_date(capfd, "backend")
