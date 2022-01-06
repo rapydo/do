@@ -25,7 +25,7 @@ setup(
         "plumbum",
         "glom",
         "GitPython==3.1.24",
-        "PyYAML==5.4.1",
+        "PyYAML==6.0",
         "pip>=10.0.0",
         "requests>=2.6.1",
         "typer[all]==0.4.0",
