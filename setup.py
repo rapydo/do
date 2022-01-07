@@ -24,7 +24,7 @@ setup(
         "sultan==0.9.1",
         "plumbum",
         "glom",
-        "GitPython==3.1.24",
+        "GitPython==3.1.25",
         "PyYAML==6.0",
         "pip>=10.0.0",
         "requests>=2.6.1",
