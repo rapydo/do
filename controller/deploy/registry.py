@@ -88,7 +88,9 @@ class Registry:
 
     def verify_image(self, image: str) -> bool:
 
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        urllib3.disable_warnings(  # type: ignore
+            urllib3.exceptions.InsecureRequestWarning
+        )
         registry = self.get_host()
         host = f"https://{registry}"
         repository, tag = image.split(":")
