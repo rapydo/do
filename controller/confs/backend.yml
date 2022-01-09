@@ -790,7 +790,13 @@ services:
 
   redis:
     restart: always
-    image: redis:6.2.5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/redis
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/redis:${RAPYDO_VERSION}
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
       test: "redis-cli --pass $$REDIS_PASSWORD -h 127.0.0.1 ping"
