@@ -20,14 +20,14 @@ def backup(
     if container:
         docker.exec_command(
             container,
-            user="root",
+            user="redis",
             command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" save'",
         )
 
     command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
     if not dry_run:
         if container:
-            docker.exec_command(container, user="root", command=command)
+            docker.exec_command(container, user="redis", command=command)
         else:
             docker.compose.create_volatile_container(SERVICE_NAME, command=command)
 
@@ -35,7 +35,7 @@ def backup(
     command = f"gzip -t {backup_path}"
     if not dry_run:
         if container:
-            docker.exec_command(container, user="root", command=command)
+            docker.exec_command(container, user="redis", command=command)
         else:
             docker.compose.create_volatile_container(SERVICE_NAME, command=command)
 

@@ -219,6 +219,9 @@ def get_default_user(service: str) -> Optional[str]:
     if service == "rabbit":
         return "rabbitmq"
 
+    if service == "redis":
+        return "redis"
+
     return None
 
 

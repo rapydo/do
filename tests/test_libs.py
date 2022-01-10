@@ -265,6 +265,7 @@ def test_get_default_user() -> None:
     assert services.get_default_user("frontend") is None
     assert services.get_default_user("postgres") == "postgres"
     assert services.get_default_user("neo4j") == "neo4j"
+    assert services.get_default_user("redis") == "redis"
 
 
 def test_get_default_command() -> None:
