@@ -816,6 +816,8 @@ services:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
 
   #################
