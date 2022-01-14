@@ -85,6 +85,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup neo4j --force --restart backend --restart rabbit",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
     # This is to verify that --force restarted neo4j
     exec_command(
@@ -303,6 +305,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Starting restore on neo4j...",
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
 
     # Wait neo4j to completely startup

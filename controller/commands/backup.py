@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -121,4 +122,8 @@ def backup(
     module.backup(container=container, now=now, force=force, dry_run=dry_run)
 
     if restart and not dry_run:
+        log.info("Restarting services in 20 seconds...")
+        time.sleep(10)
+        log.info("Restarting services in 10 seconds...")
+        time.sleep(10)
         reload(docker, restart)

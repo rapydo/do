@@ -88,6 +88,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup rabbit --force --restart backend",
         "Starting backup on rabbit...",
         "Backup completed: data/backup/rabbit/",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
     # This is to verify that --force restarted rabbit
     exec_command(
@@ -301,6 +303,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"restore rabbit {rabbit_dump_file} --force --restart backend",
         "Starting restore on rabbit...",
         f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
 
     # Wait rabbit to completely startup

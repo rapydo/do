@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from pathlib import Path
 from typing import List, Optional
@@ -101,4 +102,8 @@ def restore(
     module.restore(container=container, backup_file=backup_file, force=force)
 
     if restart:
+        log.info("Restarting services in 20 seconds...")
+        time.sleep(10)
+        log.info("Restarting services in 10 seconds...")
+        time.sleep(10)
         reload(docker, restart)

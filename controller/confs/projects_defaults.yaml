@@ -396,6 +396,7 @@ project:
 
 tags:
   specifications: OpenAPI 2.0 Specification in JSON format
-  helpers: tools for checking status and privileges
-  authentication: log in and out of the REST API
-  profile: Visualize profile for current credentials
+  status: Verify the status of the server
+  authentication: Manage authentication and active tokens
+  profile: Manage your own profile
+  management: Managent endpoints
