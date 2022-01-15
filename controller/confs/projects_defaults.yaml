@@ -69,13 +69,9 @@ variables:
     # Path to dist-packages in backend/celery containers
     PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
 
-    # Enable with 'debug', 'malloc' or 'pymalloc'
     PYTHONMALLOC: ""
-
     PYTHONASYNCIODEBUG: 0
     PYTHONFAULTHANDLER: 0
-    # if error converts warnings to exceptions
-    PYTHONWARNINGS: always
 
     BACKEND_PREFIX: ""
     APP_SECRETS: /secrets

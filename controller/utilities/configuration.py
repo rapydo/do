@@ -111,15 +111,6 @@ class PYTHONMALLOC_VALUES(Enum):
     pymalloc = "pymalloc"
 
 
-class PYTHONWARNINGS_VALUES(Enum):
-    default = "default"
-    error = "error"
-    always = "always"
-    module = "module"
-    once = "once"
-    ignore = "ignore"
-
-
 class AUTH_SERVICE_VALUES(Enum):
     no = "NO_AUTHENTICATION"
     postgres = "sqlalchemy"
@@ -303,7 +294,6 @@ class BaseEnvModel(BaseModel):
     PYTHONASYNCIODEBUG: zero_or_one
     PYTHONFAULTHANDLER: zero_or_one
     PYTHONMALLOC: PYTHONMALLOC_VALUES
-    PYTHONWARNINGS: PYTHONWARNINGS_VALUES
     BACKEND_PREFIX: str
     APP_SECRETS: Path
     DATA_PATH: Path

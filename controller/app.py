@@ -939,7 +939,6 @@ You can use of one:
             Application.env["PYTHONMALLOC"] = "debug"
             Application.env["PYTHONASYNCIODEBUG"] = "1"
             Application.env["PYTHONFAULTHANDLER"] = "1"
-            Application.env["PYTHONWARNINGS"] = "error"
 
         Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
             Application.env

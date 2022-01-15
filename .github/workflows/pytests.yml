@@ -96,7 +96,6 @@ jobs:
 
           export PYTHONMALLOC=debug
           export PYTHONASYNCIODEBUG=1
-          # export PYTHONWARNINGS=default
           # Convert warnings to exceptions
           export PYTHONWARNINGS=error
           export PYTHONFAULTHANDLER=1
@@ -211,7 +210,6 @@ jobs:
 
           export PYTHONMALLOC=debug
           export PYTHONASYNCIODEBUG=1
-          # export PYTHONWARNINGS=default
           # Convert warnings to exceptions
           export PYTHONWARNINGS=error
           export PYTHONFAULTHANDLER=1
