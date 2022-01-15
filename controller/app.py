@@ -936,6 +936,10 @@ You can use of one:
 
         if Configuration.testing and not Configuration.production:
             Application.env["APP_MODE"] = "test"
+            Application.env["PYTHONMALLOC"] = "debug"
+            Application.env["PYTHONASYNCIODEBUG"] = "1"
+            Application.env["PYTHONFAULTHANDLER"] = "1"
+            Application.env["PYTHONWARNINGS"] = "error"
 
         Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
             Application.env

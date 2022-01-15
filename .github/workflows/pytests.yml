@@ -98,7 +98,7 @@ jobs:
           export PYTHONASYNCIODEBUG=1
           export PYTHONWARNINGS=default
           # Convert warnings to exceptions
-          #   export PYTHONWARNINGS=error
+          # export PYTHONWARNINGS=error
           export PYTHONFAULTHANDLER=1
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
@@ -209,6 +209,12 @@ jobs:
             sudo mkdir -p /volumes/redisdata
           fi
 
+          export PYTHONMALLOC=debug
+          export PYTHONASYNCIODEBUG=1
+          export PYTHONWARNINGS=default
+          # Convert warnings to exceptions
+          # export PYTHONWARNINGS=error
+          export PYTHONFAULTHANDLER=1
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         uses: rapydo/actions/coverage@v1
