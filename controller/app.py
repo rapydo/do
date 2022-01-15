@@ -5,7 +5,6 @@ import shutil
 import sys
 import time
 import warnings
-from distutils.version import LooseVersion
 from pathlib import Path
 from typing import (
     Any,
@@ -24,6 +23,7 @@ import click
 import requests
 import typer
 from git import Repo as GitRepo
+from packaging.version import Version
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
@@ -672,8 +672,8 @@ class Application:
         if not rapydo_version:  # pragma: no cover
             return True
 
-        r = LooseVersion(rapydo_version)
-        c = LooseVersion(__version__)
+        r = Version(rapydo_version)
+        c = Version(__version__)
         if r == c:
             return True
         else:  # pragma: no cover

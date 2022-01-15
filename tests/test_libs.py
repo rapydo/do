@@ -7,12 +7,12 @@ import os
 import re
 import tempfile
 from datetime import datetime
-from distutils.version import LooseVersion
 from pathlib import Path
 from typing import Dict, Union
 
 import pytest
 from faker import Faker
+from packaging.version import Version
 
 from controller import __version__
 from controller.app import Application, Configuration
@@ -324,33 +324,21 @@ def test_packages(faker: Faker) -> None:
 
     v = Packages.get_bin_version("git")
     assert v is not None
-    vv = LooseVersion(v)
     # Something like 2.25.1
-    assert len(vv.version) == 3
-    assert isinstance(vv.version[0], int)
-    assert isinstance(vv.version[1], int)
-    assert isinstance(vv.version[2], int)
+    assert len(str(Version(v)).split(".")) == 3
 
     # Check docker client version
     v = Packages.get_bin_version("docker")
     assert v is not None
-    vv = LooseVersion(v)
     # Something like 19.03.8 or 18.06.0-ce
-    assert len(vv.version) >= 3
-    assert isinstance(vv.version[0], int)
-    assert isinstance(vv.version[1], int)
-    assert isinstance(vv.version[2], int)
+    assert len(str(Version(v)).split(".")) >= 3
 
     # Check docker engine version
     v = Packages.get_bin_version(
         "docker", option=["version", "--format", "'{{.Server.Version}}'"]
     )
     assert v is not None
-    vv = LooseVersion(v)
-    assert len(vv.version) >= 3
-    assert isinstance(vv.version[0], int)
-    assert isinstance(vv.version[1], int)
-    assert isinstance(vv.version[2], int)
+    assert len(str(Version(v)).split(".")) >= 3
 
     with pytest.raises(SystemExit):
         Packages.check_program("invalid")

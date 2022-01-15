@@ -4,7 +4,6 @@ import os
 import re
 import sys
 import time
-from distutils.version import LooseVersion
 from glob import glob
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
@@ -14,6 +13,7 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 from loguru import logger as log
+from packaging.version import Version
 
 from controller import print_and_exit
 
@@ -231,7 +231,7 @@ def get_latest_version(
             continue
 
         clean_latest = latest.removeprefix(prefix).removesuffix(suffix)
-        if LooseVersion(clean_t) > LooseVersion(clean_latest):
+        if Version(clean_t) > Version(clean_latest):
             latest = t
 
     return latest

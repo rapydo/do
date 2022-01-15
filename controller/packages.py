@@ -3,10 +3,10 @@
 # (we cannot understand why, but it does!)
 import os
 import re
-from distutils.version import LooseVersion
 from pathlib import Path
 from typing import List, Optional, Union
 
+from packaging.version import Version
 from sultan.api import Sultan
 
 from controller import log, print_and_exit
@@ -81,9 +81,9 @@ class Packages:
                 "A mandatory dependency is missing: {} not found{}", program, hints
             )
 
-        v = LooseVersion(found_version)
+        v = Version(found_version)
         if min_version is not None:
-            if LooseVersion(min_version) > v:
+            if Version(min_version) > v:
                 print_and_exit(
                     "Minimum supported version for {} is {}, found {}",
                     program,
@@ -92,7 +92,7 @@ class Packages:
                 )
 
         if min_recommended_version is not None:
-            if LooseVersion(min_recommended_version) > v:
+            if Version(min_recommended_version) > v:
                 log.warning(
                     "Minimum recommended version for {} is {}, found {}",
                     program,
@@ -101,7 +101,7 @@ class Packages:
                 )
 
         if max_version is not None:
-            if LooseVersion(max_version) < v:
+            if Version(max_version) < v:
                 print_and_exit(
                     "Maximum supported version for {} is {}, found {}",
                     program,
