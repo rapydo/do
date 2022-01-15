@@ -2,6 +2,7 @@ import hashlib
 import stat
 import tempfile
 import time
+import warnings
 from pathlib import Path
 
 import requests
@@ -24,6 +25,13 @@ EXPECTED_COMPOSE_BIN_MD5 = "d8518059a22e4a5ff7794e5cd7162f7e"
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.7.1"
 EXPECTED_BUILDX_BIN_MD5 = "94f186350daf6841239a599e65ba38f1"
+
+
+# Due to pip, see issue 9250 on pip repo
+warnings.filterwarnings(
+    "default",
+    message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
+)
 
 
 def download(url: str, expected_checksum: str) -> Path:
