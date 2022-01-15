@@ -104,6 +104,22 @@ class FLASK_ENV_VALUES(Enum):
     production = "production"
 
 
+class PYTHONMALLOC_VALUES(Enum):
+    empty = ""
+    debug = "debug"
+    malloc = "malloc"
+    pymalloc = "pymalloc"
+
+
+class PYTHONWARNINGS_VALUES(Enum):
+    default = "default"
+    error = "error"
+    always = "always"
+    module = "module"
+    once = "once"
+    ignore = "ignore"
+
+
 class AUTH_SERVICE_VALUES(Enum):
     no = "NO_AUTHENTICATION"
     postgres = "sqlalchemy"
@@ -284,6 +300,10 @@ class BaseEnvModel(BaseModel):
     BACKEND_URL: str
     PYTHON_MAIN_FILE: str
     PYTHON_PATH: Path
+    PYTHONASYNCIODEBUG: zero_or_one
+    PYTHONFAULTHANDLER: zero_or_one
+    PYTHONMALLOC: PYTHONMALLOC_VALUES
+    PYTHONWARNINGS: PYTHONWARNINGS_VALUES
     BACKEND_PREFIX: str
     APP_SECRETS: Path
     DATA_PATH: Path
