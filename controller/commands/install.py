@@ -30,7 +30,7 @@ EXPECTED_BUILDX_BIN_MD5 = "94f186350daf6841239a599e65ba38f1"
 # Due to pip, see issue 9250 on pip repo
 # Also silenced in packages.py
 warnings.filterwarnings(
-    "default",
+    "ignore",
     message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
 )
 

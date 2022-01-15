@@ -12,7 +12,7 @@ from typing import Dict, Union
 
 import pytest
 from faker import Faker
-from packaging.version import Version
+from packaging.version import Version  # type: ignore
 
 from controller import __version__
 from controller.app import Application, Configuration

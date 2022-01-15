@@ -7,7 +7,7 @@ import warnings
 from pathlib import Path
 from typing import List, Optional, Union
 
-from packaging.version import Version
+from packaging.version import Version  # type: ignore
 from sultan.api import Sultan
 
 from controller import log, print_and_exit
@@ -16,7 +16,7 @@ from controller.utilities import system
 # Due to pip, see issue 9250 on pip repo
 # Also silenced in install.py
 warnings.filterwarnings(
-    "default",
+    "ignore",
     message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
 )
 

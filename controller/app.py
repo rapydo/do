@@ -23,7 +23,7 @@ import click
 import requests
 import typer
 from git import Repo as GitRepo
-from packaging.version import Version
+from packaging.version import Version  # type: ignore
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
