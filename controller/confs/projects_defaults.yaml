@@ -75,7 +75,7 @@ variables:
     PYTHONASYNCIODEBUG: 0
     PYTHONFAULTHANDLER: 0
     # if error converts warnings to exceptions
-    PYTHONWARNINGS: default
+    PYTHONWARNINGS: always
 
     BACKEND_PREFIX: ""
     APP_SECRETS: /secrets
