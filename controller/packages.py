@@ -13,13 +13,6 @@ from sultan.api import Sultan
 from controller import log, print_and_exit
 from controller.utilities import system
 
-# Due to pip, see issue 9250 on pip repo
-# Also silenced in install.py
-warnings.filterwarnings(
-    "ignore",
-    message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
-)
-
 
 class Packages:
     @staticmethod
@@ -174,6 +167,14 @@ class Packages:
         command = "list --editable"
 
         with Sultan.load(sudo=False) as sultan:
+
+            # Due to pip, see issue 9250 on pip repo
+            # Also silenced in install.py
+            warnings.filterwarnings(
+                "ignore",
+                message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
+            )
+
             pip = sultan.pip3 if use_pip3 else sultan.pip
             result = pip(command).run()
 
