@@ -3,11 +3,10 @@
 # (we cannot understand why, but it does!)
 import os
 import re
-import warnings
 from pathlib import Path
 from typing import List, Optional, Union
 
-from packaging.version import Version  # type: ignore
+from packaging.version import Version
 from sultan.api import Sultan
 
 from controller import log, print_and_exit
@@ -169,14 +168,14 @@ class Packages:
         with Sultan.load(sudo=False) as sultan:
 
             # Due to pip, see issue 9250 on pip repo
-            # Also silenced in install.py
-            warnings.filterwarnings(
-                "ignore",
-                message="Creating a LegacyVersion has been deprecated and will be removed in the next major release",
-            )
+
+            value_backup = os.environ["PYTHONWARNINGS"]
+            os.environ["PYTHONWARNINGS"] = "default"
 
             pip = sultan.pip3 if use_pip3 else sultan.pip
             result = pip(command).run()
+
+            os.environ["PYTHONWARNINGS"] = value_backup
 
             for r in result.stdout + result.stderr:
                 if r.startswith(f"{package} "):

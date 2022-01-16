@@ -13,7 +13,7 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 from loguru import logger as log
-from packaging.version import Version  # type: ignore
+from packaging.version import Version
 
 from controller import print_and_exit
 

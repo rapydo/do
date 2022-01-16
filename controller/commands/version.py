@@ -1,4 +1,4 @@
-from packaging.version import Version  # type: ignore
+from packaging.version import Version
 
 from controller import RED, __version__, colors
 from controller.app import Application, Configuration
