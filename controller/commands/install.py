@@ -41,7 +41,10 @@ def download(url: str, expected_checksum: str) -> Path:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
-        md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
+        md5 = "N/A"
+        with open(file, "rb") as f:
+            md5 = hashlib.md5(f.read()).hexdigest()
+
         if md5 == expected_checksum:
             log.info("Checksum verified: {}", md5)
         else:
