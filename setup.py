@@ -32,6 +32,7 @@ setup(
         "click==8.0.1",
         "zxcvbn",
         "tabulate",
+        "packaging",
     ],
     extras_require={
         "dev": [
