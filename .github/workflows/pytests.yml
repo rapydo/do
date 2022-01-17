@@ -89,16 +89,16 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
+          PYTHONMALLOC: debug
+          PYTHONASYNCIODEBUG: 1
+          # Convert warnings to exceptions
+          PYTHONWARNINGS: error
+          PYTHONFAULTHANDLER: 1
         run: |
 
           mkdir rapydo_tests
           cd rapydo_tests
 
-          export PYTHONMALLOC=debug
-          export PYTHONASYNCIODEBUG=1
-          # Convert warnings to exceptions
-          # export PYTHONWARNINGS=error
-          export PYTHONFAULTHANDLER=1
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
       - name: Send Compose Coverage
@@ -140,8 +140,13 @@ jobs:
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
-          TEST_NAME: ${{ matrix.test }}
           SWARM_MODE: 1
+          TEST_NAME: ${{ matrix.test }}
+          PYTHONMALLOC: debug
+          PYTHONASYNCIODEBUG: 1
+          # Convert warnings to exceptions
+          # PYTHONWARNINGS: error
+          PYTHONFAULTHANDLER: 1
         run: |
           mkdir rapydo_tests
           cd rapydo_tests
@@ -208,11 +213,6 @@ jobs:
             sudo mkdir -p /volumes/redisdata
           fi
 
-          export PYTHONMALLOC=debug
-          export PYTHONASYNCIODEBUG=1
-          # Convert warnings to exceptions
-          export PYTHONWARNINGS=error
-          export PYTHONFAULTHANDLER=1
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         uses: rapydo/actions/coverage@v1
