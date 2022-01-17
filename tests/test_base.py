@@ -105,7 +105,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
         capfd,
         "-s backend check -i main --no-git --no-builds",
         # warnings are not catched !?
-        # "-s option is going to be replaced by rapydo <command> service",
+        # "-s is replaced by rapydo <command> service",
     )
 
     exec_command(

@@ -167,15 +167,8 @@ class Packages:
 
         with Sultan.load(sudo=False) as sultan:
 
-            # Due to pip, see issue 9250 on pip repo
-
-            value_backup = os.environ["PYTHONWARNINGS"]
-            os.environ["PYTHONWARNINGS"] = "default"
-
             pip = sultan.pip3 if use_pip3 else sultan.pip
             result = pip(command).run()
-
-            os.environ["PYTHONWARNINGS"] = value_backup
 
             for r in result.stdout + result.stderr:
                 if r.startswith(f"{package} "):
