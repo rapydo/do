@@ -280,7 +280,6 @@ def test_create(capfd: Capture) -> None:
         "rabbit",
         "redis",
         "celery",
-        "pushpin",
         "ftp",
     ]
     opt = "--frontend no --current --force"
@@ -321,8 +320,6 @@ def test_create(capfd: Capture) -> None:
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
             active_services = ["backend", "postgres", "redis"]
-        elif service == "pushpin":
-            active_services = ["backend", "postgres", "pushpin"]
         elif service == "ftp":
             active_services = ["backend", "ftp", "postgres"]
         else:  # pragma: no cover

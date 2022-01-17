@@ -278,7 +278,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_CELERYBEAT: zero_or_one
     ACTIVATE_FLOWER: zero_or_one
     ACTIVATE_FTP: zero_or_one
-    ACTIVATE_PUSHPIN: zero_or_one
     ACTIVATE_SMTP: zero_or_one
     ACTIVATE_SMTP_SERVER: zero_or_one
     ACTIVATE_TELEGRAM: zero_or_one
@@ -421,12 +420,6 @@ class BaseEnvModel(BaseModel):
     FLOWER_PORT: Port
     FLOWER_SSL_OPTIONS: Optional[str]
     FLOWER_PROTOCOL: FLOWER_PROTOCOL_VALUES
-    PUSHPIN_ENABLE_CONNECTOR: zero_or_one
-    PUSHPIN_EXPIRATION_TIME: PositiveInt
-    PUSHPIN_VERIFICATION_TIME: PositiveInt
-    PUSHPIN_HOST: str
-    PUSHPIN_PORT: Port
-    PUSHPIN_CONTROL_PORT: Port
     DEFAULT_SCALE_BACKEND: PositiveInt
     DEFAULT_SCALE_CELERY: PositiveInt
     DEFAULT_SCALE_CELERYBEAT: PositiveInt
@@ -463,8 +456,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_FTP: AssignedMemory
     ASSIGNED_CPU_SMTP: AssignedCPU
     ASSIGNED_MEMORY_SMTP: AssignedMemory
-    ASSIGNED_CPU_PUSHPIN: AssignedCPU
-    ASSIGNED_MEMORY_PUSHPIN: AssignedMemory
     ASSIGNED_CPU_REGISTRY: AssignedCPU
     ASSIGNED_MEMORY_REGISTRY: AssignedMemory
     REGISTRY_HOST: Optional[str]

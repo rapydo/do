@@ -200,18 +200,6 @@ services:
       options:
         syslog-address: ${SYSLOG_ADDRESS}
 
-  pushpin:
-    deploy:
-      # Is pushpin supporting replicas?
-      replicas: 1
-      resources:
-        reservations:
-          cpus: "${ASSIGNED_CPU_PUSHPIN}"
-          memory: ${ASSIGNED_MEMORY_PUSHPIN}
-    logging:
-      options:
-        syslog-address: ${SYSLOG_ADDRESS}
-
   registry:
     deploy:
       # Are replicas needed?

@@ -36,7 +36,6 @@ class TemplateDataType(TypedDict, total=False):
     enable_celery: bool
     enable_flower: bool
     enable_fail2ban: bool
-    enable_pushpin: bool
     enable_ftp: bool
     enable_bot: bool
     celery_broker: Optional[str]
