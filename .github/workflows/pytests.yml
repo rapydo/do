@@ -92,7 +92,7 @@ jobs:
           PYTHONMALLOC: debug
           PYTHONASYNCIODEBUG: 1
           # Convert warnings to exceptions
-          PYTHONWARNINGS: error
+          # PYTHONWARNINGS: error
           PYTHONFAULTHANDLER: 1
         run: |
 
