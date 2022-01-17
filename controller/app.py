@@ -54,8 +54,6 @@ from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, git, services, system
 
-warnings.simplefilter("always", DeprecationWarning)
-
 ROOT_UID = 0
 BASE_UID = 1000
 

@@ -1,6 +1,12 @@
 def main() -> None:
 
     # Import here to prevent to slow down the import
+    import warnings
+
+    warnings.simplefilter("always", DeprecationWarning)
+    # Convert warnings to exceptions
+    # export PYTHONWARNINGS=error
+
     from colorama import deinit, init
     from python_on_whales.utils import DockerException
 
