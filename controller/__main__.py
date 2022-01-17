@@ -3,13 +3,17 @@ def main() -> None:
     # All imports moved here to prevent to slow down the import of main
     import warnings
 
-    # 'error' converts warnings to exceptions
-    warnings.simplefilter("always", DeprecationWarning)
-
     from colorama import deinit, init
     from python_on_whales.utils import DockerException
 
-    from controller import log, print_and_exit
+    from controller import TESTING, log, print_and_exit
+
+    if TESTING:
+        # Convert warnings to exceptions
+        warnings.simplefilter("error", DeprecationWarning)
+    else:
+        warnings.simplefilter("always", DeprecationWarning)
+
     from controller.app import Application
 
     try:
