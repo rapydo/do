@@ -993,39 +993,11 @@ You can use of one:
             DOCKER_SUBNET = "127.0.0.1"
         Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
-        bool_envs = [
-            # This variable is for RabbitManagement and is expected to be true|false
-            "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
-            # These variables are for Neo4j and are expected to be true|false
-            "NEO4J_SSL_ENABLED",
-            "NEO4J_ALLOW_UPGRADE",
-            "NEO4J_RECOVERY_MODE",
-        ]
-
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
-
-                # Deprecated since 1.0
-                # Backend and Frontend use different booleans due to Py vs Js
-                # 0/1 is a much more portable value to prevent true|True|"true"
-                # This fixes troubles in setting boolean values only used by Angular
-                # (expected true|false) or used by Pyton (expected True|False)
-                if key not in bool_envs:  # pragma: no cover
-                    if isinstance(value, str):
-                        if value.lower() == "true":
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 1",
-                                DeprecationWarning,
-                            )
-
-                        if value.lower() == "false":
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 0",
-                                DeprecationWarning,
-                            )
 
                 if value is None:
                     value = ""
@@ -1033,9 +1005,6 @@ You can use of one:
                     value = str(value)
                 if " " in value:
                     value = f"'{value}'"
-
-                # if len(value) == 0:
-                #     value = f"'{value}'"
 
                 whandle.write(f"{key}={value}\n")
 

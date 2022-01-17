@@ -204,6 +204,11 @@ class Version(ConstrainedStr):
     regex = re.compile(r"^[0-9]+(\.[0-9]+)+$")
 
 
+# most of bool variables were deprecated since 1.0
+# Backend and Frontend use different booleans due to Py vs Js
+# 0/1 is a much more portable value to prevent true|True|"true"
+# This fixes troubles in setting boolean values only used by Angular
+# (expected true|false) or used by Pyton (expected True|False)
 class zero_or_one(IntEnum):
     ZERO = 0
     ONE = 1
@@ -385,7 +390,7 @@ class BaseEnvModel(BaseModel):
     RABBITMQ_ENABLE_SHOVEL_PLUGIN: zero_or_one
     RABBITMQ_SSL_CERTFILE: Optional[Path]
     RABBITMQ_SSL_KEYFILE: Optional[Path]
-    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: Optional[str]
+    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: Optional[true_or_false]
     RABBITMQ_SSL_ENABLED: zero_or_one
     REDIS_ENABLE_CONNECTOR: zero_or_one
     REDIS_EXPIRATION_TIME: PositiveInt
