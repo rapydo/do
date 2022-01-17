@@ -10,8 +10,9 @@ def main() -> None:
 
     if TESTING:
         # Convert warnings to exceptions
-        warnings.simplefilter("error", DeprecationWarning)
+        warnings.simplefilter("error", Warning)
     else:
+        warnings.simplefilter("always", UserWarning)
         warnings.simplefilter("always", DeprecationWarning)
 
     from controller.app import Application

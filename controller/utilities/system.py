@@ -122,8 +122,8 @@ def str_to_bytes(text: str) -> float:
 
 def get_local_ip(production: bool = False) -> str:
     if production:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.connect(("8.8.8.8", 80))
-            return str(s.getsockname()[0])
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        return str(s.getsockname()[0])
 
     return "127.0.0.1"
