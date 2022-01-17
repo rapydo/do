@@ -9,8 +9,17 @@ def main() -> None:
     from controller import TESTING, log, print_and_exit
 
     if TESTING:
+        warnings.simplefilter("always", Warning)
         # Convert warnings to exceptions
-        warnings.simplefilter("error", Warning)
+        warnings.simplefilter("error", UserWarning)
+        warnings.simplefilter("error", DeprecationWarning)
+        warnings.simplefilter("error", SyntaxWarning)
+        warnings.simplefilter("error", RuntimeWarning)
+        warnings.simplefilter("error", FutureWarning)
+        warnings.simplefilter("error", PendingDeprecationWarning)
+        warnings.simplefilter("error", ImportWarning)
+        warnings.simplefilter("error", UnicodeWarning)
+        warnings.simplefilter("error", BytesWarning)
     else:
         warnings.simplefilter("always", UserWarning)
         warnings.simplefilter("always", DeprecationWarning)
