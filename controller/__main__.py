@@ -20,6 +20,7 @@ def main() -> None:
         warnings.simplefilter("error", ImportWarning)
         warnings.simplefilter("error", UnicodeWarning)
         warnings.simplefilter("error", BytesWarning)
+        warnings.simplefilter("error", ResourceWarning)
     else:
         warnings.simplefilter("always", UserWarning)
         warnings.simplefilter("always", DeprecationWarning)
