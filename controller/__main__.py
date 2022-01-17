@@ -1,11 +1,10 @@
 def main() -> None:
 
-    # Import here to prevent to slow down the import
+    # All imports moved here to prevent to slow down the import of main
     import warnings
 
+    # 'error' converts warnings to exceptions
     warnings.simplefilter("always", DeprecationWarning)
-    # Convert warnings to exceptions
-    # export PYTHONWARNINGS=error
 
     from colorama import deinit, init
     from python_on_whales.utils import DockerException

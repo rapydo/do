@@ -33,13 +33,12 @@ class Packages:
             )
 
         try:
-            sudo = not user
-            # sudo does not work on travis
-            if Configuration.testing:
-                sudo = False
+
             # sudo does not work on Windows
             if os.name == "nt":  # pragma: no cover
                 sudo = False
+            else:
+                sudo = not user
 
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
