@@ -37,6 +37,9 @@ class Packages:
             # sudo does not work on Windows
             if os.name == "nt":  # pragma: no cover
                 sudo = False
+            # sudo not properly working on GHA
+            elif Configuration.testing:
+                sudo = False
             else:
                 sudo = not user
 
