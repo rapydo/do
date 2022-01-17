@@ -4,3 +4,4 @@ enabled  = true
 bantime = 24h
 findtime = 24h
 maxretry = 2
+usedns = no
