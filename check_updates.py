@@ -1,8 +1,9 @@
-import distutils.core
+import ast
 import json
 import os
 import re
 import sys
+import textwrap
 import time
 from glob import glob
 from pathlib import Path
@@ -237,6 +238,39 @@ def get_latest_version(
     return latest
 
 
+# https://stackify.dev/479027-how-to-extract-dependencies-information-from-a-setup-py
+def parse_setup(setup_filename: str) -> Any:
+    """Parse setup.py and return args and keywords args to its setup
+    function call
+
+    """
+    mock_setup = textwrap.dedent(
+        """\
+    def setup(*args, **kwargs):
+        __setup_calls__.append((args, kwargs))
+    """
+    )
+    parsed_mock_setup = ast.parse(mock_setup, filename=setup_filename)
+    with open(setup_filename) as setup_file:
+        parsed = ast.parse(setup_file.read())
+        for index, node in enumerate(parsed.body[:]):
+            if (
+                not isinstance(node, ast.Expr)
+                or not isinstance(node.value, ast.Call)
+                # or node.value.func.id != "setup"
+            ):
+                continue
+            parsed.body[index:index] = parsed_mock_setup.body
+            break
+
+    fixed = ast.fix_missing_locations(parsed)
+    codeobj = compile(fixed, setup_filename, "exec")
+    local_vars: Dict[str, Any] = {}
+    global_vars: Dict[str, Any] = {"__setup_calls__": []}
+    exec(codeobj, global_vars, local_vars)
+    return global_vars["__setup_calls__"][0][1]
+
+
 def parse_dockerhub(lib: str, sleep_time: int) -> str:
 
     if lib == "stilliard/pure-ftpd":
@@ -426,12 +460,12 @@ def check_versions(
             Path("../rapydo-angular/src/package.json"), dependencies
         )
 
-    controller: Any = distutils.core.run_setup("../do/setup.py")
-    http_api: Any = distutils.core.run_setup("../http-api/setup.py")
+    controller: Any = parse_setup("../do/setup.py")
+    http_api: Any = parse_setup("../http-api/setup.py")
 
     if not skip_python:
-        dependencies["controller"] = {"pip": controller.install_requires}
-        dependencies["http-api"] = {"pip": http_api.install_requires}
+        dependencies["controller"] = {"pip": controller["install_requires"]}
+        dependencies["http-api"] = {"pip": http_api["install_requires"]}
 
     filtered_dependencies: Dependencies = {}
 
