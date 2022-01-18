@@ -18,8 +18,8 @@ from controller.utilities import git
 EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.2.2"
-EXPECTED_COMPOSE_BIN_MD5 = "d8518059a22e4a5ff7794e5cd7162f7e"
+COMPOSE_VERSION = "v2.2.3"
+EXPECTED_COMPOSE_BIN_MD5 = "8e1cec6807ab5bfdd0006a5601dc68cc"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.7.1"
@@ -49,7 +49,7 @@ def download(url: str, expected_checksum: str) -> Path:
             log.info("Checksum verified: {}", md5)
         else:
             print_and_exit(
-                "Checksum of download file ({}) does not match the expected value ({})",
+                "File checksum ({}) does not match the expected value ({})",
                 md5,
                 expected_checksum,
             )
