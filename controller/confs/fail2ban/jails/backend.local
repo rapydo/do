@@ -1,2 +1,5 @@
 [backend]
 enabled  = true
+
+findtime = 6h
+maxretry = 10
