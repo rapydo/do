@@ -136,8 +136,8 @@ def test_remove(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "restart",
-            "Stack restarted",
+            "start",
+            "Stack started",
         )
 
         time.sleep(2)

@@ -1,13 +1,11 @@
 """
-This module will test the restart command
+This module will test the start --force (ex restart) command
 """
-from controller import colors
 from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
     exec_command,
-    execute_outside,
     get_container_start_date,
     init_project,
     pull_images,
@@ -18,7 +16,7 @@ from tests import (
 
 def test_all(capfd: Capture) -> None:
 
-    execute_outside(capfd, "restart")
+    exec_command(capfd, "restart", "This command is no longer available")
 
     create_project(
         capfd=capfd,
@@ -29,21 +27,13 @@ def test_all(capfd: Capture) -> None:
     init_project(capfd)
     start_registry(capfd)
     pull_images(capfd)
-
-    if Configuration.swarm_mode:
-        exec_command(
-            capfd,
-            "restart",
-            f"Your stack is not running, deploy it with {colors.RED}rapydo start",
-        )
-
     start_project(capfd)
 
     start_date1 = get_container_start_date(capfd, "backend")
     exec_command(
         capfd,
-        "restart",
-        "Stack restarted",
+        "start --force",
+        "Stack started",
     )
 
     start_date2 = get_container_start_date(capfd, "backend")
@@ -60,18 +50,10 @@ def test_all(capfd: Capture) -> None:
             "Services removed",
         )
 
-        exec_command(
-            capfd,
-            "restart",
-            "Restarting services:",
-            "Updating service first_backend",
-            "Stack restarted",
-        )
-
     exec_command(
         capfd,
-        "restart --force",
-        "Stack restarted",
+        "start --force",
+        "Stack started",
     )
 
     start_date3 = get_container_start_date(capfd, "backend")

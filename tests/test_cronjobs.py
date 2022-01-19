@@ -48,8 +48,8 @@ def test_cronjobs(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-e CRONTAB_ENABLE=1 restart --force",
-        "Stack restarted",
+        "-e CRONTAB_ENABLE=1 start --force",
+        "Stack started",
     )
 
     if Configuration.swarm_mode:

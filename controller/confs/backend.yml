@@ -28,7 +28,6 @@ networks:
 
 services:
   backend:
-    # restart: on-failure:5
     restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
@@ -996,8 +995,6 @@ services:
       - 7777:8080
 
   adminer:
-    # image: adminer:4.7.7-standalone
-    # restart: no
     build:
       context: ${SUBMODULE_DIR}/build-templates/adminer
       args:

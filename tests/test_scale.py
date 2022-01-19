@@ -148,13 +148,13 @@ def test_scale(capfd: Capture) -> None:
         # This should restart all the replicas.
         exec_command(
             capfd,
-            "restart",
+            "start",
         )
 
         # Verify that 2 replicas are still running after the restart
         exec_command(
             capfd,
-            "restart --force",
+            "start --force",
         )
 
         # Just wait for a while for all tasks to start, necessary because the previous
@@ -241,13 +241,13 @@ def test_scale(capfd: Capture) -> None:
         # This should restart all the replicas.
         exec_command(
             capfd,
-            "restart",
+            "start",
         )
 
         # Verify that 2 replicas are still running after the restart
         exec_command(
             capfd,
-            "restart --force",
+            "start --force",
         )
 
         # Still not working

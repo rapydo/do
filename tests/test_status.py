@@ -67,8 +67,8 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "restart --force",
-            "Stack restarted",
+            "start --force",
+            "Stack started",
         )
 
         time.sleep(4)

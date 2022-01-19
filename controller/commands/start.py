@@ -31,7 +31,14 @@ def start(
         None,
         help="Services to be started",
         shell_complete=Application.autocomplete_service,
-    )
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        "-f",
+        help="Force containers restart",
+        show_default=False,
+    ),
 ) -> None:
 
     Application.print_command(Application.serialize_parameter("", services))
@@ -49,28 +56,16 @@ def start(
     )
 
     if Configuration.swarm_mode:
-        # if swarm.stack_is_running():
-        #     print_and_exit(
-        #         "A stack is already running. "
-        #         "Stop it with {command1} if you want to start a new stack "
-        #         "or use {command2} to update it",
-        #         command1=RED("rapydo remove"),
-        #         command2=RED("rapydo restart"),
-        #     )
-
         docker.compose.dump_config(Application.data.services)
         docker.swarm.deploy()
-        wait_stack_deploy(docker)
 
+        if force:
+            for service in Application.data.services:
+                docker.client.service.update(
+                    f"{Configuration.project}_{service}", detach=True, force=True
+                )
+        wait_stack_deploy(docker)
     else:
-        # if compose.get_running_services():
-        #     print_and_exit(
-        #         "A stack is already running. "
-        #         "Stop it with {command1} if you want to start a new stack "
-        #         "or use {command2} to update it",
-        #         command1=RED("rapydo remove"),
-        #         command2=RED("rapydo restart"),
-        #     )
-        docker.compose.start_containers(Application.data.services)
+        docker.compose.start_containers(Application.data.services, force=force)
 
     log.info("Stack started")
