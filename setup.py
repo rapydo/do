@@ -16,7 +16,7 @@ setup(
     },
     # Remember to update mypy.additional_dependencies
     install_requires=[
-        "python-on-whales==0.34.0",
+        "python-on-whales==0.36.1",
         "python-dateutil",
         "pytz",
         "loguru",
