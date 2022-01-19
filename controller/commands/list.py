@@ -41,9 +41,12 @@ def list_cmd(
         headers = ["Name", "Image", "Status", "Path"]
 
         docker = Docker()
+        log.critical("DEBUG CODE: getting services status...")
         services_status = docker.get_services_status(Configuration.project)
+        log.critical("DEBUG CODE: {}", services_status)
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
+                log.critical("DEBUG CODE: service={}", name)
                 image = service.image
                 build = service.build
 
@@ -54,6 +57,7 @@ def list_cmd(
                 else:
                     build_path = ""
 
+                log.critical("DEBUG CODE: status={}", status)
                 table.append([name, image, status, build_path])
 
     if element_type == ElementTypes.submodules:
