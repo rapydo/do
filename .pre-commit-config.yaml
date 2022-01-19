@@ -25,7 +25,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies: [
-            "python-on-whales==0.36.0",
+            "python-on-whales==0.34.0",
             "python-dateutil",
             "pytz",
             "loguru",

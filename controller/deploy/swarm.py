@@ -88,16 +88,13 @@ class Swarm:
 
         prefix += "_"
         services_status: Dict[str, str] = dict()
-        log.critical("DEBUG CODE: getting services list...")
         for service in self.docker.service.list():
             name = service.spec.name
             if not name.startswith(prefix):
                 continue
 
-            log.critical("DEBUG CODE: service={}", service)
             for task in self.docker.service.ps(name):
                 status = task.status.state
-                log.critical("DEBUG CODE: status={}", status)
 
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
