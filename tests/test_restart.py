@@ -32,7 +32,7 @@ def test_all(capfd: Capture) -> None:
     start_date1 = get_container_start_date(capfd, "backend")
     exec_command(
         capfd,
-        "start --force",
+        "start",
         "Stack started",
     )
 
