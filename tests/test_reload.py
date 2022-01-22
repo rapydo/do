@@ -173,4 +173,10 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         "Can't reload the frontend while it is still building",
     )
 
+    container = docker.get_container("frontend")
+    assert container is not None
+
+    docker.client.container.remove(container[0], force=True)
+    exec_command(capfd, "reload frontend", "Reloading frontend...")
+
     exec_command(capfd, "remove", "Stack removed")

@@ -40,7 +40,14 @@ def reload(
                     service_name = docker.get_service(service)
                     docker.client.service.update(service_name, force=True, detach=True)
                 else:
-                    docker.client.compose.restart(service)
+                    service_name = docker.get_service(service)
+                    c = docker.get_container_name(service_name, slot=1)
+
+                    if docker.client.container.exists(c):
+                        docker.client.compose.restart(service)
+                    else:
+                        # Start is not required... but it does not hurt
+                        docker.compose.start_containers([service], force=True)
                 reloaded += 1
             continue
 

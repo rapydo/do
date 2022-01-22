@@ -157,6 +157,9 @@ class Docker:
                 containers.setdefault(slot, (c.name, MAIN_NODE))
         return containers
 
+    def get_container_name(self, service_name: str, slot: int = 1) -> str:
+        return f"{service_name}{COMPOSE_SEP}{slot}"
+
     def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
 
         if Configuration.swarm_mode:
@@ -165,7 +168,7 @@ class Docker:
             return tasks.get(slot) or tasks.get(0)
 
         service_name = self.get_service(service)
-        c = f"{service_name}{COMPOSE_SEP}{slot}"
+        c = self.get_container_name(service_name, slot=slot)
         log.debug("Container name: {}", c)
         # Can't use container.exists because a check on the status is needed
         try:
