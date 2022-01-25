@@ -73,18 +73,19 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: Install
+      - name: Install RAPyDo controller
         run: |
           python -m pip install --upgrade pip
-          # Temporary fix, see: https://github.com/frappe/bench/issues/1240
-          # without this the installation fails with
-          # importlib.metadata.PackageNotFoundError: rapydo
-          sudo pip3 uninstall setuptools
-          sudo pip3 install setuptools==59.6.0
           sudo pip install --upgrade --no-cache-dir --editable .[dev]
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
+
+      - name: Install Compose and Buildx
+        run: |
+          # Can't be merge with the step above because the following error is raised: 
+          # importlib.metadata.PackageNotFoundError: rapydo
+          # A new shell is needed,... and this can be done by running a different step
 
           rapydo install buildx
           rapydo install compose
@@ -134,12 +135,12 @@ jobs:
         run: |
           # This will remove the old rapydo version installed by rapydo install test
           sudo pip uninstall rapydo
-          pip uninstall rapydo
+          sudo pip uninstall rapydo
           # And now install again 
           pip install --upgrade --no-cache-dir --editable .[dev]
 
           # Just to verify the installed version to debug in case of errors in the next steps
-          rapydo --version
+          sudo rapydo --version
 
       - name: Run Swarm Tests
         env:
