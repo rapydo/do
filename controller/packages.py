@@ -23,6 +23,10 @@ class Packages:
         use_pip3: bool = True,
     ) -> bool:
 
+        # Do not import outside, otherwise it will lead to a circular import:
+        # cannot import name 'Configuration' from partially initialized module
+        from controller.app import Configuration
+
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
             log.warning("pip3 is not available, switching to pip")
             return Packages.install(
@@ -34,12 +38,18 @@ class Packages:
             # sudo does not work on Windows
             if os.name == "nt":  # pragma: no cover
                 sudo = False
+            # sudo not properly working on GHA
+            elif Configuration.testing:
+                sudo = False
             else:
                 sudo = not user
 
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
-                if user:
+                # --user does not work on travis:
+                # Can not perform a '--user' install.
+                # User site-packages are not visible in this virtualenv.
+                if not Configuration.testing and user:  # pragma: no cover
                     command += " --user"
                 if editable:
                     command += " --editable"
