@@ -24,6 +24,7 @@ class Packages:
     ) -> bool:
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
+            log.warning("pip3 is not available, switching to pip")
             return Packages.install(
                 package=package, editable=editable, user=user, use_pip3=False
             )
