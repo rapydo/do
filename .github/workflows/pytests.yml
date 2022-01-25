@@ -76,7 +76,11 @@ jobs:
       - name: Install
         run: |
           sudo python -m pip install --upgrade pip
-          sudo python -m pip install --upgrade --no-cache-dir --editable .[dev]
+          # --ignore-installed is needed due to:
+          # ERROR: Cannot uninstall 'PyYAML'.
+          # It is a distutils installed project and thus we cannot accurately determine
+          # which files belong to it which would lead to only a partial uninstall.
+          sudo python -m pip install --upgrade --no-cache-dir --ignore-installed --editable .[dev]
           # Needed to make git commit (used by tests) to work and prevent error: 'Author identity unknown'
           git config --global user.email "tests@rapy.do"
           git config --global user.name "RAPyDo"
@@ -129,7 +133,7 @@ jobs:
         run: |
           # This will remove the old rapydo version installed by rapydo install test
           sudo python -m pip uninstall rapydo
-          sudo python -m pip uninstall rapydo
+          python -m pip uninstall rapydo
           # And now install again 
           sudo python -m pip install --upgrade --no-cache-dir --editable .[dev]
 
