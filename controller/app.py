@@ -518,8 +518,6 @@ class Application:
 
         self.check_placeholders_and_passwords(compose_config, self.enabled_services)
 
-        # Final step, launch the command
-
         Application.data = CommandsData(
             files=self.files,
             base_files=self.base_files,
