@@ -26,6 +26,7 @@ def backup(
 
     command = f"tar -zcf {backup_path} -C /data dump.rdb appendonly.aof"
     if not dry_run:
+        log.info("Compressing the data files...")
         if container:
             docker.exec_command(container, user="redis", command=command)
         else:
@@ -34,6 +35,7 @@ def backup(
     # Verify the gz integrity
     command = f"gzip -t {backup_path}"
     if not dry_run:
+        log.info("Verifying the integrity of the backup file...")
         if container:
             docker.exec_command(container, user="redis", command=command)
         else:

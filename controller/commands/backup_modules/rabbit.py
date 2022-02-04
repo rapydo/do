@@ -23,17 +23,19 @@ def backup(
 
     backup_path = f"/backup/{SERVICE_NAME}/{now}.tar.gz"
 
-    command = f"tar -zcf {backup_path} -C /var/lib/rabbitmq mnesia"
-
     log.info("Starting backup on {}...", SERVICE_NAME)
     if not dry_run:
-        docker.compose.create_volatile_container(SERVICE_NAME, command=command)
+        log.info("Executing rabbitmq mnesia...")
+        docker.compose.create_volatile_container(
+            SERVICE_NAME, command=f"tar -zcf {backup_path} -C /var/lib/rabbitmq mnesia"
+        )
 
     # Verify the gz integrity
-    command = f"gzip -t {backup_path}"
-
     if not dry_run:
-        docker.compose.create_volatile_container(SERVICE_NAME, command=command)
+        log.info("Verifying the integrity of the backup file...")
+        docker.compose.create_volatile_container(
+            SERVICE_NAME, command=f"gzip -t {backup_path}"
+        )
 
     log.info("Backup completed: data{}", backup_path)
 

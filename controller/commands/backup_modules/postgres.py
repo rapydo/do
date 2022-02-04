@@ -24,6 +24,7 @@ def backup(
     tmp_backup_path = f"/tmp/{now}.sql"
     # Creating backup on a tmp folder as postgres user
     if not dry_run:
+        log.info("Executing pg_dumpall...")
         docker.exec_command(
             container,
             user="postgres",
@@ -32,12 +33,14 @@ def backup(
 
     # Compress the sql with best compression ratio
     if not dry_run:
+        log.info("Compressing the backup file...")
         docker.exec_command(
             container, user="postgres", command=f"gzip -9 {tmp_backup_path}"
         )
 
     # Verify the gz integrity
     if not dry_run:
+        log.info("Verifying the integrity of the backup file...")
         docker.exec_command(
             container, user="postgres", command=f"gzip -t {tmp_backup_path}.gz"
         )

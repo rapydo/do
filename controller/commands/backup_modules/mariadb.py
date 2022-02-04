@@ -30,6 +30,7 @@ def backup(
 
     # Creating backup on a tmp folder as mysql user
     if not dry_run:
+        log.info("Executing mariabackup...")
         docker.exec_command(
             container,
             user="mysql",
@@ -38,6 +39,7 @@ def backup(
 
     # Compress the prepared data folder. Used -C to skip the /tmp from folders paths
     if not dry_run:
+        log.info("Compressing the backup file...")
         docker.exec_command(
             container,
             user="mysql",
@@ -46,6 +48,7 @@ def backup(
 
     # Verify the gz integrity
     if not dry_run:
+        log.info("Verifying the integrity of the backup file...")
         docker.exec_command(
             container, user="mysql", command=f"gzip -t {tmp_backup_path}.tar.gz"
         )
