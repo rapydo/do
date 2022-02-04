@@ -1,11 +1,10 @@
 import time
 from enum import Enum
-from pathlib import Path
 from typing import List, Optional
 
 import typer
 
-from controller import log, print_and_exit
+from controller import BACKUP_DIR, log, print_and_exit
 from controller.app import Application
 from controller.commands import RESTORE_MODULES
 from controller.deploy.builds import verify_available_images
@@ -67,7 +66,7 @@ def restore(
 
     container = docker.get_container(service_name)
 
-    backup_dir = Path("data", "backup", service_name)
+    backup_dir = BACKUP_DIR.joinpath(service_name)
     if not backup_dir.exists():
         print_and_exit(
             "No backup found, the following folder does not exist: {}", backup_dir

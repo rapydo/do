@@ -3,11 +3,10 @@ This module test the backup and restore commands mariadb
 """
 import os
 import time
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
 from controller.app import Configuration
 from tests import (
     Capture,
@@ -29,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup mariadb")
     execute_outside(capfd, "restore mariadb")
 
-    backup_folder = Path("data/backup/mariadb")
+    backup_folder = BACKUP_DIR.joinpath("mariadb")
 
     create_project(
         capfd=capfd,
@@ -207,7 +206,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/mariadb/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore mariadb",

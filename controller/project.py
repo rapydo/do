@@ -3,7 +3,15 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from controller import PROJECT_DIR, log, print_and_exit
+from controller import (
+    BACKUP_DIR,
+    DATA_DIR,
+    LOGS_FOLDER,
+    PROJECT_DIR,
+    SUBMODULES_DIR,
+    log,
+    print_and_exit,
+)
 from controller.utilities import git
 
 NO_AUTHENTICATION = "NO_AUTHENTICATION"
@@ -11,13 +19,10 @@ NO_FRONTEND = "nofrontend"
 ANGULAR = "angular"
 GITKEEP = ".gitkeep"
 
-DATA = Path("data")
-SUBMODULES = Path("submodules")
-
 
 class Project:
     def __init__(self) -> None:
-        self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA, SUBMODULES]
+        self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA_DIR, SUBMODULES_DIR]
         # Will be verifed by check and added by create
         self.expected_folders: List[Path] = []
         self.expected_files: List[Path] = []
@@ -57,10 +62,10 @@ class Project:
         self.expected_folders.append(self.p_path("backend", "tests"))
         self.expected_folders.append(self.p_path("backend", "cron"))
 
-        self.suggested_gitkeep.append(SUBMODULES.joinpath(GITKEEP))
-        self.suggested_gitkeep.append(DATA.joinpath(GITKEEP))
-        self.suggested_gitkeep.append(DATA.joinpath("logs", GITKEEP))
-        self.suggested_gitkeep.append(DATA.joinpath("backup", GITKEEP))
+        self.suggested_gitkeep.append(SUBMODULES_DIR.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(DATA_DIR.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(LOGS_FOLDER.joinpath(GITKEEP))
+        self.suggested_gitkeep.append(BACKUP_DIR.joinpath(GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "cron", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("builds", GITKEEP))
         self.suggested_gitkeep.append(self.p_path("backend", "endpoints", GITKEEP))
@@ -119,18 +124,18 @@ class Project:
 
         self.data_folders.extend(
             [
-                DATA.joinpath("backup"),
-                DATA.joinpath("logs"),
-                DATA.joinpath("uploads"),
+                LOGS_FOLDER,
+                BACKUP_DIR,
+                DATA_DIR.joinpath("uploads"),
             ]
         )
 
         # Removed since 0.7.1
         self.obsolete_files.append(self.p_path("confs", "debug.yml"))
         # Removed since 0.7.4
-        self.obsolete_files.append(SUBMODULES.joinpath("rapydo-confs"))
+        self.obsolete_files.append(SUBMODULES_DIR.joinpath("rapydo-confs"))
         # Removed since 0.7.5
-        self.obsolete_files.append(SUBMODULES.joinpath("frontend"))
+        self.obsolete_files.append(SUBMODULES_DIR.joinpath("frontend"))
         # Removed since 0.7.6
         self.obsolete_files.append(self.p_path("backend", "apis"))
         # Removed since 0.8
@@ -164,7 +169,7 @@ class Project:
             )
 
             self.suggested_gitkeep.append(
-                DATA.joinpath(self.project, "frontend", GITKEEP)
+                DATA_DIR.joinpath(self.project, "frontend", GITKEEP)
             )
 
             self.suggested_gitkeep.append(
@@ -209,14 +214,14 @@ class Project:
                 ]
             )
 
-            frontend_data_dir = DATA.joinpath(self.project, "frontend")
+            frontend_data_dir = DATA_DIR.joinpath(self.project, "frontend")
             self.data_folders.extend(
                 [
                     frontend_data_dir,
                     frontend_data_dir.joinpath("app"),
                     frontend_data_dir.joinpath("node_modules"),
-                    DATA.joinpath(self.project, "karma"),
-                    DATA.joinpath(self.project, "cypress"),
+                    DATA_DIR.joinpath(self.project, "karma"),
+                    DATA_DIR.joinpath(self.project, "cypress"),
                 ]
             )
 

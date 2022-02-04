@@ -3,11 +3,10 @@ This module will test the backup and restore commands on rabbitMQ
 """
 import os
 import time
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
 from controller.app import Configuration
 from tests import (
     Capture,
@@ -29,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup rabbit")
     execute_outside(capfd, "restore rabbit")
 
-    backup_folder = Path("data/backup/rabbit")
+    backup_folder = BACKUP_DIR.joinpath("rabbit")
 
     create_project(
         capfd=capfd,
@@ -229,7 +228,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/rabbit/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore rabbit",

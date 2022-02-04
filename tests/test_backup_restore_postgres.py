@@ -2,11 +2,10 @@
 This module test the backup and restore commands + tuning postgres
 """
 import os
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -27,7 +26,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup postgres")
     execute_outside(capfd, "restore postgres")
 
-    backup_folder = Path("data/backup/postgres")
+    backup_folder = BACKUP_DIR.joinpath("postgres")
 
     create_project(
         capfd=capfd,
@@ -193,7 +192,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/postgres/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore postgres",

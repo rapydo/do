@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from controller import __version__, colors
+from controller import DATA_DIR, LOGS_FOLDER, __version__, colors
 from controller.app import Configuration
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.docker import Docker
@@ -44,7 +44,7 @@ def test_base(capfd: Capture) -> None:
     )
     init_project(capfd)
 
-    with TemporaryRemovePath(Path("data")):
+    with TemporaryRemovePath(DATA_DIR):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -193,13 +193,12 @@ RUN mkdir xyz
     )
 
     # Test init of data folders
-    logs_dir = Path("data", "logs")
-    shutil.rmtree(logs_dir)
-    assert not logs_dir.is_dir()
+    shutil.rmtree(LOGS_FOLDER)
+    assert not LOGS_FOLDER.is_dir()
     # Let's restore .projectrc and data/logs
     init_project(capfd, "--project third")
 
-    assert logs_dir.is_dir()
+    assert LOGS_FOLDER.is_dir()
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",

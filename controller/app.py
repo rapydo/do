@@ -33,6 +33,7 @@ from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
+    DATA_DIR,
     DATAFILE,
     EXTENDED_PROJECT_DISABLED,
     PLACEHOLDER,
@@ -897,7 +898,7 @@ You can use of one:
         Application.env["PROJECT_DOMAIN"] = Configuration.hostname
         Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
 
-        Application.env["DATA_DIR"] = str(Path("data").resolve())
+        Application.env["DATA_DIR"] = str(DATA_DIR.resolve())
         Application.env["SUBMODULE_DIR"] = str(SUBMODULES_DIR.resolve())
         Application.env["PROJECT_DIR"] = str(
             PROJECT_DIR.joinpath(Configuration.project).resolve()

@@ -3,9 +3,8 @@ This module will test the start command
 """
 
 import shutil
-from pathlib import Path
 
-from controller import colors
+from controller import DATA_DIR, colors
 from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
@@ -124,7 +123,7 @@ def test_all(capfd: Capture) -> None:
             "Stack removed",
         )
 
-        data_folder = Path("data", project_name)
+        data_folder = DATA_DIR.joinpath(project_name)
         karma_folder = data_folder.joinpath("karma")
 
         # Delete data/project_name/karma and it will be recreated

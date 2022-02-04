@@ -2,11 +2,10 @@
 This module will test the backup and restore commands on Redis
 """
 import os
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -27,7 +26,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup redis")
     execute_outside(capfd, "restore redis")
 
-    backup_folder = Path("data/backup/redis")
+    backup_folder = BACKUP_DIR.joinpath("redis")
 
     create_project(
         capfd=capfd,
@@ -209,7 +208,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/redis/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore redis",

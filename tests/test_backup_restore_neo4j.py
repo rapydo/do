@@ -3,11 +3,10 @@ This module will test the backup and restore commands on neo4j
 """
 import os
 import time
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
 from controller.app import Configuration
 from tests import (
     Capture,
@@ -29,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup neo4j")
     execute_outside(capfd, "restore neo4j")
 
-    backup_folder = Path("data/backup/neo4j")
+    backup_folder = BACKUP_DIR.joinpath("neo4j")
 
     create_project(
         capfd=capfd,
@@ -213,7 +212,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/neo4j/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore neo4j",

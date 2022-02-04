@@ -13,7 +13,15 @@ __version__ = "2.2"
 
 __all__ = [colors]
 
-LOGS_FOLDER = Path("data", "logs").resolve()
+
+COMPOSE_ENVIRONMENT_FILE = Path(".env")
+SUBMODULES_DIR = Path("submodules")
+PROJECT_DIR = Path("projects")
+DATA_DIR = Path("data")
+BACKUP_DIR = DATA_DIR.joinpath("backup")
+TEMPLATE_DIR = Path("templates")
+
+LOGS_FOLDER = DATA_DIR.joinpath("logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
 LOG_FORMAT = os.getenv("RAPYDO_LOG_FORMAT", "simple")
 TABLE_FORMAT = "simple"  # plain, simple, pretty, presto
@@ -56,11 +64,6 @@ if LOGS_FILE is not None:
     except PermissionError as e:  # pragma: no cover
         log.error(e)
         LOGS_FILE = None
-
-COMPOSE_ENVIRONMENT_FILE = Path(".env")
-SUBMODULES_DIR = Path("submodules")
-PROJECT_DIR = Path("projects")
-TEMPLATE_DIR = Path("templates")
 
 CONFS_DIR = Path(__file__).resolve().parent.joinpath("confs")
 

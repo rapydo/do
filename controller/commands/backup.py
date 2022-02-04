@@ -1,12 +1,11 @@
 import time
 from datetime import datetime
 from enum import Enum
-from pathlib import Path
 from typing import List
 
 import typer
 
-from controller import log, print_and_exit
+from controller import BACKUP_DIR, log, print_and_exit
 from controller.app import Application
 from controller.commands import BACKUP_MODULES
 from controller.deploy.builds import verify_available_images
@@ -96,7 +95,7 @@ def backup(
 
     container = docker.get_container(service_name)
 
-    backup_dir = Path("data", "backup", service_name)
+    backup_dir = BACKUP_DIR.joinpath(service_name)
     backup_dir.mkdir(parents=True, exist_ok=True)
 
     if max_backups > 0:
