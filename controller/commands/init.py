@@ -2,10 +2,10 @@ from pathlib import Path
 
 import typer
 
-from controller import log, print_and_exit
+from controller import DATA_DIR, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
-from controller.project import ANGULAR, DATA
+from controller.project import ANGULAR
 
 
 @Application.app.command(help="Initialize current RAPyDo project")
@@ -80,7 +80,7 @@ def init(
             log.debug("Swarm is already initialized")
 
     if Configuration.frontend == ANGULAR:
-        yarn_lock = DATA.joinpath(Configuration.project, "frontend", "yarn.lock")
+        yarn_lock = DATA_DIR.joinpath(Configuration.project, "frontend", "yarn.lock")
         if yarn_lock.exists():
             yarn_lock.unlink()
             log.info("Yarn lock file deleted")
