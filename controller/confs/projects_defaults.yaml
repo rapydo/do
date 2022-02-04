@@ -243,6 +243,7 @@ variables:
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
+    CELERY_POOL_MODE: solo
 
     # Flower
     FLOWER_USER: "flower" # This default is invalidated in production mode

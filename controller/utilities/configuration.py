@@ -134,6 +134,14 @@ class CELERY_BACKEND_VALUES(Enum):
     MONGODB = "MONGODB"
 
 
+class CELERY_POOL_MODE_VALUES(Enum):
+    prefork = "prefork"
+    eventlet = "eventlet"
+    gevent = "gevent"
+    thread = "thread"
+    solo = "solo"
+
+
 class FLOWER_PROTOCOL_VALUES(Enum):
     http = "http"
     https = "https"
@@ -414,6 +422,7 @@ class BaseEnvModel(BaseModel):
     CELERY_VERIFICATION_TIME: PositiveInt
     CELERY_BROKER: CELERY_BROKER_VALUES
     CELERY_BACKEND: CELERY_BACKEND_VALUES
+    CELERY_POOL_MODE: CELERY_POOL_MODE_VALUES
     FLOWER_USER: str
     FLOWER_PASSWORD: str
     FLOWER_DBDIR: Path

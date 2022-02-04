@@ -519,7 +519,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
-    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 --pool=solo -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 --pool=${CELERY_POOL_MODE} -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
     healthcheck:
       test: "/usr/local/bin/celery-healthcheck"
       interval: ${HEALTHCHECK_INTERVAL}
