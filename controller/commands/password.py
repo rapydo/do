@@ -9,6 +9,7 @@ from zxcvbn import zxcvbn
 
 from controller import (
     GREEN,
+    PLACEHOLDER,
     PROJECTRC,
     RED,
     REGISTRY,
@@ -219,8 +220,12 @@ def password(
             for variable in module.PASSWORD_VARIABLES:
 
                 password = Application.env.get(variable)
-                result = zxcvbn(password)
-                score = result["score"]
+
+                if password == PLACEHOLDER:
+                    score = None
+                else:
+                    result = zxcvbn(password)
+                    score = result["score"]
 
                 if variable in last_updates:
                     change_date = last_updates.get(variable, datetime.fromtimestamp(0))
@@ -241,7 +246,9 @@ def password(
                 else:
                     pass_line.append(GREEN(last_change))
 
-                if score < MIN_PASSWORD_SCORE:
+                if score is None:
+                    pass_line.append(RED("NOT SET"))
+                elif score < MIN_PASSWORD_SCORE:
                     pass_line.append(RED(score))
                 else:
                     pass_line.append(GREEN(score))
@@ -312,6 +319,9 @@ def password(
         if is_running:
             log.info("{} was running, restarting services...", service.value)
 
+            Application.get_controller().check_placeholders_and_passwords(
+                Application.data.compose_config, Application.data.services
+            )
             if service.value == REGISTRY:
                 port = cast(int, Application.env["REGISTRY_PORT"])
 

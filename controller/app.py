@@ -517,7 +517,8 @@ class Application:
         # Compose services and variables
         base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders_and_passwords(compose_config, self.enabled_services)
+        if Configuration.action != "password":
+            self.check_placeholders_and_passwords(compose_config, self.enabled_services)
 
         Application.data = CommandsData(
             files=self.files,
