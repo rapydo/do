@@ -115,9 +115,9 @@ def run(
 
     if user:
         log.warning(
-            "Please remember that users in volatile containers are not mapped "
-            "on current uid and gid. "
-            "You should avoid to write or modify files on volumes"
+            "Please remember that users in volatile containers are not mapped on"
+            " current uid and gid. You should not write or modify files on volumes"
+            " to prevent permissions errors"
         )
 
     if pull:

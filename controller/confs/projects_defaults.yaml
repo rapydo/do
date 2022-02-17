@@ -313,7 +313,7 @@ variables:
     # defaulted to local IP of active network interface
     # Note: can only be modified as env variable, not projectrc/-e :\
     SWARM_MANAGER_ADDRESS:
-    SYSLOG_ADDRESS: ""
+    # SYSLOG_ADDRESS: ""
 
     # Smtp
     SMTP_ENABLE_CONNECTOR: 1

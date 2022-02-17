@@ -474,7 +474,7 @@ class BaseEnvModel(BaseModel):
     REGISTRY_HTTP_SECRET: Optional[str]
     ACTIVATE_FAIL2BAN: zero_or_one
     SWARM_MANAGER_ADDRESS: Optional[str]
-    SYSLOG_ADDRESS: Optional[str]
+    # SYSLOG_ADDRESS: Optional[str]
     SMTP_ENABLE_CONNECTOR: zero_or_one
     SMTP_EXPIRATION_TIME: PositiveInt
     SMTP_VERIFICATION_TIME: PositiveInt

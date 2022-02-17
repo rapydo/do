@@ -970,9 +970,9 @@ You can use of one:
                 ]
 
             # is None ensure empty string as a valid address
-            if Application.env.get("SYSLOG_ADDRESS") is None:
-                manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
-                Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
+            # if Application.env.get("SYSLOG_ADDRESS") is None:
+            #     manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
+            #     Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
 
         if Configuration.FORCE_COMPOSE_ENGINE or not Configuration.swarm_mode:
             DEPLOY_ENGINE = "compose"
