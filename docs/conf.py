@@ -36,11 +36,16 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
     "sphinx.ext.coverage",
 ]
 
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 # autodoc_mock_imports = ["mymodule"]
+# autodoc_typehints = "description"
+autodoc_typehints = "both"
+always_document_param_types = True
+typehints_defaults = "comma"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

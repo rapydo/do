@@ -1,3 +1,7 @@
+"""
+CLI interface for RAPyDo
+"""
+
 import os
 import sys
 from pathlib import Path
@@ -84,17 +88,30 @@ EnvType = Union[None, str, int, float]
 def print_and_exit(
     message: str, *args: Union[str, Path], **kwargs: Union[str, Path]
 ) -> NoReturn:
+    """
+    Print a critical message and then exit with code 1
+    """
     log.critical(message, *args, **kwargs)
     sys.exit(1)
 
 
 def RED(msg: str) -> str:
+    """
+    Colorize a string with ANSI Red
+    """
+
     return f"{colors.RED}{msg}{colors.RESET}"
 
 
 def YELLOW(msg: str) -> str:
+    """
+    Colorize a string with ANSI Yellow
+    """
     return f"{colors.YELLOW}{msg}{colors.RESET}"
 
 
 def GREEN(msg: str) -> str:
+    """
+    Colorize a string with ANSI Green
+    """
     return f"{colors.GREEN}{msg}{colors.RESET}"
