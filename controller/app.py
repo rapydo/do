@@ -932,6 +932,12 @@ You can use of one:
         )
         Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords or ""
 
+        roles_dict = Configuration.specs.get("variables", {}).get("roles", {})
+        roles = ",".join(
+            [k for k, v in roles_dict.items() if v != "disabled" and k != "default"]
+        )
+        Application.env["AUTH_ROLES"] = f",{roles},"
+
         if Configuration.testing and not Configuration.production:
             Application.env["APP_MODE"] = "test"
             Application.env["PYTHONMALLOC"] = "debug"
