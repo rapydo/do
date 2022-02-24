@@ -13,7 +13,7 @@ variables:
     BACKEND_API_PORT: 443
     ACTIVATE_FAIL2BAN: 1
 
-    HEALTHCHECK_BACKEND_CMD: "curl --fail http://localhost:8080/api/status"
+    HEALTHCHECK_BACKEND_CMD: "curl --fail --max-time 3 http://localhost:8080/api/status"
     # SYSLOG_ADDRESS:
 
     RABBITMQ_PORT: 5671
