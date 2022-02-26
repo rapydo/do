@@ -17,6 +17,12 @@ variables:
     normal_user: User
     default: normal_user
 
+  roles_descriptions:
+    admin_root: Global Administrator
+    staff_user: Project Administrator
+    group_coordinator: Group Coordinator
+    normal_user: Normal User
+
   env:
     BACKEND_BUILD_MODE: backend
     FRONTEND_FRAMEWORK: nofrontend
