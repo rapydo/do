@@ -18,7 +18,7 @@ variables:
     default: normal_user
 
   roles_descriptions:
-    admin_root: Global Administrator
+    admin_root: System Administrator
     staff_user: Project Administrator
     group_coordinator: Group Coordinator
     normal_user: Normal User
