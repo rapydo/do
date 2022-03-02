@@ -1,3 +1,7 @@
+"""
+Utilities to work with python packages and binaries
+"""
+
 # BEWARE: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)

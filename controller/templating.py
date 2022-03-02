@@ -1,3 +1,6 @@
+"""
+Utilities to work with jinja2 templates
+"""
 import os
 import random
 import string

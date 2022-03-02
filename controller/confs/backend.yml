@@ -1028,6 +1028,7 @@ services:
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
+      - ssl_certs:/etc/letsencrypt
     # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
     # with the server's SSL certificates for TLS support. Optional TLS is
     # automatically enabled when the container finds this file on startup.
