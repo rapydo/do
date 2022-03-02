@@ -1,3 +1,6 @@
+"""
+Force building of one or more services docker images
+"""
 from typing import List, Set
 
 import typer

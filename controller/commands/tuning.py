@@ -1,3 +1,6 @@
+"""
+Show tuning suggestions for a service
+"""
 import os
 from enum import Enum
 

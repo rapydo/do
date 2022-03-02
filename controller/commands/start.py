@@ -1,3 +1,6 @@
+"""
+Start services for the current configuration
+"""
 import time
 from typing import List
 
@@ -24,7 +27,7 @@ def wait_stack_deploy(docker: Docker) -> None:
             pass
 
 
-@Application.app.command(help="Start services for this configuration")
+@Application.app.command(help="Start services for the current configuration")
 # Maybe to be renamed in deploy?
 def start(
     services: List[str] = typer.Argument(

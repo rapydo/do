@@ -1,3 +1,6 @@
+"""
+Pull available images from the Docker Hub
+"""
 from typing import List, Set
 
 import typer

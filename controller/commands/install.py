@@ -1,3 +1,7 @@
+"""
+Install the specified version of RAPyDO or docker, compose, buildx
+"""
+
 import hashlib
 import stat
 import tempfile

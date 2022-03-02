@@ -1,3 +1,7 @@
+"""
+Create a new RAPyDo project
+"""
+
 import os
 import shutil
 from enum import Enum

@@ -1,3 +1,6 @@
+"""
+Upgrade a project file by re-applying the templates
+"""
 from pathlib import Path
 
 import typer
@@ -9,7 +12,7 @@ from controller.commands.create import create_project
 from controller.project import NO_FRONTEND
 
 
-@Application.app.command(help="Upgrade a project by re-applying the templates")
+@Application.app.command(help="Upgrade a project file by re-applying the templates")
 def upgrade(
     path: Path = typer.Option(
         ...,

@@ -1,3 +1,6 @@
+"""
+Verify if the current project is compliant to RAPyDo specs
+"""
 import re
 from datetime import datetime
 from pathlib import Path

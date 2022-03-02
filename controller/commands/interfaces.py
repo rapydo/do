@@ -1,3 +1,7 @@
+"""
+[DEPRECATED] Execute predefined interfaces to services
+"""
+
 from enum import Enum
 from typing import Optional
 

@@ -1,3 +1,6 @@
+"""
+[DEPRECATED] Run a single container in debug mode
+"""
 import typer
 
 from controller import print_and_exit
