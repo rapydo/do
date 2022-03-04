@@ -7,43 +7,60 @@ from pathlib import Path
 
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 
+PROJECT_NAME = "second"
+BACKEND_PATH = Path(f"projects/{PROJECT_NAME}/backend")
+FRONTEND_PATH = Path(f"projects/{PROJECT_NAME}/frontend")
+ENDPOINT_NAME = "xyz"
+ENDPOINT_PATH = BACKEND_PATH.joinpath("endpoints", f"{ENDPOINT_NAME}.py")
+PYTEST_PATH = BACKEND_PATH.joinpath("tests", f"test_endpoints_{ENDPOINT_NAME}.py")
 
-def test_add(capfd: Capture) -> None:
 
+def test_execute_outside(capfd: Capture) -> None:
     execute_outside(capfd, "add endpoint x")
     execute_outside(capfd, "upgrade --path x")
+
+
+def test_add_create_and_init_project(capfd: Capture) -> None:
     create_project(
         capfd=capfd,
-        name="second",
+        name=PROJECT_NAME,
         auth="postgres",
         frontend="angular",
     )
     init_project(capfd)
 
-    path = Path("projects/second/backend/endpoints/xyz.py")
-    test_path = Path("projects/second/backend/tests/test_endpoints_xyz.py")
-    assert not path.exists()
-    assert not test_path.exists()
-    exec_command(
-        capfd,
-        "add endpoint xyz --add-tests",
-        f"Endpoint created: {path}",
-        f"Tests scaffold created: {test_path}",
-    )
-    exec_command(
-        capfd,
-        "add endpoint xyz",
-        f"{path} already exists",
-    )
-    exec_command(
-        capfd,
-        "add --force endpoint xyz",
-        f"Endpoint created: {path}",
-    )
-    assert path.is_file()
-    assert test_path.is_file()
 
-    path = Path("projects/second/backend/tasks/xyz.py")
+def test_add_endpoint(capfd: Capture) -> None:
+    assert not ENDPOINT_PATH.exists()
+    assert not PYTEST_PATH.exists()
+    exec_command(
+        capfd,
+        f"add endpoint {ENDPOINT_NAME} --add-tests",
+        f"Endpoint created: {ENDPOINT_PATH}",
+        f"Tests scaffold created: {PYTEST_PATH}",
+    )
+
+
+def test_add_endpoint_already_exists(capfd: Capture) -> None:
+    exec_command(
+        capfd,
+        f"add endpoint {ENDPOINT_NAME}",
+        f"{ENDPOINT_PATH} already exists",
+    )
+
+
+def test_add_endpoint_force(capfd: Capture) -> None:
+    exec_command(
+        capfd,
+        f"add --force endpoint {ENDPOINT_NAME}",
+        f"Endpoint created: {ENDPOINT_PATH}",
+    )
+    assert ENDPOINT_PATH.is_file()
+    assert PYTEST_PATH.is_file()
+
+
+def test_add_task(capfd: Capture) -> None:
+    path = BACKEND_PATH.joinpath("tasks/xyz.py")
     assert not path.exists()
     exec_command(
         capfd,
@@ -63,8 +80,10 @@ def test_add(capfd: Capture) -> None:
     )
     assert path.is_file()
 
-    path = Path("projects/second/frontend/app/components/xyz")
-    test_path = Path("projects/second/frontend/app/components/xyz/xyz.spec.ts")
+
+def test_add_component(capfd: Capture) -> None:
+    path = FRONTEND_PATH.joinpath("app/components/xyz")
+    test_path = FRONTEND_PATH.joinpath("app/components/xyz/xyz.spec.ts")
     assert not path.exists()
     assert not path.joinpath("xyz.ts").exists()
     assert not path.joinpath("xyz.html").exists()
@@ -106,7 +125,9 @@ def test_add(capfd: Capture) -> None:
         "Added SinkComponent to module declarations",
     )
 
-    path = Path("projects/second/frontend/app/services")
+
+def test_add_service(capfd: Capture) -> None:
+    path = FRONTEND_PATH.joinpath("app/services")
     assert not path.exists()
     assert not path.joinpath("xyz.ts").exists()
     exec_command(
@@ -138,7 +159,9 @@ def test_add(capfd: Capture) -> None:
         f"Service created: {path}",
     )
 
-    path = Path("projects/second/frontend/integration/app_mypath_my_id.spec.ts")
+
+def test_add_integration_test(capfd: Capture) -> None:
+    path = FRONTEND_PATH.joinpath("integration/app_mypath_my_id.spec.ts")
     assert not path.exists()
     exec_command(
         capfd,
@@ -164,6 +187,8 @@ def test_add(capfd: Capture) -> None:
     )
     assert path.is_file()
 
+
+def test_add_workflow(capfd: Capture) -> None:
     path = Path(".github/workflows/github_actions-backend.yml")
     assert not path.exists()
 
@@ -204,8 +229,12 @@ def test_add(capfd: Capture) -> None:
         "'abc' is not one of 'endpoint', 'task', 'component', 'service', ",
     )
 
-    exec_command(capfd, "upgrade")
+
+def test_upgrade_invalid_path(capfd: Capture) -> None:
     exec_command(
         capfd, "upgrade --path invalid", "Invalid path, cannot upgrade invalid"
     )
+
+
+def test_upgrade(capfd: Capture) -> None:
     exec_command(capfd, "upgrade --path .gitignore")
