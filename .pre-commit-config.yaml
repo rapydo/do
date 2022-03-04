@@ -11,7 +11,7 @@ repos:
     rev: v2.19.4
     hooks:
       - id: pyupgrade
-        args: [--py37-plus]
+        args: [--py38-plus]
   - repo: https://github.com/ambv/black
     rev: 21.6b0
     hooks:
@@ -21,11 +21,11 @@ repos:
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.910
+    rev: v0.930
     hooks:
       - id: mypy
         additional_dependencies: [
-            "python-on-whales==0.32.0",
+            "python-on-whales==0.36.1",
             "python-dateutil",
             "pytz",
             "loguru",
@@ -33,11 +33,11 @@ repos:
             "sultan==0.9.1",
             "plumbum",
             "glom",
-            "GitPython==3.1.24",
-            "PyYAML==5.4.1",
+            "GitPython==3.1.25",
+            "PyYAML==6.0",
             "pip>=10.0.0",
             "typer[all]==0.4.0",
-            "click==8.0.1",
+            "click==8.0.4",
 
             # Extra dependencies
             "pytest",

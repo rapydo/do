@@ -3,7 +3,7 @@ This module will test the status command
 """
 import time
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -30,7 +30,7 @@ def test_all(capfd: Capture) -> None:
     start_registry(capfd)
     pull_images(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "status",
@@ -47,7 +47,7 @@ def test_all(capfd: Capture) -> None:
 
     start_project(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
 
         exec_command(
             capfd,
@@ -67,8 +67,8 @@ def test_all(capfd: Capture) -> None:
 
         exec_command(
             capfd,
-            "restart --force",
-            "Stack restarted",
+            "start --force",
+            "Stack started",
         )
 
         time.sleep(4)

@@ -6,7 +6,7 @@ project:
   rapydo: "{{ version }}"
   {% if extend -%}
   extends: {{ extend }}
-  extends-from: projects
+  extends_from: projects
   {% endif %}
 
 variables:
@@ -17,6 +17,13 @@ variables:
   #   group_coordinator: YourCustomName
   #   admin_root: YourCustomName
   #   extra_role: YourExtraRole
+
+  # roles_descriptions:
+  #   normal_user: User Custom Description
+  #   staff_user: Staff Custom Description
+  #   group_coordinator: Group Coordinator Custom Description
+  #   admin_root: Administrator Custom Description
+  #   extra_role: Custom Role Description
 
   env:
 
@@ -61,9 +68,6 @@ variables:
     {% endif -%}
     {% if enable_flower -%}
     ACTIVATE_FLOWER: 1
-    {% endif -%}
-    {% if enable_pushpin -%}
-    ACTIVATE_PUSHPIN: 1
     {% endif -%}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1

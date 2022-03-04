@@ -1,15 +1,17 @@
 """
 This module will test the logs command
 """
+import signal
 from datetime import datetime
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
     exec_command,
     execute_outside,
     init_project,
+    mock_KeyboardInterrupt,
     pull_images,
     start_project,
     start_registry,
@@ -42,21 +44,18 @@ def test_all(capfd: Capture) -> None:
 
     now = datetime.now()
 
-    # With python on whales this test hangs forever,
-    # even if KeyboardInterrupt is correctly catched and working if manually tested
+    signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
+    signal.alarm(5)
+    # Here using main services option
+    exec_command(
+        capfd,
+        "logs --tail 10 --follow backend",
+        "REST API backend server is ready to be launched",
+    )
+    end = datetime.now()
 
-    # signal.signal(signal.SIGALRM, mock_KeyboardInterrupt)
-    # signal.alarm(5)
-    # # Here using main services option
-    # exec_command(
-    #     capfd,
-    #     "logs --tail 10 --follow backend",
-    #     "REST API backend server is ready to be launched",
-    # )
-    # end = datetime.now()
-
-    # assert (end - now).seconds >= 4
-    # signal.alarm(0)
+    assert (end - now).seconds >= 4
+    signal.alarm(0)
 
     exec_command(
         capfd,
@@ -67,31 +66,31 @@ def test_all(capfd: Capture) -> None:
     exec_command(
         capfd,
         "logs --tail 1",
-        "Enabled services: ['backend', 'frontend', 'postgres']",
+        "Enabled services: backend, frontend, postgres",
     )
 
     exec_command(
         capfd,
         "logs --tail 1 backend",
-        "Enabled services: ['backend']",
+        "Enabled services: backend",
     )
 
     exec_command(
         capfd,
         "logs --tail 1 frontend",
-        "Enabled services: ['frontend']",
+        "Enabled services: frontend",
     )
 
     exec_command(
         capfd,
         "logs --tail 1 backend frontend",
-        "Enabled services: ['backend', 'frontend']",
+        "Enabled services: backend, frontend",
     )
 
     exec_command(
         capfd,
         "logs --tail 1 frontend backend",
-        "Enabled services: ['backend', 'frontend']",
+        "Enabled services: backend, frontend",
     )
 
     exec_command(
@@ -109,7 +108,7 @@ def test_all(capfd: Capture) -> None:
     )
 
     # Debug code... no logs in swarm mode for frontend, even after a wait 20...
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "logs --tail 10 frontend",
@@ -125,7 +124,7 @@ def test_all(capfd: Capture) -> None:
         )
 
     # Follow flag is not supported in swarm mode with multiple services
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # Multiple services are not supported in swarm mode
         exec_command(
             capfd,

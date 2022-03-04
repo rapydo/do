@@ -9,7 +9,6 @@ from controller import print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 # RabbitMQ:
 # https://www.erlang-solutions.com/blog/scaling-rabbitmq-on-a-coreos-cluster-through-docker/
@@ -70,7 +69,7 @@ def scale(
                 service,
             )
 
-    docker.ping_registry()
+    docker.registry.ping()
 
     verify_available_images(
         [service],
@@ -78,9 +77,8 @@ def scale(
         Application.data.base_services,
     )
 
-    swarm = Swarm()
     try:
-        swarm.docker.service.scale(scales, detach=not wait)
+        docker.client.service.scale(scales, detach=not wait)
     # Can happens in case of scale before start
     except NoSuchService:
         print_and_exit(

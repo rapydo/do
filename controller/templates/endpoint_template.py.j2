@@ -1,6 +1,6 @@
 from typing import Any
 from restapi import decorators
-from restapi.connectors import {{auth}}
+from restapi.connectors import {{auth_service}}
 from restapi.models import Schema, fields  # ,  validate
 from restapi.rest.definition import EndpointResource, Response
 from restapi.services.authentication import User
@@ -31,7 +31,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     # @decorators.cache(timeout=300)
     def get(self, user: User) -> Response:
 
-        db = {{auth}}.get_instance()
+        db = {{auth_service}}.get_instance()
         # self.log_event(self.events.access, your-obj)
 
         data = {}
@@ -48,7 +48,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     )
     def post(self, user: User, **kwargs: Any) -> Response:
 
-        db = {{auth}}.get_instance()
+        db = {{auth_service}}.get_instance()
         log.info("Created")
 
         # Assign with the uuid of newly created resource
@@ -69,7 +69,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     )
     def put(self, uuid: str, user: User, **kwargs: Any) -> Response:
 
-        db = {{auth}}.get_instance()
+        db = {{auth_service}}.get_instance()
         # db.update_properties(myobj, kwargs)
         log.info("Updated")
         # self.log_event(self.events.modify, your-obj, kwargs)
@@ -88,7 +88,7 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
     def patch(self, uuid: str, user: User, **kwargs: Any) -> Response:
         """ Update profile for current user """
 
-        db = {{auth}}.get_instance()
+        db = {{auth_service}}.get_instance()
 
         # db.update_properties(user, kwargs)
 
@@ -106,9 +106,9 @@ class {{name.title().replace(" ", "")}}(EndpointResource):
             "204": "..."
         }
     )
-    def delete(self, uuid: str, **kwargs: Any) -> Response:
+    def delete(self, uuid: str, user: User, **kwargs: Any) -> Response:
 
-        db = {{auth}}.get_instance()
+        db = {{auth_service}}.get_instance()
         log.info("Deleted")
         # self.log_event(self.events.delete, your-obj)
 

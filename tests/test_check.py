@@ -5,8 +5,12 @@ import os
 import shutil
 from pathlib import Path
 
-from controller import SWARM_MODE, __version__, colors
-from controller.deploy.swarm import Swarm
+import pytest
+
+from controller import DATA_DIR, LOGS_FOLDER, __version__, colors
+from controller.app import Configuration
+from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
+from controller.deploy.docker import Docker
 from controller.utilities import git
 from tests import (
     Capture,
@@ -40,7 +44,7 @@ def test_base(capfd: Capture) -> None:
     )
     init_project(capfd)
 
-    with TemporaryRemovePath(Path("data")):
+    with TemporaryRemovePath(DATA_DIR):
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
@@ -90,6 +94,8 @@ RUN mkdir xyz
         "check -i main",
         f" image, execute {colors.RED}rapydo pull",
         f" image, execute {colors.RED}rapydo build",
+        f"Compose is installed with version {COMPOSE_VERSION}",
+        f"Buildx is installed with version {BUILDX_VERSION}",
         "Checks completed",
     )
 
@@ -127,11 +133,13 @@ RUN mkdir xyz
     # Test with zero projects
     with TemporaryRemovePath(Path("projects")):
         os.mkdir("projects")
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            "No project found (projects folder is empty?)",
-        )
+        # in this case SystemExit is raised in the command init...
+        with pytest.raises(SystemExit):
+            exec_command(
+                capfd,
+                "check -i main --no-git --no-builds",
+                "No project found (is projects folder empty?)",
+            )
         shutil.rmtree("projects")
 
     exec_command(
@@ -185,13 +193,12 @@ RUN mkdir xyz
     )
 
     # Test init of data folders
-    logs_dir = Path("data", "logs")
-    shutil.rmtree(logs_dir)
-    assert not logs_dir.is_dir()
+    shutil.rmtree(LOGS_FOLDER)
+    assert not LOGS_FOLDER.is_dir()
     # Let's restore .projectrc and data/logs
     init_project(capfd, "--project third")
 
-    assert logs_dir.is_dir()
+    assert LOGS_FOLDER.is_dir()
     exec_command(
         capfd,
         "check -i main --no-git --no-builds",
@@ -242,8 +249,8 @@ RUN mkdir xyz
     )
     exec_command(
         capfd,
-        "-e MIN_PASSWORD_SCORE=5 check -i main --no-git --no-builds",
-        "The password used in ALCHEMY_PASSWORD is extremely weak",
+        "-e MIN_PASSWORD_SCORE=4 -e AUTH_DEFAULT_PASSWORD=x check -i main --no-git --no-builds",
+        "The password used in AUTH_DEFAULT_PASSWORD is extremely weak",
     )
 
     exec_command(
@@ -259,7 +266,7 @@ RUN mkdir xyz
         "Checks completed",
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         # Skipping main because we are on a fake git repository
         exec_command(
             capfd,
@@ -268,8 +275,8 @@ RUN mkdir xyz
             "Checks completed",
         )
 
-        swarm = Swarm()
-        swarm.leave()
+        docker = Docker()
+        docker.client.swarm.leave(force=True)
 
         exec_command(
             capfd,
@@ -301,7 +308,7 @@ RUN mkdir xyz
 
         exec_command(
             capfd,
-            f"-e ASSIGNED_CPU_BACKEND=50 {check}",
+            f"-e ASSIGNED_CPU_BACKEND=50.0 {check}",
             "Your deployment requires ",
             " cpus but your nodes only have ",
             # The error does not halt the checks execution
@@ -318,7 +325,7 @@ RUN mkdir xyz
 
         exec_command(
             capfd,
-            f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1 {check}",
+            f"-e DEFAULT_SCALE_BACKEND=50 -e ASSIGNED_CPU_BACKEND=1.0 {check}",
             "Your deployment requires ",
             " cpus but your nodes only have ",
             # The error does not halt the checks execution

@@ -1,3 +1,6 @@
+"""
+Main Application and Configuration module
+"""
 import enum
 import json
 import os
@@ -5,15 +8,25 @@ import shutil
 import sys
 import time
 import warnings
-from distutils.version import LooseVersion
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    TypedDict,
+    Union,
+    cast,
+)
 
 import click
 import requests
 import typer
 from git import Repo as GitRepo
-from glom import glom
+from packaging.version import Version
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
@@ -23,6 +36,7 @@ from controller import (
     COMPOSE_ENVIRONMENT_FILE,
     CONFS_DIR,
     CONTAINERS_YAML_DIRNAME,
+    DATA_DIR,
     DATAFILE,
     EXTENDED_PROJECT_DISABLED,
     PLACEHOLDER,
@@ -31,9 +45,7 @@ from controller import (
     RED,
     REGISTRY,
     SUBMODULES_DIR,
-    SWARM_MODE,
     TABLE_FORMAT,
-    YELLOW,
     ComposeServices,
     EnvType,
     __version__,
@@ -46,8 +58,6 @@ from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, git, services, system
 
-warnings.simplefilter("always", DeprecationWarning)
-
 ROOT_UID = 0
 BASE_UID = 1000
 
@@ -55,12 +65,21 @@ BASE_UID = 1000
 CommandParameter = Union[int, str, bool, None, Path, Iterable[str], enum.Enum]
 
 
+class ProjectRCType(TypedDict, total=False):
+    project: str
+    stack: str
+    hostname: str
+    production: bool
+    swarm: bool
+    project_configuration: configuration.Configuration
+
+
 class Configuration:
-    projectrc: Dict[str, str] = {}
-    # To be better characterized. This is a:
-    # {'variables': 'env': Dict[str, str]}
-    host_configuration: Dict[str, Dict[str, Dict[str, str]]] = {}
-    specs: Dict[str, str] = {}
+    projectrc: ProjectRCType = {}
+    host_configuration: configuration.Configuration = {}
+    swarm_mode: bool = False
+    # This is the final configuration (defaults + project + projectrc)
+    specs: configuration.Configuration = {}
     services_list: Optional[str]
     environment: Dict[str, str]
 
@@ -161,7 +180,8 @@ def projectrc_values(
     if not param.name or value != param.get_default(ctx):
         return value
 
-    from_projectrc = Configuration.projectrc.get(param.name)
+    # This cast is not correct... but enough for this callback..
+    from_projectrc = cast(Optional[str], Configuration.projectrc.get(param.name))
 
     if from_projectrc is not None:
         return from_projectrc
@@ -275,7 +295,7 @@ def controller_cli_options(
 
     # Deprecated since 2.1
     if services_list:
-        warnings.warn("-s option is going to be replaced by rapydo <command> service")
+        warnings.warn("-s is replaced by rapydo <command> service")
         time.sleep(1)
 
     Configuration.services_list = services_list
@@ -321,6 +341,12 @@ class CommandsData:
         self.base_services = base_services
         self.compose_config = compose_config
 
+        core_services = list(base_services.keys())
+        all_services = list(compose_config.keys())
+        self.custom_services: List[str] = [
+            s for s in all_services if s not in core_services
+        ]
+
 
 class Application:
 
@@ -349,7 +375,15 @@ class Application:
         self.base_files: List[Path] = []
         self.services = None
         self.enabled_services: List[str] = []
-        load_commands()
+
+        if not PROJECT_DIR.is_dir():
+            project_dir = None
+        else:
+            project_dir = Application.project_scaffold.get_project(
+                Configuration.projectrc.get("project"), ignore_multiples=True
+            )
+
+        load_commands(project_dir)
 
         Application.load_projectrc()
 
@@ -486,9 +520,8 @@ class Application:
         # Compose services and variables
         base_services, compose_config = self.get_compose_configuration(services)
 
-        self.check_placeholders_and_passwords(compose_config, self.enabled_services)
-
-        # Final step, launch the command
+        if Configuration.action != "password":
+            self.check_placeholders_and_passwords(compose_config, self.enabled_services)
 
         Application.data = CommandsData(
             files=self.files,
@@ -504,13 +537,20 @@ class Application:
     @staticmethod
     def load_projectrc() -> None:
 
-        projectrc_yaml = configuration.load_yaml_file(file=PROJECTRC, is_optional=True)
+        projectrc_yaml = cast(
+            ProjectRCType,
+            configuration.load_yaml_file(file=PROJECTRC, is_optional=True),
+        )
 
         Configuration.host_configuration = projectrc_yaml.pop(
             "project_configuration", {}
         )
 
         Configuration.projectrc = projectrc_yaml
+        Configuration.swarm_mode = (
+            Configuration.projectrc.get("swarm", False)
+            or os.environ.get("SWARM_MODE", "0") == "1"
+        )
 
     @staticmethod
     def check_installed_software() -> None:
@@ -521,18 +561,6 @@ class Application:
             sys.version_info.minor,
             sys.version_info.micro,
         )
-
-        # Deprecated since 2.1
-        if sys.version_info.major == 3 and sys.version_info.minor == 7:
-            warnings.warn(
-                YELLOW(
-                    "Support for Python 3.7 is deprecated and will be dropped "
-                    "in a future release. Please upgrade to python 3.8+"
-                )
-            )
-            import time
-
-            time.sleep(1)
 
         # 17.05 added support for multi-stage builds
         # https://docs.docker.com/compose/compose-file/compose-file-v3/#compose-and-docker-compatibility-matrix
@@ -574,37 +602,44 @@ class Application:
                 read_extended=read_extended,
                 production=Configuration.production,
             )
+
+            # confs 3 is the core config, extra fields are allowd
+            configuration.validate_configuration(confs[3], core=True)
+            # confs 0 is the merged conf core + custom, extra fields are allowd
+            configuration.validate_configuration(confs[0], core=False)
+            log.info("Project configuration is valid")
             Configuration.specs = configuration.mix_configuration(
                 confs[0], Configuration.host_configuration
             )
+            configuration.validate_configuration(Configuration.specs, core=False)
+            log.info("Host configuration is valid")
             self.extended_project = confs[1]
             self.extended_project_path = confs[2]
 
         except AttributeError as e:  # pragma: no cover
             print_and_exit(str(e))
 
-        Configuration.frontend = glom(
-            Configuration.specs, "variables.env.FRONTEND_FRAMEWORK", default=NO_FRONTEND
+        Configuration.frontend = cast(
+            str,
+            (
+                Configuration.specs.get("variables", {})
+                .get("env", {})
+                .get("FRONTEND_FRAMEWORK", NO_FRONTEND)
+            ),
         )
 
         if Configuration.frontend == NO_FRONTEND:
             Configuration.frontend = None
 
-        Configuration.project_title = glom(
-            Configuration.specs, "project.title", default="Unknown title"
-        )
-        Configuration.version = glom(Configuration.specs, "project.version", default="")
-        Configuration.rapydo_version = glom(
-            Configuration.specs, "project.rapydo", default=""
-        )
+        project = Configuration.specs.get("project", {})
 
-        Configuration.project_description = glom(
-            Configuration.specs, "project.description", default="Unknown description"
+        Configuration.project_title = project.get("title", "Unknown title")
+        Configuration.version = project.get("version", "")
+        Configuration.rapydo_version = project.get("rapydo", "")
+        Configuration.project_description = project.get(
+            "description", "Unknown description"
         )
-
-        Configuration.project_keywords = glom(
-            Configuration.specs, "project.keywords", default=""
-        )
+        Configuration.project_keywords = project.get("keywords", "")
 
         if not Configuration.rapydo_version:  # pragma: no cover
             print_and_exit(
@@ -623,7 +658,7 @@ class Application:
         )
 
         Application.verify_rapydo_version(
-            rapydo_version=glom(specs, "project.rapydo", default="")
+            rapydo_version=specs.get("project", {}).get("rapydo", "")
         )
 
     @staticmethod
@@ -638,8 +673,8 @@ class Application:
         if not rapydo_version:  # pragma: no cover
             return True
 
-        r = LooseVersion(rapydo_version)
-        c = LooseVersion(__version__)
+        r = Version(rapydo_version)
+        c = Version(__version__)
         if r == c:
             return True
         else:  # pragma: no cover
@@ -650,10 +685,10 @@ class Application:
 
             msg = f"""RAPyDo version is not compatible.
 
-This project requires rapydo {r}, you are using {c}. {ac}
+This project requires RAPyDo {r} but you are using version {c}. {ac}
 
 You can use of one:
-  -  rapydo install               (install in editable from submodules/do, if available)
+  -  rapydo install               (install in editable from submodules/do)
   -  rapydo install --no-editable (install from pypi)
 
 """
@@ -673,7 +708,7 @@ You can use of one:
 
     @staticmethod
     def working_clone(
-        name: str, repo: Dict[str, str], from_path: Optional[Path] = None
+        name: str, repo: configuration.Submodule, from_path: Optional[Path] = None
     ) -> Optional[GitRepo]:
 
         # substitute values starting with '$$'
@@ -681,17 +716,16 @@ You can use of one:
             ANGULAR: Configuration.frontend == ANGULAR,
         }
 
-        condition = repo.get("if", "")
+        condition = repo.get("_if", "")
         if condition.startswith("$$"):
             # Is this repo enabled?
             if not myvars.get(condition.lstrip("$"), None):
                 return None
 
-        repo.setdefault(
-            "branch",
+        default_version = (
             Configuration.rapydo_version
             if Configuration.rapydo_version
-            else __version__,
+            else __version__
         )
 
         if from_path is not None:
@@ -711,12 +745,14 @@ You can use of one:
 
             os.symlink(local_path, submodule_path)
 
-        url = cast(str, repo.get("online_url"))
-        branch = cast(str, repo.get("branch"))
+        url = repo.get("online_url")
+        if not url:  # pragma: no cover
+            print_and_exit("Submodule misconfiguration, online url not found: {}", name)
+
         return git.clone(
             url=url,
             path=Path(name),
-            branch=branch,
+            branch=repo.get("branch") or default_version,
             do=Configuration.initialize,
             check=not Configuration.install,
         )
@@ -725,11 +761,9 @@ You can use of one:
     def git_submodules(from_path: Optional[Path] = None) -> None:
         """Check and/or clone git projects"""
 
-        submodules: Dict[str, Dict[str, str]] = glom(
-            Configuration.specs,
-            "variables.submodules",
-            default=cast(Dict[str, Dict[str, str]], {}),
-        ).copy()
+        submodules = (
+            Configuration.specs.get("variables", {}).get("submodules", {}).copy()
+        )
 
         main_repo = git.get_repo(".")
         # This is to reassure mypy, but this is check is already done
@@ -764,10 +798,10 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
-                if SWARM_MODE and Configuration.production:
+                if Configuration.swarm_mode and Configuration.production:
                     add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
-        if SWARM_MODE and not Configuration.FORCE_COMPOSE_ENGINE:
+        if Configuration.swarm_mode and not Configuration.FORCE_COMPOSE_ENGINE:
             add(CONFS_DIR, "swarm_options.yml")
 
         if Application.env.get("NFS_HOST"):
@@ -803,13 +837,17 @@ You can use of one:
         self.files, self.base_files = configuration.read_composer_yamls(compose_files)
         # to build the config with files and variables
 
-        from controller.deploy.compose_v2 import Compose
+        from controller.deploy.docker import Docker
 
-        compose = Compose(files=self.base_files)
-        base_services = compose.get_config().services
+        docker = Docker(
+            compose_files=self.base_files, verify_swarm=not Configuration.initialize
+        )
+        base_services = docker.compose.get_config().services
 
-        compose = Compose(files=self.files)
-        compose_config = compose.get_config().services
+        docker = Docker(
+            compose_files=self.files, verify_swarm=not Configuration.initialize
+        )
+        compose_config = docker.compose.get_config().services
 
         self.active_services = services.find_active(compose_config)
 
@@ -822,7 +860,7 @@ You can use of one:
             if service not in self.active_services:
                 print_and_exit("No such service: {}", service)
 
-        log.debug("Enabled services: {}", self.enabled_services)
+        log.debug("Enabled services: {}", ", ".join(self.enabled_services))
 
         self.create_datafile(list(compose_config.keys()), self.active_services)
 
@@ -835,11 +873,11 @@ You can use of one:
             {
                 "project": Configuration.project,
                 "hostname": Configuration.hostname,
-                "swarm": SWARM_MODE,
+                "swarm": Configuration.swarm_mode,
                 "production": Configuration.production,
                 "testing": Configuration.testing,
                 "services": self.active_services,
-                "envs": Configuration.environment,
+                "env_variables": Configuration.environment,
             },
         )
         templating.save_template(PROJECTRC, t, force=True)
@@ -859,12 +897,12 @@ You can use of one:
         except FileNotFoundError:
             pass
 
-        Application.env = glom(Configuration.specs, "variables.env", default={})
+        Application.env = Configuration.specs.get("variables", {}).get("env", {})
 
         Application.env["PROJECT_DOMAIN"] = Configuration.hostname
         Application.env["COMPOSE_PROJECT_NAME"] = Configuration.project
 
-        Application.env["DATA_DIR"] = str(Path("data").resolve())
+        Application.env["DATA_DIR"] = str(DATA_DIR.resolve())
         Application.env["SUBMODULE_DIR"] = str(SUBMODULES_DIR.resolve())
         Application.env["PROJECT_DIR"] = str(
             PROJECT_DIR.joinpath(Configuration.project).resolve()
@@ -897,8 +935,17 @@ You can use of one:
         )
         Application.env["PROJECT_KEYWORDS"] = Configuration.project_keywords or ""
 
+        roles_dict = Configuration.specs.get("variables", {}).get("roles", {})
+        roles = ",".join(
+            [k for k, v in roles_dict.items() if v != "disabled" and k != "default"]
+        )
+        Application.env["AUTH_ROLES"] = f",{roles},"
+
         if Configuration.testing and not Configuration.production:
             Application.env["APP_MODE"] = "test"
+            Application.env["PYTHONMALLOC"] = "debug"
+            Application.env["PYTHONASYNCIODEBUG"] = "1"
+            Application.env["PYTHONFAULTHANDLER"] = "1"
 
         Application.env["CELERYBEAT_SCHEDULER"] = services.get_celerybeat_scheduler(
             Application.env
@@ -920,7 +967,7 @@ You can use of one:
 
         Application.env.update(Configuration.environment)
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
 
             if not Application.env.get("SWARM_MANAGER_ADDRESS"):
                 Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip(
@@ -933,11 +980,11 @@ You can use of one:
                 ]
 
             # is None ensure empty string as a valid address
-            if Application.env.get("SYSLOG_ADDRESS") is None:
-                manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
-                Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
+            # if Application.env.get("SYSLOG_ADDRESS") is None:
+            #     manager_addr = Application.env["SWARM_MANAGER_ADDRESS"]
+            #     Application.env["SYSLOG_ADDRESS"] = f"tcp://{manager_addr}:514"
 
-        if Configuration.FORCE_COMPOSE_ENGINE or not SWARM_MODE:
+        if Configuration.FORCE_COMPOSE_ENGINE or not Configuration.swarm_mode:
             DEPLOY_ENGINE = "compose"
         else:
             DEPLOY_ENGINE = "swarm"
@@ -955,35 +1002,11 @@ You can use of one:
             DOCKER_SUBNET = "127.0.0.1"
         Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
-        bool_envs = [
-            # This variable is for RabbitManagement and is expected to be true|false
-            "RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT",
-            # These variables are for Neo4j and are expected to be true|false
-            "NEO4J_SSL_ENABLED",
-            "NEO4J_ALLOW_UPGRADE",
-            "NEO4J_RECOVERY_MODE",
-        ]
+        configuration.validate_env(Application.env)
+        log.info("Environment configuration is valid")
+
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
-
-                # Deprecated since 1.0
-                # Backend and Frontend use different booleans due to Py vs Js
-                # 0/1 is a much more portable value to prevent true|True|"true"
-                # This fixes troubles in setting boolean values only used by Angular
-                # (expected true|false) or used by Pyton (expected True|False)
-                if key not in bool_envs:  # pragma: no cover
-                    if isinstance(value, str):
-                        if value.lower() == "true":
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 1",
-                                DeprecationWarning,
-                            )
-
-                        if value.lower() == "false":
-                            warnings.warn(
-                                f"Deprecated value for {key}, convert {value} to 0",
-                                DeprecationWarning,
-                            )
 
                 if value is None:
                     value = ""
@@ -991,9 +1014,6 @@ You can use of one:
                     value = str(value)
                 if " " in value:
                     value = f"'{value}'"
-
-                # if len(value) == 0:
-                #     value = f"'{value}'"
 
                 whandle.write(f"{key}={value}\n")
 
@@ -1062,10 +1082,12 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 """
             )
         elif Configuration.check:
-            log.info("Active services: {}", active_services, log_to_file=True)
+            log.info(
+                "Active services: {}", ", ".join(active_services), log_to_file=True
+            )
 
         extra_services: List[str] = []
-        if SWARM_MODE and REGISTRY not in active_services:
+        if Configuration.swarm_mode and REGISTRY not in active_services:
             extra_services.append(REGISTRY)
 
         all_services = active_services + extra_services

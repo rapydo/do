@@ -8,7 +8,8 @@ import requests
 from faker import Faker
 from python_on_whales import docker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -38,7 +39,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     # Let's simplify this task by removing task history
     # Otherwise the wait_until very usual fails due to the logs or previous tasks
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         docker.swarm.update(task_history_limit=0)
 
     start_registry(capfd)
@@ -100,7 +101,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     assert backend_start_date2 != backend_start_date
 
     # This is needed to wait for the service rolling update
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(5)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")
@@ -141,7 +142,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     )
 
     # This is needed to wait for the service rolling update
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(5)
 
     wait_until(capfd, "logs backend --tail 10", "Boot completed")

@@ -3,9 +3,9 @@ This module will test the start command
 """
 
 import shutil
-from pathlib import Path
 
-from controller import SWARM_MODE, colors
+from controller import DATA_DIR, colors
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -21,7 +21,7 @@ from tests import (
 def test_all(capfd: Capture) -> None:
 
     execute_outside(capfd, "start")
-    if not SWARM_MODE:
+    if not Configuration.swarm_mode:
         execute_outside(capfd, "stop")
 
     project_name = "first"
@@ -34,7 +34,7 @@ def test_all(capfd: Capture) -> None:
 
     init_project(capfd)
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(
             capfd,
             "start",
@@ -59,13 +59,13 @@ def test_all(capfd: Capture) -> None:
 
     docker = Docker()
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
 
         # Deploy a sub-stack
         exec_command(
             capfd,
             "start backend",
-            "Enabled services: ['backend']",
+            "Enabled services: backend",
             "Stack started",
         )
 
@@ -87,7 +87,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start neo4j",
-            "Enabled services: ['neo4j']",
+            "Enabled services: neo4j",
             "Stack started",
         )
 
@@ -123,7 +123,7 @@ def test_all(capfd: Capture) -> None:
             "Stack removed",
         )
 
-        data_folder = Path("data", project_name)
+        data_folder = DATA_DIR.joinpath(project_name)
         karma_folder = data_folder.joinpath("karma")
 
         # Delete data/project_name/karma and it will be recreated
@@ -160,7 +160,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start backend",
-            "Enabled services: ['backend']",
+            "Enabled services: backend",
             "Stack started",
         )
 
@@ -172,7 +172,7 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "start neo4j",
-            "Enabled services: ['neo4j']",
+            "Enabled services: neo4j",
             "Stack started",
         )
 

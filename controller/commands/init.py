@@ -1,10 +1,14 @@
+"""
+Initialize the current RAPyDo project
+"""
 from pathlib import Path
 
 import typer
 
-from controller import SWARM_MODE, log, print_and_exit
+from controller import DATA_DIR, log, print_and_exit
 from controller.app import Application, Configuration
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
+from controller.project import ANGULAR
 
 
 @Application.app.command(help="Initialize current RAPyDo project")
@@ -70,12 +74,18 @@ def init(
         Application.get_controller().read_specs(read_extended=True)
         Application.get_controller().make_env()
 
-    if SWARM_MODE:
-        swarm = Swarm(check_initialization=False)
-        if not swarm.get_token():
-            swarm.init()
+    if Configuration.swarm_mode:
+        docker = Docker(verify_swarm=False)
+        if not docker.swarm.get_token():
+            docker.swarm.init()
             log.info("Swarm is now initialized")
         else:
             log.debug("Swarm is already initialized")
+
+    if Configuration.frontend == ANGULAR:
+        yarn_lock = DATA_DIR.joinpath(Configuration.project, "frontend", "yarn.lock")
+        if yarn_lock.exists():
+            yarn_lock.unlink()
+            log.info("Yarn lock file deleted")
 
     log.info("Project initialized")

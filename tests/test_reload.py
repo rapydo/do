@@ -5,7 +5,7 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -47,7 +47,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "reload backend", "Reloading Flask...")
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         service = "backend"
 
         exec_command(
@@ -123,7 +123,7 @@ def test_reload_dev(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "remove", "Stack removed")
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(capfd, "remove registry", "Service registry removed")
 
 
@@ -172,5 +172,11 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         "reload frontend",
         "Can't reload the frontend while it is still building",
     )
+
+    container = docker.get_container("frontend")
+    assert container is not None
+
+    docker.client.container.remove(container[0], force=True)
+    exec_command(capfd, "reload frontend", "Reloading frontend...")
 
     exec_command(capfd, "remove", "Stack removed")

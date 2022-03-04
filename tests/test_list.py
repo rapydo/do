@@ -2,8 +2,6 @@
 This module will test the list command
 """
 
-import time
-
 from faker import Faker
 
 from tests import (

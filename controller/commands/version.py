@@ -1,10 +1,13 @@
-from distutils.version import LooseVersion
+"""
+Show RAPyDo and project version details
+"""
+from packaging.version import Version
 
 from controller import RED, __version__, colors
 from controller.app import Application, Configuration
 
 
-@Application.app.command(help="Retrieve version details")
+@Application.app.command(help="Show rapydo and project version details")
 def version() -> None:
 
     Application.print_command()
@@ -23,8 +26,8 @@ def version() -> None:
     print(f"\nrapydo: {cv}\t{Configuration.project}: {pv}\trequired rapydo: {rv}")
 
     if __version__ != Configuration.rapydo_version:
-        cver = LooseVersion(__version__)
-        rver = LooseVersion(Configuration.rapydo_version)
+        cver = Version(__version__)
+        rver = Version(Configuration.rapydo_version)
         updown = "upgrade" if cver < rver else "downgrade"
         rv = Configuration.rapydo_version
         command = RED(f"rapydo install {Configuration.rapydo_version}")

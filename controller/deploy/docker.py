@@ -1,19 +1,15 @@
 import re
 import shlex
-import socket
 import sys
 from functools import lru_cache
-from typing import Dict, Iterable, List, Optional, Tuple, Union, cast
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
-import requests
-import urllib3
 from python_on_whales import DockerClient
 from python_on_whales.exceptions import NoSuchContainer, NoSuchService
 from python_on_whales.utils import DockerException
-from requests.auth import HTTPBasicAuth
-from requests.models import Response
 
-from controller import RED, SWARM_MODE, log, print_and_exit
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 from controller.app import Application, Configuration
 from controller.utilities import system
 
@@ -23,15 +19,51 @@ COMPOSE_SEP = "-"
 
 
 class Docker:
-    def __init__(self) -> None:
+    def __init__(
+        self, compose_files: Optional[List[Path]] = None, verify_swarm: bool = True
+    ) -> None:
 
-        self.client = DockerClient(host=self.get_engine(Configuration.remote_engine))
+        if not compose_files:
+            # Not all commands initialize Application.data
+            # e.g. init does not
+            if hasattr(Application, "data"):
+                compose_files = Application.data.files
 
-    @lru_cache()
+        if compose_files:
+            self.client = DockerClient(
+                compose_files=cast(List[Union[str, Path]], compose_files),
+                compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
+                host=self.get_engine(Configuration.remote_engine),
+            )
+
+        else:
+            self.client = DockerClient(
+                host=self.get_engine(Configuration.remote_engine),
+            )
+
+        # temporary added here to prevent circular imports, to be moved upside
+        from controller.deploy.registry import Registry
+
+        self.registry = Registry(docker=self)
+
+        # temporary added here to prevent circular imports, to be moved upside
+        from controller.deploy.swarm import Swarm
+
+        self.swarm = Swarm(
+            docker=self, check_initialization=verify_swarm and Configuration.swarm_mode
+        )
+
+        if compose_files:
+            # temporary added here to prevent circular imports, to be moved upside
+            from controller.deploy.compose_v2 import Compose
+
+            self.compose = Compose(docker=self)
+
+    @lru_cache
     def connect_engine(self, node_id: str) -> DockerClient:
         """Convert a node_id to a docker client connected to the engine hostname"""
 
-        if not node_id or node_id == MAIN_NODE or not SWARM_MODE:
+        if not node_id or node_id == MAIN_NODE or not Configuration.swarm_mode:
             return self.client
 
         node = self.client.node.inspect(node_id)
@@ -66,147 +98,30 @@ class Docker:
 
         return f"ssh://{engine}"
 
-    @staticmethod
-    def validate_remote_engine(host: str) -> bool:
-        if "@" not in host:
-            return False
-        # TODO: host should be validated as:
-        # user @ ip | host
-        return True
-
-    @staticmethod
-    def get_registry() -> str:
-        registry_host = Application.env["REGISTRY_HOST"]
-        registry_port = Application.env["REGISTRY_PORT"]
-
-        return f"{registry_host}:{registry_port}"
-
-    def ping_registry(self, do_exit: bool = True) -> bool:
-
-        registry_host = Application.env["REGISTRY_HOST"]
-        registry_port = int(Application.env.get("REGISTRY_PORT", "5000") or "5000")
-
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(1)
-            try:
-                result = sock.connect_ex((registry_host, registry_port))
-            except socket.gaierror:
-                # The error is not important, let's use a generic -1
-                # result = errno.ESRCH
-                result = -1
-
-            if result == 0:
-                return True
-
-            if do_exit:
-                print_and_exit(
-                    "Registry {} not reachable. You can start it with {command}",
-                    self.get_registry(),
-                    command=RED("rapydo run registry"),
-                )
-
-            return False
-
-    @staticmethod
-    def send_registry_request(
-        url: str, check_status: bool = True, method: str = "GET", version: str = "2"
-    ) -> Response:
-
-        if version == "2":
-            headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
-        else:
-            headers = {}
-        if method == "DELETE":
-            expected_status = 202
-            method_ref = requests.delete
-
-        else:
-            expected_status = 200
-            method_ref = requests.get
-
-        r = method_ref(
-            url,
-            verify=False,
-            auth=HTTPBasicAuth(
-                Application.env["REGISTRY_USERNAME"],
-                Application.env["REGISTRY_PASSWORD"],
-            ),
-            headers=headers,
-        )
-
-        if check_status and r.status_code != expected_status:
-            print_and_exit(
-                "The registry responded with an unexpected status {} ({} {})",
-                str(r.status_code),
-                method,
-                url,
-            )
-
-        return r
-
-    def verify_registry_image(self, image: str) -> bool:
-
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-        registry = self.get_registry()
-        host = f"https://{registry}"
-        repository, tag = image.split(":")
-        r = self.send_registry_request(
-            f"{host}/v2/{repository}/manifests/{tag}", check_status=False
-        )
-
-        if r.status_code == 401:  # pragma: no cover
-            print_and_exit("Access denied to {} registry", host)
-
-        return r.status_code == 200
-
-    def login(self) -> None:
-
-        registry = self.get_registry()
-        try:
-            self.client.login(
-                server=registry,
-                username=cast(str, Application.env["REGISTRY_USERNAME"]),
-                password=cast(str, Application.env["REGISTRY_PASSWORD"]),
-            )
-        except DockerException as e:
-            if "docker login --username" in str(e):
-
-                settings = f"""
-{{
-  "insecure-registries" : ["{registry}"]
-}}
-"""
-
-                print_and_exit(
-                    "Your registry TLS certificate is untrusted.\n\nYou should add the "
-                    "following setting into your /etc/docker/daemon.json\n{}\n"
-                    "and then restart the docker daemon\n",
-                    settings,
-                )
-
-            raise e
-
-    @staticmethod
-    def split_command(command: Optional[str]) -> List[str]:
-        # Needed because:
-        # Passing None for 's' to shlex.split() is deprecated
-        if command is None:
-            return []
-
-        return shlex.split(command)
-
     @classmethod
     def get_service(cls, service: str) -> str:
-        if not SWARM_MODE:
+        if not Configuration.swarm_mode:
             return f"{Configuration.project}{COMPOSE_SEP}{service}"
         return f"{Configuration.project}_{service}"
+
+    def get_services_status(self, prefix: str) -> Dict[str, str]:
+        if Configuration.swarm_mode:
+            return self.swarm.get_services_status(prefix)
+        else:
+            return self.compose.get_services_status(prefix)
+
+    def get_running_services(self) -> Set[str]:
+        if Configuration.swarm_mode:
+            return self.swarm.get_running_services()
+        else:
+            return self.compose.get_running_services()
 
     def get_containers(self, service: str) -> Dict[int, Tuple[str, str]]:
 
         containers: Dict[int, Tuple[str, str]] = {}
         service_name = self.get_service(service)
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             try:
                 for task in self.client.service.ps(service_name):
                     if task.status.state not in ("running", "starting", "ready"):
@@ -242,15 +157,18 @@ class Docker:
                 containers.setdefault(slot, (c.name, MAIN_NODE))
         return containers
 
+    def get_container_name(self, service_name: str, slot: int = 1) -> str:
+        return f"{service_name}{COMPOSE_SEP}{slot}"
+
     def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
 
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             tasks = self.get_containers(service)
             # the 0 index is found in case of containers in global mode, like the proxy
             return tasks.get(slot) or tasks.get(0)
 
         service_name = self.get_service(service)
-        c = f"{service_name}{COMPOSE_SEP}{slot}"
+        c = self.get_container_name(service_name, slot=slot)
         log.debug("Container name: {}", c)
         # Can't use container.exists because a check on the status is needed
         try:
@@ -264,6 +182,15 @@ class Docker:
             return (c, MAIN_NODE)
         except NoSuchContainer:
             return None
+
+    @staticmethod
+    def split_command(command: Optional[str]) -> List[str]:
+        # Needed because:
+        # Passing None for 's' to shlex.split() is deprecated
+        if command is None:
+            return []
+
+        return shlex.split(command)
 
     def exec_command(
         self,
@@ -374,3 +301,22 @@ class Docker:
                 sys.exit(int(exit_code))
 
         return None
+
+    def status(self, services: List[str]) -> None:
+        if Configuration.swarm_mode:
+            return self.swarm.status(services)
+        else:
+            return self.compose.status(services)
+
+    def remove(self, service: str) -> None:
+        if Configuration.swarm_mode:
+            service_name = Docker.get_service(service)
+            self.client.service.scale({service_name: 0}, detach=False)
+        else:
+            self.client.compose.rm([service], stop=True, volumes=False)
+
+    def start(self, service: str) -> None:
+        if Configuration.swarm_mode:
+            self.swarm.deploy()
+        else:
+            self.compose.start_containers([service])

@@ -65,7 +65,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Select a Python version
         run: |
-          versions=(3.7 3.8 3.9)
+          versions=(3.8 3.9 3.10)
           PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
           echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
         shell: bash
@@ -89,6 +89,11 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
+          PYTHONMALLOC: debug
+          PYTHONASYNCIODEBUG: 1
+          # Convert warnings to exceptions
+          # PYTHONWARNINGS: error
+          PYTHONFAULTHANDLER: 1
         run: |
 
           mkdir rapydo_tests
@@ -135,8 +140,13 @@ jobs:
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
-          TEST_NAME: ${{ matrix.test }}
           SWARM_MODE: 1
+          TEST_NAME: ${{ matrix.test }}
+          PYTHONMALLOC: debug
+          PYTHONASYNCIODEBUG: 1
+          # Convert warnings to exceptions
+          # PYTHONWARNINGS: error
+          PYTHONFAULTHANDLER: 1
         run: |
           mkdir rapydo_tests
           cd rapydo_tests

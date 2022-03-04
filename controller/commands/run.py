@@ -1,12 +1,14 @@
+"""
+Start a single container
+"""
 import os
 from typing import Optional, Tuple
 
 import typer
 
-from controller import REGISTRY, SWARM_MODE, log, print_and_exit
+from controller import REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 from controller.templating import password
 
@@ -91,17 +93,17 @@ def run(
         Application.data.compose_config, [service]
     )
 
-    if service == REGISTRY and not SWARM_MODE:
+    if service == REGISTRY and not Configuration.swarm_mode:
         print_and_exit("Can't start the registry in compose mode")
 
-    if SWARM_MODE:
-        docker = Docker()
+    docker = Docker()
+    if Configuration.swarm_mode:
         if service != REGISTRY:
-            docker.ping_registry()
+            docker.registry.ping()
         else:
 
-            if docker.ping_registry(do_exit=False):
-                registry = docker.get_registry()
+            if docker.registry.ping(do_exit=False):
+                registry = docker.registry.get_host()
                 print_and_exit("The registry is already running at {}", registry)
 
             if docker.client.container.exists("registry"):
@@ -116,16 +118,14 @@ def run(
 
     if user:
         log.warning(
-            "Please remember that users in volatile containers are not mapped "
-            "on current uid and gid. "
-            "You should avoid to write or modify files on volumes"
+            "Please remember that users in volatile containers are not mapped on"
+            " current uid and gid. You should not write or modify files on volumes"
+            " to prevent permissions errors"
         )
-
-    compose = Compose(Application.data.files)
 
     if pull:
         log.info("Pulling image for {}...", service)
-        compose.docker.compose.pull([service])
+        docker.client.compose.pull([service])
     else:
         verify_available_images(
             [service],
@@ -140,7 +140,7 @@ def run(
             command = "bash"
 
         log.info("Starting {}...", service)
-        compose.create_volatile_container(
+        docker.compose.create_volatile_container(
             service,
             command=command,
             user=user,
@@ -195,4 +195,6 @@ def run(
             f"{prot}://{Configuration.hostname}:{port}",
         )
 
-    compose.create_volatile_container(service, detach=detach, publish=[(port, target)])
+    docker.compose.create_volatile_container(
+        service, detach=detach, publish=[(port, target)]
+    )

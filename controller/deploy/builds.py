@@ -7,11 +7,12 @@ Parse dockerfiles and check for builds
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union, cast
+from typing import Dict, List, Optional, Set, TypedDict
 
 from python_on_whales.exceptions import NoSuchImage
 
-from controller import RED, SWARM_MODE, ComposeServices, log, print_and_exit
+from controller import RED, ComposeServices, log, print_and_exit
+from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
 name_priorities = [
@@ -24,14 +25,25 @@ name_priorities = [
     "bot",
 ]
 
-# From python 3.8 could be converted in a TypedDict
-# service -> str
-# services -> List[str]
-# path -> Optional[Path]
-BuildInfo = Dict[str, Dict[str, Union[str, List[str], Optional[Path]]]]
+
+class TemplateInfo(TypedDict):
+    service: str
+    services: List[str]
+    path: Optional[Path]
+
+
+BuildInfo = Dict[str, TemplateInfo]
 
 
 def name_priority(name1: str, name2: str) -> str:
+
+    # Prevents warning: Cannot determine build priority with custom services
+    if name1 in Application.data.custom_services:
+        return name2
+
+    if name2 in Application.data.custom_services:
+        return name1
+
     if name1 not in name_priorities or name2 not in name_priorities:
         log.warning("Cannot determine build priority between {} and {}", name1, name2)
         return name2
@@ -73,17 +85,14 @@ def find_templates_build(
             templates[template_image] = {
                 "services": [],
                 "path": template_build.context if template_build else None,
+                "service": template_name,
             }
-        if "service" not in templates[template_image]:
-            templates[template_image]["service"] = template_name
         else:
             templates[template_image]["service"] = name_priority(
-                # from py38 a typed dict will replace this cast
-                cast(str, templates[template_image]["service"]),
+                templates[template_image]["service"],
                 template_name,
             )
-        # from py38 a typed dict will replace this cast
-        cast(List[str], templates[template_image]["services"]).append(template_name)
+        templates[template_image]["services"].append(template_name)
 
     return templates
 
@@ -147,11 +156,8 @@ def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[
     services_normalization_mapping: Dict[str, str] = {}
 
     for s in templates.values():
-        # from py38 a typed dict will replace this cast
-        for s1 in cast(List[str], s["services"]):
-            # from py38 a typed dict will replace this cast
-            s0 = cast(str, s["service"])
-            services_normalization_mapping[s1] = s0
+        for s1 in s["services"]:
+            services_normalization_mapping[s1] = s["service"]
 
     clean_targets: Set[str] = set()
 
@@ -176,13 +182,12 @@ def verify_available_images(
 
     for service in sorted(clean_core_services):
         for image, data in templates.items():
-            # from py38 a typed dict will replace this cast
-            data_services = cast(List[str], data["services"])
+            data_services = data["services"]
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE and not is_run_command:
-                image_exists = docker.verify_registry_image(image)
+            if Configuration.swarm_mode and not is_run_command:
+                image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
 
@@ -204,13 +209,12 @@ def verify_available_images(
 
     for service in clean_services:
         for image, data in builds.items():
-            # from py38 a typed dict will replace this cast
-            data_services = cast(List[str], data["services"])
+            data_services = data["services"]
             if data["service"] != service and service not in data_services:
                 continue
 
-            if SWARM_MODE and not is_run_command:
-                image_exists = docker.verify_registry_image(image)
+            if Configuration.swarm_mode and not is_run_command:
+                image_exists = docker.registry.verify_image(image)
             else:
                 image_exists = docker.client.image.exists(image)
             if not image_exists:

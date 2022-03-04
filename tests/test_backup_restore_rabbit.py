@@ -3,11 +3,11 @@ This module will test the backup and restore commands on rabbitMQ
 """
 import os
 import time
-from pathlib import Path
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import BACKUP_DIR, colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -28,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup rabbit")
     execute_outside(capfd, "restore rabbit")
 
-    backup_folder = Path("data/backup/rabbit")
+    backup_folder = BACKUP_DIR.joinpath("rabbit")
 
     create_project(
         capfd=capfd,
@@ -87,6 +87,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup rabbit --force --restart backend",
         "Starting backup on rabbit...",
         "Backup completed: data/backup/rabbit/",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
     # This is to verify that --force restarted rabbit
     exec_command(
@@ -100,7 +102,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup invalid",
         "Invalid value for",
-        "'invalid' is not one of 'neo4j', 'postgres', 'mariadb', 'rabbit', 'redis'",
+        "'invalid' is not one of 'mariadb', 'neo4j', 'postgres', 'rabbit', 'redis'",
     )
 
     exec_command(capfd, "remove", "Stack removed")
@@ -200,7 +202,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "start backend rabbit")
 
     # Just some delay extra delay, rabbit is a slow starter
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(20)
     else:
         time.sleep(10)
@@ -226,7 +228,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/rabbit/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore rabbit",
@@ -300,6 +302,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         f"restore rabbit {rabbit_dump_file} --force --restart backend",
         "Starting restore on rabbit...",
         f"Restore from data/backup/rabbit/{rabbit_dump_file} completed",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
 
     # Wait rabbit to completely startup

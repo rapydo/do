@@ -1,10 +1,13 @@
+"""
+Pull available images from the Docker Hub
+"""
 from typing import List, Set
 
 import typer
 from glom import glom
 
-from controller import SWARM_MODE, log
-from controller.app import Application
+from controller import log
+from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
 
@@ -39,11 +42,10 @@ def pull(
 
     docker = Docker()
 
-    if SWARM_MODE:
-        docker.ping_registry()
-        docker.login()
+    if Configuration.swarm_mode:
+        docker.registry.ping()
+        docker.registry.login()
 
-    base_image: str = ""
     image: str = ""
     images: Set[str] = set()
 
@@ -51,12 +53,9 @@ def pull(
         if Application.data.services and service not in Application.data.services:
             continue
 
-        base_image = glom(
+        if base_image := glom(
             Application.data.base_services, f"{service}.image", default=""
-        )
-
-        # from py38 use walrus here
-        if base_image:
+        ):
             images.add(base_image)
 
         image = glom(Application.data.compose_config, f"{service}.image", default="")
@@ -69,8 +68,8 @@ def pull(
 
     docker.client.image.pull(list(images), quiet=quiet)
 
-    if SWARM_MODE:
-        registry = docker.get_registry()
+    if Configuration.swarm_mode:
+        registry = docker.registry.get_host()
 
         local_images: List[str] = []
         for img in images:
@@ -87,7 +86,7 @@ def pull(
     else:
         target = "Base images"
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         extra = " and pushed into the local registry"
     else:
         extra = ""

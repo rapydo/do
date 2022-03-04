@@ -1,7 +1,6 @@
 """
 Integration with Docker swarm
 """
-import sys
 from typing import Dict, List, Optional, Set, Union
 
 from glom import glom
@@ -24,9 +23,9 @@ from controller.utilities import system
 
 
 class Swarm:
-    def __init__(self, check_initialization: bool = True):
+    def __init__(self, docker: Docker, check_initialization: bool = True):
 
-        self.docker_wrapper = Docker()
+        self.docker_wrapper = docker
         self.docker = self.docker_wrapper.client
 
         if check_initialization and not self.get_token():
@@ -44,9 +43,6 @@ class Swarm:
 
         log.info("Initializing Swarm with manager IP {}", manager_address)
         self.docker.swarm.init(advertise_address=manager_address)
-
-    def leave(self) -> None:
-        self.docker.swarm.leave(force=True)
 
     def get_token(self, node_type: str = "manager") -> Optional[str]:
         try:

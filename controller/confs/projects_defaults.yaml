@@ -6,7 +6,7 @@ variables:
       online_url: https://github.com/rapydo/build-templates.git
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
-      if: $$angular
+      _if: $$angular
     do:
       online_url: https://github.com/rapydo/do.git
 
@@ -16,6 +16,12 @@ variables:
     group_coordinator: Coordinator
     normal_user: User
     default: normal_user
+
+  roles_descriptions:
+    admin_root: System Administrator
+    staff_user: Project Administrator
+    group_coordinator: Group Coordinator
+    normal_user: Normal User
 
   env:
     BACKEND_BUILD_MODE: backend
@@ -46,7 +52,6 @@ variables:
     ACTIVATE_CELERYBEAT: 0
     ACTIVATE_FLOWER: 0
     ACTIVATE_FTP: 0
-    ACTIVATE_PUSHPIN: 0
     ACTIVATE_SMTP: 1
     ACTIVATE_SMTP_SERVER: 0
     ACTIVATE_TELEGRAM: 0
@@ -64,10 +69,15 @@ variables:
     API_AUTOSTART: 0 # used in some tests to auto-start the backend
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
-    BACKEND_URI: ""
+    BACKEND_URL: ""
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
     PYTHON_PATH: /usr/local/lib/python3.9/dist-packages
+
+    PYTHONMALLOC: ""
+    PYTHONASYNCIODEBUG: 0
+    PYTHONFAULTHANDLER: 0
+
     BACKEND_PREFIX: ""
     APP_SECRETS: /secrets
     DATA_PATH: /uploads
@@ -239,6 +249,7 @@ variables:
     CELERY_VERIFICATION_TIME: 900
     CELERY_BROKER: RABBIT
     CELERY_BACKEND: RABBIT
+    CELERY_POOL_MODE: prefork
 
     # Flower
     FLOWER_USER: "flower" # This default is invalidated in production mode
@@ -247,14 +258,6 @@ variables:
     FLOWER_PORT: 5555
     FLOWER_SSL_OPTIONS:
     FLOWER_PROTOCOL: http # https in production mode, used for healthchecks
-
-    # Pushpin
-    PUSHPIN_ENABLE_CONNECTOR: 1
-    PUSHPIN_EXPIRATION_TIME: 7200
-    PUSHPIN_VERIFICATION_TIME: 900
-    PUSHPIN_HOST: pushpin.dockerized.io
-    PUSHPIN_PORT: 7999
-    PUSHPIN_CONTROL_PORT: 5561
 
     # Swarm
     DEFAULT_SCALE_BACKEND: 1
@@ -298,8 +301,6 @@ variables:
     ASSIGNED_MEMORY_FTP: "20M"
     ASSIGNED_CPU_SMTP: "0.25"
     ASSIGNED_MEMORY_SMTP: "20M"
-    ASSIGNED_CPU_PUSHPIN: "0.25"
-    ASSIGNED_MEMORY_PUSHPIN: "20M"
     ASSIGNED_CPU_REGISTRY: "0.25"
     ASSIGNED_MEMORY_REGISTRY: "20M"
 
@@ -318,7 +319,7 @@ variables:
     # defaulted to local IP of active network interface
     # Note: can only be modified as env variable, not projectrc/-e :\
     SWARM_MANAGER_ADDRESS:
-    SYSLOG_ADDRESS: ""
+    # SYSLOG_ADDRESS: ""
 
     # Smtp
     SMTP_ENABLE_CONNECTOR: 1
@@ -343,6 +344,7 @@ variables:
     # SMTP_HOST and SMTP_PORT are needed because not automatically merged with
     # SMTP_SERVER_HOST and SMTP_SERVER_PORT when ACTIVATE_SMTP_SERVER is enabled
 
+    FRONTEND_URL: ""
     FRONTEND_PREFIX: /
     ALLOW_PASSWORD_RESET: 0
     ALLOW_REGISTRATION: 0
@@ -390,11 +392,12 @@ project:
   title: "REST HTTP-API server with Python, Flask and Docker"
   description: "No description yet"
   keywords: ""
-  rapydo: 2.1
+  rapydo: 2.2
   version: v0.1
 
 tags:
   specifications: OpenAPI 2.0 Specification in JSON format
-  helpers: tools for checking status and privileges
-  authentication: log in and out of the REST API
-  profile: Visualize profile for current credentials
+  status: Verify the status of the server
+  authentication: Manage authentication and active tokens
+  profile: Manage your own profile
+  management: Managent endpoints

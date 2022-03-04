@@ -1,3 +1,7 @@
+"""
+Add a new element to the project (endpoint, task, component, service, test workflow)
+
+"""
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List
@@ -107,7 +111,7 @@ def create_template(
 
     template = templating.get_template(
         template_name,
-        {"name": name, "services": services, "auth": auth, "project": project},
+        {"name": name, "services": services, "auth_service": auth, "project": project},
     )
 
     templating.save_template(target_path, template, force=force)

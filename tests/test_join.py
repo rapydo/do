@@ -1,13 +1,13 @@
 """
 This module will test the join command
 """
-from controller import SWARM_MODE
+from controller.app import Configuration
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 
 
 def test_join(capfd: Capture) -> None:
 
-    if not SWARM_MODE:
+    if not Configuration.swarm_mode:
         return None
 
     execute_outside(capfd, "join")

@@ -1,6 +1,9 @@
-from controller import COMPOSE_FILE, SWARM_MODE, log
-from controller.app import Application
-from controller.deploy.compose_v2 import Compose as ComposeV2
+"""
+Dump the current configuration into a docker compose YAML file
+"""
+from controller import COMPOSE_FILE, log
+from controller.app import Application, Configuration
+from controller.deploy.docker import Docker
 
 
 @Application.app.command(help="Dump current config into docker compose YAML")
@@ -9,7 +12,9 @@ def dump() -> None:
     Application.print_command()
     Application.get_controller().controller_init()
 
-    compose = ComposeV2(Application.data.files)
-    compose.dump_config(Application.data.services, v1_compatibility=not SWARM_MODE)
+    docker = Docker()
+    docker.compose.dump_config(
+        Application.data.services, v1_compatibility=not Configuration.swarm_mode
+    )
 
     log.info("Config dump: {}", COMPOSE_FILE)

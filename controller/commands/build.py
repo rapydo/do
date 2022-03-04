@@ -1,16 +1,17 @@
-from pathlib import Path
-from typing import List, Set, cast
+"""
+Force building of one or more services docker images
+"""
+from typing import List, Set
 
 import typer
 
-from controller import COMPOSE_FILE, RED, SWARM_MODE, log, print_and_exit
-from controller.app import Application
+from controller import COMPOSE_FILE, RED, log, print_and_exit
+from controller.app import Application, Configuration
 from controller.deploy.builds import (
     find_templates_build,
     get_dockerfile_base_image,
     get_non_redundant_services,
 )
-from controller.deploy.compose_v2 import Compose as ComposeV2
 from controller.deploy.docker import Docker
 
 
@@ -56,16 +57,16 @@ def build(
             command=RED("rapydo install buildx"),
         )
 
-    if SWARM_MODE:
-        docker.ping_registry()
-        docker.login()
+    if Configuration.swarm_mode:
+        docker.registry.ping()
+        docker.registry.login()
 
     images: Set[str] = set()
     if core:
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with core files only
-        compose = ComposeV2(Application.data.base_files)
-        compose.dump_config(Application.data.services, set_registry=False)
+        docker = Docker(compose_files=Application.data.base_files)
+        docker.compose.dump_config(Application.data.services, set_registry=False)
         log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
         docker.client.buildx.bake(
@@ -76,11 +77,11 @@ def build(
             cache=not force,
         )
         log.info("Core images built")
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             log.warning("Local registry push is not implemented yet for core images")
 
-    compose = ComposeV2(Application.data.files)
-    compose.dump_config(Application.data.services, set_registry=False)
+    docker = Docker()
+    docker.compose.dump_config(Application.data.services, set_registry=False)
     log.debug("Compose configuration dumped on {}", COMPOSE_FILE)
 
     core_builds = find_templates_build(Application.data.base_services)
@@ -91,10 +92,9 @@ def build(
         if image not in core_builds:
 
             # this is used to validate the target Dockerfile:
-            # from py38 a typed dict will replace this cast
-            get_dockerfile_base_image(cast(Path, build.get("path")), core_builds)
-            # from py38 a typed dict will replace this cast
-            services_with_custom_builds.extend(cast(List[str], build["services"]))
+            if p := build.get("path"):
+                get_dockerfile_base_image(p, core_builds)
+            services_with_custom_builds.extend(build["services"])
             images.add(image)
 
     targets: List[str] = []
@@ -119,8 +119,8 @@ def build(
         cache=not force,
     )
 
-    if SWARM_MODE:
-        registry = docker.get_registry()
+    if Configuration.swarm_mode:
+        registry = docker.registry.get_host()
 
         local_images: List[str] = []
         for img in images:

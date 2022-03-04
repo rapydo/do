@@ -5,7 +5,8 @@ import time
 
 from faker import Faker
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -20,7 +21,7 @@ from tests import (
 def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     execute_outside(capfd, "run registry")
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         execute_outside(capfd, "images")
 
     create_project(
@@ -32,7 +33,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     )
     init_project(capfd)
 
-    if not SWARM_MODE:
+    if not Configuration.swarm_mode:
         exec_command(
             capfd,
             "run registry",
@@ -143,16 +144,16 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     # Copied from images.py
     docker = Docker()
-    registry = docker.get_registry()
+    registry = docker.registry.get_host()
     host = f"https://{registry}"
-    r = docker.send_registry_request(f"{host}/v2/_catalog")
+    r = docker.registry.send_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
     assert "repositories" in catalog
     assert "rapydo/backend" in catalog["repositories"]
 
-    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
 
     tags_list = r.json()
 
@@ -172,7 +173,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     time.sleep(1)
 
-    r = docker.send_registry_request(f"{host}/v2/_catalog")
+    r = docker.registry.send_request(f"{host}/v2/_catalog")
 
     catalog = r.json()
 
@@ -180,7 +181,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     # After the delete the repository is still in the catalog but with no tag associated
     assert "rapydo/backend" in catalog["repositories"]
 
-    r = docker.send_registry_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
 
     tags_list = r.json()
 

@@ -28,7 +28,6 @@ networks:
 
 services:
   backend:
-    # restart: on-failure:5
     restart: always
     build:
       context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
@@ -63,6 +62,11 @@ services:
 
       PYTHON_PATH: ${PYTHON_PATH}
       PYTHONUNBUFFERED: 1
+
+      PYTHONMALLOC: ${PYTHONMALLOC}
+      PYTHONASYNCIODEBUG: ${PYTHONASYNCIODEBUG}
+      PYTHONFAULTHANDLER: ${PYTHONFAULTHANDLER}
+
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
       FLASK_ENV: ${FLASK_ENV}
       API_AUTOSTART: ${API_AUTOSTART}
@@ -77,6 +81,10 @@ services:
       DATA_PATH: ${DATA_PATH}
       DATA_IMPORT_FOLDER: ${DATA_IMPORT_FOLDER}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_URL: "${BACKEND_URL}"
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
 
       # enable /auth/login and /api/admin/users methods
       MAIN_LOGIN_ENABLE: 1
@@ -126,6 +134,7 @@ services:
       NEO4J_VERIFICATION_TIME: ${NEO4J_VERIFICATION_TIME}
       NEO4J_HOST: ${NEO4J_HOST}
       NEO4J_PORT: ${NEO4J_BOLT_PORT}
+      NEO4J_USER: "${NEO4J_USER}"
       NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
       # Experimental... to be tuned / configured
       NEOMODEL_SLOW_QUERIES: "0.09"
@@ -168,13 +177,6 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-
-      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
-      PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
-      PUSHPIN_EXPIRATION_TIME: ${PUSHPIN_EXPIRATION_TIME}
-      PUSHPIN_VERIFICATION_TIME: ${PUSHPIN_VERIFICATION_TIME}
-      PUSHPIN_HOST: ${PUSHPIN_HOST}
-      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
       SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
@@ -356,6 +358,8 @@ services:
       - ${DATA_DIR}/backup:/backup
     environment:
       ACTIVATE: ${ACTIVATE_POSTGRES}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
       POSTGRES_USER: "${ALCHEMY_USER}"
       POSTGRES_PASSWORD: "${ALCHEMY_PASSWORD}"
       POSTGRES_DEFAULT_DB: ${ALCHEMY_DB}
@@ -368,7 +372,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.6.4
+    image: mariadb:10.7.1
     healthcheck:
       test: "mysqladmin ping -h localhost"
       interval: ${HEALTHCHECK_INTERVAL}
@@ -515,9 +519,9 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
     entrypoint: docker-entrypoint-celery
-    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
+    command: celery --app restapi.connectors.celery.worker.celery_app worker --concurrency=1 --pool=${CELERY_POOL_MODE} -Ofair -Q celery -n ${COMPOSE_PROJECT_NAME}-%h
     healthcheck:
-      test: "celery --app restapi.connectors.celery.worker.celery_app inspect ping -d celery@$$PROJECT_NAME-$$HOSTNAME"
+      test: "/usr/local/bin/celery-healthcheck"
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: 10s
       retries: 3
@@ -539,6 +543,10 @@ services:
       CURRENT_GID: ${CURRENT_GID}
       DATA_PATH: ${DATA_PATH}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_URL: "${BACKEND_URL}"
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       SSL_FORCE_SELF_SIGNED: ${SSL_FORCE_SELF_SIGNED}
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
@@ -589,6 +597,7 @@ services:
       NEO4J_VERIFICATION_TIME: ${NEO4J_VERIFICATION_TIME}
       NEO4J_HOST: ${NEO4J_HOST}
       NEO4J_PORT: ${NEO4J_BOLT_PORT}
+      NEO4J_USER: "${NEO4J_USER}"
       NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
 
       MONGO_ENABLE: ${ACTIVATE_MONGODB}
@@ -600,13 +609,6 @@ services:
       MONGO_USER: "${MONGO_USER}"
       MONGO_PASSWORD: "${MONGO_PASSWORD}"
       MONGO_DATABASE: ${MONGO_DATABASE}
-
-      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
-      PUSHPIN_ENABLE_CONNECTOR: ${PUSHPIN_ENABLE_CONNECTOR}
-      PUSHPIN_EXPIRATION_TIME: ${PUSHPIN_EXPIRATION_TIME}
-      PUSHPIN_VERIFICATION_TIME: ${PUSHPIN_VERIFICATION_TIME}
-      PUSHPIN_HOST: ${PUSHPIN_HOST}
-      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
       SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
@@ -669,6 +671,10 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_URL: "${BACKEND_URL}"
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       SSL_FORCE_SELF_SIGNED: ${SSL_FORCE_SELF_SIGNED}
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
@@ -701,10 +707,6 @@ services:
       MONGO_USER: "${MONGO_USER}"
       MONGO_PASSWORD: "${MONGO_PASSWORD}"
       MONGO_DATABASE: ${MONGO_DATABASE}
-
-      PUSHPIN_ENABLE: ${ACTIVATE_PUSHPIN}
-      PUSHPIN_HOST: ${PUSHPIN_HOST}
-      PUSHPIN_PORT: ${PUSHPIN_CONTROL_PORT}
 
       SMTP_ADMIN: "${SMTP_ADMIN}"
       SMTP_NOREPLY: "${SMTP_NOREPLY}"
@@ -774,7 +776,13 @@ services:
 
   redis:
     restart: always
-    image: redis:6.2.5
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/redis
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/redis:${RAPYDO_VERSION}
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     healthcheck:
       test: "redis-cli --pass $$REDIS_PASSWORD -h 127.0.0.1 ping"
@@ -794,6 +802,8 @@ services:
           - ${REDIS_HOST}
     environment:
       ACTIVATE: ${ACTIVATE_REDIS}
+      CURRENT_UID: ${CURRENT_UID}
+      CURRENT_GID: ${CURRENT_GID}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
 
   #################
@@ -826,6 +836,10 @@ services:
       PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_URL: "${BACKEND_URL}"
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
       TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
       TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
@@ -920,6 +934,10 @@ services:
       EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
       APP_SECRETS: ${APP_SECRETS}
       DOMAIN: ${PROJECT_DOMAIN}
+      BACKEND_URL: "${BACKEND_URL}"
+      BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
       SSL_FORCE_SELF_SIGNED: ${SSL_FORCE_SELF_SIGNED}
 
       CELERY_ENABLE: 1
@@ -977,8 +995,6 @@ services:
       - 7777:8080
 
   adminer:
-    # image: adminer:4.7.7-standalone
-    # restart: no
     build:
       context: ${SUBMODULE_DIR}/build-templates/adminer
       args:
@@ -1012,6 +1028,7 @@ services:
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
+      - ssl_certs:/etc/letsencrypt
     # /etc/ssl/private/ A directory containing a single pure-ftpd.pem file
     # with the server's SSL certificates for TLS support. Optional TLS is
     # automatically enabled when the container finds this file on startup.
@@ -1047,28 +1064,6 @@ services:
       default:
         aliases:
           - ${SMTP_SERVER_HOST}
-
-  ####################################
-  ### REVERSE PROXY FOR WEBSOCKETS ###
-  ####################################
-
-  pushpin:
-    restart: always
-    image: fanout/pushpin:1.33.1
-    logging:
-      driver: syslog
-      options: {}
-    environment:
-      ACTIVATE: ${ACTIVATE_PUSHPIN}
-    networks:
-      default:
-        aliases:
-          - ${PUSHPIN_HOST}
-
-    ports:
-      - 7999:7999
-    volumes:
-      - ${SUBMODULE_DIR}/do/controller/confs/pushpin/routes:/etc/pushpin/routes
 
   #############################
   ### LOCAL DOCKER REGISTRY ###

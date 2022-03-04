@@ -6,7 +6,8 @@ from datetime import datetime
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -92,7 +93,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     # failed to update service xyz_rabbit:
     # Error response from daemon:
     # rpc error: code = Unknown desc = update out of sequence
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(3)
 
     mypassword = faker.pystr()
@@ -109,7 +110,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(5)
 
     service_verify(capfd, "rabbitmq")

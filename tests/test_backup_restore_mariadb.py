@@ -2,11 +2,12 @@
 This module test the backup and restore commands mariadb
 """
 import os
-from pathlib import Path
+import time
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -27,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup mariadb")
     execute_outside(capfd, "restore mariadb")
 
-    backup_folder = Path("data/backup/mariadb")
+    backup_folder = BACKUP_DIR.joinpath("mariadb")
 
     create_project(
         capfd=capfd,
@@ -182,7 +183,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup invalid",
         "Invalid value for",
-        "'invalid' is not one of 'neo4j', 'postgres', 'mariadb', 'rabbit', 'redis'",
+        "'invalid' is not one of 'mariadb', 'neo4j', 'postgres', 'rabbit', 'redis'",
     )
 
     exec_command(capfd, "remove", "Stack removed")
@@ -205,7 +206,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/mariadb/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore mariadb",
@@ -286,6 +287,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Removing the temporary uncompressed folder",
         f"Restore from data/backup/mariadb/{mariadb_dump_file} completed",
     )
+
+    if Configuration.swarm_mode:
+        time.sleep(5)
 
     # 4) verify data match again point 1 (restore completed)
     exec_command(

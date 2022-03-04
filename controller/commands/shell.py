@@ -1,3 +1,6 @@
+"""
+Open a shell or execute a command onto a container
+"""
 from typing import Optional
 
 import typer

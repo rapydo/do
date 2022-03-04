@@ -1,10 +1,18 @@
 def main() -> None:
 
-    # Import here to prevent to slow down the import
+    # All imports moved here to prevent to slow down the import of main
+    import warnings
+
+    from controller import TESTING, log, print_and_exit
+
+    if TESTING:
+        warnings.filterwarnings("error")
+    else:  # pragma: no cover
+        warnings.filterwarnings("default")
+
     from colorama import deinit, init
     from python_on_whales.utils import DockerException
 
-    from controller import log, print_and_exit
     from controller.app import Application
 
     try:

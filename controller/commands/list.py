@@ -1,14 +1,17 @@
+"""
+Print RAPyDo configurations
+"""
+
 import os
 from enum import Enum
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import typer
 from tabulate import tabulate
 
-from controller import COMPOSE_ENVIRONMENT_FILE, SWARM_MODE, TABLE_FORMAT, log
+from controller import COMPOSE_ENVIRONMENT_FILE, TABLE_FORMAT, log
 from controller.app import Application, Configuration
-from controller.deploy.compose_v2 import Compose
-from controller.deploy.swarm import Swarm
+from controller.deploy.docker import Docker
 from controller.utilities import git
 
 
@@ -41,12 +44,8 @@ def list_cmd(
 
         headers = ["Name", "Image", "Status", "Path"]
 
-        if SWARM_MODE:
-            engine: Union[Swarm, Compose] = Swarm()
-        else:
-            engine = Compose(Application.data.files)
-
-        services_status = engine.get_services_status(Configuration.project)
+        docker = Docker()
+        services_status = docker.get_services_status(Configuration.project)
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
                 image = service.image

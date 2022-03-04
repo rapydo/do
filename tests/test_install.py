@@ -5,7 +5,7 @@ from pathlib import Path
 
 from faker import Faker
 
-from controller import __version__
+from controller import SUBMODULES_DIR, __version__
 from controller.utilities import git
 from tests import (
     Capture,
@@ -41,7 +41,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
         "All updated",
     )
 
-    with TemporaryRemovePath(Path("submodules/do")):
+    with TemporaryRemovePath(SUBMODULES_DIR.joinpath("do")):
         exec_command(
             capfd,
             "install",
@@ -87,9 +87,8 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     # are able to correctly resolve symlinks
     # ###########################################################
     # Copied from test_init_check_update.py from here...
-    submodules = Path("submodules")
-    submodules.rename("submodules.bak")
-    submodules.mkdir()
+    SUBMODULES_DIR.rename("submodules.bak")
+    SUBMODULES_DIR.mkdir()
 
     # This is to re-fill the submodules folder,
     # these folder will be removed by the next init

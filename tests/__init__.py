@@ -13,7 +13,8 @@ from glom import glom
 from python_on_whales import docker
 from typer.testing import CliRunner
 
-from controller import PROJECTRC, REGISTRY, SWARM_MODE
+from controller import PROJECTRC, REGISTRY
+from controller.app import Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import configuration
 
@@ -181,7 +182,7 @@ def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") 
 
 
 def start_registry(capfd: Capture) -> None:
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         exec_command(capfd, "run registry --pull")
         time.sleep(2)
 
@@ -203,7 +204,7 @@ def start_project(capfd: Capture) -> None:
         "start",
         "Stack started",
     )
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(10)
     else:
         time.sleep(5)
@@ -225,7 +226,7 @@ def get_container_start_date(
     capfd: Capture, service: str, wait: bool = False
 ) -> datetime:
 
-    if SWARM_MODE and wait:
+    if Configuration.swarm_mode and wait:
         time.sleep(5)
         # This is needed to debug and wait the service rollup to complete
         # Status is both for debug and to delay the get_container

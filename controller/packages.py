@@ -1,12 +1,16 @@
+"""
+Utilities to work with python packages and binaries
+"""
+
 # BEWARE: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
 import os
 import re
-from distutils.version import LooseVersion
 from pathlib import Path
 from typing import List, Optional, Union
 
+from packaging.version import Version
 from sultan.api import Sultan
 
 from controller import log, print_and_exit
@@ -28,18 +32,21 @@ class Packages:
         from controller.app import Configuration
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
+            log.warning("pip3 is not available, switching to pip")
             return Packages.install(
                 package=package, editable=editable, user=user, use_pip3=False
             )
 
         try:
-            sudo = not user
-            # sudo does not work on travis
-            if Configuration.testing:
-                sudo = False
+
             # sudo does not work on Windows
             if os.name == "nt":  # pragma: no cover
                 sudo = False
+            # sudo not properly working on GHA
+            elif Configuration.testing:
+                sudo = False
+            else:
+                sudo = not user
 
             with Sultan.load(sudo=sudo) as sultan:
                 command = "install --upgrade"
@@ -81,9 +88,9 @@ class Packages:
                 "A mandatory dependency is missing: {} not found{}", program, hints
             )
 
-        v = LooseVersion(found_version)
+        v = Version(found_version)
         if min_version is not None:
-            if LooseVersion(min_version) > v:
+            if Version(min_version) > v:
                 print_and_exit(
                     "Minimum supported version for {} is {}, found {}",
                     program,
@@ -92,7 +99,7 @@ class Packages:
                 )
 
         if min_recommended_version is not None:
-            if LooseVersion(min_recommended_version) > v:
+            if Version(min_recommended_version) > v:
                 log.warning(
                     "Minimum recommended version for {} is {}, found {}",
                     program,
@@ -101,7 +108,7 @@ class Packages:
                 )
 
         if max_version is not None:
-            if LooseVersion(max_version) < v:
+            if Version(max_version) < v:
                 print_and_exit(
                     "Maximum supported version for {} is {}, found {}",
                     program,
@@ -166,6 +173,7 @@ class Packages:
         command = "list --editable"
 
         with Sultan.load(sudo=False) as sultan:
+
             pip = sultan.pip3 if use_pip3 else sultan.pip
             result = pip(command).run()
 

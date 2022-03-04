@@ -1,13 +1,14 @@
+"""
+Reload services
+"""
 from typing import List
 
 import typer
 from python_on_whales.utils import DockerException
 
-from controller import SWARM_MODE, log
+from controller import log
 from controller.app import Application, Configuration
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Reload services")
@@ -24,13 +25,7 @@ def reload(
     Application.get_controller().controller_init(services)
 
     docker = Docker()
-
-    if SWARM_MODE:
-        swarm = Swarm()
-        running_services = swarm.get_running_services()
-    else:
-        compose = Compose(Application.data.files)
-        running_services = compose.get_running_services()
+    running_services = docker.get_running_services()
 
     reloaded = 0
     for service in Application.data.services:
@@ -44,11 +39,18 @@ def reload(
                 log.warning("Can't reload the frontend while it is still building")
             else:
                 log.info("Reloading frontend...")
-                if SWARM_MODE:
+                if Configuration.swarm_mode:
                     service_name = docker.get_service(service)
                     docker.client.service.update(service_name, force=True, detach=True)
                 else:
-                    compose.docker.compose.restart(service)
+                    service_name = docker.get_service(service)
+                    c = docker.get_container_name(service_name, slot=1)
+
+                    if docker.client.container.exists(c):
+                        docker.client.compose.restart(service)
+                    else:
+                        # Start is not required... but it does not hurt
+                        docker.compose.start_containers([service], force=True)
                 reloaded += 1
             continue
 

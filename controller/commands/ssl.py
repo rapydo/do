@@ -1,3 +1,6 @@
+"""
+Issue a SSL certificate with Let's Encrypt
+"""
 from pathlib import Path
 from typing import Optional
 
@@ -6,7 +9,6 @@ import typer
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
-from controller.deploy.compose_v2 import Compose
 from controller.deploy.docker import Docker
 
 # 0 0 * * 3 cd /home/??? && /usr/local/bin/rapydo ssl > /home/???/data/logs/ssl.log 2>&1
@@ -94,8 +96,7 @@ def ssl(
     command = f"/bin/bash updatecertificates {Configuration.hostname}"
 
     if volatile:
-        compose = Compose(Application.data.files)
-        compose.create_volatile_container(
+        docker.compose.create_volatile_container(
             service, command=command, publish=[(443, 443), (80, 80)]
         )
     else:

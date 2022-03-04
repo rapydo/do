@@ -3,7 +3,6 @@ import typer
 from controller import log
 from controller.app import Application
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 
 @Application.app.command(help="Provide instructions to join new nodes")
@@ -17,7 +16,6 @@ def join(
     )
     Application.get_controller().controller_init()
 
-    swarm = Swarm()
     docker = Docker()
 
     manager_address = "N/A"
@@ -38,10 +36,10 @@ def join(
 
     if manager:
         log.info("To add a manager to this swarm, run the following command:")
-        token = swarm.get_token("manager")
+        token = docker.swarm.get_token("manager")
     else:
         log.info("To add a worker to this swarm, run the following command:")
-        token = swarm.get_token("worker")
+        token = docker.swarm.get_token("worker")
 
     print("")
     print(f"docker swarm join --token {token} {manager_address}")

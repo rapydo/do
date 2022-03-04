@@ -3,11 +3,11 @@ This module will test the backup and restore commands on neo4j
 """
 import os
 import time
-from pathlib import Path
 
 from faker import Faker
 
-from controller import colors
+from controller import BACKUP_DIR, colors
+from controller.app import Configuration
 from tests import (
     Capture,
     TemporaryRemovePath,
@@ -28,7 +28,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "backup neo4j")
     execute_outside(capfd, "restore neo4j")
 
-    backup_folder = Path("data/backup/neo4j")
+    backup_folder = BACKUP_DIR.joinpath("neo4j")
 
     create_project(
         capfd=capfd,
@@ -59,7 +59,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "shell backend 'restapi init'")
 
     # Just some delay extra delay. restapi init alone not always is enough...
-    time.sleep(5)
+    if Configuration.swarm_mode:
+        time.sleep(10)
+    else:
+        time.sleep(5)
 
     # Verify the initialization
     cypher = "shell neo4j 'bin/cypher-shell"
@@ -81,6 +84,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "backup neo4j --force --restart backend --restart rabbit",
         "Starting backup on neo4j...",
         "Backup completed: data/backup/neo4j/",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
     # This is to verify that --force restarted neo4j
     exec_command(
@@ -94,7 +99,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup invalid",
         "Invalid value for",
-        "'invalid' is not one of 'neo4j', 'postgres', 'mariadb', 'rabbit', 'redis'",
+        "'invalid' is not one of 'mariadb', 'neo4j', 'postgres', 'rabbit', 'redis'",
     )
 
     exec_command(capfd, "remove", "Stack removed")
@@ -207,7 +212,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Invalid backup file, data/backup/neo4j/invalid does not exist",
     )
 
-    with TemporaryRemovePath(Path("data/backup")):
+    with TemporaryRemovePath(BACKUP_DIR):
         exec_command(
             capfd,
             "restore neo4j",
@@ -299,6 +304,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Starting restore on neo4j...",
         "Done: ",
         f"Restore from data/backup/neo4j/{neo4j_dump_file} completed",
+        "Restarting services in 20 seconds...",
+        "Restarting services in 10 seconds...",
     )
 
     # Wait neo4j to completely startup

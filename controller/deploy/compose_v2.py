@@ -1,20 +1,17 @@
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import yaml
-from python_on_whales import DockerClient
 from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
 
 from controller import (
-    COMPOSE_ENVIRONMENT_FILE,
     COMPOSE_FILE,
     COMPOSE_FILE_VERSION,
     RED,
     REGISTRY,
-    SWARM_MODE,
     TABLE_FORMAT,
     colors,
     log,
@@ -33,12 +30,9 @@ COMPOSE_SEP = "-"
 
 
 class Compose:
-    def __init__(self, files: List[Path]) -> None:
-        self.files = files
-        self.docker = DockerClient(
-            compose_files=cast(List[Union[str, Path]], files),
-            compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
-        )
+    def __init__(self, docker: Docker) -> None:
+        self.docker_wrapper = docker
+        self.docker = self.docker_wrapper.client
 
     def get_config(self) -> ComposeConfig:
         # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
@@ -86,13 +80,13 @@ class Compose:
         volumes = set()
         binds: Set[Path] = set()
 
-        registry = Docker.get_registry()
+        registry = self.docker_wrapper.registry.get_host()
         # Remove unused services, networks and volumes from compose configuration
         for key, value in compose_config.get("services", {}).items():
             if key not in services:
                 continue
 
-            if SWARM_MODE and set_registry and key != REGISTRY:
+            if Configuration.swarm_mode and set_registry and key != REGISTRY:
                 value["image"] = f"{registry}/{value['image']}"
 
             if "healthcheck" in value and "test" in value["healthcheck"]:
@@ -181,7 +175,7 @@ class Compose:
             services_list = ", ".join(services)
             scales = {}
 
-            log.info("Starting services ({})...", services_list)
+            log.info("Starting services: {}...", services_list)
 
         self.docker.compose.up(
             services=services,
@@ -207,7 +201,7 @@ class Compose:
     ) -> bool:
 
         compose_engine_forced = False
-        if SWARM_MODE:
+        if Configuration.swarm_mode:
             # import here to prevent circular imports
             from controller.app import Application
 

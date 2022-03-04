@@ -271,6 +271,18 @@ def test_create(capfd: Capture) -> None:
 
     os.remove(".projectrc")
 
+    """
+    Convert this to a test with parametrize fixture
+
+    @pytest.mark.parametrize("services, [
+        (postgres,),
+        (mysql,),
+        (neo4j,),
+        (mongo,),
+        ...
+    ])
+
+    """
     # Test services activation from create --service
     services = [
         "postgres",
@@ -280,7 +292,6 @@ def test_create(capfd: Capture) -> None:
         "rabbit",
         "redis",
         "celery",
-        "pushpin",
         "ftp",
     ]
     opt = "--frontend no --current --force"
@@ -321,17 +332,16 @@ def test_create(capfd: Capture) -> None:
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
             active_services = ["backend", "postgres", "redis"]
-        elif service == "pushpin":
-            active_services = ["backend", "postgres", "pushpin"]
         elif service == "ftp":
             active_services = ["backend", "ftp", "postgres"]
         else:  # pragma: no cover
             pytest.fail(f"Unrecognized service {service}")
 
+        services_list = ", ".join(sorted(active_services))
         exec_command(
             capfd,
             "-p testservices check -i main --no-git --no-builds",
-            f"Enabled services: {sorted(active_services)}",
+            f"Enabled services: {services_list}",
         )
 
     # Test Celery Activation

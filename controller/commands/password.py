@@ -1,3 +1,6 @@
+"""
+Manage services passwords
+"""
 import re
 from datetime import date, datetime, timedelta
 from enum import Enum
@@ -9,20 +12,18 @@ from zxcvbn import zxcvbn
 
 from controller import (
     GREEN,
+    PLACEHOLDER,
     PROJECTRC,
     RED,
     REGISTRY,
-    SWARM_MODE,
     TABLE_FORMAT,
     log,
     print_and_exit,
 )
-from controller.app import Application
-from controller.deploy.compose_v2 import Compose
+from controller.app import Application, Configuration
+from controller.commands import PASSWORD_MODULES
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 from controller.templating import Templating, get_strong_password
-from controller.utilities import services
 
 # make this configurable
 PASSWORD_EXPIRATION = 90
@@ -30,41 +31,11 @@ PASSWORD_EXPIRATION = 90
 UPDATE_LABEL = "updated on"
 
 
-class Services(str, Enum):
-    backend = "backend"
-    neo4j = "neo4j"
-    postgres = "postgres"
-    mariadb = "mariadb"
-    # mongodb = "mongodb"
-    rabbit = "rabbit"
-    redis = "redis"
-    registry = "registry"
-    flower = "flower"
-
-
-def get_service_passwords(service: Services) -> List[str]:
-
-    if service == Services.backend:
-        return ["AUTH_DEFAULT_PASSWORD"]
-    if service == Services.neo4j:
-        return ["NEO4J_PASSWORD"]
-    if service == Services.postgres:
-        return ["ALCHEMY_PASSWORD"]
-    if service == Services.mariadb:
-        # return ["ALCHEMY_PASSWORD", "MYSQL_ROOT_PASSWORD"]
-        # MYSQL_ROOT_PASSWORD change is not supported yet
-        return ["ALCHEMY_PASSWORD"]
-    # if service == Services.mongodb:
-    #     return ["MONGO_PASSWORD"]
-    if service == Services.rabbit:
-        return ["RABBITMQ_PASSWORD"]
-    if service == Services.redis:
-        return ["REDIS_PASSWORD"]
-    if service == Services.registry:
-        return ["REGISTRY_PASSWORD"]
-    if service == Services.flower:
-        return ["FLOWER_PASSWORD"]
-    return []  # pragma: no cover
+# Enum() expects a string, tuple, list or dict literal as the second argument
+# https://github.com/python/mypy/issues/5317
+SupportedServices = Enum(  # type: ignore
+    "SupportedServices", {name: name for name in sorted(PASSWORD_MODULES.keys())}
+)
 
 
 # Note: can't directly extract yaml with comments because it is not supported
@@ -186,7 +157,7 @@ def update_projectrc(variables: Dict[str, str]) -> None:
 
 @Application.app.command(help="Manage services passwords")
 def password(
-    service: Services = typer.Argument(None, help="Service name"),
+    service: SupportedServices = typer.Argument(None, help="Service name"),
     show: bool = typer.Option(
         False,
         "--show",
@@ -233,27 +204,31 @@ def password(
         now = datetime.now()
 
         table: List[List[str]] = []
-        for s in Services:
+        for s in PASSWORD_MODULES:
             # This should never happens and can't be (easily) tested
-            if s.value not in Application.data.base_services:  # pragma: no cover
-                print_and_exit("Command misconfiguration, unknown {} service", s.value)
+            if s not in Application.data.base_services:  # pragma: no cover
+                print_and_exit("Command misconfiguration, unknown {} service", s)
 
-            if (
-                s != Services.registry
-                and s.value not in Application.data.active_services
-            ):
+            if s != REGISTRY and s not in Application.data.active_services:
                 continue
 
-            if s == Services.registry and not SWARM_MODE:
+            if s == REGISTRY and not Configuration.swarm_mode:
                 continue
 
-            variables = get_service_passwords(s)
+            module = PASSWORD_MODULES.get(s)
 
-            for variable in variables:
+            if not module:  # pragma: no cover
+                print_and_exit(f"{s} misconfiguration, module not found")
+
+            for variable in module.PASSWORD_VARIABLES:
 
                 password = Application.env.get(variable)
-                result = zxcvbn(password)
-                score = result["score"]
+
+                if password == PLACEHOLDER:
+                    score = None
+                else:
+                    result = zxcvbn(password)
+                    score = result["score"]
 
                 if variable in last_updates:
                     change_date = last_updates.get(variable, datetime.fromtimestamp(0))
@@ -266,7 +241,7 @@ def password(
 
                 pass_line: List[str] = []
 
-                pass_line.append(s.value)
+                pass_line.append(s)
                 pass_line.append(variable)
 
                 if expired:
@@ -274,7 +249,9 @@ def password(
                 else:
                     pass_line.append(GREEN(last_change))
 
-                if score < MIN_PASSWORD_SCORE:
+                if score is None:
+                    pass_line.append(RED("NOT SET"))
+                elif score < MIN_PASSWORD_SCORE:
                     pass_line.append(RED(score))
                 else:
                     pass_line.append(GREEN(score))
@@ -300,14 +277,19 @@ def password(
     # In this case a service is asked to be updated
     else:
 
+        module = PASSWORD_MODULES.get(service.value)
+
+        if not module:  # pragma: no cover
+            print_and_exit(f"{service.value} misconfiguration, module not found")
+
         if random:
             new_password = get_strong_password()
         elif not new_password:
             print_and_exit("Please specify one between --random and --password options")
 
-        compose = Compose(Application.data.files)
+        docker = Docker()
 
-        variables = get_service_passwords(service)
+        variables = module.PASSWORD_VARIABLES
         old_password = Application.env.get(variables[0])
         new_variables = {variable: new_password for variable in variables}
 
@@ -315,37 +297,14 @@ def password(
         # others can be updated even if offline,
         # but in every case if the stack is running it has to be restarted
 
-        docker = Docker()
-        if service == Services.registry:
-            is_running = docker.ping_registry(do_exit=False)
+        if service.value == REGISTRY:
+            is_running = docker.registry.ping(do_exit=False)
             container: Optional[Tuple[str, str]] = ("registry", "")
         else:
             container = docker.get_container(service.value)
             is_running = container is not None
 
-        is_running_needed = False
-
-        if service == Services.redis:
-            is_running_needed = False
-        elif service == Services.flower:
-            is_running_needed = False
-        elif service == Services.registry:
-            is_running_needed = False
-
-        elif service == Services.backend:
-            is_running_needed = True
-        elif service == Services.neo4j:
-            is_running_needed = True
-        elif service == Services.postgres:
-            is_running_needed = True
-        elif service == Services.mariadb:
-            is_running_needed = True
-        # elif service == Services.mongodb:
-        #     is_running_needed = True
-        elif service == Services.rabbit:
-            is_running_needed = True
-        else:  # pragma: no cover
-            print_and_exit("Unexpected error, unknown service {}", service.value)
+        is_running_needed = module.IS_RUNNING_NEEDED
 
         log.info("Changing password for {}...", service.value)
 
@@ -357,95 +316,30 @@ def password(
 
         update_projectrc(new_variables)
 
-        if service == Services.backend and container:
-            # restapi init need the env variable to be updated but can't be done after
-            # the restart because it often fails because unable to re-connect to
-            # services in a short time and some long sleep would be needed
-            # => applied a workaround to be able to execute it before the restart
-            docker.exec_command(
-                container,
-                user=services.get_default_user(service),
-                command=f"""/bin/bash -c '
-                    AUTH_DEFAULT_PASSWORD=\"{new_password}\"
-                        restapi init --force-user
-                    '
-                    """,
-            )
-
-        elif service == Services.neo4j and container:
-
-            docker.exec_command(
-                container,
-                user=services.get_default_user(service),
-                command=f"""bin/cypher-shell \"
-                    ALTER CURRENT USER
-                    SET PASSWORD
-                    FROM '{old_password}'
-                    TO '{new_password}';
-                \"""",
-            )
-        elif service == Services.postgres and container:
-            # Interactively:
-            # \password username
-            # Non interactively:
-            # https://ubiq.co/database-blog/how-to-change-user-password-in-postgresql
-            user = Application.env.get("ALCHEMY_USER")
-            db = Application.env.get("ALCHEMY_DB")
-            docker.exec_command(
-                container,
-                user=services.get_default_user(service),
-                command=f"""
-                    psql -U {user} -d {db} -c \"
-                        ALTER USER {user} WITH PASSWORD \'{new_password}\';
-                    \"
-                """,
-            )
-
-        elif service == Services.mariadb and container:
-            # https://dev.mysql.com/doc/refman/8.0/en/set-password.html
-
-            user = Application.env.get("ALCHEMY_USER")
-            pwd = Application.env.get("MYSQL_ROOT_PASSWORD")
-            db = Application.env.get("ALCHEMY_DB")
-
-            docker.exec_command(
-                container,
-                user=services.get_default_user(service),
-                command=f"""
-                    mysql -uroot -p\"{pwd}\" -D\"{db}\" -e
-                        "ALTER USER '{user}'@'%' IDENTIFIED BY '{new_password}';"
-                    """,
-            )
-        # elif service == Services.mongodb and container:
-        #     # db.changeUserPassword(...)
-        #     pass
-        elif service == Services.rabbit and container:
-            user = Application.env.get("RABBITMQ_USER")
-            docker.exec_command(
-                container,
-                user=services.get_default_user(service),
-                command=f'rabbitmqctl change_password "{user}" "{new_password}"',
-            )
+        if container:
+            module.password(container, old_password, new_password)
 
         if is_running:
             log.info("{} was running, restarting services...", service.value)
 
-            if service == Services.registry:
+            Application.get_controller().check_placeholders_and_passwords(
+                Application.data.compose_config, Application.data.services
+            )
+            if service.value == REGISTRY:
                 port = cast(int, Application.env["REGISTRY_PORT"])
 
-                compose.docker.container.remove(REGISTRY, force=True)
+                docker.client.container.remove(REGISTRY, force=True)
 
-                compose.create_volatile_container(
+                docker.compose.create_volatile_container(
                     REGISTRY, detach=True, publish=[(port, port)]
                 )
-            elif SWARM_MODE:
+            elif Configuration.swarm_mode:
 
-                compose.dump_config(Application.data.services)
-                swarm = Swarm()
-                swarm.deploy()
+                docker.compose.dump_config(Application.data.services)
+                docker.swarm.deploy()
 
             else:
-                compose.start_containers(Application.data.services)
+                docker.compose.start_containers(Application.data.services)
         else:
             log.info("{} was not running, restart is not needed", service.value)
 

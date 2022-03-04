@@ -6,7 +6,8 @@ from datetime import datetime
 
 from faker import Faker
 
-from controller import SWARM_MODE, colors
+from controller import colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -101,7 +102,7 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
         mypassword,
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         time.sleep(5)
 
     service_verify(capfd, "sqlalchemy")

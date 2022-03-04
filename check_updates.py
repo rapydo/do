@@ -1,10 +1,10 @@
-import distutils.core
+import ast
 import json
 import os
 import re
 import sys
+import textwrap
 import time
-from distutils.version import LooseVersion
 from glob import glob
 from pathlib import Path
 from typing import Any, Dict, List, Optional, cast
@@ -14,6 +14,7 @@ import requests
 import yaml
 from bs4 import BeautifulSoup
 from loguru import logger as log
+from packaging.version import Version
 
 from controller import print_and_exit
 
@@ -32,7 +33,13 @@ os.chdir(Path(__file__).parent)
 
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
-skip_versions = {"typescript": "4.4.3"}
+skip_versions = {
+    "typescript": "4.5.4",
+    "node": "17.3.0-buster",
+    "ubuntu": "22.04",
+    "bootstrap": "5.1.3",
+    "ajv": "8.8.2",
+}
 
 
 def load_yaml_file(filepath: Path) -> Dict[str, Any]:
@@ -80,8 +87,7 @@ def check_updates(
         latest = parse_pypi(url, tokens[0])
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:
@@ -103,8 +109,7 @@ def check_updates(
         latest = parse_dockerhub(tokens[0], dockerhub_timeout)
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:
@@ -135,8 +140,7 @@ def check_updates(
         latest = parse_npm(url, tokens[0], npm_timeout, tokens[1])
 
         if tokens[0] in skip_versions and latest == skip_versions.get(tokens[0]):
-            print(f"# Skipping version {latest} for {tokens[0]}")
-            print("")
+            log.debug("Skipping version {} for {}", latest, tokens[0])
             return
 
         if latest != tokens[1]:
@@ -228,10 +232,43 @@ def get_latest_version(
             continue
 
         clean_latest = latest.removeprefix(prefix).removesuffix(suffix)
-        if LooseVersion(clean_t) > LooseVersion(clean_latest):
+        if Version(clean_t) > Version(clean_latest):
             latest = t
 
     return latest
+
+
+# https://stackify.dev/479027-how-to-extract-dependencies-information-from-a-setup-py
+def parse_setup(setup_filename: str) -> Any:
+    """Parse setup.py and return args and keywords args to its setup
+    function call
+
+    """
+    mock_setup = textwrap.dedent(
+        """\
+    def setup(*args, **kwargs):
+        __setup_calls__.append((args, kwargs))
+    """
+    )
+    parsed_mock_setup = ast.parse(mock_setup, filename=setup_filename)
+    with open(setup_filename) as setup_file:
+        parsed = ast.parse(setup_file.read())
+        for index, node in enumerate(parsed.body[:]):
+            if (
+                not isinstance(node, ast.Expr)
+                or not isinstance(node.value, ast.Call)
+                # or node.value.func.id != "setup"
+            ):
+                continue
+            parsed.body[index:index] = parsed_mock_setup.body
+            break
+
+    fixed = ast.fix_missing_locations(parsed)
+    codeobj = compile(fixed, setup_filename, "exec")
+    local_vars: Dict[str, Any] = {}
+    global_vars: Dict[str, Any] = {"__setup_calls__": []}
+    exec(codeobj, global_vars, local_vars)
+    return global_vars["__setup_calls__"][0][1]
 
 
 def parse_dockerhub(lib: str, sleep_time: int) -> str:
@@ -271,9 +308,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
         return get_latest_version(tags, suffix="-management")
 
     if lib == "library/ubuntu":
-        return get_latest_version(
-            tags, regexp=SEMVER2, ignores=["20.10", "21.04", "21.10"]
-        )
+        return get_latest_version(tags, regexp=SEMVER2, ignores=["21.10"])
 
     if lib == "library/postgres":
         return get_latest_version(tags, regexp=SEMVER2, suffix="-alpine")
@@ -313,11 +348,7 @@ def parseDockerfile(
                     DOCKERFILE_ENVS.setdefault(service, {})
                     DOCKERFILE_ENVS[service][env[1]] = env[2]
 
-            elif not skip_angular and (
-                "RUN npm install" in line
-                or "RUN yarn add" in line
-                or "RUN yarn global add" in line
-            ):
+            elif not skip_angular and "RUN npm install" in line:
 
                 tokens = line.split(" ")
                 for t in tokens:
@@ -429,12 +460,12 @@ def check_versions(
             Path("../rapydo-angular/src/package.json"), dependencies
         )
 
-    controller: Any = distutils.core.run_setup("../do/setup.py")
-    http_api: Any = distutils.core.run_setup("../http-api/setup.py")
+    controller: Any = parse_setup("../do/setup.py")
+    http_api: Any = parse_setup("../http-api/setup.py")
 
     if not skip_python:
-        dependencies["controller"] = {"pip": controller.install_requires}
-        dependencies["http-api"] = {"pip": http_api.install_requires}
+        dependencies["controller"] = {"pip": controller["install_requires"]}
+        dependencies["http-api"] = {"pip": http_api["install_requires"]}
 
     filtered_dependencies: Dependencies = {}
 

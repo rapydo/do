@@ -8,14 +8,13 @@ from python_on_whales.exceptions import DockerException
 from controller import RED, REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
-from controller.deploy.swarm import Swarm
 
 
-def wait_network_removal(swarm: Swarm, network: str) -> None:
+def wait_network_removal(docker: Docker, network: str) -> None:
     MAX = 30
     for i in range(0, MAX):
         try:
-            for n in swarm.docker.network.list():
+            for n in docker.client.network.list():
                 if n.driver == "overlay" and n.name == network:
                     break
             else:
@@ -54,13 +53,13 @@ def remove(
 
     Application.get_controller().controller_init(services)
 
-    swarm = Swarm()
+    docker = Docker()
     if remove_extras:
         for extra_service in remove_extras:
-            if not swarm.docker.container.exists(extra_service):
+            if not docker.client.container.exists(extra_service):
                 log.error("Service {} is not running", extra_service)
                 continue
-            swarm.docker.container.remove(extra_service, force=True)
+            docker.client.container.remove(extra_service, force=True)
             log.info("Service {} removed", extra_service)
 
         # Nothing more to do
@@ -70,16 +69,16 @@ def remove(
     all_services = Application.data.services == Application.data.active_services
 
     if all_services:
-        swarm.remove()
+        docker.swarm.remove()
         # This is needed because docker stack remove does not support a --wait flag
         # To make the remove command sync and chainable with a start command
         engine = Application.env.get("DEPLOY_ENGINE", "swarm")
         network_name = f"{Configuration.project}_{engine}_default"
-        wait_network_removal(swarm, network_name)
+        wait_network_removal(docker, network_name)
         log.info("Stack removed")
     else:
 
-        if not swarm.stack_is_running():
+        if not docker.swarm.stack_is_running():
             print_and_exit(
                 "Stack {} is not running, deploy it with {command}",
                 Configuration.project,
@@ -91,6 +90,6 @@ def remove(
             service_name = Docker.get_service(service)
             scales[service_name] = 0
 
-        swarm.docker.service.scale(scales, detach=False)
+        docker.client.service.scale(scales, detach=False)
 
         log.info("Services removed")

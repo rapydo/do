@@ -1,3 +1,7 @@
+"""
+Install the specified version of RAPyDO or docker, compose, buildx
+"""
+
 import hashlib
 import stat
 import tempfile
@@ -18,12 +22,12 @@ from controller.utilities import git
 EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.1.0"
-EXPECTED_COMPOSE_BIN_MD5 = "36360ac1955f1e7be79a8b63532f4ffd"
+COMPOSE_VERSION = "v2.2.3"
+EXPECTED_COMPOSE_BIN_MD5 = "8e1cec6807ab5bfdd0006a5601dc68cc"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.6.3"
-EXPECTED_BUILDX_BIN_MD5 = "1b3bcb477b47d2251389402d57221f6f"
+BUILDX_VERSION = "v0.7.1"
+EXPECTED_BUILDX_BIN_MD5 = "94f186350daf6841239a599e65ba38f1"
 
 
 def download(url: str, expected_checksum: str) -> Path:
@@ -41,12 +45,15 @@ def download(url: str, expected_checksum: str) -> Path:
                 if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
 
-        md5 = hashlib.md5(open(file, "rb").read()).hexdigest()
+        md5 = "N/A"
+        with open(file, "rb") as f:
+            md5 = hashlib.md5(f.read()).hexdigest()
+
         if md5 == expected_checksum:
             log.info("Checksum verified: {}", md5)
         else:
             print_and_exit(
-                "Checksum of download file ({}) does not match the expected value ({})",
+                "File checksum ({}) does not match the expected value ({})",
                 md5,
                 expected_checksum,
             )

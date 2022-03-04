@@ -1,3 +1,7 @@
+"""
+CLI interface for RAPyDo
+"""
+
 import os
 import sys
 from pathlib import Path
@@ -9,11 +13,19 @@ from python_on_whales.components.compose.models import ComposeConfigService
 
 ComposeServices = Dict[str, ComposeConfigService]
 
-__version__ = "2.1"
+__version__ = "2.2"
 
 __all__ = [colors]
 
-LOGS_FOLDER = Path("data", "logs").resolve()
+
+COMPOSE_ENVIRONMENT_FILE = Path(".env")
+SUBMODULES_DIR = Path("submodules")
+PROJECT_DIR = Path("projects")
+DATA_DIR = Path("data")
+BACKUP_DIR = DATA_DIR.joinpath("backup")
+TEMPLATE_DIR = Path("templates")
+
+LOGS_FOLDER = DATA_DIR.joinpath("logs").resolve()
 LOG_RETENTION = os.getenv("LOG_RETENTION", "180")
 LOG_FORMAT = os.getenv("RAPYDO_LOG_FORMAT", "simple")
 TABLE_FORMAT = "simple"  # plain, simple, pretty, presto
@@ -57,11 +69,6 @@ if LOGS_FILE is not None:
         log.error(e)
         LOGS_FILE = None
 
-COMPOSE_ENVIRONMENT_FILE = Path(".env")
-SUBMODULES_DIR = Path("submodules")
-PROJECT_DIR = Path("projects")
-TEMPLATE_DIR = Path("templates")
-
 CONFS_DIR = Path(__file__).resolve().parent.joinpath("confs")
 
 PLACEHOLDER = "**PLACEHOLDER**"
@@ -73,7 +80,6 @@ CONTAINERS_YAML_DIRNAME = "confs"
 COMPOSE_FILE = Path("docker-compose.yml")
 COMPOSE_FILE_VERSION = "3.9"
 
-SWARM_MODE = os.environ.get("SWARM_MODE", "0") == "1"
 REGISTRY = "registry"
 
 EnvType = Union[None, str, int, float]
@@ -82,17 +88,30 @@ EnvType = Union[None, str, int, float]
 def print_and_exit(
     message: str, *args: Union[str, Path], **kwargs: Union[str, Path]
 ) -> NoReturn:
+    """
+    Print a critical message and then exit with code 1
+    """
     log.critical(message, *args, **kwargs)
     sys.exit(1)
 
 
 def RED(msg: str) -> str:
+    """
+    Colorize a string with ANSI Red
+    """
+
     return f"{colors.RED}{msg}{colors.RESET}"
 
 
 def YELLOW(msg: str) -> str:
+    """
+    Colorize a string with ANSI Yellow
+    """
     return f"{colors.YELLOW}{msg}{colors.RESET}"
 
 
 def GREEN(msg: str) -> str:
+    """
+    Colorize a string with ANSI Green
+    """
     return f"{colors.GREEN}{msg}{colors.RESET}"

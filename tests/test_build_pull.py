@@ -7,7 +7,8 @@ from pathlib import Path
 from faker import Faker
 from git import Repo
 
-from controller import SWARM_MODE, __version__, colors
+from controller import __version__, colors
+from controller.app import Configuration
 from tests import (
     Capture,
     create_project,
@@ -41,7 +42,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         services=["rabbit"],
     )
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
 
         exec_command(
             capfd,
@@ -225,7 +226,7 @@ RUN mkdir xyz
     # This way we prevent to rebuilt the custom image of testbuild
     # This simulate a pull updating a core image making the custom image obsolete
 
-    if SWARM_MODE:
+    if Configuration.swarm_mode:
         swarm_push_warn = "Local registry push is not implemented yet for core images"
     else:
         swarm_push_warn = ""

@@ -45,14 +45,18 @@ services:
       ALLOW_TERMS_OF_USE: ${ALLOW_TERMS_OF_USE}
       AUTH_ENABLE: ${ACTIVATE_AUTH}
       AUTH_MIN_PASSWORD_LENGTH: ${AUTH_MIN_PASSWORD_LENGTH}
-      BACKEND_URI: "${BACKEND_URI}"
-      BACKEND_PORT: ${BACKEND_API_PORT}
+      # Full URL, if set HOST, PORT AND PREFIX will be ignored
+      BACKEND_URL: "${BACKEND_URL}"
       BACKEND_HOST: ${PROJECT_DOMAIN}
+      BACKEND_PORT: ${BACKEND_API_PORT}
       BACKEND_PREFIX: "${BACKEND_PREFIX}"
+      # Full URL, if set BASE_HREF and FRONTEND_PREFIX will be ignored
+      FRONTEND_URL: ${FRONTEND_URL}
       BASE_HREF: ${PROJECT_DOMAIN}
       FRONTEND_PREFIX: ${FRONTEND_PREFIX}
-      PUSHPIN_HOST: ${PROJECT_DOMAIN}
-      PUSHPIN_PORT: ${PUSHPIN_PORT}
+      # Prevent: error YN0028: The lockfile would have been created by this install,
+      #                        which is explicitly forbidden.
+      YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
       SENTRY_URL: ${SENTRY_URL}
       GA_TRACKING_CODE: ${GA_TRACKING_CODE}
 
@@ -64,6 +68,7 @@ services:
       CYPRESS_ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
       CYPRESS_ALLOW_TERMS_OF_USE: ${ALLOW_TERMS_OF_USE}
       CYPRESS_AUTH_ENABLE: ${ACTIVATE_AUTH}
+      CYPRESS_AUTH_ROLES: ${AUTH_ROLES}
       CYPRESS_AUTH_MIN_PASSWORD_LENGTH: ${AUTH_MIN_PASSWORD_LENGTH}
       CYPRESS_AUTH_MAX_PASSWORD_VALIDITY: ${AUTH_MAX_PASSWORD_VALIDITY}
       CYPRESS_AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER: ${AUTH_DISABLE_UNUSED_CREDENTIALS_AFTER}
@@ -112,7 +117,6 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.app.json:/app/tsconfig.app.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.server.json:/app/tsconfig.server.json
       - ${SUBMODULE_DIR}/rapydo-angular/tsconfig.spec.json:/app/tsconfig.spec.json
-      - ${SUBMODULE_DIR}/rapydo-angular/courtesy:/app/courtesy
 
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${PROJECT_DIR}/frontend:/app/app/custom
