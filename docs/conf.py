@@ -23,7 +23,7 @@ copyright = "2022, RAPyDo"
 author = "RAPyDo"
 
 # The full version, including alpha/beta/rc tags
-release = "2.2"
+release = "2.3"
 
 
 # -- General configuration ---------------------------------------------------

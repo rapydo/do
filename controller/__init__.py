@@ -13,7 +13,7 @@ from python_on_whales.components.compose.models import ComposeConfigService
 
 ComposeServices = Dict[str, ComposeConfigService]
 
-__version__ = "2.2"
+__version__ = "2.3"
 
 __all__ = [colors]
 

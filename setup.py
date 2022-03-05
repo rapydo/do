@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-version = "2.2"
+version = "2.3"
 
 setup(
     name="rapydo",
