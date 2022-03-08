@@ -146,7 +146,9 @@ class Docker:
 
     def verify_registry_image(self, image: str) -> bool:
 
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        urllib3.disable_warnings(  # type: ignore
+            urllib3.exceptions.InsecureRequestWarning
+        )
         registry = self.get_registry()
         host = f"https://{registry}"
         repository, tag = image.split(":")
