@@ -37,7 +37,6 @@ skip_versions = {
     "typescript": "4.5.4",
     "node": "17.3.0-buster",
     "ubuntu": "22.04",
-    "bootstrap": "5.1.3",
     "ajv": "8.8.2",
 }
 

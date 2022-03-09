@@ -1,6 +1,6 @@
 import os
 import socket
-from typing import List
+from typing import List, Optional, Union
 
 from plumbum import local
 from plumbum.commands.processes import CommandNotFound, ProcessExecutionError
@@ -127,3 +127,10 @@ def get_local_ip(production: bool = False) -> str:
             return str(s.getsockname()[0])
 
     return "127.0.0.1"
+
+
+def to_int(value: Union[int, str]) -> Optional[int]:
+    try:
+        return int(value)
+    except ValueError:
+        return None

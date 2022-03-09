@@ -106,6 +106,20 @@ class Compose:
                 if v is None:
                     value["environment"][k] = ""
 
+            # Ports are forced to be int to prevent failures with compose
+            for idx, port in enumerate(value.get("ports", [])):
+                target_port = system.to_int(port["target"])
+                published_port = system.to_int(port["published"])
+
+                if target_port is None or published_port is None:
+                    print_and_exit(  # pragma: no cover
+                        "Can't convert service ports to integers: {}-{}",
+                        port["target"],
+                        port["published"],
+                    )
+                port["target"] = target_port
+                port["published"] = published_port
+                value["ports"][idx] = port
             clean_config["services"][key] = value
 
             for k in value.get("networks", {}).keys():
