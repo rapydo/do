@@ -1057,8 +1057,12 @@ services:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
       ADDED_FLAGS: -H -d -d
+      FTP_USER: "${FTP_USER}"
+      FTP_PASSWORD: "${FTP_PASSWORD}"
     networks:
       default:
+        aliases:
+          - ${FTP_HOST}
 
   ###################
   ### SMTP SERVER  ###
