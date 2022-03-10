@@ -101,6 +101,7 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "TELEGRAM_ADMINS": ["bot"],
     "MONGO_PASSWORD": ["mongodb"],
     "MONGO_USER": ["mongodb"],
+    "FTP_PASSWORD": ["ftp"],
 }
 
 
