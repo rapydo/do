@@ -405,6 +405,13 @@ class BaseEnvModel(BaseModel):
     REDIS_HOST: str
     REDIS_PORT: Port
     REDIS_PASSWORD: str
+    FTP_ENABLE_CONNECTOR: zero_or_one
+    FTP_EXPIRATION_TIME: PositiveInt
+    FTP_VERIFICATION_TIME: PositiveInt
+    FTP_HOST: str
+    FTP_PORT: Port
+    FTP_USER: str
+    FTP_PASSWORD: str
     NFS_HOST: Optional[str]
     NFS_EXPORTS_SECRETS: Path
     NFS_EXPORTS_RABBITDATA: Path

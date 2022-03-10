@@ -229,6 +229,14 @@ variables:
     REDIS_PORT: 6379
     REDIS_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
+    FTP_ENABLE_CONNECTOR: 0
+    FTP_EXPIRATION_TIME: 7200
+    FTP_VERIFICATION_TIME: 3600
+    FTP_HOST: ftp.dockerized.io
+    FTP_PORT: 21
+    FTP_USER: "ftpuser"
+    FTP_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+
     # To be enabled with "manager.host"
     NFS_HOST:
     NFS_EXPORTS_SECRETS: /volumes/secrets
