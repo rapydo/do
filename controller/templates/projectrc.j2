@@ -51,6 +51,9 @@ project_configuration:
       {% if service == "redis" -%}
       REDIS_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
+      {% if service == "ftp" -%}
+      FTP_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
       {% if swarm -%}
       REGISTRY_USERNAME: {{ "RANDOM"| username }}
       REGISTRY_PASSWORD: {{ "RANDOM"| password }}
