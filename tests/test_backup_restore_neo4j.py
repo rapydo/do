@@ -60,9 +60,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     # Just some delay extra delay. restapi init alone not always is enough...
     if Configuration.swarm_mode:
-        time.sleep(10)
+        time.sleep(15)
     else:
-        time.sleep(5)
+        time.sleep(10)
 
     # Verify the initialization
     cypher = "shell neo4j 'bin/cypher-shell"
@@ -261,7 +261,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     neo4j_dump_file = files[-1]
 
-    time.sleep(5)
+    time.sleep(10)
 
     # Here we test the restore procedure:
     # 1) verify some data in the database
