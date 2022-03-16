@@ -36,10 +36,6 @@ project_configuration:
       NEO4J_PAGECACHE_SIZE: 1G
       NEO4J_HEAP_SIZE: 1G
       {% endif -%}
-      {% if service == "mongodb" -%}
-      MONGO_PASSWORD: {{ "RANDOM"| password }}
-      MONGO_USER: mongo
-      {% endif -%}
       {% if service == "flower" -%}
       FLOWER_PASSWORD: {{ "RANDOM"| password }}
       FLOWER_USER: {{ "RANDOM"| username }}

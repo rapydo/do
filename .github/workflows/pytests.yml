@@ -173,7 +173,6 @@ jobs:
             sudo mkdir -p /volumes/sqldata
             sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
-            sudo mkdir -p /volumes/mongodata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
           fi
@@ -208,7 +207,6 @@ jobs:
             sudo mkdir -p /volumes/sqldata
             sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
-            sudo mkdir -p /volumes/mongodata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
           fi

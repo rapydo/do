@@ -46,9 +46,6 @@ variables:
     {% if enable_neo4j -%}
     ACTIVATE_NEO4J: 1
     {% endif -%}
-    {% if enable_mongo -%}
-    ACTIVATE_MONGODB: 1
-    {% endif -%}
     {% if enable_rabbit -%}
     ACTIVATE_RABBIT: 1
     {% endif -%}
@@ -59,7 +56,7 @@ variables:
     ACTIVATE_CELERY: 1
     CELERY_ENABLE_CONNECTOR: 1
     ACTIVATE_FLOWER: 1
-    {% if enable_mongo or enable_redis -%}
+    {% if enable_redis -%}
     ACTIVATE_CELERYBEAT: 1
     {% endif -%}
     {% endif -%}

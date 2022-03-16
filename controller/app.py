@@ -957,7 +957,6 @@ You can use of one:
 
         services.check_rabbit_password(Application.env.get("RABBITMQ_PASSWORD"))
         services.check_redis_password(Application.env.get("REDIS_PASSWORD"))
-        services.check_mongodb_password(Application.env.get("MONGO_PASSWORD"))
 
         for e in Application.env:
             env_value = os.environ.get(e)

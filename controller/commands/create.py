@@ -22,14 +22,12 @@ class AuthTypes(str, Enum):
     postgres = "postgres"
     mysql = "mysql"
     neo4j = "neo4j"
-    mongo = "mongo"
 
 
 class ServiceTypes(str, Enum):
     postgres = "postgres"
     mysql = "mysql"
     neo4j = "neo4j"
-    mongo = "mongo"
     rabbit = "rabbit"
     redis = "redis"
     celery = "celery"
@@ -169,7 +167,6 @@ def create_project(
     enable_postgres = auth == "postgres" or "postgres" in services
     enable_mysql = auth == "mysql" or "mysql" in services
     enable_neo4j = auth == "neo4j" or "neo4j" in services
-    enable_mongo = auth == "mongo" or "mongo" in services
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
     enable_celery = "celery" in services
@@ -210,8 +207,6 @@ def create_project(
 
         if enable_redis:
             celery_backend = "REDIS"
-        elif enable_mongo:
-            celery_backend = "MONGODB"
         else:
             celery_backend = "RABBIT"
 
@@ -271,7 +266,6 @@ def create_project(
                 "enable_postgres": enable_postgres,
                 "enable_mysql": enable_mysql,
                 "enable_neo4j": enable_neo4j,
-                "enable_mongo": enable_mongo,
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,
                 "enable_celery": enable_celery,

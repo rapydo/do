@@ -107,8 +107,6 @@ class Project:
                 self.expected_files.append(models.joinpath("sqlalchemy.py"))
             if auth == "neo4j" or "neo4j" in services:
                 self.expected_files.append(models.joinpath("neo4j.py"))
-            if auth == "mongo" or "mongo" in services:
-                self.expected_files.append(models.joinpath("mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
         self.optionals_files.append(
@@ -438,8 +436,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
         "platform",
         "pickle",
         "plumbum",
-        "pymodm",
-        "pymongo",
         "pyotp",
         "pyqrcode",
         "pytz",

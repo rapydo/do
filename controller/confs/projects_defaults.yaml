@@ -44,7 +44,6 @@ variables:
     ACTIVATE_POSTGRES: 0
     ACTIVATE_MYSQL: 0
     ACTIVATE_NEO4J: 0
-    ACTIVATE_MONGODB: 0
     ACTIVATE_RABBIT: 0
     ACTIVATE_REDIS: 0
 
@@ -195,15 +194,6 @@ variables:
     # Enable this in case of corrupted or missing transaction logs
     NEO4J_RECOVERY_MODE: false
 
-    MONGO_ENABLE_CONNECTOR: 1
-    MONGO_EXPIRATION_TIME: 7200
-    MONGO_VERIFICATION_TIME: 900
-    MONGO_HOST: mongo.dockerized.io
-    MONGO_PORT: 27017
-    MONGO_DATABASE: rapydo
-    MONGO_USER: mongo
-    MONGO_PASSWORD: "D3vMode!" # This default is invalidated in production mode
-
     ELASTIC_HOST: elastic.dockerized.io
     ELASTIC_PORT: 9200
 
@@ -245,7 +235,6 @@ variables:
     NFS_EXPORTS_SQLDATA: /volumes/sqldata
     NFS_EXPORTS_MARIADB: /volumes/mariadb
     NFS_EXPORTS_GRAPHDATA: /volumes/graphdata
-    NFS_EXPORTS_MONGODATA: /volumes/mongodata
     NFS_EXPORTS_DATA_IMPORTS: /volumes/data_imports
     NFS_EXPORTS_PUREFTPD: /volumes/pureftpd
     NFS_EXPORTS_SSL_CERTS: /volumes/ssl_certs
@@ -288,8 +277,6 @@ variables:
     ASSIGNED_MEMORY_MARIADB: "20M"
     ASSIGNED_CPU_NEO4J: "0.25"
     ASSIGNED_MEMORY_NEO4J: "20M"
-    ASSIGNED_CPU_MONGODB: "0.25"
-    ASSIGNED_MEMORY_MONGODB: "20M"
     ASSIGNED_CPU_CELERY: "0.25"
     ASSIGNED_MEMORY_CELERY: "20M"
     ASSIGNED_CPU_CELERYBEAT: "0.25"

@@ -99,8 +99,6 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "SMTP_PASSWORD": ["backend"],
     "TELEGRAM_API_KEY": ["bot"],
     "TELEGRAM_ADMINS": ["bot"],
-    "MONGO_PASSWORD": ["mongodb"],
-    "MONGO_USER": ["mongodb"],
     "FTP_PASSWORD": ["ftp"],
 }
 
@@ -137,11 +135,6 @@ def normalize_placeholder_variable(key: str) -> str:
     if key == "CYPRESS_AUTH_DEFAULT_PASSWORD":
         return "AUTH_DEFAULT_PASSWORD"
 
-    if key == "MONGO_INITDB_ROOT_PASSWORD":
-        return "MONGO_PASSWORD"
-    if key == "MONGO_INITDB_ROOT_USERNAME":
-        return "MONGO_USER"
-
     return key
 
 
@@ -154,9 +147,6 @@ def get_celerybeat_scheduler(env: Dict[str, EnvType]) -> str:
 
     if celery_backend is None:
         return "Unknown"
-
-    if celery_backend == "MONGODB":
-        return "celerybeatmongo.schedulers.MongoScheduler"
 
     if celery_backend == "REDIS":
         return "redbeat.RedBeatScheduler"
@@ -181,18 +171,6 @@ def check_redis_password(pwd: Optional[EnvType]) -> None:
         invalid_characters = ["#"]
         if any(c in str(pwd) for c in invalid_characters):
             log.critical("Not allowed characters found in REDIS_PASSWORD.")
-            print_and_exit(
-                "Some special characters, including {}, are not allowed "
-                "because make some clients to fail to connect",
-                " ".join(invalid_characters),
-            )
-
-
-def check_mongodb_password(pwd: Optional[EnvType]) -> None:
-    if pwd:
-        invalid_characters = ["#"]
-        if any(c in str(pwd) for c in invalid_characters):
-            log.critical("Not allowed characters found in MONGO_PASSWORD.")
             print_and_exit(
                 "Some special characters, including {}, are not allowed "
                 "because make some clients to fail to connect",

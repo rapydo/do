@@ -11,8 +11,6 @@ volumes:
     driver: local
   graphdata:
     driver: local
-  mongodata:
-    driver: local
   data_imports:
     driver: local
   pureftpd:

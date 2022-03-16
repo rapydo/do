@@ -33,7 +33,6 @@ class TemplateDataType(TypedDict, total=False):
     enable_postgres: bool
     enable_mysql: bool
     enable_neo4j: bool
-    enable_mongo: bool
     enable_rabbit: bool
     enable_redis: bool
     enable_celery: bool

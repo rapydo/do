@@ -231,8 +231,6 @@ def test_normalize_placeholder_variable() -> None:
     assert short1("NEO4J_dbms_memory_heap_max__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_heap_initial__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_pagecache_size") == "NEO4J_PAGECACHE_SIZE"
-    assert short1("MONGO_INITDB_ROOT_PASSWORD") == "MONGO_PASSWORD"
-    assert short1("MONGO_INITDB_ROOT_USERNAME") == "MONGO_USER"
 
     key = "anyother"
     assert short1(key) == key
@@ -251,12 +249,10 @@ def test_get_celerybeat_scheduler() -> None:
     env["CELERY_BACKEND"] = "??"
     assert short2(env) == "Unknown"
     # This is valid, but ACTIVATE_CELERYBEAT is still missing
-    env["CELERY_BACKEND"] = "MONGODB"
+    env["CELERY_BACKEND"] = "REDIS"
     env["ACTIVATE_CELERYBEAT"] = "0"
     assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert short2(env) == "celerybeatmongo.schedulers.MongoScheduler"
-    env["CELERY_BACKEND"] = "REDIS"
     assert short2(env) == "redbeat.RedBeatScheduler"
     env["CELERY_BACKEND"] = "INVALID"
     assert short2(env) == "Unknown"

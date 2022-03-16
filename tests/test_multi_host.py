@@ -22,7 +22,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
             "postgres",
             "mysql",
             "neo4j",
-            "mongo",
         )
     )
 

@@ -71,18 +71,6 @@ services:
     #   options:
     #     syslog-address: ${SYSLOG_ADDRESS}
 
-  mongodb:
-    deploy:
-      # Is mongo supporting replicas?
-      replicas: 1
-      resources:
-        reservations:
-          cpus: "${ASSIGNED_CPU_MONGODB}"
-          memory: ${ASSIGNED_MEMORY_MONGODB}
-    # logging:
-    #   options:
-    #     syslog-address: ${SYSLOG_ADDRESS}
-
   celery:
     deploy:
       replicas: ${DEFAULT_SCALE_CELERY}
