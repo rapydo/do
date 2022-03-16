@@ -72,7 +72,7 @@ def run(
         help="User existing in selected service",
         show_default=False,
     ),
-    port: Optional[int] = typer.Option(
+    first_port: Optional[int] = typer.Option(
         None,
         "--port",
         "-p",
@@ -91,7 +91,7 @@ def run(
         Application.serialize_parameter("--debug", debug, IF=debug),
         Application.serialize_parameter("--command", command, IF=command),
         Application.serialize_parameter("--user", user, IF=user),
-        Application.serialize_parameter("--port", port, IF=port),
+        Application.serialize_parameter("--port", first_port, IF=first_port),
         Application.serialize_parameter("", service),
     )
 
@@ -173,7 +173,7 @@ def run(
             # , symbols="%*,-.=?[]^_~"
         )
 
-    publish_ports = get_publish_ports(service, port)
+    publish_ports = get_publish_ports(service, first_port)
 
     if detach is None:
         if service == "swaggerui" or service == "adminer":
@@ -189,6 +189,7 @@ def run(
         else:
             prot = "http"
 
+        port = publish_ports[0][0] if publish_ports else first_port
         log.info(
             "You can access SwaggerUI web page here: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
@@ -200,6 +201,7 @@ def run(
         else:
             prot = "http"
 
+        port = publish_ports[0][0] if publish_ports else first_port
         log.info(
             "You can access Adminer interface on: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
