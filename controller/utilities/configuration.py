@@ -412,6 +412,7 @@ class BaseEnvModel(BaseModel):
     FTP_PORT: Port
     FTP_USER: str
     FTP_PASSWORD: str
+    FTP_SSL_ENABLED: zero_or_one
     NFS_HOST: Optional[str]
     NFS_EXPORTS_SECRETS: Path
     NFS_EXPORTS_RABBITDATA: Path

@@ -236,6 +236,7 @@ variables:
     FTP_PORT: 21
     FTP_USER: "ftpuser"
     FTP_PASSWORD: "D3vMode!" # This default is invalidated in production mode
+    FTP_SSL_ENABLED: 1
 
     # To be enabled with "manager.host"
     NFS_HOST:
