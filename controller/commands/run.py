@@ -2,31 +2,41 @@
 Start a single container
 """
 import os
-from typing import Optional, Tuple
+from typing import List, Optional, Union
 
 import typer
 
 from controller import REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
+from controller.deploy.compose_v2 import PortMapping, PortRangeMapping
 from controller.deploy.docker import Docker
 from controller.templating import password
 
 
-def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
+def get_publish_ports(
+    service: str, change_first_port: Optional[int]
+) -> Optional[List[Union[PortMapping, PortRangeMapping]]]:
     service_config = Application.data.compose_config.get(service, None)
     if not service_config:
         print_and_exit("Services misconfiguration, can't find {}", service)
 
-    try:
-        current_ports = service_config.ports.pop(0)
-    except IndexError:  # pragma: no cover
-        print_and_exit("No default port found?")
+    ports: List[Union[PortMapping, PortRangeMapping]] = []
+    for p in service_config.ports:
+        port = change_first_port or p.published
+        target = p.target
 
-    port = port or current_ports.published
-    target = current_ports.target
+        # Remove it, because this option is to be applied only to the first port
+        change_first_port = None
 
-    return port, target
+        ports.append(
+            (
+                port,
+                target,
+            )
+        )
+
+    return ports
 
 
 # This command replaces volatile, interfaces and registry
@@ -163,7 +173,7 @@ def run(
             # , symbols="%*,-.=?[]^_~"
         )
 
-    port, target = get_publish_port(service, port)
+    publish_ports = get_publish_ports(service, port)
 
     if detach is None:
         if service == "swaggerui" or service == "adminer":
@@ -196,5 +206,5 @@ def run(
         )
 
     docker.compose.create_volatile_container(
-        service, detach=detach, publish=[(port, target)]
+        service, detach=detach, publish=publish_ports
     )
