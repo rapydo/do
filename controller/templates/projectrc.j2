@@ -70,6 +70,7 @@ project_configuration:
       FRONTEND_BUILD_MODE: angular-test
       NEO4J_PASSWORD: {{ "RANDOM"| password }}
       FILE_LOGLEVEL: INFO
+      FTP_ENABLE_CONNECTOR: 1
       {# SYSLOG_ADDRESS: "" #}
       {% if production -%}
       DEFAULT_DHLEN: 1024
