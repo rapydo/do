@@ -102,6 +102,7 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "MONGO_PASSWORD": ["mongodb"],
     "MONGO_USER": ["mongodb"],
     "FTP_PASSWORD": ["ftp"],
+    "FTP_USER": ["ftp"],
 }
 
 
