@@ -22,8 +22,8 @@ from controller.utilities import git
 EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.2.3"
-EXPECTED_COMPOSE_BIN_MD5 = "8e1cec6807ab5bfdd0006a5601dc68cc"
+COMPOSE_VERSION = "v2.3.4"
+EXPECTED_COMPOSE_BIN_MD5 = "aabdabb03c84a5a0e20bed7c52c423d9"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.8.1"
