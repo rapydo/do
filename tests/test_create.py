@@ -320,7 +320,7 @@ def test_create(capfd: Capture) -> None:
         elif service == "neo4j":
             active_services = ["backend", "neo4j"]
         elif service == "celery":
-            active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
+            active_services = ["backend", "celery", "flower", "postgres", "redis"]
         elif service == "rabbit":
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
