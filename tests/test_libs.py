@@ -285,6 +285,7 @@ def test_get_default_command() -> None:
     assert services.get_default_command("registry") == "ash"
     assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
+    assert "redis-cli --pass" in services.get_default_command("redis")
 
 
 def test_get_templating() -> None:
