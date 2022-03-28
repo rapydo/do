@@ -194,23 +194,20 @@ def create_project(
                 ", ".join(dirs[0:3]),  # add first 3 files/folders found
             )
 
-    celery_broker = None  # Keep default value == RABBIT
-    celery_backend = None  # Keep default value == RABBIT
+    celery_broker = None  # Keep default value == REDIS
+    celery_backend = None  # Keep default value == REDIS
     if enable_celery:
 
         if enable_rabbit:
             celery_broker = "RABBIT"
-        elif enable_redis:
-            celery_broker = "REDIS"
         else:
-            celery_broker = "RABBIT"
+            celery_broker = "REDIS"
+            enable_redis = True
 
         if enable_redis:
             celery_backend = "REDIS"
         else:
             celery_backend = "RABBIT"
-
-        enable_rabbit = celery_broker == "RABBIT" or celery_backend == "RABBIT"
 
     env_variables = parse_env_variables(envs)
 

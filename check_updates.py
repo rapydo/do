@@ -34,10 +34,11 @@ os.chdir(Path(__file__).parent)
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
 skip_versions = {
-    "typescript": "4.5.4",
-    "node": "17.3.0-buster",
+    # "typescript": "4.5.4",
+    "node": "17.8.0-buster",
     "ubuntu": "22.04",
-    "ajv": "8.8.2",
+    "ajv": "8.11.0",
+    "setuptools": "61.1.1",
 }
 
 

@@ -362,7 +362,7 @@ def test_create(capfd: Capture) -> None:
         assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
         assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
 
-    verify_celery_configuration([], "RABBIT", "RABBIT")
+    verify_celery_configuration([], "REDIS", "REDIS")
     verify_celery_configuration(["rabbit"], "RABBIT", "RABBIT")
     verify_celery_configuration(["redis"], "REDIS", "REDIS")
     verify_celery_configuration(["rabbit", "redis"], "RABBIT", "REDIS")
