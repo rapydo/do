@@ -72,7 +72,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
@@ -113,7 +113,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
@@ -154,7 +154,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
