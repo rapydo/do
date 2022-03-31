@@ -16,15 +16,15 @@ class TestApp(BaseTests):
         schema = self.getDynamicInputSchema(client, "{{name.replace(" ", "_").lower()}}", headers)
         data = self.buildData(schema)
 
-        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data)
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", json=data)
         assert r.status_code == 401
 
-        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", json=data, headers=headers)
         assert r.status_code == 200
         uuid = self.get_content(r)
         assert isinstance(uuid, str)
 
-        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", data=data, headers=headers)
+        r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", json=data, headers=headers)
         assert r.status_code == 409
 
         r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
@@ -33,13 +33,13 @@ class TestApp(BaseTests):
         assert isinstance(content, list)
         assert len(content) > 0
 
-        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data)
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", json=data)
         assert r.status_code == 401
 
-        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/wrong-id", data=data, headers=headers)
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/wrong-id", json=data, headers=headers)
         assert r.status_code == 404
 
-        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", data=data, headers=headers)
+        r = client.put(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}", json=data, headers=headers)
         assert r.status_code == 204
 
         r = client.delete(f"{API_URI}/{{name.replace(" ", "_").lower()}}/{uuid}")

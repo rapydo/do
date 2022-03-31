@@ -7,6 +7,10 @@ repos:
     rev: v2.6.1
     hooks:
       - id: prettier
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-lxml
+    rev: v1.1.0
+    hooks:
+      - id: forbid-html-img-without-alt-text
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.31.1
     hooks:
@@ -24,42 +28,10 @@ repos:
     rev: v0.942
     hooks:
       - id: mypy
-        additional_dependencies: [
-            "python-on-whales==0.40.0",
-            "python-dateutil",
-            "pytz",
-            "loguru",
-            "jinja2",
-            "sultan==0.9.1",
-            "plumbum",
-            "glom",
-            "GitPython==3.1.27",
-            "PyYAML==6.0",
-            "pip>=10.0.0",
-            "typer[all]==0.4.0",
-            "click==8.0.4",
-
-            # Extra dependencies
-            "pytest",
-            "lxml",
-            "types-PyYAML",
-            "types-pytz",
-            "types-requests",
-            "types-setuptools",
-            "types-python-dateutil",
-            "types-click",
-            "types-tabulate",
-            "Faker",
-          ]
-
+        additional_dependencies:
+          ["git+https://github.com/rapydo/http-api.git@2.3"]
+        # https://mypy.readthedocs.io/en/stable/command_line.html
         args: [
-            # -> Type of variable becomes "xyz" due to an unfollowed import
-            "--disallow-any-unimported",
-
-            # Disable errors like:
-            # found module but no type hints
-            # "--ignore-missing-imports",
-
             # This flag disallows usage of generic types that do not specify explicit type parameters.
             # Moreover, built-in collections (such as list and dict)
             # become disallowed as you should use their aliases from the typing module
@@ -69,7 +41,7 @@ repos:
             # (By default the bodies of functions without annotations are not type checked.)
             "--check-untyped-defs",
             "--warn-redundant-casts",
-            "--warn-unused-ignores",
+            # "--warn-unused-ignores",
             "--warn-return-any",
             "--warn-unreachable",
             "--warn-unused-configs",
@@ -87,10 +59,7 @@ repos:
             # This flag reports an error whenever it encounters a
             # partly annotated function definition.
             "--disallow-incomplete-defs",
-            "--txt-report",
-            ".",
           ]
-
   - repo: https://github.com/gitguardian/gg-shield
     rev: v1.11.0
     hooks:
