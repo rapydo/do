@@ -2,12 +2,14 @@
 This module will test the password command and the passwords management
 """
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from faker import Faker
+from freezegun import freeze_time
 
 from controller import colors
 from controller.app import Configuration
+from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
     Capture,
     create_project,
@@ -139,3 +141,31 @@ def test_rabbit_invalid_characters(capfd: Capture, faker: Faker) -> None:
         "Not allowed characters found in RABBITMQ_PASSWORD.",
         informative,
     )
+
+
+def test_password_expiration(capfd: Capture) -> None:
+
+    variable = "RABBITMQ_PASSWORD"
+    label = "rabbit"
+
+    today = datetime.now()
+    today_text = today.strftime("%Y-%m-%d")
+    future = today + timedelta(days=PASSWORD_EXPIRATION + 1)
+
+    exec_command(
+        capfd,
+        "password",
+        f"{label}    {variable}  {colors.GREEN}{today_text}",
+    )
+    with freeze_time(future.strftime("%Y-%m-%d")):
+        exec_command(
+            capfd,
+            "password",
+            f"{label}    {variable}  {colors.RED}{today_text}",
+        )
+
+        exec_command(
+            capfd,
+            "check -i main --no-git --no-builds",
+            f"{variable} is expired on {today_text}",
+        )

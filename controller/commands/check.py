@@ -11,6 +11,7 @@ import typer
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
+from controller.commands.password import get_expired_passwords
 from controller.deploy.builds import (
     TemplateInfo,
     find_templates_build,
@@ -197,6 +198,13 @@ def check(
             buildx_version,
             BUILDX_VERSION,
             fix_hint,
+        )
+
+    for expired_passwords in get_expired_passwords():
+        log.warning(
+            "{} is expired on {}",
+            expired_passwords[0],
+            expired_passwords[1].strftime("%Y-%m-%d"),
         )
 
     log.info("Checks completed")

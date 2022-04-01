@@ -49,6 +49,7 @@ repos:
             "types-python-dateutil",
             "types-click",
             "types-tabulate",
+            "types-freezegun",
             "Faker",
           ]
 

@@ -41,6 +41,7 @@ setup(
             "pytest-cov",
             "pytest-timeout",
             "pytest-sugar",
+            "freezegun",
             "Faker",
         ]
     },
