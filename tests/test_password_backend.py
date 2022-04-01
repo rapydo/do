@@ -164,33 +164,23 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "logs backend --tail 10")
     assert r.status_code == 200
 
-    # Cleanup the stack for the next test
-    exec_command(capfd, "remove", "Stack removed")
-
-
-def test_password_expiration(capfd: Capture) -> None:
-
     variable = "AUTH_DEFAULT_PASSWORD"
     label = "backend"
 
-    today = datetime.now()
-    today_text = today.strftime("%Y-%m-%d")
-    future = today + timedelta(days=PASSWORD_EXPIRATION + 1)
+    future = datetime.now() + timedelta(days=PASSWORD_EXPIRATION + 1)
 
-    exec_command(
-        capfd,
-        "password",
-        f"{label}    {variable}  {colors.GREEN}{today_text}",
-    )
     with freeze_time(future.strftime("%Y-%m-%d")):
         exec_command(
             capfd,
             "password",
-            f"{label}    {variable}  {colors.RED}{today_text}",
+            f"{label}    {variable}  {colors.RED}{today}",
         )
 
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            f"{variable} is expired on {today_text}",
+            f"{variable} is expired on {today}",
         )
+
+    # Cleanup the stack for the next test
+    exec_command(capfd, "remove", "Stack removed")

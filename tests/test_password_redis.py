@@ -119,6 +119,24 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "redis")
 
+    variable = "REDIS_PASSWORD"
+    label = "redis"
+
+    future = datetime.now() + timedelta(days=PASSWORD_EXPIRATION + 1)
+
+    with freeze_time(future.strftime("%Y-%m-%d")):
+        exec_command(
+            capfd,
+            "password",
+            f"{label}    {variable}  {colors.RED}{today}",
+        )
+
+        exec_command(
+            capfd,
+            "check -i main --no-git --no-builds",
+            f"{variable} is expired on {today}",
+        )
+
     # Cleanup the stack for the next test
     exec_command(capfd, "remove", "Stack removed")
 
@@ -143,31 +161,3 @@ def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
         "Not allowed characters found in REDIS_PASSWORD.",
         informative,
     )
-
-
-def test_password_expiration(capfd: Capture) -> None:
-
-    variable = "REDIS_PASSWORD"
-    label = "redis"
-
-    today = datetime.now()
-    today_text = today.strftime("%Y-%m-%d")
-    future = today + timedelta(days=PASSWORD_EXPIRATION + 1)
-
-    exec_command(
-        capfd,
-        "password",
-        f"{label}    {variable}  {colors.GREEN}{today_text}",
-    )
-    with freeze_time(future.strftime("%Y-%m-%d")):
-        exec_command(
-            capfd,
-            "password",
-            f"{label}    {variable}  {colors.RED}{today_text}",
-        )
-
-        exec_command(
-            capfd,
-            "check -i main --no-git --no-builds",
-            f"{variable} is expired on {today_text}",
-        )

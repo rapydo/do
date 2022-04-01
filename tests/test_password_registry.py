@@ -96,34 +96,24 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
     )
 
-    # This is needed otherwise the following tests will be unable to start
-    # a new instance of the registry and will fail with registry auth errors
-    exec_command(capfd, "remove registry", "Service registry removed")
-
-
-def test_password_expiration(capfd: Capture) -> None:
-
     variable = "REGISTRY_PASSWORD"
     label = "registry"
 
-    today = datetime.now()
-    today_text = today.strftime("%Y-%m-%d")
-    future = today + timedelta(days=PASSWORD_EXPIRATION + 1)
+    future = datetime.now() + timedelta(days=PASSWORD_EXPIRATION + 1)
 
-    exec_command(
-        capfd,
-        "password",
-        f"{label}    {variable}  {colors.GREEN}{today_text}",
-    )
     with freeze_time(future.strftime("%Y-%m-%d")):
         exec_command(
             capfd,
             "password",
-            f"{label}    {variable}  {colors.RED}{today_text}",
+            f"{label}    {variable}  {colors.RED}{today}",
         )
 
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            f"{variable} is expired on {today_text}",
+            f"{variable} is expired on {today}",
         )
+
+    # This is needed otherwise the following tests will be unable to start
+    # a new instance of the registry and will fail with registry auth errors
+    exec_command(capfd, "remove registry", "Service registry removed")
