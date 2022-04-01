@@ -39,7 +39,8 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     init_project(capfd, "-e API_AUTOSTART=1")
     start_registry(capfd)
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     exec_command(
         capfd,
@@ -120,7 +121,8 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     variable = "RABBITMQ_PASSWORD"
     label = "rabbit"
 
-    future = datetime.now() + timedelta(days=PASSWORD_EXPIRATION + 1)
+    future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
+    expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
     with freeze_time(future.strftime("%Y-%m-%d")):
         exec_command(
@@ -132,7 +134,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            f"{variable} is expired on {today}",
+            f"{variable} is expired on {expired}",
         )
 
     # Cleanup the stack for the next test

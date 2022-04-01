@@ -38,7 +38,8 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
     init_project(capfd)
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     exec_command(
         capfd,
@@ -99,7 +100,8 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     variable = "REGISTRY_PASSWORD"
     label = "registry"
 
-    future = datetime.now() + timedelta(days=PASSWORD_EXPIRATION + 1)
+    future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
+    expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
     with freeze_time(future.strftime("%Y-%m-%d")):
         exec_command(
@@ -111,7 +113,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            f"{variable} is expired on {today}",
+            f"{variable} is expired on {expired}",
         )
 
     # This is needed otherwise the following tests will be unable to start
