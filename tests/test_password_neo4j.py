@@ -108,23 +108,20 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "neo4j")
 
-    variable = "NEO4J_PASSWORD"
-    label = "neo4j"
-
     future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
     expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
-    with freeze_time(future.strftime("%Y-%m-%d")):
+    with freeze_time(future):
         exec_command(
             capfd,
             "password",
-            f"{label}    {variable}  {colors.RED}{today}",
+            f"neo4j      NEO4J_PASSWORD         {colors.RED}{today}",
         )
 
         exec_command(
             capfd,
             "check -i main --no-git --no-builds",
-            f"{variable} is expired on {expired}",
+            f"NEO4J_PASSWORD is expired on {expired}",
         )
 
     # Cleanup the stack for the next test
