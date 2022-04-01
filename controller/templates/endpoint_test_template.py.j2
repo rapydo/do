@@ -13,7 +13,7 @@ class TestApp(BaseTests):
         r = client.get(f"{API_URI}/{{name.replace(" ", "_").lower()}}", headers=headers)
         assert r.status_code == 200
 
-        schema = self.getDynamicInputSchema(client, "{{name.replace(" ", "_").lower()}}", headers)
+        schema = self.get_dynamic_input_schema(client, "{{name.replace(" ", "_").lower()}}", headers)
         data = self.buildData(schema)
 
         r = client.post(f"{API_URI}/{{name.replace(" ", "_").lower()}}", json=data)
