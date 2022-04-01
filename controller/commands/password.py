@@ -42,6 +42,9 @@ SupportedServices = Enum(  # type: ignore
 # https://github.com/yaml/pyyaml/issues/90
 def parse_projectrc() -> Dict[str, datetime]:
 
+    if not PROJECTRC.exists():
+        return {}
+
     updates: Dict[str, datetime] = {}
     with open(PROJECTRC) as f:
         lines = f.readlines()
