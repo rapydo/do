@@ -29,7 +29,7 @@ setup(
         "pip>=10.0.0",
         "requests>=2.6.1",
         "typer[all]==0.4.1",
-        "click==8.1.1",
+        "click==8.1.2",
         "zxcvbn",
         "tabulate",
         "packaging",
