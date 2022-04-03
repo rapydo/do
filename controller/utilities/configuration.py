@@ -73,6 +73,7 @@ class Configuration(TypedDict, total=False):
 
 class BACKEND_BUILD_MODE_VALUES(Enum):
     backend = "backend"
+    backend_legacy = "backend-legacy"
 
 
 class FRONTEND_FRAMEWORK_VALUES(Enum):
