@@ -1203,7 +1203,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.resolve()
-                    # This can be used starting from python 3.9
+                    # This can be used starting from py39
                     # do_dir = do_dir.readlink()
 
                 if do_dir == installation_path:

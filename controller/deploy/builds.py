@@ -108,7 +108,7 @@ def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
         for line in reversed(f.readlines()):
             line = line.strip().lower()
             if line.startswith("from "):
-                # from python 3.9 it will be:
+                # from py39 it will be:
                 # image = line.removeprefix("from ")
                 image = line[5:]
                 if " as " in image:
