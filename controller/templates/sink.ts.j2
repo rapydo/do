@@ -74,7 +74,7 @@ export class SinkComponent implements OnInit {
       this.upload_options = {
         endpoint: environment.backendURI + "/api/tests/chunkedupload",
         allowedTypes:
-          "application/x-zip-compressed,application/x-compressed,application/zip,multipart/x-zip",
+          "text/plain,application/zip,multipart/x-zip",
         multiple: false,
         autoUpload: true,
       };
