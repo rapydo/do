@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 
 import { FormGroup } from "@angular/forms";
 import { FormlyFieldConfig } from "@ngx-formly/core";
+import { UploadState } from "ngx-uploadx";
 
 import { FormlyService } from "@rapydo/services/formly";
 import { ApiService } from "@rapydo/services/api";
@@ -24,6 +25,11 @@ export class SinkComponent implements OnInit {
   public form2 = new FormGroup({});
   public fields2: FormlyFieldConfig[] = [];
   public model2: any = {};
+
+  // Used by ngx-upload
+  public upload_options: any;
+  public upload_progress: number = 0;
+  public upload_speed: number = 0;
 
   // Used to test the autocomplete 
   public form3 = new FormGroup({});
@@ -57,6 +63,17 @@ export class SinkComponent implements OnInit {
         this.notify.showError(error);
       }
     );
+
+    if (this.upload_options == null) {
+      this.upload_options = {
+        endpoint: environment.backendURI + "/api/tests/chunkedupload,
+        // token: this.auth.getToken(),
+        allowedTypes:
+          "application/x-zip-compressed,application/x-compressed,application/zip,multipart/x-zip",
+        multiple: false,
+        autoUpload: true,
+      };
+    }
 
     this.api.post<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
@@ -271,6 +288,18 @@ export class SinkComponent implements OnInit {
     }
 
     this.data = this.model5;
+  }
+
+  onUpload(item: UploadState) {
+    this.upload_progress = item.progress;
+    this.upload_speed = item.speed;
+    if (
+      item.progress == 100 &&
+      item.remaining == 0 &&
+      item.status == "complete"
+    ) {
+      this.upload_progress = -1;
+    }
   }
 
 }

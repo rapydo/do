@@ -76,7 +76,23 @@
               <ng-template ngbNavContent>
                 <br />
                 <div class="row">
-                  <div class="col-12">Content</div>
+                  <div class="col-12">
+                    <input
+                      *ngIf="upload_options"
+                      type="file"
+                      [uploadx]="upload_options"
+                      (state)="onUpload($event)"
+                    />
+
+                    <span *ngIf="upload_progress && upload_progress > 0">
+                      Upload speed: {{ upload_speed | bytes}}/s
+                      <ngb-progressbar
+                        showValue="true"
+                        type="info"
+                        [value]="upload_progress"
+                      ></ngb-progressbar>
+                    </span>
+                  </div>
                 </div>
               </ng-template>
             </li>

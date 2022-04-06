@@ -418,7 +418,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
         "email",
         "errno",
         "flask",
-        "flask_restful",
         "flask_sqlalchemy",
         "authlib",
         "functools",
