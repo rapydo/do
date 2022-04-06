@@ -39,7 +39,8 @@ export class SinkComponent implements OnInit {
   public upload_speed: number = 0;
 
   // Used by ngx-datatable
-  public data: Array<T> = [];
+  public ColumnMode = ColumnMode;
+  public table_data: Array<any> = [];
   public columns: Array<any> = [];
   @ViewChild("namesCell", { static: false })
   public namesCell: TemplateRef<any>;
@@ -78,9 +79,10 @@ export class SinkComponent implements OnInit {
     );
 
     if (this.upload_options == null) {
+      // In case of authenticated endpoint, you can add the token to the upload_options
+      // token: this.auth.getToken(),
       this.upload_options = {
-        endpoint: environment.backendURI + "/api/tests/chunkedupload,
-        // token: this.auth.getToken(),
+        endpoint: environment.backendURI + "/api/tests/chunkedupload",
         allowedTypes:
           "application/x-zip-compressed,application/x-compressed,application/zip,multipart/x-zip",
         multiple: false,
@@ -125,7 +127,7 @@ export class SinkComponent implements OnInit {
 
   public ngAfterViewInit(): void {
 
-    this.data = [
+    this.table_data = [
       {"shortname": "AAA", "fullname": "Aardvark Ant Alpaca", extra: "1"},
       {"shortname": "BBB", "fullname": "Buffalo Bear Bobcat", extra: "2"},
       {"shortname": "CCC", "fullname": "Cheetah Cow Caracal", extra: "3"},
@@ -134,9 +136,9 @@ export class SinkComponent implements OnInit {
     this.columns = [
       { name: "Shortname", prop: "shortname", flexGrow: 0.5 },
       { name: "Fullname", prop: "fullname", flexGrow: 1.5, cellTemplate: this.namesCell,},
-    }
     ];
   }
+
   private get_fields(wrappers) {
 
     const now = new Date();

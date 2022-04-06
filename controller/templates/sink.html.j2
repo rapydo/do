@@ -107,12 +107,12 @@
                   <div class="col-12">
             <ngx-datatable
               class="bootstrap"
-              [rows]="data"
+              [rows]="table_data"
               [columns]="columns"
               [columnMode]="ColumnMode.flex"
               [headerHeight]="40"
               [footerHeight]="40"
-              [limit]="paging.itemsPerPage"
+              [limit]="10"
               [rowHeight]="'auto'"
               (activate)="onDatatableActivate($event)"
             >
