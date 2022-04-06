@@ -68,16 +68,6 @@ export class SinkComponent implements OnInit {
     this.fields1 = this.get_fields(null);
     this.fields2 = this.get_fields(["form-field-horizontal"]);
 
-    this.api.put<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
-      (response) => {
-        let data = this.formly.json2Form(response, {});
-        this.fields3 = data.fields;
-      },
-      (error) => {
-        this.notify.showError(error);
-      }
-    );
-
     if (this.upload_options == null) {
       // In case of authenticated endpoint, you can add the token to the upload_options
       // token: this.auth.getToken(),
@@ -89,6 +79,16 @@ export class SinkComponent implements OnInit {
         autoUpload: true,
       };
     }
+
+    this.api.put<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
+      (response) => {
+        let data = this.formly.json2Form(response, {});
+        this.fields3 = data.fields;
+      },
+      (error) => {
+        this.notify.showError(error);
+      }
+    );
 
     this.api.post<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
@@ -326,6 +326,7 @@ export class SinkComponent implements OnInit {
       item.remaining == 0 &&
       item.status == "complete"
     ) {
+      this.notify.showSuccess("Upload completed");
       this.upload_progress = -1;
     }
   }

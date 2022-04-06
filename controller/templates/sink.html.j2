@@ -84,8 +84,11 @@
                       (state)="onUpload($event)"
                     />
 
-                    <span *ngIf="upload_progress && upload_progress > 0">
+                    <span *ngIf="upload_speed">
                       Upload speed: {{ upload_speed | bytes}}/s
+                    </span>
+
+                    <span *ngIf="upload_progress && upload_progress > 0">
                       <ngb-progressbar
                         showValue="true"
                         type="info"
