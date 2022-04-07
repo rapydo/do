@@ -131,9 +131,7 @@ jobs:
           sudo pip uninstall rapydo
           pip uninstall rapydo
 
-          pip list --editable
-
-          ls *.egg-info
+          rm -rf *.egg-info
 
           # And now install again 
           pip install --upgrade --no-cache-dir --editable .[dev]
