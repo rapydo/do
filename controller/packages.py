@@ -19,17 +19,11 @@ from controller.utilities import system
 
 class Packages:
     @staticmethod
-    def install(
-        package: Union[str, Path],
-        editable: bool = False,
-        use_pip3: bool = True,
-    ) -> bool:
-
+    def install(package: Union[str, Path], editable: bool) -> bool:
+        """
+        Install a python package in editable or normal mode
+        """
         # Note: package is a Path if editable, str otherwise
-
-        if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
-            log.warning("pip3 is not available, switching to pip")
-            return Packages.install(package=package, editable=editable, use_pip3=False)
 
         try:
 
@@ -44,8 +38,7 @@ class Packages:
 
                 command += f" {package}"
 
-                pip = sultan.pip3 if use_pip3 else sultan.pip
-                result = pip(command).run()
+                result = sultan.pip3(command).run()
 
                 for r in result.stdout + result.stderr:
                     print(r)
@@ -61,6 +54,9 @@ class Packages:
         max_version: Optional[str] = None,
         min_recommended_version: Optional[str] = None,
     ) -> str:
+        """
+        Verify if a binary exists and (optionally) its version
+        """
 
         found_version = Packages.get_bin_version(program)
         if found_version is None:
@@ -108,6 +104,9 @@ class Packages:
 
     @staticmethod
     def convert_bin_to_win32(exec_cmd: str) -> str:
+        """
+        Convert a binary name to Windows standards
+        """
         if exec_cmd == "docker":
             return "docker.exe"
         return exec_cmd
@@ -116,6 +115,9 @@ class Packages:
     def get_bin_version(
         cls, exec_cmd: str, option: List[str] = ["--version"]
     ) -> Optional[str]:
+        """
+        Retrieve the version of a binary
+        """
 
         try:
 
@@ -154,18 +156,19 @@ class Packages:
         return None
 
     @staticmethod
-    def get_installation_path(
-        package: str = "rapydo", use_pip3: bool = True
-    ) -> Optional[Path]:
+    def get_installation_path(package: str = "rapydo") -> Optional[Path]:
+        """
+        Retrieve the controller installation path, if installed in editable mode
+        """
         command = "list --editable"
 
         with Sultan.load(sudo=False) as sultan:
 
-            pip = sultan.pip3 if use_pip3 else sultan.pip
-            result = pip(command).run()
+            result = sultan.pip3(command).run()
 
             for r in result.stdout + result.stderr:
                 if r.startswith(f"{package} "):
                     tokens = re.split(r"\s+", r)
                     return Path(str(tokens[2]))
+
         return None

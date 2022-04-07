@@ -144,7 +144,7 @@ rapydo install {ver} --no-editable
     else:
         print_and_exit("Invalid version")
 
-    installed = Packages.install(do_path, editable=True, user=True)
+    installed = Packages.install(do_path, editable=True)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from local folder", version)
@@ -160,7 +160,7 @@ def install_controller_from_git(version: str) -> None:
 
     time.sleep(2)
 
-    installed = Packages.install(controller, user=True)
+    installed = Packages.install(controller, editable=False)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from git", version)
