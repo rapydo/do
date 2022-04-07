@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from loguru import logger as log
 
 nginx_header = "../build-templates/proxy/confs/production.conf"

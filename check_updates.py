@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, cast
 import click
 import requests
 import yaml
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from loguru import logger as log
 from packaging.version import Version
 

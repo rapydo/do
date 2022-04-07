@@ -9,8 +9,8 @@ import pytest
 
 from controller import DATA_DIR, LOGS_FOLDER, __version__, colors
 from controller.app import Configuration
-from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.deploy.docker import Docker
+from controller.packages import BUILDX_VERSION, COMPOSE_VERSION
 from controller.utilities import git
 from tests import (
     Capture,

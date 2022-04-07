@@ -17,11 +17,10 @@ from packaging.version import Version
 from controller import __version__
 from controller.app import Application, Configuration
 from controller.commands.backup import get_date_pattern
-from controller.commands.install import download
 from controller.commands.password import get_projectrc_variables_indentation
 from controller.deploy.builds import get_image_creation
 from controller.deploy.docker import Docker
-from controller.packages import Packages
+from controller.packages import ExecutionException, Packages
 from controller.templating import Templating
 from controller.utilities import git, services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
@@ -114,14 +113,14 @@ def test_git(capfd: Capture, faker: Faker) -> None:
 
 
 def test_execute_command() -> None:
-    out = system.execute_command("echo", ["-n", "Hello World"])
+    out = Packages.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
-    out = system.execute_command("echo", ["Hello World"])
+    out = Packages.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
-    with pytest.raises(system.ExecutionException):
-        assert system.execute_command("ls", ["doesnotexistforsure"])
+    with pytest.raises(ExecutionException):
+        assert Packages.execute_command("ls", ["doesnotexistforsure"])
 
 
 def test_bytes_to_str() -> None:
@@ -394,15 +393,15 @@ def test_packages(faker: Faker) -> None:
 
 def test_download() -> None:
     with pytest.raises(SystemExit):
-        download("https://www.google.com/test", "")
+        Packages.download("https://www.google.com/test", "")
 
     with pytest.raises(SystemExit):
-        download(
+        Packages.download(
             "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
             "thisisawrongchecksum",
         )
 
-    downloaded = download(
+    downloaded = Packages.download(
         "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
         "dc07bef0d12a7a9cfd0f383452cbcb6d",
     )

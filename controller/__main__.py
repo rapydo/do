@@ -10,7 +10,7 @@ def main() -> None:
     else:  # pragma: no cover
         warnings.filterwarnings("default")
 
-    from colorama import deinit, init
+    from colorama import deinit, init  # type: ignore
     from python_on_whales.utils import DockerException
 
     from controller.app import Application

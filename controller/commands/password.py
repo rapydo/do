@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple, cast
 
 import typer
 from tabulate import tabulate
-from zxcvbn import zxcvbn
+from zxcvbn import zxcvbn  # type: ignore
 
 from controller import (
     GREEN,
