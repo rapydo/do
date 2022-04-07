@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 from packaging.version import Version
 from sultan.api import Sultan
 
-from controller import log, print_and_exit
+from controller import RED, log, print_and_exit
 from controller.utilities import system
 
 
@@ -86,7 +86,9 @@ class Packages:
 
             hints = ""
             if program == "docker":  # pragma: no cover
+                install_cmd = RED("rapydo install docker")
                 hints = "\n\nTo install docker visit: https://get.docker.com"
+                hints += f"or execute {install_cmd}"
 
             print_and_exit(
                 "A mandatory dependency is missing: {} not found{}", program, hints

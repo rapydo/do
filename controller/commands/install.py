@@ -80,62 +80,15 @@ def install(
     )
 
     if version == "docker":
-        log.info("Docker current version: {}", Packages.get_bin_version("docker"))
-        url = "https://get.docker.com"
-        log.info("Downloading installation script: {}", url)
-        f = download(url, EXPECTED_DOCKER_SCRIPT_MD5)
-
-        log.info("The installation script contains a wait, please be patient")
-        with Sultan.load(sudo=True) as sultan:
-            result = sultan.sh(f).run()
-
-            for r in result.stdout + result.stderr:
-                print(r)
-
-        log.info("Docker installed version: {}", Packages.get_bin_version("docker"))
+        install_docker()
         return None
 
     if version == "compose":
-        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
-        cli_plugin.mkdir(parents=True, exist_ok=True)
-        compose_bin = cli_plugin.joinpath("docker-compose")
-
-        url = "https://github.com/docker/compose/releases/download/"
-        url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
-
-        log.info("Downloading compose binary: {}", url)
-        f = download(url, EXPECTED_COMPOSE_BIN_MD5)
-        f.rename(compose_bin)
-        compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
-
-        if docker.compose.is_installed():
-            log.info("Docker compose is installed")
-        else:  # pragma: no cover
-            log.error("Docker compose is NOT installed")
+        install_compose()
         return None
 
     if version == "buildx":
-        if docker.buildx.is_installed():
-            v = docker.buildx.version()
-            log.info("Docker buildx current version: {}", v)
-        else:  # pragma: no cover
-            log.info("Docker buildx current version: N/A")
-
-        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
-        cli_plugin.mkdir(parents=True, exist_ok=True)
-        buildx_bin = cli_plugin.joinpath("docker-buildx")
-
-        url = "https://github.com/docker/buildx/releases/download/"
-        url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
-
-        log.info("Downloading buildx binary: {}", url)
-        f = download(url, EXPECTED_BUILDX_BIN_MD5)
-
-        f.rename(buildx_bin)
-        buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
-
-        v = docker.buildx.version()
-        log.info("Docker buildx installed version: {}", v)
+        install_buildx()
         return None
 
     Application.get_controller().controller_init()
@@ -172,17 +125,8 @@ rapydo install {ver} --no-editable
         raise
 
     log.info(
-        """You asked to install rapydo {}. It will be installed in editable mode
-
-This command will require root privileges because of the editable mode.
-You could be prompted to enter your password: this is due to the use of sudo.
-
-If you want to execute this installation by yourself, you can execute:
-
-sudo pip3 install --upgrade --editable {}
-""",
+        "You asked to install rapydo {}. It will be installed in editable mode",
         version,
-        do_path,
     )
 
     time.sleep(2)
@@ -210,25 +154,9 @@ sudo pip3 install --upgrade --editable {}
 
 def install_controller_from_git(version: str) -> None:
 
-    controller_repository = "do"
-    rapydo_uri = "https://github.com/rapydo"
-    controller = f"git+{rapydo_uri}/{controller_repository}.git@{version}"
+    controller = f"git+https://github.com/rapydo/do.git@{version}"
 
-    log.info(
-        """You asked to install rapydo {} from git. It will be installed globally
-
-This command will require root privileges because of the global installation.
-You could be prompted to enter your password: this is due to the use of sudo.
-
-If you want to execute this installation by yourself, you can execute:
-
-sudo pip3 install --upgrade [--user] {}
-
-
-""",
-        version,
-        controller,
-    )
+    log.info("You asked to install rapydo {} from git", version)
 
     time.sleep(2)
 
@@ -238,3 +166,62 @@ sudo pip3 install --upgrade [--user] {}
         log.error("Unable to install controller {} from git", version)
     else:
         log.info("Controller version {} installed from git", version)
+
+
+def install_docker() -> None:
+    log.info("Docker current version: {}", Packages.get_bin_version("docker"))
+    url = "https://get.docker.com"
+    log.info("Downloading installation script: {}", url)
+    f = download(url, EXPECTED_DOCKER_SCRIPT_MD5)
+
+    log.info("The installation script contains a wait, please be patient")
+    with Sultan.load(sudo=True) as sultan:
+        result = sultan.sh(f).run()
+
+        for r in result.stdout + result.stderr:
+            print(r)
+
+    log.info("Docker installed version: {}", Packages.get_bin_version("docker"))
+
+
+def install_compose() -> None:
+    cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+    cli_plugin.mkdir(parents=True, exist_ok=True)
+    compose_bin = cli_plugin.joinpath("docker-compose")
+
+    url = "https://github.com/docker/compose/releases/download/"
+    url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
+
+    log.info("Downloading compose binary: {}", url)
+    f = download(url, EXPECTED_COMPOSE_BIN_MD5)
+    f.rename(compose_bin)
+    compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
+
+    if docker.compose.is_installed():
+        log.info("Docker compose is installed")
+    else:  # pragma: no cover
+        log.error("Docker compose is NOT installed")
+
+
+def install_buildx() -> None:
+    if docker.buildx.is_installed():
+        v = docker.buildx.version()
+        log.info("Docker buildx current version: {}", v)
+    else:  # pragma: no cover
+        log.info("Docker buildx current version: N/A")
+
+    cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+    cli_plugin.mkdir(parents=True, exist_ok=True)
+    buildx_bin = cli_plugin.joinpath("docker-buildx")
+
+    url = "https://github.com/docker/buildx/releases/download/"
+    url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
+
+    log.info("Downloading buildx binary: {}", url)
+    f = download(url, EXPECTED_BUILDX_BIN_MD5)
+
+    f.rename(buildx_bin)
+    buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
+
+    v = docker.buildx.version()
+    log.info("Docker buildx installed version: {}", v)
