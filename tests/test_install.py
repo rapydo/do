@@ -6,7 +6,6 @@ from pathlib import Path
 from faker import Faker
 
 from controller import SUBMODULES_DIR, __version__
-from controller.app import Configuration
 from controller.utilities import git
 from tests import (
     Capture,
@@ -20,12 +19,6 @@ from tests import (
 
 
 def test_install(capfd: Capture, faker: Faker) -> None:
-
-    # No need to install both in compose and swarm mode...
-    # Prevent issues with additional installation (on swarm test)
-    # starting from the dirty environment left by the compose test
-    if Configuration.swarm_mode:
-        return None
 
     execute_outside(capfd, "install")
 

@@ -17,50 +17,31 @@ from controller import RED, log, print_and_exit
 from controller.utilities import system
 
 
-# Note: user is always set as True
 class Packages:
     @staticmethod
     def install(
-        # Path if editable, str otherwise
         package: Union[str, Path],
         editable: bool = False,
-        user: bool = False,
         use_pip3: bool = True,
     ) -> bool:
 
-        # Do not import outside, otherwise it will lead to a circular import:
-        # cannot import name 'Configuration' from partially initialized module
-        from controller.app import Configuration
+        # Note: package is a Path if editable, str otherwise
 
         if use_pip3 and Packages.get_bin_version("pip3") is None:  # pragma: no cover
             log.warning("pip3 is not available, switching to pip")
-            return Packages.install(
-                package=package, editable=editable, user=user, use_pip3=False
-            )
+            return Packages.install(package=package, editable=editable, use_pip3=False)
 
         try:
 
-            # sudo does not work on Windows
-            if os.name == "nt":  # pragma: no cover
-                sudo = False
-            # sudo not properly working on GHA
-            elif Configuration.testing:
-                sudo = False
-            else:
-                sudo = not user
-
-            with Sultan.load(sudo=sudo) as sultan:
+            with Sultan.load(sudo=False) as sultan:
                 command = "install --upgrade"
-                # --user does not work on travis:
-                # Can not perform a '--user' install.
-                # User site-packages are not visible in this virtualenv.
-                if (
-                    not Configuration.testing and user and not editable
-                ):  # pragma: no cover
-                    command += " --user"
+
                 if editable:
                     command += " --prefix $HOME/.local"
                     command += " --editable"
+                else:
+                    command += " --user"
+
                 command += f" {package}"
 
                 pip = sultan.pip3 if use_pip3 else sultan.pip

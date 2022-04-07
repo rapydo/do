@@ -158,6 +158,13 @@ jobs:
           sudo cat /etc/docker/daemon.json
           sudo systemctl restart docker.service
 
+          # No need to install both in compose and swarm mode...
+          # Prevent issues with additional installation (on swarm test)
+          # starting from the dirty environment left by the compose test
+          if [[ "${TEST_NAME}" == "install" ]]; then
+            exit 0
+          fi
+
           if [[ "${TEST_NAME}" == "multi_host" ]]; then
 
             docker swarm init
