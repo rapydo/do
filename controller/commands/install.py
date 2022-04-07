@@ -200,7 +200,7 @@ sudo pip3 install --upgrade --editable {}
     else:
         print_and_exit("Invalid version")
 
-    installed = Packages.install(do_path, editable=True, user=False)
+    installed = Packages.install(do_path, editable=True, user=True)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from local folder", version)
@@ -232,7 +232,7 @@ sudo pip3 install --upgrade [--user] {}
 
     time.sleep(2)
 
-    installed = Packages.install(controller, user=False)
+    installed = Packages.install(controller, user=True)
 
     if not installed:  # pragma: no cover
         log.error("Unable to install controller {} from git", version)

@@ -17,6 +17,7 @@ from controller import log, print_and_exit
 from controller.utilities import system
 
 
+# Note: user is always set as True
 class Packages:
     @staticmethod
     def install(
@@ -53,9 +54,12 @@ class Packages:
                 # --user does not work on travis:
                 # Can not perform a '--user' install.
                 # User site-packages are not visible in this virtualenv.
-                if not Configuration.testing and user:  # pragma: no cover
+                if (
+                    not Configuration.testing and user and not editable
+                ):  # pragma: no cover
                     command += " --user"
                 if editable:
+                    command += " --prefix $HOME/.local"
                     command += " --editable"
                 command += f" {package}"
 
