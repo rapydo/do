@@ -1,6 +1,6 @@
 [tool.black]
 line-length = 88
-target-version = ['py38']
+target-version = ['py38', 'py39', 'py310']
 include = '\.pyi?$'
 exclude = '''
 
@@ -21,3 +21,10 @@ exclude = '''
                      # the root of the project
 )
 '''
+
+[settings]
+py_version = 38
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+ensure_newline_before_comments = true
