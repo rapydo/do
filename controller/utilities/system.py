@@ -1,39 +1,12 @@
 import os
 import socket
-from typing import List, Optional, Union
-
-from plumbum import local
-from plumbum.commands.processes import CommandNotFound, ProcessExecutionError
+from typing import Optional, Union
 
 from controller import log
 
 GB = 1_073_741_824
 MB = 1_048_576
 KB = 1024
-
-
-class ExecutionException(Exception):
-    pass
-
-
-def execute_command(command: str, parameters: List[str]) -> str:
-    try:
-
-        # Pattern in plumbum library for executing a shell command
-        local_command = local[command]
-        log.debug("Executing command {} {}", command, " ".join(parameters))
-        return str(local_command(parameters))
-    except CommandNotFound:
-        raise ExecutionException(f"Command not found: {command}")
-
-    except ProcessExecutionError:
-        raise ExecutionException(
-            f"Cannot execute command: {command} {' '.join(parameters)}"
-        )
-
-    # raised on Windows
-    except OSError:  # pragma: no cover
-        raise ExecutionException(f"Cannot execute: {command}")
 
 
 def get_username(uid: int) -> str:

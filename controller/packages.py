@@ -1,49 +1,72 @@
 """
 Utilities to work with python packages and binaries
 """
-
-# BEWARE: to not import this package at startup,
+# WARNING: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
+
+import hashlib
 import os
 import re
+import stat
+import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
 
+import requests
 from packaging.version import Version
-from sultan.api import Sultan
+from plumbum import local  # type: ignore
+from plumbum.commands.processes import (  # type: ignore
+    CommandNotFound,
+    ProcessExecutionError,
+)
+from python_on_whales import docker
+from sultan.api import Sultan  # type: ignore
 
 from controller import RED, log, print_and_exit
-from controller.utilities import system
+
+# https://get.docker.com
+EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
+
+# https://github.com/docker/compose/releases
+COMPOSE_VERSION = "v2.4.1"
+EXPECTED_COMPOSE_BIN_MD5 = "6167d3bd1aa3fe6fca8718b06f157822"
+
+# https://github.com/docker/buildx/releases
+BUILDX_VERSION = "v0.8.2"
+EXPECTED_BUILDX_BIN_MD5 = "67e87713bc63b57d20d8f9ee4b59c170"
+
+
+class ExecutionException(Exception):
+    pass
 
 
 class Packages:
     @staticmethod
-    def install(package: Union[str, Path], editable: bool) -> bool:
+    def install(package: Union[str, Path], editable: bool) -> None:
         """
         Install a python package in editable or normal mode
         """
-        # Note: package is a Path if editable, str otherwise
 
         try:
 
-            with Sultan.load(sudo=False) as sultan:
-                command = "install --upgrade"
+            options = ["install", "--upgrade"]
 
-                if editable:
-                    command += " --prefix $HOME/.local"
-                    command += " --editable"
-                else:
-                    command += " --user"
+            if editable:
+                options.append("--prefix")
+                options.append("~/.local")
+                options.append("--editable")
+            else:
+                options.append("--user")
 
-                command += f" {package}"
+            # Note: package is a Path if editable, str otherwise
+            options.append(str(package))
 
-                result = sultan.pip3(command).run()
+            output = Packages.execute_command("pip3", options)
 
-                for r in result.stdout + result.stderr:
-                    print(r)
+            for r in output.split("\n"):
+                print(r)
 
-                return bool(result.rc == 0)
         except Exception as e:  # pragma: no cover
             print_and_exit(str(e))
 
@@ -124,7 +147,7 @@ class Packages:
             if os.name == "nt":  # pragma: no cover
                 exec_cmd = cls.convert_bin_to_win32(exec_cmd)
 
-            output = system.execute_command(exec_cmd, option)
+            output = Packages.execute_command(exec_cmd, option)
 
             # then last element on spaces
             # get up to the first open round bracket if any, or return the whole string
@@ -150,7 +173,7 @@ class Packages:
             # echo --version -> --version
             # ls --version -> ls
             # pip3 --version -> a path
-        except system.ExecutionException as e:
+        except ExecutionException as e:
             log.error(e)
 
         return None
@@ -160,15 +183,123 @@ class Packages:
         """
         Retrieve the controller installation path, if installed in editable mode
         """
-        command = "list --editable"
-
-        with Sultan.load(sudo=False) as sultan:
-
-            result = sultan.pip3(command).run()
-
-            for r in result.stdout + result.stderr:
-                if r.startswith(f"{package} "):
-                    tokens = re.split(r"\s+", r)
-                    return Path(str(tokens[2]))
+        for r in Packages.execute_command("pip3", ["list", "--editable"]).split("\n"):
+            if r.startswith(f"{package} "):
+                tokens = re.split(r"\s+", r)
+                return Path(str(tokens[2]))
 
         return None
+
+    @staticmethod
+    def download(url: str, expected_checksum: str) -> Path:
+        try:
+            r = requests.get(url, timeout=10)
+            if r.status_code != 200:
+                print_and_exit(
+                    "Can't download {}, invalid status code {}", url, str(r.status_code)
+                )
+
+            file: Path = Path(tempfile.NamedTemporaryFile().name)
+
+            with open(file, "wb") as f:
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+
+            md5 = "N/A"
+            with open(file, "rb") as f:
+                md5 = hashlib.md5(f.read()).hexdigest()
+
+            if md5 == expected_checksum:
+                log.info("Checksum verified: {}", md5)
+            else:
+                print_and_exit(
+                    "File checksum ({}) does not match the expected value ({})",
+                    md5,
+                    expected_checksum,
+                )
+
+            return file
+        except requests.exceptions.ReadTimeout as e:  # pragma: no cover
+            print_and_exit(
+                "The request timed out, please retry in a while ({})", str(e)
+            )
+
+    @staticmethod
+    def install_docker() -> None:
+        log.info("Docker current version: {}", Packages.get_bin_version("docker"))
+        url = "https://get.docker.com"
+        log.info("Downloading installation script: {}", url)
+        f = Packages.download(url, EXPECTED_DOCKER_SCRIPT_MD5)
+
+        log.info("The installation script contains a wait, please be patient")
+        with Sultan.load(sudo=True) as sultan:
+            result = sultan.sh(f).run()
+
+            for r in result.stdout + result.stderr:
+                print(r)
+
+        log.info("Docker installed version: {}", Packages.get_bin_version("docker"))
+
+    @staticmethod
+    def install_compose() -> None:
+        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+        cli_plugin.mkdir(parents=True, exist_ok=True)
+        compose_bin = cli_plugin.joinpath("docker-compose")
+
+        url = "https://github.com/docker/compose/releases/download/"
+        url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
+
+        log.info("Downloading compose binary: {}", url)
+        f = Packages.download(url, EXPECTED_COMPOSE_BIN_MD5)
+        f.rename(compose_bin)
+        compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
+
+        if docker.compose.is_installed():
+            log.info("Docker compose is installed")
+        else:  # pragma: no cover
+            log.error("Docker compose is NOT installed")
+
+    @staticmethod
+    def install_buildx() -> None:
+        if docker.buildx.is_installed():
+            v = docker.buildx.version()
+            log.info("Docker buildx current version: {}", v)
+        else:  # pragma: no cover
+            log.info("Docker buildx current version: N/A")
+
+        cli_plugin = Path.home().joinpath(".docker", "cli-plugins")
+        cli_plugin.mkdir(parents=True, exist_ok=True)
+        buildx_bin = cli_plugin.joinpath("docker-buildx")
+
+        url = "https://github.com/docker/buildx/releases/download/"
+        url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
+
+        log.info("Downloading buildx binary: {}", url)
+        f = Packages.download(url, EXPECTED_BUILDX_BIN_MD5)
+
+        f.rename(buildx_bin)
+        buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)
+
+        v = docker.buildx.version()
+        log.info("Docker buildx installed version: {}", v)
+
+    @staticmethod
+    def execute_command(command: str, parameters: List[str]) -> str:
+        try:
+
+            # Pattern in plumbum library for executing a shell command
+            local_command = local[command]
+            log.info("Executing command {} {}", command, " ".join(parameters))
+            return str(local_command(parameters))
+        except CommandNotFound:
+            raise ExecutionException(f"Command not found: {command}")
+
+        except ProcessExecutionError:
+            raise ExecutionException(
+                f"Cannot execute command: {command} {' '.join(parameters)}"
+            )
+
+        # raised on Windows
+        except OSError:  # pragma: no cover
+            raise ExecutionException(f"Cannot execute: {command}")
