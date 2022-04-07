@@ -5,7 +5,7 @@ description = "Manage and deploy projects based on RAPyDo framework"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
 readme = "README.rst"
-keywords = ["http", "api", "rest", "docker", "docker-compose", "docker-swarm", rapydo"]
+keywords = ["http", "api", "rest", "docker", "docker-compose", "docker-swarm", "rapydo"]
 classifiers=[
     "Programming Language :: Python",
     "Intended Audience :: Developers",
