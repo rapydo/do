@@ -10,7 +10,6 @@ import typer
 
 from controller import RED, log, print_and_exit
 from controller.app import Application, Configuration
-from controller.commands.install import BUILDX_VERSION, COMPOSE_VERSION
 from controller.commands.password import get_expired_passwords
 from controller.deploy.builds import (
     TemplateInfo,
@@ -19,6 +18,7 @@ from controller.deploy.builds import (
     get_image_creation,
 )
 from controller.deploy.docker import Docker
+from controller.packages import BUILDX_VERSION, COMPOSE_VERSION
 from controller.templating import Templating
 from controller.utilities import git
 
