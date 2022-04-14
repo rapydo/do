@@ -500,6 +500,7 @@ class BaseEnvModel(BaseModel):
     SHOW_LOGIN: zero_or_one
     ENABLE_FOOTER: zero_or_one
     ENABLE_ANGULAR_SSR: zero_or_one
+    ENABLE_YARN_PNP: zero_or_one
     FORCE_SSR_SERVER_MODE: zero_or_one
     ACTIVATE_AUTH: zero_or_one
     AUTH_SERVICE: AUTH_SERVICE_VALUES
