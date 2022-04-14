@@ -1,8 +1,5 @@
 """
 Parse dockerfiles and check for builds
-
-# https://github.com/DBuildService/dockerfile-parse
-# https://docker-py.readthedocs.io/en/stable/
 """
 
 from datetime import datetime
