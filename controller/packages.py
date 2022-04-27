@@ -26,7 +26,7 @@ from sultan.api import Sultan  # type: ignore
 from controller import RED, log, print_and_exit
 
 # https://get.docker.com
-EXPECTED_DOCKER_SCRIPT_MD5 = "dd5da5e89bf5730e84ef5b20dc45588c"
+EXPECTED_DOCKER_SCRIPT_MD5 = "7ca0dd915be8e950bde383da1915b193"
 
 # https://github.com/docker/compose/releases
 COMPOSE_VERSION = "v2.4.1"
