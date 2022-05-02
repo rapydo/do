@@ -124,6 +124,12 @@ class Compose:
 
                     binds.add(Path(source.split(":")[0]))
 
+            # Remove replicas if both replicas and global mode are set
+            if "deploy" in value:  # pragma: no cover
+                if "replicas" in value["deploy"] and "mode" in value["deploy"]:
+                    if value["deploy"]["mode"] == "global":
+                        value["deploy"].pop("replicas")
+
         # Missing folders are then automatically created by the docker engine
         # the runs with root privileges and so create folders as root
         # and this can often lead to issues with permissions.
