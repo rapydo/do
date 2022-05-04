@@ -71,7 +71,7 @@ variables:
     BACKEND_URL: ""
     PYTHON_MAIN_FILE: __main__
     # Path to dist-packages in backend/celery containers
-    PYTHON_PATH: /opt/python/3.9/lib/python3.9/site-packages
+    PYTHON_PATH: /usr/local/lib/python3.10/dist-packages
 
     PYTHONMALLOC: ""
     PYTHONASYNCIODEBUG: 0
