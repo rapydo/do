@@ -73,7 +73,8 @@ class Configuration(TypedDict, total=False):
 
 class BACKEND_BUILD_MODE_VALUES(Enum):
     backend = "backend"
-    backend_legacy = "backend-legacy"
+    backend_legacy38 = "backend-legacy38"
+    backend_legacy39 = "backend-legacy39"
 
 
 class FRONTEND_FRAMEWORK_VALUES(Enum):
@@ -129,7 +130,6 @@ class CELERY_BROKER_VALUES(Enum):
 
 
 class CELERY_BACKEND_VALUES(Enum):
-    RABBIT = "RABBIT"
     REDIS = "REDIS"
 
 
