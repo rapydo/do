@@ -130,6 +130,7 @@ class CELERY_BROKER_VALUES(Enum):
 
 
 class CELERY_BACKEND_VALUES(Enum):
+    RABBIT = "RABBIT"
     REDIS = "REDIS"
 
 
