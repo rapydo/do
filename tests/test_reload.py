@@ -161,6 +161,21 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "reload frontend", "Reloading frontend...")
 
     container = docker.get_container("frontend")
+
+    if Configuration.swarm_mode:
+        # frontend reload is always execute in compose mode
+        # => the container retrieved from docker.get_container in swarm mode is None
+        assert container is None
+        # Let's retrieve the container name in compose mode:
+
+        Configuration.swarm_mode = False
+        docker = Docker()
+        container = docker.get_container("frontend")
+
+        # Let's restore the docker client
+        Configuration.swarm_mode = True
+        docker = Docker()
+
     assert container is not None
 
     docker.client.container.remove(container[0], force=True)
