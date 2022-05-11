@@ -798,7 +798,11 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
-                if Configuration.swarm_mode and Configuration.production:
+                if (
+                    Configuration.swarm_mode
+                    and Configuration.production
+                    and not Configuration.FORCE_COMPOSE_ENGINE
+                ):
                     add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
         if Configuration.swarm_mode and not Configuration.FORCE_COMPOSE_ENGINE:
