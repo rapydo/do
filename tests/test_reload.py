@@ -168,7 +168,7 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "reload frontend _backend",
+        "reload frontend backend",
         "Can't reload frontend and other services at once",
     )
     exec_command(capfd, "remove", "Stack removed")
