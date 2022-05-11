@@ -114,7 +114,7 @@ def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
                 if image.startswith("rapydo/") and image not in templates:
                     print_and_exit(
                         "Unable to find {} in this project"
-                        "\nPlease inspect the FROM image in {}/Dockerfile",
+                        "\nPlease inspect the FROM image in {}",
                         image,
                         dockerfile,
                     )
