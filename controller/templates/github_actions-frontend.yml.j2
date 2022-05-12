@@ -10,7 +10,7 @@ env:
 
 jobs:
   Development-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
@@ -44,7 +44,7 @@ jobs:
           codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
 
   Production-mode:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
