@@ -123,8 +123,8 @@ jobs:
         if: ${{ matrix.test == 'install' }}
         run: |
           # This will remove the old rapydo version installed by rapydo install test
-          sudo pip uninstall rapydo
-          pip uninstall rapydo
+          sudo pip uninstall --yes rapydo
+          pip uninstall --yes rapydo
           # And now install again 
           pip install --upgrade --no-cache-dir --editable .[dev]
 
