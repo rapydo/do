@@ -199,7 +199,7 @@ def parse_pypi(url: str, lib: str) -> str:
 
 # Sem ver with 3 tokens (like... mostly everything!)
 SEMVER3 = r"^[0-9]+\.[0-9]+\.[0-9]+$"
-# Sem ver with 2 tokens (like Ubuntu 20.04)
+# Sem ver with 2 tokens (like Ubuntu 22.04)
 SEMVER2 = r"^[0-9]+\.[0-9]+$"
 
 
