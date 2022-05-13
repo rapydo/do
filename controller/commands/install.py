@@ -19,7 +19,7 @@ from controller.packages import Packages
 from controller.utilities import git
 
 # https://get.docker.com
-EXPECTED_DOCKER_SCRIPT_MD5 = "7ca0dd915be8e950bde383da1915b193"
+EXPECTED_DOCKER_SCRIPT_MD5 = "c3a774bf0e34387a0414f225d4dd84d9"
 
 # https://github.com/docker/compose/releases
 COMPOSE_VERSION = "v2.2.3"
