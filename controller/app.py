@@ -1006,7 +1006,10 @@ You can use of one:
         Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
         FAIL2BAN_IPTABLES = "legacy"
-        if Application.env["ACTIVATE_FAIL2BAN"] == 1:
+        if (
+            Application.env["ACTIVATE_FAIL2BAN"] == 1
+            or Application.env["ACTIVATE_FAIL2BAN"] == "1"
+        ):
             iptables_version = Packages.get_bin_version("iptables", clean_output=False)
             nf_tables = iptables_version and "nf_tables" in iptables_version
             if nf_tables:
