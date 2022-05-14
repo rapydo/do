@@ -1012,7 +1012,7 @@ You can use of one:
                 FAIL2BAN_IPTABLES = "nf_tables"
             else:
                 FAIL2BAN_IPTABLES = "legacy"
-        Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
+            Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")
