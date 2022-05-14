@@ -1,0 +1,10 @@
+
+[Definition]
+
+actionstart_on_demand = false
+# Add drop rules for specified IPs.
+# Enter IPs to permanently ban, one per line in ip.blacklist:
+actionstart = <iptables> -N f2b-<name>
+              <iptables> -A f2b-<name> -j <returntype>
+              <iptables> -I <chain> -p <protocol> -j f2b-<name>
+              cat /data/ip.blacklist | while read IP; do <iptables> -I f2b-<name> 1 -s $IP -j DROP; done
