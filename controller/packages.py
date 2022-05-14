@@ -136,7 +136,7 @@ class Packages:
 
     @classmethod
     def get_bin_version(
-        cls, exec_cmd: str, option: List[str] = ["--version"]
+        cls, exec_cmd: str, option: List[str] = ["--version"], clean_output: bool = True
     ) -> Optional[str]:
         """
         Retrieve the version of a binary
@@ -149,17 +149,19 @@ class Packages:
 
             output = Packages.execute_command(exec_cmd, option)
 
-            # then last element on spaces
-            # get up to the first open round bracket if any, or return the whole string
-            output = output.split("(")[0]
-            # get up to the first comma if any, or return the whole string
-            output = output.split(",")[0]
-            # split on spaces and take the last element
-            output = output.split()[-1]
-            # Remove trailing spaces
-            output = output.strip()
-            # Removed single quotes
-            output = output.replace("'", "")
+            if clean_output:
+                # then last element on spaces
+                # get up to the first open round bracket if any,
+                # or return the whole string
+                output = output.split("(")[0]
+                # get up to the first comma if any, or return the whole string
+                output = output.split(",")[0]
+                # split on spaces and take the last element
+                output = output.split()[-1]
+                # Remove trailing spaces
+                output = output.strip()
+                # Removed single quotes
+                output = output.replace("'", "")
 
             # That's all... this magic receipt is able to extract
             # version information from most of outputs, e.g.

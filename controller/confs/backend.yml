@@ -1095,6 +1095,10 @@ services:
       # Beware: before the creation of the network this variable will contain 127.0.0.1
       # The correct subnet will only be available starting from the second command... :\
       DOCKER_SUBNET: ${DOCKER_SUBNET}
+      # This is automatically set based on the output of iptables --version, i.e.
+      # iptables v1.8.7 (nf_tables)
+      # iptables v1.8.4 (legacy)
+      FAIL2BAN_IPTABLES: ${FAIL2BAN_IPTABLES}
       # ACTIVATE: 1
       # SSMTP_HOST: SMTP server host
       # SSMTP_PORT: SMTP server port (default 25)

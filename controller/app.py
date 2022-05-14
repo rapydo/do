@@ -1005,6 +1005,15 @@ You can use of one:
             DOCKER_SUBNET = "127.0.0.1"
         Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
 
+        if Application.env["ACTIVATE_FAIL2BAN"] == "1":
+            iptables_version = Packages.get_bin_version("iptables", clean_output=False)
+            nf_tables = iptables_version and "nf_tables" in iptables_version
+            if nf_tables:
+                FAIL2BAN_IPTABLES = "nf_tables"
+            else:
+                FAIL2BAN_IPTABLES = "legacy"
+        Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
+
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")
 
