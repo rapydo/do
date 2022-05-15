@@ -1,0 +1,10 @@
+[Definition]
+
+# If false the actionstart is executed at startup
+# I true, it is executed at the first ban
+actionstart_on_demand = false
+
+actionstart = <nftables> add table <table_family> <table>
+              <nftables> -- add chain <table_family> <table> <chain> \{ type <chain_type> hook <chain_hook> priority <chain_priority> \; \}
+              %(_nft_add_set)s
+              cat /data/ip.blacklist | while read IP; do <nftables> add element <table_family> <table> <addr_set> \{ $IP \}; done

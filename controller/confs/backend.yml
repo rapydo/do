@@ -1112,5 +1112,5 @@ services:
       # /data/db could be attached to a data-dir
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d
-      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/actions:/data/action.d
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/actions:/data/action.d.available
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/ip.blacklist:/data/ip.blacklist

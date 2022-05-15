@@ -1,6 +1,7 @@
-
 [Definition]
 
+# If false the actionstart is executed at startup
+# I true, it is executed at the first ban
 actionstart_on_demand = false
 # Add drop rules for specified IPs.
 # Enter IPs to permanently ban, one per line in ip.blacklist:
