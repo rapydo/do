@@ -16,5 +16,3 @@ logpath  = /var/log/host_logs/syslog
 
 banaction = iptables-allports
 chain = DOCKER-USER
-# enable this with nft
-# chain_hook = forward

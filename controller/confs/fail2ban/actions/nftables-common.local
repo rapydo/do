@@ -8,3 +8,7 @@ actionstart = <nftables> add table <table_family> <table>
               <nftables> -- add chain <table_family> <table> <chain> \{ type <chain_type> hook <chain_hook> priority <chain_priority> \; \}
               %(_nft_add_set)s
               cat /data/ip.blacklist | while read IP; do <nftables> add element <table_family> <table> <addr_set> \{ $IP \}; done
+
+[Init]
+table = f2b-table-docker
+chain_hook = forward
