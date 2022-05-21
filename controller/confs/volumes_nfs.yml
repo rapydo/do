@@ -31,12 +31,6 @@ volumes:
       type: "nfs"
       o: addr=${NFS_HOST},nolock,soft,rw
       device: ":${NFS_EXPORTS_GRAPHDATA}"
-  mongodata:
-    driver: local
-    driver_opts:
-      type: "nfs"
-      o: addr=${NFS_HOST},nolock,soft,rw
-      device: ":${NFS_EXPORTS_MONGODATA}"
   data_imports:
     driver: local
     driver_opts:

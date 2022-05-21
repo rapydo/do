@@ -9,15 +9,15 @@ env:
   PROJECT: {{ project }}
 
 jobs:
-  backend-tests:
-    runs-on: ubuntu-20.04
+  Development-mode:
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: "3.10"
 
       - uses: rapydo/actions/install@v1
         with:
@@ -51,14 +51,38 @@ jobs:
           step: backend
           codecov_token: {% raw -%}${{ secrets.CODECOV_TOKEN }}{% endraw %}
 
+      - name: Print Logs
+        if: failure()
+        run: tail -100 data/logs/backend-server.log
+
+      - name: Docker Logs
+        if: failure()
+        run: rapydo logs
+
+  Production-mode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - uses: rapydo/actions/install@v1
+        with:
+          project: ${PROJECT}
+          # swarm: 1
+
       - name: Production mode
         run: |
-          rapydo remove
-          # rapydo remove registry
-          docker volume rm $(docker volume ls -q)
           rapydo --testing --prod init --force
           # rapydo run registry
           rapydo pull --quiet
+
+          # If a custom build is added
+          # rapydo build
+
           rapydo ssl --volatile
           rapydo start
           sleep 45
@@ -77,5 +101,4 @@ jobs:
 
       - name: Docker Logs
         if: failure()
-        run: |
-          rapydo logs
+        run: rapydo logs

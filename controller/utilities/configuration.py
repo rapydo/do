@@ -73,6 +73,8 @@ class Configuration(TypedDict, total=False):
 
 class BACKEND_BUILD_MODE_VALUES(Enum):
     backend = "backend"
+    backend_legacy38 = "backend-legacy38"
+    backend_legacy39 = "backend-legacy39"
 
 
 class FRONTEND_FRAMEWORK_VALUES(Enum):
@@ -115,7 +117,6 @@ class AUTH_SERVICE_VALUES(Enum):
     no = "NO_AUTHENTICATION"
     postgres = "sqlalchemy"
     neo4j = "neo4j"
-    mongo = "mongo"
 
 
 class ALCHEMY_DBTYPE_VALUES(Enum):
@@ -131,7 +132,6 @@ class CELERY_BROKER_VALUES(Enum):
 class CELERY_BACKEND_VALUES(Enum):
     RABBIT = "RABBIT"
     REDIS = "REDIS"
-    MONGODB = "MONGODB"
 
 
 class CELERY_POOL_MODE_VALUES(Enum):
@@ -279,7 +279,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_POSTGRES: zero_or_one
     ACTIVATE_MYSQL: zero_or_one
     ACTIVATE_NEO4J: zero_or_one
-    ACTIVATE_MONGODB: zero_or_one
     ACTIVATE_RABBIT: zero_or_one
     ACTIVATE_REDIS: zero_or_one
     ACTIVATE_CELERY: zero_or_one
@@ -375,14 +374,6 @@ class BaseEnvModel(BaseModel):
     NEO4J_PAGECACHE_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
     NEO4J_ALLOW_UPGRADE: Neo4jFlag
     NEO4J_RECOVERY_MODE: Neo4jFlag
-    MONGO_ENABLE_CONNECTOR: zero_or_one
-    MONGO_EXPIRATION_TIME: PositiveInt
-    MONGO_VERIFICATION_TIME: PositiveInt
-    MONGO_HOST: str
-    MONGO_PORT: Port
-    MONGO_DATABASE: str
-    MONGO_USER: str
-    MONGO_PASSWORD: str
     ELASTIC_HOST: str
     ELASTIC_PORT: Port
     RABBITMQ_ENABLE_CONNECTOR: zero_or_one
@@ -405,13 +396,20 @@ class BaseEnvModel(BaseModel):
     REDIS_HOST: str
     REDIS_PORT: Port
     REDIS_PASSWORD: str
+    FTP_ENABLE_CONNECTOR: zero_or_one
+    FTP_EXPIRATION_TIME: PositiveInt
+    FTP_VERIFICATION_TIME: PositiveInt
+    FTP_HOST: str
+    FTP_PORT: Port
+    FTP_USER: str
+    FTP_PASSWORD: str
+    FTP_SSL_ENABLED: zero_or_one
     NFS_HOST: Optional[str]
     NFS_EXPORTS_SECRETS: Path
     NFS_EXPORTS_RABBITDATA: Path
     NFS_EXPORTS_SQLDATA: Path
     NFS_EXPORTS_MARIADB: Path
     NFS_EXPORTS_GRAPHDATA: Path
-    NFS_EXPORTS_MONGODATA: Path
     NFS_EXPORTS_DATA_IMPORTS: Path
     NFS_EXPORTS_PUREFTPD: Path
     NFS_EXPORTS_SSL_CERTS: Path
@@ -443,8 +441,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_MARIADB: AssignedMemory
     ASSIGNED_CPU_NEO4J: AssignedCPU
     ASSIGNED_MEMORY_NEO4J: AssignedMemory
-    ASSIGNED_CPU_MONGODB: AssignedCPU
-    ASSIGNED_MEMORY_MONGODB: AssignedMemory
     ASSIGNED_CPU_CELERY: AssignedCPU
     ASSIGNED_MEMORY_CELERY: AssignedMemory
     ASSIGNED_CPU_CELERYBEAT: AssignedCPU
@@ -505,6 +501,7 @@ class BaseEnvModel(BaseModel):
     SHOW_LOGIN: zero_or_one
     ENABLE_FOOTER: zero_or_one
     ENABLE_ANGULAR_SSR: zero_or_one
+    ENABLE_YARN_PNP: zero_or_one
     FORCE_SSR_SERVER_MODE: zero_or_one
     ACTIVATE_AUTH: zero_or_one
     AUTH_SERVICE: AUTH_SERVICE_VALUES

@@ -153,13 +153,6 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
         "Services reloaded",
     )
 
-    exec_command(
-        capfd,
-        "reload frontend",
-        "Can't reload the frontend while it is still building",
-        "No service reloaded",
-    )
-
     docker = Docker()
     container = docker.get_container("frontend")
     assert container is not None
@@ -167,16 +160,30 @@ def test_reload_prod(capfd: Capture, faker: Faker) -> None:
     docker.client.container.stop(container[0])
     exec_command(capfd, "reload frontend", "Reloading frontend...")
 
-    exec_command(
-        capfd,
-        "reload frontend",
-        "Can't reload the frontend while it is still building",
-    )
-
     container = docker.get_container("frontend")
+
+    if Configuration.swarm_mode:
+        # frontend reload is always execute in compose mode
+        # => the container retrieved from docker.get_container in swarm mode is None
+        assert container is None
+        # Let's retrieve the container name in compose mode:
+
+        Configuration.swarm_mode = False
+        docker = Docker()
+        container = docker.get_container("frontend")
+
+        # Let's restore the docker client
+        Configuration.swarm_mode = True
+        docker = Docker()
+
     assert container is not None
 
     docker.client.container.remove(container[0], force=True)
     exec_command(capfd, "reload frontend", "Reloading frontend...")
 
+    exec_command(
+        capfd,
+        "reload frontend backend",
+        "Can't reload frontend and other services at once",
+    )
     exec_command(capfd, "remove", "Stack removed")

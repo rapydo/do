@@ -92,7 +92,6 @@ class Project:
         self.expected_files.append(self.p_path("backend", "tests", "__init__.py"))
         self.expected_files.append(Path(".gitignore"))
         self.expected_files.append(Path(".gitattributes"))
-        self.expected_files.append(Path(".isort.cfg"))
         self.expected_files.append(Path("pyproject.toml"))
         self.expected_files.append(Path(".flake8"))
         self.expected_files.append(Path(".prettierignore"))
@@ -107,8 +106,6 @@ class Project:
                 self.expected_files.append(models.joinpath("sqlalchemy.py"))
             if auth == "neo4j" or "neo4j" in services:
                 self.expected_files.append(models.joinpath("neo4j.py"))
-            if auth == "mongo" or "mongo" in services:
-                self.expected_files.append(models.joinpath("mongo.py"))
 
         self.optionals_folders.append(self.p_path("backend", "models", "emails"))
         self.optionals_files.append(
@@ -149,6 +146,8 @@ class Project:
         self.obsolete_files.append(self.p_path("frontend", "assets", "favicon.ico"))
         # Removed since 1.2
         self.obsolete_files.append(Path(".pre-commit-config.yaml"))
+        # Removed since 2.3
+        self.obsolete_files.append(Path(".isort.cfg"))
         return True
 
     def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:
@@ -420,7 +419,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
         "email",
         "errno",
         "flask",
-        "flask_restful",
         "flask_sqlalchemy",
         "authlib",
         "functools",
@@ -438,8 +436,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
         "platform",
         "pickle",
         "plumbum",
-        "pymodm",
-        "pymongo",
         "pyotp",
         "pyqrcode",
         "pytz",

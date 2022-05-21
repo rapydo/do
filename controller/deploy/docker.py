@@ -100,9 +100,9 @@ class Docker:
 
     @classmethod
     def get_service(cls, service: str) -> str:
-        if not Configuration.swarm_mode:
-            return f"{Configuration.project}{COMPOSE_SEP}{service}"
-        return f"{Configuration.project}_{service}"
+        if Configuration.swarm_mode:
+            return f"{Configuration.project}_{service}"
+        return f"{Configuration.project}{COMPOSE_SEP}{service}"
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
         if Configuration.swarm_mode:

@@ -34,26 +34,3 @@ def test_password(capfd: Capture, faker: Faker) -> None:
         "password backend",
         "Please specify one between --random and --password options",
     )
-
-
-# To be moved in test_password_mongo.py ... when it will be created
-# password mongo is still unsupported
-def test_mongodb_invalid_characters(capfd: Capture, faker: Faker) -> None:
-
-    create_project(
-        capfd=capfd,
-        name=random_project_name(faker),
-        auth="mongo",
-        frontend="no",
-        extra="--env MONGO_PASSWORD=invalid#password",
-    )
-
-    informative = "Some special characters, including #, are not allowed "
-    informative += "because make some clients to fail to connect"
-
-    exec_command(
-        capfd,
-        "init --force",
-        "Not allowed characters found in MONGO_PASSWORD.",
-        informative,
-    )

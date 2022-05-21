@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional, cast
 import click
 import requests
 import yaml
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup  # type: ignore
 from loguru import logger as log
 from packaging.version import Version
 
@@ -34,11 +34,11 @@ os.chdir(Path(__file__).parent)
 DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
 
 skip_versions = {
-    "typescript": "4.5.4",
-    "node": "17.3.0-buster",
+    # "typescript": "4.5.4",
+    "node": "17.8.0-buster",
     "ubuntu": "22.04",
-    "bootstrap": "5.1.3",
-    "ajv": "8.8.2",
+    "ajv": "8.11.0",
+    "setuptools": "61.1.1",
 }
 
 
@@ -199,7 +199,7 @@ def parse_pypi(url: str, lib: str) -> str:
 
 # Sem ver with 3 tokens (like... mostly everything!)
 SEMVER3 = r"^[0-9]+\.[0-9]+\.[0-9]+$"
-# Sem ver with 2 tokens (like Ubuntu 20.04)
+# Sem ver with 2 tokens (like Ubuntu 22.04)
 SEMVER2 = r"^[0-9]+\.[0-9]+$"
 
 

@@ -2,14 +2,16 @@
 This module will test the password command and the passwords management
 """
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from faker import Faker
+from freezegun import freeze_time
 from python_on_whales import docker
 
 from controller import colors
 from controller.app import Configuration
+from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
     Capture,
     create_project,
@@ -44,7 +46,8 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     start_registry(capfd)
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     exec_command(
         capfd,
@@ -72,7 +75,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
@@ -113,7 +116,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
@@ -154,13 +157,29 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
 
     r = requests.post(
         "http://127.0.0.1:8080/auth/login",
-        data={
+        json={
             "username": get_variable_from_projectrc("AUTH_DEFAULT_USERNAME"),
             "password": get_variable_from_projectrc("AUTH_DEFAULT_PASSWORD"),
         },
     )
     exec_command(capfd, "logs backend --tail 10")
     assert r.status_code == 200
+
+    future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
+    expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
+
+    with freeze_time(future):
+        exec_command(
+            capfd,
+            "password",
+            f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}{today}",
+        )
+
+        exec_command(
+            capfd,
+            "check -i main --no-git --no-builds",
+            f"AUTH_DEFAULT_PASSWORD is expired on {expired}",
+        )
 
     # Cleanup the stack for the next test
     exec_command(capfd, "remove", "Stack removed")

@@ -1,15 +1,23 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewChild, TemplateRef } from "@angular/core";
 
 import { FormGroup } from "@angular/forms";
 import { FormlyFieldConfig } from "@ngx-formly/core";
+import { UploadState } from "ngx-uploadx";
 
 import { FormlyService } from "@rapydo/services/formly";
 import { ApiService } from "@rapydo/services/api";
 import { NotificationService } from "@rapydo/services/notification";
-
+import { environment } from "@rapydo/../environments/environment";
 import { Schema, SchemaType } from "@rapydo/types";
 
 import * as moment from "moment";
+
+// === @swimlane/ngx-datatable/src/types/column-mode.type
+enum ColumnMode {
+  standard = "standard",
+  flex = "flex",
+  force = "force",
+}
 
 @Component({
   templateUrl: "sink.html",
@@ -24,6 +32,18 @@ export class SinkComponent implements OnInit {
   public form2 = new FormGroup({});
   public fields2: FormlyFieldConfig[] = [];
   public model2: any = {};
+
+  // Used by ngx-upload
+  public upload_options: any;
+  public upload_progress: number = 0;
+  public upload_speed: number = 0;
+
+  // Used by ngx-datatable
+  public ColumnMode = ColumnMode;
+  public table_data: Array<any> = [];
+  public columns: Array<any> = [];
+  @ViewChild("namesCell", { static: false })
+  public namesCell: TemplateRef<any>;
 
   // Used to test the autocomplete 
   public form3 = new FormGroup({});
@@ -47,6 +67,18 @@ export class SinkComponent implements OnInit {
   ngOnInit() {
     this.fields1 = this.get_fields(null);
     this.fields2 = this.get_fields(["form-field-horizontal"]);
+
+    if (this.upload_options == null) {
+      // In case of authenticated endpoint, you can add the token to the upload_options
+      // token: this.auth.getToken(),
+      this.upload_options = {
+        endpoint: environment.backendURI + "/api/tests/chunkedupload",
+        allowedTypes:
+          "text/plain,application/zip,multipart/x-zip",
+        multiple: false,
+        autoUpload: true,
+      };
+    }
 
     this.api.put<Schema[]>("/api/tests/autocomplete", { get_schema: true }).subscribe(
       (response) => {
@@ -91,7 +123,20 @@ export class SinkComponent implements OnInit {
       }
     );
 
+  }
 
+  public ngAfterViewInit(): void {
+
+    this.table_data = [
+      {"shortname": "AAA", "fullname": "Aardvark Ant Alpaca", extra: "1"},
+      {"shortname": "BBB", "fullname": "Buffalo Bear Bobcat", extra: "2"},
+      {"shortname": "CCC", "fullname": "Cheetah Cow Caracal", extra: "3"},
+    ];
+
+    this.columns = [
+      { name: "Shortname", prop: "shortname", flexGrow: 0.5 },
+      { name: "Fullname", prop: "fullname", flexGrow: 1.5, cellTemplate: this.namesCell,},
+    ];
   }
 
   private get_fields(wrappers) {
@@ -271,6 +316,25 @@ export class SinkComponent implements OnInit {
     }
 
     this.data = this.model5;
+  }
+
+  onUpload(item: UploadState) {
+    this.upload_progress = item.progress;
+    this.upload_speed = item.speed;
+    if (
+      item.progress == 100 &&
+      item.remaining == 0 &&
+      item.status == "complete"
+    ) {
+      this.notify.showSuccess("Upload completed");
+      this.upload_progress = -1;
+    }
+  }
+
+  public onDatatableActivate(event: any) {
+    if (event.type === "click") {
+      event.cellElement.blur();
+    }
   }
 
 }

@@ -1,16 +1,16 @@
 """
 Utilities to work with jinja2 templates
 """
+import filecmp
 import os
 import random
 import string
-from filecmp import cmp
 from pathlib import Path
 from typing import Dict, List, Optional, TypedDict
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
-from zxcvbn import zxcvbn
+from zxcvbn import zxcvbn  # type: ignore
 
 from controller import TEMPLATE_DIR, log, print_and_exit
 
@@ -33,7 +33,6 @@ class TemplateDataType(TypedDict, total=False):
     enable_postgres: bool
     enable_mysql: bool
     enable_neo4j: bool
-    enable_mongo: bool
     enable_rabbit: bool
     enable_redis: bool
     enable_celery: bool
@@ -139,6 +138,6 @@ class Templating:
     def file_changed(self, filename: str) -> bool:
 
         template = self.get_template_name(filename)
-        return not cmp(
+        return not filecmp.cmp(
             filename, os.path.join(self.template_dir, template), shallow=True
         )

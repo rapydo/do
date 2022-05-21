@@ -36,10 +36,6 @@ project_configuration:
       NEO4J_PAGECACHE_SIZE: 1G
       NEO4J_HEAP_SIZE: 1G
       {% endif -%}
-      {% if service == "mongodb" -%}
-      MONGO_PASSWORD: {{ "RANDOM"| password }}
-      MONGO_USER: mongo
-      {% endif -%}
       {% if service == "flower" -%}
       FLOWER_PASSWORD: {{ "RANDOM"| password }}
       FLOWER_USER: {{ "RANDOM"| username }}
@@ -50,6 +46,9 @@ project_configuration:
       {% endif -%}
       {% if service == "redis" -%}
       REDIS_PASSWORD: {{ "RANDOM"| password }}
+      {% endif -%}
+      {% if service == "ftp" -%}
+      FTP_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% if swarm -%}
       REGISTRY_USERNAME: {{ "RANDOM"| username }}
@@ -71,6 +70,7 @@ project_configuration:
       FRONTEND_BUILD_MODE: angular-test
       NEO4J_PASSWORD: {{ "RANDOM"| password }}
       FILE_LOGLEVEL: INFO
+      FTP_ENABLE_CONNECTOR: 1
       {# SYSLOG_ADDRESS: "" #}
       {% if production -%}
       DEFAULT_DHLEN: 1024

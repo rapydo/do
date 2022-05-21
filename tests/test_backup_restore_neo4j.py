@@ -58,11 +58,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     # This will initialize neo4j
     exec_command(capfd, "shell backend 'restapi init'")
 
+    time.sleep(25)
     # Just some delay extra delay. restapi init alone not always is enough...
     if Configuration.swarm_mode:
-        time.sleep(10)
-    else:
-        time.sleep(5)
+        time.sleep(30)
 
     # Verify the initialization
     cypher = "shell neo4j 'bin/cypher-shell"
@@ -199,7 +198,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "start", "Stack started")
 
     # Just some delay extra delay, neo4j is a slow starter
-    time.sleep(5)
+    time.sleep(25)
 
     # Restore command
     exec_command(
@@ -261,7 +260,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     files.sort()
     neo4j_dump_file = files[-1]
 
-    time.sleep(5)
+    time.sleep(25)
 
     # Here we test the restore procedure:
     # 1) verify some data in the database

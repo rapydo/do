@@ -30,7 +30,7 @@ from packaging.version import Version
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
 from tabulate import tabulate
-from zxcvbn import zxcvbn
+from zxcvbn import zxcvbn  # type: ignore
 
 from controller import (
     COMPOSE_ENVIRONMENT_FILE,
@@ -798,7 +798,11 @@ You can use of one:
             if Configuration.frontend == ANGULAR:
                 add(CONFS_DIR, "angular.yml")
                 angular_loaded = True
-                if Configuration.swarm_mode and Configuration.production:
+                if (
+                    Configuration.swarm_mode
+                    and Configuration.production
+                    and not Configuration.FORCE_COMPOSE_ENGINE
+                ):
                     add(CONFS_DIR, "swarm_angular_prod_options.yml")
 
         if Configuration.swarm_mode and not Configuration.FORCE_COMPOSE_ENGINE:
@@ -957,7 +961,6 @@ You can use of one:
 
         services.check_rabbit_password(Application.env.get("RABBITMQ_PASSWORD"))
         services.check_redis_password(Application.env.get("REDIS_PASSWORD"))
-        services.check_mongodb_password(Application.env.get("MONGO_PASSWORD"))
 
         for e in Application.env:
             env_value = os.environ.get(e)
@@ -1001,6 +1004,14 @@ You can use of one:
         except DockerException:
             DOCKER_SUBNET = "127.0.0.1"
         Application.env["DOCKER_SUBNET"] = DOCKER_SUBNET
+
+        FAIL2BAN_IPTABLES = "legacy"
+        if str(Application.env["ACTIVATE_FAIL2BAN"]) == "1":
+            iptables_version = Packages.get_bin_version("iptables", clean_output=False)
+            nf_tables = iptables_version and "nf_tables" in iptables_version
+            if nf_tables:
+                FAIL2BAN_IPTABLES = "nf_tables"
+        Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")
@@ -1204,7 +1215,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.resolve()
-                    # This can be used starting from python 3.9
+                    # This can be used starting from py39
                     # do_dir = do_dir.readlink()
 
                 if do_dir == installation_path:

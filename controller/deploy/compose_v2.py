@@ -106,6 +106,20 @@ class Compose:
                 if v is None:
                     value["environment"][k] = ""
 
+            # Ports are forced to be int to prevent failures with compose
+            for idx, port in enumerate(value.get("ports", [])):
+                target_port = system.to_int(port["target"])
+                published_port = system.to_int(port["published"])
+
+                if target_port is None or published_port is None:
+                    print_and_exit(  # pragma: no cover
+                        "Can't convert service ports to integers: {}-{}",
+                        port["target"],
+                        port["published"],
+                    )
+                port["target"] = target_port
+                port["published"] = published_port
+                value["ports"][idx] = port
             clean_config["services"][key] = value
 
             for k in value.get("networks", {}).keys():
@@ -123,6 +137,12 @@ class Compose:
                         k.get("bind", {}).pop("create_host_path", None)
 
                     binds.add(Path(source.split(":")[0]))
+
+            # Remove replicas if both replicas and global mode are set
+            if "deploy" in value:  # pragma: no cover
+                if "replicas" in value["deploy"] and "mode" in value["deploy"]:
+                    if value["deploy"]["mode"] == "global":
+                        value["deploy"].pop("replicas")
 
         # Missing folders are then automatically created by the docker engine
         # the runs with root privileges and so create folders as root

@@ -17,11 +17,10 @@ from packaging.version import Version
 from controller import __version__
 from controller.app import Application, Configuration
 from controller.commands.backup import get_date_pattern
-from controller.commands.install import download
 from controller.commands.password import get_projectrc_variables_indentation
 from controller.deploy.builds import get_image_creation
 from controller.deploy.docker import Docker
-from controller.packages import Packages
+from controller.packages import ExecutionException, Packages
 from controller.templating import Templating
 from controller.utilities import git, services, system
 from controller.utilities.configuration import load_yaml_file, mix_configuration
@@ -114,14 +113,14 @@ def test_git(capfd: Capture, faker: Faker) -> None:
 
 
 def test_execute_command() -> None:
-    out = system.execute_command("echo", ["-n", "Hello World"])
+    out = Packages.execute_command("echo", ["-n", "Hello World"])
     assert out == "Hello World"
 
-    out = system.execute_command("echo", ["Hello World"])
+    out = Packages.execute_command("echo", ["Hello World"])
     assert out == "Hello World\n"
 
-    with pytest.raises(system.ExecutionException):
-        assert system.execute_command("ls", ["doesnotexistforsure"])
+    with pytest.raises(ExecutionException):
+        assert Packages.execute_command("ls", ["doesnotexistforsure"])
 
 
 def test_bytes_to_str() -> None:
@@ -173,6 +172,19 @@ def test_str_to_bytes() -> None:
         system.str_to_bytes("1TB")
 
 
+def to_int() -> None:
+    assert system.to_int(0) == 0
+    assert system.to_int(42) == 42
+    assert system.to_int(-24) == -24
+    assert system.to_int("1") == 1
+    assert system.to_int("43") == 43
+    assert system.to_int("-25") == -25
+    assert system.to_int(None) is None  # type: ignore
+    assert system.to_int({}) is None  # type: ignore
+    assert system.to_int([]) is None  # type: ignore
+    assert system.to_int("not a number") is None
+
+
 def test_load_yaml_file() -> None:
     # Invalid file / path
     with pytest.raises(SystemExit):
@@ -218,8 +230,6 @@ def test_normalize_placeholder_variable() -> None:
     assert short1("NEO4J_dbms_memory_heap_max__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_heap_initial__size") == "NEO4J_HEAP_SIZE"
     assert short1("NEO4J_dbms_memory_pagecache_size") == "NEO4J_PAGECACHE_SIZE"
-    assert short1("MONGO_INITDB_ROOT_PASSWORD") == "MONGO_PASSWORD"
-    assert short1("MONGO_INITDB_ROOT_USERNAME") == "MONGO_USER"
 
     key = "anyother"
     assert short1(key) == key
@@ -238,12 +248,10 @@ def test_get_celerybeat_scheduler() -> None:
     env["CELERY_BACKEND"] = "??"
     assert short2(env) == "Unknown"
     # This is valid, but ACTIVATE_CELERYBEAT is still missing
-    env["CELERY_BACKEND"] = "MONGODB"
+    env["CELERY_BACKEND"] = "REDIS"
     env["ACTIVATE_CELERYBEAT"] = "0"
     assert short2(env) == "Unknown"
     env["ACTIVATE_CELERYBEAT"] = "1"
-    assert short2(env) == "celerybeatmongo.schedulers.MongoScheduler"
-    env["CELERY_BACKEND"] = "REDIS"
     assert short2(env) == "redbeat.RedBeatScheduler"
     env["CELERY_BACKEND"] = "INVALID"
     assert short2(env) == "Unknown"
@@ -276,6 +284,7 @@ def test_get_default_command() -> None:
     assert services.get_default_command("registry") == "ash"
     assert "psql -U " in services.get_default_command("postgres")
     assert "mysql -D" in services.get_default_command("mariadb")
+    assert "redis-cli --pass" in services.get_default_command("redis")
 
 
 def test_get_templating() -> None:
@@ -384,15 +393,15 @@ def test_packages(faker: Faker) -> None:
 
 def test_download() -> None:
     with pytest.raises(SystemExit):
-        download("https://www.google.com/test", "")
+        Packages.download("https://www.google.com/test", "")
 
     with pytest.raises(SystemExit):
-        download(
+        Packages.download(
             "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
             "thisisawrongchecksum",
         )
 
-    downloaded = download(
+    downloaded = Packages.download(
         "https://github.com/rapydo/do/archive/refs/tags/v1.2.zip",
         "dc07bef0d12a7a9cfd0f383452cbcb6d",
     )

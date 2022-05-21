@@ -278,7 +278,6 @@ def test_create(capfd: Capture) -> None:
         (postgres,),
         (mysql,),
         (neo4j,),
-        (mongo,),
         ...
     ])
 
@@ -288,7 +287,6 @@ def test_create(capfd: Capture) -> None:
         "postgres",
         "mysql",
         "neo4j",
-        "mongo",
         "rabbit",
         "redis",
         "celery",
@@ -306,9 +304,6 @@ def test_create(capfd: Capture) -> None:
         elif service == "neo4j":
             auth = "neo4j"
             serv_opt = ""
-        elif service == "mongo":
-            auth = "mongo"
-            serv_opt = ""
         else:
             auth = "postgres"
             serv_opt = f"--service {service}"
@@ -324,10 +319,15 @@ def test_create(capfd: Capture) -> None:
             active_services = ["backend", "postgres"]
         elif service == "neo4j":
             active_services = ["backend", "neo4j"]
-        elif service == "mongo":
-            active_services = ["backend", "mongodb"]
         elif service == "celery":
-            active_services = ["backend", "celery", "flower", "postgres", "rabbit"]
+            active_services = [
+                "backend",
+                "celery",
+                "celerybeat",
+                "flower",
+                "postgres",
+                "redis",
+            ]
         elif service == "rabbit":
             active_services = ["backend", "postgres", "rabbit"]
         elif service == "redis":
@@ -369,11 +369,7 @@ def test_create(capfd: Capture) -> None:
         assert next(x.strip() for x in lines if "CELERY_BROKER" in x).endswith(broker)
         assert next(x.strip() for x in lines if "CELERY_BACKEND" in x).endswith(backend)
 
-    verify_celery_configuration([], "RABBIT", "RABBIT")
+    verify_celery_configuration([], "REDIS", "REDIS")
     verify_celery_configuration(["rabbit"], "RABBIT", "RABBIT")
     verify_celery_configuration(["redis"], "REDIS", "REDIS")
-    verify_celery_configuration(["mongo"], "RABBIT", "MONGODB")
     verify_celery_configuration(["rabbit", "redis"], "RABBIT", "REDIS")
-    verify_celery_configuration(["rabbit", "mongo"], "RABBIT", "MONGODB")
-    verify_celery_configuration(["redis", "mongo"], "REDIS", "REDIS")
-    verify_celery_configuration(["rabbit", "redis", "mongo"], "RABBIT", "REDIS")

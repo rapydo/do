@@ -7,13 +7,13 @@ import sys
 from pathlib import Path
 from typing import Dict, NoReturn, Union
 
-from colorama import Fore as colors
+from colorama import Fore as colors  # type: ignore
 from loguru import logger as log
 from python_on_whales.components.compose.models import ComposeConfigService
 
 ComposeServices = Dict[str, ComposeConfigService]
 
-__version__ = "2.2"
+__version__ = "2.3"
 
 __all__ = [colors]
 

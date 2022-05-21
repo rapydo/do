@@ -76,7 +76,26 @@
               <ng-template ngbNavContent>
                 <br />
                 <div class="row">
-                  <div class="col-12">Content</div>
+                  <div class="col-12">
+                    <input
+                      *ngIf="upload_options"
+                      type="file"
+                      [uploadx]="upload_options"
+                      (state)="onUpload($event)"
+                    />
+
+                    <span id="upload_speed" *ngIf="upload_speed">
+                      Upload speed: {{ upload_speed | bytes}}/s
+                    </span>
+
+                    <span *ngIf="upload_progress && upload_progress > 0">
+                      <ngb-progressbar
+                        showValue="true"
+                        type="info"
+                        [value]="upload_progress"
+                      ></ngb-progressbar>
+                    </span>
+                  </div>
                 </div>
               </ng-template>
             </li>
@@ -85,8 +104,35 @@
               <a ngbNavLink>ngx-datatable</a>
               <ng-template ngbNavContent>
                 <br />
+                          <div class="table-responsive" #tableWrapper>
+            <div class="container-fluid">
                 <div class="row">
-                  <div class="col-12">Content</div>
+                  <div class="col-12">
+            <ngx-datatable
+              class="bootstrap"
+              [rows]="table_data"
+              [columns]="columns"
+              [columnMode]="ColumnMode.flex"
+              [headerHeight]="40"
+              [footerHeight]="40"
+              [limit]="10"
+              [rowHeight]="'auto'"
+              (activate)="onDatatableActivate($event)"
+            >
+            </ngx-datatable>
+
+          <ng-template
+            #namesCell
+            let-row="row"
+            let-value="value"
+            let-i="index"
+          >
+            <em>{{value}}</em>
+          </ng-template>
+
+                  </div>
+                </div>
+                </div>
                 </div>
               </ng-template>
             </li>

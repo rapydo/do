@@ -139,16 +139,6 @@ services:
       # Experimental... to be tuned / configured
       NEOMODEL_SLOW_QUERIES: "0.09"
 
-      MONGO_ENABLE: ${ACTIVATE_MONGODB}
-      MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
-      MONGO_EXPIRATION_TIME: ${MONGO_EXPIRATION_TIME}
-      MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: "${MONGO_USER}"
-      MONGO_PASSWORD: "${MONGO_PASSWORD}"
-      MONGO_DATABASE: ${MONGO_DATABASE}
-
       CELERY_ENABLE: ${ACTIVATE_CELERY}
       CELERY_ENABLE_CONNECTOR: ${CELERY_ENABLE_CONNECTOR}
       CELERY_EXPIRATION_TIME: ${CELERY_EXPIRATION_TIME}
@@ -177,6 +167,16 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
+
+      FTP_ENABLE: ${ACTIVATE_FTP}
+      FTP_ENABLE_CONNECTOR: ${FTP_ENABLE_CONNECTOR}
+      FTP_EXPIRATION_TIME: ${FTP_EXPIRATION_TIME}
+      FTP_VERIFICATION_TIME: ${FTP_VERIFICATION_TIME}
+      FTP_HOST: ${FTP_HOST}
+      FTP_PORT: ${FTP_PORT}
+      FTP_USER: "${FTP_USER}"
+      FTP_PASSWORD: "${FTP_PASSWORD}"
+      FTP_SSL_ENABLED: "${FTP_SSL_ENABLED}"
 
       SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
@@ -325,8 +325,9 @@ services:
           - ${PROXY_HOST}
 
     ports:
-      - ${PROXY_DEV_PORT}:80 # 80 redirect
+      # Keep 443 as the first port, to be able to change it with run --port option
       - ${PROXY_PROD_PORT}:443 # 443 SSL
+      - ${PROXY_DEV_PORT}:80 # 80 redirect
     environment:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
@@ -372,7 +373,7 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.7.1
+    image: mariadb:10.8.2
     healthcheck:
       test: "mysqladmin ping -h localhost"
       interval: ${HEALTHCHECK_INTERVAL}
@@ -438,6 +439,9 @@ services:
       NEO4J_dbms_memory_heap_max__size: "${NEO4J_HEAP_SIZE}"
       NEO4J_dbms_memory_heap_initial__size: "${NEO4J_HEAP_SIZE}"
       NEO4J_dbms_memory_pagecache_size: "${NEO4J_PAGECACHE_SIZE}"
+      NEO4J_dbms_directories_plugins: "plugins"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
+      NEO4J_dbms_security_procedures_unrestricted: "gds.*"
       # Useful in case of corrupted transaction logs
       NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "${NEO4J_RECOVERY_MODE}"
       NEO4J_dbms_recovery_fail__on__missing__files: "${NEO4J_RECOVERY_MODE}"
@@ -472,38 +476,6 @@ services:
       # failed: WebSocket opening handshake was canceled
       NEO4J_dbms_ssl_policy_bolt_client__auth: "NONE"
       NEO4J_dbms_ssl_policy_https_client__auth: "NONE"
-
-  mongodb:
-    restart: always
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/mongodb
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/mongodb:${RAPYDO_VERSION}
-    healthcheck:
-      test: 'mongo --eval ''db.runCommand("ping").ok'' 127.0.0.1:27017/test --quiet'
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: 10s
-      retries: 3
-      start_period: 5m
-    logging:
-      driver: syslog
-      options: {}
-    volumes:
-      - mongodata:/data/db
-    networks:
-      default:
-        aliases:
-          - ${MONGO_HOST}
-    environment:
-      ACTIVATE: ${ACTIVATE_MONGODB}
-      CURRENT_UID: ${CURRENT_UID}
-      CURRENT_GID: ${CURRENT_GID}
-      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_USER}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD}"
 
   #########################
   ###  QUEUE MANAGEMENT ###
@@ -600,15 +572,15 @@ services:
       NEO4J_USER: "${NEO4J_USER}"
       NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
 
-      MONGO_ENABLE: ${ACTIVATE_MONGODB}
-      MONGO_ENABLE_CONNECTOR: ${MONGO_ENABLE_CONNECTOR}
-      MONGO_EXPIRATION_TIME: ${MONGO_EXPIRATION_TIME}
-      MONGO_VERIFICATION_TIME: ${MONGO_VERIFICATION_TIME}
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: "${MONGO_USER}"
-      MONGO_PASSWORD: "${MONGO_PASSWORD}"
-      MONGO_DATABASE: ${MONGO_DATABASE}
+      FTP_ENABLE: ${ACTIVATE_FTP}
+      FTP_ENABLE_CONNECTOR: ${FTP_ENABLE_CONNECTOR}
+      FTP_EXPIRATION_TIME: ${FTP_EXPIRATION_TIME}
+      FTP_VERIFICATION_TIME: ${FTP_VERIFICATION_TIME}
+      FTP_HOST: ${FTP_HOST}
+      FTP_PORT: ${FTP_PORT}
+      FTP_USER: "${FTP_USER}"
+      FTP_PASSWORD: "${FTP_PASSWORD}"
+      FTP_SSL_ENABLED: "${FTP_SSL_ENABLED}"
 
       SMTP_ENABLE: ${ACTIVATE_SMTP}
       SMTP_ENABLE_CONNECTOR: ${SMTP_ENABLE_CONNECTOR}
@@ -701,12 +673,6 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: "${MONGO_USER}"
-      MONGO_PASSWORD: "${MONGO_PASSWORD}"
-      MONGO_DATABASE: ${MONGO_DATABASE}
 
       SMTP_ADMIN: "${SMTP_ADMIN}"
       SMTP_NOREPLY: "${SMTP_NOREPLY}"
@@ -960,11 +926,6 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
 
-      MONGO_HOST: ${MONGO_HOST}
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: "${MONGO_USER}"
-      MONGO_PASSWORD: "${MONGO_PASSWORD}"
-
       FLOWER_PORT: ${FLOWER_PORT}
       FLOWER_USER: "${FLOWER_USER}"
       FLOWER_PASSWORD: "${FLOWER_PASSWORD}"
@@ -1039,8 +1000,12 @@ services:
       ACTIVATE: ${ACTIVATE_FTP}
       PUBLICHOST: ${PROJECT_DOMAIN}
       ADDED_FLAGS: -H -d -d
+      FTP_USER: "${FTP_USER}"
+      FTP_PASSWORD: "${FTP_PASSWORD}"
     networks:
       default:
+        aliases:
+          - ${FTP_HOST}
 
   ###################
   ### SMTP SERVER  ###
@@ -1130,7 +1095,10 @@ services:
       # Beware: before the creation of the network this variable will contain 127.0.0.1
       # The correct subnet will only be available starting from the second command... :\
       DOCKER_SUBNET: ${DOCKER_SUBNET}
-      # ACTIVATE: 1
+      # This is automatically set based on the output of iptables --version, i.e.
+      # iptables v1.8.7 (nf_tables)
+      # iptables v1.8.4 (legacy)
+      FAIL2BAN_IPTABLES: ${FAIL2BAN_IPTABLES}
       # SSMTP_HOST: SMTP server host
       # SSMTP_PORT: SMTP server port (default 25)
       # SSMTP_HOSTNAME: Full hostname (default $(hostname -f))
@@ -1138,8 +1106,18 @@ services:
       # SSMTP_PASSWORD: SMTP password
       # SSMTP_TLS: Use TLS to talk to the SMTP server (default NO)
       # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
+      MYSQL_ENABLED: ${ACTIVATE_MYSQL}
+      NEO4J_ENABLED: ${ACTIVATE_NEO4J}
+      NGINX_ENABLED: ${ACTIVATE_PROXY}
+      POSTGRES_ENABLED: ${ACTIVATE_POSTGRES}
+      PUREFTP_ENABLED: ${ACTIVATE_FTP}
+      RABBITMQ_ENABLED: ${ACTIVATE_RABBIT}
+      REDIS_ENABLED: ${ACTIVATE_REDIS}
+
     volumes:
       - /var/log:/var/log/host_logs:ro
       # /data/db could be attached to a data-dir
-      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d
-      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/jails:/data/jail.d.available
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d.available
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/actions:/data/action.d.available
+      - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/ip.blacklist:/data/ip.blacklist

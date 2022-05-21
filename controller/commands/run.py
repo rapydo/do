@@ -2,31 +2,41 @@
 Start a single container
 """
 import os
-from typing import Optional, Tuple
+from typing import List, Optional, Union
 
 import typer
 
 from controller import REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.builds import verify_available_images
+from controller.deploy.compose_v2 import PortMapping, PortRangeMapping
 from controller.deploy.docker import Docker
 from controller.templating import password
 
 
-def get_publish_port(service: str, port: Optional[int]) -> Tuple[int, int]:
+def get_publish_ports(
+    service: str, change_first_port: Optional[int]
+) -> Optional[List[Union[PortMapping, PortRangeMapping]]]:
     service_config = Application.data.compose_config.get(service, None)
     if not service_config:
         print_and_exit("Services misconfiguration, can't find {}", service)
 
-    try:
-        current_ports = service_config.ports.pop(0)
-    except IndexError:  # pragma: no cover
-        print_and_exit("No default port found?")
+    ports: List[Union[PortMapping, PortRangeMapping]] = []
+    for p in service_config.ports:
+        port = change_first_port or p.published
+        target = p.target
 
-    port = port or current_ports.published
-    target = current_ports.target
+        # Remove it, because this option is to be applied only to the first port
+        change_first_port = None
 
-    return port, target
+        ports.append(
+            (
+                port,
+                target,
+            )
+        )
+
+    return ports
 
 
 # This command replaces volatile, interfaces and registry
@@ -62,7 +72,7 @@ def run(
         help="User existing in selected service",
         show_default=False,
     ),
-    port: Optional[int] = typer.Option(
+    first_port: Optional[int] = typer.Option(
         None,
         "--port",
         "-p",
@@ -81,7 +91,7 @@ def run(
         Application.serialize_parameter("--debug", debug, IF=debug),
         Application.serialize_parameter("--command", command, IF=command),
         Application.serialize_parameter("--user", user, IF=user),
-        Application.serialize_parameter("--port", port, IF=port),
+        Application.serialize_parameter("--port", first_port, IF=first_port),
         Application.serialize_parameter("", service),
     )
 
@@ -163,7 +173,7 @@ def run(
             # , symbols="%*,-.=?[]^_~"
         )
 
-    port, target = get_publish_port(service, port)
+    publish_ports = get_publish_ports(service, first_port)
 
     if detach is None:
         if service == "swaggerui" or service == "adminer":
@@ -179,6 +189,7 @@ def run(
         else:
             prot = "http"
 
+        port = publish_ports[0][0] if publish_ports else first_port
         log.info(
             "You can access SwaggerUI web page here: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
@@ -190,11 +201,12 @@ def run(
         else:
             prot = "http"
 
+        port = publish_ports[0][0] if publish_ports else first_port
         log.info(
             "You can access Adminer interface on: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
         )
 
     docker.compose.create_volatile_container(
-        service, detach=detach, publish=[(port, target)]
+        service, detach=detach, publish=publish_ports
     )

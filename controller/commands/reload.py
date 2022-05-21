@@ -6,7 +6,7 @@ from typing import List
 import typer
 from python_on_whales.utils import DockerException
 
-from controller import log
+from controller import log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 
@@ -27,6 +27,9 @@ def reload(
     docker = Docker()
     running_services = docker.get_running_services()
 
+    if "frontend" in services and len(services) > 1:
+        print_and_exit("Can't reload frontend and other services at once")
+
     reloaded = 0
     for service in Application.data.services:
 
@@ -35,22 +38,14 @@ def reload(
             # Only consider it if explicitly requested in input
             if "frontend" not in services:
                 log.debug("Can't reload the frontend if not explicitly requested")
-            elif service in running_services:
-                log.warning("Can't reload the frontend while it is still building")
             else:
                 log.info("Reloading frontend...")
-                if Configuration.swarm_mode:
-                    service_name = docker.get_service(service)
-                    docker.client.service.update(service_name, force=True, detach=True)
-                else:
-                    service_name = docker.get_service(service)
-                    c = docker.get_container_name(service_name, slot=1)
-
-                    if docker.client.container.exists(c):
-                        docker.client.compose.restart(service)
-                    else:
-                        # Start is not required... but it does not hurt
-                        docker.compose.start_containers([service], force=True)
+                # The frontend build stucks in swarm mode... let's start the container
+                # always in compose mode when using the reload comand
+                Configuration.FORCE_COMPOSE_ENGINE = True
+                Application.get_controller().controller_init([service])
+                docker = Docker()
+                docker.compose.start_containers([service], force=True)
                 reloaded += 1
             continue
 

@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple, cast
 
 import typer
 from tabulate import tabulate
-from zxcvbn import zxcvbn
+from zxcvbn import zxcvbn  # type: ignore
 
 from controller import (
     GREEN,
@@ -42,6 +42,9 @@ SupportedServices = Enum(  # type: ignore
 # https://github.com/yaml/pyyaml/issues/90
 def parse_projectrc() -> Dict[str, datetime]:
 
+    if not PROJECTRC.exists():
+        return {}
+
     updates: Dict[str, datetime] = {}
     with open(PROJECTRC) as f:
         lines = f.readlines()
@@ -66,7 +69,7 @@ def parse_projectrc() -> Dict[str, datetime]:
                 m = re.search(
                     # This is is expected to be a date yyyy-mm-dd
                     # this reg exp will start to fail starting from 1st Jan 2100 :-D
-                    fr".*{UPDATE_LABEL} (20[0-9][0-9]-[0-1][0-9]-[0-3][0-9])$",
+                    rf".*{UPDATE_LABEL} (20[0-9][0-9]-[0-1][0-9]-[0-3][0-9])$",
                     line,
                 )
 
@@ -153,6 +156,43 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     Application.get_controller().load_projectrc()
     Application.get_controller().read_specs(read_extended=True)
     Application.get_controller().make_env()
+
+
+def get_expired_passwords() -> List[Tuple[str, datetime]]:
+    expired_passwords: List[Tuple[str, datetime]] = []
+
+    last_updates = parse_projectrc()
+    now = datetime.now()
+
+    for s in PASSWORD_MODULES:
+        # This should never happens and can't be (easily) tested
+        if s not in Application.data.base_services:  # pragma: no cover
+            print_and_exit("Command misconfiguration, unknown {} service", s)
+
+        if s != REGISTRY and s not in Application.data.active_services:
+            continue
+
+        if s == REGISTRY and not Configuration.swarm_mode:
+            continue
+
+        module = PASSWORD_MODULES.get(s)
+
+        if not module:  # pragma: no cover
+            print_and_exit(f"{s} misconfiguration, module not found")
+
+        for variable in module.PASSWORD_VARIABLES:
+
+            if variable in last_updates:
+                change_date = last_updates.get(variable, datetime.fromtimestamp(0))
+                expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
+                if now > expiration_date:
+                    expired_passwords.append(
+                        (
+                            variable,
+                            expiration_date,
+                        )
+                    )
+    return expired_passwords
 
 
 @Application.app.command(help="Manage services passwords")

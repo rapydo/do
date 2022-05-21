@@ -1,13 +1,15 @@
 """
 This module will test the password command and the passwords management
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from faker import Faker
+from freezegun import freeze_time
 from python_on_whales import docker
 
 from controller import colors
 from controller.app import Configuration
+from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
     REGISTRY,
     Capture,
@@ -36,7 +38,8 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
     init_project(capfd)
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     exec_command(
         capfd,
@@ -93,6 +96,22 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         "password",
         f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
     )
+
+    future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
+    expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
+
+    with freeze_time(future):
+        exec_command(
+            capfd,
+            "password",
+            f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+        )
+
+        exec_command(
+            capfd,
+            "check -i main --no-git --no-builds",
+            f"REGISTRY_PASSWORD is expired on {expired}",
+        )
 
     # This is needed otherwise the following tests will be unable to start
     # a new instance of the registry and will fail with registry auth errors

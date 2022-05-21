@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
 
     strategy:
@@ -122,21 +122,8 @@ jobs:
 
           sudo rm -rf rapydo_tests
 
-      - name: Restore the controller
-        # After the compose install test the controller won't no longer work
-        # Let's reinstall it
-        if: ${{ matrix.test == 'install' }}
-        run: |
-          # This will remove the old rapydo version installed by rapydo install test
-          sudo pip uninstall rapydo
-          pip uninstall rapydo
-          # And now install again 
-          pip install --upgrade --no-cache-dir --editable .[dev]
-
-          # Just to verify the installed version to debug in case of errors in the next steps
-          rapydo --version
-
       - name: Run Swarm Tests
+        if: ${{ matrix.test != 'install' }}
         env:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
@@ -173,7 +160,6 @@ jobs:
             sudo mkdir -p /volumes/sqldata
             sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
-            sudo mkdir -p /volumes/mongodata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
           fi
@@ -208,13 +194,13 @@ jobs:
             sudo mkdir -p /volumes/sqldata
             sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
-            sudo mkdir -p /volumes/mongodata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
           fi
 
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
+        if: ${{ matrix.test != 'install' }}
         uses: rapydo/actions/coverage@v1
         with:
           repository: .
