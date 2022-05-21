@@ -33,6 +33,7 @@ with open(blacklist) as blacklist_file:
             params={"ipAddress": IP},
             data={"maxAgeInDays": 180},
             headers={"Key": API_KEY, "Accept": "application/json"},
+            timeout=15,
         )
         data = r.json().get("data", {})
         score = data.get("abuseConfidenceScore", 0)
