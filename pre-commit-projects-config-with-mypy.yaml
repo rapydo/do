@@ -30,7 +30,7 @@ repos:
       - id: mypy
         additional_dependencies:
           [
-            "git+https://github.com/rapydo/http-api.git@2.3",
+            "git+https://github.com/rapydo/http-api.git@2.4",
             "lxml",
             "types-pytz",
             "types-python-dateutil",
@@ -43,7 +43,7 @@ repos:
             "pika-stubs",
             "celery-types",
             "sqlalchemy-stubs",
-            "Faker==13.3.3",
+            "Faker",
           ]
         # https://mypy.readthedocs.io/en/stable/command_line.html
         args: [
