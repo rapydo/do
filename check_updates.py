@@ -444,8 +444,6 @@ def check_versions(
         dependencies["controller"] = {"pip": parse_setup("../do/setup.cfg")}
         dependencies["http-api"] = {"pip": parse_setup("../http-api/setup.cfg")}
 
-    log.critical(dependencies)
-
     filtered_dependencies: Dependencies = {}
 
     for service, categories in dependencies.items():
