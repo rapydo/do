@@ -243,8 +243,9 @@ def parse_setup(setup_filename: str) -> List[str]:
     config = configparser.ConfigParser()
     config.read(setup_filename)
 
+    dep_list = config["options"]["install_requires"].strip().split("\n")
     dependencies: List[str] = []
-    for dep in config["options"]["install_requires"]:
+    for dep in dep_list:
         if "==" in dep:
             dependencies.append(dep)
 
@@ -441,8 +442,10 @@ def check_versions(
         )
 
     if not skip_python:
-        dependencies["controller"] = {"pip": parse_setup("../do/setup.cfg")}
-        dependencies["http-api"] = {"pip": parse_setup("../http-api/setup.cfg")}
+        dependencies["controller"] = {}
+        dependencies["controller"]["pip"] = parse_setup("../do/setup.cfg")
+        dependencies["http-api"] = {}
+        dependencies["http-api"]["pip"] = parse_setup("../http-api/setup.cfg")
 
     filtered_dependencies: Dependencies = {}
 
@@ -452,9 +455,8 @@ def check_versions(
 
         for category, deps in categories.items():
 
+            filtered_dependencies[service][category] = []
             for d in deps:
-
-                filtered_dependencies[service][category] = []
 
                 skipped = False
                 if re.match(r"^git\+https://github\.com.*@master$", d):
