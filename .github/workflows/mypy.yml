@@ -30,7 +30,7 @@ jobs:
           cat report/index.txt
 
       - name: Save Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: mypy-report
           path: report
