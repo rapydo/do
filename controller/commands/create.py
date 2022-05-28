@@ -34,7 +34,6 @@ class ServiceTypes(str, Enum):
     flower = "flower"
     fail2ban = "fail2ban"
     ftp = "ftp"
-    bot = "bot"
 
 
 class FrontendTypes(str, Enum):
@@ -173,7 +172,6 @@ def create_project(
     enable_flower = "flower" in services
     enable_fail2ban = "fail2ban" in services
     enable_ftp = "ftp" in services
-    enable_bot = "bot" in services
 
     if auth == "postgres" or auth == "mysql":
         auth = "sqlalchemy"
@@ -269,7 +267,6 @@ def create_project(
                 "enable_flower": enable_flower,
                 "enable_fail2ban": enable_fail2ban,
                 "enable_ftp": enable_ftp,
-                "enable_bot": enable_bot,
                 "celery_broker": celery_broker,
                 "celery_backend": celery_backend,
                 "frontend": frontend,

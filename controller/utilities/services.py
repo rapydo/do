@@ -97,8 +97,6 @@ vars_to_services_mapping: Dict[str, List[str]] = {
     "SMTP_HOST": ["backend"],
     "SMTP_USERNAME": ["backend"],
     "SMTP_PASSWORD": ["backend"],
-    "TELEGRAM_API_KEY": ["bot"],
-    "TELEGRAM_ADMINS": ["bot"],
     "FTP_PASSWORD": ["ftp"],
     "FTP_USER": ["ftp"],
 }

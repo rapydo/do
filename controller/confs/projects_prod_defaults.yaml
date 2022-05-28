@@ -29,7 +29,6 @@ variables:
 
     FLOWER_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     FLOWER_PROTOCOL: https # used for healthchecks
-    TELEGRAM_WORKERS: 4
 
     POSTGRES_MAX_CONNECTIONS: 250
     POSTGRES_SHARED_BUFFERS: 1GB

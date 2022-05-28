@@ -19,7 +19,6 @@ name_priorities = [
     "flower",
     "celerybeat",
     "maintenance",
-    "bot",
 ]
 
 

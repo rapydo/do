@@ -189,17 +189,6 @@ services:
       SMTP_USERNAME: "${SMTP_USERNAME}"
       SMTP_PASSWORD: "${SMTP_PASSWORD}"
 
-      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
-      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
-      TELEGRAM_USERS: "${TELEGRAM_USERS}"
-      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
-      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
-      TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
-      TELEGRAM_APP_ID: ${TELEGRAM_APP_ID}
-      TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
-      TELETHON_SESSION: ${TELETHON_SESSION}
-
       SENTRY_URL: "${SENTRY_URL}"
       RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
       MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
@@ -771,68 +760,6 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-
-  #################
-  ###    BOT    ###
-  #################
-
-  bot:
-    restart: always
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
-    entrypoint: docker-entrypoint-bot
-    hostname: telegram-bot
-    logging:
-      driver: syslog
-      options: {}
-    environment:
-      ACTIVATE: ${ACTIVATE_TELEGRAM}
-      APP_MODE: ${APP_MODE}
-      LOGURU_LEVEL: ${LOG_LEVEL}
-      LOG_RETENTION: ${LOG_RETENTION}
-      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
-      CURRENT_UID: ${CURRENT_UID}
-      CURRENT_GID: ${CURRENT_GID}
-      PYTHON_PATH: ${PYTHON_PATH}
-      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
-      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      DOMAIN: ${PROJECT_DOMAIN}
-      BACKEND_URL: "${BACKEND_URL}"
-      BACKEND_PREFIX: "${BACKEND_PREFIX}"
-      FRONTEND_URL: ${FRONTEND_URL}
-      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
-      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
-      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
-      TELEGRAM_USERS: "${TELEGRAM_USERS}"
-      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
-      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
-      TELEGRAM_APP_HASH: "${TELEGRAM_APP_HASH}"
-      TELEGRAM_APP_ID: "${TELEGRAM_APP_ID}"
-      TELEGRAM_BOTNAME: "${TELEGRAM_BOTNAME}"
-      TELETHON_SESSION: "${TELETHON_SESSION}"
-
-    volumes:
-      # configuration files
-      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
-      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - secrets:${APP_SECRETS}
-      # Vanilla code
-      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
-      # From project, if any
-      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
-      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # submodules
-      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
-      # Logs
-      - ${DATA_DIR}/logs:/logs
-    networks:
-      default:
 
   ##########################
   ### SERVICE INTERFACES ###

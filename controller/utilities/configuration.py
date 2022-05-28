@@ -287,7 +287,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_FTP: zero_or_one
     ACTIVATE_SMTP: zero_or_one
     ACTIVATE_SMTP_SERVER: zero_or_one
-    ACTIVATE_TELEGRAM: zero_or_one
     ACTIVATE_SWAGGERUI: zero_or_one
     ACTIVATE_ADMINER: zero_or_one
     RUN_SCHEMATHESIS: zero_or_one
@@ -482,14 +481,6 @@ class BaseEnvModel(BaseModel):
     SMTP_PASSWORD: Optional[str]
     SMTP_SERVER_HOST: str
     SMTP_SERVER_PORT: Port
-    TELEGRAM_API_KEY: str
-    TELEGRAM_ADMINS: str
-    TELEGRAM_USERS: Optional[str]
-    TELEGRAM_WORKERS: PositiveInt
-    TELEGRAM_APP_HASH: Optional[str]
-    TELEGRAM_APP_ID: Optional[str]
-    TELEGRAM_BOTNAME: Optional[str]
-    TELETHON_SESSION: Optional[str]
     FRONTEND_URL: str
     FRONTEND_PREFIX: str
     ALLOW_PASSWORD_RESET: zero_or_one

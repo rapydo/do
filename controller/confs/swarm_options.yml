@@ -117,18 +117,6 @@ services:
     #   options:
     #     syslog-address: ${SYSLOG_ADDRESS}
 
-  bot:
-    deploy:
-      # Can't support replicas for sure
-      replicas: 1
-      resources:
-        reservations:
-          cpus: "${ASSIGNED_CPU_BOT}"
-          memory: ${ASSIGNED_MEMORY_BOT}
-    # logging:
-    #   options:
-    #     syslog-address: ${SYSLOG_ADDRESS}
-
   flower:
     deploy:
       # Are replicas needed? And supported?
