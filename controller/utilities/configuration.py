@@ -448,8 +448,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_RABBIT: AssignedMemory
     ASSIGNED_CPU_REDIS: AssignedCPU
     ASSIGNED_MEMORY_REDIS: AssignedMemory
-    ASSIGNED_CPU_BOT: AssignedCPU
-    ASSIGNED_MEMORY_BOT: AssignedMemory
     ASSIGNED_CPU_FLOWER: AssignedCPU
     ASSIGNED_MEMORY_FLOWER: AssignedMemory
     ASSIGNED_CPU_SWAGGERUI: AssignedCPU
