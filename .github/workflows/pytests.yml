@@ -4,6 +4,11 @@ on:
   push:
   workflow_dispatch:
 
+# Cancel previous running jobs on the same branch in case of new pushs
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
