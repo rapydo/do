@@ -1,0 +1,39 @@
+name: MyPy
+
+env:
+  PROJECT: {{ project }}
+
+on:
+  push:
+  workflow_dispatch:
+
+# Cancel previous running jobs on the same branch in case of new pushs
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - uses: rapydo/actions/install@v1
+        with:
+          project: ${PROJECT}
+          submodule: http-api
+      - uses: rapydo/actions/mypy@v1
+        with:
+          project: ${PROJECT}
+          # install: ...
+          # ignore: ...
+      - name: Save Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: mypy-report
+          path: report
