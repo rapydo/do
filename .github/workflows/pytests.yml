@@ -62,7 +62,7 @@ jobs:
           ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Select a Python version
         run: |
           versions=(3.8 3.9 3.10)
