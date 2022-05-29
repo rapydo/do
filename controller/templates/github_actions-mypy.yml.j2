@@ -9,7 +9,7 @@ on:
 
 # Cancel previous running jobs on the same branch in case of new pushs
 concurrency:
-  group: ${{ github.ref }}
+  group: {% raw %}${{ github.ref }}{% endraw %}
   cancel-in-progress: true
 
 jobs:
