@@ -138,7 +138,7 @@ def test_add(capfd: Capture) -> None:
         f"Service created: {path}",
     )
 
-    path = Path("projects/second/frontend/integration/app_mypath_my_id.spec.ts")
+    path = Path("projects/second/frontend/e2e/app_mypath_my_id.spec.ts")
     assert not path.exists()
     exec_command(
         capfd,

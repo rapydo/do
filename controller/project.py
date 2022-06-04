@@ -164,7 +164,7 @@ class Project:
                 [
                     self.p_path("frontend", "app"),
                     self.p_path("frontend", "styles"),
-                    self.p_path("frontend", "integration"),
+                    self.p_path("frontend", "e2e"),
                     self.p_path("frontend", "assets"),
                     self.p_path("frontend", "assets", "favicon"),
                 ]
@@ -174,9 +174,7 @@ class Project:
                 DATA_DIR.joinpath(self.project, "frontend", GITKEEP)
             )
 
-            self.suggested_gitkeep.append(
-                self.p_path("frontend", "integration", GITKEEP)
-            )
+            self.suggested_gitkeep.append(self.p_path("frontend", "e2e", GITKEEP))
 
             self.expected_files.extend(
                 [
@@ -259,6 +257,8 @@ class Project:
                     frontend_data_dir.joinpath("browserslist"),
                     # Removed since 1.2 (replaced with scss in styles)
                     self.p_path("frontend", "css"),
+                    # Removed since 2.4 (renamed into e2e)
+                    self.p_path("frontend", "integration"),
                 ]
             )
 

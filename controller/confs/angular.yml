@@ -127,7 +127,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
-      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/app/cypress/e2e/rapydo
+      - ${PROJECT_DIR}/frontend/e2e:/app/cypress/e2e/custom
 
       - ${DATA_DIR}/logs:/logs
