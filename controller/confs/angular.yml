@@ -108,7 +108,7 @@ services:
 
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/karma:/coverage
-      # Output folder, configured in cypress.json
+      # Output folder, configured in cypress.config.ts
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
@@ -121,7 +121,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${PROJECT_DIR}/frontend:/app/app/custom
 
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress.config.ts:/app/cypress.config.ts
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
