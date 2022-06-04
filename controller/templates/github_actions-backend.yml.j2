@@ -10,7 +10,7 @@ env:
 
 # Cancel previous running jobs on the same branch in case of new pushs
 concurrency:
-  group: {% raw %}${{ github.ref }}{% endraw %}
+  group: backend-{% raw %}${{ github.ref }}{% endraw %}
   cancel-in-progress: true
 
 jobs:
