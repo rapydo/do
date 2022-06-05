@@ -10,7 +10,7 @@ updates:
     directory: "/"
     open-pull-requests-limit: 99
     schedule:
-      interval: "daily"
+      interval: "weekly"
 
   # Maintain dependencies for Python
   - package-ecosystem: "pip"
