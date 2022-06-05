@@ -21,5 +21,15 @@ setup(
         "zxcvbn",
         "tabulate",
         "packaging",
-    ]
+    ],
+    extras_require={
+        "dev": [
+            "pytest",
+            "pytest-cov",
+            "pytest-timeout",
+            "pytest-sugar",
+            "freezegun",
+            "Faker",
+        ]
+    },
 )
