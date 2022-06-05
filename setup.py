@@ -17,7 +17,7 @@ setup(
         "pip>=21.3",
         "requests>=2.6.1",
         "typer[all]==0.4.1",
-        "click==8.1.2",
+        "click==8.1.3",
         "zxcvbn",
         "colorama",
         "tabulate",
