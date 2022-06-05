@@ -16,7 +16,7 @@ classifiers=[
     "Programming Language :: Python :: 3.10",
 ]
 
-dependencies = [
+# dependencies = [
 #     "python-on-whales==0.40.0",
 #     "python-dateutil",
 #     "pytz",
@@ -34,17 +34,17 @@ dependencies = [
 #     "zxcvbn",
 #     "tabulate",
 #     "packaging",
-]
+# ]
 
-[project.optional-dependencies]
-dev = [
+# [project.optional-dependencies]
+# dev = [
 #     "pytest",
 #     "pytest-cov",
 #     "pytest-timeout",
 #     "pytest-sugar",
 #     "freezegun",
 #     "Faker",
-]
+# ]
 
 [project.urls]
 homepage = "https://rapydo.github.io/docs"

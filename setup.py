@@ -19,6 +19,7 @@ setup(
         "typer[all]==0.4.1",
         "click==8.1.2",
         "zxcvbn",
+        "colorama",
         "tabulate",
         "packaging",
     ],
