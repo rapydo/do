@@ -205,6 +205,8 @@ services:
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Used to force installation in case of pull requests
+      - ${SUBMODULE_DIR}/http-api:/http-api-package
       # Unit tests
       - ${SUBMODULE_DIR}/http-api/tests:/code/tests
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
