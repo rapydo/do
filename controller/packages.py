@@ -29,8 +29,8 @@ from controller import RED, log, print_and_exit
 EXPECTED_DOCKER_SCRIPT_MD5 = "e62a7013fdab6d9ec1feadac8d6e1c13"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.5.0"
-EXPECTED_COMPOSE_BIN_MD5 = "4bf63c523fb4a00efb2b18a218354a4c"
+COMPOSE_VERSION = "v2.6.0"
+EXPECTED_COMPOSE_BIN_MD5 = "ce37e8103a13c02d7ecae957f527d613"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.8.2"
