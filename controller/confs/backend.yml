@@ -362,7 +362,14 @@ services:
 
   mariadb:
     restart: always
-    image: mariadb:10.8.2
+
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/mariadb
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+        CURRENT_UID: ${CURRENT_UID}
+        CURRENT_GID: ${CURRENT_GID}
+    image: rapydo/mariadb:${RAPYDO_VERSION}
     healthcheck:
       test: "mysqladmin ping -h localhost"
       interval: ${HEALTHCHECK_INTERVAL}
