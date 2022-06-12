@@ -58,8 +58,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     value1 = f"old-{faker.pystr()}"
     value2 = f"new-{faker.pystr()}"
 
-    # NOTE: q = redis.__name__ is just to have a fixed name to be used to test the
-    # queue without the need to introdure further nested " or '
     get_key = f'shell redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" get {key}\'"'
     set_key1 = (
         f'shell redis "sh -c \'redis-cli --pass "$REDIS_PASSWORD" set {key} {value1}\'"'
