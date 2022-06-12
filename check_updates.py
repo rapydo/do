@@ -243,8 +243,13 @@ def parse_setup(setup_filename: str) -> List[str]:
     config = configparser.ConfigParser()
     config.read(setup_filename)
 
-    dep_list = config["options"]["install_requires"].strip().split("\n")
     dependencies: List[str] = []
+
+    if "install_requires" not in config["options"]:
+        log.warning("No install requires found in {}", setup_filename)
+        return dependencies
+
+    dep_list = config["options"]["install_requires"].strip().split("\n")
     for dep in dep_list:
         if "==" in dep:
             dependencies.append(dep)
