@@ -52,9 +52,11 @@ class Packages:
 
             options = ["install", "--upgrade"]
 
+            home = Path.home()
+
             if editable:
                 options.append("--prefix")
-                options.append("~/.local")
+                options.append(f"{home}/.local")
                 options.append("--editable")
             else:
                 options.append("--user")
