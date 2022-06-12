@@ -1,6 +1,4 @@
-from celery.app.task import Task
-
-from restapi.connectors.celery import CeleryExt, CeleryRetryTask, Ignore
+from restapi.connectors.celery import CeleryExt, CeleryRetryTask, Ignore, Task
 from restapi.utilities.logs import log
 from restapi.connectors import {{auth_service}}
 
@@ -10,7 +8,7 @@ class MyException(Exception):
 
 
 @CeleryExt.task(idempotent=True, autoretry_for=(MyException,))
-def {{name}}(self: Task, myinput: str) -> str:
+def {{name}}(self: Task[[str], str], myinput: str) -> str:
     log.info("Task ID: {}", self.request.id)
 
     db = {{auth_service}}.get_instance()

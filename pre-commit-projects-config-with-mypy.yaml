@@ -43,7 +43,6 @@ repos:
             "pika-stubs",
             "celery-types",
             "sqlalchemy-stubs",
-            "Faker",
           ]
         # https://mypy.readthedocs.io/en/stable/command_line.html
         args: [
