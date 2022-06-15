@@ -2,6 +2,7 @@ name: MyPy
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 # Cancel previous running jobs on the same branch in case of new pushs
