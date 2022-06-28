@@ -24,6 +24,7 @@ jobs:
 
       # Scan code using project's configuration on https://semgrep.dev/manage
       - run: semgrep ci --sarif --output=semgrep.sarif
+        name: Run semgrep
         env:
           SEMGREP_APP_TOKEN: {% raw %}${{ secrets.SEMGREP_APP_TOKEN }}{% endraw %}
 
