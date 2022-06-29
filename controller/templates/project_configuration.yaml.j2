@@ -25,6 +25,15 @@ variables:
   #   admin_root: Administrator Custom Description
   #   extra_role: Custom Role Description
 
+  submodules:
+    http-api:
+      # branch: http-api-branch
+    build-templates:
+      # branch: build-templates-branch
+    rapydo-angular:
+      # branch: rapydo-angular-branch
+    do:
+      # branch: do-branch
   env:
 
     {% if auth_service == "NO_AUTHENTICATION" -%}
