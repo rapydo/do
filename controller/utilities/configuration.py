@@ -345,7 +345,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_SMTP_SERVER: zero_or_one
     ACTIVATE_SWAGGERUI: zero_or_one
     ACTIVATE_ADMINER: zero_or_one
-    RUN_SCHEMATHESIS: zero_or_one
     MAX_LOGS_LENGTH: PositiveInt
     APP_MODE: APP_MODE_VALUES
     FLASK_HOST: str
