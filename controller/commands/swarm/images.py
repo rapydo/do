@@ -30,7 +30,7 @@ def images(
 
     Application.get_controller().controller_init()
 
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     # https://docs.docker.com/registry/spec/api/
 
     docker = Docker()
