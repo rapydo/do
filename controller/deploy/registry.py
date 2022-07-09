@@ -88,7 +88,7 @@ class Registry:
 
     def verify_image(self, image: str) -> bool:
 
-        urllib3.disable_warnings(  # type: ignore
+        urllib3.disable_warnings(
             urllib3.exceptions.InsecureRequestWarning
         )
         registry = self.get_host()
