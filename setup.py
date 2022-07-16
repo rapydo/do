@@ -16,7 +16,7 @@ setup(
         "PyYAML==6.0",
         "pip>=21.3",
         "requests>=2.6.1",
-        "typer[all]==0.5.0",
+        "typer[all]==0.6.1",
         "click==8.1.3",
         "zxcvbn",
         "colorama",
