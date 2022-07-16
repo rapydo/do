@@ -108,7 +108,7 @@ jobs:
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
       - name: Send Compose Coverage
-        uses: rapydo/actions/coverage@v1
+        uses: rapydo/actions/coverage@v2
         with:
           repository: .
           cov_file: rapydo_tests/coverage.xml
@@ -207,7 +207,7 @@ jobs:
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         if: ${{ matrix.test != 'install' }}
-        uses: rapydo/actions/coverage@v1
+        uses: rapydo/actions/coverage@v2
         with:
           repository: .
           cov_file: rapydo_tests/coverage.xml
