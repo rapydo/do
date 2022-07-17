@@ -134,7 +134,7 @@ def test_create(capfd: Capture) -> None:
     exec_command(
         capfd,
         "create first --auth postgres --frontend angular --current --service invalid",
-        "Error: Invalid value for",
+        "Invalid value for",
     )
 
     create_command = "create first --auth postgres --frontend angular"
