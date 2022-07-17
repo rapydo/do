@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 from freezegun import freeze_time
 
-from controller import colors
 from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
@@ -40,6 +39,10 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
 
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
+    if Configuration.swarm_mode:
+        prefix = "│ mariadb  │"
+    else:
+        prefix = "│ mariadb │"
 
     exec_command(
         capfd,
@@ -50,8 +53,7 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"mariadb    ALCHEMY_PASSWORD       {colors.RED}N/A",
-        # f"mariadb    MYSQL_ROOT_PASSWORD    {colors.RED}N/A",
+        f"{prefix} ALCHEMY_PASSWORD      │ N/A",
     )
 
     pull_images(capfd)
@@ -87,11 +89,10 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"mariadb    ALCHEMY_PASSWORD       {colors.GREEN}{today}",
-        # f"mariadb    MYSQL_ROOT_PASSWORD    {colors.GREEN}{today}",
+        f"{prefix} ALCHEMY_PASSWORD      │ {today}",
     )
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password mariadb --password {mypassword}",
@@ -117,7 +118,7 @@ def test_password_mysql(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"mariadb    ALCHEMY_PASSWORD       {colors.RED}{today}",
+            f"{prefix} ALCHEMY_PASSWORD      │ {today}",
         )
 
         exec_command(

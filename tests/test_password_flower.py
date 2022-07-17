@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from faker import Faker
 from freezegun import freeze_time
 
-from controller import colors
+from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
     Capture,
@@ -39,11 +39,11 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
 
-    exec_command(
-        capfd,
-        "password",
-        f"flower     FLOWER_PASSWORD        {colors.RED}N/A",
-    )
+    if Configuration.swarm_mode:
+        prefix = "│ flower   │"
+    else:
+        prefix = "│ flower  │"
+    exec_command(capfd, "password", f"{prefix} FLOWER_PASSWORD       │ N/A")
 
     flower_pass1 = get_variable_from_projectrc("FLOWER_PASSWORD")
     exec_command(
@@ -60,7 +60,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
+        f"{prefix} FLOWER_PASSWORD       │ {today}",
     )
 
     pull_images(capfd)
@@ -87,10 +87,10 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"flower     FLOWER_PASSWORD        {colors.GREEN}{today}",
+        f"{prefix} FLOWER_PASSWORD       │ {today}",
     )
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password flower --password {mypassword}",
@@ -111,7 +111,7 @@ def test_password_flower(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"flower     FLOWER_PASSWORD        {colors.RED}{today}",
+            f"{prefix} FLOWER_PASSWORD       │ {today}",
         )
 
         exec_command(

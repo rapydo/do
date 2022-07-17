@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 from freezegun import freeze_time
 
-from controller import colors
 from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
@@ -41,6 +40,10 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
 
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
+    if Configuration.swarm_mode:
+        prefix = "│ rabbit   │"
+    else:
+        prefix = "│ rabbit  │"
 
     exec_command(
         capfd,
@@ -51,7 +54,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"rabbit     RABBITMQ_PASSWORD      {colors.RED}N/A",
+        f"{prefix} RABBITMQ_PASSWORD     │ N/A",
     )
 
     pull_images(capfd)
@@ -89,7 +92,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"rabbit     RABBITMQ_PASSWORD      {colors.GREEN}{today}",
+        f"{prefix} RABBITMQ_PASSWORD     │ {today}",
     )
 
     # Needed to prevent random:
@@ -99,7 +102,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
     if Configuration.swarm_mode:
         time.sleep(3)
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password rabbit --password {mypassword}",
@@ -125,7 +128,7 @@ def test_password_rabbit(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"rabbit     RABBITMQ_PASSWORD      {colors.RED}{today}",
+            f"{prefix} RABBITMQ_PASSWORD     │ {today}",
         )
 
         exec_command(
