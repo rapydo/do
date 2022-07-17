@@ -34,7 +34,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         f"--invalid-option create {project}",
-        "No such option: --invalid-option",
+        "No such option:",
     )
 
     exec_command(capfd, "rapydo", "Usage")
