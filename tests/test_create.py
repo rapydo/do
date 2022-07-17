@@ -19,7 +19,7 @@ def test_create(capfd: Capture) -> None:
     exec_command(
         capfd,
         "create first",
-        "Missing option '--auth'",
+        "Missing option",
     )
 
     exec_command(
@@ -31,7 +31,7 @@ def test_create(capfd: Capture) -> None:
     exec_command(
         capfd,
         "create first --auth postgres",
-        "Missing option '--frontend'.",
+        "Missing option",
     )
 
     exec_command(
