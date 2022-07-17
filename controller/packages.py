@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import stat
+import sys
 import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
@@ -55,8 +56,9 @@ class Packages:
             home = Path.home()
 
             if editable:
-                options.append("--prefix")
-                options.append(f"{home}/.local")
+                if sys.platform != "darwin" and sys.platform != "win32":
+                    options.append("--prefix")
+                    options.append(f"{home}/.local")
                 options.append("--editable")
             else:
                 options.append("--user")
