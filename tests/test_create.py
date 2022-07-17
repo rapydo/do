@@ -19,25 +19,25 @@ def test_create(capfd: Capture) -> None:
     exec_command(
         capfd,
         "create first",
-        "Missing option '--auth'",
+        "Missing option",
     )
 
     exec_command(
         capfd,
         "create first --auth xyz",
-        "Invalid value for '--auth'",
+        "Invalid value for",
     )
 
     exec_command(
         capfd,
         "create first --auth postgres",
-        "Missing option '--frontend'.",
+        "Missing option",
     )
 
     exec_command(
         capfd,
         "create first --auth postgres --frontend xyz",
-        "Invalid value for '--frontend'",
+        "Invalid value for",
     )
 
     exec_command(
@@ -134,7 +134,7 @@ def test_create(capfd: Capture) -> None:
     exec_command(
         capfd,
         "create first --auth postgres --frontend angular --current --service invalid",
-        "Error: Invalid value for '--service'",
+        "Invalid value for",
     )
 
     create_command = "create first --auth postgres --frontend angular"
