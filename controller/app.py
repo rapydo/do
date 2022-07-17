@@ -29,7 +29,6 @@ from git import Repo as GitRepo
 from packaging.version import Version
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
-from tabulate import tabulate
 from zxcvbn import zxcvbn  # type: ignore
 
 from controller import (
@@ -45,7 +44,6 @@ from controller import (
     RED,
     REGISTRY,
     SUBMODULES_DIR,
-    TABLE_FORMAT,
     ComposeServices,
     EnvType,
     __version__,
@@ -57,6 +55,7 @@ from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, git, services, system
+from controller.utilities.tables import print_table
 
 ROOT_UID = 0
 BASE_UID = 1000
@@ -1163,15 +1162,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if placeholders:
             log.critical("The following variables are missing in your configuration:")
 
-            print("")
-            print(
-                tabulate(
-                    placeholders,
-                    tablefmt=TABLE_FORMAT,
-                    headers=["VARIABLE", "SERVICE(S)"],
-                )
+            print_table(
+                ["VARIABLE", "SERVICE(S)"],
+                placeholders,
+                table_title="Missing variables",
             )
-            print("")
 
             log.info("You can fix this error by updating your .projectrc file")
 

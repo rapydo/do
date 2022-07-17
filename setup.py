@@ -20,7 +20,6 @@ setup(
         "click==8.1.3",
         "zxcvbn",
         "colorama",
-        "tabulate",
         "packaging",
     ],
     extras_require={

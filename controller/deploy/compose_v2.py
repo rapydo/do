@@ -5,21 +5,19 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import yaml
 from python_on_whales.components.compose.models import ComposeConfig
 from python_on_whales.utils import DockerException
-from tabulate import tabulate
 
 from controller import (
     COMPOSE_FILE,
     COMPOSE_FILE_VERSION,
     RED,
     REGISTRY,
-    TABLE_FORMAT,
-    colors,
     log,
     print_and_exit,
 )
 from controller.app import Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
+from controller.utilities.tables import print_table
 
 Port = Union[str, int]
 PortMapping = Tuple[Port, Port]
@@ -347,15 +345,20 @@ class Compose:
 
             status = container.state.status
             if status == "shutdown" or status == "complete":
-                COLOR = colors.BLUE
+                OPEN_COLOR = "[bold blue]"
+                CLOSE_COLOR = "[/bold blue]"
             elif status == "running":
-                COLOR = colors.GREEN
+                OPEN_COLOR = "[bold green]"
+                CLOSE_COLOR = "[/bold green]"
             elif status == "starting" or status == "ready":
-                COLOR = colors.YELLOW
+                OPEN_COLOR = "[bold yellow]"
+                CLOSE_COLOR = "[/bold yellow]"
             elif status == "failed":
-                COLOR = colors.RED
+                OPEN_COLOR = "[bold red]"
+                CLOSE_COLOR = "[/bold red]"
             else:
-                COLOR = colors.RESET
+                OPEN_COLOR = ""
+                CLOSE_COLOR = ""
 
             ports_list = []
             for container_port, host_port in container.network_settings.ports.items():
@@ -366,7 +369,7 @@ class Compose:
             table.append(
                 [
                     container.id[0:12],
-                    f"{COLOR}{container.name}{colors.RESET}",
+                    f"{OPEN_COLOR}{container.name}{CLOSE_COLOR}",
                     status,
                     container.created.strftime("%d-%m-%Y %H:%M:%S"),
                     container.config.image,
@@ -377,12 +380,10 @@ class Compose:
         if not table:
             log.info("No container is running")
         else:
-            print(
-                tabulate(
-                    table,
-                    tablefmt=TABLE_FORMAT,
-                    headers=["ID", "NAME", "STATUS", "CREATED", "IMAGE", "PORTS"],
-                )
+            print_table(
+                ["ID", "NAME", "STATUS", "CREATED", "IMAGE", "PORTS"],
+                table,
+                table_title="List of containers",
             )
 
     def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:

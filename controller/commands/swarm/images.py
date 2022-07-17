@@ -4,12 +4,12 @@ from typing import List, Optional, Tuple, cast
 
 import typer
 import urllib3
-from tabulate import tabulate
 
-from controller import RED, TABLE_FORMAT, log
+from controller import log
 from controller.app import Application
 from controller.deploy.docker import Docker
 from controller.utilities import system
+from controller.utilities.tables import print_table
 
 
 @Application.app.command(help="Query the local registry")
@@ -115,11 +115,11 @@ def images(
             image_line: List[str] = []
 
             if to_be_removed:
-                image_line.append(RED(repository))
-                image_line.append(RED(tag))
-                image_line.append(RED(_id))
-                image_line.append(RED(creation_date))
-                image_line.append(RED(SIZE))
+                image_line.append(f"[bold red]{repository}[/bold red]")
+                image_line.append(f"[bold red]{tag}[/bold red]")
+                image_line.append(f"[bold red]{_id}[/bold red]")
+                image_line.append(f"[bold red]{creation_date}[/bold red]")
+                image_line.append(f"[bold red]{SIZE}[/bold red]")
                 creation_date = "DELETING ..."
                 images_to_be_removed.append((repository, digest, tag))
             else:
@@ -131,13 +131,10 @@ def images(
 
             table.append(image_line)
 
-        print("")
-        print(
-            tabulate(
-                table,
-                tablefmt=TABLE_FORMAT,
-                headers=["REPOSITORY", "TAG", "IMAGE ID", "CREATED", "SIZE"],
-            )
+        print_table(
+            ["REPOSITORY", "TAG", "IMAGE ID", "CREATED", "SIZE"],
+            table,
+            table_title="Registry images",
         )
 
         if len(remove_images) != len(images_to_be_removed):

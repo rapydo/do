@@ -7,12 +7,12 @@ from enum import Enum
 from typing import Dict, List
 
 import typer
-from tabulate import tabulate
 
-from controller import COMPOSE_ENVIRONMENT_FILE, TABLE_FORMAT, log
+from controller import COMPOSE_ENVIRONMENT_FILE, log
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import git
+from controller.utilities.tables import print_table
 
 
 class ElementTypes(str, Enum):
@@ -32,7 +32,7 @@ def list_cmd(
 
     table: List[List[str]] = []
     if element_type == ElementTypes.env:
-        log.info("List env variables:\n")
+        table_title = "List of env variables"
         headers = ["Key", "Value"]
         env = read_env()
         for var in sorted(env):
@@ -40,7 +40,7 @@ def list_cmd(
             table.append([var, val])
 
     if element_type == ElementTypes.services:
-        log.info("List of active services:\n")
+        table_title = "List of active services"
 
         headers = ["Name", "Image", "Status", "Path"]
 
@@ -61,7 +61,7 @@ def list_cmd(
                 table.append([name, image, status, build_path])
 
     if element_type == ElementTypes.submodules:
-        log.info("List of submodules:\n")
+        table_title = "List of submodules"
         headers = ["Repo", "Branch", "Path"]
         for name in Application.gits:
             repo = Application.gits.get(name)
@@ -74,8 +74,8 @@ def list_cmd(
 
                 table.append([name, branch, path])
 
-    print("")
-    print(tabulate(table, tablefmt=TABLE_FORMAT, headers=headers))
+    log.info("{}:\n", table_title)
+    print_table(headers, table, table_title=table_title)
 
 
 def read_env() -> Dict[str, str]:

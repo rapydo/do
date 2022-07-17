@@ -6,20 +6,12 @@ from typing import Dict, List, Optional, Set, Union
 from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
-from tabulate import tabulate
 
-from controller import (
-    COMPOSE_FILE,
-    GREEN,
-    RED,
-    TABLE_FORMAT,
-    colors,
-    log,
-    print_and_exit,
-)
+from controller import COMPOSE_FILE, GREEN, RED, colors, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
+from controller.utilities.tables import print_table
 
 
 class Swarm:
@@ -153,7 +145,7 @@ class Swarm:
                 ]
             )
 
-        print(tabulate(nodes_table, tablefmt=TABLE_FORMAT, headers=headers))
+        print_table(headers, nodes_table, table_title="Cluster status")
         stack_services = self.docker.service.list()
 
         print("")

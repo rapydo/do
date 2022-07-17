@@ -7,23 +7,14 @@ from enum import Enum
 from typing import Dict, List, Optional, Tuple, cast
 
 import typer
-from tabulate import tabulate
 from zxcvbn import zxcvbn  # type: ignore
 
-from controller import (
-    GREEN,
-    PLACEHOLDER,
-    PROJECTRC,
-    RED,
-    REGISTRY,
-    TABLE_FORMAT,
-    log,
-    print_and_exit,
-)
+from controller import PLACEHOLDER, PROJECTRC, REGISTRY, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.commands import PASSWORD_MODULES
 from controller.deploy.docker import Docker
 from controller.templating import Templating, get_strong_password
+from controller.utilities.tables import print_table
 
 # make this configurable
 PASSWORD_EXPIRATION = 90
@@ -285,16 +276,16 @@ def password(
                 pass_line.append(variable)
 
                 if expired:
-                    pass_line.append(RED(last_change))
+                    pass_line.append(f"[bold red]{last_change}[/bold red]")
                 else:
-                    pass_line.append(GREEN(last_change))
+                    pass_line.append(f"[bold green]{last_change}[/bold green]")
 
                 if score is None:
-                    pass_line.append(RED("NOT SET"))
+                    pass_line.append("[bold red]NOT SET[/bold red]")
                 elif score < MIN_PASSWORD_SCORE:
-                    pass_line.append(RED(score))
+                    pass_line.append(f"[bold red]{score}[/bold red]")
                 else:
-                    pass_line.append(GREEN(score))
+                    pass_line.append(f"[bold green]{score}[/bold green]")
 
                 if show:
                     pass_line.append(str(password))
@@ -305,14 +296,7 @@ def password(
         if show:
             headers.append("PASSWORD")
 
-        print("")
-        print(
-            tabulate(
-                table,
-                tablefmt=TABLE_FORMAT,
-                headers=headers,
-            )
-        )
+        print_table(headers, table, table_title="Current passwords for active services")
 
     # In this case a service is asked to be updated
     else:

@@ -47,7 +47,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "list env",
-        "List env variables:",
+        "List of env variables:",
         "ACTIVATE_ALCHEMY",
         "CUSTOMVAR1",
         "CUSTOMVAR2",
