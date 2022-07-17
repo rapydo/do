@@ -87,6 +87,12 @@ class FRONTEND_BUILD_MODE_VALUES(Enum):
     angular_test = "angular-test"
 
 
+class DOCKER_LOGGING_DRIVERS(Enum):
+    json_file = "json-file"
+    syslog = "syslog"
+    local = "local"
+
+
 class LOG_LEVEL_VALUES(Enum):
     DEBUG = "DEBUG"
     INFO = "INFO"
@@ -323,6 +329,7 @@ class BaseEnvModel(BaseModel):
     FRONTEND_FRAMEWORK: FRONTEND_FRAMEWORK_VALUES
     FRONTEND_BUILD_MODE: FRONTEND_BUILD_MODE_VALUES
     NETWORK_MTU: PositiveInt
+    DOCKER_LOGGING_DRIVER: DOCKER_LOGGING_DRIVERS
     HEALTHCHECK_INTERVAL: HealthcheckInterval
     HEALTHCHECK_BACKEND_CMD: str
     LOG_LEVEL: LOG_LEVEL_VALUES

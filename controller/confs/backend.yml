@@ -44,7 +44,7 @@ services:
       start_period: 5m
     hostname: backend-server
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
@@ -232,7 +232,7 @@ services:
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     working_dir: /etc/nginx
     healthcheck:
@@ -303,7 +303,7 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - ssl_certs:/etc/letsencrypt
@@ -340,7 +340,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - sqldata:/var/lib/postgresql
@@ -376,7 +376,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - mariadb:/var/lib/mysql
@@ -410,7 +410,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - graphdata:/data
@@ -494,7 +494,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: developer
     working_dir: /code
@@ -625,7 +625,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: developer
     working_dir: /code
@@ -708,7 +708,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     hostname: rabbit
     environment:
@@ -752,7 +752,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - redisdata:/data
@@ -792,7 +792,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     working_dir: /code
     expose:
@@ -874,7 +874,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/swaggerui:${RAPYDO_VERSION}
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
@@ -897,7 +897,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/adminer:${RAPYDO_VERSION}
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: adminer
     networks:
@@ -927,7 +927,7 @@ services:
     # with the server's SSL certificates for TLS support. Optional TLS is
     # automatically enabled when the container finds this file on startup.
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
@@ -954,7 +954,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
@@ -981,7 +981,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     ports:
       - 5000:5000
