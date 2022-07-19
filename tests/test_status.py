@@ -95,17 +95,17 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "xx-backend-1",
+            "xx-backend…",
         )
 
         exec_command(
             capfd,
             "status backend",
-            "xx-backend-1",
+            "xx-backend…",
         )
 
         exec_command(
             capfd,
             "status backend postgres",
-            "xx-backend-1",
+            "xx-backend…",
         )
