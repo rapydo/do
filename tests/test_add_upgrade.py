@@ -201,7 +201,8 @@ def test_add(capfd: Capture) -> None:
         capfd,
         "add abc xyz",
         "Invalid value for",
-        "'abc' is not one of 'endpoint', 'task', 'component', 'service', ",
+        "'abc' is not one of 'endpoint', 'task', 'component',",
+        "'service', 'integration_test', 'workflow'.",
     )
 
     exec_command(capfd, "upgrade")
