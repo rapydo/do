@@ -138,8 +138,14 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "images --remove invalid",
+        "-e REGISTRY_PORT=5001 images --remove invalid",
         "Some of the images that you specified are not found in this registry",
+    )
+
+    exec_command(
+        capfd,
+        "run registry",
+        "The registry container is already existing, removing",
     )
 
     # Copied from images.py
