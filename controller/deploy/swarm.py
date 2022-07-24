@@ -7,7 +7,7 @@ from glom import glom
 from python_on_whales import Service
 from python_on_whales.exceptions import NoSuchService, NotASwarmManager
 
-from controller import COMPOSE_FILE, GREEN, RED, colors, log, print_and_exit
+from controller import COMPOSE_FILE, RED, colors, log, print_and_exit
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from controller.utilities import system
@@ -128,20 +128,22 @@ class Swarm:
             ram = system.bytes_to_str(node.description.resources.memory_bytes)
 
             if state == "Ready+Active":
-                color_fn = GREEN
+                p = "[bold green]"
+                s = "[/bold green]"
             else:
-                color_fn = RED
+                p = "[bold red]"
+                s = "[/bold red]"
 
             nodes_table.append(
                 [
-                    color_fn(node.spec.role.title()),
-                    color_fn(state),
-                    color_fn(node.description.hostname),
-                    color_fn(node.status.addr),
-                    color_fn(cpu),
-                    color_fn(ram),
-                    color_fn(",".join(node.spec.labels)),
-                    color_fn(f"v{node.description.engine.engine_version}"),
+                    p + (node.spec.role.title()) + s,
+                    p + (state) + s,
+                    p + (node.description.hostname) + s,
+                    p + (node.status.addr) + s,
+                    p + (cpu) + s,
+                    p + (ram) + s,
+                    p + (",".join(node.spec.labels)) + s,
+                    p + (f"v{node.description.engine.engine_version}") + s,
                 ]
             )
 
