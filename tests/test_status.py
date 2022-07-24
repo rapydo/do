@@ -54,8 +54,8 @@ def test_all(capfd: Capture) -> None:
             "status",
             "Manager",
             "Ready+Active",
-            "xx_backend_1",
-            "xx_postgres_1",
+            "xx_backend",
+            "xx_postgres",
             " [1]",
             # No longer found starting because
             # HEALTHCHECK_INTERVAL is defaulted to 1s during tests
