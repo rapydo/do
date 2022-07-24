@@ -100,6 +100,7 @@ jobs:
           # Convert warnings to exceptions
           # PYTHONWARNINGS: error
           PYTHONFAULTHANDLER: 1
+          COLUMNS: 160
         run: |
 
           mkdir rapydo_tests
@@ -140,6 +141,7 @@ jobs:
           # Convert warnings to exceptions
           # PYTHONWARNINGS: error
           PYTHONFAULTHANDLER: 1
+          COLUMNS: 160
         run: |
           mkdir rapydo_tests
           cd rapydo_tests
