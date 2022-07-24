@@ -984,7 +984,7 @@ services:
       driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     ports:
-      - 5000:5000
+      - ${REGISTRY_PORT}:5000
     environment:
       # Used to issue the certificate
       REGISTRY_HOST: ${REGISTRY_HOST}
