@@ -17,8 +17,10 @@ from typing import List, Optional, Union
 import requests
 from packaging.version import Version
 from plumbum import local  # type: ignore
-from plumbum.commands.processes import CommandNotFound  # type: ignore
-from plumbum.commands.processes import ProcessExecutionError
+from plumbum.commands.processes import (  # type: ignore
+    CommandNotFound,
+    ProcessExecutionError,
+)
 from python_on_whales import docker
 from sultan.api import Sultan  # type: ignore
 

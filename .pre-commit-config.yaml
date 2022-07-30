@@ -39,6 +39,45 @@ repos:
             "Faker",
           ]
 
+        args: [
+            # -> Type of variable becomes "xyz" due to an unfollowed import
+            "--disallow-any-unimported",
+
+            # Disable errors like:
+            # found module but no type hints
+            # "--ignore-missing-imports",
+
+            # This flag disallows usage of generic types that do not specify explicit type parameters.
+            # Moreover, built-in collections (such as list and dict)
+            # become disallowed as you should use their aliases from the typing module
+            # (such as List[int] and Dict[str, str]).
+            "--disallow-any-generics",
+            # This flag type checks the body of every function, regardless of whether it has type annotations.
+            # (By default the bodies of functions without annotations are not type checked.)
+            "--check-untyped-defs",
+            "--warn-redundant-casts",
+            "--warn-unused-ignores",
+            "--warn-return-any",
+            "--warn-unreachable",
+            "--warn-unused-configs",
+
+            # This flag reports an error whenever a function with type annotations
+            # calls a function defined without annotations
+            # -> Call to untyped function "xyz" in typed context
+            "--disallow-untyped-calls",
+
+            # This flag reports an error whenever it encounters a
+            # function definition without type annotations.
+            # -> xyz Function is missing a type annotation
+            "--disallow-untyped-defs",
+
+            # This flag reports an error whenever it encounters a
+            # partly annotated function definition.
+            "--disallow-incomplete-defs",
+            "--txt-report",
+            ".",
+          ]
+
   - repo: https://github.com/gitguardian/gg-shield
     rev: v1.13.0
     hooks:
