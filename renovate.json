@@ -6,6 +6,7 @@
   "commitMessageExtra": "to {{newVersion}}",
   "pre-commit": {
     "enabled": true,
+    "groupName": "pre-commit",
     "fileMatch": ["^pre-commit-projects-config.yaml$"]
   },
   "github-actions": {
