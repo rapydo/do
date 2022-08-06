@@ -8,7 +8,7 @@
     "enabled": true,
     "fileMatch": ["^pre-commit-projects-config.yaml$"]
   },
-  "github-tags": {
+  "github-actions": {
     "fileMatch": ["controller/templates/github_actions-.*.yml.j2$"]
   }
 }
