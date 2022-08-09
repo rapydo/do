@@ -352,6 +352,10 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_SMTP_SERVER: zero_or_one
     ACTIVATE_SWAGGERUI: zero_or_one
     ACTIVATE_ADMINER: zero_or_one
+    ACTIVATE_MYPY: zero_or_one
+    MYPY_DISALLOW_UNTYPED_DEFS: zero_or_one
+    MYPY_IGNORE_LIBS: str
+    MYPY_ADD_LIBS: str
     MAX_LOGS_LENGTH: PositiveInt
     APP_MODE: APP_MODE_VALUES
     FLASK_HOST: str

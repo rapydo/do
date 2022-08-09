@@ -1055,3 +1055,26 @@ services:
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d.available
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/actions:/data/action.d.available
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/ip.blacklist:/data/ip.blacklist
+
+  ################
+  ###   MYPY   ###
+  ################
+
+  mypy:
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/mypy
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+    image: rapydo/mypy:${RAPYDO_VERSION}
+    command: mypy --version
+    working_dir: /code/${COMPOSE_PROJECT_NAME}
+    environment:
+      ACTIVATE: ${ACTIVATE_MYPY}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+      DISALLOW_UNTYPED_DEFS: ${MYPY_DISALLOW_UNTYPED_DEFS}
+      IGNORE_LIBS: ${MYPY_IGNORE_LIBS}
+      ADD_LIBS: ${MYPY_ADD_LIBS}
+    volumes:
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      - ${SUBMODULE_DIR}/http-api/tests:/code/tests
+      - ${PROJECT_DIR}/backend/tests:/code/tests/custom
