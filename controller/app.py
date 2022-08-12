@@ -1206,10 +1206,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                     "rapydo is unable to update it"
                 )
 
-            elif installation_path.is_symlink():
-                installation_path = installation_path.resolve()
-
             elif Application.gits["do"].working_dir:
+
+                if installation_path.is_symlink():
+                    installation_path = installation_path.resolve()
+
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.resolve()
