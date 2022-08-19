@@ -15,13 +15,13 @@
   "regexManagers": [
     {
       "fileMatch": ["controller/packages.py$"],
-      "matchStrings": ["COMPOSE_VERSION = \"?<currentValue>.*?)\"\\n"],
+      "matchStrings": ["COMPOSE_VERSION = \"(?<currentValue>.*?)\"\\n"],
       "depNameTemplate": "docker/compose",
       "datasourceTemplate": "github-releases"
     },
     {
       "fileMatch": ["controller/packages.py$"],
-      "matchStrings": ["BUILDX_VERSION = \"?<currentValue>.*?)\"\\n"],
+      "matchStrings": ["BUILDX_VERSION = \"(?<currentValue>.*?)\"\\n"],
       "depNameTemplate": "docker/buildx",
       "datasourceTemplate": "github-releases"
     }
