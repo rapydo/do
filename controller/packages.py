@@ -35,7 +35,7 @@ EXPECTED_COMPOSE_BIN_MD5 = "ce37e8103a13c02d7ecae957f527d613"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.9.1"
-EXPECTED_BUILDX_BIN_MD5 = "67e87713bc63b57d20d8f9ee4b59c170"
+EXPECTED_BUILDX_BIN_MD5 = "1f4ac4fbe0780d478caf7ac1806f186a"
 
 
 class ExecutionException(Exception):
