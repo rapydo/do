@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     install_requires=[
-        "python-on-whales==0.51.1",
+        "python-on-whales==0.52.0",
         "python-dateutil",
         "pytz",
         "loguru",
