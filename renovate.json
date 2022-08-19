@@ -11,5 +11,19 @@
   },
   "github-actions": {
     "fileMatch": ["controller/templates/github_actions-.*.yml.j2$"]
-  }
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["controller/packages.py$"],
+      "matchStrings": ["COMPOSE_VERSION = \"?<currentValue>.*?)\"\\n"],
+      "depNameTemplate": "docker/compose",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["controller/packages.py$"],
+      "matchStrings": ["BUILDX_VERSION = \"?<currentValue>.*?)\"\\n"],
+      "depNameTemplate": "docker/buildx",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
 }
