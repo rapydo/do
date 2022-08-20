@@ -31,7 +31,7 @@ EXPECTED_DOCKER_SCRIPT_MD5 = "e62a7013fdab6d9ec1feadac8d6e1c13"
 
 # https://github.com/docker/compose/releases
 COMPOSE_VERSION = "v2.10.0"
-EXPECTED_COMPOSE_BIN_MD5 = "d098bb8304809a1335e0cf2c18d424db"
+EXPECTED_COMPOSE_BIN_MD5 = "f2c78e4df3c21b17151f9a44f384c8b8"
 
 # https://github.com/docker/buildx/releases
 BUILDX_VERSION = "v0.8.2"
