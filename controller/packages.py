@@ -34,8 +34,8 @@ COMPOSE_VERSION = "v2.9.0"
 EXPECTED_COMPOSE_BIN_MD5 = "d098bb8304809a1335e0cf2c18d424db"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.8.2"
-EXPECTED_BUILDX_BIN_MD5 = "67e87713bc63b57d20d8f9ee4b59c170"
+BUILDX_VERSION = "v0.9.1"
+EXPECTED_BUILDX_BIN_MD5 = "1f4ac4fbe0780d478caf7ac1806f186a"
 
 
 class ExecutionException(Exception):
