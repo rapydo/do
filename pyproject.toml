@@ -60,8 +60,11 @@ rapydo = "controller.__main__:main"
 requires = ["setuptools>=64.0", "wheel>=0.34.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["controller"]
+[tool.setuptools.package-data]
+controller = ["py.typed", "templates/*", "confs/*"]
+
+[tool.setuptools.packages.find]
+exclude = ["stubs"]
 
 [tool.black]
 line-length = 88
