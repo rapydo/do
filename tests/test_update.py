@@ -24,7 +24,7 @@ def test_base(capfd: Capture) -> None:
     )
 
     open("submodules/do/temp.file", "a").close()
-    with open("submodules/do/setup.py", "a") as f:
+    with open("submodules/do/pyproject.toml", "a") as f:
         f.write("# added from tests\n")
 
     exec_command(
@@ -34,6 +34,6 @@ def test_base(capfd: Capture) -> None:
         "Untracked files:",
         "submodules/do/temp.file",
         "Changes not staged for commit:",
-        "submodules/do/setup.py",
+        "submodules/do/pyproject.toml",
         "Can't continue with updates",
     )
