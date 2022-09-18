@@ -25,5 +25,12 @@
       "depNameTemplate": "docker/buildx",
       "datasourceTemplate": "github-releases"
     }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeStrategy": "squash"
+    }
   ]
 }
