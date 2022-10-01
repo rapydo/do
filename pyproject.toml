@@ -46,6 +46,17 @@ dev = [
     "freezegun",
     "Faker",
 ]
+types = [
+    "rapydo[dev]",
+    "mypy",
+    "lxml",
+    "html5lib",
+    "types-PyYAML",
+    "types-python-dateutil",
+    "types-pytz",
+    "types-requests",
+    "types-freezegun",
+]
 
 [project.urls]
 homepage = "https://rapydo.github.io/docs"

@@ -24,20 +24,8 @@ repos:
     rev: v0.961
     hooks:
       - id: mypy
-        additional_dependencies: [
-            "git+https://github.com/rapydo/do.git@2.4",
-            # Extra dependencies
-            "pytest",
-            "lxml",
-            "types-PyYAML",
-            "types-pytz",
-            "types-requests",
-            "types-setuptools",
-            "types-python-dateutil",
-            "types-click",
-            "types-freezegun",
-            "Faker",
-          ]
+        additional_dependencies:
+          ["git+https://github.com/rapydo/do.git@2.4#egg=rapydo[types]"]
 
         args: [
             # -> Type of variable becomes "xyz" due to an unfollowed import

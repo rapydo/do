@@ -36,19 +36,7 @@ repos:
         stages: [manual]
         additional_dependencies:
           [
-            "git+https://github.com/rapydo/http-api.git@2.4",
-            "lxml",
-            "types-pytz",
-            "types-python-dateutil",
-            "types-requests",
-            "types-certifi",
-            "types-click",
-            "types-PyYAML",
-            "types-orjson",
-            "types-redis",
-            "pika-stubs",
-            "celery-types",
-            "sqlalchemy-stubs",
+            "git+https://github.com/rapydo/http-api.git@2.4#egg=rapydo_http[types]",
           ]
         # https://mypy.readthedocs.io/en/stable/command_line.html
         args: [
