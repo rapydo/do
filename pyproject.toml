@@ -1,3 +1,8 @@
+[tool.poetry]
+name = "rapydo"
+version = "2.4"
+description = "Manage and deploy projects based on RAPyDo framework"
+
 [project]
 name = "rapydo"
 version = "2.4"
