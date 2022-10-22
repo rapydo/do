@@ -440,8 +440,7 @@ services:
       NEO4J_dbms_memory_heap_initial__size: "${NEO4J_HEAP_SIZE}"
       NEO4J_dbms_memory_pagecache_size: "${NEO4J_PAGECACHE_SIZE}"
       NEO4J_dbms_directories_plugins: "plugins"
-      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
-      NEO4J_dbms_security_procedures_unrestricted: "gds.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*"
       # Useful in case of corrupted transaction logs
       NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "${NEO4J_RECOVERY_MODE}"
       NEO4J_dbms_recovery_fail__on__missing__files: "${NEO4J_RECOVERY_MODE}"
