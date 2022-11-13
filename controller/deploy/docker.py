@@ -198,7 +198,7 @@ class Docker:
         # Dict[int, Tuple[str, str]] == return of get_containers
         containers: Union[str, Tuple[str, str], Dict[int, Tuple[str, str]]],
         user: Optional[str],
-        command: str = None,
+        command: Optional[str] = None,
         # this basically force tty=False
         force_output_return: bool = False,
     ) -> Optional[Union[str, Iterable[Tuple[str, bytes]]]]:
