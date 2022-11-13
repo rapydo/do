@@ -160,7 +160,7 @@ def create_project(
     force: bool = False,
     force_current: bool = False,
     add_optionals: bool = False,
-    path: Path = None,
+    path: Optional[Path] = None,
 ) -> None:
 
     project_scaffold = Project()
