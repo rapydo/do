@@ -1,5 +1,5 @@
 rapydo[dev]
-mypy==0.982
+mypy==0.991
 lxml==4.9.1
 html5lib==1.1
 types-PyYAML==6.0.12.2
