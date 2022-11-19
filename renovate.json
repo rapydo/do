@@ -10,7 +10,9 @@
     "fileMatch": ["^pre-commit-projects-config.yaml$"]
   },
   "pip_requirements": {
-    "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"]
+    "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"],
+    "automerge": true,
+    "automergeStrategy": "squash"
   },
   "github-actions": {
     "fileMatch": ["controller/templates/github_actions-.*.yml.j2$"]
