@@ -21,9 +21,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-      - name: Install MyPy
+      - name: Install MyPy and pre-commit
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip pre-commit
           pip install --upgrade --no-cache-dir --editable .[types]
 
       - name: Run MyPy
@@ -41,6 +41,4 @@ jobs:
           path: report
 
       - name: Run Pre-commit
-        run: |
-          pip install --no-cache-dir pre-commit
-          pre-commit run --all
+        run: pre-commit run --all
