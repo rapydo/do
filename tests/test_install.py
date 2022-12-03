@@ -122,7 +122,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     data = data.replace(f'rapydo: "{__version__}"', 'rapydo: "0.7.6"')
     fin.close()
     # Write the new content
-    fin = open(pconf, "wt")
+    fin = open(pconf, "w")
     fin.write(data)
     fin.close()
 
@@ -139,7 +139,7 @@ def test_install(capfd: Capture, faker: Faker) -> None:
     data = data.replace('rapydo: "0.7.6"', 'rapydo: "99.99.99"')
     fin.close()
     # Write the new content
-    fin = open(pconf, "wt")
+    fin = open(pconf, "w")
     fin.write(data)
     fin.close()
 

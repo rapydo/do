@@ -206,7 +206,7 @@ RUN mkdir xyz
     )
 
     # Test dirty repo
-    fin = open("submodules/do/new_file", "wt+")
+    fin = open("submodules/do/new_file", "w+")
     fin.write("xyz")
     fin.close()
 
