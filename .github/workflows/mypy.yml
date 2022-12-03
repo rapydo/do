@@ -39,3 +39,6 @@ jobs:
         with:
           name: mypy-report
           path: report
+
+      - name: Run Pre-commit
+        run: pre-commit run --all
