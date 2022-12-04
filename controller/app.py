@@ -1132,7 +1132,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         placeholders = []
         for variable, raw_services in missing.items():
 
-            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            if variable in services.vars_to_services_mapping:
+                serv = {services.vars_to_services_mapping[variable]}
+            else:
+                serv = raw_services
             active_serv = [s for s in serv if s in all_services]
 
             if active_serv:
@@ -1143,7 +1146,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         )
         for variable, raw_services in passwords_services.items():
 
-            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            if variable in services.vars_to_services_mapping:
+                serv = {services.vars_to_services_mapping[variable]}
+            else:
+                serv = raw_services
+
             active_serv = [s for s in serv if s in all_services]
             if active_serv:
                 password = passwords.get(variable)

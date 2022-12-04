@@ -24,7 +24,7 @@ project_configuration:
 
       {% if production -%}
       {% if services -%}{% for service in services -%}
-      {% if service == "postgres" or service == "mariadb" -%}
+      {% if service == "postgres" -%}
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}

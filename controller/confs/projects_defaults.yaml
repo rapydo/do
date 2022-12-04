@@ -234,7 +234,6 @@ variables:
     NFS_EXPORTS_SECRETS: /volumes/secrets
     NFS_EXPORTS_RABBITDATA: /volumes/rabbitdata
     NFS_EXPORTS_SQLDATA: /volumes/sqldata
-    NFS_EXPORTS_MARIADB: /volumes/mariadb
     NFS_EXPORTS_GRAPHDATA: /volumes/graphdata
     NFS_EXPORTS_DATA_IMPORTS: /volumes/data_imports
     NFS_EXPORTS_PUREFTPD: /volumes/pureftpd
@@ -274,8 +273,6 @@ variables:
     ASSIGNED_MEMORY_PROXY: "20M"
     ASSIGNED_CPU_POSTGRES: "0.25"
     ASSIGNED_MEMORY_POSTGRES: "20M"
-    ASSIGNED_CPU_MARIADB: "0.25"
-    ASSIGNED_MEMORY_MARIADB: "20M"
     ASSIGNED_CPU_NEO4J: "0.25"
     ASSIGNED_MEMORY_NEO4J: "20M"
     ASSIGNED_CPU_CELERY: "0.25"

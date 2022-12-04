@@ -78,27 +78,27 @@ def find_active(services: ComposeServices) -> List[str]:
     return active_services
 
 
-vars_to_services_mapping: Dict[str, List[str]] = {
-    "FLOWER_USER": ["flower"],
-    "FLOWER_PASSWORD": ["flower"],
-    "RABBITMQ_USER": ["rabbit"],
-    "RABBITMQ_PASSWORD": ["rabbit"],
-    "REDIS_PASSWORD": ["redis"],
-    "ALCHEMY_USER": ["postgres", "mariadb"],
-    "ALCHEMY_PASSWORD": ["postgres", "mariadb"],
-    "NEO4J_PASSWORD": ["neo4j"],
-    "NEO4J_HEAP_SIZE": ["neo4j"],
-    "NEO4J_PAGECACHE_SIZE": ["neo4j"],
-    "AUTH_DEFAULT_PASSWORD": ["backend"],
-    "AUTH_DEFAULT_USERNAME": ["backend"],
-    "SMTP_PORT": ["backend"],
-    "SMTP_ADMIN": ["backend"],
-    "SMTP_NOREPLY": ["backend"],
-    "SMTP_HOST": ["backend"],
-    "SMTP_USERNAME": ["backend"],
-    "SMTP_PASSWORD": ["backend"],
-    "FTP_PASSWORD": ["ftp"],
-    "FTP_USER": ["ftp"],
+vars_to_services_mapping: Dict[str, str] = {
+    "FLOWER_USER": "flower",
+    "FLOWER_PASSWORD": "flower",
+    "RABBITMQ_USER": "rabbit",
+    "RABBITMQ_PASSWORD": "rabbit",
+    "REDIS_PASSWORD": "redis",
+    "ALCHEMY_USER": "postgres",
+    "ALCHEMY_PASSWORD": "postgres",
+    "NEO4J_PASSWORD": "neo4j",
+    "NEO4J_HEAP_SIZE": "neo4j",
+    "NEO4J_PAGECACHE_SIZE": "neo4j",
+    "AUTH_DEFAULT_PASSWORD": "backend",
+    "AUTH_DEFAULT_USERNAME": "backend",
+    "SMTP_PORT": "backend",
+    "SMTP_ADMIN": "backend",
+    "SMTP_NOREPLY": "backend",
+    "SMTP_HOST": "backend",
+    "SMTP_USERNAME": "backend",
+    "SMTP_PASSWORD": "backend",
+    "FTP_PASSWORD": "ftp",
+    "FTP_USER": "ftp",
 }
 
 

@@ -47,18 +47,6 @@ services:
     #   options:
     #     syslog-address: ${SYSLOG_ADDRESS}
 
-  mariadb:
-    deploy:
-      # Is mariadb supporting replicas?
-      replicas: 1
-      resources:
-        reservations:
-          cpus: "${ASSIGNED_CPU_MARIADB}"
-          memory: ${ASSIGNED_MEMORY_MARIADB}
-    # logging:
-    #   options:
-    #     syslog-address: ${SYSLOG_ADDRESS}
-
   neo4j:
     deploy:
       # Replicas are not supported for sure

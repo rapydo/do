@@ -7,8 +7,6 @@ volumes:
     driver: local
   sqldata:
     driver: local
-  mariadb:
-    driver: local
   graphdata:
     driver: local
   data_imports:

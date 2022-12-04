@@ -19,12 +19,6 @@ volumes:
       type: "nfs"
       o: addr=${NFS_HOST},nolock,soft,rw
       device: ":${NFS_EXPORTS_SQLDATA}"
-  mariadb:
-    driver: local
-    driver_opts:
-      type: "nfs"
-      o: addr=${NFS_HOST},nolock,soft,rw
-      device: ":${NFS_EXPORTS_MARIADB}"
   graphdata:
     driver: local
     driver_opts:
