@@ -141,7 +141,7 @@ jobs:
           IP_DEV=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=False))")
           IP_PROD=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=True))")
           sudo cat /etc/docker/daemon.json
-          sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
+          sudo bash -c "echo '{\"exec-opts\": [\"native.cgroupdriver=cgroupfs\"], \"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
           sudo cat /etc/docker/daemon.json
           sudo systemctl restart docker.service
 
