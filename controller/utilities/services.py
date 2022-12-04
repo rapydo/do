@@ -111,11 +111,6 @@ def normalize_placeholder_variable(key: str) -> str:
     if key == "POSTGRES_PASSWORD":
         return "ALCHEMY_PASSWORD"
 
-    if key == "MYSQL_USER":
-        return "ALCHEMY_USER"
-    if key == "MYSQL_PASSWORD":
-        return "ALCHEMY_PASSWORD"
-
     if key == "DEFAULT_USER":
         return "RABBITMQ_USER"
     if key == "DEFAULT_PASS":
@@ -216,9 +211,6 @@ def get_default_command(service: str) -> str:
 
     if service == "postgres":
         return 'sh -c \'psql -U "$POSTGRES_USER" "$POSTGRES_DEFAULT_DB"\''
-
-    if service == "mariadb":
-        return 'sh -c \'mysql -D"$MYSQL_DATABASE" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD"\''
 
     if service == "redis":
         return "sh -c 'redis-cli --pass \"$REDIS_PASSWORD\"'"

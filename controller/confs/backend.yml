@@ -358,40 +358,6 @@ services:
         aliases:
           - ${ALCHEMY_HOST}
 
-  mariadb:
-    restart: always
-
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/mariadb
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/mariadb:${RAPYDO_VERSION}
-    healthcheck:
-      test: "mysqladmin ping -h localhost"
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: 20s
-      retries: 3
-      start_period: 5m
-    logging:
-      driver: ${DOCKER_LOGGING_DRIVER}
-      options: {}
-    volumes:
-      - mariadb:/var/lib/mysql
-      - ${DATA_DIR}/backup:/backup
-    environment:
-      ACTIVATE: ${ACTIVATE_MYSQL}
-      # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_USER: "${ALCHEMY_USER}"
-      MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
-      MYSQL_DATABASE: ${ALCHEMY_DB}
-    networks:
-      default:
-        aliases:
-          - ${ALCHEMY_HOST}
-
   neo4j:
     restart: always
     build:
@@ -1039,7 +1005,6 @@ services:
       # SSMTP_PASSWORD: SMTP password
       # SSMTP_TLS: Use TLS to talk to the SMTP server (default NO)
       # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
-      MYSQL_ENABLED: ${ACTIVATE_MYSQL}
       NEO4J_ENABLED: ${ACTIVATE_NEO4J}
       NGINX_ENABLED: ${ACTIVATE_PROXY}
       POSTGRES_ENABLED: ${ACTIVATE_POSTGRES}

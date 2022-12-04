@@ -221,8 +221,6 @@ def test_normalize_placeholder_variable() -> None:
     assert short1("NEO4J_AUTH") == "NEO4J_PASSWORD"
     assert short1("POSTGRES_USER") == "ALCHEMY_USER"
     assert short1("POSTGRES_PASSWORD") == "ALCHEMY_PASSWORD"
-    assert short1("MYSQL_USER") == "ALCHEMY_USER"
-    assert short1("MYSQL_PASSWORD") == "ALCHEMY_PASSWORD"
     assert short1("DEFAULT_USER") == "RABBITMQ_USER"
     assert short1("DEFAULT_PASS") == "RABBITMQ_PASSWORD"
     assert short1("CYPRESS_AUTH_DEFAULT_USERNAME") == "AUTH_DEFAULT_USERNAME"
@@ -283,7 +281,6 @@ def test_get_default_command() -> None:
     assert services.get_default_command("neo4j") == "bin/cypher-shell"
     assert services.get_default_command("registry") == "ash"
     assert "psql -U " in services.get_default_command("postgres")
-    assert "mysql -D" in services.get_default_command("mariadb")
     assert "redis-cli --pass" in services.get_default_command("redis")
 
 

@@ -43,7 +43,6 @@ variables:
 
     ACTIVATE_ALCHEMY: 0
     ACTIVATE_POSTGRES: 0
-    ACTIVATE_MYSQL: 0
     ACTIVATE_NEO4J: 0
     ACTIVATE_RABBIT: 0
     ACTIVATE_REDIS: 0
@@ -151,8 +150,6 @@ variables:
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
     ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
-
-    MYSQL_ROOT_PASSWORD: "D3vMode!" # This default is invalidated in production mode
 
     # Have a look at this website for a quick tuning:
     # https://pgtune.leopard.in.ua

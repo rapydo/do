@@ -20,13 +20,11 @@ from controller.utilities import git
 class AuthTypes(str, Enum):
     no = "no"
     postgres = "postgres"
-    mysql = "mysql"
     neo4j = "neo4j"
 
 
 class ServiceTypes(str, Enum):
     postgres = "postgres"
-    mysql = "mysql"
     neo4j = "neo4j"
     rabbit = "rabbit"
     redis = "redis"
@@ -164,7 +162,6 @@ def create_project(
 
     project_scaffold = Project()
     enable_postgres = auth == "postgres" or "postgres" in services
-    enable_mysql = auth == "mysql" or "mysql" in services
     enable_neo4j = auth == "neo4j" or "neo4j" in services
     enable_rabbit = "rabbit" in services
     enable_redis = "redis" in services
@@ -173,7 +170,7 @@ def create_project(
     enable_fail2ban = "fail2ban" in services
     enable_ftp = "ftp" in services
 
-    if auth == "postgres" or auth == "mysql":
+    if auth == "postgres":
         auth = "sqlalchemy"
 
     if auth == "no":
@@ -259,7 +256,6 @@ def create_project(
                 "project": project_name,
                 "auth_service": auth,
                 "enable_postgres": enable_postgres,
-                "enable_mysql": enable_mysql,
                 "enable_neo4j": enable_neo4j,
                 "enable_rabbit": enable_rabbit,
                 "enable_redis": enable_redis,

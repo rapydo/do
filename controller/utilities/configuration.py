@@ -340,7 +340,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_PROXY: zero_or_one
     ACTIVATE_ALCHEMY: zero_or_one
     ACTIVATE_POSTGRES: zero_or_one
-    ACTIVATE_MYSQL: zero_or_one
     ACTIVATE_NEO4J: zero_or_one
     ACTIVATE_RABBIT: zero_or_one
     ACTIVATE_REDIS: zero_or_one
@@ -414,7 +413,6 @@ class BaseEnvModel(BaseModel):
     ALCHEMY_DB: str
     ALCHEMY_DBS: str
     ALCHEMY_POOLSIZE: PositiveInt
-    MYSQL_ROOT_PASSWORD: str
     POSTGRES_MAX_CONNECTIONS: PositiveInt
     POSTGRES_SHARED_BUFFERS: PostgresMem
     POSTGRES_WAL_BUFFERS: PostgresMem

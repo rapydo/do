@@ -102,7 +102,7 @@ class Project:
         if auth or services:
 
             models = self.p_path("backend", "models")
-            if auth == "sqlalchemy" or "postgres" in services or "mysql" in services:
+            if auth == "sqlalchemy" or "postgres" in services:
                 self.expected_files.append(models.joinpath("sqlalchemy.py"))
             if auth == "neo4j" or "neo4j" in services:
                 self.expected_files.append(models.joinpath("neo4j.py"))

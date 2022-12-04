@@ -31,7 +31,6 @@ class TemplateDataType(TypedDict, total=False):
     services: List[str]
     env_variables: Dict[str, str]
     enable_postgres: bool
-    enable_mysql: bool
     enable_neo4j: bool
     enable_rabbit: bool
     enable_redis: bool
