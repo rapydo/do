@@ -102,7 +102,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         capfd,
         "backup invalid",
         "Invalid value for",
-        "is not one of 'mariadb', 'neo4j', 'postgres', 'rabbit', 'redis'",
+        "is not one of 'neo4j', 'postgres', 'rabbit', 'redis'",
     )
 
     exec_command(capfd, "remove", "Stack removed")
