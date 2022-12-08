@@ -3,12 +3,12 @@ name: MyPy
 on:
   push:
     paths:
-      - "*"
+      - "**"
       - "!controller/builds/**"
       - "!.github/workflows/docker-build.yml"
   pull_request:
     paths:
-      - "*"
+      - "**"
       - "!controller/builds/**"
       - "!.github/workflows/docker-build.yml"
   workflow_dispatch:
