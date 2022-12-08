@@ -36,7 +36,7 @@ repos:
         stages: [manual]
         additional_dependencies:
           [
-            "git+https://github.com/rapydo/http-api.git@2.4#egg=rapydo_http[types]",
+            "git+https://github.com/rapydo/http-api.git@3.0#egg=rapydo_http[types]",
           ]
         # https://mypy.readthedocs.io/en/stable/command_line.html
         args: [

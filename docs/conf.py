@@ -19,11 +19,11 @@ sys.path.insert(0, os.path.abspath(".."))
 # -- Project information -----------------------------------------------------
 
 project = "RAPyDo Controller"
-copyright = "2022, RAPyDo"
+copyright = "RAPyDo"
 author = "RAPyDo"
 
 # The full version, including alpha/beta/rc tags
-release = "2.4"
+release = "3.0"
 
 
 # -- General configuration ---------------------------------------------------
