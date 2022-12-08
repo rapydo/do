@@ -27,6 +27,8 @@ repos:
         additional_dependencies:
           ["git+https://github.com/rapydo/do.git@3.0#egg=rapydo[types]"]
 
+        exclude: ^controller/builds/
+
         args: [
             # -> Type of variable becomes "xyz" due to an unfollowed import
             "--disallow-any-unimported",

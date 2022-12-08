@@ -2,7 +2,13 @@ name: MyPy
 
 on:
   push:
+    paths:
+      - "!controller/builds/**"
+      - "!.github/workflows/docker-build.yml"
   pull_request:
+    paths:
+      - "!controller/builds/**"
+      - "!.github/workflows/docker-build.yml"
   workflow_dispatch:
 
 # Cancel previous running jobs on the same branch in case of new pushs
