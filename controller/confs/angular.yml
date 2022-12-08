@@ -7,7 +7,7 @@ services:
 
   frontend:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${FRONTEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}

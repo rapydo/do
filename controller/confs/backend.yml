@@ -30,7 +30,7 @@ services:
   backend:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -223,7 +223,7 @@ services:
   proxy:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/proxy
+      context: ${SUBMODULE_DIR}/do/controller/builds/proxy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -293,7 +293,7 @@ services:
   maintenance:
     # restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/proxy
+      context: ${SUBMODULE_DIR}/do/controller/builds/proxy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -325,7 +325,7 @@ services:
   postgres:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/postgres
+      context: ${SUBMODULE_DIR}/do/controller/builds/postgres
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -361,7 +361,7 @@ services:
   neo4j:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/neo4j
+      context: ${SUBMODULE_DIR}/do/controller/builds/neo4j
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -445,7 +445,7 @@ services:
   celery:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -575,7 +575,7 @@ services:
   celerybeat:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -661,7 +661,7 @@ services:
   rabbit:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/rabbitmq
+      context: ${SUBMODULE_DIR}/do/controller/builds/rabbitmq
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -704,7 +704,7 @@ services:
   redis:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/redis
+      context: ${SUBMODULE_DIR}/do/controller/builds/redis
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -740,7 +740,7 @@ services:
   flower:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -833,7 +833,7 @@ services:
 
   swaggerui:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/swaggerui
+      context: ${SUBMODULE_DIR}/do/controller/builds/swaggerui
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -856,7 +856,7 @@ services:
 
   adminer:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/adminer
+      context: ${SUBMODULE_DIR}/do/controller/builds/adminer
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -884,7 +884,7 @@ services:
   ###################
   ftp:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/ftp
+    build: ${SUBMODULE_DIR}/do/controller/builds/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
@@ -935,7 +935,7 @@ services:
 
   registry:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/registry
+    build: ${SUBMODULE_DIR}/do/controller/builds/registry
     image: rapydo/registry:${RAPYDO_VERSION}
     hostname: registry
     # make it common to all projects
@@ -980,7 +980,7 @@ services:
 
   fail2ban:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/fail2ban
+    build: ${SUBMODULE_DIR}/do/controller/builds/fail2ban
     image: rapydo/fail2ban:${RAPYDO_VERSION}
     # This works for compose but not for swarm.
     # In swarm mode this flag is replaced with an external network
@@ -1026,7 +1026,7 @@ services:
 
   mypy:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/mypy
+      context: ${SUBMODULE_DIR}/do/controller/builds/mypy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
     image: rapydo/mypy:${RAPYDO_VERSION}

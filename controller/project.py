@@ -148,6 +148,8 @@ class Project:
         self.obsolete_files.append(Path(".pre-commit-config.yaml"))
         # Removed since 2.3
         self.obsolete_files.append(Path(".isort.cfg"))
+        # Removed since 3.0
+        self.obsolete_files.append(SUBMODULES_DIR.joinpath("build-templates"))
         return True
 
     def load_frontend_scaffold(self, frontend: Optional[str]) -> bool:

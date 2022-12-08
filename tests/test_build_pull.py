@@ -258,10 +258,10 @@ RUN mkdir xyz
     """
         )
 
-    fin = open("submodules/build-templates/backend/Dockerfile", "a")
+    fin = open("submodules/do/controller/builds/backend/Dockerfile", "a")
     fin.write("xyz")
     fin.close()
-    r = Repo("submodules/build-templates")
+    r = Repo("submodules/do")
     r.git.commit("-a", "-m", "'fake'")
     exec_command(
         capfd,

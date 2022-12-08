@@ -2,8 +2,6 @@ variables:
   submodules:
     http-api:
       online_url: https://github.com/rapydo/http-api.git
-    build-templates:
-      online_url: https://github.com/rapydo/build-templates.git
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
       _if: $$angular

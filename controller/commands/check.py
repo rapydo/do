@@ -261,11 +261,11 @@ def build_is_obsolete(
         return None, None
 
     # compare dates between git and docker
-    btempl = Application.gits.get("build-templates")
+    do = Application.gits.get("do")
     vanilla = Application.gits.get("main")
 
-    if btempl and btempl.working_dir and is_relative_to(path, str(btempl.working_dir)):
-        git_repo = btempl
+    if do and do.working_dir and is_relative_to(path, str(do.working_dir)):
+        git_repo = do
     elif (
         vanilla
         and vanilla.working_dir

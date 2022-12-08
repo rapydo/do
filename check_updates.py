@@ -316,7 +316,7 @@ def parseDockerfile(
     skip_python: bool,
 ) -> Dependencies:
     with open(d) as f:
-        service = d.replace("../build-templates/", "")
+        service = d.replace("controller/builds/", "")
         service = service.replace("/Dockerfile", "")
         dependencies.setdefault(service, {})
 
@@ -360,7 +360,7 @@ def parseDockerfile(
 
 def parseRequirements(d: str, dependencies: Dependencies) -> Dependencies:
     with open(d) as f:
-        service = d.replace("../build-templates/", "")
+        service = d.replace("controller/builds/", "")
         service = service.replace("/requirements.txt", "")
         for line in f:
             line = line.strip()
@@ -427,7 +427,7 @@ def check_versions(
 
             dependencies[service]["compose"] = [image]
 
-    for d in glob("../build-templates/*/Dockerfile"):
+    for d in glob("controller/builds/*/Dockerfile"):
         if "not_used_anymore_" in d:
             continue
 
@@ -436,7 +436,7 @@ def check_versions(
         )
 
     if not skip_python:
-        for d in glob("../build-templates/*/requirements.txt"):
+        for d in glob("controller/builds/*/requirements.txt"):
 
             dependencies = parseRequirements(d, dependencies)
 
