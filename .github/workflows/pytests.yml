@@ -2,7 +2,13 @@ name: Test
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
+
+# Cancel previous running jobs on the same branch in case of new pushs
+concurrency:
+  group: do-tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -13,7 +19,6 @@ jobs:
       matrix:
         test: [
             # > 6 minutes
-            backup_restore_mariadb,
             backup_restore_neo4j,
             backup_restore_postgres,
             backup_restore_rabbit,
@@ -29,7 +34,6 @@ jobs:
             install,
             multi_host,
             password_backend,
-            password_mysql,
             password_postgres,
             password_redis,
             registry,
@@ -62,15 +66,15 @@ jobs:
           ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Select a Python version
         run: |
-          versions=(3.8 3.9 3.10)
+          versions=(3.8 3.9 3.10 3.11)
           PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
           echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
         shell: bash
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Install
@@ -94,6 +98,7 @@ jobs:
           # Convert warnings to exceptions
           # PYTHONWARNINGS: error
           PYTHONFAULTHANDLER: 1
+          COLUMNS: 160
         run: |
 
           mkdir rapydo_tests
@@ -102,7 +107,7 @@ jobs:
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
 
       - name: Send Compose Coverage
-        uses: rapydo/actions/coverage@v1
+        uses: rapydo/actions/coverage@v2
         with:
           repository: .
           cov_file: rapydo_tests/coverage.xml
@@ -134,6 +139,7 @@ jobs:
           # Convert warnings to exceptions
           # PYTHONWARNINGS: error
           PYTHONFAULTHANDLER: 1
+          COLUMNS: 160
         run: |
           mkdir rapydo_tests
           cd rapydo_tests
@@ -141,7 +147,7 @@ jobs:
           IP_DEV=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=False))")
           IP_PROD=$(python3 -c "from controller.utilities import system; print(system.get_local_ip(production=True))")
           sudo cat /etc/docker/daemon.json
-          sudo bash -c "echo '{\"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
+          sudo bash -c "echo '{\"exec-opts\": [\"native.cgroupdriver=cgroupfs\"], \"cgroup-parent\": \"/actions_job\", \"insecure-registries\" : [\"${IP_DEV}:5000\", \"${IP_PROD}:5000\"]}' >  /etc/docker/daemon.json"
           sudo cat /etc/docker/daemon.json
           sudo systemctl restart docker.service
 
@@ -158,7 +164,6 @@ jobs:
             sudo mkdir -p /volumes/secrets
             sudo mkdir -p /volumes/rabbitdata
             sudo mkdir -p /volumes/sqldata
-            sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
@@ -192,7 +197,6 @@ jobs:
             sudo mkdir -p /volumes/secrets
             sudo mkdir -p /volumes/rabbitdata
             sudo mkdir -p /volumes/sqldata
-            sudo mkdir -p /volumes/mariadb
             sudo mkdir -p /volumes/graphdata
             sudo mkdir -p /volumes/data_imports
             sudo mkdir -p /volumes/redisdata
@@ -201,7 +205,7 @@ jobs:
           py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         if: ${{ matrix.test != 'install' }}
-        uses: rapydo/actions/coverage@v1
+        uses: rapydo/actions/coverage@v2
         with:
           repository: .
           cov_file: rapydo_tests/coverage.xml

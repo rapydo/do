@@ -9,7 +9,6 @@ from faker import Faker
 from freezegun import freeze_time
 from python_on_whales import docker
 
-from controller import colors
 from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
@@ -49,6 +48,11 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
 
+    if Configuration.swarm_mode:
+        prefix = "│ backend  │"
+    else:
+        prefix = "│ backend  │"
+
     exec_command(
         capfd,
         "password backend --random",
@@ -58,7 +62,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}N/A",
+        f"{prefix} AUTH_DEFAULT_PASSWORD │ N/A",
     )
 
     pull_images(capfd)
@@ -127,10 +131,10 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"backend    AUTH_DEFAULT_PASSWORD  {colors.GREEN}{today}",
+        f"{prefix} AUTH_DEFAULT_PASSWORD │ {today}",
     )
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password backend --password {mypassword}",
@@ -172,7 +176,7 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"backend    AUTH_DEFAULT_PASSWORD  {colors.RED}{today}",
+            f"{prefix} AUTH_DEFAULT_PASSWORD │ {today}",
         )
 
         exec_command(

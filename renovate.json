@@ -1,0 +1,41 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base"],
+  "commitMessageAction": "Bump",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{newVersion}}",
+  "pre-commit": {
+    "enabled": true,
+    "groupName": "pre-commit",
+    "fileMatch": ["^pre-commit-projects-config.yaml$"],
+    "automerge": true,
+    "automergeStrategy": "squash"
+  },
+  "pip_requirements": {
+    "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"]
+  },
+  "github-actions": {
+    "fileMatch": ["controller/templates/github_actions-.*.yml.j2$"]
+  },
+  "regexManagers": [
+    {
+      "fileMatch": ["controller/packages.py$"],
+      "matchStrings": ["COMPOSE_VERSION = \"(?<currentValue>.*?)\"\\n"],
+      "depNameTemplate": "docker/compose",
+      "datasourceTemplate": "github-releases"
+    },
+    {
+      "fileMatch": ["controller/packages.py$"],
+      "matchStrings": ["BUILDX_VERSION = \"(?<currentValue>.*?)\"\\n"],
+      "depNameTemplate": "docker/buildx",
+      "datasourceTemplate": "github-releases"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeStrategy": "squash"
+    }
+  ]
+}

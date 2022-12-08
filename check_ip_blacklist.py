@@ -4,9 +4,8 @@ from pathlib import Path
 
 import requests
 from loguru import logger as log
-from tabulate import tabulate
 
-from controller import GREEN, RED, TABLE_FORMAT, YELLOW
+from controller.utilities.tables import print_table
 
 # Single check:
 # https://www.abuseipdb.com/check/193.124.7.9
@@ -47,26 +46,24 @@ with open(blacklist) as blacklist_file:
         domain = data.get("domain", "N/A")
 
         if score > 80:
-            color = RED
+            color = "red"
         elif score > 0:
-            color = YELLOW
+            color = "yellow"
         else:
-            color = GREEN
+            color = "green"
         blacklist_data.append(
             [
-                color(IP),
-                color(country),
-                color(domain),
-                color(score),
-                color(total_reports),
-                color(last_report),
+                f"[bold {color}]{IP}[/bold {color}]",
+                f"[bold {color}]{country}[/bold {color}]",
+                f"[bold {color}]{domain}[/bold {color}]",
+                f"[bold {color}]{score}[/bold {color}]",
+                f"[bold {color}]{total_reports}[/bold {color}]",
+                f"[bold {color}]{last_report}[/bold {color}]",
             ]
         )
 
-print(
-    tabulate(
-        blacklist_data,
-        tablefmt=TABLE_FORMAT,
-        headers=["IP", "COUNTRY", "DOMAIN", "SCORE", "REPORTS", "LAST REPORT"],
-    )
+print_table(
+    ["IP", "COUNTRY", "DOMAIN", "SCORE", "REPORTS", "LAST REPORT"],
+    blacklist_data,
+    table_title="Blacklisted IPs",
 )

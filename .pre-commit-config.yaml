@@ -4,53 +4,28 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.6.2
+    rev: v3.0.0-alpha.4
     hooks:
       - id: prettier
   - repo: https://github.com/asottile/pyupgrade
-    rev: v2.32.0
+    rev: v3.3.1
     hooks:
       - id: pyupgrade
         args: [--py38-plus]
   - repo: https://github.com/ambv/black
-    rev: 22.3.0
+    rev: 22.10.0
     hooks:
       - id: black
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
     hooks:
       - id: flake8
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.942
+    rev: v0.991
     hooks:
       - id: mypy
-        additional_dependencies: [
-            "python-on-whales==0.40.0",
-            "python-dateutil",
-            "pytz",
-            "loguru",
-            "jinja2",
-            "sultan==0.9.1",
-            "plumbum",
-            "glom",
-            "GitPython==3.1.27",
-            "PyYAML==6.0",
-            "pip>=10.0.0",
-            "typer[all]==0.4.1",
-            "click==8.1.2",
-
-            # Extra dependencies
-            "pytest",
-            "lxml",
-            "types-PyYAML",
-            "types-pytz",
-            "types-requests",
-            "types-python-dateutil",
-            "types-click",
-            "types-tabulate",
-            "types-freezegun",
-            "Faker",
-          ]
+        additional_dependencies:
+          ["git+https://github.com/rapydo/do.git@2.4#egg=rapydo[types]"]
 
         args: [
             # -> Type of variable becomes "xyz" due to an unfollowed import
@@ -92,7 +67,7 @@ repos:
           ]
 
   - repo: https://github.com/gitguardian/gg-shield
-    rev: v1.11.0
+    rev: v1.14.1
     hooks:
       - id: ggshield
         language_version: python3

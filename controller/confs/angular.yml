@@ -39,6 +39,7 @@ services:
       ENABLE_ANGULAR_SSR: ${ENABLE_ANGULAR_SSR}
       ENABLE_YARN_PNP: ${ENABLE_YARN_PNP}
       FORCE_SSR_SERVER_MODE: ${FORCE_SSR_SERVER_MODE}
+      SPINNER_TYPE: ${SPINNER_TYPE}
       SHOW_LOGIN: ${SHOW_LOGIN}
       ENABLE_FOOTER: ${ENABLE_FOOTER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
@@ -76,7 +77,6 @@ services:
       CYPRESS_AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
       CYPRESS_AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
       CYPRESS_AUTH_LOGIN_BAN_TIME: ${AUTH_LOGIN_BAN_TIME}
-      CYPRESS_TESTING_TOTP_HASH:
 
       CYPRESS_BACKEND_HOST: ${FLASK_HOST}
       CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
@@ -109,7 +109,7 @@ services:
 
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend:/app
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/karma:/coverage
-      # Output folder, configured in cypress.json
+      # Output folder, configured in cypress.config.ts
       - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/cypress:/cypress
 
       - ${SUBMODULE_DIR}/rapydo-angular/karma.conf.js:/app/karma.conf.js
@@ -122,13 +122,13 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/src:/app/app/rapydo
       - ${PROJECT_DIR}/frontend:/app/app/custom
 
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress.json:/app/cypress.json
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress.config.ts:/app/cypress.config.ts
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/integration:/app/cypress/integration/rapydo
-      - ${PROJECT_DIR}/frontend/integration:/app/cypress/integration/custom
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/app/cypress/e2e/rapydo
+      - ${PROJECT_DIR}/frontend/e2e:/app/cypress/e2e/custom
 
       - ${DATA_DIR}/logs:/logs

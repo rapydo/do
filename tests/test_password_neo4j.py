@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 from freezegun import freeze_time
 
-from controller import colors
 from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
@@ -41,6 +40,11 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
 
+    if Configuration.swarm_mode:
+        prefix = "│ neo4j    │"
+    else:
+        prefix = "│ neo4j   │"
+
     exec_command(
         capfd,
         "password neo4j --random",
@@ -50,7 +54,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"neo4j      NEO4J_PASSWORD         {colors.RED}N/A",
+        f"{prefix} NEO4J_PASSWORD        │ N/A",
     )
 
     pull_images(capfd)
@@ -86,10 +90,10 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"neo4j      NEO4J_PASSWORD         {colors.GREEN}{today}",
+        f"{prefix} NEO4J_PASSWORD        │ {today}",
     )
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password neo4j --password {mypassword}",
@@ -115,7 +119,7 @@ def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"neo4j      NEO4J_PASSWORD         {colors.RED}{today}",
+            f"{prefix} NEO4J_PASSWORD        │ {today}",
         )
 
         exec_command(

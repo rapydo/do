@@ -14,19 +14,23 @@ jobs:
   semgrep:
     name: Scan
     runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+    # Skip any PR created by dependabot to avoid permission issues
+    if: (github.actor != 'dependabot[bot]')
     steps:
-      # Checkout project source
-      - uses: actions/checkout@v2
+      # Fetch project source
+      - uses: actions/checkout@v3
 
       # Scan code using project's configuration on https://semgrep.dev/manage
-      - uses: returntocorp/semgrep-action@v1
-        with:
-          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
-          generateSarif: "1"
+      - run: semgrep ci --sarif --output=semgrep.sarif
+        name: Run semgrep
+        env:
+          SEMGREP_APP_TOKEN: {% raw %}${{ secrets.SEMGREP_APP_TOKEN }}{% endraw %}
 
       # Upload SARIF file generated in previous step
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v1
+        uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: semgrep.sarif
         if: always()

@@ -31,7 +31,6 @@ class TemplateDataType(TypedDict, total=False):
     services: List[str]
     env_variables: Dict[str, str]
     enable_postgres: bool
-    enable_mysql: bool
     enable_neo4j: bool
     enable_rabbit: bool
     enable_redis: bool
@@ -39,7 +38,6 @@ class TemplateDataType(TypedDict, total=False):
     enable_flower: bool
     enable_fail2ban: bool
     enable_ftp: bool
-    enable_bot: bool
     celery_broker: Optional[str]
     celery_backend: Optional[str]
 

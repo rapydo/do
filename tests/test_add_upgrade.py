@@ -138,7 +138,7 @@ def test_add(capfd: Capture) -> None:
         f"Service created: {path}",
     )
 
-    path = Path("projects/second/frontend/integration/app_mypath_my_id.spec.ts")
+    path = Path("projects/second/frontend/e2e/app_mypath_my_id.spec.ts")
     assert not path.exists()
     exec_command(
         capfd,
@@ -201,7 +201,8 @@ def test_add(capfd: Capture) -> None:
         capfd,
         "add abc xyz",
         "Invalid value for",
-        "'abc' is not one of 'endpoint', 'task', 'component', 'service', ",
+        "'abc' is not one of 'endpoint', 'task', 'component',",
+        "'service', 'integration_test', 'workflow'.",
     )
 
     exec_command(capfd, "upgrade")

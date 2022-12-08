@@ -24,12 +24,9 @@ project_configuration:
 
       {% if production -%}
       {% if services -%}{% for service in services -%}
-      {% if service == "postgres" or service == "mariadb" -%}
+      {% if service == "postgres" -%}
       ALCHEMY_USER: sqluser
       ALCHEMY_PASSWORD: {{ "RANDOM"| password }}
-      {% endif -%}
-      {% if service == "mariadb" -%}
-      MYSQL_ROOT_PASSWORD: {{ "RANDOM"| password }}
       {% endif -%}
       {% if service == "neo4j" -%}
       NEO4J_PASSWORD: {{ "RANDOM"| password }}

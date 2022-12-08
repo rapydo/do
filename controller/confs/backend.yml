@@ -44,7 +44,7 @@ services:
       start_period: 5m
     hostname: backend-server
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_BACKEND}
@@ -103,8 +103,6 @@ services:
       AUTH_JWT_TOKEN_TTL: ${AUTH_JWT_TOKEN_TTL}
       AUTH_TOKEN_SAVE_FREQUENCY: ${AUTH_TOKEN_SAVE_FREQUENCY}
       AUTH_TOKEN_IP_GRACE_PERIOD: ${AUTH_TOKEN_IP_GRACE_PERIOD}
-      # Only used for testing purpose
-      AUTH_TESTING_TOTP_HASH:
       ALLOW_ACCESS_TOKEN_PARAMETER: ${ALLOW_ACCESS_TOKEN_PARAMETER}
       ALLOW_PASSWORD_RESET: ${ALLOW_PASSWORD_RESET}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION}
@@ -112,7 +110,6 @@ services:
       SSL_FORCE_SELF_SIGNED: ${SSL_FORCE_SELF_SIGNED}
 
       REGISTRATION_NOTIFICATIONS: ${REGISTRATION_NOTIFICATIONS}
-      DEBUG_ENDPOINTS: 0
       FORCE_PRODUCTION_TESTS: ${FORCE_PRODUCTION_TESTS}
 
       ALCHEMY_ENABLE: ${ACTIVATE_ALCHEMY}
@@ -189,19 +186,7 @@ services:
       SMTP_USERNAME: "${SMTP_USERNAME}"
       SMTP_PASSWORD: "${SMTP_PASSWORD}"
 
-      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
-      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
-      TELEGRAM_USERS: "${TELEGRAM_USERS}"
-      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
-      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
-      TELEGRAM_APP_HASH: ${TELEGRAM_APP_HASH}
-      TELEGRAM_APP_ID: ${TELEGRAM_APP_ID}
-      TELEGRAM_BOTNAME: ${TELEGRAM_BOTNAME}
-      TELETHON_SESSION: ${TELETHON_SESSION}
-
       SENTRY_URL: "${SENTRY_URL}"
-      RUN_SCHEMATHESIS: ${RUN_SCHEMATHESIS}
       MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
 
     volumes:
@@ -218,6 +203,8 @@ services:
       - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
       # submodules
       - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
+      # Used to force installation in case of pull requests
+      - ${SUBMODULE_DIR}/http-api:/http-api-package
       # Unit tests
       - ${SUBMODULE_DIR}/http-api/tests:/code/tests
       - ${PROJECT_DIR}/backend/tests:/code/tests/custom
@@ -244,7 +231,7 @@ services:
     image: rapydo/proxy:${RAPYDO_VERSION}
     hostname: proxy
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     working_dir: /etc/nginx
     healthcheck:
@@ -315,7 +302,7 @@ services:
     entrypoint: docker-entrypoint-maintenanance
     hostname: proxy
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - ssl_certs:/etc/letsencrypt
@@ -352,7 +339,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - sqldata:/var/lib/postgresql
@@ -366,33 +353,6 @@ services:
       POSTGRES_DEFAULT_DB: ${ALCHEMY_DB}
       POSTGRES_DBS: ${ALCHEMY_DBS}
       PGDATA: /var/lib/postgresql/current
-    networks:
-      default:
-        aliases:
-          - ${ALCHEMY_HOST}
-
-  mariadb:
-    restart: always
-    image: mariadb:10.8.2
-    healthcheck:
-      test: "mysqladmin ping -h localhost"
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: 20s
-      retries: 3
-      start_period: 5m
-    logging:
-      driver: syslog
-      options: {}
-    volumes:
-      - mariadb:/var/lib/mysql
-      - ${DATA_DIR}/backup:/backup
-    environment:
-      ACTIVATE: ${ACTIVATE_MYSQL}
-      # MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-      MYSQL_USER: "${ALCHEMY_USER}"
-      MYSQL_PASSWORD: "${ALCHEMY_PASSWORD}"
-      MYSQL_DATABASE: ${ALCHEMY_DB}
     networks:
       default:
         aliases:
@@ -415,7 +375,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - graphdata:/data
@@ -440,8 +400,9 @@ services:
       NEO4J_dbms_memory_heap_initial__size: "${NEO4J_HEAP_SIZE}"
       NEO4J_dbms_memory_pagecache_size: "${NEO4J_PAGECACHE_SIZE}"
       NEO4J_dbms_directories_plugins: "plugins"
-      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
-      NEO4J_dbms_security_procedures_unrestricted: "gds.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*"
+      # NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
+      # NEO4J_dbms_security_procedures_unrestricted: "gds.*"
       # Useful in case of corrupted transaction logs
       NEO4J_unsupported_dbms_tx__log_fail__on__corrupted__log__files: "${NEO4J_RECOVERY_MODE}"
       NEO4J_dbms_recovery_fail__on__missing__files: "${NEO4J_RECOVERY_MODE}"
@@ -499,7 +460,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: developer
     working_dir: /code
@@ -630,7 +591,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: developer
     working_dir: /code
@@ -713,7 +674,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     hostname: rabbit
     environment:
@@ -757,7 +718,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     volumes:
       - redisdata:/data
@@ -771,68 +732,6 @@ services:
       CURRENT_UID: ${CURRENT_UID}
       CURRENT_GID: ${CURRENT_GID}
       REDIS_PASSWORD: "${REDIS_PASSWORD}"
-
-  #################
-  ###    BOT    ###
-  #################
-
-  bot:
-    restart: always
-    build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
-      args:
-        RAPYDO_VERSION: ${RAPYDO_VERSION}
-        CURRENT_UID: ${CURRENT_UID}
-        CURRENT_GID: ${CURRENT_GID}
-    image: rapydo/${BACKEND_BUILD_MODE}:${RAPYDO_VERSION}
-    entrypoint: docker-entrypoint-bot
-    hostname: telegram-bot
-    logging:
-      driver: syslog
-      options: {}
-    environment:
-      ACTIVATE: ${ACTIVATE_TELEGRAM}
-      APP_MODE: ${APP_MODE}
-      LOGURU_LEVEL: ${LOG_LEVEL}
-      LOG_RETENTION: ${LOG_RETENTION}
-      FILE_LOGLEVEL: ${FILE_LOGLEVEL}
-      CURRENT_UID: ${CURRENT_UID}
-      CURRENT_GID: ${CURRENT_GID}
-      PYTHON_PATH: ${PYTHON_PATH}
-      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
-      EXTENDED_PACKAGE: ${EXTENDED_PROJECT}
-      DOMAIN: ${PROJECT_DOMAIN}
-      BACKEND_URL: "${BACKEND_URL}"
-      BACKEND_PREFIX: "${BACKEND_PREFIX}"
-      FRONTEND_URL: ${FRONTEND_URL}
-      FRONTEND_PREFIX: ${FRONTEND_PREFIX}
-      TELEGRAM_ENABLE: ${ACTIVATE_TELEGRAM}
-      TELEGRAM_API_KEY: "${TELEGRAM_API_KEY}"
-      TELEGRAM_ADMINS: "${TELEGRAM_ADMINS}"
-      TELEGRAM_USERS: "${TELEGRAM_USERS}"
-      TELEGRAM_WORKERS: ${TELEGRAM_WORKERS}
-      TELEGRAM_BACKEND_HOST: ${FLASK_HOST}
-      TELEGRAM_APP_HASH: "${TELEGRAM_APP_HASH}"
-      TELEGRAM_APP_ID: "${TELEGRAM_APP_ID}"
-      TELEGRAM_BOTNAME: "${TELEGRAM_BOTNAME}"
-      TELETHON_SESSION: "${TELETHON_SESSION}"
-
-    volumes:
-      # configuration files
-      - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
-      - ${PROJECT_DIR}/project_configuration.yaml:/code/confs/project_configuration.yaml
-      - secrets:${APP_SECRETS}
-      # Vanilla code
-      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
-      # From project, if any
-      - ${BASE_PROJECT_DIR}/backend:/code/${EXTENDED_PROJECT}
-      - ${BASE_PROJECT_DIR}/project_configuration.yaml:/code/confs/extended_project_configuration.yaml
-      # submodules
-      - ${SUBMODULE_DIR}/http-api/restapi:${PYTHON_PATH}/restapi
-      # Logs
-      - ${DATA_DIR}/logs:/logs
-    networks:
-      default:
 
   ##########################
   ### SERVICE INTERFACES ###
@@ -859,7 +758,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     working_dir: /code
     expose:
@@ -941,7 +840,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/swaggerui:${RAPYDO_VERSION}
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SWAGGERUI}
@@ -964,7 +863,7 @@ services:
         CURRENT_GID: ${CURRENT_GID}
     image: rapydo/adminer:${RAPYDO_VERSION}
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     # user: adminer
     networks:
@@ -994,7 +893,7 @@ services:
     # with the server's SSL certificates for TLS support. Optional TLS is
     # automatically enabled when the container finds this file on startup.
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_FTP}
@@ -1021,7 +920,7 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     environment:
       ACTIVATE: ${ACTIVATE_SMTP_SERVER}
@@ -1048,10 +947,10 @@ services:
       retries: 3
       start_period: 5m
     logging:
-      driver: syslog
+      driver: ${DOCKER_LOGGING_DRIVER}
       options: {}
     ports:
-      - 5000:5000
+      - ${REGISTRY_PORT}:5000
     environment:
       # Used to issue the certificate
       REGISTRY_HOST: ${REGISTRY_HOST}
@@ -1106,7 +1005,6 @@ services:
       # SSMTP_PASSWORD: SMTP password
       # SSMTP_TLS: Use TLS to talk to the SMTP server (default NO)
       # SSMTP_STARTTLS: Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation (default NO)
-      MYSQL_ENABLED: ${ACTIVATE_MYSQL}
       NEO4J_ENABLED: ${ACTIVATE_NEO4J}
       NGINX_ENABLED: ${ACTIVATE_PROXY}
       POSTGRES_ENABLED: ${ACTIVATE_POSTGRES}
@@ -1121,3 +1019,26 @@ services:
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/filters:/data/filter.d.available
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/actions:/data/action.d.available
       - ${SUBMODULE_DIR}/do/controller/confs/fail2ban/ip.blacklist:/data/ip.blacklist
+
+  ################
+  ###   MYPY   ###
+  ################
+
+  mypy:
+    build:
+      context: ${SUBMODULE_DIR}/build-templates/mypy
+      args:
+        RAPYDO_VERSION: ${RAPYDO_VERSION}
+    image: rapydo/mypy:${RAPYDO_VERSION}
+    command: mypy --version
+    working_dir: /code/${COMPOSE_PROJECT_NAME}
+    environment:
+      ACTIVATE: ${ACTIVATE_MYPY}
+      PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+      DISALLOW_UNTYPED_DEFS: ${MYPY_DISALLOW_UNTYPED_DEFS}
+      IGNORE_LIBS: ${MYPY_IGNORE_LIBS}
+      ADD_LIBS: ${MYPY_ADD_LIBS}
+    volumes:
+      - ${PROJECT_DIR}/backend:/code/${COMPOSE_PROJECT_NAME}
+      - ${SUBMODULE_DIR}/http-api/tests:/code/tests
+      - ${PROJECT_DIR}/backend/tests:/code/tests/custom

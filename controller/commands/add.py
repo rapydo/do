@@ -384,7 +384,7 @@ def create_integration_test(
     if add_tests:
         print_and_exit("Add integration_test does not support --add-tests flag")
 
-    path = project_scaffold.p_path("frontend", "integration")
+    path = project_scaffold.p_path("frontend", "e2e")
 
     # Expected name is a route-like string, e.g. app/mypath/:my_id
 

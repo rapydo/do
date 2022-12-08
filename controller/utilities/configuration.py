@@ -87,6 +87,12 @@ class FRONTEND_BUILD_MODE_VALUES(Enum):
     angular_test = "angular-test"
 
 
+class DOCKER_LOGGING_DRIVERS(Enum):
+    json_file = "json-file"
+    syslog = "syslog"
+    local = "local"
+
+
 class LOG_LEVEL_VALUES(Enum):
     DEBUG = "DEBUG"
     INFO = "INFO"
@@ -151,6 +157,62 @@ class NEO4J_BOLT_TLS_LEVEL_VALUES(Enum):
     REQUIRED = "REQUIRED"
     OPTIONAL = "OPTIONAL"
     DISABLED = "DISABLED"
+
+
+class SPINNER_TYPES(Enum):
+    BALL_8BITS = "ball-8bits"
+    BALL_ATOM = "ball-atom"
+    BALL_BEAT = "ball-beat"
+    BALL_CIRCUS = "ball-circus"
+    BALL_CLIMBING_DOT = "ball-climbing-dot"
+    BALL_CLIP_ROTATE = "ball-clip-rotate"
+    BALL_CLIP_ROTATE_MULTIPLE = "ball-clip-rotate-multiple"
+    BALL_CLIP_ROTATE_PULSE = "ball-clip-rotate-pulse"
+    BALL_ELASTIC_DOTS = "ball-elastic-dots"
+    BALL_FALL = "ball-fall"
+    BALL_FUSSION = "ball-fussion"
+    BALL_GRID_BEAT = "ball-grid-beat"
+    BALL_GRID_PULSE = "ball-grid-pulse"
+    BALL_NEWTON_CRADLE = "ball-newton-cradle"
+    BALL_PULSE = "ball-pulse"
+    BALL_PULSE_RISE = "ball-pulse-rise"
+    BALL_PULSE_SYNC = "ball-pulse-sync"
+    BALL_ROTATE = "ball-rotate"
+    BALL_RUNNING_DOTS = "ball-running-dots"
+    BALL_SCALE = "ball-scale"
+    BALL_SCALE_MULTIPLE = "ball-scale-multiple"
+    BALL_SCALE_PULSE = "ball-scale-pulse"
+    BALL_SCALE_RIPPLE = "ball-scale-ripple"
+    BALL_SCALE_RIPPLE_MULTIPLE = "ball-scale-ripple-multiple"
+    BALL_SPIN = "ball-spin"
+    BALL_SPIN_CLOCKWISE = "ball-spin-clockwise"
+    BALL_SPIN_CLOCKWISE_FADE = "ball-spin-clockwise-fade"
+    BALL_SPIN_CLOCKWISE_FADE_ROTATING = "ball-spin-clockwise-fade-rotating"
+    BALL_SPIN_FADE = "ball-spin-fade"
+    BALL_SPIN_FADE_ROTATING = "ball-spin-fade-rotating"
+    BALL_SPIN_ROTATE = "ball-spin-rotate"
+    BALL_SQUARE_CLOCKWISE_SPIN = "ball-square-clockwise-spin"
+    BALL_SQUARE_SPIN = "ball-square-spin"
+    BALL_TRIANGLE_PATH = "ball-triangle-path"
+    BALL_ZIG_ZAG = "ball-zig-zag"
+    BALL_ZIG_ZAG_DEFLECT = "ball-zig-zag-deflect"
+    COG = "cog"
+    CUBE_TRANSITION = "cube-transition"
+    FIRE = "fire"
+    LINE_SCALE = "line-scale"
+    LINE_SCALE_PARTY = "line-scale-party"
+    LINE_SCALE_PULSE_OUT = "line-scale-pulse-out"
+    LINE_SCALE_PULSE_OUT_RAPID = "line-scale-pulse-out-rapid"
+    LINE_SPIN_CLOCKWISE_FADE = "line-spin-clockwise-fade"
+    LINE_SPIN_CLOCKWISE_FADE_ROTATING = "line-spin-clockwise-fade-rotating"
+    LINE_SPIN_FADE = "line-spin-fade"
+    LINE_SPIN_FADE_ROTATING = "line-spin-fade-rotating"
+    PACMAN = "pacman"
+    SQUARE_JELLY_BOX = "square-jelly-box"
+    SQUARE_LOADER = "square-loader"
+    SQUARE_SPIN = "square-spin"
+    TIMER = "timer"
+    TRIANGLE_SKEW_SPIN = "triangle-skew-spin"
 
 
 class true_or_false(Enum):
@@ -267,6 +329,7 @@ class BaseEnvModel(BaseModel):
     FRONTEND_FRAMEWORK: FRONTEND_FRAMEWORK_VALUES
     FRONTEND_BUILD_MODE: FRONTEND_BUILD_MODE_VALUES
     NETWORK_MTU: PositiveInt
+    DOCKER_LOGGING_DRIVER: DOCKER_LOGGING_DRIVERS
     HEALTHCHECK_INTERVAL: HealthcheckInterval
     HEALTHCHECK_BACKEND_CMD: str
     LOG_LEVEL: LOG_LEVEL_VALUES
@@ -277,7 +340,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_PROXY: zero_or_one
     ACTIVATE_ALCHEMY: zero_or_one
     ACTIVATE_POSTGRES: zero_or_one
-    ACTIVATE_MYSQL: zero_or_one
     ACTIVATE_NEO4J: zero_or_one
     ACTIVATE_RABBIT: zero_or_one
     ACTIVATE_REDIS: zero_or_one
@@ -287,10 +349,12 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_FTP: zero_or_one
     ACTIVATE_SMTP: zero_or_one
     ACTIVATE_SMTP_SERVER: zero_or_one
-    ACTIVATE_TELEGRAM: zero_or_one
     ACTIVATE_SWAGGERUI: zero_or_one
     ACTIVATE_ADMINER: zero_or_one
-    RUN_SCHEMATHESIS: zero_or_one
+    ACTIVATE_MYPY: zero_or_one
+    MYPY_DISALLOW_UNTYPED_DEFS: zero_or_one
+    MYPY_IGNORE_LIBS: str
+    MYPY_ADD_LIBS: str
     MAX_LOGS_LENGTH: PositiveInt
     APP_MODE: APP_MODE_VALUES
     FLASK_HOST: str
@@ -349,7 +413,6 @@ class BaseEnvModel(BaseModel):
     ALCHEMY_DB: str
     ALCHEMY_DBS: str
     ALCHEMY_POOLSIZE: PositiveInt
-    MYSQL_ROOT_PASSWORD: str
     POSTGRES_MAX_CONNECTIONS: PositiveInt
     POSTGRES_SHARED_BUFFERS: PostgresMem
     POSTGRES_WAL_BUFFERS: PostgresMem
@@ -408,7 +471,6 @@ class BaseEnvModel(BaseModel):
     NFS_EXPORTS_SECRETS: Path
     NFS_EXPORTS_RABBITDATA: Path
     NFS_EXPORTS_SQLDATA: Path
-    NFS_EXPORTS_MARIADB: Path
     NFS_EXPORTS_GRAPHDATA: Path
     NFS_EXPORTS_DATA_IMPORTS: Path
     NFS_EXPORTS_PUREFTPD: Path
@@ -437,8 +499,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_PROXY: AssignedMemory
     ASSIGNED_CPU_POSTGRES: AssignedCPU
     ASSIGNED_MEMORY_POSTGRES: AssignedMemory
-    ASSIGNED_CPU_MARIADB: AssignedCPU
-    ASSIGNED_MEMORY_MARIADB: AssignedMemory
     ASSIGNED_CPU_NEO4J: AssignedCPU
     ASSIGNED_MEMORY_NEO4J: AssignedMemory
     ASSIGNED_CPU_CELERY: AssignedCPU
@@ -449,8 +509,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_RABBIT: AssignedMemory
     ASSIGNED_CPU_REDIS: AssignedCPU
     ASSIGNED_MEMORY_REDIS: AssignedMemory
-    ASSIGNED_CPU_BOT: AssignedCPU
-    ASSIGNED_MEMORY_BOT: AssignedMemory
     ASSIGNED_CPU_FLOWER: AssignedCPU
     ASSIGNED_MEMORY_FLOWER: AssignedMemory
     ASSIGNED_CPU_SWAGGERUI: AssignedCPU
@@ -482,14 +540,6 @@ class BaseEnvModel(BaseModel):
     SMTP_PASSWORD: Optional[str]
     SMTP_SERVER_HOST: str
     SMTP_SERVER_PORT: Port
-    TELEGRAM_API_KEY: str
-    TELEGRAM_ADMINS: str
-    TELEGRAM_USERS: Optional[str]
-    TELEGRAM_WORKERS: PositiveInt
-    TELEGRAM_APP_HASH: Optional[str]
-    TELEGRAM_APP_ID: Optional[str]
-    TELEGRAM_BOTNAME: Optional[str]
-    TELETHON_SESSION: Optional[str]
     FRONTEND_URL: str
     FRONTEND_PREFIX: str
     ALLOW_PASSWORD_RESET: zero_or_one
@@ -503,6 +553,7 @@ class BaseEnvModel(BaseModel):
     ENABLE_ANGULAR_SSR: zero_or_one
     ENABLE_YARN_PNP: zero_or_one
     FORCE_SSR_SERVER_MODE: zero_or_one
+    SPINNER_TYPE: SPINNER_TYPES
     ACTIVATE_AUTH: zero_or_one
     AUTH_SERVICE: AUTH_SERVICE_VALUES
     AUTH_DEFAULT_USERNAME: str

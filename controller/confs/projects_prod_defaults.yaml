@@ -2,6 +2,7 @@ variables:
   env:
     LOG_LEVEL: INFO # log level for backend and celery
     MIN_PASSWORD_SCORE: 4
+    DOCKER_LOGGING_DRIVER: "syslog"
 
     ACTIVATE_PROXY: 1
     APP_MODE: production
@@ -29,7 +30,6 @@ variables:
 
     FLOWER_SSL_OPTIONS: --certfile=/ssl/real/fullchain1.pem --keyfile=/ssl/real/privkey1.pem
     FLOWER_PROTOCOL: https # used for healthchecks
-    TELEGRAM_WORKERS: 4
 
     POSTGRES_MAX_CONNECTIONS: 250
     POSTGRES_SHARED_BUFFERS: 1GB
@@ -49,7 +49,6 @@ variables:
     AUTH_DEFAULT_PASSWORD: "**PLACEHOLDER**"
     ALCHEMY_USER: "**PLACEHOLDER**"
     ALCHEMY_PASSWORD: "**PLACEHOLDER**"
-    MYSQL_ROOT_PASSWORD: "**PLACEHOLDER**"
     NEO4J_PASSWORD: "**PLACEHOLDER**"
     RABBITMQ_USER: "**PLACEHOLDER**"
     RABBITMQ_PASSWORD: "**PLACEHOLDER**"

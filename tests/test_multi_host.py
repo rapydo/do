@@ -20,7 +20,6 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     auth = rand.choice(
         (
             "postgres",
-            "mysql",
             "neo4j",
         )
     )

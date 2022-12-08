@@ -29,7 +29,6 @@ from git import Repo as GitRepo
 from packaging.version import Version
 from python_on_whales import docker
 from python_on_whales.utils import DockerException
-from tabulate import tabulate
 from zxcvbn import zxcvbn  # type: ignore
 
 from controller import (
@@ -45,7 +44,6 @@ from controller import (
     RED,
     REGISTRY,
     SUBMODULES_DIR,
-    TABLE_FORMAT,
     ComposeServices,
     EnvType,
     __version__,
@@ -57,6 +55,7 @@ from controller.packages import Packages
 from controller.project import ANGULAR, NO_FRONTEND, Project
 from controller.templating import Templating
 from controller.utilities import configuration, git, services, system
+from controller.utilities.tables import print_table
 
 ROOT_UID = 0
 BASE_UID = 1000
@@ -1133,7 +1132,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         placeholders = []
         for variable, raw_services in missing.items():
 
-            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            if variable in services.vars_to_services_mapping:
+                serv = {services.vars_to_services_mapping[variable]}
+            else:
+                serv = raw_services
             active_serv = [s for s in serv if s in all_services]
 
             if active_serv:
@@ -1144,7 +1146,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         )
         for variable, raw_services in passwords_services.items():
 
-            serv = services.vars_to_services_mapping.get(variable) or raw_services
+            if variable in services.vars_to_services_mapping:
+                serv = {services.vars_to_services_mapping[variable]}
+            else:
+                serv = raw_services
+
             active_serv = [s for s in serv if s in all_services]
             if active_serv:
                 password = passwords.get(variable)
@@ -1163,15 +1169,11 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         if placeholders:
             log.critical("The following variables are missing in your configuration:")
 
-            print("")
-            print(
-                tabulate(
-                    placeholders,
-                    tablefmt=TABLE_FORMAT,
-                    headers=["VARIABLE", "SERVICE(S)"],
-                )
+            print_table(
+                ["VARIABLE", "SERVICE(S)"],
+                placeholders,
+                table_title="Missing variables",
             )
-            print("")
 
             log.info("You can fix this error by updating your .projectrc file")
 
@@ -1212,6 +1214,10 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
 
             elif Application.gits["do"].working_dir:
+
+                if installation_path.is_symlink():
+                    installation_path = installation_path.resolve()
+
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
                     do_dir = do_dir.resolve()

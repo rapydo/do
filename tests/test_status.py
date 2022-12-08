@@ -22,7 +22,7 @@ def test_all(capfd: Capture) -> None:
 
     create_project(
         capfd=capfd,
-        name="first",
+        name="xx",
         auth="postgres",
         frontend="no",
     )
@@ -54,8 +54,8 @@ def test_all(capfd: Capture) -> None:
             "status",
             "Manager",
             "Ready+Active",
-            "first_backend",
-            "first_postgres",
+            "xx_backend",
+            "xx_postgres",
             " [1]",
             # No longer found starting because
             # HEALTHCHECK_INTERVAL is defaulted to 1s during tests
@@ -95,17 +95,17 @@ def test_all(capfd: Capture) -> None:
         exec_command(
             capfd,
             "status",
-            "first-backend-1",
+            "xx-backend-1",
         )
 
         exec_command(
             capfd,
             "status backend",
-            "first-backend-1",
+            "xx-backend-1",
         )
 
         exec_command(
             capfd,
             "status backend postgres",
-            "first-backend-1",
+            "xx-backend-1",
         )

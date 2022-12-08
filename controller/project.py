@@ -102,7 +102,7 @@ class Project:
         if auth or services:
 
             models = self.p_path("backend", "models")
-            if auth == "sqlalchemy" or "postgres" in services or "mysql" in services:
+            if auth == "sqlalchemy" or "postgres" in services:
                 self.expected_files.append(models.joinpath("sqlalchemy.py"))
             if auth == "neo4j" or "neo4j" in services:
                 self.expected_files.append(models.joinpath("neo4j.py"))
@@ -164,7 +164,7 @@ class Project:
                 [
                     self.p_path("frontend", "app"),
                     self.p_path("frontend", "styles"),
-                    self.p_path("frontend", "integration"),
+                    self.p_path("frontend", "e2e"),
                     self.p_path("frontend", "assets"),
                     self.p_path("frontend", "assets", "favicon"),
                 ]
@@ -174,9 +174,7 @@ class Project:
                 DATA_DIR.joinpath(self.project, "frontend", GITKEEP)
             )
 
-            self.suggested_gitkeep.append(
-                self.p_path("frontend", "integration", GITKEEP)
-            )
+            self.suggested_gitkeep.append(self.p_path("frontend", "e2e", GITKEEP))
 
             self.expected_files.extend(
                 [
@@ -237,7 +235,7 @@ class Project:
                     frontend_data_dir.joinpath("tsconfig.app.json"),
                     frontend_data_dir.joinpath("tsconfig.spec.json"),
                     frontend_data_dir.joinpath("tsconfig.server.json"),
-                    frontend_data_dir.joinpath("cypress.json"),
+                    frontend_data_dir.joinpath("cypress.config.ts"),
                 ]
             )
 
@@ -259,6 +257,8 @@ class Project:
                     frontend_data_dir.joinpath("browserslist"),
                     # Removed since 1.2 (replaced with scss in styles)
                     self.p_path("frontend", "css"),
+                    # Removed since 2.4 (renamed into e2e)
+                    self.p_path("frontend", "integration"),
                 ]
             )
 

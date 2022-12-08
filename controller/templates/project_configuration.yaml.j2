@@ -25,6 +25,15 @@ variables:
   #   admin_root: Administrator Custom Description
   #   extra_role: Custom Role Description
 
+  submodules:
+    http-api:
+      # branch: "http-api-branch"
+    build-templates:
+      # branch: "build-templates-branch"
+    rapydo-angular:
+      # branch: "rapydo-angular-branch"
+    do:
+      # branch: "do-branch"
   env:
 
     {% if auth_service == "NO_AUTHENTICATION" -%}
@@ -36,12 +45,6 @@ variables:
     {% if enable_postgres -%}
     ACTIVATE_ALCHEMY: 1
     ACTIVATE_POSTGRES: 1
-    {% endif -%}
-    {% if enable_mysql -%}
-    ACTIVATE_ALCHEMY: 1
-    ACTIVATE_MYSQL: 1
-    ALCHEMY_PORT: 3306
-    ALCHEMY_DBTYPE: "mysql+pymysql"
     {% endif -%}
     {% if enable_neo4j -%}
     ACTIVATE_NEO4J: 1
@@ -68,9 +71,6 @@ variables:
     {% endif -%}
     {% if enable_ftp -%}
     ACTIVATE_FTP: 1
-    {% endif -%}
-    {% if enable_bot -%}
-    ACTIVATE_TELEGRAM: 1
     {% endif -%}
     {% if celery_broker -%}
     CELERY_BROKER: {{ celery_broker }}

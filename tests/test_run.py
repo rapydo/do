@@ -135,7 +135,8 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "run adminer --port XYZ",
-        "Invalid value for '--port' / '-p': 'XYZ' is not a valid integer",
+        "Invalid value for",
+        "'XYZ' is not a valid integer",
     )
 
     img = f"rapydo/adminer:{__version__}"

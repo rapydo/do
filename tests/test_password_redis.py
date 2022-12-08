@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from faker import Faker
 from freezegun import freeze_time
 
-from controller import colors
 from controller.app import Configuration
 from controller.commands.password import PASSWORD_EXPIRATION
 from tests import (
@@ -41,11 +40,15 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
     now = datetime.now()
     today = now.strftime("%Y-%m-%d")
+    if Configuration.swarm_mode:
+        prefix = "│ redis    │"
+    else:
+        prefix = "│ redis   │"
 
     exec_command(
         capfd,
         "password",
-        f"redis      REDIS_PASSWORD         {colors.RED}N/A",
+        f"{prefix} REDIS_PASSWORD        │ N/A",
     )
 
     redis_pass1 = get_variable_from_projectrc("REDIS_PASSWORD")
@@ -63,7 +66,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
+        f"{prefix} REDIS_PASSWORD        │ {today}",
     )
 
     pull_images(capfd)
@@ -98,10 +101,10 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"redis      REDIS_PASSWORD         {colors.GREEN}{today}",
+        f"{prefix} REDIS_PASSWORD        │ {today}",
     )
 
-    mypassword = faker.pystr()
+    mypassword = faker.pystr(min_chars=12, max_chars=12)
     exec_command(
         capfd,
         f"password redis --password {mypassword}",
@@ -127,7 +130,7 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"redis      REDIS_PASSWORD         {colors.RED}{today}",
+            f"{prefix} REDIS_PASSWORD        │ {today}",
         )
 
         exec_command(

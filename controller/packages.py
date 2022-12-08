@@ -9,6 +9,7 @@ import hashlib
 import os
 import re
 import stat
+import sys
 import tempfile
 from pathlib import Path
 from typing import List, Optional, Union
@@ -26,15 +27,19 @@ from sultan.api import Sultan  # type: ignore
 from controller import RED, log, print_and_exit
 
 # https://get.docker.com
-EXPECTED_DOCKER_SCRIPT_MD5 = "c3a774bf0e34387a0414f225d4dd84d9"
+EXPECTED_DOCKER_SCRIPT_MD5 = "f0914813fcbbe35f1358a994cff812d3"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.5.0"
-EXPECTED_COMPOSE_BIN_MD5 = "4bf63c523fb4a00efb2b18a218354a4c"
+COMPOSE_VERSION = "v2.9.0"
+EXPECTED_COMPOSE_LINUX_BIN_MD5 = "d098bb8304809a1335e0cf2c18d424db"
+EXPECTED_COMPOSE_MACOS_BIN_MD5 = "e7ce20441172f1e9f2c17688fe7e76a5"
+EXPECTED_COMPOSE_WIN_BIN_MD5 = "not-implemented"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.8.2"
-EXPECTED_BUILDX_BIN_MD5 = "67e87713bc63b57d20d8f9ee4b59c170"
+BUILDX_VERSION = "v0.9.1"
+EXPECTED_BUILDX_LINUX_BIN_MD5 = "1f4ac4fbe0780d478caf7ac1806f186a"
+EXPECTED_BUILDX_MACOS_BIN_MD5 = "b259567a4cf3bb99bfbfe0e02baf2c76"
+EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
 
 
 class ExecutionException(Exception):
@@ -52,9 +57,12 @@ class Packages:
 
             options = ["install", "--upgrade"]
 
+            home = Path.home()
+
             if editable:
-                options.append("--prefix")
-                options.append("~/.local")
+                if sys.platform != "darwin" and sys.platform != "win32":
+                    options.append("--prefix")
+                    options.append(f"{home}/.local")
                 options.append("--editable")
             else:
                 options.append("--user")
@@ -249,11 +257,21 @@ class Packages:
         cli_plugin.mkdir(parents=True, exist_ok=True)
         compose_bin = cli_plugin.joinpath("docker-compose")
 
+        if sys.platform == "darwin":  # pragma: no cover
+            bin_name = "docker-compose-darwin-x86_64"
+            expected_compose_bin_md5 = EXPECTED_COMPOSE_MACOS_BIN_MD5
+        elif sys.platform == "win32":  # pragma: no cover
+            bin_name = "docker-compose-windows-x86_64.exe"
+            expected_compose_bin_md5 = EXPECTED_COMPOSE_WIN_BIN_MD5
+        else:
+            bin_name = "docker-compose-linux-x86_64"
+            expected_compose_bin_md5 = EXPECTED_COMPOSE_LINUX_BIN_MD5
+
         url = "https://github.com/docker/compose/releases/download/"
-        url += f"{COMPOSE_VERSION}/docker-compose-linux-x86_64"
+        url += f"{COMPOSE_VERSION}/{bin_name}"
 
         log.info("Downloading compose binary: {}", url)
-        f = Packages.download(url, EXPECTED_COMPOSE_BIN_MD5)
+        f = Packages.download(url, expected_compose_bin_md5)
         f.rename(compose_bin)
         compose_bin.chmod(compose_bin.stat().st_mode | stat.S_IEXEC)
 
@@ -274,11 +292,24 @@ class Packages:
         cli_plugin.mkdir(parents=True, exist_ok=True)
         buildx_bin = cli_plugin.joinpath("docker-buildx")
 
+        if sys.platform == "darwin":  # pragma: no cover
+            # Intel CPU
+            # bin_name = f"buildx-{BUILDX_VERSION}.darwin-amd64"
+            # Apple CPU
+            bin_name = f"buildx-{BUILDX_VERSION}.darwin-arm64"
+            expected_compose_bin_md5 = EXPECTED_BUILDX_MACOS_BIN_MD5
+        elif sys.platform == "win32":  # pragma: no cover
+            bin_name = f"buildx-{BUILDX_VERSION}.windows-amd64.exe"
+            expected_compose_bin_md5 = EXPECTED_BUILDX_WIN_BIN_MD5
+        else:
+            bin_name = f"buildx-{BUILDX_VERSION}.linux-amd64"
+            expected_compose_bin_md5 = EXPECTED_BUILDX_LINUX_BIN_MD5
+
         url = "https://github.com/docker/buildx/releases/download/"
-        url += f"{BUILDX_VERSION}/buildx-{BUILDX_VERSION}.linux-amd64"
+        url += f"{BUILDX_VERSION}/{bin_name}"
 
         log.info("Downloading buildx binary: {}", url)
-        f = Packages.download(url, EXPECTED_BUILDX_BIN_MD5)
+        f = Packages.download(url, expected_compose_bin_md5)
 
         f.rename(buildx_bin)
         buildx_bin.chmod(buildx_bin.stat().st_mode | stat.S_IEXEC)

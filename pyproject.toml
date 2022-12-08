@@ -1,9 +1,10 @@
 [project]
 name = "rapydo"
-version = "2.3"
+version = "2.4"
 description = "Manage and deploy projects based on RAPyDo framework"
 requires-python = ">=3.8"
 license = {file = "LICENSE"}
+dynamic = ["dependencies", "optional-dependencies"]
 readme = "README.rst"
 keywords = ["http", "api", "rest", "docker", "docker-compose", "docker-swarm", "rapydo"]
 classifiers=[
@@ -14,37 +15,12 @@ classifiers=[
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 
-dependencies = [
-    "python-on-whales==0.40.0",
-    "python-dateutil",
-    "pytz",
-    "loguru",
-    "jinja2",
-    "sultan==0.9.1",
-    "plumbum",
-    "glom",
-    "GitPython==3.1.27",
-    "PyYAML==6.0",
-    "pip>=21.3",
-    "requests>=2.6.1",
-    "typer[all]==0.4.1",
-    "click==8.1.2",
-    "zxcvbn",
-    "tabulate",
-    "packaging",
-]
-
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "pytest-cov",
-    "pytest-timeout",
-    "pytest-sugar",
-    "freezegun",
-    "Faker",
-]
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = {file = ["requirements.dev.txt"]}, types = {file = ["requirements.types.txt"]}}
 
 [project.urls]
 homepage = "https://rapydo.github.io/docs"
@@ -56,8 +32,15 @@ repository = "https://github.com/rapydo/do"
 rapydo = "controller.__main__:main"
 
 [build-system]
-requires = ["setuptools>=59.0", "wheel"]
+requires = ["setuptools>=64.0", "wheel>=0.34.0"]
 build-backend = "setuptools.build_meta"
+# build-backend = "poetry.masonry.api"
+
+[tool.setuptools.package-data]
+controller = ["py.typed", "templates/*", "confs/*"]
+
+[tool.setuptools.packages.find]
+exclude = ["stubs"]
 
 [tool.black]
 line-length = 88
@@ -86,3 +69,4 @@ line_length = 88
 multi_line_output = 3
 include_trailing_comma = true
 ensure_newline_before_comments = true
+

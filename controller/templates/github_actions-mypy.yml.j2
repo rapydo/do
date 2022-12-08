@@ -1,0 +1,27 @@
+name: MyPy
+
+env:
+  PROJECT: {{ project }}
+
+on:
+  push:
+  ## pull_request:
+  workflow_dispatch:
+
+# Cancel previous running jobs on the same branch in case of new pushs
+concurrency:
+  group: mypy-{% raw %}${{ github.ref }}{% endraw %}
+  cancel-in-progress: true
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: rapydo/actions/mypy@v2
+        with:
+          project: ${PROJECT}
+          # install: ...
+          # ignore: ...
