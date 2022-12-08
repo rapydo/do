@@ -4,6 +4,7 @@
   "commitMessageAction": "Bump",
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{newVersion}}",
+  "branchConcurrentLimit": 0,
   "pre-commit": {
     "enabled": true,
     "groupName": "pre-commit",
