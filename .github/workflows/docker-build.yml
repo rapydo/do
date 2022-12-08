@@ -77,7 +77,7 @@ jobs:
           docker exec fail2ban fail2ban-regex /tmp/testbed.syslog /tmp/fail2ban/filters/nginx.conf --print-all-missed > /tmp/nginx.missed
 
           # Verify that all rules have matches on the testbed
-          EXPECTED_RULES=$(grep -E "^\s+\^%\(prefix\)s<ADDR>" do/controller/confs/fail2ban/filters/nginx.conf | wc -l)
+          EXPECTED_RULES=$(grep -E "^\s+\^%\(prefix\)s<ADDR>" controller/confs/fail2ban/filters/nginx.conf | wc -l)
           echo "Expected ${EXPECTED_RULES} rules in nginx.conf"
 
           for i in $(seq 1 ${EXPECTED_RULES}); do
