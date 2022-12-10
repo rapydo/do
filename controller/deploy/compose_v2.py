@@ -87,6 +87,13 @@ class Compose:
             if Configuration.swarm_mode and set_registry and key != REGISTRY:
                 value["image"] = f"{registry}/{value['image']}"
 
+            for non_null_key in (
+                "command",
+                "entrypoint",
+            ):
+                if non_null_key in value and value[non_null_key] is None:
+                    value.pop(non_null_key)
+
             if "healthcheck" in value and "test" in value["healthcheck"]:
                 # healtcheck commands can contain env variables double-escaped ($$)
                 # When dumped to docker-compose.yml the double escape is removed
