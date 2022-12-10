@@ -60,7 +60,6 @@ services:
       #                        which is explicitly forbidden.
       YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
       SENTRY_URL: ${SENTRY_URL}
-      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
 
       CYPRESS_AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
       CYPRESS_AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}

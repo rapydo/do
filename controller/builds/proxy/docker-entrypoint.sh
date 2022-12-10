@@ -106,12 +106,6 @@ if [[ -z "${CORS_ALLOWED_ORIGIN}" ]]; then
     export CORS_ALLOWED_ORIGIN=https://$DOMAIN;
 fi
 
-if [[ ! -z "$GA_TRACKING_CODE" ]]; then
-   export CSPGA="https://www.google-analytics.com https://www.googletagmanager.com";
-else
-    export CSPGA="";
-fi
-
 # all .preconf, including limit_req_zone, are loaded from nginx.conf before all *confs
 # *.conf are loaded from main nginx.conf
 # *.service are loaded from ${APP_MODE}.conf

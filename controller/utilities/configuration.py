@@ -542,7 +542,6 @@ class BaseEnvModel(BaseModel):
     ALLOW_TERMS_OF_USE: zero_or_one
     REGISTRATION_NOTIFICATIONS: zero_or_one
     SENTRY_URL: Optional[str]
-    GA_TRACKING_CODE: Optional[str]
     SHOW_LOGIN: zero_or_one
     ENABLE_FOOTER: zero_or_one
     ENABLE_ANGULAR_SSR: zero_or_one
