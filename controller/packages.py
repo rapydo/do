@@ -30,9 +30,9 @@ from controller import RED, log, print_and_exit
 EXPECTED_DOCKER_SCRIPT_MD5 = "f0914813fcbbe35f1358a994cff812d3"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.9.0"
-EXPECTED_COMPOSE_LINUX_BIN_MD5 = "d098bb8304809a1335e0cf2c18d424db"
-EXPECTED_COMPOSE_MACOS_BIN_MD5 = "e7ce20441172f1e9f2c17688fe7e76a5"
+COMPOSE_VERSION = "v2.14.0"
+EXPECTED_COMPOSE_LINUX_BIN_MD5 = "e08757eb4fe383828d62beb7321aa0f7"
+EXPECTED_COMPOSE_MACOS_BIN_MD5 = "0e62d39aaeb080d9c79d44ebbcdc9e44"
 EXPECTED_COMPOSE_WIN_BIN_MD5 = "not-implemented"
 
 # https://github.com/docker/buildx/releases
