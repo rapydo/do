@@ -6,7 +6,7 @@ variables:
 
     ACTIVATE_PROXY: 1
     APP_MODE: production
-    FLASK_ENV: production
+    FLASK_DEBUG: "0"
     # in development mode this is mapped on port 81
     PROXY_DEV_PORT: 80
     # used to reach the backend from outer network

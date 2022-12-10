@@ -68,7 +68,7 @@ services:
       PYTHONFAULTHANDLER: ${PYTHONFAULTHANDLER}
 
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
-      FLASK_ENV: ${FLASK_ENV}
+      FLASK_DEBUG: ${FLASK_DEBUG}
       API_AUTOSTART: ${API_AUTOSTART}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"

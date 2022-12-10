@@ -107,11 +107,6 @@ class APP_MODE_VALUES(Enum):
     test = "test"
 
 
-class FLASK_ENV_VALUES(Enum):
-    development = "development"
-    production = "production"
-
-
 class PYTHONMALLOC_VALUES(Enum):
     empty = ""
     debug = "debug"
@@ -359,7 +354,7 @@ class BaseEnvModel(BaseModel):
     APP_MODE: APP_MODE_VALUES
     FLASK_HOST: str
     FLASK_DEFAULT_PORT: Port
-    FLASK_ENV: FLASK_ENV_VALUES
+    FLASK_DEBUG: zero_or_one
     API_AUTOSTART: zero_or_one
     BACKEND_PORT: Port
     BACKEND_API_PORT: Port
