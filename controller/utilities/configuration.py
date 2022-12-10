@@ -75,6 +75,7 @@ class BACKEND_BUILD_MODE_VALUES(Enum):
     backend = "backend"
     backend_legacy38 = "backend-legacy38"
     backend_legacy39 = "backend-legacy39"
+    backend_legacy310 = "backend-legacy310"
 
 
 class FRONTEND_FRAMEWORK_VALUES(Enum):

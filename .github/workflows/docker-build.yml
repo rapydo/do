@@ -32,6 +32,8 @@ jobs:
             backend-legacy38,
             # used by nig, sdc, highlander
             backend-legacy39,
+            # not used yet
+            backend-legacy310,
             angular,
             angular-test,
             proxy,
@@ -134,7 +136,7 @@ jobs:
           rapydo install compose
 
       - name: Test backend
-        if: ${{ matrix.service == 'backend' || matrix.service == 'backend-legacy38' || matrix.service == 'backend-legacy39' }}
+        if: ${{ matrix.service == 'backend' || matrix.service == 'backend-legacy38' || matrix.service == 'backend-legacy39' || matrix.service == 'backend-legacy310'}}
         run: |
           cd test-${{ matrix.service }}
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
