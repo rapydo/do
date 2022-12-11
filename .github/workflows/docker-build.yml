@@ -156,8 +156,7 @@ jobs:
           cd test-${{ matrix.service }}
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
-          export BACKEND_PYTHON_VERSION="3.10"
-          rapydo init
+          rapydo -e BACKEND_PYTHON_VERSION=v3.10 init
           cat .projectrc
           rapydo start backend
 
@@ -174,8 +173,7 @@ jobs:
           cd test-${{ matrix.service }}
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
-          export BACKEND_PYTHON_VERSION="3.9"
-          rapydo init
+          rapydo -e BACKEND_PYTHON_VERSION=v3.9 init
           cat .projectrc
           rapydo start backend
 
@@ -192,8 +190,7 @@ jobs:
           cd test-${{ matrix.service }}
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
-          export BACKEND_PYTHON_VERSION="3.8"
-          rapydo init
+          rapydo -e BACKEND_PYTHON_VERSION=v3.8 init
           cat .projectrc
           rapydo start backend
 

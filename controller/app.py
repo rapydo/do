@@ -1013,7 +1013,10 @@ You can use of one:
         Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
         # Set Backend Python version
-        py_version = Application.env["BACKEND_PYTHON_VERSION"]
+        # TODO: replace with removeprefix
+        py_version = str(
+            Application.env.get("BACKEND_PYTHON_VERSION", "v3.11")
+        ).replace("v", "")
         py_path = f"/usr/local/lib/python{py_version}/dist-packages"
         py_values = configuration.BACKEND_PYTHON_VERSION_VALUES
         if py_version == py_values.py38.value:
