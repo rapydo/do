@@ -10,7 +10,7 @@ if [ "$HOSTNAME" == "backend-server" ]; then
     else
 
         echo "Reloading Flask..."
-        touch ${PYTHON_PATH}/restapi/__main__.py
+        touch ${FLASK_APP}
     fi
 elif [ "$HOSTNAME" == "flower" ]; then
     echo "Reload of flower not implemented yet"
