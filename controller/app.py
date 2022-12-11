@@ -1012,20 +1012,20 @@ You can use of one:
                 FAIL2BAN_IPTABLES = "nf_tables"
         Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
-        backend_py_version = Application.env["BACKEND_PYTHON_VERSION"]
-        Application.env[
-            "PYTHON_PATH"
-        ] = f"/usr/local/lib/python{backend_py_version}/dist-packages"
-        if backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py38.value:
-            Application.env["BACKEND_BUILD_MODE"] = "backend-legacy38"
-        elif (
-            backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py39.value
-        ):
-            Application.env["BACKEND_BUILD_MODE"] = "backend-legacy39"
-        # elif backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py310.value:
-        #     Application.env["BACKEND_BUILD_MODE"] = "backend-legacy310"
+        # Set Backend Python version
+        py_version = Application.env["BACKEND_PYTHON_VERSION"]
+        py_path = f"/usr/local/lib/python{py_version}/dist-packages"
+        py_values = configuration.BACKEND_PYTHON_VERSION_VALUES
+        if py_version == py_values.py38.value:
+            build_mode = "backend-legacy38"
+        elif py_version == py_values.py39.value:
+            build_mode = "backend-legacy39"
+        elif py_version == py_values.py310.value:
+            build_mode = "backend-legacy310"
         else:
-            Application.env["BACKEND_BUILD_MODE"] = "backend"
+            build_mode = "backend"
+        Application.env["PYTHON_PATH"] = py_path
+        Application.env["BACKEND_BUILD_MODE"] = build_mode
 
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")

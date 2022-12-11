@@ -70,7 +70,7 @@ variables:
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URL: ""
     PYTHON_MAIN_FILE: __main__
-    BACKEND_PYTHON_VERSION: "3.10"
+    BACKEND_PYTHON_VERSION: "3.11"
 
     PYTHONMALLOC: ""
     PYTHONASYNCIODEBUG: 0

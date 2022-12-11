@@ -102,6 +102,7 @@ class APP_MODE_VALUES(Enum):
 
 
 class BACKEND_PYTHON_VERSION_VALUES(Enum):
+    py311 = "3.11"
     py310 = "3.10"
     py39 = "3.9"
     py38 = "3.8"
