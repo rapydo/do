@@ -157,7 +157,6 @@ jobs:
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
           rapydo -e BACKEND_PYTHON_VERSION=v3.10 init
-          cat .projectrc
           rapydo start backend
 
           # Expected startup time: ~ 2 seconds
@@ -174,7 +173,6 @@ jobs:
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
           rapydo -e BACKEND_PYTHON_VERSION=v3.9 init
-          cat .projectrc
           rapydo start backend
 
           # Expected startup time: ~ 2 seconds
@@ -191,7 +189,6 @@ jobs:
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
           rapydo -e BACKEND_PYTHON_VERSION=v3.8 init
-          cat .projectrc
           rapydo start backend
 
           # Expected startup time: ~ 2 seconds
