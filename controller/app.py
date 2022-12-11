@@ -1012,6 +1012,21 @@ You can use of one:
                 FAIL2BAN_IPTABLES = "nf_tables"
         Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
+        backend_py_version = Application.env["BACKEND_PYTHON_VERSION"]
+        Application.env[
+            "PYTHON_PATH"
+        ] = f"/usr/local/lib/python{backend_py_version}/dist-packages"
+        if backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py38.value:
+            Application.env["BACKEND_BUILD_MODE"] = "backend-legacy38"
+        elif (
+            backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py39.value
+        ):
+            Application.env["BACKEND_BUILD_MODE"] = "backend-legacy39"
+        # elif backend_py_version == configuration.BACKEND_PYTHON_VERSION_VALUES.py310.value:
+        #     Application.env["BACKEND_BUILD_MODE"] = "backend-legacy310"
+        else:
+            Application.env["BACKEND_BUILD_MODE"] = "backend"
+
         configuration.validate_env(Application.env)
         log.info("Environment configuration is valid")
 

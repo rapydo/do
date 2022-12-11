@@ -71,13 +71,6 @@ class Configuration(TypedDict, total=False):
     variables: Variables
 
 
-class BACKEND_BUILD_MODE_VALUES(Enum):
-    backend = "backend"
-    backend_legacy38 = "backend-legacy38"
-    backend_legacy39 = "backend-legacy39"
-    backend_legacy310 = "backend-legacy310"
-
-
 class FRONTEND_FRAMEWORK_VALUES(Enum):
     nofrontend = "nofrontend"
     angular = "angular"
@@ -106,6 +99,12 @@ class APP_MODE_VALUES(Enum):
     development = "development"
     production = "production"
     test = "test"
+
+
+class BACKEND_PYTHON_VERSION_VALUES(Enum):
+    py310 = "3.10"
+    py39 = "3.9"
+    py38 = "3.8"
 
 
 class PYTHONMALLOC_VALUES(Enum):
@@ -321,7 +320,6 @@ class SubmoduleModel(BaseModel):
 
 
 class BaseEnvModel(BaseModel):
-    BACKEND_BUILD_MODE: BACKEND_BUILD_MODE_VALUES
     FRONTEND_FRAMEWORK: FRONTEND_FRAMEWORK_VALUES
     FRONTEND_BUILD_MODE: FRONTEND_BUILD_MODE_VALUES
     NETWORK_MTU: PositiveInt
@@ -360,8 +358,8 @@ class BaseEnvModel(BaseModel):
     BACKEND_PORT: Port
     BACKEND_API_PORT: Port
     BACKEND_URL: str
+    BACKEND_PYTHON_VERSION: BACKEND_PYTHON_VERSION_VALUES
     PYTHON_MAIN_FILE: str
-    PYTHON_PATH: Path
     PYTHONASYNCIODEBUG: zero_or_one
     PYTHONFAULTHANDLER: zero_or_one
     PYTHONMALLOC: PYTHONMALLOC_VALUES

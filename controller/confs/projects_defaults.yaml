@@ -22,7 +22,6 @@ variables:
     normal_user: Normal User
 
   env:
-    BACKEND_BUILD_MODE: backend
     FRONTEND_FRAMEWORK: nofrontend
     FRONTEND_BUILD_MODE: angular # or angular-test
     NETWORK_MTU: 1500
@@ -71,8 +70,7 @@ variables:
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URL: ""
     PYTHON_MAIN_FILE: __main__
-    # Path to dist-packages in backend/celery containers
-    PYTHON_PATH: /usr/local/lib/python3.10/dist-packages
+    BACKEND_PYTHON_VERSION: "3.10"
 
     PYTHONMALLOC: ""
     PYTHONASYNCIODEBUG: 0
