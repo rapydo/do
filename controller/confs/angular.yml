@@ -122,10 +122,10 @@ services:
       - ${PROJECT_DIR}/frontend:/app/app/custom
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress.config.ts:/app/cypress.config.ts
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/e2e/coverage.webpack.js
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/e2e/support
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/e2e/plugins
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/e2e/fixtures
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/e2e/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/e2e/rapydo
       - ${PROJECT_DIR}/frontend/e2e:/e2e/custom
