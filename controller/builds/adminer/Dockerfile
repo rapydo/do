@@ -17,12 +17,11 @@ COPY --chmod=740 ./docker-entrypoint.sh /usr/local/bin/nginx-docker-entrypoint
 COPY ./development.conf /etc/nginx/adminer-development.conf
 COPY ./production.conf /etc/nginx/adminer-production.conf
 
-RUN mkdir -p /run/nginx \
-    && rm -f /etc/nginx/http.d/default.conf \
+RUN rm -f /etc/nginx/sites-enabled/default \
     && sed -i '3i/usr/local/bin/nginx-docker-entrypoint' /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 
 COPY --chmod=740 reload-adminer.sh /usr/local/bin/reload
 COPY banner.sh print_versions.sh /etc/
-RUN echo '/bin/ash /etc/banner.sh' >> ~/.bashrc
+RUN echo '/bin/bash /etc/banner.sh' >> ~/.bashrc
