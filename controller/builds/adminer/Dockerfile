@@ -2,10 +2,6 @@ FROM adminer:4.8.1
 
 USER root
 
-# RUN apk update --no-cache && \
-#     apk upgrade --no-cache && \
-#     apk add --no-cache nginx autoconf gcc g++ make libffi-dev openssl-dev
-
 RUN apt-get update -qq \
      && apt-get dist-upgrade --yes -qq \
      && apt-get install --yes --no-install-recommends \
