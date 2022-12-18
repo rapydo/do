@@ -128,6 +128,7 @@ services:
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/e2e/fixtures
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/e2e/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/e2e/rapydo
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend/node_modules:/e2e/node_modules
       - ${PROJECT_DIR}/frontend/e2e:/e2e/custom
 
       - ${DATA_DIR}/logs:/logs
