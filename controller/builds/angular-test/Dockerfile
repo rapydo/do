@@ -14,7 +14,7 @@ RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 ENV ANGULAR_VERSION 15.0.4
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
-ENV CYPRESS_VERSION 12.1.0
+ENV CYPRESS_VERSION 12.2.0
 ENV CYPRESS_RUN_BINARY=${CYPRESS_PATH}/${CYPRESS_VERSION}/Cypress/Cypress
 
 # Install Chrome
@@ -32,7 +32,7 @@ RUN \
   rm -rf /var/lib/apt/lists/* && \
   google-chrome --version
 
-RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.1.2 sitemap-generator-cli@7.5.0 angular-spec-generator@1.1.0 cypress@${CYPRESS_VERSION} --force
+RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.2.0 sitemap-generator-cli@7.5.0 angular-spec-generator@1.1.0 cypress@${CYPRESS_VERSION} --force
 
 # 777 is required to let node user to write the folder, even when uid is fixed at runtime.
 RUN mv /root/.cache/Cypress /usr/local/Cypress && chown -R node:node /usr/local/Cypress && chmod -R 777 /usr/local/Cypress
