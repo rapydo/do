@@ -1,4 +1,4 @@
-FROM crazymax/fail2ban:1.0.1
+FROM crazymax/fail2ban:1.0.2
 
 RUN apk update --no-cache && apk upgrade --no-cache
 
