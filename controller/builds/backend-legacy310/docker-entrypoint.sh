@@ -86,7 +86,7 @@ else
             HOME=$CODE_DIR su -p ${APIUSER} -c 'restapi wait'
 
             # Please note that errors in the upgrade will not make fail the server startup due to the || true statement
-            HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic current" || true';
+            HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic current || true';
             HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic upgrade head || true';
 
             echo "Migration completed";
