@@ -50,9 +50,6 @@ ENV GUNICORN_CONF /tmp/gunicorn_conf.py
 COPY gunicorn_conf.py ${GUNICORN_CONF}
 COPY --chmod=740 launch_gunicorn.sh /usr/local/bin/mygunicorn
 
-# UTILITIES
-COPY --chmod=740 flask_migrate /usr/local/bin/flask_migrate
-
 # variables
 ENV PAGER less
 ENV PYTHONIOENCODING="utf-8"

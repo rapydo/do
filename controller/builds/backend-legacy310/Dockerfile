@@ -73,7 +73,6 @@ STOPSIGNAL SIGINT
 CMD ["docker-entrypoint", "rest"]
 
 # UTILITIES
-COPY --chmod=740 flask_migrate /usr/local/bin/flask_migrate
 COPY --chmod=740 reload-backend.sh /usr/local/bin/reload
 COPY --chmod=740 celery-healthcheck.sh /usr/local/bin/celery-healthcheck
 
