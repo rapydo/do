@@ -80,14 +80,14 @@ else
 
         if [[ ! -d "${PROJECT_NAME}/migrations" ]]; then
             echo "Skipping migrations check, ${PROJECT_NAME}/migrations does not exist";
-        elif [[ $(HOME=$CODE_DIR su -p ${APIUSER} -c 'flask db current --directory "${PROJECT_NAME}/migrations" 2>&1 | tail -1 | grep "head"') ]]; then
+        elif [[ $(HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic current" 2>&1 | tail -1 | grep "head"') ]]; then
             echo "All database migrations are already installed";
         else
             HOME=$CODE_DIR su -p ${APIUSER} -c 'restapi wait'
 
             # Please note that errors in the upgrade will not make fail the server startup due to the || true statement
-            HOME=$CODE_DIR su -p ${APIUSER} -c 'flask db stamp --directory "${PROJECT_NAME}/migrations" || true';
-            HOME=$CODE_DIR su -p ${APIUSER} -c 'flask db upgrade --directory "${PROJECT_NAME}/migrations" || true';
+            HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic current" || true';
+            HOME=$CODE_DIR su -p ${APIUSER} -c 'alembic upgrade head || true';
 
             echo "Migration completed";
         fi
