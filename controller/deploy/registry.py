@@ -66,8 +66,8 @@ class Registry:
             expected_status = 200
             method_ref = requests.get
 
-        user = Application.env["REGISTRY_USERNAME"]
-        password = Application.env["REGISTRY_PASSWORD"]
+        user = str(Application.env["REGISTRY_USERNAME"])
+        password = str(Application.env["REGISTRY_PASSWORD"])
         if not user or not password:  # pragma: no cover
             print_and_exit("Invalid registry username or password")
 
