@@ -66,13 +66,15 @@ class Registry:
             expected_status = 200
             method_ref = requests.get
 
+        user = Application.env["REGISTRY_USERNAME"]
+        password = Application.env["REGISTRY_PASSWORD"]
+        if not user or not password:  # pragma: no cover
+            print_and_exit("Invalid registry username or password")
+
         r = method_ref(
             url,
             verify=False,
-            auth=HTTPBasicAuth(
-                Application.env["REGISTRY_USERNAME"],
-                Application.env["REGISTRY_PASSWORD"],
-            ),
+            auth=HTTPBasicAuth(user, password),
             headers=headers,
         )
 
