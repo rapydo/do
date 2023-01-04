@@ -190,6 +190,8 @@ services:
       SENTRY_URL: "${SENTRY_URL}"
       MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
 
+      # Temporary added to silence SQLAlchemy 2.0 uber warning
+      SQLALCHEMY_SILENCE_UBER_WARNING: "1"
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
