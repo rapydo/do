@@ -70,8 +70,8 @@ class Registry:
             url,
             verify=False,
             auth=HTTPBasicAuth(
-                Application.env["REGISTRY_USERNAME"],
-                Application.env["REGISTRY_PASSWORD"],
+                Application.env["REGISTRY_USERNAME"],  # type: ignore
+                Application.env["REGISTRY_PASSWORD"],  # type: ignore
             ),
             headers=headers,
         )
