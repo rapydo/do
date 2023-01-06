@@ -192,6 +192,8 @@ services:
 
       # Temporary added to silence SQLAlchemy 2.0 uber warning
       SQLALCHEMY_SILENCE_UBER_WARNING: "1"
+      # Added to raise sqlalchemy RemovedIn20Warning deprecation warnings
+      SQLALCHEMY_WARN_20: "1"
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml

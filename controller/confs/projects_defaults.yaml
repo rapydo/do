@@ -145,7 +145,7 @@ variables:
     ALCHEMY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
-    ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
+    ALCHEMY_POOLSIZE: 30 # default is 5
 
     # Have a look at this website for a quick tuning:
     # https://pgtune.leopard.in.ua
