@@ -168,7 +168,6 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
         if not module:  # pragma: no cover
             print_and_exit(f"{s} misconfiguration, module not found")
 
-        log.critical(Application.env)
         PASSWORD_EXPIRATION = int(
             Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
         )
