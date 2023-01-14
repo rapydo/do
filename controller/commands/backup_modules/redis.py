@@ -35,7 +35,7 @@ def backup(
         docker.exec_command(
             container,
             user="redis",
-            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 0'",
+            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 0'",  # noqa
         )
 
     command = f"tar -zcf {backup_path} -C /data dump.rdb appendonlydir"
@@ -50,7 +50,7 @@ def backup(
         docker.exec_command(
             container,
             user="redis",
-            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 100'",
+            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 100'",  # noqa
         )
 
     # Verify the gz integrity

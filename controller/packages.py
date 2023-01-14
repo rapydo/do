@@ -144,11 +144,17 @@ class Packages:
 
     @classmethod
     def get_bin_version(
-        cls, exec_cmd: str, option: List[str] = ["--version"], clean_output: bool = True
+        cls,
+        exec_cmd: str,
+        option: Optional[List[str]] = None,
+        clean_output: bool = True,
     ) -> Optional[str]:
         """
         Retrieve the version of a binary
         """
+
+        if option is None:
+            option = ["--version"]
 
         try:
 
@@ -325,14 +331,14 @@ class Packages:
             local_command = local[command]
             log.info("Executing command {} {}", command, " ".join(parameters))
             return str(local_command(parameters))
-        except CommandNotFound:
-            raise ExecutionException(f"Command not found: {command}")
+        except CommandNotFound as e:
+            raise ExecutionException(f"Command not found: {command}") from e
 
-        except ProcessExecutionError:
+        except ProcessExecutionError as e:
             raise ExecutionException(
                 f"Cannot execute command: {command} {' '.join(parameters)}"
-            )
+            ) from e
 
         # raised on Windows
-        except OSError:  # pragma: no cover
-            raise ExecutionException(f"Cannot execute: {command}")
+        except OSError as e:  # pragma: no cover
+            raise ExecutionException(f"Cannot execute: {command}") from e
