@@ -16,9 +16,6 @@ from controller.deploy.docker import Docker
 from controller.templating import Templating, get_strong_password
 from controller.utilities.tables import print_table
 
-# make this configurable
-PASSWORD_EXPIRATION = 90
-
 UPDATE_LABEL = "updated on"
 
 
@@ -171,6 +168,10 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
         if not module:  # pragma: no cover
             print_and_exit(f"{s} misconfiguration, module not found")
 
+        log.critical(Application.env)
+        PASSWORD_EXPIRATION = int(
+            Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+        )
         for variable in module.PASSWORD_VARIABLES:
 
             if variable in last_updates:
@@ -251,6 +252,9 @@ def password(
             if not module:  # pragma: no cover
                 print_and_exit(f"{s} misconfiguration, module not found")
 
+            PASSWORD_EXPIRATION = int(
+                Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+            )
             for variable in module.PASSWORD_VARIABLES:
 
                 password = Application.env.get(variable)

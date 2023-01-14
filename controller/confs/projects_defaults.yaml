@@ -366,6 +366,8 @@ variables:
     ALLOW_ACCESS_TOKEN_PARAMETER: 0
     DEFAULT_DHLEN: 2048
 
+    PASSWORD_EXPIRATION_WARNING: 180
+
     FORCE_PRODUCTION_TESTS: 0 # Very dangerous, do not touch it!
 
 project:

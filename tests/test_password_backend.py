@@ -9,8 +9,7 @@ from faker import Faker
 from freezegun import freeze_time
 from python_on_whales import docker
 
-from controller.app import Configuration
-from controller.commands.password import PASSWORD_EXPIRATION
+from controller.app import Application, Configuration
 from tests import (
     Capture,
     create_project,
@@ -169,6 +168,9 @@ def test_password_backend(capfd: Capture, faker: Faker) -> None:
     exec_command(capfd, "logs backend --tail 10")
     assert r.status_code == 200
 
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
     future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
     expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 

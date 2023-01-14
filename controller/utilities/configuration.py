@@ -566,6 +566,7 @@ class BaseEnvModel(BaseModel):
     ALLOW_ACCESS_TOKEN_PARAMETER: zero_or_one
     DEFAULT_DHLEN: PositiveInt
 
+    PASSWORD_EXPIRATION_WARNING: NonNegativeInt
     FORCE_PRODUCTION_TESTS: zero_or_one
 
 

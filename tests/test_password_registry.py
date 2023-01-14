@@ -8,8 +8,7 @@ from freezegun import freeze_time
 from python_on_whales import docker
 
 from controller import colors
-from controller.app import Configuration
-from controller.commands.password import PASSWORD_EXPIRATION
+from controller.app import Application, Configuration
 from tests import (
     REGISTRY,
     Capture,
@@ -97,6 +96,9 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
     )
 
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
     future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
     expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
