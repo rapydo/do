@@ -1,4 +1,4 @@
-FROM node:18.12.1-buster
+FROM node:18.13.0-buster
 # https://nodejs.org/en/blog/release
 
 ARG CURRENT_UID
@@ -11,7 +11,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 
 # used by print_versions
-ENV ANGULAR_VERSION 15.0.4
+ENV ANGULAR_VERSION 15.0.5
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
 ENV CYPRESS_VERSION 12.3.0
