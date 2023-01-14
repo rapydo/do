@@ -293,7 +293,7 @@ class Neo4jFlag:
     def __get_validators__(cls) -> Iterator[Callable[["Neo4jFlag", Any], bool]]:
         yield cls.validate
 
-    def validate(self, value: Any) -> bool:
+    def validate(cls, value: Any) -> bool:
         if isinstance(value, bool):
             return value
 
