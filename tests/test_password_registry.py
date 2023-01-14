@@ -115,6 +115,9 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
             f"REGISTRY_PASSWORD is expired on {expired}",
         )
 
+    # TODO: should be verified that no red is shown
+    exec_command(capfd, "-e PASSWORD_EXPIRATION_WARNING=0 password")
+
     # This is needed otherwise the following tests will be unable to start
     # a new instance of the registry and will fail with registry auth errors
     exec_command(capfd, "remove registry", "Service registry removed")

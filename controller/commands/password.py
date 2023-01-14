@@ -151,6 +151,12 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
 
     last_updates = parse_projectrc()
     now = datetime.now()
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
+
+    if PASSWORD_EXPIRATION == 0:
+        return expired_passwords
 
     for s in PASSWORD_MODULES:
         # This should never happens and can't be (easily) tested
@@ -168,9 +174,6 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
         if not module:  # pragma: no cover
             print_and_exit(f"{s} misconfiguration, module not found")
 
-        PASSWORD_EXPIRATION = int(
-            Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
-        )
         for variable in module.PASSWORD_VARIABLES:
 
             if variable in last_updates:
@@ -264,14 +267,19 @@ def password(
                     result = zxcvbn(password)
                     score = result["score"]
 
-                if variable in last_updates:
-                    change_date = last_updates.get(variable, datetime.fromtimestamp(0))
-                    expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
-                    expired = now > expiration_date
-                    last_change = change_date.strftime("%Y-%m-%d")
-                else:
+                if variable not in last_updates:
                     expired = True
                     last_change = "N/A"
+                else:
+                    change_date = last_updates.get(variable, datetime.fromtimestamp(0))
+                    last_change = change_date.strftime("%Y-%m-%d")
+                    if PASSWORD_EXPIRATION == 0:
+                        expired = False
+                    else:
+                        expiration_date = change_date + timedelta(
+                            days=PASSWORD_EXPIRATION
+                        )
+                        expired = now > expiration_date
 
                 pass_line: List[str] = []
 

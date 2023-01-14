@@ -141,6 +141,9 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
             f"REDIS_PASSWORD is expired on {expired}",
         )
 
+    # TODO: should be verified that no red is shown
+    exec_command(capfd, "-e PASSWORD_EXPIRATION_WARNING=0 password")
+
     # Cleanup the stack for the next test
     exec_command(capfd, "remove", "Stack removed")
 
