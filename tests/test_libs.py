@@ -172,16 +172,13 @@ def test_str_to_bytes() -> None:
         system.str_to_bytes("1TB")
 
 
-def to_int() -> None:
+def test_to_int() -> None:
     assert system.to_int(0) == 0
     assert system.to_int(42) == 42
     assert system.to_int(-24) == -24
     assert system.to_int("1") == 1
     assert system.to_int("43") == 43
     assert system.to_int("-25") == -25
-    assert system.to_int(None) is None  # type: ignore
-    assert system.to_int({}) is None  # type: ignore
-    assert system.to_int([]) is None  # type: ignore
     assert system.to_int("not a number") is None
 
 

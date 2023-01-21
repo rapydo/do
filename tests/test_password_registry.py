@@ -7,7 +7,6 @@ from faker import Faker
 from freezegun import freeze_time
 from python_on_whales import docker
 
-from controller import colors
 from controller.app import Application, Configuration
 from tests import (
     REGISTRY,
@@ -24,6 +23,8 @@ from tests import (
 
 def test_password_registry(capfd: Capture, faker: Faker) -> None:
 
+    # load variables and initialize the Configuration
+    Application()
     if not Configuration.swarm_mode:
         return None
 
@@ -43,7 +44,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.RED}N/A",
+        "│ registry │ REGISTRY_PASSWORD     │ N/A",
     )
     registry_pass1 = get_variable_from_projectrc("REGISTRY_PASSWORD")
 
@@ -65,7 +66,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+        f"│ registry │ REGISTRY_PASSWORD     │ {today}",
     )
 
     exec_command(capfd, "images", "This registry contains ")
@@ -93,7 +94,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+        f"│ registry │ REGISTRY_PASSWORD     │ {today}",
     )
 
     PASSWORD_EXPIRATION = int(
@@ -106,7 +107,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+            f"│ registry │ REGISTRY_PASSWORD     │ {today}",
         )
 
         exec_command(

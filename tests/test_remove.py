@@ -26,7 +26,9 @@ def get_containers() -> List[str]:
     for container in docker.container.list():
         name = container.name
 
-        if name == REGISTRY or name == "adminer" or name == "swaggerui":
+        if (
+            name == REGISTRY or name == "adminer" or name == "swaggerui"
+        ):  # pragma: no cover
             continue
 
         # this is swarm mode:

@@ -271,16 +271,6 @@ def test_create(capfd: Capture) -> None:
 
     os.remove(".projectrc")
 
-    """
-    Convert this to a test with parametrize fixture
-
-    @pytest.mark.parametrize("services, [
-        (postgres,),
-        (neo4j,),
-        ...
-    ])
-
-    """
     # Test services activation from create --service
     services = [
         "postgres",
