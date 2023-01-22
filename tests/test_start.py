@@ -3,6 +3,7 @@ This module will test the start command
 """
 
 import shutil
+import time
 
 from controller import DATA_DIR, colors
 from controller.app import Configuration
@@ -110,6 +111,8 @@ def test_all(capfd: Capture) -> None:
         )
 
         # Now both backend and neo4j are expected to be running
+        # but a couple of seconds of sleep should avoid some flakyness
+        time.sleep(2)
         assert docker.get_container("backend") is not None
         assert docker.get_container("neo4j") is not None
 
