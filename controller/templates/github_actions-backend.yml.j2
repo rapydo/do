@@ -82,7 +82,7 @@ jobs:
 
       - name: Production mode
         run: |
-          rapydo --testing --prod init --force
+          rapydo --testing --prod -e FRONTEND_FRAMEWORK=nofrontend init --force
           # rapydo run registry
           rapydo pull --quiet
 
