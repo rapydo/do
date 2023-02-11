@@ -14,7 +14,7 @@ RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 ENV ANGULAR_VERSION 15.1.3
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
-ENV CYPRESS_VERSION 12.4.1
+ENV CYPRESS_VERSION 12.5.1
 ENV CYPRESS_RUN_BINARY=${CYPRESS_PATH}/${CYPRESS_VERSION}/Cypress/Cypress
 
 # Install Chrome
