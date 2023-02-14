@@ -18,7 +18,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "list env")
     create_project(
         capfd=capfd,

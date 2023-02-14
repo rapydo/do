@@ -15,7 +15,6 @@ from tests import (
 
 
 def test_tuning(capfd: Capture, faker: Faker) -> None:
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

@@ -11,7 +11,6 @@ from controller.deploy.docker import Docker
 def scale(
     scaling: str = typer.Argument(..., help="scale SERVICE to NUM_REPLICA")
 ) -> None:
-
     Application.print_command(Application.serialize_parameter("", scaling))
 
     Application.get_controller().controller_init()

@@ -53,7 +53,6 @@ def shell(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--user", user, IF=user),
         Application.serialize_parameter(

@@ -17,7 +17,6 @@ def restart(
         show_default=False,
     ),
 ) -> None:
-
     # Deprecated since 2.2
 
     print_and_exit(

@@ -9,7 +9,6 @@ def get_services(
     services: Optional[Union[str, Iterable[str]]],
     default: List[str],
 ) -> List[str]:
-
     return_list: List[str] = []
     if not services:
         return_list = sorted(default)
@@ -24,7 +23,6 @@ def get_services(
     ]
 
     if excluded_services_list:
-
         # Filter out _ services from return_list
         return_list = [s for s in return_list if not s.startswith("_")]
 
@@ -40,7 +38,6 @@ def get_services(
 def walk_services(
     actives: List[str], dependecies: Dict[str, List[str]], index: int = 0
 ) -> List[str]:
-
     if index >= len(actives):
         return actives
 
@@ -66,7 +63,6 @@ def find_active(services: ComposeServices) -> List[str]:
     base_actives: List[str] = []
 
     for name, service in services.items():
-
         dependencies[name] = list(service.depends_on.keys())
 
         if service.environment and service.environment.get("ACTIVATE", "0") == "1":
@@ -133,7 +129,6 @@ def normalize_placeholder_variable(key: str) -> str:
 
 
 def get_celerybeat_scheduler(env: Dict[str, EnvType]) -> str:
-
     if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
         return "Unknown"
 
@@ -173,7 +168,6 @@ def check_redis_password(pwd: Optional[EnvType]) -> None:
 
 
 def get_default_user(service: str) -> Optional[str]:
-
     if service in ["backend", "celery", "flower", "celerybeat"]:
         return "developer"
 
@@ -199,7 +193,6 @@ def get_default_user(service: str) -> Optional[str]:
 
 
 def get_default_command(service: str) -> str:
-
     if service == "backend":
         return "restapi launch"
 

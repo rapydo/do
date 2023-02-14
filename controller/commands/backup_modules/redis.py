@@ -10,7 +10,6 @@ SERVICE_NAME = __name__
 def backup(
     container: Optional[Tuple[str, str]], now: datetime, force: bool, dry_run: bool
 ) -> None:
-
     docker = Docker()
 
     log.info("Starting backup on {}...", SERVICE_NAME)

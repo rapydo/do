@@ -22,7 +22,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "backup postgres")
     execute_outside(capfd, "restore postgres")
 

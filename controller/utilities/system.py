@@ -39,7 +39,6 @@ def get_current_gid() -> int:
 
 
 def bytes_to_str(value: float) -> str:
-
     if value >= GB:
         value /= GB
         unit = "GB"
@@ -57,7 +56,6 @@ def bytes_to_str(value: float) -> str:
 
 # This is no longer needed
 def str_to_bytes(text: str) -> float:
-
     text = text.upper()
 
     value: str = text

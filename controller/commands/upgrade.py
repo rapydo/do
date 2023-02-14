@@ -21,7 +21,6 @@ def upgrade(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--path", path, IF=path),
     )

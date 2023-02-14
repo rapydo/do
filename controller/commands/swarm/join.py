@@ -21,7 +21,6 @@ def join(
     manager_address = "N/A"
     # Search for the manager address
     for node in docker.client.node.list():
-
         role = node.spec.role
         state = node.status.state
         availability = node.spec.availability

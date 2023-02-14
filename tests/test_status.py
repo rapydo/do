@@ -17,7 +17,6 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
-
     execute_outside(capfd, "status")
 
     create_project(
@@ -48,7 +47,6 @@ def test_all(capfd: Capture) -> None:
     start_project(capfd)
 
     if Configuration.swarm_mode:
-
         exec_command(
             capfd,
             "status",

@@ -21,7 +21,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "shell backend ls")
 
     create_project(
@@ -161,7 +160,6 @@ def test_all(capfd: Capture, faker: Faker) -> None:
             "Service converged",
         )
     else:
-
         service = "redis"
         exec_command(
             capfd,

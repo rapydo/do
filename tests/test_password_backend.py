@@ -26,7 +26,6 @@ from tests import (
 
 
 def test_password_backend(capfd: Capture, faker: Faker) -> None:
-
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,

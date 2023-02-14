@@ -23,7 +23,6 @@ from tests import (
 
 
 def test_init(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "init")
     create_project(
         capfd=capfd,

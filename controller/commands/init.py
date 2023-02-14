@@ -26,7 +26,6 @@ def init(
         help="Link all submodules in an existing folder instead of download them",
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter(
             "--force", create_projectrc, IF=create_projectrc

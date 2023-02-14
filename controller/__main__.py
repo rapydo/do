@@ -1,5 +1,4 @@
 def main() -> None:
-
     # All imports moved here to prevent to slow down the import of main
     import warnings
 

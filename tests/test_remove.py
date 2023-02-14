@@ -50,12 +50,10 @@ def get_containers() -> List[str]:
 
 
 def get_networks() -> List[str]:
-
     return [net.name for net in docker.network.list()]
 
 
 def count_volumes() -> Tuple[int, int]:
-
     named = 0
     unnamed = 0
 
@@ -70,7 +68,6 @@ def count_volumes() -> Tuple[int, int]:
 
 
 def test_remove(capfd: Capture) -> None:
-
     execute_outside(capfd, "remove")
 
     create_project(
@@ -162,7 +159,6 @@ def test_remove(capfd: Capture) -> None:
         assert NAMED_VOLUMES_NUM == n
         assert UNNAMED_VOLUMES_NUM > u
     else:
-
         exec_command(
             capfd,
             "remove postgres",

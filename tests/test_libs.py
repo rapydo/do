@@ -28,7 +28,6 @@ from tests import Capture, create_project, init_project, random_project_name
 
 
 def test_autocomplete(capfd: Capture, faker: Faker) -> None:
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),
@@ -80,7 +79,6 @@ def test_autocomplete(capfd: Capture, faker: Faker) -> None:
 
 
 def test_git(capfd: Capture, faker: Faker) -> None:
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

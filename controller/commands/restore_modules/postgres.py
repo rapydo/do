@@ -10,7 +10,6 @@ EXPECTED_EXT = ".sql.gz"
 def restore(
     container: Optional[Tuple[str, str]], backup_file: str, force: bool
 ) -> None:
-
     if not container:
         print_and_exit(
             "The restore procedure requires {} running, please start your stack",

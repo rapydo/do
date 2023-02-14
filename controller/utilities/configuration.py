@@ -629,7 +629,6 @@ def read_configuration(
     for key in variables:
         # Can't be tested because it is included in default configuration
         if project.get(key) is None:  # pragma: no cover
-
             print_and_exit(
                 "Project not configured, missing key '{}' in file {}/{}",
                 key,
@@ -710,7 +709,6 @@ def mix_configuration(
         return base
 
     for key, elements in custom.items():
-
         if key not in base:
             # TypedDict key must be a string literal;
             base[key] = custom[key]  # type: ignore
@@ -769,15 +767,12 @@ def load_yaml_file(
 
 
 def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path]]:
-
     base_files: List[Path] = []
     all_files: List[Path] = []
 
     # YAML CHECK UP
     for path in config_files:
-
         try:
-
             # This is to verify that mandatory files exist and yml syntax is valid
             conf = load_yaml_file(file=path, is_optional=False)
 
@@ -797,7 +792,6 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
                     base_files.append(path)
 
         except KeyError as e:  # pragma: no cover
-
             print_and_exit("Error reading {}: {}", path, str(e))
 
     return all_files, base_files
@@ -805,7 +799,6 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
 
 def validate_configuration(conf: Configuration, core: bool) -> None:
     if conf:
-
         try:
             if core:
                 CoreConfigurationModel(**conf)

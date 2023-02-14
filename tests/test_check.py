@@ -23,7 +23,6 @@ from tests import (
 
 
 def test_base(capfd: Capture) -> None:
-
     execute_outside(capfd, "check")
 
     create_project(

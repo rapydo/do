@@ -24,7 +24,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "backup rabbit")
     execute_outside(capfd, "restore rabbit")
 

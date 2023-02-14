@@ -24,7 +24,6 @@ from tests import (
 
 
 def test_password_redis(capfd: Capture, faker: Faker) -> None:
-
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
@@ -149,7 +148,6 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
 
 def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

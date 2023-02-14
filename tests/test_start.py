@@ -20,7 +20,6 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
-
     execute_outside(capfd, "start")
     if not Configuration.swarm_mode:
         execute_outside(capfd, "stop")
@@ -61,7 +60,6 @@ def test_all(capfd: Capture) -> None:
     docker = Docker()
 
     if Configuration.swarm_mode:
-
         # Deploy a sub-stack
         exec_command(
             capfd,
@@ -158,7 +156,6 @@ def test_all(capfd: Capture) -> None:
         )
         assert karma_folder.exists()
     else:
-
         # Deploy a sub-stack
         exec_command(
             capfd,

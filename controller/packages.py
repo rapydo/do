@@ -54,7 +54,6 @@ class Packages:
         """
 
         try:
-
             options = ["install", "--upgrade"]
 
             home = Path.home()
@@ -91,7 +90,6 @@ class Packages:
 
         found_version = Packages.get_bin_version(program)
         if found_version is None:
-
             hints = ""
             if program == "docker":  # pragma: no cover
                 install_cmd = RED("rapydo install docker")
@@ -157,7 +155,6 @@ class Packages:
             option = ["--version"]
 
         try:
-
             if os.name == "nt":  # pragma: no cover
                 exec_cmd = cls.convert_bin_to_win32(exec_cmd)
 
@@ -326,7 +323,6 @@ class Packages:
     @staticmethod
     def execute_command(command: str, parameters: List[str]) -> str:
         try:
-
             # Pattern in plumbum library for executing a shell command
             local_command = local[command]
             log.info("Executing command {} {}", command, " ".join(parameters))

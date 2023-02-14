@@ -22,7 +22,6 @@ from tests import (
 
 
 def test_password_registry(capfd: Capture, faker: Faker) -> None:
-
     # load variables and initialize the Configuration
     Application()
     if not Configuration.swarm_mode:

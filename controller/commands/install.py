@@ -19,7 +19,6 @@ def install(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--no-editable", not editable, IF=not editable),
         Application.serialize_parameter("", version),
@@ -50,12 +49,10 @@ def install(
 
 
 def install_controller_from_folder(version: str) -> None:
-
     do_path = SUBMODULES_DIR.joinpath("do")
     try:
         Application.git_submodules()
     except SystemExit:
-
         log.info(
             """You asked to install rapydo {ver} in editable mode, but {p} is missing.
 
@@ -93,7 +90,6 @@ rapydo install {ver} --no-editable
 
 
 def install_controller_from_git(version: str) -> None:
-
     controller = f"git+https://github.com/rapydo/do.git@{version}"
 
     log.info("You asked to install rapydo {} from git", version)

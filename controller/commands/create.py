@@ -88,7 +88,6 @@ def create(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--auth", auth),
         Application.serialize_parameter("--frontend", frontend),
@@ -159,7 +158,6 @@ def create_project(
     add_optionals: bool = False,
     path: Optional[Path] = None,
 ) -> None:
-
     project_scaffold = Project()
     enable_postgres = auth == "postgres" or "postgres" in services
     enable_neo4j = auth == "neo4j" or "neo4j" in services
@@ -192,7 +190,6 @@ def create_project(
     celery_broker = None  # Keep default value == REDIS
     celery_backend = None  # Keep default value == REDIS
     if enable_celery:
-
         if enable_rabbit:
             celery_broker = "RABBIT"
         else:
@@ -248,7 +245,6 @@ def create_project(
             files = [path]
 
     for p in files:
-
         template = templating.get_template(
             p.name,
             {
@@ -307,7 +303,6 @@ def create_project(
 
 
 def parse_env_variables(envs: Optional[List[str]]) -> Dict[str, str]:
-
     if not envs:
         return {}
 

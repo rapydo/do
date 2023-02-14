@@ -15,7 +15,6 @@ from tests import (
 
 
 def test_dump(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "dump")
 
     create_project(

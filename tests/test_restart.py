@@ -15,7 +15,6 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
-
     exec_command(capfd, "restart", "This command is no longer available")
 
     create_project(

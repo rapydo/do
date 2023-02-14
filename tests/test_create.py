@@ -15,7 +15,6 @@ from tests import Capture, TemporaryRemovePath, exec_command, init_project
 
 
 def test_create(capfd: Capture) -> None:
-
     exec_command(
         capfd,
         "create first",
@@ -282,7 +281,6 @@ def test_create(capfd: Capture) -> None:
     ]
     opt = "--frontend no --current --force"
     for service in services:
-
         if service == "postgres":
             auth = "postgres"
             serv_opt = ""
@@ -335,7 +333,6 @@ def test_create(capfd: Capture) -> None:
     def verify_celery_configuration(
         services_list: List[str], broker: str, backend: str
     ) -> None:
-
         services = "--service celery"
         if services_list:
             for service in services_list:

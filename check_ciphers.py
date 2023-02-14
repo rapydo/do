@@ -54,5 +54,4 @@ with open(nginx_header) as headers:
                         log.error(f"{cipher: <30} {iana_name: <45} {level}")
                     break
             else:
-
                 log.error("{} not found on ciphersuite", cipher)

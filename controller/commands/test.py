@@ -31,7 +31,6 @@ def test(
     # I have no need to test a command to locally execute tests
     # and I would like to preventany recursive test execution!
 ) -> None:  # pragma: no cover
-
     Application.print_command(
         Application.serialize_parameter("--swarm", swarm_mode, IF=swarm_mode),
         Application.serialize_parameter("--no-rm", no_remove, IF=no_remove),

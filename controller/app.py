@@ -283,7 +283,6 @@ def controller_cli_options(
         is_eager=True,
     ),
 ) -> None:
-
     # This is needed because during tests both Application and Configuration
     # are persistent and after a run (i.e. after starting the registry)
     # FORCE_COMPOSE_ENGINE remains enabled
@@ -305,7 +304,6 @@ def controller_cli_options(
     Configuration.remote_engine = remote_engine
     Configuration.environment = {}
     for e in environment:
-
         if "=" not in e:
             print_and_exit("Invalid enviroment, missing value in {}", e)
 
@@ -348,7 +346,6 @@ class CommandsData:
 
 
 class Application:
-
     # Typer app
     # Register callback with CLI options and basic initialization/checks
     app = typer.Typer(
@@ -366,7 +363,6 @@ class Application:
     compose_config: ComposeServices
 
     def __init__(self) -> None:
-
         Application.controller = self
 
         self.active_services: List[str] = []
@@ -392,7 +388,6 @@ class Application:
         value: CommandParameter,
         IF: CommandParameter = True,
     ) -> Optional[str]:
-
         if isinstance(value, enum.Enum):
             value = value.value
 
@@ -413,7 +408,6 @@ class Application:
 
     @staticmethod
     def print_command(*parameters: Optional[str]) -> None:
-
         pre_params = " ".join(
             [p for p in Configuration.parameters if p is not None]
         ).strip()
@@ -535,7 +529,6 @@ class Application:
 
     @staticmethod
     def load_projectrc() -> None:
-
         projectrc_yaml = cast(
             ProjectRCType,
             configuration.load_yaml_file(file=PROJECTRC, is_optional=True),
@@ -553,7 +546,6 @@ class Application:
 
     @staticmethod
     def check_installed_software() -> None:
-
         log.debug(
             "python version: {}.{}.{}",
             sys.version_info.major,
@@ -592,7 +584,6 @@ class Application:
         """Read project configuration"""
 
         try:
-
             confs = configuration.read_configuration(
                 default_file_path=CONFS_DIR,
                 base_project_path=Configuration.ABS_PROJECT_PATH,
@@ -649,7 +640,6 @@ class Application:
 
     @staticmethod
     def preliminary_version_check() -> None:
-
         specs = configuration.load_yaml_file(
             file=Configuration.ABS_PROJECT_PATH.joinpath(
                 configuration.PROJECT_CONF_FILENAME
@@ -709,7 +699,6 @@ You can use of one:
     def working_clone(
         name: str, repo: configuration.Submodule, from_path: Optional[Path] = None
     ) -> Optional[GitRepo]:
-
         # substitute values starting with '$$'
         myvars = {
             ANGULAR: Configuration.frontend == ANGULAR,
@@ -728,7 +717,6 @@ You can use of one:
         )
 
         if from_path is not None:
-
             local_path = from_path.joinpath(name)
             if not local_path.exists():
                 print_and_exit("Submodule {} not found in {}", name, local_path)
@@ -780,7 +768,6 @@ You can use of one:
     def get_compose_configuration(
         self, enabled_services: Optional[Iterable[str]] = None
     ) -> Tuple[ComposeServices, ComposeServices]:
-
         compose_files: List[Path] = []
 
         MODE = f"{Configuration.stack}.yml"
@@ -894,7 +881,6 @@ You can use of one:
             log.info("Created default {} file", PROJECTRC)
 
     def make_env(self) -> None:
-
         try:
             COMPOSE_ENVIRONMENT_FILE.unlink()
         except FileNotFoundError:
@@ -970,7 +956,6 @@ You can use of one:
         Application.env.update(Configuration.environment)
 
         if Configuration.swarm_mode:
-
             if not Application.env.get("SWARM_MANAGER_ADDRESS"):
                 Application.env["SWARM_MANAGER_ADDRESS"] = system.get_local_ip(
                     Configuration.production
@@ -1035,7 +1020,6 @@ You can use of one:
 
         with open(COMPOSE_ENVIRONMENT_FILE, "w+") as whandle:
             for key, value in sorted(Application.env.items()):
-
                 if value is None:
                     value = ""
                 else:
@@ -1101,7 +1085,6 @@ You can use of one:
     def check_placeholders_and_passwords(
         compose_services: ComposeServices, active_services: List[str]
     ) -> None:
-
         if not active_services:  # pragma: no cover
             print_and_exit(
                 """You have no active service
@@ -1149,7 +1132,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
         placeholders = []
         for variable, raw_services in missing.items():
-
             if variable in services.vars_to_services_mapping:
                 serv = {services.vars_to_services_mapping[variable]}
             else:
@@ -1163,7 +1145,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             Application.env.get("MIN_PASSWORD_SCORE", 2)  # type: ignore
         )
         for variable, raw_services in passwords_services.items():
-
             if variable in services.vars_to_services_mapping:
                 serv = {services.vars_to_services_mapping[variable]}
             else:
@@ -1201,7 +1182,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     @staticmethod
     def git_update(ignore_submodule: List[str]) -> None:
-
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
@@ -1232,7 +1212,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 )
 
             elif Application.gits["do"].working_dir:
-
                 if installation_path.is_symlink():
                     installation_path = installation_path.resolve()
 
@@ -1258,7 +1237,6 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
     @staticmethod
     def git_checks(ignore_submodule: List[str]) -> None:
-
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping checks on {}", name)

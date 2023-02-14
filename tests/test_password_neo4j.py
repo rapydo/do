@@ -24,7 +24,6 @@ from tests import (
 
 
 def test_password_neo4j(capfd: Capture, faker: Faker) -> None:
-
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
