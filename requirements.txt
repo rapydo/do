@@ -6,7 +6,7 @@ jinja2
 sultan==0.9.1
 plumbum
 glom
-GitPython==3.1.30
+GitPython==3.1.31
 PyYAML==6.0
 pip==22.3.1
 setuptools==65.7.0
