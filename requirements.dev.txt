@@ -1,6 +1,7 @@
 pytest==7.2.1
 pytest-cov==4.0.0
-pytest-timeout==2.1.0
+pytest-rerunfailures==11.1.1
 pytest-sugar==0.9.6
+pytest-timeout==2.1.0
 freezegun==1.2.2
 Faker

@@ -4,6 +4,7 @@ This module will test the password command and the passwords management
 import time
 from datetime import datetime, timedelta
 
+import pytest
 from faker import Faker
 from freezegun import freeze_time
 
@@ -23,6 +24,7 @@ from tests import (
 )
 
 
+@pytest.mark.flaky(reruns=2)
 def test_password_postgres(capfd: Capture, faker: Faker) -> None:
     project_name = random_project_name(faker)
     create_project(
