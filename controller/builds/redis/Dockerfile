@@ -1,4 +1,4 @@
-FROM redis:7.0.8
+FROM redis:7.0.9
 
 ARG CURRENT_UID
 RUN test -n "$CURRENT_UID"
