@@ -1,4 +1,4 @@
-FROM registry:2.8.1
+FROM registry:2.8.2
 
 # apache2-utils adds htpasswd
 RUN apk update --no-cache && apk upgrade --no-cache && apk add --no-cache openssl apache2-utils
