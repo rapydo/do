@@ -11,7 +11,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 
 # used by print_versions
-ENV ANGULAR_VERSION 15.2.2
+ENV ANGULAR_VERSION 15.2.8
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
 ENV CYPRESS_VERSION 12.7.0
