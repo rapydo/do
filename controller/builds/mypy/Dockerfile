@@ -1,4 +1,4 @@
-FROM python:3.11.2
+FROM python:3.11.3
 
 ARG RAPYDO_VERSION
 RUN test -n "$RAPYDO_VERSION"
