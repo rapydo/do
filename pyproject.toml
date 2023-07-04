@@ -27,6 +27,7 @@ dependencies = [
     "glom",
     "GitPython==3.1.27",
     "PyYAML==6.0",
+    "pydantic==1.10.11",
     "pip>=21.3",
     "requests>=2.6.1",
     "typer[all]==0.4.1",
