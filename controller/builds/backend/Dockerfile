@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:kinetic
 
 ARG RAPYDO_VERSION
 RUN test -n "$RAPYDO_VERSION"
