@@ -26,6 +26,7 @@ setup(
         "glom",
         "GitPython==3.1.25",
         "PyYAML==6.0",
+        "pydantic==1.10.11",
         "pip>=10.0.0",
         "requests>=2.6.1",
         "typer[all]==0.4.0",
