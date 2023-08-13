@@ -8,7 +8,7 @@
   "pre-commit": {
     "enabled": true,
     "groupName": "pre-commit",
-    "fileMatch": ["^pre-commit-projects-config.yaml$"],
+    "fileMatch": ["^pre-commit-projects-config.yaml$"]
   },
   "pip_requirements": {
     "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"]
