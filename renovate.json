@@ -9,8 +9,6 @@
     "enabled": true,
     "groupName": "pre-commit",
     "fileMatch": ["^pre-commit-projects-config.yaml$"],
-    "automerge": true,
-    "automergeStrategy": "squash"
   },
   "pip_requirements": {
     "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"]
