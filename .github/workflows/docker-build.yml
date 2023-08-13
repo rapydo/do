@@ -45,7 +45,6 @@ jobs:
             adminer,
             swaggerui,
             registry,
-            controller,
             fail2ban,
             mypy,
           ]
@@ -381,10 +380,6 @@ jobs:
           docker logs registry
           echo -e "\nDocker Registry is expected to have completed the startup\n";
           docker logs registry 2>&1 | grep "debug server listening localhost"
-      # - name: Test controller
-      #   if: ${{ matrix.service == 'controller'}}
-      #   run: |
-      #     ...
 
       - name: Login to DockerHub
         if: ${{ github.event_name != 'pull_request'}}
