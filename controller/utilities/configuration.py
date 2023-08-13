@@ -775,7 +775,7 @@ def validate_configuration(conf: Configuration, core: bool) -> None:
             if core:
                 CoreConfigurationModel(**conf)  # type: ignore
             else:
-                CustomConfigurationModel(**conf)
+                CustomConfigurationModel(**conf)  # type: ignore
         except ValidationError as e:
             for field in str(e).split("\n")[1::2]:
                 # field is like:
