@@ -773,7 +773,7 @@ def validate_configuration(conf: Configuration, core: bool) -> None:
 
         try:
             if core:
-                CoreConfigurationModel(**conf)
+                CoreConfigurationModel(**conf)  # type: ignore
             else:
                 CustomConfigurationModel(**conf)
         except ValidationError as e:
@@ -790,7 +790,7 @@ def validate_configuration(conf: Configuration, core: bool) -> None:
 
 def validate_env(env: Dict[str, EnvType]) -> None:
     try:
-        BaseEnvModel(**env)
+        BaseEnvModel(**env)  # type: ignore
     except ValidationError as e:
         for field in str(e).split("\n")[1::2]:
             log.error("Invalid value for {}: {}", field, env.get(field, "N/A"))
