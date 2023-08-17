@@ -25,7 +25,6 @@ from python_on_whales import docker
 from sultan.api import Sultan  # type: ignore
 
 from controller import RED, log, print_and_exit
-from controller.app import Application
 
 # https://get.docker.com
 EXPECTED_DOCKER_SCRIPT_MD5 = "beca7796f8eb377ac0089619675e63a4"
@@ -42,8 +41,6 @@ EXPECTED_BUILDX_LINUX_BIN_MD5 = "e3509cd345eb5d5955a718579d474084"
 EXPECTED_BUILDX_MACOS_BIN_MD5 = "6a52179cc659d1135961b900689c834d"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
 
-PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
-
 
 class ExecutionException(Exception):
     pass
@@ -56,6 +53,10 @@ class Packages:
         Install a python package in editable or normal mode
         """
 
+        # Avoid circular imports
+        from controller.app import Application
+
+        PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
         try:
             options = ["install", "--upgrade"]
 
@@ -199,6 +200,10 @@ class Packages:
         """
         Retrieve the controller installation path, if installed in editable mode
         """
+        # Avoid circular imports
+        from controller.app import Application
+
+        PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
         for r in Packages.execute_command(PIP_BIN, ["list", "--editable"]).split("\n"):
             if r.startswith(f"{package} "):
                 tokens = re.split(r"\s+", r)
