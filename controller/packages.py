@@ -25,6 +25,7 @@ from python_on_whales import docker
 from sultan.api import Sultan  # type: ignore
 
 from controller import RED, log, print_and_exit
+from controller.app import Application
 
 # https://get.docker.com
 EXPECTED_DOCKER_SCRIPT_MD5 = "beca7796f8eb377ac0089619675e63a4"
@@ -40,6 +41,8 @@ BUILDX_VERSION = "v0.10.0"
 EXPECTED_BUILDX_LINUX_BIN_MD5 = "e3509cd345eb5d5955a718579d474084"
 EXPECTED_BUILDX_MACOS_BIN_MD5 = "6a52179cc659d1135961b900689c834d"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
+
+PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
 
 
 class ExecutionException(Exception):
@@ -69,7 +72,7 @@ class Packages:
             # Note: package is a Path if editable, str otherwise
             options.append(str(package))
 
-            output = Packages.execute_command("pip3", options)
+            output = Packages.execute_command(PIP_BIN, options)
 
             for r in output.split("\n"):
                 print(r)
@@ -181,7 +184,7 @@ class Packages:
             # git version 2.25.1
             # rapydo version 0.7.x
             return output
-            # Note that in may other cases it fails...
+            # Note that in many other cases it fails...
             # but we are interested in a very small list of programs, so it's ok
             # echo --version -> --version
             # ls --version -> ls
@@ -196,7 +199,7 @@ class Packages:
         """
         Retrieve the controller installation path, if installed in editable mode
         """
-        for r in Packages.execute_command("pip3", ["list", "--editable"]).split("\n"):
+        for r in Packages.execute_command(PIP_BIN, ["list", "--editable"]).split("\n"):
             if r.startswith(f"{package} "):
                 tokens = re.split(r"\s+", r)
                 return Path(str(tokens[2]))

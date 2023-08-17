@@ -31,6 +31,7 @@ variables:
 
     LOG_LEVEL: DEBUG # log level for backend and celery (in production mode will be set to INFO)
     DOCKER_LOGGING_DRIVER: "json-file"
+    PIP_BIN: "pip3"
     FILE_LOGLEVEL: WARNING
     LOG_RETENTION: 180 # in days
     MIN_PASSWORD_SCORE: 2 # raised to 4 in prod mode
