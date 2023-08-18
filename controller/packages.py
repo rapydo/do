@@ -345,4 +345,4 @@ class Packages:
 
         # raised on Windows
         except OSError as e:  # pragma: no cover
-            raise ExecutionException(f"Cannot execute: {command}") from e
+            raise ExecutionException(f"Cannot execute: {command}: {e}") from e
