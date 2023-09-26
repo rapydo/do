@@ -70,10 +70,3 @@ repos:
             "--txt-report",
             ".",
           ]
-
-  - repo: https://github.com/gitguardian/gg-shield
-    rev: v1.17.3
-    hooks:
-      - id: ggshield
-        language_version: python3
-        stages: [commit]
