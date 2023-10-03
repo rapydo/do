@@ -100,7 +100,6 @@ jobs:
           LOGURU_LEVEL: DEBUG
           TESTING: 1
           TEST_NAME: ${{ matrix.test }}
-          PIP_BIN: pip
           PYTHONMALLOC: debug
           PYTHONASYNCIODEBUG: 1
           # Convert warnings to exceptions

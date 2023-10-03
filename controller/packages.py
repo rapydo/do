@@ -41,6 +41,9 @@ EXPECTED_BUILDX_LINUX_BIN_MD5 = "e3509cd345eb5d5955a718579d474084"
 EXPECTED_BUILDX_MACOS_BIN_MD5 = "6a52179cc659d1135961b900689c834d"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
 
+DEFAULT_PIP_BIN = "pip3"
+ALTERNATIVE_PIP_BIN = "pip"
+
 
 class ExecutionException(Exception):
     pass
@@ -48,15 +51,13 @@ class ExecutionException(Exception):
 
 class Packages:
     @staticmethod
-    def install(package: Union[str, Path], editable: bool) -> None:
+    def install(
+        package: Union[str, Path], editable: bool, pip_bin: str = DEFAULT_PIP_BIN
+    ) -> None:
         """
         Install a python package in editable or normal mode
         """
 
-        # Avoid circular imports
-        from controller.app import Application
-
-        PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
         try:
             options = ["install", "--upgrade"]
 
@@ -73,12 +74,14 @@ class Packages:
             # Note: package is a Path if editable, str otherwise
             options.append(str(package))
 
-            output = Packages.execute_command(PIP_BIN, options)
+            output = Packages.execute_command(pip_bin, options)
 
             for r in output.split("\n"):
                 print(r)
 
         except Exception as e:  # pragma: no cover
+            if pip_bin == DEFAULT_PIP_BIN:
+                return Packages.install(package, editable, pip_bin=ALTERNATIVE_PIP_BIN)
             print_and_exit(str(e))
 
     @staticmethod
