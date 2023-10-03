@@ -199,18 +199,25 @@ class Packages:
         return None
 
     @staticmethod
-    def get_installation_path(package: str = "rapydo") -> Optional[Path]:
+    def get_installation_path(
+        package: str = "rapydo", pip_bin: str = DEFAULT_PIP_BIN
+    ) -> Optional[Path]:
         """
         Retrieve the controller installation path, if installed in editable mode
         """
-        # Avoid circular imports
-        from controller.app import Application
-
-        PIP_BIN = str(Application.env.get("PIP_BIN", "pip3"))
-        for r in Packages.execute_command(PIP_BIN, ["list", "--editable"]).split("\n"):
-            if r.startswith(f"{package} "):
-                tokens = re.split(r"\s+", r)
-                return Path(str(tokens[2]))
+        try:
+            for r in Packages.execute_command(pip_bin, ["list", "--editable"]).split(
+                "\n"
+            ):
+                if r.startswith(f"{package} "):
+                    tokens = re.split(r"\s+", r)
+                    return Path(str(tokens[2]))
+        except Exception as e:  # pragma: no cover
+            if pip_bin == DEFAULT_PIP_BIN:
+                return Packages.get_installation_path(
+                    package, pip_bin=ALTERNATIVE_PIP_BIN
+                )
+            print_and_exit(str(e))
 
         return None
 
