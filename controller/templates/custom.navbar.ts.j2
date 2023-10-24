@@ -40,3 +40,19 @@ export class CustomBrandComponent {
     this.project = t;
   }
 }
+
+@Component({
+  selector: "customcontrols",
+  templateUrl: "custom.navbar.controls.html",
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class CustomControlsComponent {
+  @Input() user: User;
+  @Output() onClick: EventEmitter<null> = new EventEmitter<null>();
+
+  constructor() {}
+
+  public collapse() {
+    this.onClick.emit();
+  }
+}

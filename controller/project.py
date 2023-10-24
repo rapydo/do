@@ -187,6 +187,7 @@ class Project:
                     self.p_path("frontend", "app", "custom.footer.ts"),
                     self.p_path("frontend", "app", "custom.profile.ts"),
                     self.p_path("frontend", "app", "custom.navbar.links.html"),
+                    self.p_path("frontend", "app", "custom.navbar.controls.html"),
                     self.p_path("frontend", "app", "custom.navbar.brand.html"),
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
