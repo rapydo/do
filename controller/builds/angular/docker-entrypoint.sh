@@ -65,10 +65,6 @@ else
     echo "nodeLinker: \"${NODE_LINKER}\"" >> .yarnrc.yml
 fi
 
-
-# https://github.com/yarnpkg/berry/tree/master/packages/plugin-typescript#yarnpkgplugin-typescript
-run_as_node "yarn plugin import typescript"
-
 if [ "$APP_MODE" == "production" ]; then
 
     if [[ -z $FRONTEND_URL ]];
