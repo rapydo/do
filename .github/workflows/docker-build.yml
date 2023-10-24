@@ -205,9 +205,9 @@ jobs:
           rapydo -e FRONTEND_BUILD_MODE=${{ matrix.service }} init
           rapydo start frontend
 
-          # Expected startup time: ~ 5-6 minutes
+          # Expected startup time: ~ 3 minutes
 
-          sleep 150
+          sleep 120
           if rapydo logs frontend | grep "Compiled successfully.";
           then
             echo "Angular was not expected to have started yet";
