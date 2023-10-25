@@ -1,4 +1,4 @@
-FROM node:18.17.1-buster
+FROM node:20.9.0-buster
 # https://nodejs.org/en/blog/release
 
 ARG CURRENT_UID
