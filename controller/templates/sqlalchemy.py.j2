@@ -7,7 +7,7 @@ from sqlalchemy import Column, String
 
 # Add (inject) attributes to User
 {% if extend -%}
-setattr(User, "my_custom_field2", Column(String(255)))
+User.my_custom_field2 = Column(String(255))
 {% else -%}
-setattr(User, "my_custom_field", Column(String(255)))
+User.my_custom_field = Column(String(255))
 {% endif -%}
