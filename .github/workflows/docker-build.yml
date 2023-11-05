@@ -32,8 +32,6 @@ jobs:
             backend-legacy310,
             # used by nig, sdc, highlander
             backend-legacy39,
-            # used by mistral
-            backend-legacy38,
             angular,
             angular-test,
             proxy,
@@ -172,22 +170,6 @@ jobs:
           rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
           # can't make it work via -e, always passing as a float...
           rapydo -e BACKEND_PYTHON_VERSION=v3.9 init
-          rapydo start backend
-
-          # Expected startup time: ~ 2 seconds
-
-          sleep 2
-          rapydo logs backend
-          echo -e "\nBackend is expected to have completed the startup\n";
-          rapydo logs backend | grep "REST API backend server is ready to be launched"
-
-      - name: Test backend legacy38
-        if: ${{ matrix.service == 'backend-legacy38' }}
-        run: |
-          cd test-${{ matrix.service }}
-          rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
-          # can't make it work via -e, always passing as a float...
-          rapydo -e BACKEND_PYTHON_VERSION=v3.8 init
           rapydo start backend
 
           # Expected startup time: ~ 2 seconds

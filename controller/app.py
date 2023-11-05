@@ -1000,9 +1000,7 @@ You can use of one:
         # Set Backend Python version
         py_version = Application.env.get("BACKEND_PYTHON_VERSION", "v3.11")
         py_values = configuration.BACKEND_PYTHON_VERSION_VALUES
-        if py_version == py_values.py38.value:
-            build_mode = "backend-legacy38"
-        elif py_version == py_values.py39.value:
+        if py_version == py_values.py39.value:
             build_mode = "backend-legacy39"
         elif py_version == py_values.py310.value:
             build_mode = "backend-legacy310"

@@ -105,7 +105,6 @@ class BACKEND_PYTHON_VERSION_VALUES(Enum):
     py311 = "v3.11"
     py310 = "v3.10"
     py39 = "v3.9"
-    py38 = "v3.8"
 
 
 class PYTHONMALLOC_VALUES(Enum):
