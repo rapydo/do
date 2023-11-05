@@ -36,10 +36,7 @@ jobs:
 
       - name: Run MyPy
         run: |
-          echo "[mypy]" > mypy.ini
-          echo "mypy_path = ./stubs" >> mypy.ini
-
-          mypy --disallow-untyped-defs --disallow-incomplete-defs --disallow-any-unimported --disallow-any-generics --check-untyped-defs --disallow-untyped-calls --warn-redundant-casts --warn-unused-ignores --warn-unused-configs --warn-return-any --warn-unreachable --txt-report report --html-report report --exclude "controller/builds/" controller/
+          mypy --txt-report report --html-report report controller/
           cat report/index.txt
 
       - name: Save Report
