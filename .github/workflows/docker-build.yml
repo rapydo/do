@@ -119,7 +119,7 @@ jobs:
 
       - name: Set up Python
         if: ${{ matrix.service != 'fail2ban' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
