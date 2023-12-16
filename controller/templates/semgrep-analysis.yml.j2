@@ -17,7 +17,7 @@ jobs:
     container:
       image: returntocorp/semgrep
     # Skip any PR created by dependabot to avoid permission issues
-    if: (github.actor != 'renovate[bot]')
+    if: (github.actor != 'dependabot[bot]')
     steps:
       # Fetch project source
       - uses: actions/checkout@v3
