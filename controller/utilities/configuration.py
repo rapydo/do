@@ -528,6 +528,7 @@ class BaseEnvModel(BaseModel):
     SMTP_VERIFICATION_TIME: PositiveInt
     SMTP_ADMIN: Optional[str]
     SMTP_NOREPLY: Optional[str]
+    SMTP_REPLYTO: Optional[str]
     SMTP_HOST: Optional[str]
     SMTP_PORT: NullablePort
     SMTP_USERNAME: Optional[str]
