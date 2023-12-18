@@ -94,6 +94,7 @@ vars_to_services_mapping: Dict[str, str] = {
     "SMTP_PORT": "backend",
     "SMTP_ADMIN": "backend",
     "SMTP_NOREPLY": "backend",
+    "SMTP_REPLYTO": "backend",
     "SMTP_HOST": "backend",
     "SMTP_USERNAME": "backend",
     "SMTP_PASSWORD": "backend",
