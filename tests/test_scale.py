@@ -30,7 +30,6 @@ def count_running_containers() -> int:
 
 
 def test_scale(capfd: Capture) -> None:
-
     execute_outside(capfd, "scale x=1")
 
     create_project(
@@ -46,7 +45,6 @@ def test_scale(capfd: Capture) -> None:
     BASE_SERVICE_NUM = 3
 
     if Configuration.swarm_mode:
-
         exec_command(
             capfd,
             "scale backend=2",
@@ -84,7 +82,6 @@ def test_scale(capfd: Capture) -> None:
     )
 
     if Configuration.swarm_mode:
-
         exec_command(
             capfd,
             "scale backend=2 --wait",
@@ -180,7 +177,6 @@ def test_scale(capfd: Capture) -> None:
         )
 
     else:
-
         exec_command(
             capfd,
             "scale redis",

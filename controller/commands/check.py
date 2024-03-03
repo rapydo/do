@@ -49,7 +49,6 @@ def check(
         shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--no-git", no_git, IF=no_git),
         Application.serialize_parameter("--no-builds", no_builds, IF=no_builds),
@@ -88,7 +87,6 @@ def check(
         )
 
         for image_tag, build in all_builds.items():
-
             services = build["services"]
             if not any(x in Application.data.active_services for x in services):
                 continue
@@ -217,7 +215,6 @@ def print_obsolete(
     service: Optional[str],
     from_img: Optional[str] = None,
 ) -> None:
-
     if service:
         if from_img:
             log.warning(
@@ -256,7 +253,6 @@ def is_relative_to(path: Path, rel: str) -> bool:
 def build_is_obsolete(
     image_creation: datetime, path: Optional[Path]
 ) -> Tuple[Optional[str], Optional[str]]:
-
     if not path:  # pragma: no cover
         return None, None
 

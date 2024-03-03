@@ -145,7 +145,7 @@ variables:
     ALCHEMY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
-    ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
+    ALCHEMY_POOLSIZE: 30 # default is 5
 
     # Have a look at this website for a quick tuning:
     # https://pgtune.leopard.in.ua
@@ -315,6 +315,7 @@ variables:
     SMTP_VERIFICATION_TIME: 900
     SMTP_ADMIN:
     SMTP_NOREPLY:
+    SMTP_REPLYTO:
     SMTP_HOST:
     SMTP_PORT: 25
     SMTP_USERNAME:
@@ -365,6 +366,8 @@ variables:
     AUTH_TOKEN_IP_GRACE_PERIOD: 1800 # period before starting to evaluate IP address on token validation
     ALLOW_ACCESS_TOKEN_PARAMETER: 0
     DEFAULT_DHLEN: 2048
+
+    PASSWORD_EXPIRATION_WARNING: 180
 
     FORCE_PRODUCTION_TESTS: 0 # Very dangerous, do not touch it!
 

@@ -12,7 +12,6 @@ from controller.app import Application
 
 
 class ServiceTypes(str, Enum):
-
     # New values
     swaggerui = "swaggerui"
     adminer = "adminer"
@@ -42,7 +41,6 @@ def interfaces(
         help="port to be associated to the current service interface",
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--detach", detach, IF=detach),
         Application.serialize_parameter("--port", port, IF=port),

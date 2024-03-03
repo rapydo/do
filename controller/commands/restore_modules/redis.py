@@ -10,7 +10,6 @@ EXPECTED_EXT = ".tar.gz"
 def restore(
     container: Optional[Tuple[str, str]], backup_file: str, force: bool
 ) -> None:
-
     if container and not force:
         print_and_exit(
             "Redis is running and the restore will temporary stop it. "

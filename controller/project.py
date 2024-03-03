@@ -49,7 +49,6 @@ class Project:
     def load_project_scaffold(
         self, project: str, auth: Optional[str], services: Optional[List[str]] = None
     ) -> bool:
-
         if services is None:
             services = []
 
@@ -100,7 +99,6 @@ class Project:
         self.fixed_files.append(Path("pyproject.toml"))
 
         if auth or services:
-
             models = self.p_path("backend", "models")
             if auth == "sqlalchemy" or "postgres" in services:
                 self.expected_files.append(models.joinpath("sqlalchemy.py"))
@@ -189,6 +187,7 @@ class Project:
                     self.p_path("frontend", "app", "custom.footer.ts"),
                     self.p_path("frontend", "app", "custom.profile.ts"),
                     self.p_path("frontend", "app", "custom.navbar.links.html"),
+                    self.p_path("frontend", "app", "custom.navbar.controls.html"),
                     self.p_path("frontend", "app", "custom.navbar.brand.html"),
                     self.p_path("frontend", "app", "custom.footer.html"),
                     self.p_path("frontend", "app", "custom.profile.html"),
@@ -268,16 +267,13 @@ class Project:
 
     @staticmethod
     def get_project(project: Optional[str], ignore_multiples: bool = False) -> str:
-
         projects = os.listdir(PROJECT_DIR)
 
         if project is None:
-
             if len(projects) == 0:
                 print_and_exit("No project found (is {} folder empty?)", PROJECT_DIR)
 
             if len(projects) > 1:
-
                 # It is used by the preliminary get used to load the commands
                 # In case of multiple projects without a proper definition in
                 # projectrc, the custom commands will not be loaded
@@ -315,7 +311,6 @@ class Project:
             print_and_exit("Wrong project name, expected at least two characters")
 
         if not re.match("^[a-z][a-z0-9]+$", project):
-
             # First character is expected to be a-z
             tmp_str = re.sub("[a-z]", "", project[0])
             # Other characters are expected to be a-z 0-9
@@ -373,7 +368,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
 
         for fpath in self.expected_main_folders:
             if not folder.joinpath(fpath).is_dir():
-
                 return f"""Folder not found: {fpath}
 \nPlease note that this command only works from inside a rapydo-like repository
 Verify that you are in the right folder, now you are in: {Path.cwd()}
@@ -382,7 +376,6 @@ Verify that you are in the right folder, now you are in: {Path.cwd()}
         return None
 
     def inspect_project_folder(self) -> None:
-
         for fpath in self.expected_folders:
             if not fpath.is_dir():
                 print_and_exit(

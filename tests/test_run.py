@@ -18,7 +18,6 @@ from tests import (
 
 
 def test_debug_run(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "run backend")
 
     create_project(
@@ -100,7 +99,6 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "run adminer")
 
     project_name = random_project_name(faker)

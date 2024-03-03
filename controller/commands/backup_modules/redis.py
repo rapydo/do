@@ -10,7 +10,6 @@ SERVICE_NAME = __name__
 def backup(
     container: Optional[Tuple[str, str]], now: datetime, force: bool, dry_run: bool
 ) -> None:
-
     docker = Docker()
 
     log.info("Starting backup on {}...", SERVICE_NAME)
@@ -35,7 +34,7 @@ def backup(
         docker.exec_command(
             container,
             user="redis",
-            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 0'",
+            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 0'",  # noqa
         )
 
     command = f"tar -zcf {backup_path} -C /data dump.rdb appendonlydir"
@@ -50,7 +49,7 @@ def backup(
         docker.exec_command(
             container,
             user="redis",
-            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 100'",
+            command="sh -c 'redis-cli --pass \"$REDIS_PASSWORD\" CONFIG SET auto-aof-rewrite-percentage 100'",  # noqa
         )
 
     # Verify the gz integrity

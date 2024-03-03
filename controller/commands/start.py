@@ -43,7 +43,6 @@ def start(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(Application.serialize_parameter("", services))
 
     Application.get_controller().controller_init(services)

@@ -65,7 +65,6 @@ class Compose:
         set_registry: bool = True,
         v1_compatibility: bool = False,
     ) -> None:
-
         compose_config = self.get_config_json()
 
         clean_config: Dict[str, Any] = {
@@ -136,7 +135,6 @@ class Compose:
                 if source and volume_type == "volume":
                     volumes.add(source.split(":")[0])
                 elif source and volume_type == "bind":
-
                     # Remove unsupported option: 'create_host_path'
                     if v1_compatibility:
                         k.get("bind", {}).pop("create_host_path", None)
@@ -188,7 +186,6 @@ class Compose:
         force: bool = False,
         scales: Optional[Dict[str, int]] = None,
     ) -> None:
-
         if scales:
             # Based on rapydo scale implementation services is always a 1-length list
             service = services[0]
@@ -224,7 +221,6 @@ class Compose:
         detach: bool = False,
         user: Optional[str] = None,
     ) -> bool:
-
         compose_engine_forced = False
         if Configuration.swarm_mode:
             # import here to prevent circular imports
@@ -279,7 +275,6 @@ class Compose:
             return False
 
     def get_running_services(self) -> Set[str]:
-
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
         containers = set()
         try:
@@ -307,7 +302,6 @@ class Compose:
             return containers
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
-
         prefix += COMPOSE_SEP
         services_status: Dict[str, str] = dict()
         try:
@@ -338,7 +332,6 @@ class Compose:
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
         table: List[List[str]] = []
         for container in self.docker.compose.ps():
-
             name = container.name
             if not name.startswith(prefix):
                 continue
@@ -394,7 +387,6 @@ class Compose:
             )
 
     def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
-
         if len(services) > 1:
             timestamps = False
             log_prefix = True

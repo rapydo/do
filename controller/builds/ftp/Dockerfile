@@ -1,4 +1,4 @@
-FROM stilliard/pure-ftpd:stretch-latest
+FROM stilliard/pure-ftpd:buster-latest
 
 RUN apt-get update -qq \
     && apt-get dist-upgrade --yes -qq \

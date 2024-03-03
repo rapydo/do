@@ -16,9 +16,6 @@ from controller.deploy.docker import Docker
 from controller.templating import Templating, get_strong_password
 from controller.utilities.tables import print_table
 
-# make this configurable
-PASSWORD_EXPIRATION = 90
-
 UPDATE_LABEL = "updated on"
 
 
@@ -32,7 +29,6 @@ SupportedServices = Enum(  # type: ignore
 # Note: can't directly extract yaml with comments because it is not supported
 # https://github.com/yaml/pyyaml/issues/90
 def parse_projectrc() -> Dict[str, datetime]:
-
     if not PROJECTRC.exists():
         return {}
 
@@ -73,7 +69,6 @@ def parse_projectrc() -> Dict[str, datetime]:
 def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
     env_indentation = 0
     for line in projectrc:
-
         # save the indentation level of the env block
         # it will be used to determine the variables indentation
         # if no further lines will be found
@@ -104,7 +99,6 @@ def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
 # Note: can't directly use utilities in app.py because in this case we want to
 # maintain all values (not only templated variables) and we also want to keep comments
 def update_projectrc(variables: Dict[str, str]) -> None:
-
     today = date.today().strftime("%Y-%m-%d")
     annotation = f"# {UPDATE_LABEL} {today}"
     with open(PROJECTRC) as f:
@@ -154,6 +148,12 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
 
     last_updates = parse_projectrc()
     now = datetime.now()
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
+
+    if PASSWORD_EXPIRATION == 0:
+        return expired_passwords
 
     for s in PASSWORD_MODULES:
         # This should never happens and can't be (easily) tested
@@ -172,7 +172,6 @@ def get_expired_passwords() -> List[Tuple[str, datetime]]:
             print_and_exit(f"{s} misconfiguration, module not found")
 
         for variable in module.PASSWORD_VARIABLES:
-
             if variable in last_updates:
                 change_date = last_updates.get(variable, datetime.fromtimestamp(0))
                 expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
@@ -208,7 +207,6 @@ def password(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--show", show, IF=show),
         Application.serialize_parameter("--random", random, IF=random),
@@ -220,7 +218,6 @@ def password(
 
     # No service specified, only a summary will be reported
     if not service:
-
         if random:
             print_and_exit("--random flag is not supported without a service")
 
@@ -251,8 +248,10 @@ def password(
             if not module:  # pragma: no cover
                 print_and_exit(f"{s} misconfiguration, module not found")
 
+            PASSWORD_EXPIRATION = int(
+                Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+            )
             for variable in module.PASSWORD_VARIABLES:
-
                 password = Application.env.get(variable)
 
                 if password == PLACEHOLDER:
@@ -261,14 +260,19 @@ def password(
                     result = zxcvbn(password)
                     score = result["score"]
 
-                if variable in last_updates:
-                    change_date = last_updates.get(variable, datetime.fromtimestamp(0))
-                    expiration_date = change_date + timedelta(days=PASSWORD_EXPIRATION)
-                    expired = now > expiration_date
-                    last_change = change_date.strftime("%Y-%m-%d")
-                else:
+                if variable not in last_updates:
                     expired = True
                     last_change = "N/A"
+                else:
+                    change_date = last_updates.get(variable, datetime.fromtimestamp(0))
+                    last_change = change_date.strftime("%Y-%m-%d")
+                    if PASSWORD_EXPIRATION == 0:
+                        expired = False
+                    else:
+                        expiration_date = change_date + timedelta(
+                            days=PASSWORD_EXPIRATION
+                        )
+                        expired = now > expiration_date
 
                 pass_line: List[str] = []
 
@@ -300,7 +304,6 @@ def password(
 
     # In this case a service is asked to be updated
     else:
-
         module = PASSWORD_MODULES.get(service.value)
 
         if not module:  # pragma: no cover
@@ -358,7 +361,6 @@ def password(
                     REGISTRY, detach=True, publish=[(port, port)]
                 )
             elif Configuration.swarm_mode:
-
                 docker.compose.dump_config(Application.data.services)
                 docker.swarm.deploy()
 

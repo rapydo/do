@@ -21,7 +21,6 @@ from tests import (
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "reload")
 
     project_name = random_project_name(faker)
@@ -63,7 +62,6 @@ def test_base(capfd: Capture, faker: Faker) -> None:
             "Service converged",
         )
     else:
-
         service = "fail2ban"
         exec_command(
             capfd,

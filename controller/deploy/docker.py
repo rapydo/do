@@ -22,7 +22,6 @@ class Docker:
     def __init__(
         self, compose_files: Optional[List[Path]] = None, verify_swarm: bool = True
     ) -> None:
-
         if not compose_files:
             # Not all commands initialize Application.data
             # e.g. init does not
@@ -85,7 +84,6 @@ class Docker:
 
     @classmethod
     def get_engine(cls, engine: Optional[str]) -> Optional[str]:
-
         if not engine:
             return None
 
@@ -117,7 +115,6 @@ class Docker:
             return self.compose.get_running_services()
 
     def get_containers(self, service: str) -> Dict[int, Tuple[str, str]]:
-
         containers: Dict[int, Tuple[str, str]] = {}
         service_name = self.get_service(service)
 
@@ -161,7 +158,6 @@ class Docker:
         return f"{service_name}{COMPOSE_SEP}{slot}"
 
     def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
-
         if Configuration.swarm_mode:
             tasks = self.get_containers(service)
             # the 0 index is found in case of containers in global mode, like the proxy
@@ -202,7 +198,6 @@ class Docker:
         # this basically force tty=False
         force_output_return: bool = False,
     ) -> Optional[Union[str, Iterable[Tuple[str, bytes]]]]:
-
         if isinstance(containers, str):
             containers = (
                 containers,
@@ -220,7 +215,6 @@ class Docker:
         # contain sensitive data, for example when used from change password command
         tty = not force_output_return and sys.stdout.isatty()
         for container in containers_list:
-
             try:
                 client = self.connect_engine(container[1])
                 if client.client_config.host:
@@ -263,7 +257,6 @@ class Docker:
                         print(line.strip())
 
             except DockerException as e:
-
                 m = re.search(r"It returned with code (\d+)\n", str(e))
                 if not m:
                     log.debug("Catched exception does not contains any valid exit code")

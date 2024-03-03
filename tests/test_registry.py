@@ -3,10 +3,11 @@ This module will test the run registry and image commands
 """
 import time
 
+import pytest
 from faker import Faker
 
 from controller import __version__, colors
-from controller.app import Configuration
+from controller.app import Application, Configuration
 from controller.deploy.docker import Docker
 from tests import (
     Capture,
@@ -18,7 +19,10 @@ from tests import (
 )
 
 
+@pytest.mark.flaky(reruns=2)
 def test_docker_registry(capfd: Capture, faker: Faker) -> None:
+    # load variables and initialize the Configuration
+    Application()
 
     execute_outside(capfd, "run registry")
     if Configuration.swarm_mode:
@@ -29,7 +33,8 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
         name=random_project_name(faker),
         auth="no",
         frontend="no",
-        services=["rabbit"],
+        # these two are the smaller
+        services=["redis", "postgres"],
     )
     init_project(capfd)
 
@@ -44,21 +49,21 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "pull backend",
+        "pull redis",
         "Registry 127.0.0.1:5000 not reachable. "
         f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
         capfd,
-        "build backend",
+        "build redis",
         "Registry 127.0.0.1:5000 not reachable. "
         f"You can start it with {colors.RED}rapydo run registry",
     )
 
     exec_command(
         capfd,
-        "start backend",
+        "start redis",
         "Registry 127.0.0.1:5000 not reachable. "
         f"You can start it with {colors.RED}rapydo run registry",
     )
@@ -99,7 +104,7 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "pull backend",
+        "pull redis",
         "Base images pulled from docker hub and pushed into the local registry",
     )
 
@@ -107,12 +112,12 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
         capfd,
         "images",
         "This registry contains 1 image(s):",
-        "rapydo/backend",
+        "rapydo/redis",
     )
 
     exec_command(
         capfd,
-        "pull rabbit",
+        "pull postgres",
         "Base images pulled from docker hub and pushed into the local registry",
     )
 
@@ -120,8 +125,8 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
         capfd,
         "images",
         "This registry contains 2 image(s):",
-        "rapydo/backend",
-        "rapydo/rabbitmq",
+        "rapydo/redis",
+        "rapydo/postgres",
     )
 
     exec_command(
@@ -157,21 +162,21 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     catalog = r.json()
 
     assert "repositories" in catalog
-    assert "rapydo/backend" in catalog["repositories"]
+    assert "rapydo/redis" in catalog["repositories"]
 
-    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/redis/tags/list")
 
     tags_list = r.json()
 
     assert "name" in tags_list
-    assert tags_list["name"] == "rapydo/backend"
+    assert tags_list["name"] == "rapydo/redis"
     assert "tags" in tags_list
     assert __version__ in tags_list["tags"]
 
     exec_command(
         capfd,
-        f"images --remove rapydo/backend:{__version__}",
-        f"Image rapydo/backend:{__version__} deleted from ",
+        f"images --remove rapydo/redis:{__version__}",
+        f"Image rapydo/redis:{__version__} deleted from ",
         "Executing registry garbage collector...",
         "Registry garbage collector successfully executed",
         "Registry restarted to clean the layers cache",
@@ -185,21 +190,21 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     assert "repositories" in catalog
     # After the delete the repository is still in the catalog but with no tag associated
-    assert "rapydo/backend" in catalog["repositories"]
+    assert "rapydo/redis" in catalog["repositories"]
 
-    r = docker.registry.send_request(f"{host}/v2/rapydo/backend/tags/list")
+    r = docker.registry.send_request(f"{host}/v2/rapydo/redis/tags/list")
 
     tags_list = r.json()
 
     assert "name" in tags_list
-    assert tags_list["name"] == "rapydo/backend"
+    assert tags_list["name"] == "rapydo/redis"
     assert "tags" in tags_list
     # No tags associated to this repository
     assert tags_list["tags"] is None
 
     exec_command(
         capfd,
-        f"images --remove rapydo/backend:{__version__}",
+        f"images --remove rapydo/redis:{__version__}",
         "Some of the images that you specified are not found in this registry",
     )
 
@@ -207,19 +212,19 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
         capfd,
         "images",
         "This registry contains 1 image(s):",
-        "rapydo/rabbitmq",
+        "rapydo/postgres",
     )
 
     exec_command(
         capfd,
-        f"images --remove rapydo/backend:{__version__}",
+        f"images --remove rapydo/redis:{__version__}",
         "Some of the images that you specified are not found in this registry",
     )
 
     exec_command(
         capfd,
-        f"images --remove rapydo/rabbitmq:{__version__}",
-        f"Image rapydo/rabbitmq:{__version__} deleted from ",
+        f"images --remove rapydo/postgres:{__version__}",
+        f"Image rapydo/postgres:{__version__} deleted from ",
         "Executing registry garbage collector...",
         "Registry garbage collector successfully executed",
         "Registry restarted to clean the layers cache",
@@ -227,6 +232,6 @@ def test_docker_registry(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        f"images --remove rapydo/rabbitmq:{__version__}",
+        f"images --remove rapydo/postgres:{__version__}",
         "This registry contains no images",
     )

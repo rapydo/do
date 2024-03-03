@@ -31,7 +31,6 @@ def pull(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--all", include_all, IF=include_all),
         Application.serialize_parameter("--quiet", quiet, IF=quiet),

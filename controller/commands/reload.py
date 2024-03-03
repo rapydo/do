@@ -19,7 +19,6 @@ def reload(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(Application.serialize_parameter("", services))
 
     Application.get_controller().controller_init(services)
@@ -32,7 +31,6 @@ def reload(
 
     reloaded = 0
     for service in Application.data.services:
-
         # Special case: frontend in production mode
         if Configuration.production and service == "frontend":
             # Only consider it if explicitly requested in input

@@ -23,7 +23,6 @@ def images(
         shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--remove", remove_images, IF=remove_images),
     )
@@ -50,7 +49,6 @@ def images(
 
     images: List[Tuple[str, str, str, int, Optional[datetime]]] = []
     for repository in catalog.get("repositories", {}):
-
         # Fetch the tags under the repository identified by <name>
         r = docker.registry.send_request(f"{host}/v2/{repository}/tags/list")
         # tags can be None if all the tags of a repository have deleted
@@ -58,7 +56,6 @@ def images(
         tags = r.json().get("tags") or {}
 
         for tag in tags:
-
             # Fetch the manifest identified by name and reference
             r = docker.registry.send_request(f"{host}/v2/{repository}/manifests/{tag}")
             manifest = r.json()
@@ -90,12 +87,10 @@ def images(
     if not images:
         log.warning("This registry contains no images")
     else:
-
         log.info("This registry contains {} image(s):", len(images))
         images_to_be_removed: List[Tuple[str, str, str]] = []
         table: List[List[str]] = []
         for img in images:
-
             digest = img[0]
             # to be replaced with removeprefix starting from py39
             if digest.startswith("sha256:"):

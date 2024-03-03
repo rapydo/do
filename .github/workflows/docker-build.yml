@@ -32,8 +32,6 @@ jobs:
             backend-legacy310,
             # used by nig, sdc, highlander
             backend-legacy39,
-            # used by mistral
-            backend-legacy38,
             angular,
             angular-test,
             proxy,
@@ -45,13 +43,12 @@ jobs:
             adminer,
             swaggerui,
             registry,
-            controller,
             fail2ban,
             mypy,
           ]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Build the Docker image
         run: |
           cd controller/builds
@@ -122,7 +119,7 @@ jobs:
 
       - name: Set up Python
         if: ${{ matrix.service != 'fail2ban' }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -182,22 +179,6 @@ jobs:
           echo -e "\nBackend is expected to have completed the startup\n";
           rapydo logs backend | grep "REST API backend server is ready to be launched"
 
-      - name: Test backend legacy38
-        if: ${{ matrix.service == 'backend-legacy38' }}
-        run: |
-          cd test-${{ matrix.service }}
-          rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
-          # can't make it work via -e, always passing as a float...
-          rapydo -e BACKEND_PYTHON_VERSION=v3.8 init
-          rapydo start backend
-
-          # Expected startup time: ~ 2 seconds
-
-          sleep 2
-          rapydo logs backend
-          echo -e "\nBackend is expected to have completed the startup\n";
-          rapydo logs backend | grep "REST API backend server is ready to be launched"
-
       - name: Test angular
         if: ${{ matrix.service == 'angular' || matrix.service == 'angular-test' }}
         run: |
@@ -206,16 +187,16 @@ jobs:
           rapydo -e FRONTEND_BUILD_MODE=${{ matrix.service }} init
           rapydo start frontend
 
-          # Expected startup time: ~ 5-6 minutes
+          # Expected startup time: ~ 3 minutes
 
-          sleep 150
+          sleep 60
           if rapydo logs frontend | grep "Compiled successfully.";
           then
             echo "Angular was not expected to have started yet";
             exit 1
           fi
 
-          sleep 150
+          sleep 120
           rapydo logs frontend
           echo -e "\nAngular is expected to have completed the startup\n";
           rapydo logs frontend | grep "Compiled successfully."
@@ -381,14 +362,10 @@ jobs:
           docker logs registry
           echo -e "\nDocker Registry is expected to have completed the startup\n";
           docker logs registry 2>&1 | grep "debug server listening localhost"
-      # - name: Test controller
-      #   if: ${{ matrix.service == 'controller'}}
-      #   run: |
-      #     ...
 
       - name: Login to DockerHub
         if: ${{ github.event_name != 'pull_request'}}
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}

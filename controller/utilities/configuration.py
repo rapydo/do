@@ -105,7 +105,6 @@ class BACKEND_PYTHON_VERSION_VALUES(Enum):
     py311 = "v3.11"
     py310 = "v3.10"
     py39 = "v3.9"
-    py38 = "v3.8"
 
 
 class PYTHONMALLOC_VALUES(Enum):
@@ -529,6 +528,7 @@ class BaseEnvModel(BaseModel):
     SMTP_VERIFICATION_TIME: PositiveInt
     SMTP_ADMIN: Optional[str]
     SMTP_NOREPLY: Optional[str]
+    SMTP_REPLYTO: Optional[str]
     SMTP_HOST: Optional[str]
     SMTP_PORT: NullablePort
     SMTP_USERNAME: Optional[str]
@@ -566,6 +566,7 @@ class BaseEnvModel(BaseModel):
     ALLOW_ACCESS_TOKEN_PARAMETER: zero_or_one
     DEFAULT_DHLEN: PositiveInt
 
+    PASSWORD_EXPIRATION_WARNING: NonNegativeInt
     FORCE_PRODUCTION_TESTS: zero_or_one
 
 
@@ -628,7 +629,6 @@ def read_configuration(
     for key in variables:
         # Can't be tested because it is included in default configuration
         if project.get(key) is None:  # pragma: no cover
-
             print_and_exit(
                 "Project not configured, missing key '{}' in file {}/{}",
                 key,
@@ -709,7 +709,6 @@ def mix_configuration(
         return base
 
     for key, elements in custom.items():
-
         if key not in base:
             # TypedDict key must be a string literal;
             base[key] = custom[key]  # type: ignore
@@ -768,15 +767,12 @@ def load_yaml_file(
 
 
 def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path]]:
-
     base_files: List[Path] = []
     all_files: List[Path] = []
 
     # YAML CHECK UP
     for path in config_files:
-
         try:
-
             # This is to verify that mandatory files exist and yml syntax is valid
             conf = load_yaml_file(file=path, is_optional=False)
 
@@ -796,7 +792,6 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
                     base_files.append(path)
 
         except KeyError as e:  # pragma: no cover
-
             print_and_exit("Error reading {}: {}", path, str(e))
 
     return all_files, base_files
@@ -804,7 +799,6 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
 
 def validate_configuration(conf: Configuration, core: bool) -> None:
     if conf:
-
         try:
             if core:
                 CoreConfigurationModel(**conf)

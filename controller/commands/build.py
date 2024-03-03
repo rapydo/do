@@ -90,7 +90,6 @@ def build(
     services_with_custom_builds: List[str] = []
     for image, build in all_builds.items():
         if image not in core_builds:
-
             # this is used to validate the target Dockerfile:
             if p := build.get("path"):
                 get_dockerfile_base_image(p, core_builds)

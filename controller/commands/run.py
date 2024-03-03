@@ -85,7 +85,6 @@ def run(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--pull", pull, IF=pull),
         Application.serialize_parameter("--debug", debug, IF=debug),
@@ -111,7 +110,6 @@ def run(
         if service != REGISTRY:
             docker.registry.ping()
         else:
-
             if docker.registry.ping(do_exit=False):
                 registry = docker.registry.get_host()
                 print_and_exit("The registry is already running at {}", registry)

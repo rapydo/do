@@ -16,7 +16,6 @@ TUNING_MODULES: Dict[str, ModuleType] = {}
 
 
 def load_module(path: Path) -> Dict[str, ModuleType]:
-
     # Initially it was:
     # for c in commands_folder.glob("[!_|.]*.py"):
     #     import_module(f"controller.commands.{c.stem}")
@@ -36,7 +35,6 @@ def load_module(path: Path) -> Dict[str, ModuleType]:
 
 
 def load_commands(project: Optional[str]) -> None:
-
     # re-initialization needed for tests
     BACKUP_MODULES.clear()
     RESTORE_MODULES.clear()

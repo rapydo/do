@@ -24,7 +24,6 @@ class Registry:
         return f"{registry_host}:{registry_port}"
 
     def ping(self, do_exit: bool = True) -> bool:
-
         registry_host = Application.env["REGISTRY_HOST"]
         registry_port = int(Application.env.get("REGISTRY_PORT", "5000") or "5000")
 
@@ -53,7 +52,6 @@ class Registry:
     def send_request(
         url: str, check_status: bool = True, method: str = "GET", version: str = "2"
     ) -> Response:
-
         if version == "2":
             headers = {"Accept": "application/vnd.docker.distribution.manifest.v2+json"}
         else:
@@ -89,7 +87,6 @@ class Registry:
         return r
 
     def verify_image(self, image: str) -> bool:
-
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         registry = self.get_host()
         host = f"https://{registry}"
@@ -104,7 +101,6 @@ class Registry:
         return r.status_code == 200
 
     def login(self) -> None:
-
         registry = self.get_host()
         try:
             self.docker.login(
@@ -114,7 +110,6 @@ class Registry:
             )
         except DockerException as e:
             if "docker login --username" in str(e):
-
                 settings = f"""
 {{
   "insecure-registries" : ["{registry}"]

@@ -19,7 +19,6 @@ from tests import (
 
 
 def test_cronjobs(capfd: Capture, faker: Faker) -> None:
-
     project = random_project_name(faker)
     create_project(
         capfd=capfd,

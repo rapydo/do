@@ -15,7 +15,6 @@ from tests import (
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "password")
 
     project_name = random_project_name(faker)

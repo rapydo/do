@@ -48,7 +48,6 @@ def restore(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--force", force, IF=force),
         Application.serialize_parameter("--restart", restart, IF=restart),

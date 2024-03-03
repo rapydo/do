@@ -27,19 +27,22 @@ from sultan.api import Sultan  # type: ignore
 from controller import RED, log, print_and_exit
 
 # https://get.docker.com
-EXPECTED_DOCKER_SCRIPT_MD5 = "f0914813fcbbe35f1358a994cff812d3"
+EXPECTED_DOCKER_SCRIPT_MD5 = "21991ad5158db696823e3fd54eab00da"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.14.2"
-EXPECTED_COMPOSE_LINUX_BIN_MD5 = "e6739efadaf75e91b59f0888859697e9"
-EXPECTED_COMPOSE_MACOS_BIN_MD5 = "483e415e9bb08c2d1213c57687fd7431"
+COMPOSE_VERSION = "v2.24.6"
+EXPECTED_COMPOSE_LINUX_BIN_MD5 = "a032e3515dd60105877b60a4e7d644c1"
+EXPECTED_COMPOSE_MACOS_BIN_MD5 = "9d3bb0a14906fece7d76d9361f3ab0f9"
 EXPECTED_COMPOSE_WIN_BIN_MD5 = "not-implemented"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.9.1"
-EXPECTED_BUILDX_LINUX_BIN_MD5 = "1f4ac4fbe0780d478caf7ac1806f186a"
-EXPECTED_BUILDX_MACOS_BIN_MD5 = "b259567a4cf3bb99bfbfe0e02baf2c76"
+BUILDX_VERSION = "v0.10.0"
+EXPECTED_BUILDX_LINUX_BIN_MD5 = "e3509cd345eb5d5955a718579d474084"
+EXPECTED_BUILDX_MACOS_BIN_MD5 = "6a52179cc659d1135961b900689c834d"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
+
+DEFAULT_PIP_BIN = "pip3"
+ALTERNATIVE_PIP_BIN = "pip"
 
 
 class ExecutionException(Exception):
@@ -48,13 +51,14 @@ class ExecutionException(Exception):
 
 class Packages:
     @staticmethod
-    def install(package: Union[str, Path], editable: bool) -> None:
+    def install(
+        package: Union[str, Path], editable: bool, pip_bin: str = DEFAULT_PIP_BIN
+    ) -> None:
         """
         Install a python package in editable or normal mode
         """
 
         try:
-
             options = ["install", "--upgrade"]
 
             home = Path.home()
@@ -70,12 +74,14 @@ class Packages:
             # Note: package is a Path if editable, str otherwise
             options.append(str(package))
 
-            output = Packages.execute_command("pip3", options)
+            output = Packages.execute_command(pip_bin, options)
 
             for r in output.split("\n"):
                 print(r)
 
         except Exception as e:  # pragma: no cover
+            if pip_bin == DEFAULT_PIP_BIN:
+                return Packages.install(package, editable, pip_bin=ALTERNATIVE_PIP_BIN)
             print_and_exit(str(e))
 
     @staticmethod
@@ -91,7 +97,6 @@ class Packages:
 
         found_version = Packages.get_bin_version(program)
         if found_version is None:
-
             hints = ""
             if program == "docker":  # pragma: no cover
                 install_cmd = RED("rapydo install docker")
@@ -144,14 +149,19 @@ class Packages:
 
     @classmethod
     def get_bin_version(
-        cls, exec_cmd: str, option: List[str] = ["--version"], clean_output: bool = True
+        cls,
+        exec_cmd: str,
+        option: Optional[List[str]] = None,
+        clean_output: bool = True,
     ) -> Optional[str]:
         """
         Retrieve the version of a binary
         """
 
-        try:
+        if option is None:
+            option = ["--version"]
 
+        try:
             if os.name == "nt":  # pragma: no cover
                 exec_cmd = cls.convert_bin_to_win32(exec_cmd)
 
@@ -178,7 +188,7 @@ class Packages:
             # git version 2.25.1
             # rapydo version 0.7.x
             return output
-            # Note that in may other cases it fails...
+            # Note that in many other cases it fails...
             # but we are interested in a very small list of programs, so it's ok
             # echo --version -> --version
             # ls --version -> ls
@@ -189,14 +199,25 @@ class Packages:
         return None
 
     @staticmethod
-    def get_installation_path(package: str = "rapydo") -> Optional[Path]:
+    def get_installation_path(
+        package: str = "rapydo", pip_bin: str = DEFAULT_PIP_BIN
+    ) -> Optional[Path]:
         """
         Retrieve the controller installation path, if installed in editable mode
         """
-        for r in Packages.execute_command("pip3", ["list", "--editable"]).split("\n"):
-            if r.startswith(f"{package} "):
-                tokens = re.split(r"\s+", r)
-                return Path(str(tokens[2]))
+        try:
+            for r in Packages.execute_command(pip_bin, ["list", "--editable"]).split(
+                "\n"
+            ):
+                if r.startswith(f"{package} "):
+                    tokens = re.split(r"\s+", r)
+                    return Path(str(tokens[2]))
+        except Exception as e:  # pragma: no cover
+            if pip_bin == DEFAULT_PIP_BIN:
+                return Packages.get_installation_path(
+                    package, pip_bin=ALTERNATIVE_PIP_BIN
+                )
+            print_and_exit(str(e))
 
         return None
 
@@ -320,19 +341,18 @@ class Packages:
     @staticmethod
     def execute_command(command: str, parameters: List[str]) -> str:
         try:
-
             # Pattern in plumbum library for executing a shell command
             local_command = local[command]
             log.info("Executing command {} {}", command, " ".join(parameters))
             return str(local_command(parameters))
-        except CommandNotFound:
-            raise ExecutionException(f"Command not found: {command}")
+        except CommandNotFound as e:
+            raise ExecutionException(f"Command not found: {command}") from e
 
-        except ProcessExecutionError:
+        except ProcessExecutionError as e:
             raise ExecutionException(
                 f"Cannot execute command: {command} {' '.join(parameters)}"
-            )
+            ) from e
 
         # raised on Windows
-        except OSError:  # pragma: no cover
-            raise ExecutionException(f"Cannot execute: {command}")
+        except OSError as e:  # pragma: no cover
+            raise ExecutionException(f"Cannot execute: {command}: {e}") from e

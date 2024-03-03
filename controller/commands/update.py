@@ -21,7 +21,6 @@ def update(
         shell_complete=Application.autocomplete_submodule,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--ignore-submodule", ignore_submodules),
     )

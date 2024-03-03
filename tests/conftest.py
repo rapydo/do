@@ -8,7 +8,6 @@ from faker import Faker
 # To execute tests in an insulated environment
 @pytest.fixture(autouse=True)
 def create_folder() -> None:
-
     # If you are already in a test folder
     # (this is the case starting from the second test)
     # back to the main folder
@@ -32,6 +31,5 @@ def create_folder() -> None:
 # Beware, this replaces the standard faker fixture provided by Faker it-self
 @pytest.fixture
 def faker() -> Faker:
-
     # Call to untyped function "Faker" in typed context
     return Faker("en_US")

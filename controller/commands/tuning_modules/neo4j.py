@@ -7,7 +7,6 @@ SERVICE_NAME = __name__
 
 
 def tuning(ram: int, cpu: int) -> None:
-
     verify_available_images(
         [SERVICE_NAME],
         Application.data.compose_config,

@@ -20,7 +20,6 @@ from tests import (
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "version")
 
     exec_command(

@@ -16,7 +16,6 @@ from controller.utilities.tables import print_table
 
 class Swarm:
     def __init__(self, docker: Docker, check_initialization: bool = True):
-
         self.docker_wrapper = docker
         self.docker = self.docker_wrapper.client
 
@@ -27,7 +26,6 @@ class Swarm:
             )
 
     def init(self) -> None:
-
         manager_address = str(
             Application.env.get("SWARM_MANAGER_ADDRESS")
             or system.get_local_ip(Configuration.production)
@@ -40,7 +38,6 @@ class Swarm:
         try:
             return str(self.docker.swarm.join_token(node_type))
         except NotASwarmManager:
-
             return None
 
     @staticmethod
@@ -58,7 +55,6 @@ class Swarm:
         return False
 
     def get_running_services(self) -> Set[str]:
-
         prefix = f"{Configuration.project}_"
         containers = set()
         for service in self.docker.service.list():
@@ -77,7 +73,6 @@ class Swarm:
         return containers
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
-
         prefix += "_"
         services_status: Dict[str, str] = dict()
         for service in self.docker.service.list():
@@ -94,7 +89,6 @@ class Swarm:
         return services_status
 
     def deploy(self) -> None:
-
         self.docker.stack.deploy(
             name=Configuration.project,
             compose_files=COMPOSE_FILE,
@@ -116,7 +110,6 @@ class Swarm:
             self.docker.service.update(service_name, force=True, detach=True)
 
     def status(self, services: List[str]) -> None:
-
         nodes: Dict[str, str] = {}
         nodes_table: List[List[str]] = []
         headers = ["Role", "State", "Name", "IP", "CPUs", "RAM", "LABELS", "Version"]
@@ -158,7 +151,6 @@ class Swarm:
 
         prefix = f"{Configuration.project}_"
         for service in stack_services:
-
             service_name = service.spec.name
 
             tmp_service_name = service_name
@@ -174,7 +166,6 @@ class Swarm:
 
             running_tasks = 0
             for task in self.docker.service.ps(service_name):
-
                 if task.status.state == "shutdown" or task.status.state == "complete":
                     COLOR = colors.BLUE
                 elif task.status.state == "running":
@@ -249,7 +240,6 @@ class Swarm:
         self.docker.stack.remove(Configuration.project)
 
     def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
-
         if service not in Application.data.active_services:
             print_and_exit("No such service: {}", service)
 
@@ -316,7 +306,6 @@ class Swarm:
         nodes_cpus = 0.0
         nodes_memory = 0.0
         for node in self.docker.node.list():
-
             nodes_cpus += round(node.description.resources.nano_cpus / 1000000000)
             nodes_memory += node.description.resources.memory_bytes
 
