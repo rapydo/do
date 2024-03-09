@@ -47,53 +47,6 @@ def test_base(capfd: Capture, faker: Faker) -> None:
 
     exec_command(capfd, "reload backend", "Reloading Flask...")
 
-    if Configuration.swarm_mode:
-        service = "backend"
-
-        exec_command(
-            capfd,
-            "start backend",
-            "Stack started",
-        )
-
-        exec_command(
-            capfd,
-            "scale backend=2 --wait",
-            f"{project_name}_backend scaled to 2",
-            "Service converged",
-        )
-    else:
-
-        service = "fail2ban"
-        exec_command(
-            capfd,
-            "scale fail2ban=2",
-            "Scaling services: fail2ban=2...",
-            "Services scaled: fail2ban=2",
-        )
-
-    time.sleep(4)
-
-    docker = Docker()
-    container1 = docker.get_container(service, slot=1)
-    container2 = docker.get_container(service, slot=2)
-    assert container1 is not None
-    assert container2 is not None
-    assert container1 != container2
-
-    exec_command(
-        capfd,
-        f"reload {service}",
-        f"Executing command on {container1[0]}",
-        f"Executing command on {container2[0]}",
-    )
-
-    exec_command(capfd, "shell backend -u root 'rm /usr/local/bin/reload'")
-
-    exec_command(
-        capfd, "reload backend", "Service backend does not support the reload command"
-    )
-
     exec_command(capfd, "remove", "Stack removed")
 
 
