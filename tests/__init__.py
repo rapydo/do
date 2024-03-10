@@ -220,7 +220,7 @@ def get_container_start_date(
     capfd: Capture, service: str, wait: bool = False
 ) -> datetime:
     if Configuration.swarm_mode and wait:
-        time.sleep(5)
+        time.sleep(10)
         # This is needed to debug and wait the service rollup to complete
         # Status is both for debug and to delay the get_container
         exec_command(capfd, "status")
