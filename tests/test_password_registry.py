@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+
 from datetime import datetime, timedelta
 
 from faker import Faker

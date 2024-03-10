@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+
 from faker import Faker
 
 from tests import (

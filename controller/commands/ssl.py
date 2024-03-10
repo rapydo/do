@@ -1,6 +1,7 @@
 """
 Issue a SSL certificate with Let's Encrypt
 """
+
 from pathlib import Path
 from typing import Optional
 

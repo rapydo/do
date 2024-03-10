@@ -1,6 +1,7 @@
 """
 This module will test the scale command
 """
+
 import time
 
 from python_on_whales import docker

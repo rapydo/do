@@ -1,6 +1,7 @@
 """
 Update the current project
 """
+
 from typing import List
 
 import typer

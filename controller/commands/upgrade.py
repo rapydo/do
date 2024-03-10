@@ -1,6 +1,7 @@
 """
 Upgrade a project file by re-applying the templates
 """
+
 from pathlib import Path
 
 import typer

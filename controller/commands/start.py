@@ -1,6 +1,7 @@
 """
 Start services for the current configuration
 """
+
 import time
 from typing import List
 

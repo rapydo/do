@@ -1,6 +1,7 @@
 """
 This module will test the shell command
 """
+
 import signal
 
 import pytest

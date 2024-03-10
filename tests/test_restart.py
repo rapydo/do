@@ -1,6 +1,7 @@
 """
 This module will test the start --force (ex restart) command
 """
+
 from controller.app import Configuration
 from tests import (
     Capture,

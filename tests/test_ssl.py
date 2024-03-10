@@ -1,6 +1,7 @@
 """
 This module will test the ssl command
 """
+
 import time
 
 from faker import Faker

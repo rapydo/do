@@ -1,6 +1,7 @@
 """
 Initialize the current RAPyDo project
 """
+
 from pathlib import Path
 
 import typer
