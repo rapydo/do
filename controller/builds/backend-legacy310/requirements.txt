@@ -2,4 +2,4 @@ dumb-init==1.2.5.post1
 gunicorn==21.2.0
 gevent==24.2.1
 setuptools==69.1.1
-pip==23.3.1
+pip==23.3.2
