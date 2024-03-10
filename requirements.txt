@@ -6,7 +6,7 @@ jinja2
 sultan==0.9.1
 plumbum
 glom
-GitPython==3.1.41
+GitPython==3.1.42
 PyYAML==6.0.1
 pydantic==1.10.13
 pip==23.3.1
