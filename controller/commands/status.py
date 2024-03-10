@@ -1,6 +1,7 @@
 """
 Show current services status
 """
+
 from typing import List
 
 import typer

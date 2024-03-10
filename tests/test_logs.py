@@ -1,6 +1,7 @@
 """
 This module will test the logs command
 """
+
 import signal
 from datetime import datetime
 

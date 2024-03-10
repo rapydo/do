@@ -1,6 +1,7 @@
 """
 This module will test the status command
 """
+
 import time
 
 from controller.app import Configuration

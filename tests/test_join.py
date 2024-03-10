@@ -1,6 +1,7 @@
 """
 This module will test the join command
 """
+
 from controller.app import Application, Configuration
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 

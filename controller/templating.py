@@ -1,6 +1,7 @@
 """
 Utilities to work with jinja2 templates
 """
+
 import filecmp
 import os
 import random
