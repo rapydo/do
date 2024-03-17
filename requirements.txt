@@ -11,7 +11,7 @@ PyYAML==6.0.1
 pydantic==1.10.14
 pip==24.0
 setuptools==69.1.1
-wheel==0.41.3
+wheel==0.43.0
 requests==2.31.0
 typer[all]==0.9.0
 click==8.1.7
