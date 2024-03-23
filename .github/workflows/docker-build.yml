@@ -210,6 +210,9 @@ jobs:
           rapydo start proxy
           rapydo ssl
 
+          sleep 1
+          rapydo logs proxy | grep "Creating a self signed SSL certificate for localhost"
+
           # The first startup is going to be very slow due to the DHParam generation
           # Can't estimate the generation time because it greatly depends on the random entropy
           sleep 1
