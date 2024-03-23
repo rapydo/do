@@ -310,7 +310,7 @@ class Compose:
                 if not name.startswith(prefix):
                     continue
 
-                status = container.state.status
+                status = container.state.status or "N/A"
 
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
@@ -343,7 +343,7 @@ class Compose:
             if name not in services:
                 continue
 
-            status = container.state.status
+            status = container.state.status or "N/A"
             if status == "shutdown" or status == "complete":
                 OPEN_COLOR = "[bold blue]"
                 CLOSE_COLOR = "[/bold blue]"
@@ -361,18 +361,25 @@ class Compose:
                 CLOSE_COLOR = ""
 
             ports_list = []
-            for container_port, host_port in container.network_settings.ports.items():
-                if host_port:
-                    container_port = container_port.split("/")[0]
-                    ports_list.append(f"{container_port}->{host_port[0]['HostPort']}")
+            if container.network_settings.ports:
+                for (
+                    container_port,
+                    host_port,
+                ) in container.network_settings.ports.items():
+                    if host_port:
+                        container_port = container_port.split("/")[0]
+                        ports_list.append(
+                            f"{container_port}->{host_port[0]['HostPort']}"
+                        )
 
+            container_image = container.config.image or "N/A"
             table.append(
                 [
                     container.id[0:12],
                     f"{OPEN_COLOR}{container.name}{CLOSE_COLOR}",
                     status,
                     container.created.strftime("%d-%m-%Y %H:%M:%S"),
-                    container.config.image,
+                    container_image,
                     ",".join(ports_list),
                 ],
             )

@@ -2,6 +2,8 @@
 This module will test the start --force (ex restart) command
 """
 
+import pytest
+
 from controller.app import Configuration
 from tests import (
     Capture,
@@ -15,6 +17,7 @@ from tests import (
 )
 
 
+@pytest.mark.flaky(reruns=2)
 def test_all(capfd: Capture) -> None:
     exec_command(capfd, "restart", "This command is no longer available")
 

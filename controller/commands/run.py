@@ -23,19 +23,24 @@ def get_publish_ports(
         print_and_exit("Services misconfiguration, can't find {}", service)
 
     ports: List[Union[PortMapping, PortRangeMapping]] = []
-    for p in service_config.ports:
-        port = change_first_port or p.published
-        target = p.target
+    if service_config.ports:
+        for p in service_config.ports:
+            port = change_first_port or p.published
+            target = p.target
+            if port is None or target is None:
+                log.warning(
+                    "Found null port on {}; port: {}, target: {}", service, port, target
+                )
+                continue
+            # Remove it, because this option is to be applied only to the first port
+            change_first_port = None
 
-        # Remove it, because this option is to be applied only to the first port
-        change_first_port = None
-
-        ports.append(
-            (
-                port,
-                target,
+            ports.append(
+                (
+                    port,
+                    target,
+                )
             )
-        )
 
     return ports
 

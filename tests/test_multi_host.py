@@ -34,7 +34,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     )
 
     for node in docker.node.list():
-        if node.spec.role.lower() == "manager":
+        if node.spec.role and node.spec.role.lower() == "manager":
             MANAGER_ADDRESS = node.status.addr
 
     assert MANAGER_ADDRESS is not None
