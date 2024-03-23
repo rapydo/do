@@ -1,6 +1,7 @@
 """
 Install the specified version of RAPyDO or docker, compose, buildx
 """
+
 import typer
 
 from controller import SUBMODULES_DIR, log, print_and_exit

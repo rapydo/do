@@ -1,6 +1,7 @@
 """
 Start a single container
 """
+
 import os
 from typing import List, Optional, Union
 
@@ -167,7 +168,7 @@ def run(
         # Other symbols like # and " also lead to configuration errors
         os.environ["REGISTRY_HTTP_SECRET"] = password(
             param_not_used="",
-            length=96
+            length=96,
             # , symbols="%*,-.=?[]^_~"
         )
 

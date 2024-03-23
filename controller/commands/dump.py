@@ -1,6 +1,7 @@
 """
 Dump the current configuration into a docker compose YAML file
 """
+
 from controller import COMPOSE_FILE, log
 from controller.app import Application, Configuration
 from controller.deploy.docker import Docker

@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+
 import time
 from datetime import datetime, timedelta
 

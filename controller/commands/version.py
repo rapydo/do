@@ -1,6 +1,7 @@
 """
 Show RAPyDo and project version details
 """
+
 from packaging.version import Version
 
 from controller import RED, __version__, colors

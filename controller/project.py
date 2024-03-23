@@ -1,6 +1,7 @@
 """
 Utilities to handle projects' structure
 """
+
 import os
 import re
 from pathlib import Path

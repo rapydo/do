@@ -1,6 +1,7 @@
 """
 [DEPRECATED] Restart modified running containers
 """
+
 import typer
 
 from controller import RED, print_and_exit

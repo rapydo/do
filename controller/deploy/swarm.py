@@ -1,6 +1,7 @@
 """
 Integration with Docker swarm
 """
+
 from typing import Dict, List, Optional, Set, Union
 
 from glom import glom

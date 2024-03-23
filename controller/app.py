@@ -1,6 +1,7 @@
 """
 Main Application and Configuration module
 """
+
 import enum
 import json
 import os

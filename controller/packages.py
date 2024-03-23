@@ -1,6 +1,7 @@
 """
 Utilities to work with python packages and binaries
 """
+
 # WARNING: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
@@ -36,7 +37,7 @@ EXPECTED_COMPOSE_MACOS_BIN_MD5 = "9d3bb0a14906fece7d76d9361f3ab0f9"
 EXPECTED_COMPOSE_WIN_BIN_MD5 = "not-implemented"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.12.1"
+BUILDX_VERSION = "v0.13.1"
 EXPECTED_BUILDX_LINUX_BIN_MD5 = "1e3a1620417081e1950821065de61337"
 EXPECTED_BUILDX_MACOS_BIN_MD5 = "36efa5504e8efbad753cc0c615eb427b"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
