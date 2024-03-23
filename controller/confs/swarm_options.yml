@@ -189,6 +189,7 @@ services:
 
     # network_mode does not work in swarm mode
     # This external network is a workaround to let the container access the host network
+    network_mode: ""
     networks:
       - outside
 
