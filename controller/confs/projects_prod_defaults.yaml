@@ -2,7 +2,7 @@ variables:
   env:
     LOG_LEVEL: INFO # log level for backend and celery
     MIN_PASSWORD_SCORE: 4
-    DOCKER_LOGGING_DRIVER: "syslog"
+    # DOCKER_LOGGING_DRIVER: "syslog"
 
     ACTIVATE_PROXY: 1
     APP_MODE: production

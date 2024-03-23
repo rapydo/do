@@ -212,10 +212,12 @@ jobs:
 
           # The first startup is going to be very slow due to the DHParam generation
           # Can't estimate the generation time because it greatly depends on the random entropy
+          sleep 1
+          rapydo logs proxy | grep "Generating DH parameters"
+
           # 15 seconds should be enough for DHParams to complete
           sleep 15
           rapydo logs proxy
-          rapydo logs proxy | grep "Generating DH parameters"
 
           # Let's remove the first container and start again to verify the normal startup time
           rapydo remove

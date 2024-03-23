@@ -137,7 +137,7 @@ done
 
 if [ ! -f "$DHPARAM" ]; then
     echo "DHParam is missing, creating a new $DHPARAM with length = ${DEFAULT_DHLEN}"
-    openssl dhparam -out $DHPARAM $DEFAULT_DHLEN -dsaparam
+    openssl dhparam -out $DHPARAM -dsaparam $DEFAULT_DHLEN
 fi
 
 if [ "$1" == 'updatecertificates' ]; then
