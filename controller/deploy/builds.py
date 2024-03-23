@@ -125,16 +125,21 @@ def find_templates_override(
     builds: Dict[str, str] = {}
 
     for service in services.values():
-        if service.build is not None and service.image not in templates:
+        if (
+            service.build is not None
+            and service.build.context is not None
+            and service.image not in templates
+        ):
             baseimage = get_dockerfile_base_image(service.build.context, templates)
-
             if not baseimage.startswith("rapydo/"):
                 continue
 
             vanilla_img = service.image
-            template_img = baseimage
-            log.debug("{} extends {}", vanilla_img, template_img)
-            builds[vanilla_img] = template_img
+            if vanilla_img is None:  # pragma: no cover
+                continue
+
+            log.debug("{} extends {}", vanilla_img, baseimage)
+            builds[vanilla_img] = baseimage
 
     return builds
 

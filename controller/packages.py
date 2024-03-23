@@ -1,6 +1,7 @@
 """
 Utilities to work with python packages and binaries
 """
+
 # WARNING: to not import this package at startup,
 # but only into functions otherwise pip will go crazy
 # (we cannot understand why, but it does!)
@@ -30,15 +31,15 @@ from controller import RED, log, print_and_exit
 EXPECTED_DOCKER_SCRIPT_MD5 = "21991ad5158db696823e3fd54eab00da"
 
 # https://github.com/docker/compose/releases
-COMPOSE_VERSION = "v2.24.6"
+COMPOSE_VERSION = "v2.26.0"
 EXPECTED_COMPOSE_LINUX_BIN_MD5 = "593fb55fe05a76d5c5efb383e91ba129"
 EXPECTED_COMPOSE_MACOS_BIN_MD5 = "e9b48a919560f33710530ef6f18e26a1"
 EXPECTED_COMPOSE_WIN_BIN_MD5 = "not-implemented"
 
 # https://github.com/docker/buildx/releases
-BUILDX_VERSION = "v0.10.0"
-EXPECTED_BUILDX_LINUX_BIN_MD5 = "e3509cd345eb5d5955a718579d474084"
-EXPECTED_BUILDX_MACOS_BIN_MD5 = "6a52179cc659d1135961b900689c834d"
+BUILDX_VERSION = "v0.12.1"
+EXPECTED_BUILDX_LINUX_BIN_MD5 = "1e3a1620417081e1950821065de61337"
+EXPECTED_BUILDX_MACOS_BIN_MD5 = "36efa5504e8efbad753cc0c615eb427b"
 EXPECTED_BUILDX_WIN_BIN_MD5 = "not-implemented"
 
 DEFAULT_PIP_BIN = "pip3"

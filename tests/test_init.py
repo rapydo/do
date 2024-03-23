@@ -2,6 +2,7 @@
 This module will test the init command.
 Other module that will initialize projects will consider the init command fully working
 """
+
 import os
 from pathlib import Path
 

@@ -1,4 +1,4 @@
-FROM node:20.9.0-buster
+FROM node:20.11.1-buster
 # https://nodejs.org/en/blog/release
 
 ARG CURRENT_UID
@@ -18,7 +18,7 @@ ENV ANGULAR_VERSION 15.2.10
 
 RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.5.0 sitemap-generator-cli@7.5.0 --force
 
-RUN npm install --prefix /opt dotenv@16.3.1 deepmerge@4.3.1 ajv@8.12.0 ajv-formats@2.1.1
+RUN npm install --prefix /opt dotenv@16.4.5 deepmerge@4.3.1 ajv@8.12.0 ajv-formats@2.1.1
 
 WORKDIR /app/
 

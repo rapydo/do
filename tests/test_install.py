@@ -1,6 +1,7 @@
 """
 This module will test the install command
 """
+
 from pathlib import Path
 
 from faker import Faker

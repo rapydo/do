@@ -1,6 +1,7 @@
 """
 Main Application and Configuration module
 """
+
 import enum
 import json
 import os
@@ -834,10 +835,18 @@ You can use of one:
         )
         base_services = docker.compose.get_config().services
 
+        if base_services is None:  # pragma: no cover
+            log.error("Got invalid compose base config")
+            base_services = {}
+
         docker = Docker(
             compose_files=self.files, verify_swarm=not Configuration.initialize
         )
         compose_config = docker.compose.get_config().services
+
+        if compose_config is None:  # pragma: no cover
+            log.error("Got invalid compose config")
+            compose_config = {}
 
         self.active_services = services.find_active(compose_config)
 
@@ -981,9 +990,13 @@ You can use of one:
         # Unfortunately this will only work after the creation of the network
         # i.e. will be fallen back to 127.0.0.1 the first time
         try:
-            DOCKER_SUBNET = docker.network.inspect(
+            docker_network = docker.network.inspect(
                 f"{Configuration.project}_{DEPLOY_ENGINE}_default"
-            ).ipam.config[0]["Subnet"]
+            )
+            if docker_network.ipam.config:
+                DOCKER_SUBNET = docker_network.ipam.config[0]["Subnet"]
+            else:
+                DOCKER_SUBNET = "127.0.0.1"
         # The first execution will fail and fallen back to localhost
         except DockerException:
             DOCKER_SUBNET = "127.0.0.1"
@@ -1116,6 +1129,16 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
             service = compose_services[service_name]
 
             if service:
+                if service.environment is None:
+                    log.error(
+                        "Invalid env format, cannot check placeholders and passwords"
+                    )
+                    continue
+                if isinstance(service.environment, list):  # pragma: no cover
+                    log.error(
+                        "Unsupported env format, cannot check placeholders and passwords"
+                    )
+                    continue
                 for key, value in service.environment.items():
                     if str(value) == PLACEHOLDER:
                         key = services.normalize_placeholder_variable(key)
@@ -1124,7 +1147,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
                     elif key.endswith("_PASSWORD") and value:
                         key = services.normalize_placeholder_variable(key)
-                        passwords.setdefault(key, value)
+                        passwords.setdefault(key, cast(str, value))
                         passwords_services.setdefault(key, set())
                         passwords_services[key].add(service_name)
 
