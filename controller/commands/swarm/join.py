@@ -30,6 +30,7 @@ def join(
             and state == "ready"
             and availability == "active"
             and node.manager_status
+            and node.manager_status.addr
         ):
             manager_address = node.manager_status.addr
 

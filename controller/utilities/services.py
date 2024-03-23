@@ -65,7 +65,14 @@ def find_active(services: ComposeServices) -> List[str]:
     for name, service in services.items():
         dependencies[name] = list(service.depends_on.keys())
 
-        if service.environment and service.environment.get("ACTIVATE", "0") == "1":
+        if service.environment is None:  # pragma: no cover
+            continue
+
+        if isinstance(service.environment, list):  # pragma: no cover
+            log.error("Unsupported service environment format as list")
+            continue
+
+        if service.environment.get("ACTIVATE", "0") == "1":
             base_actives.append(name)
 
     log.debug("Base active services: {}", ", ".join(base_actives))
