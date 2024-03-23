@@ -209,7 +209,7 @@ jobs:
             sudo mkdir -p /volumes/redisdata
           fi
 
-          py.test --timeout=600 --durations=5 --reruns 2 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
+          py.test --timeout=600 --durations=5  -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         if: ${{ matrix.test != 'install' }}
         uses: rapydo/actions/coverage@v2

@@ -4,7 +4,6 @@ This module will test the run registry and image commands
 
 import time
 
-import pytest
 from faker import Faker
 
 from controller import __version__, colors
@@ -20,7 +19,6 @@ from tests import (
 )
 
 
-@pytest.mark.flaky(reruns=2)
 def test_docker_registry(capfd: Capture, faker: Faker) -> None:
     # load variables and initialize the Configuration
     Application()

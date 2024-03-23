@@ -40,6 +40,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     init_project(capfd)
     start_registry(capfd)
 
+    if Configuration.swarm_mode:
+        time.sleep(10)
+
     exec_command(
         capfd,
         "backup rabbit",
