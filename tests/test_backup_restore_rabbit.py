@@ -309,6 +309,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Restarting services in 10 seconds...",
     )
 
+    if Configuration.swarm_mode:
+        # Sigh...
+        time.sleep(30)
+
     # Wait rabbit to completely startup
     service_verify(capfd, "rabbitmq")
 
