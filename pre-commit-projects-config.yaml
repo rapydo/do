@@ -28,7 +28,7 @@ repos:
           - flake8-bugbear==22.12.6
 
   - repo: https://github.com/gitguardian/gg-shield
-    rev: v1.25.0
+    rev: v1.26.0
     hooks:
       - id: ggshield
         language_version: python3
