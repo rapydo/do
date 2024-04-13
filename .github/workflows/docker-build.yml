@@ -121,7 +121,7 @@ jobs:
         if: ${{ matrix.service != 'fail2ban' }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Install RAPyDo
         if: ${{ matrix.service != 'fail2ban' }}
@@ -212,12 +212,10 @@ jobs:
 
           # The first startup is going to be very slow due to the DHParam generation
           # Can't estimate the generation time because it greatly depends on the random entropy
-          sleep 1
-          rapydo logs proxy | grep "Generating DH parameters" 
-
           # 15 seconds should be enough for DHParams to complete
           sleep 15
           rapydo logs proxy
+          rapydo logs proxy | grep "Generating DSA parameters"
 
           # Let's remove the first container and start again to verify the normal startup time
           rapydo remove

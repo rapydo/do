@@ -11,10 +11,10 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 
 # used by print_versions
-ENV ANGULAR_VERSION 15.2.10
+ENV ANGULAR_VERSION 15.2.11
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
-ENV CYPRESS_VERSION 13.7.1
+ENV CYPRESS_VERSION 13.7.3
 ENV CYPRESS_RUN_BINARY=${CYPRESS_PATH}/${CYPRESS_VERSION}/Cypress/Cypress
 
 # Install Chrome

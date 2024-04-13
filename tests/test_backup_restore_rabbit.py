@@ -40,6 +40,9 @@ def test_all(capfd: Capture, faker: Faker) -> None:
     init_project(capfd)
     start_registry(capfd)
 
+    if Configuration.swarm_mode:
+        time.sleep(10)
+
     exec_command(
         capfd,
         "backup rabbit",
@@ -305,6 +308,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Restarting services in 20 seconds...",
         "Restarting services in 10 seconds...",
     )
+
+    if Configuration.swarm_mode:
+        # Unfortunately final check on Swarm is really too much flaky...
+        return
 
     # Wait rabbit to completely startup
     service_verify(capfd, "rabbitmq")

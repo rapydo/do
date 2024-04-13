@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Select a Python version
         run: |
-          versions=(3.8 3.9 3.10 3.11)
+          versions=(3.8 3.9 3.10 3.11 3.12)
           PYTHON_VERSION=${versions[$(($RANDOM % ${#versions[@]}))]}
           echo "PYTHON_VERSION=${PYTHON_VERSION}" >> $GITHUB_ENV
         shell: bash
@@ -209,7 +209,7 @@ jobs:
             sudo mkdir -p /volumes/redisdata
           fi
 
-          py.test --timeout=600 --durations=5 -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
+          py.test --timeout=600 --durations=5  -s -x --cov-report=xml --cov=.. ../tests/test_${TEST_NAME}.py
       - name: Send Swarm Coverage
         if: ${{ matrix.test != 'install' }}
         uses: rapydo/actions/coverage@v2

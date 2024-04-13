@@ -344,6 +344,7 @@ variables:
     ENABLE_FOOTER: 1
     ENABLE_ANGULAR_SSR: 1
     ENABLE_YARN_PNP: 0
+    ENABLE_ANGULAR_MULTI_LANGUAGE: 0
     FORCE_SSR_SERVER_MODE: 0
     SPINNER_TYPE: "ball-scale-multiple"
 
@@ -375,7 +376,7 @@ project:
   title: "REST HTTP-API server with Python, Flask and Docker"
   description: "No description yet"
   keywords: ""
-  rapydo: 3.0
+  rapydo: "3.0"
   version: v0.1
 
 tags:

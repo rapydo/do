@@ -1,31 +1,11 @@
-import re
 from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    TypedDict,
-    Union,
-    cast,
-)
+from typing import Annotated, Dict, List, Optional, Tuple, TypedDict, Union, cast
 
 import yaml
 from glom import glom
-from pydantic import (
-    BaseModel,
-    ConstrainedInt,
-    ConstrainedStr,
-    Extra,
-    PositiveInt,
-    PydanticValueError,
-    ValidationError,
-)
+from pydantic import BaseModel, ConfigDict, Extra, Field, PositiveInt, ValidationError
 
 from controller import (
     COMPOSE_FILE_VERSION,
@@ -219,54 +199,17 @@ class PLACEHOLDER_VALUE(Enum):
     PLACEHOLDER_VALUE = PLACEHOLDER
 
 
-# Conflicts between pydantic and mypy
-# https://stackoverflow.com/questions/66924001/conflict-between-pydantic-constr-and-mypy-checking
-class Port(ConstrainedInt):
-    gt = 0
-    le = 65535
-
-
-class NullablePort(ConstrainedInt):
-    ge = 0
-    le = 65535
-
-
-class PasswordScore(ConstrainedInt):
-    ge = 0
-    le = 4
-
-
-class GzipCompressionLevel(ConstrainedInt):
-    ge = 1
-    le = 9
-
-
-class NonNegativeInt(ConstrainedInt):
-    ge = 0
-
-
-class AssignedCPU(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+\.[0-9]+$")
-
-
-class AssignedMemory(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(M|G)$")
-
-
-class PostgresMem(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(KB|MB|GB)$")
-
-
-class Neo4jMem(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(K|M|G|k|m|g)$")
-
-
-class HealthcheckInterval(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(s|m|h)$")
-
-
-class Version(ConstrainedStr):
-    regex = re.compile(r"^[0-9]+(\.[0-9]+)+$")
+Port = Annotated[int, Field(gt=0, le=65535)]
+NullablePort = Annotated[int, Field(gt=0, le=65535)]
+PasswordScore = Annotated[int, Field(ge=0, le=4)]
+GzipCompressionLevel = Annotated[int, Field(ge=1, le=9)]
+NonNegativeInt = Annotated[int, Field(ge=0)]
+AssignedCPU = Annotated[str, Field(pattern=r"^[0-9]+\.[0-9]+$")]
+AssignedMemory = Annotated[str, Field(pattern=r"^[0-9]+(M|G)$")]
+PostgresMem = Annotated[str, Field(pattern=r"^[0-9]+(KB|MB|GB)$")]
+Neo4jMem = Annotated[str, Field(pattern="^[0-9]+(K|M|G|k|m|g)$")]
+HealthcheckInterval = Annotated[str, Field(pattern=r"^[0-9]+(s|m|h)$")]
+Version = Annotated[str, Field(pattern=r"^[0-9]+(\.[0-9]+)+$")]
 
 
 # most of bool variables were deprecated since 1.0
@@ -279,32 +222,6 @@ class zero_or_one(IntEnum):
     ONE = 1
 
 
-class InvalidNeo4jFlag(PydanticValueError):
-    msg_template = "Invalid Neo4j flag, expected values are: true or false"
-
-
-class Neo4jFlag:
-    @classmethod
-    def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-        field_schema.update(type="boolean")
-
-    @classmethod
-    def __get_validators__(cls) -> Iterator[Callable[["Neo4jFlag", Any], bool]]:
-        yield cls.validate
-
-    def validate(cls, value: Any) -> bool:
-        if isinstance(value, bool):
-            return value
-
-        if value == "true":
-            return True
-
-        if value == "false":
-            return False
-
-        raise InvalidNeo4jFlag()
-
-
 class ProjectModel(BaseModel):
     title: str
     description: str
@@ -315,7 +232,7 @@ class ProjectModel(BaseModel):
 
 class SubmoduleModel(BaseModel):
     online_url: str
-    branch: Optional[str]
+    branch: Optional[str] = None
     _if: str
 
 
@@ -379,20 +296,20 @@ class BaseEnvModel(BaseModel):
     PROXY_DEV_PORT: Port
     PROXY_PROD_PORT: Port
     PROXIED_CONNECTION: zero_or_one
-    DOMAIN_ALIASES: Optional[str]
-    SET_UNSAFE_EVAL: Optional[str]
-    SET_UNSAFE_INLINE: Optional[str]
-    SET_STYLE_UNSAFE_INLINE: Optional[str]
-    SET_CSP_SCRIPT_SRC: Optional[str]
-    SET_CSP_IMG_SRC: Optional[str]
-    SET_CSP_FONT_SRC: Optional[str]
-    SET_CSP_CONNECT_SRC: Optional[str]
-    SET_CSP_FRAME_SRC: Optional[str]
+    DOMAIN_ALIASES: Optional[str] = None
+    SET_UNSAFE_EVAL: Optional[str] = None
+    SET_UNSAFE_INLINE: Optional[str] = None
+    SET_STYLE_UNSAFE_INLINE: Optional[str] = None
+    SET_CSP_SCRIPT_SRC: Optional[str] = None
+    SET_CSP_IMG_SRC: Optional[str] = None
+    SET_CSP_FONT_SRC: Optional[str] = None
+    SET_CSP_CONNECT_SRC: Optional[str] = None
+    SET_CSP_FRAME_SRC: Optional[str] = None
     SET_MAX_REQUESTS_PER_SECOND_AUTH: PositiveInt
     SET_MAX_REQUESTS_BURST_AUTH: PositiveInt
     SET_MAX_REQUESTS_PER_SECOND_API: PositiveInt
     SET_MAX_REQUESTS_BURST_API: PositiveInt
-    CORS_ALLOWED_ORIGIN: Optional[str]
+    CORS_ALLOWED_ORIGIN: Optional[str] = None
     SSL_VERIFY_CLIENT: zero_or_one
     SSL_FORCE_SELF_SIGNED: zero_or_one
 
@@ -424,13 +341,13 @@ class BaseEnvModel(BaseModel):
     NEO4J_PASSWORD: str
     NEO4J_EXPOSED_WEB_INTERFACE_PORT: Port
     NEO4J_WEB_INTERFACE_PORT: Port
-    NEO4J_SSL_ENABLED: Neo4jFlag
+    NEO4J_SSL_ENABLED: bool
     NEO4J_BOLT_TLS_LEVEL: NEO4J_BOLT_TLS_LEVEL_VALUES
     # They are equal to placeholder in production mode when neo4j is not enabled
     NEO4J_HEAP_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
     NEO4J_PAGECACHE_SIZE: Union[Neo4jMem, PLACEHOLDER_VALUE]
-    NEO4J_ALLOW_UPGRADE: Neo4jFlag
-    NEO4J_RECOVERY_MODE: Neo4jFlag
+    NEO4J_ALLOW_UPGRADE: bool
+    NEO4J_RECOVERY_MODE: bool
     ELASTIC_HOST: str
     ELASTIC_PORT: Port
     RABBITMQ_ENABLE_CONNECTOR: zero_or_one
@@ -443,9 +360,9 @@ class BaseEnvModel(BaseModel):
     RABBITMQ_PASSWORD: str
     RABBITMQ_MANAGEMENT_PORT: Port
     RABBITMQ_ENABLE_SHOVEL_PLUGIN: zero_or_one
-    RABBITMQ_SSL_CERTFILE: Optional[Path]
-    RABBITMQ_SSL_KEYFILE: Optional[Path]
-    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: Optional[true_or_false]
+    RABBITMQ_SSL_CERTFILE: Optional[Path] = None
+    RABBITMQ_SSL_KEYFILE: Optional[Path] = None
+    RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: Optional[true_or_false] = None
     RABBITMQ_SSL_ENABLED: zero_or_one
     REDIS_ENABLE_CONNECTOR: zero_or_one
     REDIS_EXPIRATION_TIME: PositiveInt
@@ -461,7 +378,7 @@ class BaseEnvModel(BaseModel):
     FTP_USER: str
     FTP_PASSWORD: str
     FTP_SSL_ENABLED: zero_or_one
-    NFS_HOST: Optional[str]
+    NFS_HOST: Optional[str] = None
     NFS_EXPORTS_SECRETS: Path
     NFS_EXPORTS_RABBITDATA: Path
     NFS_EXPORTS_SQLDATA: Path
@@ -481,7 +398,7 @@ class BaseEnvModel(BaseModel):
     FLOWER_PASSWORD: str
     FLOWER_DBDIR: Path
     FLOWER_PORT: Port
-    FLOWER_SSL_OPTIONS: Optional[str]
+    FLOWER_SSL_OPTIONS: Optional[str] = None
     FLOWER_PROTOCOL: FLOWER_PROTOCOL_VALUES
     DEFAULT_SCALE_BACKEND: PositiveInt
     DEFAULT_SCALE_CELERY: PositiveInt
@@ -515,24 +432,24 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_SMTP: AssignedMemory
     ASSIGNED_CPU_REGISTRY: AssignedCPU
     ASSIGNED_MEMORY_REGISTRY: AssignedMemory
-    REGISTRY_HOST: Optional[str]
+    REGISTRY_HOST: Optional[str] = None
     REGISTRY_PORT: Port
     REGISTRY_USERNAME: str
     REGISTRY_PASSWORD: str
-    REGISTRY_HTTP_SECRET: Optional[str]
+    REGISTRY_HTTP_SECRET: Optional[str] = None
     ACTIVATE_FAIL2BAN: zero_or_one
-    SWARM_MANAGER_ADDRESS: Optional[str]
+    SWARM_MANAGER_ADDRESS: Optional[str] = None
     # SYSLOG_ADDRESS: Optional[str]
     SMTP_ENABLE_CONNECTOR: zero_or_one
     SMTP_EXPIRATION_TIME: PositiveInt
     SMTP_VERIFICATION_TIME: PositiveInt
-    SMTP_ADMIN: Optional[str]
-    SMTP_NOREPLY: Optional[str]
-    SMTP_REPLYTO: Optional[str]
-    SMTP_HOST: Optional[str]
+    SMTP_ADMIN: Optional[str] = None
+    SMTP_NOREPLY: Optional[str] = None
+    SMTP_REPLYTO: Optional[str] = None
+    SMTP_HOST: Optional[str] = None
     SMTP_PORT: NullablePort
-    SMTP_USERNAME: Optional[str]
-    SMTP_PASSWORD: Optional[str]
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
     SMTP_SERVER_HOST: str
     SMTP_SERVER_PORT: Port
     FRONTEND_URL: str
@@ -541,11 +458,12 @@ class BaseEnvModel(BaseModel):
     ALLOW_REGISTRATION: zero_or_one
     ALLOW_TERMS_OF_USE: zero_or_one
     REGISTRATION_NOTIFICATIONS: zero_or_one
-    SENTRY_URL: Optional[str]
+    SENTRY_URL: Optional[str] = None
     SHOW_LOGIN: zero_or_one
     ENABLE_FOOTER: zero_or_one
     ENABLE_ANGULAR_SSR: zero_or_one
     ENABLE_YARN_PNP: zero_or_one
+    ENABLE_ANGULAR_MULTI_LANGUAGE: zero_or_one
     FORCE_SSR_SERVER_MODE: zero_or_one
     SPINNER_TYPE: SPINNER_TYPES
     ACTIVATE_AUTH: zero_or_one
@@ -570,12 +488,12 @@ class BaseEnvModel(BaseModel):
     FORCE_PRODUCTION_TESTS: zero_or_one
 
 
-class CoreEnvModel(BaseEnvModel, extra=Extra.forbid):
-    pass
+class CoreEnvModel(BaseEnvModel):
+    model_config = ConfigDict(extra="forbid")  # type: ignore[typeddict-item]
 
 
-class CustomEnvModel(BaseEnvModel, extra=Extra.ignore):
-    pass
+class CustomEnvModel(BaseEnvModel):
+    model_config = ConfigDict(extra="ignore")  # type: ignore[typeddict-item]
 
 
 class CoreVariablesModel(BaseModel):
@@ -799,6 +717,7 @@ def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path
 
 def validate_configuration(conf: Configuration, core: bool) -> None:
     if conf:
+
         try:
             if core:
                 CoreConfigurationModel(**conf)

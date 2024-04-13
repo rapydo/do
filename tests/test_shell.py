@@ -4,7 +4,6 @@ This module will test the shell command
 
 import signal
 
-import pytest
 from faker import Faker
 
 from controller.app import Configuration
@@ -22,7 +21,6 @@ from tests import (
 )
 
 
-@pytest.mark.flaky(reruns=2)
 def test_all(capfd: Capture, faker: Faker) -> None:
     execute_outside(capfd, "shell backend ls")
 
