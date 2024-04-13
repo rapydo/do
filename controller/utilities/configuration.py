@@ -1,11 +1,12 @@
+import sys
 from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Annotated, Dict, List, Optional, Tuple, TypedDict, Union, cast
+from typing import Dict, List, Optional, Tuple, TypedDict, Union, cast
 
 import yaml
 from glom import glom
-from pydantic import BaseModel, ConfigDict, Extra, Field, PositiveInt, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, PositiveInt, ValidationError
 
 from controller import (
     COMPOSE_FILE_VERSION,
@@ -15,6 +16,13 @@ from controller import (
     log,
     print_and_exit,
 )
+
+# py38
+if sys.version_info.major == 3 and sys.version_info.minor == 8:
+    from typing_extensions import Annotated
+else:
+    from typing import Annotated  # type: ignore
+
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
