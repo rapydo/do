@@ -208,7 +208,7 @@ class PLACEHOLDER_VALUE(Enum):
 
 
 Port = Annotated[int, Field(gt=0, le=65535)]
-NullablePort = Annotated[int, Field(gt=0, le=65535)]
+NullablePort = Annotated[int, Field(ge=0, le=65535)]
 PasswordScore = Annotated[int, Field(ge=0, le=4)]
 GzipCompressionLevel = Annotated[int, Field(ge=1, le=9)]
 NonNegativeInt = Annotated[int, Field(ge=0)]
