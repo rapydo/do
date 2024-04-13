@@ -497,11 +497,11 @@ class BaseEnvModel(BaseModel):
 
 
 class CoreEnvModel(BaseEnvModel):
-    model_config = ConfigDict(extra="forbid")  # type: ignore[typeddict-item]
+    model_config = ConfigDict(extra="forbid")
 
 
 class CustomEnvModel(BaseEnvModel):
-    model_config = ConfigDict(extra="ignore")  # type: ignore[typeddict-item]
+    model_config = ConfigDict(extra="ignore")
 
 
 class CoreVariablesModel(BaseModel):
