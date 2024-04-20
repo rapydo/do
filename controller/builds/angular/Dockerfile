@@ -16,7 +16,7 @@ ENV NODE_PATH /opt/node_modules
 # used by print_versions
 ENV ANGULAR_VERSION 15.2.11
 
-RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.5.0 sitemap-generator-cli@7.5.0 --force
+RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.5.1 sitemap-generator-cli@7.5.0 --force
 
 RUN npm install --prefix /opt dotenv@16.4.5 deepmerge@4.3.1 ajv@8.12.0 ajv-formats@2.1.1
 
