@@ -54,4 +54,4 @@ def interfaces(
         return None
 
     # Deprecated since 2.1
-    print_and_exit("Interfaces command is replaced by rapydo run {}", service)
+    print_and_exit("Interfaces command is replaced by rapydo run {}", service.value)
