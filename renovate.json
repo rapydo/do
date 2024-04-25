@@ -109,6 +109,13 @@
       "matchUpdateTypes": ["patch"],
       "automerge": true,
       "automergeStrategy": "squash"
+    },
+    {
+      "groupName": "test-deps",
+      "matchManagers": ["pip_requirements"],
+      "fileMatch": ["^requirements.dev.txt$", "^requirements.types.txt$"],
+      "automerge": true,
+      "automergeStrategy": "squash"
     }
   ]
 }
