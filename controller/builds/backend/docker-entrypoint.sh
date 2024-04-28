@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+export PATH="${PATH}:/opt/venv/bin/"
+
 if [[ ! -t 0 ]]; then
     /bin/bash /etc/banner.sh
 fi

@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ARG RAPYDO_VERSION
 RUN test -n "$RAPYDO_VERSION"
@@ -25,8 +25,6 @@ ENV PYTHONPATH="${CODE_DIR}"
 
 ## preesed tzdata, update package index, upgrade packages and install needed software
 
-# is libbz2-dev also needed here? Added to the modified version for hld and nig
-# is liblzma-dev also needed here? Added to the modified version for nig
 RUN echo "tzdata tzdata/Areas select Etc" > /tmp/preseed.txt; \
      echo "tzdata tzdata/Zones/Europe select UTC" >> /tmp/preseed.txt; \
      debconf-set-selections /tmp/preseed.txt \
@@ -34,16 +32,18 @@ RUN echo "tzdata tzdata/Areas select Etc" > /tmp/preseed.txt; \
      && apt-get dist-upgrade --yes -qq \
      && apt-get install --yes --no-install-recommends \
      tzdata bash file less vim curl wget telnet iputils-ping sysstat git zip unzip build-essential gosu cron ca-certificates libgeos-dev \
-     python${PYTHON_VERSION} python${PYTHON_VERSION}-dev \
-     python3-gdbm python3-setuptools \
-     && ln -sf /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 \
-     && curl --silent https://bootstrap.pypa.io/get-pip.py --output get-pip.py \
-     && python3 get-pip.py \
-     && rm get-pip.py \
+     python${PYTHON_VERSION} python${PYTHON_VERSION}-dev python${PYTHON_VERSION}-venv \
+     python3-gdbm python3-setuptools python3-pip \
      && apt-get autoremove --yes && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/requirements.txt
-RUN pip3 install --upgrade --no-cache-dir -r /tmp/requirements.txt && pip3 install --upgrade --no-cache-dir git+https://github.com/rapydo/http-api.git@$RAPYDO_VERSION#egg=rapydo_http[dev]
+RUN /usr/bin/python${PYTHON_VERSION} -m venv /opt/venv && /opt/venv/bin/pip3 install --upgrade --no-cache-dir -r /tmp/requirements.txt && /opt/venv/bin/pip3 install --upgrade --no-cache-dir git+https://github.com/rapydo/http-api.git@$RAPYDO_VERSION#egg=rapydo_http[dev]
+
+RUN for f in /opt/venv/bin/*; do \
+        if [ -x "$f" ]; then \
+            ln -s "$f" "/usr/bin/$(basename $f)"; \
+        fi \
+    done
 
 RUN useradd \
     -r -M -d /home/$APIUSER -s /bin/bash -p ! \
@@ -68,7 +68,7 @@ COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY ./docker-entrypoint-celery.sh /usr/local/bin/docker-entrypoint-celery
 
 WORKDIR $CODE_DIR
-ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
+ENTRYPOINT ["/opt/venv/bin/dumb-init", "--"]
 STOPSIGNAL SIGINT
 CMD ["docker-entrypoint", "rest"]
 
