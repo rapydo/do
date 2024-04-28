@@ -6,7 +6,6 @@ and will only use the specific configuration needed by the test itself
 
 import os
 from pathlib import Path
-from typing import List
 
 import pytest
 
@@ -331,7 +330,7 @@ def test_create(capfd: Capture) -> None:
     project_configuration = "projects/testcelery/project_configuration.yaml"
 
     def verify_celery_configuration(
-        services_list: List[str], broker: str, backend: str
+        services_list: list[str], broker: str, backend: str
     ) -> None:
         services = "--service celery"
         if services_list:

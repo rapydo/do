@@ -13,7 +13,7 @@ import stat
 import sys
 import tempfile
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import requests
 from packaging.version import Version
@@ -152,7 +152,7 @@ class Packages:
     def get_bin_version(
         cls,
         exec_cmd: str,
-        option: Optional[List[str]] = None,
+        option: Optional[list[str]] = None,
         clean_output: bool = True,
     ) -> Optional[str]:
         """
@@ -184,7 +184,7 @@ class Packages:
 
             # That's all... this magic receipt is able to extract
             # version information from most of outputs, e.g.
-            # Python 3.8.2
+            # Python 3.12.1
             # Docker version 19.03.8, build afacb8b7f0
             # git version 2.25.1
             # rapydo version 0.7.x
@@ -340,7 +340,7 @@ class Packages:
         log.info("Docker buildx installed version: {}", v)
 
     @staticmethod
-    def execute_command(command: str, parameters: List[str]) -> str:
+    def execute_command(command: str, parameters: list[str]) -> str:
         try:
             # Pattern in plumbum library for executing a shell command
             local_command = local[command]

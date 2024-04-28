@@ -5,7 +5,7 @@ Utilities to handle projects' structure
 import os
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from controller import (
     BACKUP_DIR,
@@ -26,29 +26,29 @@ GITKEEP = ".gitkeep"
 
 class Project:
     def __init__(self) -> None:
-        self.expected_main_folders: List[Path] = [PROJECT_DIR, DATA_DIR, SUBMODULES_DIR]
+        self.expected_main_folders: list[Path] = [PROJECT_DIR, DATA_DIR, SUBMODULES_DIR]
         # Will be verifed by check and added by create
-        self.expected_folders: List[Path] = []
-        self.expected_files: List[Path] = []
+        self.expected_folders: list[Path] = []
+        self.expected_files: list[Path] = []
         # Copied as they are, no templating (used for binary files, like images)
-        self.raw_files: List[Path] = []
+        self.raw_files: list[Path] = []
         # Intended to be immutable, check will raise warning when differs
-        self.fixed_files: List[Path] = []
+        self.fixed_files: list[Path] = []
         # Not verified, added by create if --add-optionals
-        self.optionals_folders: List[Path] = []
-        self.optionals_files: List[Path] = []
+        self.optionals_folders: list[Path] = []
+        self.optionals_files: list[Path] = []
         # Created in data if missing
-        self.data_folders: List[Path] = []
-        self.data_files: List[Path] = []
+        self.data_folders: list[Path] = []
+        self.data_files: list[Path] = []
         # check will raise an error if these files will be found
-        self.obsolete_files: List[Path] = []
-        self.suggested_gitkeep: List[Path] = []
+        self.obsolete_files: list[Path] = []
+        self.suggested_gitkeep: list[Path] = []
 
     def p_path(self, *args: str) -> Path:
         return PROJECT_DIR.joinpath(self.project, *args)
 
     def load_project_scaffold(
-        self, project: str, auth: Optional[str], services: Optional[List[str]] = None
+        self, project: str, auth: Optional[str], services: Optional[list[str]] = None
     ) -> bool:
         if services is None:
             services = []

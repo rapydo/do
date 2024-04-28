@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 from urllib.parse import urlparse
 
 import pytz
@@ -173,7 +173,7 @@ def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
 
 def check_file_younger_than(
     gitobj: Repo, filename: Path, timestamp: Union[str, float]
-) -> Tuple[bool, float, datetime]:
+) -> tuple[bool, float, datetime]:
     try:
         commits = gitobj.blame(rev="HEAD", file=str(filename))
     except GitCommandError:
@@ -195,13 +195,13 @@ def check_file_younger_than(
     )
 
 
-def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
+def get_unstaged_files(gitobj: Repo) -> dict[str, list[str]]:
     """
     ref:
     http://gitpython.readthedocs.io/en/stable/tutorial.html#obtaining-diff-information
     """
 
-    diff: List[Diff] = []
+    diff: list[Diff] = []
     diff.extend(gitobj.index.diff(gitobj.head.commit))
     diff.extend(gitobj.index.diff(None))
 
@@ -211,7 +211,7 @@ def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
     }
 
 
-def print_diff(gitobj: Repo, unstaged: Dict[str, List[str]]) -> bool:
+def print_diff(gitobj: Repo, unstaged: dict[str, list[str]]) -> bool:
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
     if not changed and not untracked:

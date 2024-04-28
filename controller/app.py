@@ -9,19 +9,9 @@ import shutil
 import sys
 import time
 import warnings
+from collections.abc import Iterable
 from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    TypedDict,
-    Union,
-    cast,
-)
+from typing import Any, Optional, TypedDict, Union, cast
 
 import click
 import requests
@@ -81,10 +71,10 @@ class Configuration:
     # This is the final configuration (defaults + project + projectrc)
     specs: configuration.Configuration = {}
     services_list: Optional[str]
-    environment: Dict[str, str]
+    environment: dict[str, str]
 
     action: Optional[str] = None
-    parameters: List[str] = []
+    parameters: list[str] = []
 
     production: bool = False
     testing: bool = False
@@ -117,7 +107,7 @@ class Configuration:
     FORCE_COMPOSE_ENGINE: bool = False
 
     @staticmethod
-    def set_action(action: Optional[str], params: Dict[str, Any]) -> None:
+    def set_action(action: Optional[str], params: dict[str, Any]) -> None:
         Configuration.action = action
         Configuration.initialize = Configuration.action == "init"
         Configuration.update = Configuration.action == "update"
@@ -242,7 +232,7 @@ def controller_cli_options(
         envvar="TESTING",
         show_default=False,
     ),
-    environment: List[str] = typer.Option(
+    environment: list[str] = typer.Option(
         [],
         "--env",
         "-e",
@@ -325,10 +315,10 @@ def controller_cli_options(
 class CommandsData:
     def __init__(
         self,
-        files: List[Path],
-        base_files: List[Path],
-        services: List[str],
-        active_services: List[str],
+        files: list[Path],
+        base_files: list[Path],
+        services: list[str],
+        active_services: list[str],
         base_services: ComposeServices,
         compose_config: ComposeServices,
     ):
@@ -341,7 +331,7 @@ class CommandsData:
 
         core_services = list(base_services.keys())
         all_services = list(compose_config.keys())
-        self.custom_services: List[str] = [
+        self.custom_services: list[str] = [
             s for s in all_services if s not in core_services
         ]
 
@@ -357,8 +347,8 @@ class Application:
     controller: Optional["Application"] = None
     project_scaffold = Project()
     data: CommandsData
-    gits: Dict[str, GitRepo] = {}
-    env: Dict[str, EnvType] = {}
+    gits: dict[str, GitRepo] = {}
+    env: dict[str, EnvType] = {}
 
     base_services: ComposeServices
     compose_config: ComposeServices
@@ -366,11 +356,11 @@ class Application:
     def __init__(self) -> None:
         Application.controller = self
 
-        self.active_services: List[str] = []
-        self.files: List[Path] = []
-        self.base_files: List[Path] = []
+        self.active_services: list[str] = []
+        self.files: list[Path] = []
+        self.base_files: list[Path] = []
         self.services = None
-        self.enabled_services: List[str] = []
+        self.enabled_services: list[str] = []
 
         if not PROJECT_DIR.is_dir():
             project_dir = None
@@ -768,8 +758,8 @@ You can use of one:
 
     def get_compose_configuration(
         self, enabled_services: Optional[Iterable[str]] = None
-    ) -> Tuple[ComposeServices, ComposeServices]:
-        compose_files: List[Path] = []
+    ) -> tuple[ComposeServices, ComposeServices]:
+        compose_files: list[Path] = []
 
         MODE = f"{Configuration.stack}.yml"
         customconf = Configuration.ABS_PROJECT_PATH.joinpath(CONTAINERS_YAML_DIRNAME)
@@ -1041,7 +1031,7 @@ You can use of one:
                 whandle.write(f"{key}={value}\n")
 
     @staticmethod
-    def create_datafile(services: List[str], active_services: List[str]) -> None:
+    def create_datafile(services: list[str], active_services: list[str]) -> None:
         try:
             DATAFILE.unlink()
         except FileNotFoundError:
@@ -1057,18 +1047,18 @@ You can use of one:
             json.dump(data, outfile)
 
     @staticmethod
-    def parse_datafile(key: str) -> List[str]:
+    def parse_datafile(key: str) -> list[str]:
         try:
             with open(DATAFILE) as json_file:
                 datafile = json.load(json_file)
-                return cast(List[str], datafile.get(key, []))
+                return cast(list[str], datafile.get(key, []))
         except FileNotFoundError:
             return []
 
     @staticmethod
     def autocomplete_service(
         ctx: click.core.Context, param: click.Parameter, incomplete: str
-    ) -> List[str]:
+    ) -> list[str]:
         values = Application.parse_datafile("services")
         if not incomplete:
             return values
@@ -1077,7 +1067,7 @@ You can use of one:
     @staticmethod
     def autocomplete_allservice(
         ctx: click.core.Context, param: click.Parameter, incomplete: str
-    ) -> List[str]:
+    ) -> list[str]:
         values = Application.parse_datafile("allservices")
         if not incomplete:
             return values
@@ -1086,7 +1076,7 @@ You can use of one:
     @staticmethod
     def autocomplete_submodule(
         ctx: click.core.Context, param: click.Parameter, incomplete: str
-    ) -> List[str]:
+    ) -> list[str]:
         values = Application.parse_datafile("submodules")
         if not incomplete:
             return values
@@ -1094,7 +1084,7 @@ You can use of one:
 
     @staticmethod
     def check_placeholders_and_passwords(
-        compose_services: ComposeServices, active_services: List[str]
+        compose_services: ComposeServices, active_services: list[str]
     ) -> None:
         if not active_services:  # pragma: no cover
             print_and_exit(
@@ -1108,15 +1098,15 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 "Active services: {}", ", ".join(active_services), log_to_file=True
             )
 
-        extra_services: List[str] = []
+        extra_services: list[str] = []
         if Configuration.swarm_mode and REGISTRY not in active_services:
             extra_services.append(REGISTRY)
 
         all_services = active_services + extra_services
 
-        missing: Dict[str, Set[str]] = {}
-        passwords: Dict[str, str] = {}
-        passwords_services: Dict[str, Set[str]] = {}
+        missing: dict[str, set[str]] = {}
+        passwords: dict[str, str] = {}
+        passwords_services: dict[str, set[str]] = {}
         for service_name in all_services:
             # This can happens with `rapydo run swagger` because in case of run
             # the controller_init method is executed without passing the service
@@ -1202,7 +1192,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
         return None
 
     @staticmethod
-    def git_update(ignore_submodule: List[str]) -> None:
+    def git_update(ignore_submodule: list[str]) -> None:
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping update on {}", name)
@@ -1238,9 +1228,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
 
                 do_dir = Path(Application.gits["do"].working_dir)
                 if do_dir.is_symlink():
-                    do_dir = do_dir.resolve()
-                    # This can be used starting from py39
-                    # do_dir = do_dir.readlink()
+                    do_dir = do_dir.readlink()
 
                 if do_dir == installation_path:
                     log.info(
@@ -1257,7 +1245,7 @@ and add the variable "ACTIVATE_DESIREDSERVICE: 1"
                 log.warning("Controller submodule folder can't be found")
 
     @staticmethod
-    def git_checks(ignore_submodule: List[str]) -> None:
+    def git_checks(ignore_submodule: list[str]) -> None:
         for name, gitobj in Application.gits.items():
             if name in ignore_submodule:
                 log.debug("Skipping checks on {}", name)

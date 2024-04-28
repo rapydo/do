@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from controller.deploy.docker import Docker
 from controller.utilities import services
 
@@ -8,7 +6,7 @@ PASSWORD_VARIABLES = ["AUTH_DEFAULT_PASSWORD"]
 IS_RUNNING_NEEDED = True
 
 
-def password(container: Tuple[str, str], old_password: str, new_password: str) -> None:
+def password(container: tuple[str, str], old_password: str, new_password: str) -> None:
     docker = Docker()
     # restapi init need the env variable to be updated but can't be done after
     # the restart because it often fails because unable to re-connect to

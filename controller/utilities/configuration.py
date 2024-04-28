@@ -1,8 +1,7 @@
-import sys
 from copy import deepcopy
 from enum import Enum, IntEnum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TypedDict, Union, cast
+from typing import Annotated, Optional, TypedDict, Union, cast
 
 import yaml
 from glom import glom
@@ -16,13 +15,6 @@ from controller import (
     log,
     print_and_exit,
 )
-
-# py38
-if sys.version_info.major == 3 and sys.version_info.minor == 8:
-    from typing_extensions import Annotated
-else:
-    from typing import Annotated  # type: ignore
-
 
 PROJECTS_DEFAULTS_FILE = Path("projects_defaults.yaml")
 PROJECTS_PROD_DEFAULTS_FILE = Path("projects_prod_defaults.yaml")
@@ -46,16 +38,16 @@ class Submodule(TypedDict):
 
 
 class Variables(TypedDict):
-    submodules: Dict[str, Submodule]
-    roles: Dict[str, str]
-    env: Dict[str, EnvType]
+    submodules: dict[str, Submodule]
+    roles: dict[str, str]
+    env: dict[str, EnvType]
 
 
 # total is False because of .projectrc and project_configuration
 # But should be total=True in case of projects_defaults
 class Configuration(TypedDict, total=False):
     project: Project
-    tags: Dict[str, str]
+    tags: dict[str, str]
     variables: Variables
 
 
@@ -505,26 +497,26 @@ class CustomEnvModel(BaseEnvModel):
 
 
 class CoreVariablesModel(BaseModel):
-    submodules: Dict[str, SubmoduleModel]
-    roles: Dict[str, str]
+    submodules: dict[str, SubmoduleModel]
+    roles: dict[str, str]
     env: CoreEnvModel
 
 
 class CustomVariablesModel(BaseModel):
-    submodules: Dict[str, SubmoduleModel]
-    roles: Dict[str, str]
+    submodules: dict[str, SubmoduleModel]
+    roles: dict[str, str]
     env: CustomEnvModel
 
 
 class CoreConfigurationModel(BaseModel):
     project: ProjectModel
-    tags: Dict[str, str]
+    tags: dict[str, str]
     variables: CoreVariablesModel
 
 
 class CustomConfigurationModel(BaseModel):
     project: ProjectModel
-    tags: Dict[str, str]
+    tags: dict[str, str]
     variables: CustomVariablesModel
 
 
@@ -535,7 +527,7 @@ def read_configuration(
     submodules_path: Path,
     read_extended: bool = True,
     production: bool = False,
-) -> Tuple[Configuration, Optional[str], Optional[Path], Configuration]:
+) -> tuple[Configuration, Optional[str], Optional[Path], Configuration]:
     """
     Read default configuration
     """
@@ -692,9 +684,9 @@ def load_yaml_file(
             print_and_exit("Failed to read [{}]: {}", file, str(e))
 
 
-def read_composer_yamls(config_files: List[Path]) -> Tuple[List[Path], List[Path]]:
-    base_files: List[Path] = []
-    all_files: List[Path] = []
+def read_composer_yamls(config_files: list[Path]) -> tuple[list[Path], list[Path]]:
+    base_files: list[Path] = []
+    all_files: list[Path] = []
 
     # YAML CHECK UP
     for path in config_files:
@@ -743,7 +735,7 @@ def validate_configuration(conf: Configuration, core: bool) -> None:
             print_and_exit(str(e))
 
 
-def validate_env(env: Dict[str, EnvType]) -> None:
+def validate_env(env: dict[str, EnvType]) -> None:
     try:
         BaseEnvModel(**env)
     except ValidationError as e:

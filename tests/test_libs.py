@@ -8,7 +8,7 @@ import re
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Union
+from typing import Union
 
 import pytest
 from faker import Faker
@@ -230,7 +230,7 @@ def test_normalize_placeholder_variable() -> None:
 
 def test_get_celerybeat_scheduler() -> None:
     short2 = services.get_celerybeat_scheduler
-    env: Dict[str, Union[None, str, int, float]] = {}
+    env: dict[str, Union[None, str, int, float]] = {}
     assert short2(env) == "Unknown"
 
     # Both ACTIVATE_CELERYBEAT and CELERY_BACKEND are required

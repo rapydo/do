@@ -1,5 +1,3 @@
-from typing import List
-
 import typer
 
 from controller import log
@@ -9,7 +7,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Stop running containers, but do not remove them")
 def stop(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be stopped",
         shell_complete=Application.autocomplete_service,

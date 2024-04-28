@@ -4,7 +4,7 @@ Parse dockerfiles and check for builds
 
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, TypedDict
+from typing import Optional, TypedDict
 
 from python_on_whales.exceptions import NoSuchImage
 
@@ -24,11 +24,11 @@ name_priorities = [
 
 class TemplateInfo(TypedDict):
     service: str
-    services: List[str]
+    services: list[str]
     path: Optional[Path]
 
 
-BuildInfo = Dict[str, TemplateInfo]
+BuildInfo = dict[str, TemplateInfo]
 
 
 def name_priority(name1: str, name2: str) -> str:
@@ -100,9 +100,7 @@ def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
         for line in reversed(f.readlines()):
             line = line.strip().lower()
             if line.startswith("from "):
-                # from py39 it will be:
-                # image = line.removeprefix("from ")
-                image = line[5:]
+                image = line.removeprefix("from ")
                 if " as " in image:
                     image = image.split(" as ")[0]
 
@@ -121,8 +119,8 @@ def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
 
 def find_templates_override(
     services: ComposeServices, templates: BuildInfo
-) -> Dict[str, str]:
-    builds: Dict[str, str] = {}
+) -> dict[str, str]:
+    builds: dict[str, str] = {}
 
     for service in services.values():
         if (
@@ -144,15 +142,15 @@ def find_templates_override(
     return builds
 
 
-def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[str]:
+def get_non_redundant_services(templates: BuildInfo, targets: list[str]) -> set[str]:
     # Removed redundant services
-    services_normalization_mapping: Dict[str, str] = {}
+    services_normalization_mapping: dict[str, str] = {}
 
     for s in templates.values():
         for s1 in s["services"]:
             services_normalization_mapping[s1] = s["service"]
 
-    clean_targets: Set[str] = set()
+    clean_targets: set[str] = set()
 
     for t in targets:
         clean_t = services_normalization_mapping.get(t, t)
@@ -162,7 +160,7 @@ def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[
 
 
 def verify_available_images(
-    services: List[str],
+    services: list[str],
     compose_config: ComposeServices,
     base_services: ComposeServices,
     is_run_command: bool = False,

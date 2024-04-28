@@ -7,15 +7,13 @@ import os
 import random
 import string
 from pathlib import Path
-from typing import Dict, List, Optional, TypedDict
+from typing import Optional, TypedDict
 
 from jinja2 import DebugUndefined, Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound, UndefinedError
 from zxcvbn import zxcvbn  # type: ignore
 
 from controller import TEMPLATE_DIR, log, print_and_exit
-
-# TemplateDataType = Dict[str, Union[bool, float, str, List[str], Dict[str, str], None]]
 
 
 class TemplateDataType(TypedDict, total=False):
@@ -29,8 +27,8 @@ class TemplateDataType(TypedDict, total=False):
     swarm: bool
     production: bool
     testing: bool
-    services: List[str]
-    env_variables: Dict[str, str]
+    services: list[str]
+    env_variables: dict[str, str]
     enable_postgres: bool
     enable_neo4j: bool
     enable_rabbit: bool

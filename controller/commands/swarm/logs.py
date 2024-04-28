@@ -1,5 +1,3 @@
-from typing import List
-
 import typer
 
 from controller import log, print_and_exit
@@ -9,7 +7,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Watch log tails of services")
 def logs(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be inspected",
         shell_complete=Application.autocomplete_service,

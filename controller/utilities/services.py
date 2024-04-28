@@ -1,5 +1,6 @@
 import warnings
-from typing import Dict, Iterable, List, Optional, Union
+from collections.abc import Iterable
+from typing import Optional, Union
 
 from controller import ComposeServices, EnvType, log, print_and_exit
 from controller.project import ANGULAR
@@ -7,9 +8,9 @@ from controller.project import ANGULAR
 
 def get_services(
     services: Optional[Union[str, Iterable[str]]],
-    default: List[str],
-) -> List[str]:
-    return_list: List[str] = []
+    default: list[str],
+) -> list[str]:
+    return_list: list[str] = []
     if not services:
         return_list = sorted(default)
     elif isinstance(services, str):
@@ -18,7 +19,7 @@ def get_services(
     else:
         return_list = sorted(services)
 
-    excluded_services_list: List[str] = [
+    excluded_services_list: list[str] = [
         s[1:] for s in return_list if s.startswith("_")
     ]
 
@@ -36,8 +37,8 @@ def get_services(
 
 
 def walk_services(
-    actives: List[str], dependecies: Dict[str, List[str]], index: int = 0
-) -> List[str]:
+    actives: list[str], dependecies: dict[str, list[str]], index: int = 0
+) -> list[str]:
     if index >= len(actives):
         return actives
 
@@ -53,14 +54,14 @@ def walk_services(
     return walk_services(actives, dependecies, index)
 
 
-def find_active(services: ComposeServices) -> List[str]:
+def find_active(services: ComposeServices) -> list[str]:
     """
     Check only services involved in current mode,
     which is equal to services 'activated' + 'depends_on'.
     """
 
-    dependencies: Dict[str, List[str]] = {}
-    base_actives: List[str] = []
+    dependencies: dict[str, list[str]] = {}
+    base_actives: list[str] = []
 
     for name, service in services.items():
         dependencies[name] = list(service.depends_on.keys())
@@ -81,7 +82,7 @@ def find_active(services: ComposeServices) -> List[str]:
     return active_services
 
 
-vars_to_services_mapping: Dict[str, str] = {
+vars_to_services_mapping: dict[str, str] = {
     "FLOWER_USER": "flower",
     "FLOWER_PASSWORD": "flower",
     "RABBITMQ_USER": "rabbit",
@@ -136,7 +137,7 @@ def normalize_placeholder_variable(key: str) -> str:
     return key
 
 
-def get_celerybeat_scheduler(env: Dict[str, EnvType]) -> str:
+def get_celerybeat_scheduler(env: dict[str, EnvType]) -> str:
     if env.get("ACTIVATE_CELERYBEAT", "0") == "0":
         return "Unknown"
 

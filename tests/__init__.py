@@ -5,7 +5,7 @@ from datetime import datetime
 from importlib import reload
 from pathlib import Path
 from types import TracebackType
-from typing import Any, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Optional, TypeVar
 
 import pytest
 from faker import Faker
@@ -40,7 +40,7 @@ class TemporaryRemovePath:
 
     def __exit__(
         self,
-        _type: Optional[Type[Exception]],
+        _type: Optional[type[Exception]],
         value: Optional[Exception],
         tb: Optional[TracebackType],
     ) -> bool:
@@ -64,7 +64,7 @@ def mock_KeyboardInterrupt(signum, frame):  # type: ignore
     raise KeyboardInterrupt("Time is up")
 
 
-def exec_command(capfd: Capture, command: str, *asserts: str) -> List[str]:
+def exec_command(capfd: Capture, command: str, *asserts: str) -> list[str]:
     # This is needed to reload the LOG dir
     import controller
 
@@ -149,7 +149,7 @@ def create_project(
     name: Optional[str] = None,
     auth: str = "postgres",
     frontend: str = "angular",
-    services: Optional[List[str]] = None,
+    services: Optional[list[str]] = None,
     extra: str = "",
 ) -> None:
     opt = "--current --origin-url https://your_remote_git/your_project.git"
@@ -226,7 +226,7 @@ def get_container_start_date(
         exec_command(capfd, "status")
 
     # Optional is needed because docker.get_container returns Optional[str]
-    container: Optional[Tuple[str, str]] = None
+    container: Optional[tuple[str, str]] = None
 
     docker = Docker()
     if service == REGISTRY:

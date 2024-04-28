@@ -2,8 +2,6 @@
 Reload services
 """
 
-from typing import List
-
 import typer
 from python_on_whales.utils import DockerException
 
@@ -14,7 +12,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Reload services")
 def reload(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be reloaded",
         shell_complete=Application.autocomplete_service,

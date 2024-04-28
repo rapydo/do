@@ -3,7 +3,6 @@ Start services for the current configuration
 """
 
 import time
-from typing import List
 
 import typer
 from python_on_whales.exceptions import DockerException
@@ -31,7 +30,7 @@ def wait_stack_deploy(docker: Docker) -> None:
 @Application.app.command(help="Start services for the current configuration")
 # Maybe to be renamed in deploy?
 def start(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be started",
         shell_complete=Application.autocomplete_service,

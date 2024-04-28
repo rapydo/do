@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 
 from controller import log, print_and_exit
 from controller.deploy.docker import Docker
@@ -8,7 +8,7 @@ SERVICE_NAME = __name__
 
 
 def backup(
-    container: Optional[Tuple[str, str]], now: datetime, force: bool, dry_run: bool
+    container: Optional[tuple[str, str]], now: datetime, force: bool, dry_run: bool
 ) -> None:
     if container and not force:
         print_and_exit(

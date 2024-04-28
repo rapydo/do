@@ -6,7 +6,7 @@ import os
 import shutil
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 import typer
 
@@ -47,7 +47,7 @@ def create(
         ..., "--frontend", help="Frontend framework to enable"
     ),
     extend: str = typer.Option(None, "--extend", help="Extend from another project"),
-    services: List[ServiceTypes] = typer.Option(
+    services: list[ServiceTypes] = typer.Option(
         [],
         "--service",
         "-s",
@@ -57,7 +57,7 @@ def create(
     origin_url: Optional[str] = typer.Option(
         None, "--origin-url", help="Set the git origin url for the project"
     ),
-    envs: List[str] = typer.Option(
+    envs: list[str] = typer.Option(
         None,
         "--env",
         "-e",
@@ -111,7 +111,7 @@ def create(
         if not PROJECT_DIR.joinpath(extend).is_dir():
             print_and_exit("Invalid extend value: project {} not found", extend)
 
-    services_list: List[str] = [service.value for service in services]
+    services_list: list[str] = [service.value for service in services]
     create_project(
         project_name=project_name,
         auth=auth.value,
@@ -149,9 +149,9 @@ def create_project(
     project_name: str,
     auth: str,
     frontend: str,
-    services: List[str],
+    services: list[str],
     extend: Optional[str],
-    envs: Optional[List[str]] = None,
+    envs: Optional[list[str]] = None,
     auto: bool = False,
     force: bool = False,
     force_current: bool = False,
@@ -302,11 +302,11 @@ def create_project(
                 print_and_exit("File is missing: {}", p)
 
 
-def parse_env_variables(envs: Optional[List[str]]) -> Dict[str, str]:
+def parse_env_variables(envs: Optional[list[str]]) -> dict[str, str]:
     if not envs:
         return {}
 
-    env_variables: Dict[str, str] = {}
+    env_variables: dict[str, str] = {}
     for env in envs:
         e = env.split("=")
         if len(e) != 2:

@@ -1,5 +1,3 @@
-from typing import List
-
 import typer
 
 from controller import REGISTRY, log
@@ -9,7 +7,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Stop and remove containers")
 def remove(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be removed",
         shell_complete=Application.autocomplete_service,
@@ -26,7 +24,7 @@ def remove(
         Application.serialize_parameter("", services),
     )
 
-    remove_extras: List[str] = []
+    remove_extras: list[str] = []
     for extra in (
         REGISTRY,
         "adminer",

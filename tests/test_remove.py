@@ -3,7 +3,6 @@ This module will test the remove command
 """
 
 import time
-from typing import List, Tuple
 
 from python_on_whales import docker
 
@@ -21,8 +20,8 @@ from tests import (
 )
 
 
-def get_containers() -> List[str]:
-    containers: List[str] = []
+def get_containers() -> list[str]:
+    containers: list[str] = []
 
     for container in docker.container.list():
         name = container.name
@@ -50,11 +49,11 @@ def get_containers() -> List[str]:
     return sorted(containers)
 
 
-def get_networks() -> List[str]:
+def get_networks() -> list[str]:
     return [net.name for net in docker.network.list()]
 
 
-def count_volumes() -> Tuple[int, int]:
+def count_volumes() -> tuple[int, int]:
     named = 0
     unnamed = 0
 
@@ -94,7 +93,7 @@ def test_remove(capfd: Capture) -> None:
     # Even if nothing is running, remove is permitted both on Compose and Swarm
     exec_command(capfd, "remove", "Stack removed")
 
-    NONE: List[str] = []
+    NONE: list[str] = []
     if Configuration.swarm_mode:
         BACKEND_ONLY = ["rem_backend"]
         ALL = ["rem_backend", "rem_postgres"]

@@ -1,5 +1,5 @@
 import time
-from typing import Dict, List, Union
+from typing import Union
 
 import typer
 from python_on_whales import Service
@@ -30,7 +30,7 @@ def wait_network_removal(docker: Docker, network: str) -> None:
 
 @Application.app.command(help="Stop and remove services")
 def remove(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be removed",
         shell_complete=Application.autocomplete_service,
@@ -38,7 +38,7 @@ def remove(
 ) -> None:
     Application.print_command(Application.serialize_parameter("", services))
 
-    remove_extras: List[str] = []
+    remove_extras: list[str] = []
     for extra in (
         REGISTRY,
         "adminer",
@@ -83,7 +83,7 @@ def remove(
                 command=RED("rapydo start"),
             )
 
-        scales: Dict[Union[str, Service], int] = {}
+        scales: dict[Union[str, Service], int] = {}
         for service in Application.data.services:
             service_name = Docker.get_service(service)
             scales[service_name] = 0

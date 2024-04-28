@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from typing import List, Optional, Tuple, cast
+from typing import Optional, cast
 
 import typer
 import urllib3
@@ -14,7 +14,7 @@ from controller.utilities.tables import print_table
 
 @Application.app.command(help="Query the local registry")
 def images(
-    remove_images: List[str] = typer.Option(
+    remove_images: list[str] = typer.Option(
         [],
         "--rm",
         "--remove",
@@ -47,7 +47,7 @@ def images(
 
     catalog = r.json()
 
-    images: List[Tuple[str, str, str, int, Optional[datetime]]] = []
+    images: list[tuple[str, str, str, int, Optional[datetime]]] = []
     for repository in catalog.get("repositories", {}):
         # Fetch the tags under the repository identified by <name>
         r = docker.registry.send_request(f"{host}/v2/{repository}/tags/list")
@@ -88,13 +88,10 @@ def images(
         log.warning("This registry contains no images")
     else:
         log.info("This registry contains {} image(s):", len(images))
-        images_to_be_removed: List[Tuple[str, str, str]] = []
-        table: List[List[str]] = []
+        images_to_be_removed: list[tuple[str, str, str]] = []
+        table: list[list[str]] = []
         for img in images:
-            digest = img[0]
-            # to be replaced with removeprefix starting from py39
-            if digest.startswith("sha256:"):
-                digest = digest[7:]
+            digest = img[0].removeprefix("sha256:")
             _id = digest[0:12]
 
             repository = img[1]
@@ -107,7 +104,7 @@ def images(
             )
             creation_date = d.strftime("%Y-%m-%d %H:%M:%S") if d else "N/A"
 
-            image_line: List[str] = []
+            image_line: list[str] = []
 
             if to_be_removed:
                 image_line.append(f"[bold red]{repository}[/bold red]")

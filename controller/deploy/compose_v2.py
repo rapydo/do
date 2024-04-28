@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, Union
 
 import yaml
 from python_on_whales.components.compose.models import ComposeConfig
@@ -20,8 +20,8 @@ from controller.utilities import system
 from controller.utilities.tables import print_table
 
 Port = Union[str, int]
-PortMapping = Tuple[Port, Port]
-PortRangeMapping = Tuple[Port, Port, str]
+PortMapping = tuple[Port, Port]
+PortRangeMapping = tuple[Port, Port, str]
 
 # Starting from v2.0.0 _ is replaced by -
 COMPOSE_SEP = "-"
@@ -33,11 +33,11 @@ class Compose:
         self.docker = self.docker_wrapper.client
 
     def get_config(self) -> ComposeConfig:
-        # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
+        # return type is Union[ComposeConfig, dict[str, Any]] based on return_json
         return self.docker.compose.config(return_json=False)  # type: ignore
 
-    def get_config_json(self) -> Dict[str, Any]:
-        # return type is Union[ComposeConfig, Dict[str, Any]] based on return_json
+    def get_config_json(self) -> dict[str, Any]:
+        # return type is Union[ComposeConfig, dict[str, Any]] based on return_json
         return self.docker.compose.config(return_json=True)  # type: ignore
 
     @staticmethod
@@ -61,13 +61,13 @@ class Compose:
 
     def dump_config(
         self,
-        services: List[str],
+        services: list[str],
         set_registry: bool = True,
         v1_compatibility: bool = False,
     ) -> None:
         compose_config = self.get_config_json()
 
-        clean_config: Dict[str, Any] = {
+        clean_config: dict[str, Any] = {
             "version": compose_config.get("version", COMPOSE_FILE_VERSION),
             "networks": {},
             "volumes": {},
@@ -75,7 +75,7 @@ class Compose:
         }
         networks = set()
         volumes = set()
-        binds: Set[Path] = set()
+        binds: set[Path] = set()
 
         registry = self.docker_wrapper.registry.get_host()
         # Remove unused services, networks and volumes from compose configuration
@@ -165,10 +165,7 @@ class Compose:
                 device = volume_config["driver_opts"].get("device", "")
 
                 if device_type == "nfs" and device:
-                    # starting from py39
-                    # device = device.removeprefix(":")
-                    if device.startswith(":"):
-                        device = device[1:]
+                    device = device.removeprefix(":")
                     d = Path(device)
                     if not d.exists():
                         self.create_local_path(d, "volume path")
@@ -182,9 +179,9 @@ class Compose:
 
     def start_containers(
         self,
-        services: List[str],
+        services: list[str],
         force: bool = False,
-        scales: Optional[Dict[str, int]] = None,
+        scales: Optional[dict[str, int]] = None,
     ) -> None:
         if scales:
             # Based on rapydo scale implementation services is always a 1-length list
@@ -216,7 +213,7 @@ class Compose:
         self,
         service: str,
         command: Optional[str] = None,
-        publish: Optional[List[Union[PortMapping, PortRangeMapping]]] = None,
+        publish: Optional[list[Union[PortMapping, PortRangeMapping]]] = None,
         # used by interfaces
         detach: bool = False,
         user: Optional[str] = None,
@@ -274,7 +271,7 @@ class Compose:
             log.critical(e)
             return False
 
-    def get_running_services(self) -> Set[str]:
+    def get_running_services(self) -> set[str]:
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
         containers = set()
         try:
@@ -301,9 +298,9 @@ class Compose:
         except DockerException:
             return containers
 
-    def get_services_status(self, prefix: str) -> Dict[str, str]:
+    def get_services_status(self, prefix: str) -> dict[str, str]:
         prefix += COMPOSE_SEP
-        services_status: Dict[str, str] = dict()
+        services_status: dict[str, str] = dict()
         try:
             for container in self.docker.compose.ps():
                 name = container.name
@@ -326,11 +323,11 @@ class Compose:
         except DockerException:
             return services_status
 
-    def status(self, services: List[str]) -> None:
+    def status(self, services: list[str]) -> None:
         print("")
 
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
-        table: List[List[str]] = []
+        table: list[list[str]] = []
         for container in self.docker.compose.ps():
             name = container.name
             if not name.startswith(prefix):
@@ -393,7 +390,7 @@ class Compose:
                 table_title="List of containers",
             )
 
-    def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
+    def logs(self, services: list[str], follow: bool = False, tail: int = 500) -> None:
         if len(services) > 1:
             timestamps = False
             log_prefix = True

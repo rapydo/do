@@ -5,22 +5,22 @@ All core commands implemented in RAPyDo
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 from types import ModuleType
-from typing import Dict, Optional
+from typing import Optional
 
 from controller import PROJECT_DIR
 
-BACKUP_MODULES: Dict[str, ModuleType] = {}
-RESTORE_MODULES: Dict[str, ModuleType] = {}
-PASSWORD_MODULES: Dict[str, ModuleType] = {}
-TUNING_MODULES: Dict[str, ModuleType] = {}
+BACKUP_MODULES: dict[str, ModuleType] = {}
+RESTORE_MODULES: dict[str, ModuleType] = {}
+PASSWORD_MODULES: dict[str, ModuleType] = {}
+TUNING_MODULES: dict[str, ModuleType] = {}
 
 
-def load_module(path: Path) -> Dict[str, ModuleType]:
+def load_module(path: Path) -> dict[str, ModuleType]:
     # Initially it was:
     # for c in commands_folder.glob("[!_|.]*.py"):
     #     import_module(f"controller.commands.{c.stem}")
 
-    loaded_modules: Dict[str, ModuleType] = {}
+    loaded_modules: dict[str, ModuleType] = {}
     if path.is_dir():
         for c in path.glob("[!_|.]*.py"):
             spec = spec_from_file_location(c.stem, c)

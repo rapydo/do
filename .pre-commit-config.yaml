@@ -11,7 +11,7 @@ repos:
     rev: v3.15.2
     hooks:
       - id: pyupgrade
-        args: [--py38-plus]
+        args: [--py39-plus]
   - repo: https://github.com/ambv/black
     rev: 24.4.0
     hooks:
@@ -41,9 +41,6 @@ repos:
             # "--ignore-missing-imports",
 
             # This flag disallows usage of generic types that do not specify explicit type parameters.
-            # Moreover, built-in collections (such as list and dict)
-            # become disallowed as you should use their aliases from the typing module
-            # (such as List[int] and Dict[str, str]).
             "--disallow-any-generics",
             # This flag type checks the body of every function, regardless of whether it has type annotations.
             # (By default the bodies of functions without annotations are not type checked.)

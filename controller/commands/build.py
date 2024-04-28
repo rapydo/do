@@ -1,8 +1,6 @@
 """
-Force building of one or more services docker images
+Build docker images for configured services
 """
-
-from typing import List, Set
 
 import typer
 
@@ -18,7 +16,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Force building of one or more services docker images")
 def build(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be built",
         shell_complete=Application.autocomplete_service,
@@ -62,7 +60,7 @@ def build(
         docker.registry.ping()
         docker.registry.login()
 
-    images: Set[str] = set()
+    images: set[str] = set()
     if core:
         log.debug("Forcing rebuild of core builds")
         # Create merged compose file with core files only
@@ -88,7 +86,7 @@ def build(
     core_builds = find_templates_build(Application.data.base_services)
     all_builds = find_templates_build(Application.data.compose_config)
 
-    services_with_custom_builds: List[str] = []
+    services_with_custom_builds: list[str] = []
     for image, build in all_builds.items():
         if image not in core_builds:
             # this is used to validate the target Dockerfile:
@@ -97,7 +95,7 @@ def build(
             services_with_custom_builds.extend(build["services"])
             images.add(image)
 
-    targets: List[str] = []
+    targets: list[str] = []
     for service in Application.data.active_services:
         if Application.data.services and service not in Application.data.services:
             continue
@@ -122,7 +120,7 @@ def build(
     if Configuration.swarm_mode:
         registry = docker.registry.get_host()
 
-        local_images: List[str] = []
+        local_images: list[str] = []
         for img in images:
             new_tag = f"{registry}/{img}"
             docker.client.tag(img, new_tag)

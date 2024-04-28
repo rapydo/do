@@ -3,7 +3,7 @@ Start a single container
 """
 
 import os
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import typer
 
@@ -17,12 +17,12 @@ from controller.templating import password
 
 def get_publish_ports(
     service: str, change_first_port: Optional[int]
-) -> Optional[List[Union[PortMapping, PortRangeMapping]]]:
+) -> Optional[list[Union[PortMapping, PortRangeMapping]]]:
     service_config = Application.data.compose_config.get(service, None)
     if not service_config:
         print_and_exit("Services misconfiguration, can't find {}", service)
 
-    ports: List[Union[PortMapping, PortRangeMapping]] = []
+    ports: list[Union[PortMapping, PortRangeMapping]] = []
     if service_config.ports:
         for p in service_config.ports:
             port = change_first_port or p.published

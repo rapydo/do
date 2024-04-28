@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 
 from controller import log
 from controller.deploy.docker import Docker
@@ -8,7 +8,7 @@ SERVICE_NAME = __name__
 
 
 def backup(
-    container: Optional[Tuple[str, str]], now: datetime, force: bool, dry_run: bool
+    container: Optional[tuple[str, str]], now: datetime, force: bool, dry_run: bool
 ) -> None:
     docker = Docker()
 

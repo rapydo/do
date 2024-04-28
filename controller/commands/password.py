@@ -5,7 +5,7 @@ Manage services passwords
 import re
 from datetime import date, datetime, timedelta
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Optional, cast
 
 import typer
 from zxcvbn import zxcvbn  # type: ignore
@@ -29,11 +29,11 @@ SupportedServices = Enum(  # type: ignore
 
 # Note: can't directly extract yaml with comments because it is not supported
 # https://github.com/yaml/pyyaml/issues/90
-def parse_projectrc() -> Dict[str, datetime]:
+def parse_projectrc() -> dict[str, datetime]:
     if not PROJECTRC.exists():
         return {}
 
-    updates: Dict[str, datetime] = {}
+    updates: dict[str, datetime] = {}
     with open(PROJECTRC) as f:
         lines = f.readlines()
 
@@ -67,7 +67,7 @@ def parse_projectrc() -> Dict[str, datetime]:
     return updates
 
 
-def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
+def get_projectrc_variables_indentation(projectrc: list[str]) -> int:
     env_indentation = 0
     for line in projectrc:
         # save the indentation level of the env block
@@ -99,12 +99,12 @@ def get_projectrc_variables_indentation(projectrc: List[str]) -> int:
 
 # Note: can't directly use utilities in app.py because in this case we want to
 # maintain all values (not only templated variables) and we also want to keep comments
-def update_projectrc(variables: Dict[str, str]) -> None:
+def update_projectrc(variables: dict[str, str]) -> None:
     today = date.today().strftime("%Y-%m-%d")
     annotation = f"# {UPDATE_LABEL} {today}"
     with open(PROJECTRC) as f:
         lines = f.readlines()
-        append_additional_lines: List[str] = []
+        append_additional_lines: list[str] = []
 
         blanks = get_projectrc_variables_indentation(lines)
         if blanks == 0:  # pragma: no cover
@@ -144,8 +144,8 @@ def update_projectrc(variables: Dict[str, str]) -> None:
     Application.get_controller().make_env()
 
 
-def get_expired_passwords() -> List[Tuple[str, datetime]]:
-    expired_passwords: List[Tuple[str, datetime]] = []
+def get_expired_passwords() -> list[tuple[str, datetime]]:
+    expired_passwords: list[tuple[str, datetime]] = []
 
     last_updates = parse_projectrc()
     now = datetime.now()
@@ -232,7 +232,7 @@ def password(
         last_updates = parse_projectrc()
         now = datetime.now()
 
-        table: List[List[str]] = []
+        table: list[list[str]] = []
         for s in PASSWORD_MODULES:
             # This should never happens and can't be (easily) tested
             if s not in Application.data.base_services:  # pragma: no cover
@@ -275,7 +275,7 @@ def password(
                         )
                         expired = now > expiration_date
 
-                pass_line: List[str] = []
+                pass_line: list[str] = []
 
                 pass_line.append(s)
                 pass_line.append(variable)
@@ -327,7 +327,7 @@ def password(
 
         if service.value == REGISTRY:
             is_running = docker.registry.ping(do_exit=False)
-            container: Optional[Tuple[str, str]] = ("registry", "")
+            container: Optional[tuple[str, str]] = ("registry", "")
         else:
             container = docker.get_container(service.value)
             is_running = container is not None

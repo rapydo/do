@@ -1,10 +1,8 @@
-from typing import List
-
 from rich.console import Console
 from rich.table import Table
 
 
-def print_table(headers: List[str], rows: List[List[str]], table_title: str) -> None:
+def print_table(headers: list[str], rows: list[list[str]], table_title: str) -> None:
     table = Table(title=table_title)
 
     for header in headers:

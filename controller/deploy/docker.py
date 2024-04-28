@@ -1,9 +1,10 @@
 import re
 import shlex
 import sys
+from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 from python_on_whales import DockerClient
 from python_on_whales.exceptions import NoSuchContainer, NoSuchService
@@ -20,7 +21,7 @@ COMPOSE_SEP = "-"
 
 class Docker:
     def __init__(
-        self, compose_files: Optional[List[Path]] = None, verify_swarm: bool = True
+        self, compose_files: Optional[list[Path]] = None, verify_swarm: bool = True
     ) -> None:
         if not compose_files:
             # Not all commands initialize Application.data
@@ -30,7 +31,7 @@ class Docker:
 
         if compose_files:
             self.client = DockerClient(
-                compose_files=cast(List[Union[str, Path]], compose_files),
+                compose_files=cast(list[Union[str, Path]], compose_files),
                 compose_env_file=COMPOSE_ENVIRONMENT_FILE.resolve(),
                 host=self.get_engine(Configuration.remote_engine),
             )
@@ -102,20 +103,20 @@ class Docker:
             return f"{Configuration.project}_{service}"
         return f"{Configuration.project}{COMPOSE_SEP}{service}"
 
-    def get_services_status(self, prefix: str) -> Dict[str, str]:
+    def get_services_status(self, prefix: str) -> dict[str, str]:
         if Configuration.swarm_mode:
             return self.swarm.get_services_status(prefix)
         else:
             return self.compose.get_services_status(prefix)
 
-    def get_running_services(self) -> Set[str]:
+    def get_running_services(self) -> set[str]:
         if Configuration.swarm_mode:
             return self.swarm.get_running_services()
         else:
             return self.compose.get_running_services()
 
-    def get_containers(self, service: str) -> Dict[int, Tuple[str, str]]:
-        containers: Dict[int, Tuple[str, str]] = {}
+    def get_containers(self, service: str) -> dict[int, tuple[str, str]]:
+        containers: dict[int, tuple[str, str]] = {}
         service_name = self.get_service(service)
 
         if Configuration.swarm_mode:
@@ -148,16 +149,14 @@ class Docker:
             for c in self.client.container.list():
                 if not c.name.startswith(prefix):
                     continue
-                # from py39 use removeprefix
-                # slot = c.name.removeprefix(prefix)
-                slot = int(c.name[len(prefix) :])
+                slot = int(c.name.removeprefix(prefix))
                 containers.setdefault(slot, (c.name, MAIN_NODE))
         return containers
 
     def get_container_name(self, service_name: str, slot: int = 1) -> str:
         return f"{service_name}{COMPOSE_SEP}{slot}"
 
-    def get_container(self, service: str, slot: int = 1) -> Optional[Tuple[str, str]]:
+    def get_container(self, service: str, slot: int = 1) -> Optional[tuple[str, str]]:
         if Configuration.swarm_mode:
             tasks = self.get_containers(service)
             # the 0 index is found in case of containers in global mode, like the proxy
@@ -180,7 +179,7 @@ class Docker:
             return None
 
     @staticmethod
-    def split_command(command: Optional[str]) -> List[str]:
+    def split_command(command: Optional[str]) -> list[str]:
         # Needed because:
         # Passing None for 's' to shlex.split() is deprecated
         if command is None:
@@ -190,14 +189,14 @@ class Docker:
 
     def exec_command(
         self,
-        # Tuple[str, str] == return of get_container
-        # Dict[int, Tuple[str, str]] == return of get_containers
-        containers: Union[str, Tuple[str, str], Dict[int, Tuple[str, str]]],
+        # tuple[str, str] == return of get_container
+        # dict[int, tuple[str, str]] == return of get_containers
+        containers: Union[str, tuple[str, str], dict[int, tuple[str, str]]],
         user: Optional[str],
         command: Optional[str] = None,
         # this basically force tty=False
         force_output_return: bool = False,
-    ) -> Optional[Union[str, Iterable[Tuple[str, bytes]]]]:
+    ) -> Optional[Union[str, Iterable[tuple[str, bytes]]]]:
         if isinstance(containers, str):
             containers = (
                 containers,
@@ -295,7 +294,7 @@ class Docker:
 
         return None
 
-    def status(self, services: List[str]) -> None:
+    def status(self, services: list[str]) -> None:
         if Configuration.swarm_mode:
             return self.swarm.status(services)
         else:

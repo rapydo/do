@@ -4,7 +4,6 @@ Print RAPyDo configurations
 
 import os
 from enum import Enum
-from typing import Dict, List
 
 import typer
 
@@ -30,7 +29,7 @@ def list_cmd(
     Application.print_command(Application.serialize_parameter("", element_type))
     Application.get_controller().controller_init()
 
-    table: List[List[str]] = []
+    table: list[list[str]] = []
     if element_type == ElementTypes.env:
         table_title = "List of env variables"
         headers = ["Key", "Value"]
@@ -80,8 +79,8 @@ def list_cmd(
     print_table(headers, table, table_title=table_title)
 
 
-def read_env() -> Dict[str, str]:
-    env: Dict[str, str] = {}
+def read_env() -> dict[str, str]:
+    env: dict[str, str] = {}
     with open(COMPOSE_ENVIRONMENT_FILE) as f:
         for line in f.readlines():
             tokens = line.split("=")

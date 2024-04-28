@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Union
 
 import typer
 from glom import glom
@@ -53,7 +53,7 @@ def scale(
     docker = Docker()
 
     service_name = docker.get_service(service)
-    scales: Dict[Union[str, Service], int] = {}
+    scales: dict[Union[str, Service], int] = {}
     try:
         scales[service_name] = int(nreplicas)
     except ValueError:

@@ -2,7 +2,7 @@
 Integration with Docker swarm
 """
 
-from typing import Dict, List, Optional, Set, Union
+from typing import Optional, Union
 
 from glom import glom
 from python_on_whales import Service
@@ -55,7 +55,7 @@ class Swarm:
                 return True
         return False
 
-    def get_running_services(self) -> Set[str]:
+    def get_running_services(self) -> set[str]:
         prefix = f"{Configuration.project}_"
         containers = set()
         for service in self.docker.service.list():
@@ -76,9 +76,9 @@ class Swarm:
                 containers.add(name)
         return containers
 
-    def get_services_status(self, prefix: str) -> Dict[str, str]:
+    def get_services_status(self, prefix: str) -> dict[str, str]:
         prefix += "_"
-        services_status: Dict[str, str] = dict()
+        services_status: dict[str, str] = dict()
         for service in self.docker.service.list():
             name = service.spec.name
             if name is None:  # pragma: no cover
@@ -110,15 +110,15 @@ class Swarm:
 
         replicas = self.get_replicas(service_instance)
         if replicas == 0:
-            scales: Dict[Union[str, Service], int] = {}
+            scales: dict[Union[str, Service], int] = {}
             scales[service_name] = 1
             self.docker.service.scale(scales, detach=True)
         else:
             self.docker.service.update(service_name, force=True, detach=True)
 
-    def status(self, services: List[str]) -> None:
-        nodes: Dict[str, str] = {}
-        nodes_table: List[List[str]] = []
+    def status(self, services: list[str]) -> None:
+        nodes: dict[str, str] = {}
+        nodes_table: list[list[str]] = []
         headers = ["Role", "State", "Name", "IP", "CPUs", "RAM", "LABELS", "Version"]
         for node in self.docker.node.list():
             node_hostname = node.description.hostname or "N/A"
@@ -187,7 +187,7 @@ class Swarm:
 
             print(f"{colors.RESET}Inspecting {service_name}...", end="\r")
 
-            tasks_lines: List[str] = []
+            tasks_lines: list[str] = []
 
             running_tasks = 0
             for task in self.docker.service.ps(service_name):
@@ -279,7 +279,7 @@ class Swarm:
         service_name = self.docker_wrapper.get_service(service)
 
         try:
-            # lines: Iterable[Tuple[str, bytes]] due to stream=True
+            # lines: Iterable[tuple[str, bytes]] due to stream=True
             # without stream=True the type would be :str
             lines = self.docker.service.logs(
                 service_name,

@@ -2,8 +2,6 @@
 Pull available images from the Docker Hub
 """
 
-from typing import List, Set
-
 import typer
 from glom import glom
 
@@ -14,7 +12,7 @@ from controller.deploy.docker import Docker
 
 @Application.app.command(help="Pull available images from docker hub")
 def pull(
-    services: List[str] = typer.Argument(
+    services: list[str] = typer.Argument(
         None,
         help="Services to be pulled",
         shell_complete=Application.autocomplete_service,
@@ -47,7 +45,7 @@ def pull(
         docker.registry.login()
 
     image: str = ""
-    images: Set[str] = set()
+    images: set[str] = set()
 
     for service in Application.data.active_services:
         if Application.data.services and service not in Application.data.services:
@@ -71,7 +69,7 @@ def pull(
     if Configuration.swarm_mode:
         registry = docker.registry.get_host()
 
-        local_images: List[str] = []
+        local_images: list[str] = []
         for img in images:
             new_tag = f"{registry}/{img}"
             docker.client.tag(img, new_tag)

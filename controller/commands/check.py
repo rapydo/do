@@ -5,7 +5,7 @@ Verify if the current project is compliant to RAPyDo specs
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 import typer
 
@@ -41,7 +41,7 @@ def check(
         help="Skip check on docker builds",
         show_default=False,
     ),
-    ignore_submodules: List[str] = typer.Option(
+    ignore_submodules: list[str] = typer.Option(
         [],
         "--ignore-submodule",
         "-i",
@@ -74,7 +74,7 @@ def check(
     else:
         log.info("Checking builds (skip with --no-builds)")
 
-        dimages: List[str] = []
+        dimages: list[str] = []
 
         for img in docker.client.images():
             if img.repo_tags:
@@ -238,22 +238,9 @@ Update it with: {command}""",
             )
 
 
-def is_relative_to(path: Path, rel: str) -> bool:
-    # This works from py39
-    try:
-        return path.is_relative_to(rel)
-    # py38 compatibility fix
-    except Exception:
-        try:
-            path.relative_to(rel)
-            return True
-        except ValueError:
-            return False
-
-
 def build_is_obsolete(
     image_creation: datetime, path: Optional[Path]
-) -> Tuple[Optional[str], Optional[str]]:
+) -> tuple[Optional[str], Optional[str]]:
     if not path:  # pragma: no cover
         return None, None
 
@@ -261,12 +248,12 @@ def build_is_obsolete(
     do = Application.gits.get("do")
     vanilla = Application.gits.get("main")
 
-    if do and do.working_dir and is_relative_to(path, str(do.working_dir)):
+    if do and do.working_dir and path.is_relative_to(str(do.working_dir)):
         git_repo = do
     elif (
         vanilla
         and vanilla.working_dir
-        and is_relative_to(path, str(vanilla.working_dir))
+        and path.is_relative_to(str(vanilla.working_dir))
     ):
         git_repo = vanilla
     else:  # pragma: no cover

@@ -6,7 +6,7 @@ import sys
 import time
 from glob import glob
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Optional, cast
 
 import click
 import requests
@@ -24,13 +24,13 @@ if sys.version_info.major == 3 and sys.version_info.minor <= 8:
         str(sys.version_info.minor),
     )
 
-Dependencies = Dict[str, Dict[str, List[str]]]
+Dependencies = dict[str, dict[str, list[str]]]
 # change current dir to the folder containing this script
 # this way the script will be allowed to access all required files
 # by providing relative links
 os.chdir(Path(__file__).parent)
 
-DOCKERFILE_ENVS: Dict[str, Dict[str, str]] = {}
+DOCKERFILE_ENVS: dict[str, dict[str, str]] = {}
 
 skip_versions = {
     # "typescript": "4.5.4",
@@ -41,7 +41,7 @@ skip_versions = {
 }
 
 
-def load_yaml_file(filepath: Path) -> Dict[str, Any]:
+def load_yaml_file(filepath: Path) -> dict[str, Any]:
     log.debug("Reading file {}", filepath)
 
     if filepath is None or not filepath.exists():
@@ -55,7 +55,7 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
             if not docs:
                 print_and_exit("YAML file is empty: {}", filepath)
 
-            return cast(Dict[str, Any], docs[0])
+            return cast(dict[str, Any], docs[0])
 
         except Exception as e:
             log.warning("Failed to read YAML file [{}]: {}", filepath, e)
@@ -196,11 +196,11 @@ SEMVER2 = r"^[0-9]+\.[0-9]+$"
 
 
 def get_latest_version(
-    tags: List[str],
+    tags: list[str],
     regexp: str = SEMVER3,
     prefix: str = "",
     suffix: str = "",
-    ignores: Optional[List[str]] = None,
+    ignores: Optional[list[str]] = None,
 ) -> str:
     if ignores is None:
         ignores = []
@@ -228,13 +228,13 @@ def get_latest_version(
     return latest
 
 
-def parse_setup(setup_filename: str) -> List[str]:
+def parse_setup(setup_filename: str) -> list[str]:
     """Parse setup.cfg and return all dependencies"""
 
     config = configparser.ConfigParser()
     config.read(setup_filename)
 
-    dependencies: List[str] = []
+    dependencies: list[str] = []
 
     if "install_requires" not in config["options"]:
         log.warning("No install requires found in {}", setup_filename)

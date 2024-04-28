@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 from controller import log, print_and_exit
 from controller.deploy.docker import Docker
@@ -8,7 +8,7 @@ EXPECTED_EXT = ".tar.gz"
 
 
 def restore(
-    container: Optional[Tuple[str, str]], backup_file: str, force: bool
+    container: Optional[tuple[str, str]], backup_file: str, force: bool
 ) -> None:
     if container and not force:
         print_and_exit(

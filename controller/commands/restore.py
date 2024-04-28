@@ -4,7 +4,7 @@ Restore a backup of one service
 
 import time
 from enum import Enum
-from typing import List, Optional
+from typing import Optional
 
 import typer
 
@@ -22,7 +22,7 @@ SupportedServices = Enum(  # type: ignore
 
 
 # Also duplicated in backup.py. A wrapper is needed (to be also used in reload.py)
-def reload(docker: Docker, services: List[str]) -> None:
+def reload(docker: Docker, services: list[str]) -> None:
     for service in services:
         containers = docker.get_containers(service)
         docker.exec_command(containers, user="root", command="/usr/local/bin/reload")
@@ -42,7 +42,7 @@ def restore(
         help="Force the backup procedure",
         show_default=False,
     ),
-    restart: List[str] = typer.Option(
+    restart: list[str] = typer.Option(
         [],
         "--restart",
         help="Service to be restarted once completed the restore (multiple allowed)",

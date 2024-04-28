@@ -2,8 +2,6 @@
 Update the current project
 """
 
-from typing import List
-
 import typer
 
 from controller import log
@@ -13,7 +11,7 @@ from controller.utilities import services
 
 @Application.app.command(help="Update the current project")
 def update(
-    ignore_submodules: List[str] = typer.Option(
+    ignore_submodules: list[str] = typer.Option(
         [],
         "--ignore-submodule",
         "-i",
