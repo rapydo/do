@@ -1,11 +1,14 @@
 """
 This module will test the join command
 """
-from controller.app import Configuration
+
+from controller.app import Application, Configuration
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 
 
 def test_join(capfd: Capture) -> None:
+    # load variables and initialize the Configuration
+    Application()
 
     if not Configuration.swarm_mode:
         return None

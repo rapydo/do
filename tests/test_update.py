@@ -1,11 +1,11 @@
 """
 This module will test the update command
 """
+
 from tests import Capture, create_project, exec_command, execute_outside, init_project
 
 
 def test_base(capfd: Capture) -> None:
-
     execute_outside(capfd, "update")
 
     create_project(

@@ -1,6 +1,7 @@
 """
 Show current services status
 """
+
 from typing import List
 
 import typer
@@ -17,7 +18,6 @@ def status(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(Application.serialize_parameter("", services))
 
     Application.get_controller().controller_init(services)

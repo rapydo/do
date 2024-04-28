@@ -36,7 +36,6 @@ def remove(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(Application.serialize_parameter("", services))
 
     remove_extras: List[str] = []
@@ -77,7 +76,6 @@ def remove(
         wait_network_removal(docker, network_name)
         log.info("Stack removed")
     else:
-
         if not docker.swarm.stack_is_running():
             print_and_exit(
                 "Stack {} is not running, deploy it with {command}",

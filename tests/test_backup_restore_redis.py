@@ -1,6 +1,7 @@
 """
 This module will test the backup and restore commands on Redis
 """
+
 import os
 
 from faker import Faker
@@ -22,7 +23,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "backup redis")
     execute_outside(capfd, "restore redis")
 

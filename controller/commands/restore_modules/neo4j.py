@@ -10,7 +10,6 @@ EXPECTED_EXT = ".dump"
 def restore(
     container: Optional[Tuple[str, str]], backup_file: str, force: bool
 ) -> None:
-
     if container and not force:
         print_and_exit(
             "Neo4j is running and the restore will temporary stop it. "

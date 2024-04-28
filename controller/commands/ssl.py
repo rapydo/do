@@ -1,6 +1,7 @@
 """
 Issue a SSL certificate with Let's Encrypt
 """
+
 from pathlib import Path
 from typing import Optional
 
@@ -78,7 +79,6 @@ def ssl(
     )
 
     if chain_file is not None and key_file is not None:
-
         log.info("Unable to automatically perform the requested operation")
         log.info("You can execute the following commands by your-self:")
 

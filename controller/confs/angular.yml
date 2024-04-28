@@ -7,7 +7,7 @@ services:
 
   frontend:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${FRONTEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${FRONTEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -38,6 +38,7 @@ services:
       PROJECT_KEYWORDS: "${PROJECT_KEYWORDS}"
       ENABLE_ANGULAR_SSR: ${ENABLE_ANGULAR_SSR}
       ENABLE_YARN_PNP: ${ENABLE_YARN_PNP}
+      ENABLE_ANGULAR_MULTI_LANGUAGE: ${ENABLE_ANGULAR_MULTI_LANGUAGE}
       FORCE_SSR_SERVER_MODE: ${FORCE_SSR_SERVER_MODE}
       SPINNER_TYPE: ${SPINNER_TYPE}
       SHOW_LOGIN: ${SHOW_LOGIN}
@@ -60,7 +61,6 @@ services:
       #                        which is explicitly forbidden.
       YARN_ENABLE_IMMUTABLE_INSTALLS: "false"
       SENTRY_URL: ${SENTRY_URL}
-      GA_TRACKING_CODE: ${GA_TRACKING_CODE}
 
       CYPRESS_AUTH_DEFAULT_USERNAME: ${AUTH_DEFAULT_USERNAME}
       CYPRESS_AUTH_DEFAULT_PASSWORD: ${AUTH_DEFAULT_PASSWORD}
@@ -77,6 +77,7 @@ services:
       CYPRESS_AUTH_SECOND_FACTOR_AUTHENTICATION: ${AUTH_SECOND_FACTOR_AUTHENTICATION}
       CYPRESS_AUTH_MAX_LOGIN_ATTEMPTS: ${AUTH_MAX_LOGIN_ATTEMPTS}
       CYPRESS_AUTH_LOGIN_BAN_TIME: ${AUTH_LOGIN_BAN_TIME}
+      CYPRESS_CACHE_FOLDER: "/tmp"
 
       CYPRESS_BACKEND_HOST: ${FLASK_HOST}
       CYPRESS_API_URL: http://${FLASK_HOST}:${BACKEND_PORT}/
@@ -123,12 +124,13 @@ services:
       - ${PROJECT_DIR}/frontend:/app/app/custom
 
       - ${SUBMODULE_DIR}/rapydo-angular/cypress.config.ts:/app/cypress.config.ts
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/app/cypress/tsconfig.json
       - ${SUBMODULE_DIR}/rapydo-angular/cypress/coverage.webpack.js:/app/cypress/coverage.webpack.js
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/app/cypress/support
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/app/cypress/plugins
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/app/cypress/fixtures
-      - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/app/cypress/e2e/rapydo
-      - ${PROJECT_DIR}/frontend/e2e:/app/cypress/e2e/custom
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/support:/e2e/support
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/plugins:/e2e/plugins
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/fixtures:/e2e/fixtures
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/tsconfig.json:/e2e/tsconfig.json
+      - ${SUBMODULE_DIR}/rapydo-angular/cypress/e2e:/e2e/rapydo
+      - ${DATA_DIR}/${COMPOSE_PROJECT_NAME}/frontend/node_modules:/e2e/node_modules
+      - ${PROJECT_DIR}/frontend/e2e:/e2e/custom
 
       - ${DATA_DIR}/logs:/logs

@@ -42,7 +42,6 @@ skip_versions = {
 
 
 def load_yaml_file(filepath: Path) -> Dict[str, Any]:
-
     log.debug("Reading file {}", filepath)
 
     if filepath is None or not filepath.exists():
@@ -51,7 +50,6 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
 
     with open(filepath) as fh:
         try:
-
             docs = list(yaml.safe_load_all(fh))
 
             if not docs:
@@ -60,7 +58,6 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
             return cast(Dict[str, Any], docs[0])
 
         except Exception as e:
-
             log.warning("Failed to read YAML file [{}]: {}", filepath, e)
             return {}
 
@@ -68,7 +65,6 @@ def load_yaml_file(filepath: Path) -> Dict[str, Any]:
 def check_updates(
     service: str, category: str, lib: str, npm_timeout: int, dockerhub_timeout: int
 ) -> None:
-
     if category == "pip":
         if "==" in lib:
             tokens = lib.split("==")
@@ -152,7 +148,6 @@ def check_updates(
 
 
 def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
-
     # This is to prevent duplicated checks on libraries beloging the same family
     if lib in [
         "@angular/compiler",
@@ -167,7 +162,6 @@ def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
         "@angular/platform-server",
         "@angular/compiler-cli",
     ]:
-
         return current_version
 
     time.sleep(sleep_time)
@@ -185,7 +179,6 @@ def parse_npm(url: str, lib: str, sleep_time: int, current_version: str) -> str:
 
 
 def parse_pypi(url: str, lib: str) -> str:
-
     page = requests.get(url, timeout=30)
     soup = BeautifulSoup(page.content, "html5lib")
     span = soup.find("h1", attrs={"class": "package-header__name"})
@@ -209,13 +202,11 @@ def get_latest_version(
     suffix: str = "",
     ignores: Optional[List[str]] = None,
 ) -> str:
-
     if ignores is None:
         ignores = []
 
     latest = "0.0.0"
     for t in tags:
-
         if not t.startswith(prefix):
             continue
 
@@ -258,7 +249,6 @@ def parse_setup(setup_filename: str) -> List[str]:
 
 
 def parse_dockerhub(lib: str, sleep_time: int) -> str:
-
     if lib == "stilliard/pure-ftpd":
         return "stretch-latest"
 
@@ -316,12 +306,11 @@ def parseDockerfile(
     skip_python: bool,
 ) -> Dependencies:
     with open(d) as f:
-        service = d.replace("../build-templates/", "")
+        service = d.replace("controller/builds/", "")
         service = service.replace("/Dockerfile", "")
         dependencies.setdefault(service, {})
 
         for line in f:
-
             if line.startswith("#"):
                 continue
 
@@ -335,7 +324,6 @@ def parseDockerfile(
                     DOCKERFILE_ENVS[service][env[1]] = env[2]
 
             elif not skip_angular and "RUN npm install" in line:
-
                 tokens = line.split(" ")
                 for t in tokens:
                     t = t.strip()
@@ -346,7 +334,6 @@ def parseDockerfile(
             elif not skip_python and (
                 "RUN pip install" in line or "RUN pip3 install" in line
             ):
-
                 tokens = line.split(" ")
                 for t in tokens:
                     t = t.strip()
@@ -360,7 +347,7 @@ def parseDockerfile(
 
 def parseRequirements(d: str, dependencies: Dependencies) -> Dependencies:
     with open(d) as f:
-        service = d.replace("../build-templates/", "")
+        service = d.replace("controller/builds/", "")
         service = service.replace("/requirements.txt", "")
         for line in f:
             line = line.strip()
@@ -409,7 +396,6 @@ def check_versions(
     npm_timeout: int = 1,
     dockerhub_timeout: int = 1,
 ) -> None:
-
     dependencies: Dependencies = {}
 
     if not skip_docker:
@@ -427,7 +413,7 @@ def check_versions(
 
             dependencies[service]["compose"] = [image]
 
-    for d in glob("../build-templates/*/Dockerfile"):
+    for d in glob("controller/builds/*/Dockerfile"):
         if "not_used_anymore_" in d:
             continue
 
@@ -436,12 +422,10 @@ def check_versions(
         )
 
     if not skip_python:
-        for d in glob("../build-templates/*/requirements.txt"):
-
+        for d in glob("controller/builds/*/requirements.txt"):
             dependencies = parseRequirements(d, dependencies)
 
     if not skip_angular:
-
         dependencies = parsePackageJson(
             Path("../rapydo-angular/src/package.json"), dependencies
         )
@@ -455,14 +439,11 @@ def check_versions(
     filtered_dependencies: Dependencies = {}
 
     for service, categories in dependencies.items():
-
         filtered_dependencies.setdefault(service, {})
 
         for category, deps in categories.items():
-
             filtered_dependencies[service][category] = []
             for d in deps:
-
                 skipped = False
                 if re.match(r"^git\+https://github\.com.*@master$", d):
                     skipped = True

@@ -1,6 +1,7 @@
 """
 Upgrade a project file by re-applying the templates
 """
+
 from pathlib import Path
 
 import typer
@@ -21,7 +22,6 @@ def upgrade(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--path", path, IF=path),
     )

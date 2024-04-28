@@ -1,6 +1,7 @@
 """
 This module will test the password command and the passwords management
 """
+
 from faker import Faker
 
 from tests import (
@@ -15,7 +16,6 @@ from tests import (
 
 
 def test_password(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "password")
 
     project_name = random_project_name(faker)

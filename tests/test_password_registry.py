@@ -1,15 +1,14 @@
 """
 This module will test the password command and the passwords management
 """
+
 from datetime import datetime, timedelta
 
 from faker import Faker
 from freezegun import freeze_time
 from python_on_whales import docker
 
-from controller import colors
-from controller.app import Configuration
-from controller.commands.password import PASSWORD_EXPIRATION
+from controller.app import Application, Configuration
 from tests import (
     REGISTRY,
     Capture,
@@ -24,7 +23,8 @@ from tests import (
 
 
 def test_password_registry(capfd: Capture, faker: Faker) -> None:
-
+    # load variables and initialize the Configuration
+    Application()
     if not Configuration.swarm_mode:
         return None
 
@@ -44,7 +44,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.RED}N/A",
+        "│ registry │ REGISTRY_PASSWORD     │ N/A",
     )
     registry_pass1 = get_variable_from_projectrc("REGISTRY_PASSWORD")
 
@@ -66,7 +66,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+        f"│ registry │ REGISTRY_PASSWORD     │ {today}",
     )
 
     exec_command(capfd, "images", "This registry contains ")
@@ -94,9 +94,12 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "password",
-        f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+        f"│ registry │ REGISTRY_PASSWORD     │ {today}",
     )
 
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
     future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
     expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
@@ -104,7 +107,7 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
         exec_command(
             capfd,
             "password",
-            f"registry   REGISTRY_PASSWORD      {colors.GREEN}{today}",
+            f"│ registry │ REGISTRY_PASSWORD     │ {today}",
         )
 
         exec_command(
@@ -112,6 +115,9 @@ def test_password_registry(capfd: Capture, faker: Faker) -> None:
             "check -i main --no-git --no-builds",
             f"REGISTRY_PASSWORD is expired on {expired}",
         )
+
+    # TODO: should be verified that no red is shown
+    exec_command(capfd, "-e PASSWORD_EXPIRATION_WARNING=0 password")
 
     # This is needed otherwise the following tests will be unable to start
     # a new instance of the registry and will fail with registry auth errors

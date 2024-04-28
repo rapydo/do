@@ -1,14 +1,14 @@
 """
 This module will test the password command and the passwords management
 """
+
 import time
 from datetime import datetime, timedelta
 
 from faker import Faker
 from freezegun import freeze_time
 
-from controller.app import Configuration
-from controller.commands.password import PASSWORD_EXPIRATION
+from controller.app import Application, Configuration
 from tests import (
     Capture,
     create_project,
@@ -25,7 +25,6 @@ from tests import (
 
 
 def test_password_redis(capfd: Capture, faker: Faker) -> None:
-
     project_name = random_project_name(faker)
     create_project(
         capfd=capfd,
@@ -123,6 +122,9 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
 
     service_verify(capfd, "redis")
 
+    PASSWORD_EXPIRATION = int(
+        Application.env.get("PASSWORD_EXPIRATION_WARNING") or "180"
+    )
     future = now + timedelta(days=PASSWORD_EXPIRATION + 1)
     expired = (now + timedelta(days=PASSWORD_EXPIRATION)).strftime("%Y-%m-%d")
 
@@ -139,12 +141,14 @@ def test_password_redis(capfd: Capture, faker: Faker) -> None:
             f"REDIS_PASSWORD is expired on {expired}",
         )
 
+    # TODO: should be verified that no red is shown
+    exec_command(capfd, "-e PASSWORD_EXPIRATION_WARNING=0 password")
+
     # Cleanup the stack for the next test
     exec_command(capfd, "remove", "Stack removed")
 
 
 def test_redis_invalid_characters(capfd: Capture, faker: Faker) -> None:
-
     create_project(
         capfd=capfd,
         name=random_project_name(faker),

@@ -1,6 +1,7 @@
 """
 This module will test the install command
 """
+
 from pathlib import Path
 
 from faker import Faker
@@ -19,7 +20,6 @@ from tests import (
 
 
 def test_install(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "install")
 
     project = random_project_name(faker)

@@ -1,6 +1,7 @@
 """
 This module will test the reload command
 """
+
 import time
 
 from faker import Faker
@@ -21,7 +22,6 @@ from tests import (
 
 
 def test_base(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "reload")
 
     project_name = random_project_name(faker)
@@ -63,7 +63,6 @@ def test_base(capfd: Capture, faker: Faker) -> None:
             "Service converged",
         )
     else:
-
         service = "fail2ban"
         exec_command(
             capfd,
@@ -72,7 +71,7 @@ def test_base(capfd: Capture, faker: Faker) -> None:
             "Services scaled: fail2ban=2",
         )
 
-    time.sleep(4)
+    time.sleep(6)
 
     docker = Docker()
     container1 = docker.get_container(service, slot=1)

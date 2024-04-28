@@ -65,7 +65,6 @@ class Compose:
         set_registry: bool = True,
         v1_compatibility: bool = False,
     ) -> None:
-
         compose_config = self.get_config_json()
 
         clean_config: Dict[str, Any] = {
@@ -86,6 +85,13 @@ class Compose:
 
             if Configuration.swarm_mode and set_registry and key != REGISTRY:
                 value["image"] = f"{registry}/{value['image']}"
+
+            for non_null_key in (
+                "command",
+                "entrypoint",
+            ):
+                if non_null_key in value and value[non_null_key] is None:
+                    value.pop(non_null_key)
 
             if "healthcheck" in value and "test" in value["healthcheck"]:
                 # healtcheck commands can contain env variables double-escaped ($$)
@@ -129,7 +135,6 @@ class Compose:
                 if source and volume_type == "volume":
                     volumes.add(source.split(":")[0])
                 elif source and volume_type == "bind":
-
                     # Remove unsupported option: 'create_host_path'
                     if v1_compatibility:
                         k.get("bind", {}).pop("create_host_path", None)
@@ -181,7 +186,6 @@ class Compose:
         force: bool = False,
         scales: Optional[Dict[str, int]] = None,
     ) -> None:
-
         if scales:
             # Based on rapydo scale implementation services is always a 1-length list
             service = services[0]
@@ -217,7 +221,6 @@ class Compose:
         detach: bool = False,
         user: Optional[str] = None,
     ) -> bool:
-
         compose_engine_forced = False
         if Configuration.swarm_mode:
             # import here to prevent circular imports
@@ -272,7 +275,6 @@ class Compose:
             return False
 
     def get_running_services(self) -> Set[str]:
-
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
         containers = set()
         try:
@@ -300,7 +302,6 @@ class Compose:
             return containers
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
-
         prefix += COMPOSE_SEP
         services_status: Dict[str, str] = dict()
         try:
@@ -309,7 +310,7 @@ class Compose:
                 if not name.startswith(prefix):
                     continue
 
-                status = container.state.status
+                status = container.state.status or "N/A"
 
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
@@ -331,7 +332,6 @@ class Compose:
         prefix = f"{Configuration.project}{COMPOSE_SEP}"
         table: List[List[str]] = []
         for container in self.docker.compose.ps():
-
             name = container.name
             if not name.startswith(prefix):
                 continue
@@ -343,7 +343,7 @@ class Compose:
             if name not in services:
                 continue
 
-            status = container.state.status
+            status = container.state.status or "N/A"
             if status == "shutdown" or status == "complete":
                 OPEN_COLOR = "[bold blue]"
                 CLOSE_COLOR = "[/bold blue]"
@@ -361,18 +361,25 @@ class Compose:
                 CLOSE_COLOR = ""
 
             ports_list = []
-            for container_port, host_port in container.network_settings.ports.items():
-                if host_port:
-                    container_port = container_port.split("/")[0]
-                    ports_list.append(f"{container_port}->{host_port[0]['HostPort']}")
+            if container.network_settings.ports:
+                for (
+                    container_port,
+                    host_port,
+                ) in container.network_settings.ports.items():
+                    if host_port:
+                        container_port = container_port.split("/")[0]
+                        ports_list.append(
+                            f"{container_port}->{host_port[0]['HostPort']}"
+                        )
 
+            container_image = container.config.image or "N/A"
             table.append(
                 [
                     container.id[0:12],
                     f"{OPEN_COLOR}{container.name}{CLOSE_COLOR}",
                     status,
                     container.created.strftime("%d-%m-%Y %H:%M:%S"),
-                    container.config.image,
+                    container_image,
                     ",".join(ports_list),
                 ],
             )
@@ -387,7 +394,6 @@ class Compose:
             )
 
     def logs(self, services: List[str], follow: bool = False, tail: int = 500) -> None:
-
         if len(services) > 1:
             timestamps = False
             log_prefix = True

@@ -1,10 +1,13 @@
 """ CUSTOM Models for the relational database """
 
-from restapi.connectors.sqlalchemy.models import User, db
+# Create new models by extending Base:
+# from restapi.connectors.sqlalchemy.models import Base
+from restapi.connectors.sqlalchemy.models import User
+from sqlalchemy import Column, String
 
 # Add (inject) attributes to User
 {% if extend -%}
-setattr(User, "my_custom_field2", db.Column(db.String(255)))
+User.my_custom_field2 = Column(String(255))
 {% else -%}
-setattr(User, "my_custom_field", db.Column(db.String(255)))
+User.my_custom_field = Column(String(255))
 {% endif -%}

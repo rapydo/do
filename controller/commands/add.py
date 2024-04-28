@@ -2,6 +2,7 @@
 Add a new element to the project (endpoint, task, component, service, test workflow)
 
 """
+
 from enum import Enum
 from pathlib import Path
 from typing import Callable, List
@@ -27,7 +28,6 @@ class ElementTypes(str, Enum):
 def get_function(
     element: ElementTypes,
 ) -> Callable[[Project, str, List[str], str, bool, bool], None]:
-
     if element == "endpoint":
         return create_endpoint
 
@@ -69,7 +69,6 @@ def add(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--add-tests", add_tests, IF=add_tests),
         Application.serialize_parameter("--force", force, IF=force),
@@ -105,7 +104,6 @@ def create_template(
     force: bool,
     project: str,
 ) -> None:
-
     if not force and target_path.exists():
         print_and_exit("{} already exists", target_path)
 
@@ -380,7 +378,6 @@ def create_integration_test(
     force: bool,
     add_tests: bool,
 ) -> None:
-
     if add_tests:
         print_and_exit("Add integration_test does not support --add-tests flag")
 
@@ -421,7 +418,6 @@ def create_workflow(
     force: bool,
     add_tests: bool,
 ) -> None:
-
     if add_tests:
         print_and_exit("Add workflow does not support --add-tests flag")
 

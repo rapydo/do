@@ -1,6 +1,7 @@
 """
 This module test the backup and restore commands + tuning postgres
 """
+
 import os
 
 from faker import Faker
@@ -22,7 +23,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "backup postgres")
     execute_outside(capfd, "restore postgres")
 

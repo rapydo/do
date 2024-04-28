@@ -1,6 +1,7 @@
 """
 Start a single container
 """
+
 import os
 from typing import List, Optional, Union
 
@@ -22,19 +23,24 @@ def get_publish_ports(
         print_and_exit("Services misconfiguration, can't find {}", service)
 
     ports: List[Union[PortMapping, PortRangeMapping]] = []
-    for p in service_config.ports:
-        port = change_first_port or p.published
-        target = p.target
+    if service_config.ports:
+        for p in service_config.ports:
+            port = change_first_port or p.published
+            target = p.target
+            if port is None or target is None:
+                log.warning(
+                    "Found null port on {}; port: {}, target: {}", service, port, target
+                )
+                continue
+            # Remove it, because this option is to be applied only to the first port
+            change_first_port = None
 
-        # Remove it, because this option is to be applied only to the first port
-        change_first_port = None
-
-        ports.append(
-            (
-                port,
-                target,
+            ports.append(
+                (
+                    port,
+                    target,
+                )
             )
-        )
 
     return ports
 
@@ -85,7 +91,6 @@ def run(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--pull", pull, IF=pull),
         Application.serialize_parameter("--debug", debug, IF=debug),
@@ -111,7 +116,6 @@ def run(
         if service != REGISTRY:
             docker.registry.ping()
         else:
-
             if docker.registry.ping(do_exit=False):
                 registry = docker.registry.get_host()
                 print_and_exit("The registry is already running at {}", registry)
@@ -169,7 +173,7 @@ def run(
         # Other symbols like # and " also lead to configuration errors
         os.environ["REGISTRY_HTTP_SECRET"] = password(
             param_not_used="",
-            length=96
+            length=96,
             # , symbols="%*,-.=?[]^_~"
         )
 

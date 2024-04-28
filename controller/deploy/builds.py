@@ -32,7 +32,6 @@ BuildInfo = Dict[str, TemplateInfo]
 
 
 def name_priority(name1: str, name2: str) -> str:
-
     # Prevents warning: Cannot determine build priority with custom services
     if name1 in Application.data.custom_services:
         return name2
@@ -61,11 +60,9 @@ def get_image_creation(image_name: str) -> datetime:
 def find_templates_build(
     base_services: ComposeServices, include_image: bool = False
 ) -> BuildInfo:
-
     templates: BuildInfo = {}
 
     for template_name, base_service in base_services.items():
-
         template_build = base_service.build
 
         if not template_build and not include_image:
@@ -94,7 +91,6 @@ def find_templates_build(
 
 
 def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
-
     dockerfile = path.joinpath("Dockerfile")
 
     if not dockerfile.exists():
@@ -126,28 +122,29 @@ def get_dockerfile_base_image(path: Path, templates: BuildInfo) -> str:
 def find_templates_override(
     services: ComposeServices, templates: BuildInfo
 ) -> Dict[str, str]:
-
     builds: Dict[str, str] = {}
 
     for service in services.values():
-
-        if service.build is not None and service.image not in templates:
-
+        if (
+            service.build is not None
+            and service.build.context is not None
+            and service.image not in templates
+        ):
             baseimage = get_dockerfile_base_image(service.build.context, templates)
-
             if not baseimage.startswith("rapydo/"):
                 continue
 
             vanilla_img = service.image
-            template_img = baseimage
-            log.debug("{} extends {}", vanilla_img, template_img)
-            builds[vanilla_img] = template_img
+            if vanilla_img is None:  # pragma: no cover
+                continue
+
+            log.debug("{} extends {}", vanilla_img, baseimage)
+            builds[vanilla_img] = baseimage
 
     return builds
 
 
 def get_non_redundant_services(templates: BuildInfo, targets: List[str]) -> Set[str]:
-
     # Removed redundant services
     services_normalization_mapping: Dict[str, str] = {}
 
@@ -170,7 +167,6 @@ def verify_available_images(
     base_services: ComposeServices,
     is_run_command: bool = False,
 ) -> None:
-
     docker = Docker()
     # All template builds (core only)
     templates = find_templates_build(base_services, include_image=True)

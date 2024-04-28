@@ -30,7 +30,7 @@ services:
   backend:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -68,7 +68,7 @@ services:
       PYTHONFAULTHANDLER: ${PYTHONFAULTHANDLER}
 
       FLASK_APP: ${PYTHON_PATH}/restapi/${PYTHON_MAIN_FILE}.py
-      FLASK_ENV: ${FLASK_ENV}
+      FLASK_DEBUG: ${FLASK_DEBUG}
       API_AUTOSTART: ${API_AUTOSTART}
       # used by gunicorn
       APP_MODULE: "restapi.${PYTHON_MAIN_FILE}:app"
@@ -123,6 +123,7 @@ services:
       ALCHEMY_DB: ${ALCHEMY_DB}
       ALCHEMY_POOLSIZE: ${ALCHEMY_POOLSIZE}
       ALCHEMY_DBTYPE: ${ALCHEMY_DBTYPE}
+      ALEMBIC_CONFIG: "${COMPOSE_PROJECT_NAME}/migrations/alembic.ini"
       ALEMBIC_AUTO_MIGRATE: ${ALEMBIC_AUTO_MIGRATE}
 
       NEO4J_ENABLE: ${ACTIVATE_NEO4J}
@@ -181,6 +182,7 @@ services:
       SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
       SMTP_ADMIN: "${SMTP_ADMIN}"
       SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_REPLYTO: "${SMTP_REPLYTO}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
       SMTP_USERNAME: "${SMTP_USERNAME}"
@@ -189,6 +191,10 @@ services:
       SENTRY_URL: "${SENTRY_URL}"
       MAX_LOGS_LENGTH: ${MAX_LOGS_LENGTH}
 
+      # Temporary added to silence SQLAlchemy 2.0 uber warning
+      SQLALCHEMY_SILENCE_UBER_WARNING: "1"
+      # Added to raise sqlalchemy RemovedIn20Warning deprecation warnings
+      SQLALCHEMY_WARN_20: "1"
     volumes:
       # configuration files
       - ${SUBMODULE_DIR}/do/controller/confs/projects_defaults.yaml:/code/confs/projects_defaults.yaml
@@ -223,7 +229,7 @@ services:
   proxy:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/proxy
+      context: ${SUBMODULE_DIR}/do/controller/builds/proxy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -288,12 +294,11 @@ services:
       MAX_REQUESTS_BURST_AUTH: ${SET_MAX_REQUESTS_BURST_AUTH}
       MAX_REQUESTS_PER_SECOND_API: ${SET_MAX_REQUESTS_PER_SECOND_API}
       MAX_REQUESTS_BURST_API: ${SET_MAX_REQUESTS_BURST_API}
-      GA_TRACKING_CODE: "${GA_TRACKING_CODE}"
 
   maintenance:
     # restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/proxy
+      context: ${SUBMODULE_DIR}/do/controller/builds/proxy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -325,7 +330,7 @@ services:
   postgres:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/postgres
+      context: ${SUBMODULE_DIR}/do/controller/builds/postgres
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -361,7 +366,7 @@ services:
   neo4j:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/neo4j
+      context: ${SUBMODULE_DIR}/do/controller/builds/neo4j
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -445,7 +450,7 @@ services:
   celery:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -549,6 +554,7 @@ services:
       SMTP_VERIFICATION_TIME: ${SMTP_VERIFICATION_TIME}
       SMTP_ADMIN: "${SMTP_ADMIN}"
       SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_REPLYTO: "${SMTP_REPLYTO}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
       SMTP_USERNAME: "${SMTP_USERNAME}"
@@ -575,7 +581,7 @@ services:
   celerybeat:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -637,6 +643,7 @@ services:
 
       SMTP_ADMIN: "${SMTP_ADMIN}"
       SMTP_NOREPLY: "${SMTP_NOREPLY}"
+      SMTP_REPLYTO: "${SMTP_REPLYTO}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
       SMTP_USERNAME: "${SMTP_USERNAME}"
@@ -661,7 +668,7 @@ services:
   rabbit:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/rabbitmq
+      context: ${SUBMODULE_DIR}/do/controller/builds/rabbitmq
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -704,7 +711,7 @@ services:
   redis:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/redis
+      context: ${SUBMODULE_DIR}/do/controller/builds/redis
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -740,7 +747,7 @@ services:
   flower:
     restart: always
     build:
-      context: ${SUBMODULE_DIR}/build-templates/${BACKEND_BUILD_MODE}
+      context: ${SUBMODULE_DIR}/do/controller/builds/${BACKEND_BUILD_MODE}
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -833,7 +840,7 @@ services:
 
   swaggerui:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/swaggerui
+      context: ${SUBMODULE_DIR}/do/controller/builds/swaggerui
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -856,7 +863,7 @@ services:
 
   adminer:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/adminer
+      context: ${SUBMODULE_DIR}/do/controller/builds/adminer
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
         CURRENT_UID: ${CURRENT_UID}
@@ -884,7 +891,7 @@ services:
   ###################
   ftp:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/ftp
+    build: ${SUBMODULE_DIR}/do/controller/builds/ftp
     image: rapydo/ftp:${RAPYDO_VERSION}
     volumes:
       - pureftpd:/etc/pure-ftpd/passwd
@@ -935,7 +942,7 @@ services:
 
   registry:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/registry
+    build: ${SUBMODULE_DIR}/do/controller/builds/registry
     image: rapydo/registry:${RAPYDO_VERSION}
     hostname: registry
     # make it common to all projects
@@ -980,7 +987,7 @@ services:
 
   fail2ban:
     restart: always
-    build: ${SUBMODULE_DIR}/build-templates/fail2ban
+    build: ${SUBMODULE_DIR}/do/controller/builds/fail2ban
     image: rapydo/fail2ban:${RAPYDO_VERSION}
     # This works for compose but not for swarm.
     # In swarm mode this flag is replaced with an external network
@@ -1026,7 +1033,7 @@ services:
 
   mypy:
     build:
-      context: ${SUBMODULE_DIR}/build-templates/mypy
+      context: ${SUBMODULE_DIR}/do/controller/builds/mypy
       args:
         RAPYDO_VERSION: ${RAPYDO_VERSION}
     image: rapydo/mypy:${RAPYDO_VERSION}

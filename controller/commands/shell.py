@@ -1,6 +1,7 @@
 """
 Open a shell or execute a command onto a container
 """
+
 from typing import Optional
 
 import typer
@@ -53,7 +54,6 @@ def shell(
         show_default=False,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--user", user, IF=user),
         Application.serialize_parameter(

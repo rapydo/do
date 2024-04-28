@@ -9,7 +9,6 @@ from tests import Capture, create_project, exec_command, execute_outside, init_p
 
 
 def test_add(capfd: Capture) -> None:
-
     execute_outside(capfd, "add endpoint x")
     execute_outside(capfd, "upgrade --path x")
     create_project(

@@ -1,6 +1,7 @@
 """
 This module will test the ssl command
 """
+
 import time
 
 from faker import Faker
@@ -19,7 +20,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "ssl")
 
     project = random_project_name(faker)
@@ -79,7 +79,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Creating a self signed SSL certificate",
         "Self signed SSL certificate successfully created",
         # Just to verify that the default does not change
-        "Generating DH parameters, 1024 bit long safe prime, generator 2",
+        "Generating DSA parameters, 1024 bit long prime",
     )
 
     # Start to verify certificate creation while services are running

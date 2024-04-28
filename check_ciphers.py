@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup  # type: ignore
 from loguru import logger as log
 
-nginx_header = "../build-templates/proxy/confs/production.conf"
+nginx_header = "controller/builds/proxy/confs/production.conf"
 
 with open(nginx_header) as headers:
     for line in headers.readlines():
@@ -54,5 +54,4 @@ with open(nginx_header) as headers:
                         log.error(f"{cipher: <30} {iana_name: <45} {level}")
                     break
             else:
-
                 log.error("{} not found on ciphersuite", cipher)

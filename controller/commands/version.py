@@ -1,6 +1,7 @@
 """
 Show RAPyDo and project version details
 """
+
 from packaging.version import Version
 
 from controller import RED, __version__, colors
@@ -9,7 +10,6 @@ from controller.app import Application, Configuration
 
 @Application.app.command(help="Show rapydo and project version details")
 def version() -> None:
-
     Application.print_command()
 
     Application.get_controller().controller_init()

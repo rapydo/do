@@ -41,7 +41,6 @@ def get_origin(gitobj: Optional[Repo]) -> Optional[str]:
 
 
 def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
-
     if not gitobj:
         log.error("git object is None, cannot retrieve active branch")
         return None
@@ -53,7 +52,6 @@ def get_active_branch(gitobj: Optional[Repo]) -> Optional[str]:
 
 
 def switch_branch(gitobj: Optional[Repo], branch_name: str) -> bool:
-
     if not gitobj:
         log.error("git object is None, cannot switch the active branch")
         return False
@@ -93,7 +91,6 @@ def switch_branch(gitobj: Optional[Repo], branch_name: str) -> bool:
 def clone(
     url: str, path: Path, branch: str, do: bool = False, check: bool = True
 ) -> Repo:
-
     local_path = SUBMODULES_DIR.joinpath(path)
 
     if local_path.exists():
@@ -121,13 +118,11 @@ def clone(
 
 
 def compare_repository(gitobj: Repo, branch: str, online_url: str) -> bool:
-
     # origin = gitobj.remote()
     # url = list(origin.urls).pop(0)
     url = gitobj.remotes.origin.url
 
     if online_url != url:  # pragma: no cover
-
         local_url = urlparse(url)
         expected_url = urlparse(online_url)
 
@@ -179,7 +174,6 @@ def timestamp_from_string(timestamp_string: Union[str, float]) -> datetime:
 def check_file_younger_than(
     gitobj: Repo, filename: Path, timestamp: Union[str, float]
 ) -> Tuple[bool, float, datetime]:
-
     try:
         commits = gitobj.blame(rev="HEAD", file=str(filename))
     except GitCommandError:
@@ -218,7 +212,6 @@ def get_unstaged_files(gitobj: Repo) -> Dict[str, List[str]]:
 
 
 def print_diff(gitobj: Repo, unstaged: Dict[str, List[str]]) -> bool:
-
     changed = len(unstaged["changed"]) > 0
     untracked = len(unstaged["untracked"]) > 0
     if not changed and not untracked:
@@ -259,7 +252,6 @@ def can_be_updated(path: str, gitobj: Repo, do_print: bool = True) -> bool:
 
 
 def update(path: str, gitobj: Repo) -> None:
-
     if not gitobj.active_branch:  # pragma: no cover
         log.error("Can't update {}, no active branch found", path)
         return None
@@ -303,7 +295,6 @@ def update(path: str, gitobj: Repo) -> None:
 
 
 def check_unstaged(path: str, gitobj: Repo) -> None:
-
     unstaged = get_unstaged_files(gitobj)
     if len(unstaged["changed"]) > 0 or len(unstaged["untracked"]) > 0:
         log.warning("You have unstaged files on {}", path)
@@ -311,7 +302,6 @@ def check_unstaged(path: str, gitobj: Repo) -> None:
 
 
 def fetch(path: str, gitobj: Repo) -> None:
-
     for remote in gitobj.remotes:
         if remote.name == "origin":
             try:
@@ -321,7 +311,6 @@ def fetch(path: str, gitobj: Repo) -> None:
 
 
 def check_updates(path: str, gitobj: Repo) -> None:
-
     fetch(path, gitobj)
 
     branch = get_active_branch(gitobj)
@@ -343,7 +332,6 @@ def check_updates(path: str, gitobj: Repo) -> None:
             path,
         )
     else:
-
         if not commits_behind_list:
             log.debug("{} repo is updated", path)
         else:  # pragma: no cover
@@ -369,7 +357,6 @@ def check_updates(path: str, gitobj: Repo) -> None:
             "Remote branch {} not found for {}. Is it a local branch?", branch, path
         )
     else:
-
         if len(commits_ahead_list) > 0:
             log.warning("You have commits not pushed on {} repo", path)
         else:

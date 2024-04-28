@@ -1,6 +1,7 @@
 """
 This module will test the build and pull commands
 """
+
 import os
 from pathlib import Path
 
@@ -21,7 +22,6 @@ from tests import (
 
 
 def test_all(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "pull")
     execute_outside(capfd, "build")
 
@@ -31,7 +31,7 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name="testbuild",
         auth="no",
         frontend="no",
-        services=["rabbit"],
+        services=["redis"],
     )
     init_project(capfd)
     create_project(
@@ -39,11 +39,10 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         name=project2,
         auth="no",
         frontend="no",
-        services=["rabbit"],
+        services=["redis"],
     )
 
     if Configuration.swarm_mode:
-
         exec_command(
             capfd,
             "pull",
@@ -68,8 +67,8 @@ def test_all(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "-e ACTIVATE_RABBIT=0 pull --quiet rabbit",
-        "No such service: rabbit",
+        "-e ACTIVATE_REDIS=0 pull --quiet redis",
+        "No such service: redis",
     )
 
     exec_command(
@@ -99,14 +98,14 @@ def test_all(capfd: Capture, faker: Faker) -> None:
         "Images pulled from docker hub",
     )
 
-    # Add a custom image to extend base rabbit image:
+    # Add a custom image to extend base redis image:
     with open("projects/testbuild/confs/commons.yml", "a") as f:
         f.write(
             """
 services:
-  rabbit:
-    build: ${PROJECT_DIR}/builds/rabbit
-    image: testbuild/rabbit:${RAPYDO_VERSION}
+  redis:
+    build: ${PROJECT_DIR}/builds/redis
+    image: testbuild/redis:${RAPYDO_VERSION}
 
     """
         )
@@ -114,77 +113,77 @@ services:
     # Missing folder
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Build path not found",
     )
 
-    os.makedirs("projects/testbuild/builds/rabbit")
+    os.makedirs("projects/testbuild/builds/redis")
 
     # Missing Dockerfile
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Build path not found: ",
-        "projects/testbuild/builds/rabbit/Dockerfile",
+        "projects/testbuild/builds/redis/Dockerfile",
     )
 
     # Empty Dockerfile
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+    with open("projects/testbuild/builds/redis/Dockerfile", "w+") as f:
         pass
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
-        "projects/testbuild/builds/rabbit/Dockerfile",
+        "projects/testbuild/builds/redis/Dockerfile",
     )
 
     # Missing base image
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+    with open("projects/testbuild/builds/redis/Dockerfile", "w+") as f:
         f.write("RUN ls")
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Invalid Dockerfile, no base image found in ",
-        "projects/testbuild/builds/rabbit/Dockerfile",
+        "projects/testbuild/builds/redis/Dockerfile",
     )
 
     # Invalid RAPyDo template
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+    with open("projects/testbuild/builds/redis/Dockerfile", "w+") as f:
         f.write("FROM rapydo/invalid")
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Unable to find rapydo/invalid in this project",
         "Please inspect the FROM image in",
-        "projects/testbuild/builds/rabbit/Dockerfile",
+        "projects/testbuild/builds/redis/Dockerfile",
     )
 
-    image = f"testbuild/rabbit:${__version__}"
+    image = f"testbuild/redis:${__version__}"
     exec_command(
         capfd,
         "start",
-        f" image, execute {colors.RED}rapydo build rabbit",
+        f" image, execute {colors.RED}rapydo build redis",
     )
 
     # Not a RAPyDo child but build is possibile
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+    with open("projects/testbuild/builds/redis/Dockerfile", "w+") as f:
         f.write("FROM ubuntu")
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
         "Custom images built",
     )
 
-    with open("projects/testbuild/builds/rabbit/Dockerfile", "w+") as f:
+    with open("projects/testbuild/builds/redis/Dockerfile", "w+") as f:
         f.write(
             f"""
-FROM rapydo/rabbitmq:{__version__}
+FROM rapydo/redis:{__version__}
 # Just a simple command to differentiate from the parent
 RUN mkdir xyz
 """
@@ -196,13 +195,13 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "build rabbit",
+        "build redis",
         "docker buildx is installed",
-        f"naming to docker.io/testbuild/rabbit:{__version__}",
+        f"naming to docker.io/testbuild/redis:{__version__}",
         "Custom images built",
     )
 
-    test_file = Path("projects/testbuild/builds/rabbit/test")
+    test_file = Path("projects/testbuild/builds/redis/test")
     with open(test_file, "w+") as f:
         f.write("test")
 
@@ -217,11 +216,11 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        f"-e ACTIVATE_RABBIT=0 -p {project2} build --core rabbit",
-        "No such service: rabbit",
+        f"-e ACTIVATE_REDIS=0 -p {project2} build --core redis",
+        "No such service: redis",
     )
 
-    # Rebuild core rabbit image => custom rabbit is now obsolete
+    # Rebuild core redis image => custom redis is now obsolete
     # Please note the use of the project 2.
     # This way we prevent to rebuilt the custom image of testbuild
     # This simulate a pull updating a core image making the custom image obsolete
@@ -233,7 +232,7 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        f"-p {project2} build --core rabbit",
+        f"-p {project2} build --core redis",
         "Core images built",
         swarm_push_warn,
         "No custom images to build",
@@ -241,27 +240,27 @@ RUN mkdir xyz
     exec_command(
         capfd,
         "check -i main --no-git",
-        f"Obsolete image testbuild/rabbit:{__version__}",
+        f"Obsolete image testbuild/redis:{__version__}",
         "built on ",
         " that changed on ",
-        f"Update it with: {colors.RED}rapydo build rabbit",
+        f"Update it with: {colors.RED}rapydo build redis",
     )
 
     # Add a second service with the same image to test redundant builds
     with open("projects/testbuild/confs/commons.yml", "a") as f:
         f.write(
             """
-  rabbit2:
-    build: ${PROJECT_DIR}/builds/rabbit
-    image: testbuild/rabbit:${RAPYDO_VERSION}
+  redis2:
+    build: ${PROJECT_DIR}/builds/redis
+    image: testbuild/redis:${RAPYDO_VERSION}
 
     """
         )
 
-    fin = open("submodules/build-templates/backend/Dockerfile", "a")
+    fin = open("submodules/do/controller/builds/backend/Dockerfile", "a")
     fin.write("xyz")
     fin.close()
-    r = Repo("submodules/build-templates")
+    r = Repo("submodules/do")
     r.git.commit("-a", "-m", "'fake'")
     exec_command(
         capfd,
@@ -279,7 +278,7 @@ RUN mkdir xyz
     with open("projects/testbuild/confs/commons.yml", "a") as f:
         f.write(
             """
-  rabbit3:
+  redis3:
     image: alpine:latest
     environment:
       ACTIVATE: 1
@@ -288,13 +287,13 @@ RUN mkdir xyz
 
     exec_command(
         capfd,
-        "pull --quiet rabbit3",
+        "pull --quiet redis3",
         "Base images pulled from docker hub",
     )
 
     # Now this should fail because pull does not include custom services
     exec_command(
         capfd,
-        "start rabbit3",
+        "start redis3",
         "Stack started",
     )

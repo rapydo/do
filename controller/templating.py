@@ -1,6 +1,7 @@
 """
 Utilities to work with jinja2 templates
 """
+
 import filecmp
 import os
 import random
@@ -77,7 +78,6 @@ def get_strong_password() -> str:
 
 class Templating:
     def __init__(self) -> None:
-
         self.template_dir = Path(__file__).resolve().parent.joinpath(TEMPLATE_DIR)
 
         if not self.template_dir.is_dir():
@@ -97,7 +97,6 @@ class Templating:
 
     @staticmethod
     def get_template_name(filename: str) -> str:
-
         if filename.startswith("."):
             filename = filename[1:]
 
@@ -116,7 +115,6 @@ class Templating:
             print_and_exit(str(e))
 
     def save_template(self, filename: Path, content: str, force: bool = False) -> None:
-
         if filename.exists():
             if force:
                 self.make_backup(filename)
@@ -134,7 +132,6 @@ class Templating:
         log.info("A backup of {} is saved as {}", filename, backup_filename)
 
     def file_changed(self, filename: str) -> bool:
-
         template = self.get_template_name(filename)
         return not filecmp.cmp(
             filename, os.path.join(self.template_dir, template), shallow=True

@@ -1,6 +1,7 @@
 """
 Execute a backup of one service
 """
+
 import time
 from datetime import datetime
 from enum import Enum
@@ -72,7 +73,6 @@ def backup(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--force", force, IF=force),
         Application.serialize_parameter("--max", max_backups, IF=max_backups),

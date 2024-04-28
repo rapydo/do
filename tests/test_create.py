@@ -15,7 +15,6 @@ from tests import Capture, TemporaryRemovePath, exec_command, init_project
 
 
 def test_create(capfd: Capture) -> None:
-
     exec_command(
         capfd,
         "create first",
@@ -271,16 +270,6 @@ def test_create(capfd: Capture) -> None:
 
     os.remove(".projectrc")
 
-    """
-    Convert this to a test with parametrize fixture
-
-    @pytest.mark.parametrize("services, [
-        (postgres,),
-        (neo4j,),
-        ...
-    ])
-
-    """
     # Test services activation from create --service
     services = [
         "postgres",
@@ -292,7 +281,6 @@ def test_create(capfd: Capture) -> None:
     ]
     opt = "--frontend no --current --force"
     for service in services:
-
         if service == "postgres":
             auth = "postgres"
             serv_opt = ""
@@ -345,7 +333,6 @@ def test_create(capfd: Capture) -> None:
     def verify_celery_configuration(
         services_list: List[str], broker: str, backend: str
     ) -> None:
-
         services = "--service celery"
         if services_list:
             for service in services_list:

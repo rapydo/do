@@ -49,11 +49,13 @@ def list_cmd(
         for name, service in Application.data.compose_config.items():
             if name in Application.data.active_services:
                 image = service.image
+                if image is None:  # pragma: no cover
+                    image = "N/A"
                 build = service.build
 
                 status = services_status.get(name, "N/A")
 
-                if build:
+                if build and build.context:
                     build_path = str(build.context.relative_to(os.getcwd()))
                 else:
                     build_path = ""

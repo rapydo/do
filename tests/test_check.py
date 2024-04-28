@@ -1,6 +1,7 @@
 """
 This module will test the check command
 """
+
 import os
 import shutil
 from pathlib import Path
@@ -23,7 +24,6 @@ from tests import (
 
 
 def test_base(capfd: Capture) -> None:
-
     execute_outside(capfd, "check")
 
     create_project(

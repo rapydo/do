@@ -1,6 +1,7 @@
 """
 Restore a backup of one service
 """
+
 import time
 from enum import Enum
 from typing import List, Optional
@@ -48,7 +49,6 @@ def restore(
         shell_complete=Application.autocomplete_service,
     ),
 ) -> None:
-
     Application.print_command(
         Application.serialize_parameter("--force", force, IF=force),
         Application.serialize_parameter("--restart", restart, IF=restart),

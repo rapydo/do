@@ -1,17 +1,19 @@
 """
 This module will test the swarm multi host mode
 """
+
 import random
 
 from python_on_whales import docker
 
 from controller import colors
-from controller.app import Configuration
+from controller.app import Application, Configuration
 from tests import Capture, create_project, exec_command, pull_images, start_registry
 
 
 def test_swarm_multi_host(capfd: Capture) -> None:
-
+    # load variables and initialize the Configuration
+    Application()
     if not Configuration.swarm_mode:
         return None
 
@@ -32,7 +34,7 @@ def test_swarm_multi_host(capfd: Capture) -> None:
     )
 
     for node in docker.node.list():
-        if node.spec.role.lower() == "manager":
+        if node.spec.role and node.spec.role.lower() == "manager":
             MANAGER_ADDRESS = node.status.addr
 
     assert MANAGER_ADDRESS is not None

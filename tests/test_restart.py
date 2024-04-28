@@ -1,6 +1,7 @@
 """
 This module will test the start --force (ex restart) command
 """
+
 from controller.app import Configuration
 from tests import (
     Capture,
@@ -15,7 +16,6 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
-
     exec_command(capfd, "restart", "This command is no longer available")
 
     create_project(
@@ -29,14 +29,14 @@ def test_all(capfd: Capture) -> None:
     pull_images(capfd)
     start_project(capfd)
 
-    start_date1 = get_container_start_date(capfd, "backend")
+    start_date1 = get_container_start_date(capfd, "backend", wait=True)
     exec_command(
         capfd,
         "start",
         "Stack started",
     )
 
-    start_date2 = get_container_start_date(capfd, "backend")
+    start_date2 = get_container_start_date(capfd, "backend", wait=True)
 
     # The service is not restarted because its definition is unchanged
     assert start_date1 == start_date2

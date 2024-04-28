@@ -1,6 +1,7 @@
 """
 This module will test the cronjobs installed on the backend container
 """
+
 import time
 
 from faker import Faker
@@ -19,7 +20,6 @@ from tests import (
 
 
 def test_cronjobs(capfd: Capture, faker: Faker) -> None:
-
     project = random_project_name(faker)
     create_project(
         capfd=capfd,

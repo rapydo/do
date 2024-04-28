@@ -35,7 +35,6 @@ class TemporaryRemovePath:
         self.tmp_path = self.path.with_suffix(f"{path.suffix}.bak")
 
     def __enter__(self: T) -> T:
-
         self.path.rename(self.tmp_path)
         return self
 
@@ -66,7 +65,6 @@ def mock_KeyboardInterrupt(signum, frame):  # type: ignore
 
 
 def exec_command(capfd: Capture, command: str, *asserts: str) -> List[str]:
-
     # This is needed to reload the LOG dir
     import controller
 
@@ -143,7 +141,6 @@ def service_verify(capfd: Capture, service: str) -> None:
 
 
 def random_project_name(faker: Faker) -> str:
-
     return f"{faker.word()}{faker.word()}".lower()
 
 
@@ -155,7 +152,6 @@ def create_project(
     services: Optional[List[str]] = None,
     extra: str = "",
 ) -> None:
-
     opt = "--current --origin-url https://your_remote_git/your_project.git"
     s = ""
     if services:
@@ -170,7 +166,6 @@ def create_project(
 
 
 def init_project(capfd: Capture, pre_options: str = "", post_options: str = "") -> None:
-
     if "HEALTHCHECK_INTERVAL" not in pre_options:
         pre_options += " -e HEALTHCHECK_INTERVAL=1s "
 
@@ -190,7 +185,6 @@ def start_registry(capfd: Capture) -> None:
 
 
 def pull_images(capfd: Capture) -> None:
-
     exec_command(
         capfd,
         "pull --quiet",
@@ -224,10 +218,9 @@ def execute_outside(capfd: Capture, command: str) -> None:
 
 def get_container_start_date(
     capfd: Capture, service: str, wait: bool = False
-) -> datetime:
-
+) -> Optional[datetime]:
     if Configuration.swarm_mode and wait:
-        time.sleep(5)
+        time.sleep(10)
         # This is needed to debug and wait the service rollup to complete
         # Status is both for debug and to delay the get_container
         exec_command(capfd, "status")
@@ -257,7 +250,6 @@ def get_variable_from_projectrc(variable: str) -> str:
 def wait_until(
     capfd: Capture, command: str, expected: str, max_retries: int = 30, sleep: int = 2
 ) -> bool:
-
     counter = 1
 
     while counter <= max_retries:

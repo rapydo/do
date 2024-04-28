@@ -2,8 +2,6 @@ variables:
   submodules:
     http-api:
       online_url: https://github.com/rapydo/http-api.git
-    build-templates:
-      online_url: https://github.com/rapydo/build-templates.git
     rapydo-angular:
       online_url: https://github.com/rapydo/rapydo-angular.git
       _if: $$angular
@@ -24,7 +22,6 @@ variables:
     normal_user: Normal User
 
   env:
-    BACKEND_BUILD_MODE: backend
     FRONTEND_FRAMEWORK: nofrontend
     FRONTEND_BUILD_MODE: angular # or angular-test
     NETWORK_MTU: 1500
@@ -67,14 +64,13 @@ variables:
     APP_MODE: development
     FLASK_HOST: apiserver.dockerized.io
     FLASK_DEFAULT_PORT: 8080 # used for Flask biding (into the container)
-    FLASK_ENV: development
+    FLASK_DEBUG: "1"
     API_AUTOSTART: 0 # used in some tests to auto-start the backend
     BACKEND_PORT: 8080 # used for port mapping (outside the container)
     BACKEND_API_PORT: 8080 # used to reach the backend from outer network (in production should much with proxy ssl port)
     BACKEND_URL: ""
     PYTHON_MAIN_FILE: __main__
-    # Path to dist-packages in backend/celery containers
-    PYTHON_PATH: /usr/local/lib/python3.10/dist-packages
+    BACKEND_PYTHON_VERSION: "v3.11"
 
     PYTHONMALLOC: ""
     PYTHONASYNCIODEBUG: 0
@@ -149,7 +145,7 @@ variables:
     ALCHEMY_PASSWORD: "D3vMode!" # This default is invalidated in production mode
     ALCHEMY_DB: SQL_API
     ALCHEMY_DBS: SQL_API
-    ALCHEMY_POOLSIZE: 30 # or 20 # (default is 5)
+    ALCHEMY_POOLSIZE: 30 # default is 5
 
     # Have a look at this website for a quick tuning:
     # https://pgtune.leopard.in.ua
@@ -319,6 +315,7 @@ variables:
     SMTP_VERIFICATION_TIME: 900
     SMTP_ADMIN:
     SMTP_NOREPLY:
+    SMTP_REPLYTO:
     SMTP_HOST:
     SMTP_PORT: 25
     SMTP_USERNAME:
@@ -343,11 +340,11 @@ variables:
     ALLOW_TERMS_OF_USE: 0
     REGISTRATION_NOTIFICATIONS: 1
     SENTRY_URL:
-    GA_TRACKING_CODE:
     SHOW_LOGIN: 1
     ENABLE_FOOTER: 1
     ENABLE_ANGULAR_SSR: 1
     ENABLE_YARN_PNP: 0
+    ENABLE_ANGULAR_MULTI_LANGUAGE: 0
     FORCE_SSR_SERVER_MODE: 0
     SPINNER_TYPE: "ball-scale-multiple"
 
@@ -371,13 +368,15 @@ variables:
     ALLOW_ACCESS_TOKEN_PARAMETER: 0
     DEFAULT_DHLEN: 2048
 
+    PASSWORD_EXPIRATION_WARNING: 180
+
     FORCE_PRODUCTION_TESTS: 0 # Very dangerous, do not touch it!
 
 project:
   title: "REST HTTP-API server with Python, Flask and Docker"
   description: "No description yet"
   keywords: ""
-  rapydo: 2.4
+  rapydo: "3.0"
   version: v0.1
 
 tags:

@@ -1,6 +1,7 @@
 """
 [DEPRECATED] Restart modified running containers
 """
+
 import typer
 
 from controller import RED, print_and_exit
@@ -17,7 +18,6 @@ def restart(
         show_default=False,
     ),
 ) -> None:
-
     # Deprecated since 2.2
 
     print_and_exit(

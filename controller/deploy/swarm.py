@@ -1,6 +1,7 @@
 """
 Integration with Docker swarm
 """
+
 from typing import Dict, List, Optional, Set, Union
 
 from glom import glom
@@ -16,7 +17,6 @@ from controller.utilities.tables import print_table
 
 class Swarm:
     def __init__(self, docker: Docker, check_initialization: bool = True):
-
         self.docker_wrapper = docker
         self.docker = self.docker_wrapper.client
 
@@ -27,7 +27,6 @@ class Swarm:
             )
 
     def init(self) -> None:
-
         manager_address = str(
             Application.env.get("SWARM_MANAGER_ADDRESS")
             or system.get_local_ip(Configuration.production)
@@ -40,7 +39,6 @@ class Swarm:
         try:
             return str(self.docker.swarm.join_token(node_type))
         except NotASwarmManager:
-
             return None
 
     @staticmethod
@@ -58,11 +56,13 @@ class Swarm:
         return False
 
     def get_running_services(self) -> Set[str]:
-
         prefix = f"{Configuration.project}_"
         containers = set()
         for service in self.docker.service.list():
             name = service.spec.name
+            if name is None:  # pragma: no cover
+                log.warning("Got null name for {}", service)
+                continue
             if not name.startswith(prefix):
                 continue
 
@@ -77,16 +77,18 @@ class Swarm:
         return containers
 
     def get_services_status(self, prefix: str) -> Dict[str, str]:
-
         prefix += "_"
         services_status: Dict[str, str] = dict()
         for service in self.docker.service.list():
             name = service.spec.name
+            if name is None:  # pragma: no cover
+                log.warning("Got null name for {}", service)
+                continue
             if not name.startswith(prefix):
                 continue
 
             for task in self.docker.service.ps(name):
-                status = task.status.state
+                status = task.status.state or "N/A"
 
                 # to be replaced with removeprefix
                 name = name[len(prefix) :]
@@ -94,7 +96,6 @@ class Swarm:
         return services_status
 
     def deploy(self) -> None:
-
         self.docker.stack.deploy(
             name=Configuration.project,
             compose_files=COMPOSE_FILE,
@@ -116,16 +117,21 @@ class Swarm:
             self.docker.service.update(service_name, force=True, detach=True)
 
     def status(self, services: List[str]) -> None:
-
         nodes: Dict[str, str] = {}
         nodes_table: List[List[str]] = []
         headers = ["Role", "State", "Name", "IP", "CPUs", "RAM", "LABELS", "Version"]
         for node in self.docker.node.list():
-            nodes[node.id] = node.description.hostname
+            node_hostname = node.description.hostname or "N/A"
+            node_addr = node.status.addr or "N/A"
+            nodes[node.id] = node_hostname
 
-            state = f"{node.status.state.title()}+{node.spec.availability.title()}"
-            cpu = str(round(node.description.resources.nano_cpus / 1000000000))
-            ram = system.bytes_to_str(node.description.resources.memory_bytes)
+            state = cpu = ram = ""
+            if node.status.state and node.spec.availability:
+                state = f"{node.status.state.title()}+{node.spec.availability.title()}"
+            if node.description.resources and node.description.resources.nano_cpus:
+                cpu = str(round(node.description.resources.nano_cpus / 1000000000))
+            if node.description.resources and node.description.resources.memory_bytes:
+                ram = system.bytes_to_str(node.description.resources.memory_bytes)
 
             if state == "Ready+Active":
                 p = "[bold green]"
@@ -134,16 +140,28 @@ class Swarm:
                 p = "[bold red]"
                 s = "[/bold red]"
 
+            node_role = "N/A"
+            if node.spec.role:
+                node_role = node.spec.role.title()
+
+            node_labels = ""
+            if node.spec.labels:
+                node_labels = ",".join(node.spec.labels)
+
+            engine_version = "N/A"
+            if node.description.engine and node.description.engine.engine_version:
+                engine_version = f"v{node.description.engine.engine_version}"
+
             nodes_table.append(
                 [
-                    p + (node.spec.role.title()) + s,
+                    p + (node_role) + s,
                     p + (state) + s,
-                    p + (node.description.hostname) + s,
-                    p + (node.status.addr) + s,
+                    p + (node_hostname) + s,
+                    p + (node_addr) + s,
                     p + (cpu) + s,
                     p + (ram) + s,
-                    p + (",".join(node.spec.labels)) + s,
-                    p + (f"v{node.description.engine.engine_version}") + s,
+                    p + (node_labels) + s,
+                    p + (engine_version) + s,
                 ]
             )
 
@@ -158,8 +176,7 @@ class Swarm:
 
         prefix = f"{Configuration.project}_"
         for service in stack_services:
-
-            service_name = service.spec.name
+            service_name = service.spec.name or "N/A"
 
             tmp_service_name = service_name
             if tmp_service_name.startswith(prefix):
@@ -174,7 +191,6 @@ class Swarm:
 
             running_tasks = 0
             for task in self.docker.service.ps(service_name):
-
                 if task.status.state == "shutdown" or task.status.state == "complete":
                     COLOR = colors.BLUE
                 elif task.status.state == "running":
@@ -198,7 +214,9 @@ class Swarm:
                 status = f"{COLOR}{task.status.state:8}{colors.RESET}"
                 errors = f"err={task.status.err}" if task.status.err else ""
                 labels = ",".join(task.labels)
-                ts = task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S")
+                ts = "N/A"
+                if task.status.timestamp:
+                    ts = task.status.timestamp.strftime("%d-%m-%Y %H:%M:%S")
 
                 tasks_lines.append(
                     "\t".join(
@@ -234,7 +252,13 @@ class Swarm:
             else:
                 ports_list = []
 
-            image = service.spec.task_template.container_spec.image.split("@")[0]
+            image = "N/A"
+            if (
+                service.spec.task_template
+                and service.spec.task_template.container_spec
+                and service.spec.task_template.container_spec.image
+            ):
+                image = service.spec.task_template.container_spec.image.split("@")[0]
             ports = ",".join(ports_list)
             print(
                 f"{COLOR}{service_name:23}{colors.RESET} [{replicas}] {image}\t{ports}"
@@ -249,7 +273,6 @@ class Swarm:
         self.docker.stack.remove(Configuration.project)
 
     def logs(self, service: str, follow: bool, tail: int, timestamps: bool) -> None:
-
         if service not in Application.data.active_services:
             print_and_exit("No such service: {}", service)
 
@@ -299,12 +322,12 @@ class Swarm:
             if not config.deploy:
                 continue
 
-            if config.deploy.resources.reservations:
+            if config.deploy.resources and config.deploy.resources.reservations:
                 # int() are needed because python on whales 0.25 extended type of
                 # cpus and replicas to Union[float, str] according to compose-cli typing
 
-                cpus = int(config.deploy.resources.reservations.cpus) or 0
-                memory = config.deploy.resources.reservations.memory
+                cpus = int(config.deploy.resources.reservations.cpus or 0)
+                memory = config.deploy.resources.reservations.memory or 0
 
                 # the proxy container is now defined as global and without any replicas
                 # => replicas is None => defaulted to 1
@@ -316,9 +339,11 @@ class Swarm:
         nodes_cpus = 0.0
         nodes_memory = 0.0
         for node in self.docker.node.list():
-
-            nodes_cpus += round(node.description.resources.nano_cpus / 1000000000)
-            nodes_memory += node.description.resources.memory_bytes
+            if node.description.resources:
+                nodes_cpus += round(
+                    (node.description.resources.nano_cpus or 0) / 1000000000
+                )
+                nodes_memory += node.description.resources.memory_bytes or 0
 
         if total_cpus > nodes_cpus:
             log.critical(

@@ -2,6 +2,7 @@
 This module will test the init command.
 Other module that will initialize projects will consider the init command fully working
 """
+
 import os
 from pathlib import Path
 
@@ -23,7 +24,6 @@ from tests import (
 
 
 def test_init(capfd: Capture, faker: Faker) -> None:
-
     execute_outside(capfd, "init")
     create_project(
         capfd=capfd,
@@ -78,7 +78,6 @@ def test_init(capfd: Capture, faker: Faker) -> None:
         capfd,
         "init",
         f"Switched http-api branch from 0.7.6 to {__version__}",
-        f"build-templates already set on branch {__version__}",
         f"do already set on branch {__version__}",
     )
 

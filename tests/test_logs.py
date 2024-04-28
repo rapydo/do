@@ -1,6 +1,7 @@
 """
 This module will test the logs command
 """
+
 import signal
 from datetime import datetime
 
@@ -19,7 +20,6 @@ from tests import (
 
 
 def test_all(capfd: Capture) -> None:
-
     execute_outside(capfd, "logs backend")
 
     create_project(
