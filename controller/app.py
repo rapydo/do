@@ -1001,12 +1001,14 @@ You can use of one:
         Application.env["FAIL2BAN_IPTABLES"] = FAIL2BAN_IPTABLES
 
         # Set Backend Python version
-        py_version = Application.env.get("BACKEND_PYTHON_VERSION", "v3.11")
+        py_version = Application.env.get("BACKEND_PYTHON_VERSION", "v3.12")
         py_values = configuration.BACKEND_PYTHON_VERSION_VALUES
         if py_version == py_values.py39.value:
             build_mode = "backend-legacy39"
         elif py_version == py_values.py310.value:
             build_mode = "backend-legacy310"
+        elif py_version == py_values.py311.value:
+            build_mode = "backend-legacy311"
         else:
             build_mode = "backend"
         Application.env["BACKEND_BUILD_MODE"] = build_mode
