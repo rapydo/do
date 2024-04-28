@@ -1,4 +1,4 @@
-FROM node:20.11.1-buster
+FROM node:20.12.2-buster
 # https://nodejs.org/en/blog/release
 
 ARG CURRENT_UID
@@ -11,7 +11,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 
 # used by print_versions
-ENV ANGULAR_VERSION 15.2.11
+ENV ANGULAR_VERSION 17.3.6
 ENV NODE_PATH /opt/node_modules
 ENV CYPRESS_PATH /usr/local/Cypress
 ENV CYPRESS_VERSION 13.8.1
@@ -32,7 +32,7 @@ RUN \
   rm -rf /var/lib/apt/lists/* && \
   google-chrome --version
 
-RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@1.5.1 sitemap-generator-cli@7.5.0 angular-spec-generator@1.1.0 cypress@${CYPRESS_VERSION} --force
+RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@2.1.1 sitemap-generator-cli@7.5.0 angular-spec-generator@1.1.0 cypress@${CYPRESS_VERSION} --force
 
 # 777 is required to let node user to write the folder, even when uid is fixed at runtime.
 RUN mv /root/.cache/Cypress /usr/local/Cypress && chown -R node:node /usr/local/Cypress && chmod -R 777 /usr/local/Cypress
