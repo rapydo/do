@@ -41,11 +41,11 @@ RUN /usr/bin/python${PYTHON_VERSION} -m venv /opt/venv && /opt/venv/bin/pip3 ins
 
 RUN for f in /opt/venv/bin/*; do \
         if [ -x "$f" ]; then \
-            ln -s "$f" "/usr/bin/$(basename $f)"; \
+            ln -sf "$f" "/usr/bin/$(basename $f)"; \
         fi \
     done
 
-RUN useradd \
+RUN userdel --force --remove ubuntu && useradd \
     -r -M -d /home/$APIUSER -s /bin/bash -p ! \
     --uid $CURRENT_UID $APIUSER \
     && groupmod -og $CURRENT_GID $APIUSER \
