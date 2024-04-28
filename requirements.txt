@@ -1,4 +1,4 @@
-python-on-whales==0.70.1
+python-on-whales==0.71.0
 python-dateutil
 pytz
 loguru
