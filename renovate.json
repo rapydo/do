@@ -7,7 +7,7 @@
   "branchConcurrentLimit": 0,
   "pre-commit": {
     "enabled": true,
-    "groupName": "pre-commit",
+    "groupName": "pre-commit-and-mypy",
     "fileMatch": ["^pre-commit-projects-config.yaml$"]
   },
   "pip_requirements": {
@@ -107,6 +107,13 @@
   "packageRules": [
     {
       "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeStrategy": "squash"
+    },
+    {
+      "groupName": "pre-commit-and-mypy",
+      "matchManagers": ["pip_requirements"],
+      "matchPackageNames": ["mypy"],
       "automerge": true,
       "automergeStrategy": "squash"
     }
