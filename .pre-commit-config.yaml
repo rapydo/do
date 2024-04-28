@@ -28,7 +28,7 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          ["git+https://github.com/rapydo/do.git@3.0#egg=rapydo[types]"]
+          ["git+https://github.com/rapydo/do.git@3.1#egg=rapydo[types]"]
 
         exclude: ^controller/builds/
 

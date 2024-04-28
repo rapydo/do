@@ -376,7 +376,7 @@ project:
   title: "REST HTTP-API server with Python, Flask and Docker"
   description: "No description yet"
   keywords: ""
-  rapydo: "3.0"
+  rapydo: "3.1"
   version: v0.1
 
 tags:
