@@ -18,7 +18,7 @@ ENV ANGULAR_VERSION 17.3.6
 
 RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@2.1.1 sitemap-generator-cli@7.5.0 --force
 
-RUN npm install --prefix /opt dotenv@16.4.5 deepmerge@4.3.1 ajv@8.12.0 ajv-formats@2.1.1
+RUN npm install --prefix /opt dotenv@16.4.5 deepmerge@4.3.1 ajv@8.17.1 ajv-formats@2.1.1
 
 WORKDIR /app/
 
