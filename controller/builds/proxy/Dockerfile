@@ -1,4 +1,4 @@
-FROM nginx:1.26.0-alpine as build-certbot
+FROM nginx:1.27.2-alpine as build-certbot
 
 RUN apk update --no-cache && \
     apk add --no-cache gcc musl-dev libffi-dev python3-dev py3-pip
@@ -11,7 +11,7 @@ ENV PATH="${CERTBOT_PATH}/bin:$PATH"
 
 RUN pip3 install --no-cache-dir certbot==2.10.0
 
-FROM nginx:1.26.0-alpine
+FROM nginx:1.27.2-alpine
 
 ARG RAPYDO_VERSION
 RUN test -n "$RAPYDO_VERSION" && \
