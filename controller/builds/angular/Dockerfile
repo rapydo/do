@@ -14,7 +14,7 @@ RUN groupmod -og $CURRENT_GID node && usermod -u $CURRENT_UID node
 
 ENV NODE_PATH /opt/node_modules
 # used by print_versions
-ENV ANGULAR_VERSION 17.3.6
+ENV ANGULAR_VERSION 17.3.11
 
 RUN npm install -g npm yarn @angular/cli@${ANGULAR_VERSION} ts-json-schema-generator@2.1.1 sitemap-generator-cli@7.5.0 --force
 
