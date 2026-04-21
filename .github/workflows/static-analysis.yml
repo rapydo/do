@@ -50,7 +50,7 @@ jobs:
       #     dotnet-version: '3.1.x'
       # Run open source static analysis tools
       - name: Run OSSAR
-        uses: github/ossar-action@v1
+        uses: github/ossar-action@v2.0.0
         id: ossar
 
         # Upload results to the Security tab
