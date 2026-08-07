@@ -123,7 +123,7 @@ jobs:
         if: ${{ matrix.service != 'fail2ban' }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install RAPyDo
         if: ${{ matrix.service != 'fail2ban' }}
