@@ -278,7 +278,7 @@ def parse_dockerhub(lib: str, sleep_time: int) -> str:
     tags = resp.json().get("tags")
 
     if lib == "library/node":
-        return get_latest_version(tags, suffix="-buster")
+        return get_latest_version(tags, suffix="-bookworm")
 
     if lib == "library/rabbitmq":
         return get_latest_version(tags, suffix="-management")

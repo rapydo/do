@@ -1,4 +1,4 @@
-FROM node:20.11.1-buster
+FROM node:20.20.2-bookworm
 # https://nodejs.org/en/blog/release
 
 ARG CURRENT_UID
