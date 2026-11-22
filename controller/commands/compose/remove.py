@@ -29,7 +29,6 @@ def remove(
     remove_extras: List[str] = []
     for extra in (
         REGISTRY,
-        "adminer",
         "swaggerui",
     ):
         if services and extra in services:

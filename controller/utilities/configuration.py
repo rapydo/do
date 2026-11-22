@@ -269,7 +269,6 @@ class BaseEnvModel(BaseModel):
     ACTIVATE_SMTP: zero_or_one
     ACTIVATE_SMTP_SERVER: zero_or_one
     ACTIVATE_SWAGGERUI: zero_or_one
-    ACTIVATE_ADMINER: zero_or_one
     ACTIVATE_MYPY: zero_or_one
     MYPY_DISALLOW_UNTYPED_DEFS: zero_or_one
     MYPY_IGNORE_LIBS: str
@@ -432,8 +431,6 @@ class BaseEnvModel(BaseModel):
     ASSIGNED_MEMORY_FLOWER: AssignedMemory
     ASSIGNED_CPU_SWAGGERUI: AssignedCPU
     ASSIGNED_MEMORY_SWAGGERUI: AssignedMemory
-    ASSIGNED_CPU_ADMINER: AssignedCPU
-    ASSIGNED_MEMORY_ADMINER: AssignedMemory
     ASSIGNED_CPU_FTP: AssignedCPU
     ASSIGNED_MEMORY_FTP: AssignedMemory
     ASSIGNED_CPU_SMTP: AssignedCPU

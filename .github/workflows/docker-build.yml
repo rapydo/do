@@ -40,7 +40,6 @@ jobs:
             redis,
             postgres,
             ftp,
-            adminer,
             swaggerui,
             registry,
             fail2ban,
@@ -313,20 +312,6 @@ jobs:
           echo -e "\nPure-FTP is expected to have completed the startup\n";
           rapydo logs ftp | grep "Starting Pure-FTPd"
 
-      - name: Test adminer
-        if: ${{ matrix.service == 'adminer'}}
-        run: |
-          cd test-${{ matrix.service }}
-          rapydo create prj --auth no --frontend no --current --origin-url https://your_remote_git/your_project.git
-          rapydo init
-          rapydo run adminer --detach
-
-          # Expected startup time: 1-2 seconds
-
-          sleep 2
-          docker logs adminer
-          echo -e "\nAdminer is expected to have completed the startup\n";
-          docker logs adminer 2>&1 | grep "Development Server .* started"
       - name: Test swaggerui
         if: ${{ matrix.service == 'swaggerui'}}
         run: |

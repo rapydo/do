@@ -13,7 +13,6 @@ from controller.deploy.docker import Docker
 # RabbitMQ:
 # https://www.erlang-solutions.com/blog/scaling-rabbitmq-on-a-coreos-cluster-through-docker/
 supported_services = [
-    "adminer",
     "backend",
     "celery",
     "flower",

@@ -27,9 +27,7 @@ def get_containers() -> List[str]:
     for container in docker.container.list():
         name = container.name
 
-        if (
-            name == REGISTRY or name == "adminer" or name == "swaggerui"
-        ):  # pragma: no cover
+        if name == REGISTRY or name == "swaggerui":  # pragma: no cover
             continue
 
         # this is swarm mode:
@@ -258,26 +256,19 @@ def test_remove(capfd: Capture) -> None:
 
     exec_command(
         capfd,
-        "run --detach --pull --port 7777 adminer",
-        "You can access Adminer interface",
-    )
-    exec_command(
-        capfd,
         "run --detach --pull --port 8888 swaggerui",
         "You can access SwaggerUI web page",
     )
 
     exec_command(
         capfd,
-        "remove adminer postgres swaggerui",
-        "Service adminer removed",
+        "remove postgres swaggerui",
         "Service swaggerui removed",
     )
 
     exec_command(
         capfd,
-        "remove adminer postgres swaggerui",
-        "Service adminer is not running",
+        "remove postgres swaggerui",
         "Service swaggerui is not running",
     )
 
@@ -286,7 +277,7 @@ def test_remove(capfd: Capture) -> None:
     exec_command(capfd, "start backend", "Stack started")
     time.sleep(2)
     assert get_containers() == BACKEND_ONLY
-    exec_command(capfd, "remove adminer", "Service adminer is not running")
+    exec_command(capfd, "remove swaggerui", "Service swaggerui is not running")
     assert get_containers() == BACKEND_ONLY
 
     exec_command(capfd, "remove", "Stack removed")

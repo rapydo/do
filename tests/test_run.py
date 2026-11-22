@@ -99,7 +99,7 @@ def test_debug_run(capfd: Capture, faker: Faker) -> None:
 
 
 def test_interfaces(capfd: Capture, faker: Faker) -> None:
-    execute_outside(capfd, "run adminer")
+    execute_outside(capfd, "run swaggerui")
 
     project_name = random_project_name(faker)
     create_project(
@@ -115,13 +115,13 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     exec_command(
         capfd,
         "interfaces sqlalchemy",
-        "Deprecated interface sqlalchemy, use adminer instead",
+        "Deprecated interface sqlalchemy",
     )
 
     exec_command(
         capfd,
-        "interfaces adminer",
-        "Interfaces command is replaced by rapydo run adminer",
+        "interfaces swaggerui",
+        "Interfaces command is replaced by rapydo run swaggerui",
     )
 
     exec_command(
@@ -132,45 +132,21 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
 
     exec_command(
         capfd,
-        "run adminer --port XYZ",
+        "run swaggerui --port XYZ",
         "Invalid value for",
         "'XYZ' is not a valid integer",
     )
 
-    img = f"rapydo/adminer:{__version__}"
+    img = f"rapydo/swaggerui:{__version__}"
     exec_command(
         capfd,
-        "run adminer",
+        "run swaggerui",
         f"Missing {img} image, add {colors.RED}--pull{colors.RESET} option",
     )
 
-    # Launch Adminer UI with default port
-    exec_command(
-        capfd,
-        "run adminer --pull --detach",
-        "Pulling image for adminer...",
-        # f"Creating {project_name}_adminer_run",
-        "You can access Adminer interface on: http://localhost:7777",
-    )
-
-    # Admin or SwaggerUI does not start? You can debug with:
+    # SwaggerUI does not start? You can debug with:
     # from python_on_whales import docker
-    # assert docker.logs("adminer", tail=10) == "debug"
-
-    exec_command(
-        capfd,
-        "remove adminer",
-        "Service adminer removed",
-    )
-
-    # Launch Adminer UI with custom port
-    exec_command(
-        capfd,
-        "run adminer --port 3333 --detach",
-        # "Pulling adminer",
-        # f"Creating {project_name}_adminer_run",
-        "You can access Adminer interface on: http://localhost:3333",
-    )
+    # assert docker.logs("swaggerui", tail=10) == "debug"
 
     # Launch Swagger UI with default port
     exec_command(
@@ -198,12 +174,11 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
     # that made run interfaces fail on GA
     exec_command(
         capfd,
-        "remove adminer swaggerui",
-        "Service adminer removed",
+        "remove swaggerui",
         "Service swaggerui removed",
     )
 
-    # Test Swagger UI and Admin in production mode
+    # Test Swagger UI in production mode
     exec_command(
         capfd,
         "--prod init -f",
@@ -217,18 +192,10 @@ def test_interfaces(capfd: Capture, faker: Faker) -> None:
         "You can access SwaggerUI web page here: https://localhost:5555",
     )
 
-    exec_command(
-        capfd,
-        "--prod run adminer --port 6666 --detach",
-        "You can access Adminer interface on: https://localhost:6666",
-    )
-
     # Problems with the certificate?
-    # Service adminer is not running
     # Service swaggerui is not running
     # exec_command(
     #     capfd,
-    #     "remove adminer swaggerui",
-    #     "Service adminer removed",
+    #     "remove swaggerui",
     #     "Service swaggerui removed",
     # )

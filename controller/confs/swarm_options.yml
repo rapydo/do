@@ -128,18 +128,6 @@ services:
     #   options:
     #     syslog-address: ${SYSLOG_ADDRESS}
 
-  adminer:
-    deploy:
-      # Are replicas needed? And supported?
-      replicas: 1
-      resources:
-        reservations:
-          cpus: "${ASSIGNED_CPU_ADMINER}"
-          memory: ${ASSIGNED_MEMORY_ADMINER}
-    # logging:
-    #   options:
-    #     syslog-address: ${SYSLOG_ADDRESS}
-
   ftp:
     deploy:
       # Is proftp supporting replicas?

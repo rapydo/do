@@ -180,7 +180,7 @@ def run(
     publish_ports = get_publish_ports(service, first_port)
 
     if detach is None:
-        if service == "swaggerui" or service == "adminer":
+        if service == "swaggerui":
             detach = False
         else:
             detach = True
@@ -196,18 +196,6 @@ def run(
         port = publish_ports[0][0] if publish_ports else first_port
         log.info(
             "You can access SwaggerUI web page here: {}\n",
-            f"{prot}://{Configuration.hostname}:{port}",
-        )
-
-    if service == "adminer":
-        if Configuration.production:
-            prot = "https"
-        else:
-            prot = "http"
-
-        port = publish_ports[0][0] if publish_ports else first_port
-        log.info(
-            "You can access Adminer interface on: {}\n",
             f"{prot}://{Configuration.hostname}:{port}",
         )
 

@@ -14,7 +14,6 @@ from controller.app import Application
 class ServiceTypes(str, Enum):
     # New values
     swaggerui = "swaggerui"
-    adminer = "adminer"
     flower = "flower"
 
     # Deprecated since 1.2
@@ -48,7 +47,7 @@ def interfaces(
     )
     # Deprecated since 1.2
     if service.value == "sqlalchemy":
-        log.warning("Deprecated interface sqlalchemy, use adminer instead")
+        log.warning("Deprecated interface sqlalchemy")
         return None
 
     # Deprecated since 2.1
