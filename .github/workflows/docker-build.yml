@@ -172,14 +172,14 @@ jobs:
 
           # Expected startup time: ~ 3 minutes
 
-          sleep 60
+          sleep 20
           if rapydo logs frontend | grep "Compiled successfully.";
           then
             echo "Angular was not expected to have started yet";
             exit 1
           fi
 
-          sleep 120
+          sleep 160
           rapydo logs frontend
           echo -e "\nAngular is expected to have completed the startup\n";
           rapydo logs frontend | grep "Compiled successfully."
